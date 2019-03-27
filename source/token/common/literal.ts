@@ -94,6 +94,7 @@ function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, e
    }
 
    ec.setPos(pToken.closeQuote);
+
    ec.check(!pToken.closeQuote, WFEID.LITERAL_NO_CLOSE_QUOTE, [ type ]);
 }
 

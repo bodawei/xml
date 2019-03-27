@@ -34,7 +34,7 @@ function expectNoErrorsOrWarnings(validator: stream.Transform, done: () => void)
 
 function expectError(validator: stream.Transform, expected: any, done: () => void) {
    gatherStream(validator, (tokens) => {
-      let arrayExpected = [];
+      let arrayExpected = expected;
 
       if (!Array.isArray(expected)) {
          arrayExpected = [ expected ];

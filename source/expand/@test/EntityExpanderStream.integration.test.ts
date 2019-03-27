@@ -186,6 +186,36 @@ describe('EntityExpanderStream (integration)', () => {
       }, done);
    });
 
+   it('replaces references to external parameter entities in entity values', (done) => {
+      pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one [
+            <!ENTITY % externalPE SYSTEM "foo.xml">
+            <!ENTITY internalGE "%externalPE;">
+            <!ELEMENT one ANY>
+         ]>
+         <one>
+            &internalGE;
+         </one>`);
+      pTokenStream.endText();
+
+      gatherStream(entityExpander, (results) => {
+         const index = getIndex(results, GENERAL_ENTITY_DECLARATION_PTOKEN);
+         const expectedRef1 = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            openSpace: undefined,
+            name: SToken.fromString('externalPE'),
+            nameSpace: undefined,
+            close: SToken.fromString(';'),
+         });
+
+         expect((results[index] as any).value).toEqualRangeless([
+            new ParameterEntityStartPToken(expectedRef1),
+            new TextPToken({ text: SToken.fromString('!placeholder!') }),
+            new ParameterEntityEndPToken(expectedRef1),
+         ]);
+      }, done);
+   });
+
    it('replaces references in ATTLIST defaults', (done) => {
       pTokenStream.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [

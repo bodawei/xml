@@ -7,7 +7,7 @@ import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
-import unassigned from '../unassigned';
+import unassigned, { UnassignedArray, UnassignedValue, UnassignedType } from '../unassigned';
 
 import externalId from '../externalId';
 import literal from '../literal';
@@ -318,6 +318,30 @@ describe('externalId (unit)', () => {
             expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
 
+      });
+
+   });
+
+   describe('assignUnassignedNew()', () => {
+      let unProps: jasmine.Spy;
+
+      beforeEach(() => {
+         unProps = spyOn(unassigned, 'assignToProps');
+      });
+
+      it('undoes the previous externalID if nothing was settable', () => {
+         const unassigned: UnassignedValue = {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
+         };
+
+         const prev: any = {
+            externalId: {  },
+         };
+
+         externalId.assignUnassignedNew([ unassigned ], prev, 'foo');
+
+         expect(prev.externalId).toEqual({});
       });
 
    });

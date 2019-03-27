@@ -2,7 +2,7 @@
 
 import { EntityLocation, Range } from 'basic';
 import { ErrorCollector } from 'error';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource, strOrBlank } from 'sToken';
 
 import { ParameterEntityReferencePToken, parseParameterEntityReference } from '../parameterEntityReference';
 import { TextPToken } from '../text';
@@ -313,7 +313,7 @@ function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPT
             case UnassignedType.WORD:
                let canAssign = true;
                if (descriptor.allowed) {
-                  const valueText = nextValue.token.text ? nextValue.token.text.str : '';
+                  const valueText = strOrBlank(nextValue.token.text);
                   canAssign = descriptor.allowed.test(valueText.toLocaleLowerCase());
                }
 
@@ -460,9 +460,7 @@ function getSTokens(unassignedArray: UnassignedArray) {
       const value = unassignedArray[index];
 
       if (value.type === 'word' || value.type === 'space') {
-         if (value.token.text) {
-            tokens.push(value.token.text);
-         }
+         tokens.push(value.token.text);
       } else if (value.type === 'literal') {
          tokens = tokens.concat(literal.getSTokens(value.token));
       } else if (value.type == 'reference') {

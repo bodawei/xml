@@ -187,11 +187,8 @@ class ExpanderTraker {
       this.names.push(name);
    }
 
-   public stopExpanding(name: string) {
-      if (this.names[this.names.length -1] !== name) {
-         throw new Error('Tried to stop expanding something while it is not being expanded');
-      }
-
+   public stopExpanding() {
+      // We right now can't end up in a sitaution where this isn't the right one.
       this.names.pop();
    }
 }
@@ -337,7 +334,7 @@ class EntityExpander {
    private handleXmlDeclaration(pToken: XmlDeclarationPToken, handled: TokenHandled) {
       for (const param of pToken.params) {
          const name = param.name.str.toLowerCase();
-         const value = param.value ? param.value.str.toLowerCase() : '';
+         const value = strOrBlank(param.value).toLowerCase();
 
          if (name === 'standalone' && value === 'yes' && this.validationMode === ValidationMode.NON_VALIDATING) {
             this.validationMode = ValidationMode.STANDALONE;
@@ -570,7 +567,7 @@ class EntityExpander {
       this.bodyExpansionTracker.startExpanding(entityName)
 
       const entityProcessed = () => {
-         this.bodyExpansionTracker.stopExpanding(entityName);
+         this.bodyExpansionTracker.stopExpanding();
          this.expandToken(new GeneralEntityEndPToken(pToken), handled);
       };
 
@@ -757,20 +754,21 @@ class EntityExpander {
          let seekingCount = 0;
 
          for (var info of missingParameterEntities) {
-            if (seeking[info.token.name!.str]) { // typeHack
+            const loopInfo = info;
+            if (seeking[loopInfo.token.name!.str]) { // typeHack
                continue;
             }
 
-            seeking[info.token.name!.str] = true; // typeHack
+            seeking[loopInfo.token.name!.str] = true; // typeHack
             seekingCount ++;
 
             // typeHack
-            const sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData(EntityKind.EXTERNAL));
+            const sTokenSource = this.processors.retrieveExternalEntity(loopInfo.token.externalId!, new EntityMetaData(EntityKind.EXTERNAL));
 
             this.processors.processForEntityValue(sTokenSource, (results: ExpandedLiteralValuePToken) => {
                // Note: Could be getting a TextDecl here
                this.expandEntityValue(results, (newResult) => {
-                  info.cache = newResult;
+                  loopInfo.cache = newResult;
                   seekingCount --;
 
                   if (seekingCount === 0) {
@@ -791,7 +789,7 @@ class EntityExpander {
       for (let element of value) {
          if (element.type === UnassignedType.REFERENCE) {
             const peRef = element.token;
-            const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
+            const peInfo = this.paramEntitiesByName[strOrBlank(peRef.name)];
 
             if (peInfo && !peInfo.unssignedCache) {
                missingParameterEntities.push(peInfo);
@@ -803,28 +801,30 @@ class EntityExpander {
          done();
       } else {
          const seeking: { [name: string] : boolean} = {};
+         const sources = [];
          let seekingCount = 0;
 
-         for (var info of missingParameterEntities) {
-            if (seeking[info.token.name!.str]) { // typeHack
+         for (let index = 0; index < missingParameterEntities.length; index++) {
+            const loopInfo = missingParameterEntities[index];
+            if (seeking[loopInfo.token.name!.str]) { // typeHack
+               // if (seekingCount === 0) {
+               //    done();
+               // }
                continue;
             }
 
-            seeking[info.token.name!.str] = true; // typeHack
-            seekingCount ++;
+            seekingCount++;
+            seeking[loopInfo.token.name!.str] = true; // typeHack
 
             let sTokenSource: STokenSource;
-            // typeHack
-            if (info.isInternal) {
+            if (loopInfo.isInternal) {
                sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
                // Should add ranges
-               info.token.value.forEach((element) => {
+               loopInfo.token.value.forEach((element) => {
                   switch (element.type) {
                      case TEXT_PTOKEN:
                         const textEl = element as TextPToken;
-                        if (textEl.text) {
-                           sTokenSource.addText(textEl.text.str);
-                        }
+                        sTokenSource.addText(textEl.text.str);
                         break;
                      case CHARREF_PTOKEN:
                         const charRefEl = element as charRef.CharRefPToken;
@@ -839,19 +839,26 @@ class EntityExpander {
                });
                sTokenSource.endText();
             } else {
-               sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData(EntityKind.EXTERNAL));
+               sTokenSource = this.processors.retrieveExternalEntity(loopInfo.token.externalId!, new EntityMetaData(EntityKind.EXTERNAL));
             }
 
+            sources.push({
+               source: sTokenSource,
+               info: loopInfo,
+            });
+         }
+
+         sources.forEach(stuff => {
             // That could be gettting a textdecl, too
-            unassigned.parseAllValues(sTokenSource, isElementDecl, (results?: UnassignedArray) => {
-               info.unssignedCache = results;
-               seekingCount --;
+            unassigned.parseAllValues(stuff.source, isElementDecl, (results?: UnassignedArray) => {
+               stuff.info.unssignedCache = results;
+               seekingCount --; // this doesn't work if the sToken souce is processed snchronously
 
                if (seekingCount === 0) {
                   done();
                }
             });
-         }
+         });
       }
    }
 
@@ -867,7 +874,7 @@ class EntityExpander {
          for (let element of value) {
             if (element.type === UnassignedType.REFERENCE) {
                const peRef = element.token;
-               const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
+               const peInfo = this.paramEntitiesByName[strOrBlank(peRef.name)];
 
                if (peInfo && peInfo.unssignedCache) {
                   newUnassigned = newUnassigned.concat(peInfo.unssignedCache);
@@ -900,9 +907,7 @@ class EntityExpander {
          // console.log(element);
          if (element.type === TEXT_PTOKEN) {
             const text = element as TextPToken;
-            if (text.text) {
-               sTokenSource.addText(text.text.str, text.text.firstRange);
-            }
+            sTokenSource.addText(text.text.str, text.text.firstRange);
          } else if (element.type === CHARREF_PTOKEN) {
             // §4.5 For an internal entity, the replacement text is the content of the entity,
             // after replacement of character references and parameter-entity references.

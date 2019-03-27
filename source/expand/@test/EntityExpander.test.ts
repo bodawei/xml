@@ -707,6 +707,192 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
+      it('does not expand an unassigned value that is a reference with no declaration', (done) => {
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('frog'),
+            })
+         } ];
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+         });
+         const input = [
+            notationDecl,
+         ];
+
+         spyOn(notationDecl, 'assignUnassigned');
+
+         doExpand(true, input, (results: any[]) => {
+            expect(results[0].unassigned.length).toEqual(1);
+            expect(results[0].unassigned[0].type).toEqual('reference');
+            done();
+         });
+      });
+
+      it('copes with a charref being incompletely defined', (done) => {
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('badCharRef'),
+            })
+         } ];
+         const paramDecl = new ParameterEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            parameter: SToken.fromString('%'),
+            name: SToken.fromString('badCharRef'),
+            value: [
+               new CharRefPToken({ open: SToken.fromString('&#') }),
+               new TextPToken({ text: SToken.fromString('UBLIC') }),
+            ],
+      });
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+         });
+         const input = [
+            paramDecl,
+            notationDecl,
+         ];
+
+         spyOn(notationDecl, 'assignUnassigned');
+
+         doExpand(true, input, (results: any[]) => {
+            expect(results[1].unassigned[0].type).toEqual('word');
+            done();
+         });
+      });
+
+      it('replaces multiple unassigned references to the same entity', (done) => {
+         externalMap.publicName = 'I will not be used';
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('externalEntity'),
+            })
+         }, {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('externalEntity'),
+            })
+         } ];
+         const paramDecl = new ParameterEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            parameter: SToken.fromString('%'),
+            name: SToken.fromString('externalEntity'),
+            externalId: {
+               system: {
+                  value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
+               }
+            },
+         });
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+         });
+         const input = [
+            paramDecl,
+            notationDecl,
+         ];
+
+         spyOn(notationDecl, 'assignUnassigned');
+
+         doExpand(true, input, (results: any[]) => {
+            expect(results[1].unassigned.length).toEqual(18); // not quite right.
+            done();
+         });
+      });
+
+      it('replaces multiple unassigned references to the different entities', (done) => {
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('internalEntity'),
+            })
+         }, {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('internalEntity2'),
+            })
+         } ];
+         const paramDecl = new ParameterEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            parameter: SToken.fromString('%'),
+            name: SToken.fromString('internalEntity'),
+            value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
+         });
+         const paramDecl2 = new ParameterEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            parameter: SToken.fromString('%'),
+            name: SToken.fromString('internalEntity2'),
+            value: [ new TextPToken({ text: SToken.fromString('publicName') })],
+         });
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+         });
+         const input = [
+            paramDecl,
+            paramDecl2,
+            notationDecl,
+         ];
+
+         spyOn(notationDecl, 'assignUnassigned');
+
+         doExpand(true, input, (results: any[]) => {
+            expect(results[2].unassigned.length).toEqual(2); // not quite right.
+            done();
+         });
+      });
+
+      it('will try to retrieve from an external reference', (done) => {
+         externalMap.publicName = 'I will not be used';
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('externalEntity'),
+            })
+         } ];
+         const paramDecl = new ParameterEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            parameter: SToken.fromString('%'),
+            name: SToken.fromString('externalEntity'),
+            externalId: {
+               system: {
+                  value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
+               }
+            },
+         });
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+         });
+         const input = [
+            paramDecl,
+            notationDecl,
+         ];
+
+         spyOn(notationDecl, 'assignUnassigned');
+
+         doExpand(true, input, (results: any[]) => {
+            expect(results[1].unassigned.length).toEqual(9);   // the parsing is wrong.
+            done();
+         });
+      });
+
       it('expands a parameter entity reference before assigning unassigned values', (done) => {
          const refToPe1 = new ParameterEntityReferencePToken({
             open: SToken.fromString('%'),
@@ -1530,6 +1716,28 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
+      it('skips a partially undefined charRef', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('foo'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), charCode: 0 }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('foo'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
       it('replaces an entity reference to an internal entity', (done) => {
          const input = [
             new GeneralEntityDeclarationPToken({
@@ -1770,6 +1978,89 @@ describe('EntityExpander (unit)', () => {
             expect(results[1].type).toEqual(PARAMETER_ENTITY_START_PTOKEN);
             expect(results[2].type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
             expect(results[3].type).toEqual(PARAMETER_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('replaces multiple references to the same entity', (done) => {
+         externalMap.systemUrl = '(foo)';
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+               externalId: {
+                  system: {
+                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
+                  }
+               },
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [ new ParameterEntityReferencePToken({
+                  open: SToken.fromString('%'),
+                  name: SToken.fromString('foo'),
+               }), new ParameterEntityReferencePToken({
+                  open: SToken.fromString('%'),
+                  name: SToken.fromString('foo'),
+               }) ],
+            })
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(2);
+
+            expect((results[1] as any).value.map((x: any) => x.type)).toEqual([
+               'PARAMETER_ENTITY_START_PTOKEN', 'TEXT_PTOKEN', 'PARAMETER_ENTITY_END_PTOKEN',
+               'PARAMETER_ENTITY_START_PTOKEN', 'TEXT_PTOKEN', 'PARAMETER_ENTITY_END_PTOKEN']);
+            done();
+         });
+      });
+
+      it('replaces multiple references to the distinct entity', (done) => {
+         externalMap.systemUrl = '(foo)';
+         externalMap.systemUrl2 = '(foo)';
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+               externalId: {
+                  system: {
+                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
+                  }
+               },
+            }),
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('bar'),
+               externalId: {
+                  system: {
+                     value: [ new TextPToken({ text: SToken.fromString('systemUrl2') }), ],
+                  }
+               },
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [ new ParameterEntityReferencePToken({
+                  open: SToken.fromString('%'),
+                  name: SToken.fromString('foo'),
+               }), new ParameterEntityReferencePToken({
+                  open: SToken.fromString('%'),
+                  name: SToken.fromString('bar'),
+               }) ],
+            })
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+
+            expect((results[2] as any).value.map((x: any) => x.type)).toEqual([
+               'PARAMETER_ENTITY_START_PTOKEN', 'TEXT_PTOKEN', 'PARAMETER_ENTITY_END_PTOKEN',
+               'PARAMETER_ENTITY_START_PTOKEN', 'TEXT_PTOKEN', 'PARAMETER_ENTITY_END_PTOKEN']);
             done();
          });
       });

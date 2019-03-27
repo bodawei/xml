@@ -129,9 +129,7 @@ function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
       const item = pToken[index];
 
       if (isTextPToken(item)) {
-         if (item.text) {
-            value.push(new TextXToken(item.text.str, item));
-         }
+         value.push(new TextXToken(item.text.str, item));
       } else {
          value.push(item.toXToken());
       }
@@ -154,7 +152,7 @@ function getSTokens(pToken: LiteralValuePToken) {
          const typeHack: any = item
 
          results = results.concat(typeHack.toSTokenArray());
-      } else if (item.text) {
+      } else {
          results.push(item.text);
       }
    }

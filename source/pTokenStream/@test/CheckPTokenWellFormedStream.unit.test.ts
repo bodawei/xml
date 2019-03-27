@@ -675,6 +675,41 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             expectError(checker, expected, done);
          });
 
+         it('reports no error if there is the start of a parsed entity in an attribute value (§4.1.0)', (done) => {
+            const declaration = new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('unp'),
+               nameSpace: SToken.fromString(' '),
+               openQuote: SToken.fromString('"'),
+               value: [],
+               closeQuote: SToken.fromString('"'),
+               close: SToken.fromString('>'),
+            });
+            const reference = new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('unp'),
+            });
+            const start = new GeneralEntityStartPToken(reference);
+            const attribute: AttributePToken = {
+               name: SToken.fromString('foo'),
+               equal: SToken.fromString('='),
+               openQuote: SToken.fromString('"'),
+               value: [start, new TextPToken({ text: SToken.fromString('x') })],
+               closeQuote: SToken.fromString('"'),
+            };
+            (pToken as any).attributes = [ attribute ];
+
+            checker.write(metaData);
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(declaration);
+            checker.write(docTypeEnd);
+            checker.write(pToken);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
+         });
+
          it('reports no errors if there was a declaration (§4.1.0)', (done) => {
             checker.write(xmlDecl);
             checker.write(docTypeStart);

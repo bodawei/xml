@@ -34,7 +34,11 @@ function processForEntityValue(sTokenSource: STokenSource, done: (result: Expand
 }
 
 function retrieveExternalEntity(externalId: ExternalId, entityMetaData: EntityMetaData) {
-   return new STokenSource(defaultExtractors, entityMetaData);
+   const source = new STokenSource(defaultExtractors, entityMetaData);
+   source.addText('!placeholder!');
+   source.endText();
+
+   return source;
 }
 
 /**********************************************************************\
