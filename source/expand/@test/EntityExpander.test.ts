@@ -57,6 +57,8 @@ import { isNullOrUndefined } from "util";
 import { CharDataPToken } from "source/token/charData";
 import { expectError } from "./utils";
 
+const toSToken = SToken.fromString;
+
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string} = {};
 
@@ -243,11 +245,12 @@ describe('EntityExpander (unit)', () => {
       it('does not change the value if it contains no general entity references', (done) => {
          const input = [
             new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: [
                      new TextPToken({ text: SToken.fromString('foo') }),
                   ]
-               }],
+               }] as any,
             }),
          ];
 
@@ -285,12 +288,13 @@ describe('EntityExpander (unit)', () => {
                ],
             }),
             new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: [
                      new TextPToken({ text: SToken.fromString('foo') }),
                      refToGe,
                   ]
-               }],
+               }] as any,
             }),
          ];
 
@@ -315,12 +319,13 @@ describe('EntityExpander (unit)', () => {
 
          const input = [
             new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: [
                      new TextPToken({ text: SToken.fromString('foo') }),
                      refToGe,
                   ]
-               }],
+               }] as any,
             }),
          ];
 
@@ -2236,6 +2241,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
             }),
             new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: [
                      new GeneralEntityReferencePToken({
@@ -2243,7 +2249,7 @@ describe('EntityExpander (unit)', () => {
                         name: SToken.fromString('test'),
                      }),
                   ],
-               }],
+               }] as any,
             }),
          ];
 
@@ -2275,6 +2281,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
             }),
             new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: [
                      new GeneralEntityReferencePToken({
@@ -2282,7 +2289,7 @@ describe('EntityExpander (unit)', () => {
                         name: SToken.fromString('test'),
                      }),
                   ],
-               }],
+               }] as any,
             }),
          ];
 
@@ -2314,6 +2321,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
             }),
             new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: [
                      new GeneralEntityReferencePToken({
@@ -2321,7 +2329,7 @@ describe('EntityExpander (unit)', () => {
                         name: SToken.fromString('test'),
                      }),
                   ],
-               }],
+               }] as any,
             }),
          ];
 

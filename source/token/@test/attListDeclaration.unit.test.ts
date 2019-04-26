@@ -15,6 +15,8 @@ import * as wordList from '../common/wordList';
 import misc from '../common/misc';
 import { TextPToken, TextXToken } from '../text';
 
+const toSToken = SToken.fromString;
+
 const { WordListPToken, WordListType } = wordList;
 type LiteralOptions = {
    pToken: {
@@ -28,6 +30,7 @@ describe('attListDeclaration (unit)', () => {
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
       aldPToken = new attListDeclaration.PToken({
+         open: toSToken('<!'),
          elementName: makeSToken('elementName'),
          postElementNameSpace: makeSToken(' '),
          attDefs: [ {
@@ -55,7 +58,9 @@ describe('attListDeclaration (unit)', () => {
             type: 'CDATA',
             defaultType: '#REQUIRED',
             value: [],
-         }], new attListDeclaration.PToken());
+         }], new attListDeclaration.PToken({
+            open: toSToken('<!'),
+         }));
 
          expect(xToken.elementName).toEqual('foo');
          expect(xToken.attDefs[0].name).toEqual('attName');
@@ -104,7 +109,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs = [];
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -118,10 +123,11 @@ describe('attListDeclaration (unit)', () => {
             undefined,
          ]);
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([ [ new attListDeclaration.PToken({
+            open: toSToken('<!'),
             elementName: undefined,
             postElementNameSpace: undefined,
             close: undefined,
@@ -145,7 +151,7 @@ describe('attListDeclaration (unit)', () => {
          const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -180,7 +186,7 @@ describe('attListDeclaration (unit)', () => {
          });
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -231,7 +237,7 @@ describe('attListDeclaration (unit)', () => {
          });
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -259,7 +265,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.close = makeSToken('>');
          aldPToken.attDefs[0].value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -287,7 +293,7 @@ describe('attListDeclaration (unit)', () => {
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
          aldPToken.attDefs[0].value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -320,7 +326,7 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -344,7 +350,7 @@ describe('attListDeclaration (unit)', () => {
             done();
          });
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          const expectedArgs = parseSpy.calls.argsFor(0);
@@ -380,7 +386,7 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -411,7 +417,7 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -434,7 +440,7 @@ describe('attListDeclaration (unit)', () => {
             done();
          });
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          const expectedArgs = parseSpy.calls.argsFor(0);
@@ -467,7 +473,7 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -483,12 +489,13 @@ describe('attListDeclaration (unit)', () => {
                '>',
             ]);
 
-            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+            attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
             mockSource.respondInAsyncTime();
 
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                close: makeSToken('>'),
             }));
          });
@@ -509,12 +516,13 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
 
-            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+            attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
             mockSource.respondInAsyncTime();
 
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
                close: makeSToken('>'),
@@ -539,19 +547,20 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
 
-            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+            attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
             mockSource.respondInAsyncTime();
 
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
                attDefs: [{
                   name: makeSToken('attName'),
                   postNameSpace: makeSToken(' '),
                   value: []
-               }],
+               }] as any,
                close: makeSToken('>'),
             }));
          });
@@ -576,12 +585,13 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
 
-            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+            attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
             mockSource.respondInAsyncTime();
 
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
                attDefs: [{
@@ -590,7 +600,7 @@ describe('attListDeclaration (unit)', () => {
                   type: makeSToken('CDATA'),
                   postTypeSpace: makeSToken(' '),
                   value: [],
-               }],
+               }] as any,
                close: makeSToken('>'),
             }));
          });
@@ -618,12 +628,13 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
 
-            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+            attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
             mockSource.respondInAsyncTime();
 
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
                attDefs: [{
@@ -634,7 +645,7 @@ describe('attListDeclaration (unit)', () => {
                   defaultType: makeSToken('#FIXED'),
                   postDefaultTypeSpace: makeSToken(' '),
                   value: [],
-               }],
+               }] as any,
                close: makeSToken('>'),
             }));
          });
@@ -651,13 +662,16 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
-         attListDeclaration.assignUnassigned(new attListDeclaration.PToken({}));
+         attListDeclaration.assignUnassigned(new attListDeclaration.PToken({
+            open: toSToken('<!'),
+         }));
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
       });
 
       it('deletes the unassigned property if it is empty', () => {
          const alPToken = new attListDeclaration.PToken({
+            open: toSToken('<!'),
             unassigned: [],
             nextPropName: 'elementName',
          });
@@ -670,6 +684,7 @@ describe('attListDeclaration (unit)', () => {
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          const alPToken = new attListDeclaration.PToken({
+            open: toSToken('<!'),
             unassigned: [ {
                type: 'reference',
             } ],
@@ -685,6 +700,7 @@ describe('attListDeclaration (unit)', () => {
          it('calls unassigned.assignToProps() when the match is in the el name', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'elementName',
             });
@@ -694,7 +710,7 @@ describe('attListDeclaration (unit)', () => {
 
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'elementName', [
-                  { name: 'postDeclTypeSpace', type: 'space' },
+                  { name: 'declTypeSpace', type: 'space' },
                   { name: 'elementName', type: 'word' },
                   { name: 'postElementNameSpace', type: 'space' },
                ]);
@@ -711,6 +727,7 @@ describe('attListDeclaration (unit)', () => {
          it('calls unassigned.assignToProps() with "xtra" if missing is name', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -740,6 +757,7 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -747,8 +765,9 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                postElementNameSpace: SToken.fromString('\t'),
-               attDefs: [ {} ],
+               attDefs: [ {} ] as any,
             }));
          });
 
@@ -759,6 +778,7 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                postElementNameSpace: SToken.fromString(' '),
                unassigned: unassignedValue,
                nextPropName: 'name',
@@ -767,8 +787,9 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                postElementNameSpace: SToken.fromString(' \t'),
-               attDefs: [ {} ],
+               attDefs: [ {} ] as any,
             }));
          });
 
@@ -779,8 +800,9 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -788,9 +810,10 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   postNameSpace: SToken.fromString('\t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -801,9 +824,10 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   postNameSpace: SToken.fromString(' ')
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -811,9 +835,10 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   postNameSpace: SToken.fromString(' \t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -824,9 +849,10 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   type: SToken.fromString('lala'),
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -834,10 +860,11 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   type: SToken.fromString('lala'),
                   postTypeSpace: SToken.fromString('\t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -848,10 +875,11 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   type: SToken.fromString('lala'),
                   postTypeSpace: SToken.fromString(' ')
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -859,10 +887,11 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   type: SToken.fromString('lala'),
                   postTypeSpace: SToken.fromString(' \t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -873,9 +902,10 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   defaultType: SToken.fromString('lala'),
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -883,10 +913,11 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   defaultType: SToken.fromString('lala'),
                   postDefaultTypeSpace: SToken.fromString('\t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -897,10 +928,11 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   defaultType: SToken.fromString('lala'),
                   postDefaultTypeSpace: SToken.fromString(' ')
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -908,10 +940,11 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   defaultType: SToken.fromString('lala'),
                   postDefaultTypeSpace: SToken.fromString(' \t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -922,9 +955,10 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: {},
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -932,10 +966,11 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   value: {},
                   postValueSpace: SToken.fromString('\t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -946,10 +981,11 @@ describe('attListDeclaration (unit)', () => {
                pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: {},
                   postValueSpace: SToken.fromString(' ')
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -957,10 +993,11 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   value: {},
                   postValueSpace: SToken.fromString(' \t'),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -971,10 +1008,11 @@ describe('attListDeclaration (unit)', () => {
                // pToken.xtra = SToken.fromString('\t');
             })
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [{
                   value: {},
                   postValueSpace: SToken.fromString(' ')
-               }],
+               }] as any,
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
@@ -982,10 +1020,11 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
 
             expect(declPToken).toEqual(new attListDeclaration.PToken({
+               open: toSToken('<!'),
                attDefs: [ {
                   value: {},
                   postValueSpace: SToken.fromString(' '),
-               }, {} ],
+               }, {} ] as any,
             }));
          });
 
@@ -1001,9 +1040,10 @@ describe('attListDeclaration (unit)', () => {
          it('calls unassigned.assignToProps() with no "xtra" if missing is type', () => {
             const unassignedValue = [ 'placeholder unassigned' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'type',
-               attDefs: [ {} ],
+               attDefs: [ {} ] as any,
             });
 
             attListDeclaration.assignUnassigned(declPToken);
@@ -1026,9 +1066,10 @@ describe('attListDeclaration (unit)', () => {
          it('assigns a enumeration if there is no type', () => {
             const unassignedValue = [ '(' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'type',
-               attDefs: [ {} ],
+               attDefs: [ {} ] as any,
             });
             // consume one unassigned value, so the system thinks we got a nameList
             spy.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
@@ -1041,11 +1082,12 @@ describe('attListDeclaration (unit)', () => {
          it('assigns a nameList if type is ""', () => {
             const unassignedValue = [ '(' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'defaultType',
                attDefs: [ {
                   type: SToken.fromString(''),
-               } ],
+               } ] as any,
             });
             // consume one unassigned value, so the system thinks we got an enumeration
             spy.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
@@ -1058,11 +1100,12 @@ describe('attListDeclaration (unit)', () => {
          it('assigns a nameList if type is NOTATION', () => {
             const unassignedValue = [ '(' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'defaultType',
                attDefs: [ {
                   type: SToken.fromString('NOTATION'),
-               } ],
+               } ] as any,
             });
             // consume one unassigned value, so the system thinks we got an enumeration
             spy.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
@@ -1075,9 +1118,10 @@ describe('attListDeclaration (unit)', () => {
          it('assigns no enumeration if enumeration.assignUnassigned consumes no tokens', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'type',
-               attDefs: [ {} ],
+               attDefs: [ {} ] as any,
             });
 
             attListDeclaration.assignUnassigned(declPToken);
@@ -1091,9 +1135,10 @@ describe('attListDeclaration (unit)', () => {
                type: SToken.fromString('CDATA'),
             };
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'defaultType',
-               attDefs: [ attDef ],
+               attDefs: [ attDef ] as any,
             });
 
             attListDeclaration.assignUnassigned(declPToken);
@@ -1128,6 +1173,7 @@ describe('attListDeclaration (unit)', () => {
                close: SToken.fromString(')'),
             });
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'defaultType',
                attDefs: [ {
@@ -1163,9 +1209,10 @@ describe('attListDeclaration (unit)', () => {
          it('does not call nameList.assignUnassigned() if the next property is value', () => {
             const unassignedValue = [ 'placeholder unassigned' ];
             const declPToken = new attListDeclaration.PToken({
+               open: toSToken('<!'),
                unassigned: unassignedValue,
                nextPropName: 'value',
-               attDefs: [ {} ],
+               attDefs: [ {} ] as any,
             });
 
             attListDeclaration.assignUnassigned(declPToken);
@@ -1205,11 +1252,11 @@ describe('attListDeclaration (unit)', () => {
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
 
-      it('asks the declaration module to look for problems in the declaration part', () => {
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+      // it('asks the declaration module to look for problems in the declaration part', () => {
+      //    attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
-         expect(declaration.checkWellFormed).toHaveBeenCalledWith(aldPToken, mockErrorCollector, emd);
-      });
+      //    expect(declaration.checkWellFormed).toHaveBeenCalledWith(aldPToken, mockErrorCollector, emd);
+      // });
 
       it('reports an error if there is no element name', () => {
          delete aldPToken.elementName;

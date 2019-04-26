@@ -11,6 +11,8 @@ import { parseParameterEntityReference, ParameterEntityReferencePToken, Paramete
 import { CharRefPToken, CharRefXToken, parseCharRef } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
+import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };

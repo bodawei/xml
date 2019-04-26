@@ -44,6 +44,8 @@ import * as xToken from 'token';
 type Token = { type: string };
 type TokenArray = Array<Token>;
 
+const toSToken = SToken.fromString;
+
 describe('NodeStream (unit)', () => {
 
    function gatherResult(stream: stream.Transform, expect: (result: Token) => void) {
@@ -1138,6 +1140,7 @@ describe('NodeStream (unit)', () => {
          it('processes through the unassigned values', (done) => {
             const unassignedVals = [ xToken.unassigned.wordFromSToken(SToken.fromString('elName')) ];
             const pToken = new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [],
                unassigned: unassignedVals,
             });
@@ -1155,6 +1158,7 @@ describe('NodeStream (unit)', () => {
 
          it('passes a complete ATTLIST token through', () => {
             const pToken = new AttListPToken({
+               open: toSToken('<!'),
                attDefs: [],
             });
             const declToken = xToken.attListDeclaration.pTokenToXToken(pToken);

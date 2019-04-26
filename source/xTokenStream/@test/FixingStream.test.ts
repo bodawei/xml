@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import * as tokenNs from 'token';
+import { SToken } from 'sToken';
 import { CommentXToken } from 'token';
 import attListDecl, { AttListPToken } from '../../token/attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../../token/elementDeclaration';
@@ -19,7 +20,7 @@ describe('FixingStream (unit)', () => {
 
    beforeEach(() => {
       fs = new FixingStream();
-      dummyPToken = new attListDecl.PToken();
+      dummyPToken = new attListDecl.PToken({ open: SToken.fromString('<!') });
       dummyElPToken = new elementDeclaration.PToken();
    });
 

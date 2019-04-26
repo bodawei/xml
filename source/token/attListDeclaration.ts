@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import unassigned, { UnassignedArray } from './common/unassigned';
 
-import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
+import { DeclarationStart } from './bridge/declaration';
 import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';
 import { parseWordList, newWordListFromUndefined, WordListType, WordListPToken } from './common/wordList';
 import { AttributeValueXToken } from './common/attribute';
@@ -19,6 +19,11 @@ const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NM
 const DEF_TYPES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
 type DeliverPToken = (pToken?: any) => void;
+type ProtoToken = {
+   open: SToken;
+   attDefs?: Array<AttDefPToken> | void;
+   [other: string]: any;
+};
 
 type AttDefPToken = {
    name: SToken;
@@ -36,8 +41,12 @@ type AttDefPToken = {
    xtra?: SToken;
 }
 
-class AttListPToken extends DeclarationPToken {
-   public readonly type: string = ATTLISTDECL_PTOKEN_TYPE;
+class AttListPToken {
+   public readonly type: typeof ATTLISTDECL_PTOKEN_TYPE = ATTLISTDECL_PTOKEN_TYPE;
+   public open: SToken;
+   public openSpace?: SToken;
+   public declType?: SToken;
+   public declTypeSpace?: SToken;
    public elementName?: SToken;
    public postElementNameSpace?: SToken;
    public attDefs: Array<AttDefPToken>;
@@ -46,15 +55,16 @@ class AttListPToken extends DeclarationPToken {
    public extra?: UnassignedArray;
    public nextPropName?: string;
 
-   constructor(basePToken?: DeclarationPToken|AttListPToken|Object) {
-      /* istanbul ignore next */ // Istanbul is confused by transpilation
-      super(ATTLISTDECL_PTOKEN_TYPE, basePToken);
+   constructor(basePToken: ProtoToken|AttListPToken) {
+      Object.assign(this, basePToken);
 
-      if (basePToken && 'attDefs' in basePToken) {
+      if (basePToken.attDefs) {
          this.attDefs = basePToken.attDefs;
       } else {
          this.attDefs = [];
       }
+
+      this.open = basePToken.open
    }
 }
 
@@ -88,7 +98,7 @@ class AttListPToken extends DeclarationPToken {
    attValue.
 \**********************************************************************/
 
-function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: DeliverPToken): void {
+function parse(source: STokenSource, declarationPToken: DeclarationStart, deliverPToken: DeliverPToken): void {
    const pToken = new AttListPToken(declarationPToken);
 
    parseElementName(source, pToken, () => {
@@ -224,7 +234,7 @@ function assignUnassigned(attLiPToken: AttListPToken) {
 
    if (attLiPToken.nextPropName === 'elementName') {
       unassigned.assignToProps(attLiPToken.unassigned, attLiPToken, attLiPToken.nextPropName, [
-         { name: 'postDeclTypeSpace', type: 'space' },
+         { name: 'declTypeSpace', type: 'space' },
          { name: 'elementName', type: 'word' },
          { name: 'postElementNameSpace', type: 'space' },
       ]);
@@ -353,7 +363,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
 
    // When you rework this, make sure you're doing all the text checking correctly.
 
-   declaration.checkWellFormed(pToken, ec, entityMetaData);
+   // declaration.checkWellFormed(pToken, ec, entityMetaData);
 
    const elNameText = strOrBlank(pToken.elementName);
 

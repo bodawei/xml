@@ -246,9 +246,9 @@ describe('EntityExpanderStream (integration)', () => {
          });
          const expected = new AttListPToken({
             open: SToken.fromString('<!'),
-            postOpenSpace: undefined,
+            openSpace: undefined,
             declType: SToken.fromString('ATTLIST'),
-            postDeclTypeSpace: SToken.fromString(' '),
+            declTypeSpace: SToken.fromString(' '),
             elementName: SToken.fromString('one'),
             postElementNameSpace: SToken.fromString(' '),
             attDefs: [{
@@ -270,7 +270,7 @@ describe('EntityExpanderStream (integration)', () => {
                   }),
                   new GeneralEntityStartPToken(expectedRef2),
                   new TextPToken({ text: SToken.fromString('(') }),
-                  new ParameterEntityStartPToken(expectedRef1),
+                  new ParameterEntityStartPToken(expectedRef1), // Maybe should not ahve these
                   new TextPToken({ text: SToken.fromString('foo') }),
                   new ParameterEntityEndPToken(expectedRef1),
                   new TextPToken({ text: SToken.fromString(')') }),
@@ -286,7 +286,7 @@ describe('EntityExpanderStream (integration)', () => {
                      charCode: 0x5D,
                   }),
                ],
-            }],
+            }] as any,
             close: SToken.fromString('>'),
          });
 

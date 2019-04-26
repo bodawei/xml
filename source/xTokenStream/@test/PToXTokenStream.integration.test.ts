@@ -86,7 +86,7 @@ describe('PToXTokenStream (integration)', () => {
             type: 'ENTITY',
             defaultType: '',
             value: [],
-         }], new attListDeclaration.PToken()),
+         }], new attListDeclaration.PToken({ open: SToken.fromString('<!') })),
       ], done);
    });
 

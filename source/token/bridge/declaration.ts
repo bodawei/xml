@@ -60,6 +60,9 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
          case 'NOTATION':
             parseNotationDeclaration(source, start, deliverPToken);
             return;
+         case 'ATTLIST':
+            attListDeclaration.parse(source, start, deliverPToken);
+            return;
       }
 
 
@@ -87,9 +90,6 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
                   });
                }
             });
-            break;
-         case 'ATTLIST':
-            attListDeclaration.parse(source, newResult, deliverPToken);
             break;
          case 'ELEMENT':
             elementDeclaration.parse(source, newResult, deliverPToken);
