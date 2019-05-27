@@ -39,6 +39,7 @@ class ElementDeclaration {
 }
 
 class ElementDeclarationPToken extends declaration.PToken {
+   public readonly type: typeof ELEMENTDECL = ELEMENTDECL;
    public name?: SToken;
    public postNameSpace?: SToken;
    public contentSpec?: SToken;
@@ -73,6 +74,10 @@ class ElementDeclarationPToken extends declaration.PToken {
       );
 
       return results;
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      checkWellFormed(this, ec, entityMetaData);
    }
 }
 

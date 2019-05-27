@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { Token, ENTITY_META_DATA, EntityKind } from 'basic';
 import {
@@ -27,10 +27,10 @@ import {
    attListDeclaration,
    unassigned,
    PToken,
-   InternalSubsetStartXToken,
-   InternalSubsetEndXToken,
-   ExternalSubsetEndXToken,
-   ExternalSubsetStartXToken,
+   InternalSubsetStartToken,
+   InternalSubsetEndToken,
+   ExternalSubsetEndToken,
+   ExternalSubsetStartToken,
    CharDataPToken,
    CHARDATA_PTOKEN,
 } from 'token';
@@ -79,7 +79,7 @@ enum ValidationMode {
 }
 
 type Done = () => void;
-type ExpandToken = (token: Token, tokenProcessed: TokenHandled) => void;
+type ExpandToken = (token: PToken, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
 type ProcessBody = (sTokenSource: STokenSource, expandToken: ExpandToken, done: STokenSourceProcessed) => void;
 type ProcessForEntityValue = (sTokenSource: STokenSource, done: (results: ExpandedLiteralValuePToken) => void) => void;
@@ -351,7 +351,7 @@ class EntityExpander {
       this.docTypeStart = pToken;
 
       if (pToken.openSubset) {
-         this.deliverAToken(new InternalSubsetStartXToken());
+         this.deliverAToken(new InternalSubsetStartToken());
       }
 
       handled();
@@ -359,13 +359,13 @@ class EntityExpander {
 
    private handleDocTypeEnd(pToken: DocTypeEndPToken, handled: TokenHandled) {
       if (this.docTypeStart && this.docTypeStart.openSubset) {
-         this.deliverAToken(new InternalSubsetEndXToken());
+         this.deliverAToken(new InternalSubsetEndToken());
       }
 
       if (this.docTypeStart && this.docTypeStart.externalId) {
          const sTokenSource = this.processors.retrieveExternalEntity(this.docTypeStart.externalId!, new EntityMetaData());
 
-         this.deliverAToken(new ExternalSubsetStartXToken());
+         this.deliverAToken(new ExternalSubsetStartToken());
          this.processors.processBody(sTokenSource, (token: Token, done: TokenHandled) => {
             if (token.type !== ENTITY_META_DATA) {
                this.deliverAToken(token);
@@ -373,7 +373,7 @@ class EntityExpander {
 
             done();
          }, () => {
-            this.deliverAToken(new ExternalSubsetEndXToken());
+            this.deliverAToken(new ExternalSubsetEndToken());
             this.deliverAToken(pToken);
             handled();
          });
@@ -443,13 +443,13 @@ class EntityExpander {
                // §4.2.1 defines internal-ness
                if (pToken.parameter) {
                   info = {
-                     token: pToken,
+                     token: pToken as any,
                      isInternal: !pToken.externalId,
                   };
                   entityGroup = this.paramEntitiesByName;
                } else {
                   info = {
-                     token: pToken,
+                     token: pToken as any,
                      isUnparsed: !!(pToken as GeneralEntityDeclarationPToken).nDataName,
                      isInternal: !pToken.externalId,
                   };

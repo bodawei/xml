@@ -243,6 +243,8 @@ Spec is a little inconsistent about these:
 
 - Flipping the coin the other way, this opts to go with the pedantic interpretation that if there's an external subset, and the ATTLIST (in the internal subset) has a reference in a default value with no declaration, it will not report an error. This isn't quite right, as the presence or absence of an external subset should have no effect on the ATTLIST in the internal subset, but this is what the spec says. (and this is knowable at the point of parsing the ATTLIST)
 
+- §4.3.2 says that "A consequence of well-formedness in entities is that the logical and physical structures in an XML document are properly nested; no start-tag, end-tag... can begin in one entity and end in another".  The syntax productions in [39] and [43] certainly suggest that any start tag must also be balanced with an end tag in the same entity. This assumes that is so, even though the wording does not say that.
+
 ## Parameter Entities
 - Can appear in an entity value literal
 - Can't appear in any other literal

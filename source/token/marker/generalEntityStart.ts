@@ -1,5 +1,7 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
 
+import { EntityMetaData } from 'basic';
+import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
 
@@ -16,6 +18,10 @@ class GeneralEntityStartPToken {
 
    constructor(geReferencePToken: GeneralEntityReferencePToken) {
       this.referencePToken = geReferencePToken;
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
+      this.referencePToken.checkWellFormed(ec, entityMetaData);
    }
 
    toXToken() {

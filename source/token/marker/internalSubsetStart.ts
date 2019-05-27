@@ -5,13 +5,13 @@
  subset.
 \**********************************************************************/
 
-const INTERNAL_SUBSET_START_XTOKEN = 'INTERNAL_SUBSET_START_XTOKEN';
+const INTERNAL_SUBSET_START_TOKEN = 'INTERNAL_SUBSET_START_TOKEN';
 
-class InternalSubsetStartXToken {
-   public readonly type: typeof INTERNAL_SUBSET_START_XTOKEN = INTERNAL_SUBSET_START_XTOKEN;
+class InternalSubsetStartToken {
+   public readonly type: typeof INTERNAL_SUBSET_START_TOKEN = INTERNAL_SUBSET_START_TOKEN;
 }
 
 export {
-   INTERNAL_SUBSET_START_XTOKEN,
-   InternalSubsetStartXToken
+   INTERNAL_SUBSET_START_TOKEN,
+   InternalSubsetStartToken,
 };

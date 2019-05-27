@@ -2,4 +2,3 @@
 
 export { default as PTokenStream } from './PTokenStream';
 export { default as PTokenFromLiteralStream } from './PTokenFromLiteralStream';
-export { default as CheckPTokenWellFormedStream } from './CheckPTokenWellFormedStream';

@@ -88,7 +88,7 @@ class MockErrorCollector extends ErrorCollector {
    check(condition: any, id: string, params?: Array<string>, position?: Position) {
       if (condition) {
          if (params) {
-            this.report(id, params);
+            this.report(id, params, position);
          } else {
             this.report(id);
          }
@@ -98,6 +98,34 @@ class MockErrorCollector extends ErrorCollector {
    reportError(id: string, constructor: ErrConstFunc, params: Array<string>, position?: Position) {
       this.report(id, params);
    }
+}
+
+function toNotReportError(util: any) {
+   return {
+      compare: (mockErrorCollector: MockErrorCollector, expectedId: string) => {
+         if (!mockErrorCollector) {
+            throw new Error('Did not get a mock error collector as expected.');
+         }
+
+         const errors = mockErrorCollector.errors;
+         let pass = true;
+         let message = `No error with the id ${expectedId} reported.`;
+
+         for (let index = 0; index < errors.length; index++) {
+            const actual = errors[index];
+
+            if (expectedId === actual.id) {
+                  pass = false;
+                  message = `The error ${expectedId} was found.`;
+            }
+         }
+
+         return {
+            pass,
+            message,
+         };
+      },
+   };
 }
 
 function toReportError(util: any) {
@@ -176,6 +204,7 @@ function makeCompareObject(util: any, ErrorClass: any) {
 beforeEach(() => {
    jasmine.addMatchers({
       toReportError,
+      toNotReportError,
       toReportWarning,
    });
 

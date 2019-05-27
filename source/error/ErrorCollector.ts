@@ -94,6 +94,10 @@ class ErrorCollector {
 
       this.errors.push(new constructor(code, params, posOffset, this.context));
    }
+
+   appendFrom(other: ErrorCollector) {
+      this.errors = this.errors.concat(other.getErrors());
+   }
 }
 
 export default ErrorCollector;

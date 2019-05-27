@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation } from 'basic';
@@ -189,7 +189,7 @@ describe('EntityManager (unit)', () => {
       });
 
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
-         manager.addParameterEntityFromInternalSubset(pTokenToXToken('test', 'two'));
+         manager.addParameterEntityFromInternalSubset(makePEToken('test', 'two'));
 
          expectParameterNameToLookupValue('test', 'two', done);
       });
@@ -210,7 +210,7 @@ describe('EntityManager (unit)', () => {
    describe('getParameterEntityToken', () => {
 
       it('returns the token asked for', () => {
-         const token = pTokenToXToken('test', 'two');
+         const token = makePEToken('test', 'two');
          manager.addParameterEntityFromInternalSubset(token);
 
          expect(manager.getParameterEntityToken('test')).toEqual(token);

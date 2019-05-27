@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from 'extractor';

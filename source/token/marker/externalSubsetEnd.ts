@@ -5,13 +5,13 @@
  subset.
 \**********************************************************************/
 
-const EXTERNAL_SUBSET_END_XTOKEN = 'EXTERNAL_SUBSET_END_XTOKEN';
+const EXTERNAL_SUBSET_END_TOKEN = 'EXTERNAL_SUBSET_END_TOKEN';
 
-class ExternalSubsetEndXToken {
-   public readonly type: typeof EXTERNAL_SUBSET_END_XTOKEN = EXTERNAL_SUBSET_END_XTOKEN;
+class ExternalSubsetEndToken {
+   public readonly type: typeof EXTERNAL_SUBSET_END_TOKEN = EXTERNAL_SUBSET_END_TOKEN;
 }
 
 export {
-   EXTERNAL_SUBSET_END_XTOKEN,
-   ExternalSubsetEndXToken
+   EXTERNAL_SUBSET_END_TOKEN,
+   ExternalSubsetEndToken
 };

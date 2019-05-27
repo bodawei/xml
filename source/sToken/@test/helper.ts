@@ -201,8 +201,8 @@ class MockSTokenSource extends STokenSource {
       }
       this.queuedCalls = [];
 
-      this.extractToObject = spyOn(this, 'extractToObject').and.callThrough();
-      this.extract = spyOn(this, 'extract').and.callThrough();
+      this.extractToObject = spyOn(this as any, 'extractToObject').and.callThrough(); // typeHack
+      this.extract = spyOn(this as any, 'extract').and.callThrough(); // typeHack
    }
 
    extractToObjectNoParams(type: string, obj: Object, name: string): void {

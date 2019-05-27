@@ -7,7 +7,8 @@ import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
-import unassigned, { UnassignedArray, UnassignedValue, UnassignedType } from '../unassigned';
+import unassigned from '../unassigned';
+import { UnassignedArray, UnassignedValue, UnassignedType } from '../unassigned';
 
 import externalId from '../externalId';
 import literal from '../literal';
@@ -27,7 +28,7 @@ describe('externalId (unit)', () => {
          expectedSToken = makeSTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
          literalParseSpy = spyOn(literal, 'parse').and.callFake((_1: any, options: any, callback: Function) => { callback(); });
-         unCheck = spyOn(unassigned, 'makeCheckCallback').and.callFake((_1: any, _2: any, _3: any, cb: Function) => cb);
+         unCheck = spyOn(unassigned, 'makeCheckCallback').and.callFake((_1: any, _2: any, _3: any, cb: (values?: UnassignedArray) => void) => cb);
          spyOn(unassigned, 'checkForPERef').and.callFake((_1: any, cb: Function) => {
             cb();
          })
@@ -657,7 +658,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports an error if the PUBLIC value has illegal characters', () => {
-         pTokenPart.public.value[0].str = 'bad&chars';
+         pTokenPart.public.value[0].text.str = 'bad&chars';
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
          // invoke the callback function
@@ -698,7 +699,7 @@ describe('externalId (unit)', () => {
          litWell.and.callFake((_1: any, _2: any, _3: any, _4: any, callback: Function) => {
             return callback ? callback() : undefined;
          });
-         pTokenPart.public.value[0].str = '{}{}{}{}';
+         pTokenPart.public.value[0].text.str = '{}{}{}{}';
 
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 

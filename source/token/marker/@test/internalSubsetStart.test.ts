@@ -2,28 +2,28 @@
 /* eslint-env jasmine */
 
 import {
-   InternalSubsetStartXToken,
-   INTERNAL_SUBSET_START_XTOKEN,
+   InternalSubsetStartToken,
+   INTERNAL_SUBSET_START_TOKEN,
 } from '../internalSubsetStart';
 
 describe('InternalSubsetStart (unit)', () => {
 
-   describe('InternalSubsetStartXToken', () => {
+   describe('InternalSubsetStartToken', () => {
 
       it('has a type property', () => {
-         const token = new InternalSubsetStartXToken();
+         const token = new InternalSubsetStartToken();
 
          expect(token).toEqualShape({
-            type: INTERNAL_SUBSET_START_XTOKEN,
+            type: INTERNAL_SUBSET_START_TOKEN,
          });
       });
 
    });
 
-   describe('INTERNAL_SUBSET_START_XTOKEN', () => {
+   describe('INTERNAL_SUBSET_START_TOKEN', () => {
 
       it('has a value', () => {
-         expect(INTERNAL_SUBSET_START_XTOKEN).toEqual('INTERNAL_SUBSET_START_XTOKEN');
+         expect(INTERNAL_SUBSET_START_TOKEN).toEqual('INTERNAL_SUBSET_START_TOKEN');
       });
 
    });

@@ -2,11 +2,39 @@
 
 import declaration from './bridge/baseDeclaration';
 
-import attListDeclaration from './attListDeclaration';
-import elementDeclaration from './elementDeclaration';
+import attListDeclaration, { AttListPToken } from './attListDeclaration';
+import elementDeclaration, { ElementDeclarationPToken } from './elementDeclaration';
 
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
+import { XmlDeclarationPToken } from './xmlDeclaration';
+import { DocTypeStartPToken } from './docTypeStart';
+import { InternalSubsetStartToken } from './marker/internalSubsetStart';
+import { InternalSubsetEndToken } from './marker/internalSubsetEnd';
+import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
+import { ExternalSubsetEndToken } from './marker/externalSubsetEnd';
+import { DocTypeEndPToken, DOCTYPE_END_PTOKEN } from './docTypeEnd';
+import { CdataPToken } from './cdata';
+import { CharDataPToken } from './charData';
+import { CommentPToken } from './comment';
+import { ProcessingInstructionPToken } from './processingInstruction';
+import { CharRefPToken } from './charRef';
+import { TextPToken } from './text';
+import { GeneralEntityReferencePToken } from './generalEntityReference';
+import { ParameterEntityReferencePToken } from './parameterEntityReference';
+import { GeneralEntityStartPToken, GENERAL_ENTITY_START_PTOKEN } from './marker/generalEntityStart';
+import { GeneralEntityEndPToken, GENERAL_ENTITY_END_PTOKEN } from './marker/generalEntityEnd';
+import { NotationDeclarationPToken } from './notationDeclaration';
+import { GeneralEntityDeclarationPToken } from './generalEntityDeclaration';
+import { ParameterEntityDeclarationPToken } from './parameterEntityDeclaration';
+import { ParameterEntityStartPToken, PARAMETER_ENTITY_START_PTOKEN } from './marker/parameterEntityStart';
+import { SpacePToken } from './space';
+import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
+import { ElementEndPToken } from './elementEnd';
+import { EntityMetaData } from 'basic';
+import { SToken } from 'sToken';
+import { TextDeclarationPToken } from './textDeclaration';
+import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 export * from './entityDeclaration';
 
 export * from './bridge/declaration';
@@ -41,10 +69,54 @@ export * from './text';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
-type PToken = {
-   type: string;
-   [key: string]: any;
-};
+type PToken =
+   | EntityMetaData
+   | AttListPToken
+   | CommentPToken
+   | CdataPToken
+   | CharDataPToken
+   | CharRefPToken
+   | DocTypeStartPToken
+   | DocTypeEndPToken
+   | ElementDeclarationPToken
+   | ElementEmptyPToken
+   | ElementEndPToken
+   | ElementStartPToken
+   | ExternalSubsetStartToken
+   | ExternalSubsetEndToken
+   | GeneralEntityDeclarationPToken
+   | GeneralEntityEndPToken
+   | GeneralEntityReferencePToken
+   | GeneralEntityStartPToken
+   | InternalSubsetStartToken
+   | InternalSubsetEndToken
+   | NotationDeclarationPToken
+   | ParameterEntityDeclarationPToken
+   | ParameterEntityEndPToken
+   | ParameterEntityReferencePToken
+   | ParameterEntityStartPToken
+   | ProcessingInstructionPToken
+   | SpacePToken
+   | TextPToken
+   | TextDeclarationPToken
+   | XmlDeclarationPToken
+   ;
+
+function getFirstSToken(pToken: PToken): SToken {
+   let startContext;
+
+   if (pToken.type === DOCTYPE_END_PTOKEN) {
+      startContext = pToken.closeSubset; // eh?  And what if there is no close?
+   } else if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
+      startContext = pToken.referencePToken.open;
+   } else if (pToken.type === GENERAL_ENTITY_START_PTOKEN || pToken.type === GENERAL_ENTITY_END_PTOKEN) {
+      startContext = pToken.referencePToken.open;
+   } else {
+      startContext = (pToken as any).open || (pToken as any).text;
+   }
+
+   return startContext;
+}
 
 export {
    declaration,
@@ -55,4 +127,6 @@ export {
    unassigned,
    literalValue,
    PToken,
+
+   getFirstSToken,
 };

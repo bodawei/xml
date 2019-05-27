@@ -28,7 +28,7 @@ const PARAMETER_ENTITY_DECLARATION_XTOKEN = 'PARAMETER_ENTITY_DECLARATION_XTOKEN
 type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;  // @@ why are these PTokens?  And where did the text come from, and has it been scanned for chars?
 
 class ParameterEntityDeclarationXToken {
-   public readonly type: string = PARAMETER_ENTITY_DECLARATION_XTOKEN;
+   public readonly type: typeof PARAMETER_ENTITY_DECLARATION_XTOKEN = PARAMETER_ENTITY_DECLARATION_XTOKEN;
    public readonly name: string;
    public readonly isParameter: boolean;
    public readonly externalLoc: EntityLocation | void;
@@ -45,7 +45,7 @@ class ParameterEntityDeclarationXToken {
 }
 
 class ParameterEntityDeclarationPToken {
-   public readonly type: string = PARAMETER_ENTITY_DECLARATION_PTOKEN;
+   public readonly type: typeof PARAMETER_ENTITY_DECLARATION_PTOKEN = PARAMETER_ENTITY_DECLARATION_PTOKEN;
    public readonly open: SToken;
    public readonly openSpace?: SToken;
    public readonly declType?: SToken;

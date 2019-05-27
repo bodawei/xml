@@ -14,7 +14,7 @@ function processSTokenSource(sTokenSource: STokenSource, expandToken: ExpandToke
 
    pTokenStream.on('data', (token: Token) => {
       pTokenStream.pause();
-      expandToken(token, () => pTokenStream.resume());
+      expandToken(token as any, () => pTokenStream.resume());
    });
    pTokenStream.on('end', () => {
       done();

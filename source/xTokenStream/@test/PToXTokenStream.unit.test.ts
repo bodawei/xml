@@ -19,10 +19,10 @@ import {
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
    NotationDeclarationPToken,
-   InternalSubsetStartXToken,
-   InternalSubsetEndXToken,
-   ExternalSubsetEndXToken,
-   ExternalSubsetStartXToken,
+   InternalSubsetStartToken,
+   InternalSubsetEndToken,
+   ExternalSubsetEndToken,
+   ExternalSubsetStartToken,
    CommentPToken,
    ElementStartPToken,
    ElementEmptyPToken,
@@ -229,35 +229,35 @@ describe('PToXTokenStream (unit)', () => {
    });
 
    it('passes InternalSubsetStart through', () => {
-      tokenStream.write(new InternalSubsetStartXToken());
+      tokenStream.write(new InternalSubsetStartToken());
 
       const result = tokenStream.read();
 
-      expect(result).toEqual(new InternalSubsetStartXToken());
+      expect(result).toEqual(new InternalSubsetStartToken());
    });
 
    it('passes InternalSubsetEnd through', () => {
-      tokenStream.write(new InternalSubsetEndXToken());
+      tokenStream.write(new InternalSubsetEndToken());
 
       const result = tokenStream.read();
 
-      expect(result).toEqual(new InternalSubsetEndXToken());
+      expect(result).toEqual(new InternalSubsetEndToken());
    });
 
    it('passes ExternalSubsetStart through', () => {
-      tokenStream.write(new ExternalSubsetStartXToken());
+      tokenStream.write(new ExternalSubsetStartToken());
 
       const result = tokenStream.read();
 
-      expect(result).toEqual(new ExternalSubsetStartXToken());
+      expect(result).toEqual(new ExternalSubsetStartToken());
    });
 
    it('passes ExternalSubsetEnd through', () => {
-      tokenStream.write(new ExternalSubsetEndXToken());
+      tokenStream.write(new ExternalSubsetEndToken());
 
       const result = tokenStream.read();
 
-      expect(result).toEqual(new ExternalSubsetEndXToken());
+      expect(result).toEqual(new ExternalSubsetEndToken());
    });
 
    it('throws an error if asked to deal with an unknown pToken type', () => {

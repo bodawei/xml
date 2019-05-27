@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { Range, EntityLocation } from 'basic';
@@ -6,7 +6,7 @@ import { SToken, STokenSource } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as tokenStuff from 'token';
-import { TextPToken } from 'token';
+import { CharRefPToken, TextPToken } from 'token';
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
 describe('PTokenFromLiteralStream (unit)', () => {
@@ -42,6 +42,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
          });
 
          it('calls text.parse with just & if not looking for perefs', () => {
+            const aToken = new TextPToken({ text: SToken.fromString('x') });
             const mockSource = new MockSTokenSource([
                [ 'x', 'peekChar' ],
             ]);
@@ -57,12 +58,13 @@ describe('PTokenFromLiteralStream (unit)', () => {
 
             // Cheat slightly and make sure function is good
             const pushSpy = spyOn(pTokenStream, 'push');
-            parseSpy.calls.argsFor(0)[2]('x');
+            parseSpy.calls.argsFor(0)[2](aToken);
 
-            expect(pushSpy).toHaveBeenCalledWith('x');
+            expect(pushSpy).toHaveBeenCalledWith(aToken);
          });
 
          it('calls text.parse with all terminators if can look for peref', () => {
+            const aToken = new TextPToken({ text: SToken.fromString('x') });
             const mockSource = new MockSTokenSource([
                [ 'x', 'peekChar' ],
             ]);
@@ -78,9 +80,9 @@ describe('PTokenFromLiteralStream (unit)', () => {
 
             // Cheat slightly and make sure function is good
             const pushSpy = spyOn(pTokenStream, 'push');
-            parseSpy.calls.argsFor(0)[2]('x');
+            parseSpy.calls.argsFor(0)[2](aToken);
 
-            expect(pushSpy).toHaveBeenCalledWith('x');
+            expect(pushSpy).toHaveBeenCalledWith(aToken);
          });
 
          it('pushes null in the extremely unlikely chance that somehow we peek a character and then can not read it', () => {
@@ -100,6 +102,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
          });
 
          it('calls charRef.parse if &# is found', () => {
+            const aToken = new CharRefPToken({ open: SToken.fromString('x') });
             const mockSource = new MockSTokenSource([
                [ '&', 'peekChar' ],
                [ '&#', 'match', '&#' ],
@@ -116,9 +119,9 @@ describe('PTokenFromLiteralStream (unit)', () => {
 
             // Cheat slightly and make sure function is good
             const pushSpy = spyOn(pTokenStream, 'push');
-            parseSpy.calls.argsFor(0)[2]('x');
+            parseSpy.calls.argsFor(0)[2](aToken);
 
-            expect(pushSpy).toHaveBeenCalledWith('x');
+            expect(pushSpy).toHaveBeenCalledWith(aToken);
          });
       });
 

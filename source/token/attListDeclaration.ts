@@ -66,6 +66,10 @@ class AttListPToken {
 
       this.open = basePToken.open
    }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      checkWellFormed(this, ec, entityMetaData);
+   }
 }
 
 /**********************************************************************\
@@ -549,6 +553,8 @@ const attListDecl = {
 
 export default attListDecl;
 export {
+   ATTLISTDECL_PTOKEN_TYPE,
+
    AttListPToken,
    AttDefPToken,
    AttListXToken,

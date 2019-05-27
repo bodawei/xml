@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2019 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { ENTITY_META_DATA, EntityLocation, EntityMetaData, Range } from 'basic';
@@ -19,8 +19,8 @@ import {
    GeneralEntityDeclarationXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
-   InternalSubsetStartXToken,
-   InternalSubsetEndXToken,
+   InternalSubsetStartToken,
+   InternalSubsetEndToken,
    NotationDeclarationXToken,
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
@@ -81,9 +81,9 @@ describe('NodeStream (integration)', () => {
          matchTokenTypes(results, [
             XmlDeclarationXToken,
             DocTypeStartXToken,
-            InternalSubsetStartXToken,
+            InternalSubsetStartToken,
             tokenNs.GeneralEntityDeclarationXToken,
-            InternalSubsetEndXToken,
+            InternalSubsetEndToken,
             DocTypeEndXToken,
             ElementStartXToken,
             GeneralEntityStartXToken,
@@ -114,12 +114,12 @@ describe('NodeStream (integration)', () => {
          matchTokenTypes(results, [
             XmlDeclarationXToken,
             DocTypeStartXToken,
-               InternalSubsetStartXToken,
+               InternalSubsetStartToken,
                tokenNs.ParameterEntityDeclarationXToken,
                ParameterEntityStartXToken,
                   tokenNs.GeneralEntityDeclarationXToken,
                ParameterEntityEndXToken,
-               InternalSubsetEndXToken,
+               InternalSubsetEndToken,
             DocTypeEndXToken,
             ElementStartXToken,
                CharDataXToken,

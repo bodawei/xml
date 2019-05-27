@@ -126,6 +126,8 @@ function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityM
    misc.checkName(pToken.name, ec, entityMetaData, WFEID.DOCTYPE_NAME_INVALID);
 
    externalId.checkWellFormed(pToken.externalId, ec, entityMetaData);
+
+   ec.setPos(pToken.openSubset);
 }
 
 /**********************************************************************\

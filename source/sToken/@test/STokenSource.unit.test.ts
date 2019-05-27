@@ -20,7 +20,7 @@ describe('STokenSource (unit)', () => {
       process(segment: Segment) {
          this._text.push(segment.text.substring(segment.index));
          segment.index = segment.text.length;
-         this._segInfo.push({
+         this.segInfo.push({
             chars: segment.text.length,
             rows: 0,
             columns: segment.text.length,
@@ -41,7 +41,7 @@ describe('STokenSource (unit)', () => {
          return {
             text: combinedText,
             original: combinedText,
-            segments: this._segInfo,
+            segments: this.segInfo,
          };
       }
    }
@@ -74,7 +74,7 @@ describe('STokenSource (unit)', () => {
          segment.index = str.length;
 
          this._text.push(str);
-         this._segInfo.push(info);
+         this.segInfo.push(info);
 
          if (!segment.atEnd()) {
             info.segment = segment;
@@ -100,7 +100,7 @@ describe('STokenSource (unit)', () => {
          return {
             text: combinedText,
             original: combinedText,
-            segments: this._segInfo,
+            segments: this.segInfo,
          };
       }
    }
@@ -357,7 +357,7 @@ describe('STokenSource (unit)', () => {
       });
 
       it('passes a version and arbitrary params to the extractor', () => {
-         spyOn(testExtractors, 'foo');
+         spyOn(testExtractors as any, 'foo'); // testHack
 
          source.extract('foo', 55, () => {});
 

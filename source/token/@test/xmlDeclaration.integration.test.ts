@@ -14,14 +14,12 @@ describe('xmlDeclaration (integration)', () => {
    let start: InstructionStart;
 
    beforeEach(() => {
-      beforeEach(() => {
-         start = {
-            open: SToken.fromString('<?'),
-            openSpace: undefined,
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-         };
-      });
+      start = {
+         open: SToken.fromString('<?'),
+         openSpace: undefined,
+         target: SToken.fromString('xml'),
+         targetSpace: SToken.fromString(' '),
+      };
    });
 
    describe('parseXmlDeclaration()', () => {

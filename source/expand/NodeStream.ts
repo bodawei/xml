@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
@@ -22,10 +22,10 @@ import {
    unassigned,
    literalValue,
 
-   ExternalSubsetEndXToken,
-   ExternalSubsetStartXToken,
-   InternalSubsetEndXToken,
-   InternalSubsetStartXToken,
+   ExternalSubsetEndToken,
+   ExternalSubsetStartToken,
+   InternalSubsetEndToken,
+   InternalSubsetStartToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    ParameterEntityEndXToken,
@@ -181,12 +181,12 @@ class NodeStream extends stream.Transform {
          return;
       } else if (xToken.type === DOCTYPE_END_XTOKEN) {
          if (this.docTypeStart && this.docTypeStart.hasInternalSubset) {
-            this.push(new InternalSubsetEndXToken());
+            this.push(new InternalSubsetEndToken());
          }
 
          if (this.docTypeStart && this.docTypeStart.externalLoc) {
-            this.push(new ExternalSubsetStartXToken());
-            this.push(new ExternalSubsetEndXToken());
+            this.push(new ExternalSubsetStartToken());
+            this.push(new ExternalSubsetEndToken());
          }
       } else if (xToken.type === XMLDECL_XTOKEN) {
          if (this.processMode === ProcessMode.NON_VALIDATING && (xToken as XmlDeclarationXToken).standalone) {
@@ -200,7 +200,7 @@ class NodeStream extends stream.Transform {
          this.docTypeStart = xToken as DocTypeStartXToken; // typeHack
 
          if (this.docTypeStart.hasInternalSubset) {
-            this.push(new InternalSubsetStartXToken());
+            this.push(new InternalSubsetStartToken());
          }
       }
 

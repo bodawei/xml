@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2019 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { Token, EntityLocation, EntityMetaData, Range } from "basic";
@@ -28,16 +28,17 @@ import {
    XmlDeclarationPToken,
 
    CHARDATA_PTOKEN,
-   INTERNAL_SUBSET_START_XTOKEN,
-   INTERNAL_SUBSET_END_XTOKEN,
-   EXTERNAL_SUBSET_START_XTOKEN,
-   EXTERNAL_SUBSET_END_XTOKEN,
+   INTERNAL_SUBSET_START_TOKEN,
+   INTERNAL_SUBSET_END_TOKEN,
+   EXTERNAL_SUBSET_START_TOKEN,
+   EXTERNAL_SUBSET_END_TOKEN,
    NOTATION_DECLARATION_PTOKEN,
-   InternalSubsetStartXToken,
-   InternalSubsetEndXToken,
+   InternalSubsetStartToken,
+   InternalSubsetEndToken,
    ElementEndPToken,
    TextDeclarationPToken,
    TEXTDECL_PTOKEN,
+   PToken,
 } from "token";
 import { ExpandedLiteralValuePToken } from "source/token/entityDeclaration"; // @@@ TEMP
 
@@ -65,7 +66,7 @@ describe('EntityExpander (unit)', () => {
    function processBody(sTokenSource: STokenSource, writeToken: ExpandToken, done: () => void) {
       const pTokenStream = new PTokenStream(sTokenSource);
 
-      pTokenStream.on('data', (token: Token) => {
+      pTokenStream.on('data', (token: PToken) => {
          pTokenStream.pause();
          writeToken(token, () => {
             pTokenStream.resume();
@@ -168,8 +169,8 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(5);
-            expect(results[1].type).toEqual(INTERNAL_SUBSET_START_XTOKEN);
-            expect(results[3].type).toEqual(INTERNAL_SUBSET_END_XTOKEN);
+            expect(results[1].type).toEqual(INTERNAL_SUBSET_START_TOKEN);
+            expect(results[3].type).toEqual(INTERNAL_SUBSET_END_TOKEN);
             done();
          });
       });
@@ -196,9 +197,9 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(5);
-            expect(results[1].type).toEqual(EXTERNAL_SUBSET_START_XTOKEN);
+            expect(results[1].type).toEqual(EXTERNAL_SUBSET_START_TOKEN);
             expect(results[2].type).toEqual(ELEMENT_DECLARATION_PTOKEN);
-            expect(results[3].type).toEqual(EXTERNAL_SUBSET_END_XTOKEN);
+            expect(results[3].type).toEqual(EXTERNAL_SUBSET_END_TOKEN);
             done();
          });
       });
@@ -228,12 +229,12 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(8);
-            expect(results[1].type).toEqual(INTERNAL_SUBSET_START_XTOKEN);
+            expect(results[1].type).toEqual(INTERNAL_SUBSET_START_TOKEN);
             expect(results[2].type).toEqual(NOTATION_DECLARATION_PTOKEN);
-            expect(results[3].type).toEqual(INTERNAL_SUBSET_END_XTOKEN);
-            expect(results[4].type).toEqual(EXTERNAL_SUBSET_START_XTOKEN);
+            expect(results[3].type).toEqual(INTERNAL_SUBSET_END_TOKEN);
+            expect(results[4].type).toEqual(EXTERNAL_SUBSET_START_TOKEN);
             expect(results[5].type).toEqual(ELEMENT_DECLARATION_PTOKEN);
-            expect(results[6].type).toEqual(EXTERNAL_SUBSET_END_XTOKEN);
+            expect(results[6].type).toEqual(EXTERNAL_SUBSET_END_TOKEN);
             done();
          });
       });

@@ -97,7 +97,7 @@ describe('ErrorCollector', () => {
 
       beforeEach(() => {
          loc = new EntityLocation();
-         constructorSpy = jasmine.createSpy('').and.returnValue({ error: true });
+         constructorSpy = jasmine.createSpy('').and.returnValue({ id: 'constructorSpy' });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
          errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
          ec = new ErrorCollector(contextStart, constructorSpy as any); // typeHack
@@ -119,9 +119,37 @@ describe('ErrorCollector', () => {
 
       it('accepts an offset as the position', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
-         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], new Offset(loc, 5, 5, 5)); // typeHack
+         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], new Offset(loc, 5, 5, 5));
 
          expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 5, 5, 5), contextStart);
+      });
+
+   });
+
+   describe('appendFrom()', () => {
+      let ec: ErrorCollector;
+      let loc: EntityLocation;
+      let constructorSpy: jasmine.Spy;
+      let contextStart: SToken;
+      let errorStart: SToken;
+
+      beforeEach(() => {
+         loc = new EntityLocation();
+         constructorSpy = jasmine.createSpy('').and.returnValue({ id: 'constructorSpy' });
+         contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
+         errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
+         ec = new ErrorCollector(contextStart, constructorSpy as any); // typeHack
+      });
+
+      it('combines both the current and new errors', () => {
+         ec.reportError('FOO', constructorSpy as any, [ 'name' ], errorStart);
+         const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
+         const ec2 = new ErrorCollector(SToken.fromString('x'), otherConstructorSpy as any);
+         ec2.reportError('FOO2', otherConstructorSpy as any, [ 'name' ], errorStart);
+
+         ec.appendFrom(ec2);
+
+         expect(ec.getErrors()).toEqual([ { id: 'constructorSpy' }, { id: 'x' } ]);
       });
 
    });

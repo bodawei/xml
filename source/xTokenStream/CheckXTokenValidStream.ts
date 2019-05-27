@@ -23,12 +23,12 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
 
-   EXTERNAL_SUBSET_START_XTOKEN,
-   EXTERNAL_SUBSET_END_XTOKEN,
+   EXTERNAL_SUBSET_START_TOKEN,
+   EXTERNAL_SUBSET_END_TOKEN,
    GENERAL_ENTITY_END_XTOKEN,
    GENERAL_ENTITY_START_XTOKEN,
-   INTERNAL_SUBSET_START_XTOKEN,
-   INTERNAL_SUBSET_END_XTOKEN,
+   INTERNAL_SUBSET_START_TOKEN,
+   INTERNAL_SUBSET_END_TOKEN,
 
    CDATA_XTOKEN,
    CHARDATA_XTOKEN,
@@ -582,19 +582,19 @@ class CheckXTokenValidStream extends stream.Transform {
          this.checkContextValidity(xToken, pToken, context);
       }
 
-      if (xToken.type === EXTERNAL_SUBSET_START_XTOKEN) {
+      if (xToken.type === EXTERNAL_SUBSET_START_TOKEN) {
          this.externalDeclarations = true;
       }
 
-      if (xToken.type === EXTERNAL_SUBSET_END_XTOKEN) {
+      if (xToken.type === EXTERNAL_SUBSET_END_TOKEN) {
          this.externalDeclarations = false;
       }
 
-      if (xToken.type === INTERNAL_SUBSET_START_XTOKEN) {
+      if (xToken.type === INTERNAL_SUBSET_START_TOKEN) {
          this.inInternalSubset = true;
       }
 
-      if (xToken.type === INTERNAL_SUBSET_END_XTOKEN) {
+      if (xToken.type === INTERNAL_SUBSET_END_TOKEN) {
          this.inInternalSubset = false;
       }
 

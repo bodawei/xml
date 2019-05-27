@@ -9,6 +9,7 @@ import literal, { LiteralPToken } from './literal';
 import { strOrBlank, STokenSource, SToken } from 'sToken';
 import { UnassignedArray } from './unassigned';
 import { EIDRM } from 'constants';
+import { TEXT_PTOKEN } from '../text';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -236,13 +237,25 @@ function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, enti
    ec.check(!pTokenPart.postIdTypeSpace, WFEID.EXTERNALID_IDTYPE_NO_SPACE);
 
    if (capitalType === 'PUBLIC') {
+      // This is very fragile if there is no value.
       literal.checkWellFormed(pTokenPart.public, ec, entityMetaData, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
          if (!pTokenPart.public || !pTokenPart.public.value) {
             return;
          }
-         const match = PUBID_CHARS.exec((pTokenPart.public.value[0] as any).str); //typeHack
-         ec.check(!match || match[0] !== (pTokenPart.public.value[0] as any).str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-            [ (pTokenPart.public.value[0] as any).str[match![0].length] ]); //typeHack
+         let sToken
+
+         // we are so confused
+         if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
+            sToken = (pTokenPart.public.value[0] as any).text; //typeHack
+         } else {
+            sToken = (pTokenPart.public.value[0] as any).str;
+         }
+
+
+         const match = PUBID_CHARS.exec(sToken.str);
+
+         ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+            [ sToken.str[match![0].length] ]);
       });
    }
 

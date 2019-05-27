@@ -5,13 +5,13 @@
  subset.
 \**********************************************************************/
 
-const EXTERNAL_SUBSET_START_XTOKEN = 'EXTERNAL_SUBSET_START_XTOKEN';
+const EXTERNAL_SUBSET_START_TOKEN = 'EXTERNAL_SUBSET_START_TOKEN';
 
-class ExternalSubsetStartXToken {
-   public readonly type: typeof EXTERNAL_SUBSET_START_XTOKEN = EXTERNAL_SUBSET_START_XTOKEN;
+class ExternalSubsetStartToken {
+   public readonly type: typeof EXTERNAL_SUBSET_START_TOKEN = EXTERNAL_SUBSET_START_TOKEN;
 }
 
 export {
-   EXTERNAL_SUBSET_START_XTOKEN,
-   ExternalSubsetStartXToken
+   EXTERNAL_SUBSET_START_TOKEN,
+   ExternalSubsetStartToken
 };

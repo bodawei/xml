@@ -26,12 +26,12 @@ import {
    ElementStartPToken,
    ElementStartXToken,
    SpaceXToken,
-   ExternalSubsetStartXToken,
-   ExternalSubsetEndXToken,
+   ExternalSubsetStartToken,
+   ExternalSubsetEndToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
-   InternalSubsetStartXToken,
-   InternalSubsetEndXToken,
+   InternalSubsetStartToken,
+   InternalSubsetEndToken,
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
    NotationDeclarationXToken,
@@ -472,7 +472,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if standalone=yes and external declaration for attribute, and attribute changes as a result', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-               validator.write(new ExternalSubsetStartXToken());
+               validator.write(new ExternalSubsetStartToken());
                validator.write(new elementDeclaration.XToken('testEl', 'ANY', undefined));
                validator.write(new attListDeclaration.XToken('testEl', [{
                   name: 'idRefs',
@@ -480,7 +480,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   value: [],
                   defaultType: '#REQUIRED',
                }]));
-               validator.write(new ExternalSubsetEndXToken());
+               validator.write(new ExternalSubsetEndToken());
                validator.write(new ElementStartXToken('testEl', [{
                   name: 'idRefs',
                   value: [
@@ -499,7 +499,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error if standalone=no and external declaration for attribute, and attribute changes as a result', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, false));
-               validator.write(new ExternalSubsetStartXToken());
+               validator.write(new ExternalSubsetStartToken());
                validator.write(new elementDeclaration.XToken('testEl', 'ANY', undefined));
                validator.write(new attListDeclaration.XToken('testEl', [{
                   name: 'idRefs',
@@ -507,7 +507,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   value: [],
                   defaultType: '#REQUIRED',
                }]));
-               validator.write(new ExternalSubsetEndXToken());
+               validator.write(new ExternalSubsetEndToken());
                validator.write(new ElementStartXToken('testEl', [{
                   name: 'idRefs',
                   value: [
@@ -742,10 +742,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new ElementStartXToken('testEl', []);
 
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-               validator.write(new ExternalSubsetStartXToken());
+               validator.write(new ExternalSubsetStartToken());
                validator.write(elDecl1);
                validator.write(attListDecl1);
-               validator.write(new ExternalSubsetEndXToken());
+               validator.write(new ExternalSubsetEndToken());
                validator.write(startToken1);
                validator.end();
 
@@ -765,10 +765,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new ElementStartXToken('testEl', []);
 
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-               validator.write(new InternalSubsetStartXToken());
+               validator.write(new InternalSubsetStartToken());
                validator.write(elDecl1);
                validator.write(attListDecl1);
-               validator.write(new InternalSubsetEndXToken());
+               validator.write(new InternalSubsetEndToken());
                validator.write(startToken1);
                validator.end();
 
@@ -2572,10 +2572,10 @@ describe('CheckXTokenValidStream (unit)', () => {
             }]);
 
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(elDecl1);
             validator.write(attListDecl1);
-            validator.write(new InternalSubsetEndXToken());
+            validator.write(new InternalSubsetEndToken());
             validator.end();
 
             const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_REFERENCE_UNDEFINED,
@@ -3066,9 +3066,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports an error if the referenced entity is externally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', []));
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
             validator.end();
@@ -3080,9 +3080,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports no error if the referenced entity is internally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new InternalSubsetEndXToken());
+            validator.write(new InternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', []));
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
             validator.end();
@@ -3092,7 +3092,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports no error if the referenced entity is internally declared after multiple param entity expansions and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
@@ -3104,7 +3104,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new ParameterEntityEndXToken('someEntity3'));
             validator.write(new ParameterEntityEndXToken('someEntity2'));
             validator.write(new GeneralEntityDeclarationXToken('intDeclEntity', []));
-            validator.write(new InternalSubsetEndXToken());
+            validator.write(new InternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', []));
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
             validator.end();
@@ -3114,7 +3114,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports an error if the referenced entity is externally declared in parameter entity expansion and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
@@ -3125,7 +3125,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new GeneralEntityEndXToken('someEntity4'));
             validator.write(new ParameterEntityEndXToken('someEntity3'));
             validator.write(new ParameterEntityEndXToken('someEntity2'));
-            validator.write(new InternalSubsetEndXToken());
+            validator.write(new InternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', []));
             validator.write(new GeneralEntityStartXToken('extDeclEntity1'));
             validator.write(new GeneralEntityStartXToken('extDeclEntity2'));
@@ -3140,9 +3140,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if in an attribute and is externally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', [{
                name: 'testElAttr',
                value: [ new GeneralEntityStartXToken('extDeclEntity') ],
@@ -3156,9 +3156,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is not reported as an error if in an attribute and is externally declared and standlone=no (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, false));
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', [{
                name: 'testElAttr',
                value: [ new GeneralEntityStartXToken('extDeclEntity') ],
@@ -3170,10 +3170,10 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if multiple in an attribute and all are externally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', [{
                name: 'testElAttr',
                value: [
@@ -3194,10 +3194,10 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if it is top-level externally  embedded in another and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', [{
                name: 'testElAttr',
                value: [
@@ -3216,9 +3216,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if it is top-level externally declared and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extParamEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new GeneralEntityDeclarationXToken('intGenEntity', []));
             validator.write(new ElementStartXToken('testEl', [{
                name: 'testElAttr',
@@ -3238,12 +3238,12 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error it is an embedded externally declared and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
-            validator.write(new InternalSubsetEndXToken());
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new InternalSubsetEndToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', [{
                name: 'testElAttr',
                value: [
@@ -3269,9 +3269,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                value: [],
                defaultType: '#REQUIRED',
             }]));
-            validator.write(new ExternalSubsetStartXToken());
+            validator.write(new ExternalSubsetStartToken());
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementStartXToken('testEl', [{
                name: 'entityAttr',
                value: [
@@ -3287,11 +3287,11 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if externally declared and referenced from attr default and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new attListDeclaration.XToken('testEl', [{
                name: 'cdataAttr',
@@ -3311,7 +3311,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if parameter entity externally declared and referenced from attr default and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
             validator.write(new ParameterEntityDeclarationXToken('extDeclParamEntity', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
@@ -3328,7 +3328,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                ],
                defaultType: '#REQUIRED',
             }]));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.end();
 
             const expected1 = new ValidityError(ValidityError.ID.ATTLISTDECL_PARAMENTITY_EXTERNAL_DECLARED,
@@ -3338,9 +3338,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if parameter entity externally declared and referenced from attr and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
+            validator.write(new ExternalSubsetStartToken()); // Really should be an expanded PERef
             validator.write(new ParameterEntityDeclarationXToken('extDeclParamEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new GeneralEntityDeclarationXToken('intDeclEntity', []));
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new ElementStartXToken('testEl', []));
@@ -3357,9 +3357,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if externally declared and used as an ENTITY attribute default and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
+            validator.write(new ExternalSubsetStartToken()); // Really should be an expanded PERef
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new attListDeclaration.XToken('testEl', [{
                name: 'entityAttr',
@@ -3378,9 +3378,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if externally declared and used as an ENTITIES attribute default and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
+            validator.write(new ExternalSubsetStartToken()); // Really should be an expanded PERef
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
+            validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new attListDeclaration.XToken('testEl', [{
                name: 'entityAttr',
@@ -3399,13 +3399,13 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is reported as an error if it is a parameter entity reference to an external declaration (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
+            validator.write(new ExternalSubsetStartToken()); // Really should be an expanded PERef
             validator.write(new ParameterEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndXToken());
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new ExternalSubsetEndToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new ParameterEntityStartXToken('extDeclEntity'));
             validator.write(new ParameterEntityEndXToken('extDeclEntity'));
-            validator.write(new InternalSubsetEndXToken());
+            validator.write(new InternalSubsetEndToken());
             validator.end();
 
             const expected1 = new ValidityError(ValidityError.ID.PARAMENTITY_EXTERNAL_DECLARED,
@@ -3415,11 +3415,11 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('is not reported as an error if it is a parameter entity reference to an external declaration (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartXToken());
+            validator.write(new InternalSubsetStartToken());
             validator.write(new ParameterEntityDeclarationXToken('intDeclEntity', []));
             validator.write(new ParameterEntityStartXToken('intDeclEntity'));
             validator.write(new ParameterEntityEndXToken('intDeclEntity'));
-            validator.write(new InternalSubsetEndXToken());
+            validator.write(new InternalSubsetEndToken());
             validator.end();
 
             expectNoErrorsOrWarnings(validator, done);
@@ -4460,7 +4460,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an element with element content is externally declared and standalone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-               validator.write(new ExternalSubsetStartXToken());
+               validator.write(new ExternalSubsetStartToken());
                validator.write(new ElementDeclaration('extDeclaredElement', 'CHILDREN', {
                   names: [{
                      name: 'child',
@@ -4469,7 +4469,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE',
                   repeat: 'ONE',
                }));
-               validator.write(new ExternalSubsetEndXToken());
+               validator.write(new ExternalSubsetEndToken());
                validator.write(new ElementStartXToken('extDeclaredElement', []));
                validator.write(new SpaceXToken('  '));
                validator.write(new ElementEndXToken('extDeclaredElement'));

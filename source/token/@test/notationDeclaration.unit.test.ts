@@ -47,7 +47,7 @@ describe('notationdeDlaration (unit)', () => {
          externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
             cb({ externalId: true });
          });
-         unassignedParsePERefSpy = spyOn(unassigned, 'parsePERefOrOrdinary').and.callFake((_1: any, _2: any, _3: any, cb1: () => void, cb2: () => void) => {
+         unassignedParsePERefSpy = spyOn(unassigned as any, 'parsePERefOrOrdinary').and.callFake((_1: any, _2: any, _3: any, cb1: () => void, cb2: () => void) => { // typeHack
             peRefCallback = cb1;
             nonPeRefCallback = cb2;
          });

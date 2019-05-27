@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import stream from 'readable-stream';
@@ -17,12 +17,12 @@ import { DocTypeStartXToken } from 'source/token/docTypeStart';
 import { DocTypeEndXToken } from 'source/token/docTypeEnd';
 import {
    ElementStartXToken,
-   ExternalSubsetEndXToken,
-   ExternalSubsetStartXToken,
+   ExternalSubsetEndToken,
+   ExternalSubsetStartToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
-   InternalSubsetEndXToken,
-   InternalSubsetStartXToken,
+   InternalSubsetEndToken,
+   InternalSubsetStartToken,
    ParameterEntityEndPToken,
    ParameterEntityStartXToken,
    ParameterEntityStartPToken,
@@ -149,7 +149,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.end;
 
             nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(new InternalSubsetStartXToken());
+            expect(nodeStream.read()).toEqual(new InternalSubsetStartToken());
          });
 
          it('adds no internal subset marker to the stream when there is no internal subset', () => {
@@ -172,7 +172,7 @@ describe('NodeStream (unit)', () => {
 
             nodeStream.read(); // decl token
             nodeStream.read(); // internal start
-            expect(nodeStream.read()).toEqual(new InternalSubsetEndXToken())
+            expect(nodeStream.read()).toEqual(new InternalSubsetEndToken())
          });
 
          it('adds an end of internal subset marker when there is no internal subset', () => {
@@ -196,7 +196,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.end;
 
             nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(new ExternalSubsetStartXToken())
+            expect(nodeStream.read()).toEqual(new ExternalSubsetStartToken())
          });
 
          it('adds an external subset end marker if there is one', () => {
@@ -209,7 +209,7 @@ describe('NodeStream (unit)', () => {
 
             nodeStream.read(); // decl token
             nodeStream.read(); // external start
-            expect(nodeStream.read()).toEqual(new ExternalSubsetEndXToken());
+            expect(nodeStream.read()).toEqual(new ExternalSubsetEndToken());
          });
 
          it('orders internal and external subsets properly', () => {
@@ -221,10 +221,10 @@ describe('NodeStream (unit)', () => {
             nodeStream.end;
 
             expect(nodeStream.read()).toEqual(declToken);
-            expect(nodeStream.read()).toEqual(new InternalSubsetStartXToken());
-            expect(nodeStream.read()).toEqual(new InternalSubsetEndXToken());
-            expect(nodeStream.read()).toEqual(new ExternalSubsetStartXToken());
-            expect(nodeStream.read()).toEqual(new ExternalSubsetEndXToken());
+            expect(nodeStream.read()).toEqual(new InternalSubsetStartToken());
+            expect(nodeStream.read()).toEqual(new InternalSubsetEndToken());
+            expect(nodeStream.read()).toEqual(new ExternalSubsetStartToken());
+            expect(nodeStream.read()).toEqual(new ExternalSubsetEndToken());
             expect(nodeStream.read()).toEqual(declEndToken);
          });
 
@@ -948,7 +948,7 @@ describe('NodeStream (unit)', () => {
                   return secondDeclXToken;
                }
             });
-            spyOn(declToken, 'assignUnassigned').and.callFake((pToken: GeneralEntityDeclarationPToken) => {
+            spyOn(declToken, 'assignUnassigned').and.callFake(() => {
                expect(declToken.unassigned).toEqual([
                   xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
                      type: UnassignedType.ENTITY_START,
@@ -1176,7 +1176,9 @@ describe('NodeStream (unit)', () => {
                isParameter: false,
                isInternal: true,
                isParsable: true,
-               getStream() {}
+               getStream() {
+                  return 'x' as any;
+               }
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
                cb([ new TextPToken({ text: SToken.fromString('') }) ]);
@@ -1304,7 +1306,9 @@ describe('NodeStream (unit)', () => {
                isParameter: false,
                isInternal: true,
                isParsable: true,
-               getStream() {}
+               getStream() {
+                  return 'x' as any;
+               }
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
                cb([ new TextPToken({ text: SToken.fromString('') }) ]);
@@ -1420,7 +1424,9 @@ describe('NodeStream (unit)', () => {
                isParameter: false,
                isInternal: true,
                isParsable: true,
-               getStream() {}
+               getStream() {
+                  return 'x' as any;
+               }
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
                asyncCallback = cb;
@@ -1457,7 +1463,9 @@ describe('NodeStream (unit)', () => {
                isParameter: false,
                isInternal: true,
                isParsable: true,
-               getStream() {}
+               getStream() {
+                  return 'x' as any;
+               }
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
                cb([ new TextPToken({ text: SToken.fromString('') }) ]);
@@ -1505,7 +1513,9 @@ describe('NodeStream (unit)', () => {
                isParameter: false,
                isInternal: true,
                isParsable: true,
-               getStream() {}
+               getStream() {
+                  return 'x' as any;
+               }
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
                cb([ new TextPToken({ text: SToken.fromString('') }) ]);
@@ -1546,7 +1556,9 @@ describe('NodeStream (unit)', () => {
                isParameter: false,
                isInternal: true,
                isParsable: true,
-               getStream() {}
+               getStream() {
+                  return 'x' as any;
+               }
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
                cb([ /* PTokens for text, entity ref and text */ ]);

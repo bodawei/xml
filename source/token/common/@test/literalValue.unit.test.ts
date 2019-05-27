@@ -228,7 +228,7 @@ describe('literalValue (unit)', () => {
          literalValue.makeXTokenCompatible(pToken);
 
          expect(refSpy.calls.count()).toEqual(1);
-         expect(refSpy.calls.argsFor(0)[0]).toBeUndefined();
+         expect(refSpy.calls.argsFor(0)).toEqual([]);
       });
 
       it('copes with no values at all', () => {

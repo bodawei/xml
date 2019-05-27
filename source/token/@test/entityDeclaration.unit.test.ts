@@ -12,6 +12,7 @@ import { parseEntityDeclaration } from '../entityDeclaration';
 import { GeneralEntityDeclarationPToken, GeneralEntityDeclarationXToken } from '../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from '../parameterEntityDeclaration';
 import unassigned from '../common/unassigned';
+import { UnassignedArray } from '../common/unassigned';
 import externalId from '../common/externalId';
 import misc from '../common/misc';
 import literal from '../common/literal';
@@ -56,7 +57,7 @@ describe('entityDeclaration (unit)', () => {
 
          literalSpy = spyOn(literal, 'parse');
 
-         unCheck = spyOn(unassigned, 'makeCheckCallback').and.callFake((_1: any, _2: any, _3: any, other: Function) => {
+         unCheck = spyOn(unassigned as any, 'makeCheckCallback').and.callFake((_1: any, _2: any, _3: any, other: () => void) => { // typeHack
             checkForPERefCallback = other;
          });
 

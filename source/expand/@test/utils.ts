@@ -1,8 +1,8 @@
-/* Copyright ® 2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
+import { PToken } from 'token';
 
-type PToken = { type: string };
 type PTokenArray = Array<PToken>;
 
 // function gatherResult(stream: stream.Transform, expect: (result: any) => void) {

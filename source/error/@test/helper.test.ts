@@ -299,7 +299,7 @@ describe('error helper', () => {
 
             ec.check(true, 'z', []);
 
-            expect(ec.report).toHaveBeenCalledWith('z', []);
+            expect(ec.report).toHaveBeenCalledWith('z', [], undefined);
          });
 
          it('calls report() with id if no params passed and condition true', () => {
@@ -307,7 +307,7 @@ describe('error helper', () => {
 
             ec.check(true, 'w', []);
 
-            expect(ec.report).toHaveBeenCalledWith('w', []);
+            expect(ec.report).toHaveBeenCalledWith('w', [], undefined);
          });
 
          it('does not call report() when condition is false', () => {

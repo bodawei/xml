@@ -446,7 +446,7 @@ describe('entityDeclaration (unit)', () => {
          checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE, [ 'entityName' ]);
+            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE, [ 'entityName' ], undefined);
       });
 
       it('reports an error if there is no name', () => {
