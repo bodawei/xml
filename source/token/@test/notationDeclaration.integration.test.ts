@@ -50,16 +50,16 @@ describe('notationDeclaration (integration)', () => {
          parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (result) => {
             expect(result).toEqualRangeless(new NotationDeclarationPToken({
                open: SToken.fromString('<!'),
-               unassigned: [ {
+               unassigned: [{
                   type: UnassignedType.REFERENCE,
                   token: new ParameterEntityReferencePToken({
-                     open:  SToken.fromString('%'),
+                     open: SToken.fromString('%'),
                      openSpace: undefined,
-                     name:  SToken.fromString('foo'),
+                     name: SToken.fromString('foo'),
                      nameSpace: undefined,
-                     close:  SToken.fromString(';'),
+                     close: SToken.fromString(';'),
                   }),
-               } ],
+               }],
                nextPropName: 'name',
                close: SToken.fromString('>'),
             }));
@@ -71,23 +71,24 @@ describe('notationDeclaration (integration)', () => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('notationName %foo;>');
          source.endText();
-         const unassignedValue = [ {
+         const unassignedValue = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
-               open:  SToken.fromString('%'),
+               open: SToken.fromString('%'),
                openSpace: undefined,
-               name:  SToken.fromString('foo'),
+               name: SToken.fromString('foo'),
                nameSpace: undefined,
-               close:  SToken.fromString(';'),
+               close: SToken.fromString(';'),
             }),
-          } ];
+         }];
 
          parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (result) => {
             expect(result).toEqualRangeless(new NotationDeclarationPToken({
+               type: 'NOTATION_DECLARATION_PTOKEN',
                open: SToken.fromString('<!'),
                name: SToken.fromString('notationName'),
                nameSpace: SToken.fromString(' '),
-               unassigned: unassignedValue,
+               unassigned: unassignedValue as any,
                nextPropName: 'idType',
                externalId: {
                   type: 'EXTERNAL_ID',
@@ -110,42 +111,43 @@ describe('notationDeclaration (integration)', () => {
          parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (pToken) => {
             // "expand" what should be there.
             (pToken as any).unassigned = [{
-                  type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-               },
-               unassigned.wordFromSToken(SToken.fromString('notationName')),
-               unassigned.spaceFromSToken(SToken.fromString(' ')),
-               unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
-                  type: UnassignedType.LITERAL,
-                  token: {
-                     openQuote: SToken.fromString('"'),
-                     value: [ SToken.fromString('foo') ],
-                     closeQuote: SToken.fromString('"'),
-                  }
-               }, {
-                  type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
+               type: UnassignedType.ENTITY_START,
+               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
+            },
+            unassigned.wordFromSToken(SToken.fromString('notationName')),
+            unassigned.spaceFromSToken(SToken.fromString(' ')),
+            unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
+               type: UnassignedType.LITERAL,
+               token: {
+                  openQuote: SToken.fromString('"'),
+                  value: [SToken.fromString('foo')],
+                  closeQuote: SToken.fromString('"'),
                }
+            }, {
+               type: UnassignedType.ENTITY_END,
+               token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
+            }
             ];
 
             pToken.assignUnassigned();
 
             expect(pToken).toEqualRangeless(new NotationDeclarationPToken({
+               type: 'NOTATION_DECLARATION_PTOKEN',
                open: SToken.fromString('<!'),
-               declTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
+               declTypeSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
                name: SToken.fromString('notationName'),
                nameSpace: SToken.fromString(' '),
-               unassigned: (pToken as any).unassigned,
+               unassigned: (pToken as any).unassigned as any,
                extra: [],
                externalId: {
                   idType: SToken.fromString('PUBLIC'),
                   public: {
                      openQuote: SToken.fromString('"'),
-                     value: [ SToken.fromString('foo') ],
+                     value: [SToken.fromString('foo')], // ICK
                      closeQuote: SToken.fromString('"'),
-                  },
-                  postPublicSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
-               },
+                  } as any,
+                  postPublicSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+               } as any,
                close: SToken.fromString('>'),
             }));
             done();
@@ -212,16 +214,16 @@ describe('notationDeclaration (integration)', () => {
                type: UnassignedType.ENTITY_START,
                token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             }, {
-                  type: UnassignedType.LITERAL,
-                  token: {
-                     openQuote: SToken.fromString('"'),
-                     value: [ new TextPToken({ text: SToken.fromString('sys.dtd') }) ],
-                     closeQuote: SToken.fromString('"'),
-                  },
-               }, {
-                  type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
+               type: UnassignedType.LITERAL,
+               token: {
+                  openQuote: SToken.fromString('"'),
+                  value: [new TextPToken({ text: SToken.fromString('sys.dtd') })],
+                  closeQuote: SToken.fromString('"'),
                },
+            }, {
+               type: UnassignedType.ENTITY_END,
+               token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
+            },
             ].concat(pToken.unassigned as any);
             pToken.assignUnassigned();
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);

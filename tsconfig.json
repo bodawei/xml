@@ -1,5 +1,5 @@
 {
-    "compilerOptions": {
+   "compilerOptions": {
       "strict": true,
       "noImplicitAny": true,
       "allowJs": true,
@@ -7,28 +7,47 @@
       "target": "es5",
       "sourceMap": true,
       "outDir": "./temp/typescript",
-
       "baseUrl": "./",
       "paths": {
-         "basic": [ "./source/basic" ],
-         "error": [ "./source/error" ],
-         "error-test": [ "./source/error/@test/helper" ],
-         "expand": [ "./source/expand" ],
-         "extractor": [ "./source/extractor" ],
-         "pTokenStream": [ "./source/pTokenStream" ],
-         "sToken": [ "./source/sToken" ],
-         "sToken-test": [ "./source/sToken/@test/helper" ],
-         "token": [ "./source/token" ],
-         "wellformedness": [ "./source/wellformedness" ],
-         "xTokenStream": [ "./source/xTokenStream" ],
+         "basic": [
+            "./source/basic"
+         ],
+         "error": [
+            "./source/error"
+         ],
+         "error-test": [
+            "./source/error/@test/helper"
+         ],
+         "expand": [
+            "./source/expand"
+         ],
+         "extractor": [
+            "./source/extractor"
+         ],
+         "pTokenStream": [
+            "./source/pTokenStream"
+         ],
+         "sToken": [
+            "./source/sToken"
+         ],
+         "sToken-test": [
+            "./source/sToken/@test/helper"
+         ],
+         "token": [
+            "./source/token"
+         ],
+         "wellformedness": [
+            "./source/wellformedness"
+         ],
+         "xTokenStream": ["./source/xTokenStream"],
       }
-     },
-    "include": [
-        "build/**/*jasmine*.js",
-        "source/**/*.js",
-        "source/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-    ],
+   },
+   "include": [
+      "build/**/*jasmine*.js",
+      "source/**/*.js",
+      "source/**/*.ts"
+   ],
+   "exclude": [
+      "node_modules",
+   ],
 }

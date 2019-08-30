@@ -67,7 +67,7 @@ function firstSToken(value: AttributeValue): SToken | void {
 function check1dot0rev1(value: AttributeValue, attrValue: string, ec: ErrorCollector) {
    const isValid = ONE_DOT_ZERO_REV1_REGEX.test(attrValue);
 
-   ec.check(!isValid, WFID.ATTRIBUTE_LANG_BAD_CODE, [ attrValue ], firstSToken(value));
+   ec.check(!isValid, WFID.ATTRIBUTE_LANG_BAD_CODE, [attrValue], firstSToken(value));
 }
 
 /*
@@ -137,7 +137,7 @@ function check1dot0rev2AndBeyond(value: AttributeValue, attrValue: string, ec: E
       return;
    }
 
-   ec.report(WFID.ATTRIBUTE_LANG_BAD_CODE, [ attrValue ], firstSToken(value));
+   ec.report(WFID.ATTRIBUTE_LANG_BAD_CODE, [attrValue], firstSToken(value));
 }
 
 function hasReference(value: AttributeValue): boolean {

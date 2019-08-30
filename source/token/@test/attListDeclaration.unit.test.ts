@@ -80,10 +80,8 @@ describe('attListDeclaration (unit)', () => {
 
    describe('parse()', () => {
       let callback: jasmine.Spy;
-      let checkForPERefCallback: (values?:UnassignedArray) => void;
       let makeCheckCallbackSpy: jasmine.Spy;
       let literalParseSpy: jasmine.Spy;
-      let nameListParseSpy: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -91,10 +89,12 @@ describe('attListDeclaration (unit)', () => {
          // nameListParseSpy = spyOn(nameList, 'parse');
          makeCheckCallbackSpy = spyOn(unassigned, 'makeCheckCallback'); // TS
          makeCheckCallbackSpy.and.callFake((_1: any, _2: any, _3: any, other: (x?: UnassignedArray) => void) => {
-            checkForPERefCallback = other;
+            return other;
          });
 
-         spyOn(unassigned, 'checkForPERef').and.callFake(() => checkForPERefCallback());
+         spyOn(unassigned, 'checkForPERef').and.callFake((junk: any, cb: () => void) => {
+            cb();
+         });
          literalParseSpy = spyOn(literal, 'parse').and.callFake((_1: any, _2: any, done: () => void) => done());
       });
 
@@ -483,7 +483,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref at the start', () => {
             makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: any) => {
-               foundRef();
+               return foundRef;
             });
             const mockSource = new MockSTokenSource([
                '>',
@@ -504,11 +504,7 @@ describe('attListDeclaration (unit)', () => {
             let calls = 0;
             makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
-               if (calls > 1) {
-                  foundRef();
-               } else {
-                  other();
-               }
+               return  (calls > 1) ? foundRef : other;
             });
             const mockSource = new MockSTokenSource([
                [ 'elName', 'word', [ '>', '%' ] ],
@@ -533,11 +529,7 @@ describe('attListDeclaration (unit)', () => {
             let calls = 0;
             makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
-               if (calls > 2) {
-                  foundRef();
-               } else {
-                  other();
-               }
+               return (calls > 2) ? foundRef : other;
             });
             const mockSource = new MockSTokenSource([
                [ 'elName', 'word', [ '>', '%' ] ],
@@ -569,11 +561,7 @@ describe('attListDeclaration (unit)', () => {
             let calls = 0;
             makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
-               if (calls > 3) {
-                  foundRef();
-               } else {
-                  other();
-               }
+               return (calls > 3) ? foundRef : other;
             });
             const mockSource = new MockSTokenSource([
                'elName',
@@ -609,11 +597,7 @@ describe('attListDeclaration (unit)', () => {
             let calls = 0;
             makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
-               if (calls > 4) {
-                  foundRef();
-               } else {
-                  other();
-               }
+               return (calls > 4) ? foundRef : other;
             });
             const mockSource = new MockSTokenSource([
                'elName',

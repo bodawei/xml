@@ -20,9 +20,9 @@ class SpaceExtractor extends Extractor {
    private foundSpace: boolean = false;
 
    process(segment: Segment) {
-      const spaceRegexp = this._version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;
-      const info = this._makeInfo(segment);
-      this._segInfo.push(info);
+      const spaceRegexp = this.version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;
+      const info = this.makeInfo(segment);
+      this.segInfo.push(info);
 
       /*
        * Check if the next char is a space before doing the full-on search
@@ -44,7 +44,7 @@ class SpaceExtractor extends Extractor {
       const allSpace = result!; // typeHack Because above check garantues this is not null.
       const spaceLength = allSpace[0].length;
 
-      this._processText(allSpace[0], info);
+      this.processText(allSpace[0], info);
 
       segment.index += spaceLength;
 
@@ -59,7 +59,7 @@ class SpaceExtractor extends Extractor {
 
    finish() {
       this.state = this.foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
-      return this._finish();
+      return this.innerFinish();
    }
 
 }

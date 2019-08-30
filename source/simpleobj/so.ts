@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import {
    CdataXToken,
@@ -26,7 +26,7 @@ class Node {
 
 }
 
-class SimpleObj extends stream.Transform {
+class SimpleObj extends Transform {
    public _stack: Array<any>;
    public _root: any;
 

@@ -16,8 +16,8 @@ class CharExtractor extends Extractor {
    private foundCR: boolean = false;
 
    process(segment: Segment): void {
-      const info = this._makeInfo(segment);
-      this._segInfo.push(info);
+      const info = this.makeInfo(segment);
+      this.segInfo.push(info);
 
       if (this.foundCR) {
          this._checkEOL(segment, info);
@@ -32,7 +32,7 @@ class CharExtractor extends Extractor {
          return;
       }
 
-      this._processText(currentChar, info);
+      this.processText(currentChar, info);
 
       if (currentChar === '\r') {
          if (segment.atEnd()) {
@@ -46,8 +46,8 @@ class CharExtractor extends Extractor {
    }
 
    finish() {
-      this.state = this._text.length > 0 ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
-      return this._finish();
+      this.state = this.text.length > 0 ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+      return this.innerFinish();
    }
 
    _incrementSegment(segment: Segment, info: SegmentInfo, foundChar: string): void {
@@ -66,8 +66,8 @@ class CharExtractor extends Extractor {
    _checkEOL(segment: Segment, info: SegmentInfo): void {
       const candidate = segment.text[segment.index];
 
-      if (candidate === '\n' || (candidate === '\u0085' && this._version === 1.1)) {
-         this._text.push(candidate);
+      if (candidate === '\n' || (candidate === '\u0085' && this.version === 1.1)) {
+         this.text.push(candidate);
          info.chars ++;
          this._incrementSegment(segment, info, candidate);
       }

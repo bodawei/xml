@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import { EntityMetaData } from 'basic';
 import * as tokens from 'token';
@@ -21,7 +21,7 @@ describe('CommentFixingStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let xTokenStream: PToXTokenStream;
 
-   function gatherTokens(stream: stream.Transform, done: (result: Array<any>) => void) {
+   function gatherTokens(stream: Transform, done: (result: Array<any>) => void) {
       const results: Array<any> = [];
 
       stream.on('data', (data: any) => {

@@ -13,19 +13,18 @@ const HEX_DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 \**********************************************************************/
 
 class DigitExtractor extends Extractor {
-   private foundDigit?: boolean;
+   private foundDigit: boolean = false;
    private base: 10 | 16;
 
    constructor(version: number, base: 10 | 16) {
       super(version);
 
       this.base = base;
-      this.foundDigit = false;
    }
 
    process(segment: Segment) {
-      const info = this._makeInfo(segment);
-      this._segInfo.push(info);
+      const info = this.makeInfo(segment);
+      this.segInfo.push(info);
       const regex = this.base === 10 ? DIGITS_REGEX : HEX_DIGITS_REGEX;
 
       /*
@@ -50,7 +49,7 @@ class DigitExtractor extends Extractor {
       const result = regex.exec(segment.text);
       const allDigits = result!; // typeHack
 
-      this._processText(allDigits[0], info);
+      this.processText(allDigits[0], info);
 
       const digitsLength = allDigits[0].length;
       segment.index += digitsLength;
@@ -66,7 +65,7 @@ class DigitExtractor extends Extractor {
 
    finish() {
       this.state = this.foundDigit ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
-      return this._finish();
+      return this.innerFinish();
    }
 
 }

@@ -1,17 +1,17 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 import { PToken } from 'token';
 
 type PTokenArray = Array<PToken>;
 
-// function gatherResult(stream: stream.Transform, expect: (result: any) => void) {
+// function gatherResult(stream: Transform, expect: (result: any) => void) {
 //    stream.on('data', (item: PToken) => {
 //       expect(item);
 //    });
 // }
 
-function gatherStream(stream: stream.Transform, expect: (results: PTokenArray) => void, done: () => void) {
+function gatherStream(stream: Transform, expect: (results: PTokenArray) => void, done: () => void) {
    const cache: PTokenArray = [];
 
    stream.on('data', (item: PToken) => {
@@ -25,19 +25,19 @@ function gatherStream(stream: stream.Transform, expect: (results: PTokenArray) =
    });
 }
 
-function expectNoErrorsOrWarnings(validator: stream.Transform, done: () => void) {
+function expectNoErrorsOrWarnings(validator: Transform, done: () => void) {
    gatherStream(validator, (tokens: PTokenArray) => {
       (expect(tokens) as any).toBeErrorAndWarningFree(); // typeHack
       done();
    }, done);
 }
 
-function expectError(validator: stream.Transform, expected: any, done: () => void) {
+function expectError(validator: Transform, expected: any, done: () => void) {
    gatherStream(validator, (tokens) => {
       let arrayExpected = expected;
 
       if (!Array.isArray(expected)) {
-         arrayExpected = [ expected ];
+         arrayExpected = [expected];
       }
 
       for (const expectedVal of arrayExpected) {
@@ -47,7 +47,7 @@ function expectError(validator: stream.Transform, expected: any, done: () => voi
 }
 
 
-// function expectNoErrors(validator: stream.Transform, done: () => void) {
+// function expectNoErrors(validator: Transform, done: () => void) {
 //    gatherStream(validator, (tokens: PTokenArray) => {
 //       (expect(tokens) as any).toBeErrorFree(); // typeHack
 //       done();

@@ -54,14 +54,14 @@ import { CharRefPToken, CHARREF_PTOKEN } from "source/token/charRef";
 import { DocTypeStartPToken } from "source/token/docTypeStart";
 import { DocTypeEndPToken } from "source/token/docTypeEnd";
 import { ELEMENT_DECLARATION_PTOKEN } from "source/token/elementDeclaration";
-import { isNullOrUndefined } from "util";
+// import { isNullOrUndefined } from "util";
 import { CharDataPToken } from "source/token/charData";
 import { expectError } from "./utils";
 
 const toSToken = SToken.fromString;
 
 describe('EntityExpander (unit)', () => {
-   const externalMap: { [publicName: string]: string} = {};
+   const externalMap: { [publicName: string]: string } = {};
 
    function processBody(sTokenSource: STokenSource, writeToken: ExpandToken, done: () => void) {
       const pTokenStream = new PTokenStream(sTokenSource);
@@ -256,7 +256,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect((results[0] as any).attDefs[0].value).toEqual([ new TextPToken({ text: SToken.fromString('foo') }) ]);
+            expect((results[0] as any).attDefs[0].value).toEqual([new TextPToken({ text: SToken.fromString('foo') })]);
             done();
          });
       });
@@ -341,13 +341,13 @@ describe('EntityExpander (unit)', () => {
 
       it('expands a parameter entity reference before assigning unassigned values', (done) => {
          let didAssign = false;
-         const unassignedVals = [ {
+         const unassignedVals = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
             }),
-         } ];
+         }];
          const input = [
             new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
@@ -436,7 +436,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect((results[0] as any).value).toEqual([ new TextPToken({ text: SToken.fromString('foo') }) ]);
+            expect((results[0] as any).value).toEqual([new TextPToken({ text: SToken.fromString('foo') })]);
             done();
          });
       });
@@ -530,7 +530,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('pe2'),
                externalId: {
                   system: {
-                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [new TextPToken({ text: SToken.fromString('systemUrl') }),],
                   }
                },
                value: [],
@@ -597,13 +597,13 @@ describe('EntityExpander (unit)', () => {
 
       it('expands a parameter entity reference before assigning unassigned values', (done) => {
          let didAssign = false;
-         const unassignedVals = [ {
+         const unassignedVals = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
             }),
-         } ];
+         }];
          const entityDecl = new GeneralEntityDeclarationPToken({
             open: SToken.fromString('<!'),
             unassigned: unassignedVals,
@@ -668,32 +668,40 @@ describe('EntityExpander (unit)', () => {
       it('passes a declaration with no unassigned values through without changes', (done) => {
          const input = [
             new NotationDeclarationPToken({
+               type: 'NOTATION_DECLARATION_PTOKEN',
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
-               externalId: {},
+               externalId: {
+                  type: 'EXTERNAL_ID',
+               },
             }),
          ];
 
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(1);
             expect(results[0]).toEqual(new NotationDeclarationPToken({
+               type: 'NOTATION_DECLARATION_PTOKEN',
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                extra: [],
-               externalId: {},
+               externalId: {
+                  type: 'EXTERNAL_ID',
+               },
             }));
             done();
          });
       });
 
       it('passes a declaration with an unassigned value through', (done) => {
-         const unassignedVals = [ unassigned.wordFromSToken(SToken.fromString('public')) ];
+         const unassignedVals = [unassigned.wordFromSToken(SToken.fromString('public'))];
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
             externalId: {
-               nextParamName: 'idType',
+               type: 'EXTERNAL_ID',
+               nextPropName: 'idType',
                unassigned: unassignedVals,
             },
          });
@@ -714,14 +722,15 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('does not expand an unassigned value that is a reference with no declaration', (done) => {
-         const unassignedVals = [ {
+         const unassignedVals: any = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('frog'),
             })
-         } ];
+         }];
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
@@ -740,13 +749,13 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('copes with a charref being incompletely defined', (done) => {
-         const unassignedVals = [ {
+         const unassignedVals: any = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('%'),
                name: SToken.fromString('badCharRef'),
             })
-         } ];
+         }];
          const paramDecl = new ParameterEntityDeclarationPToken({
             open: SToken.fromString('<!'),
             parameter: SToken.fromString('%'),
@@ -755,8 +764,9 @@ describe('EntityExpander (unit)', () => {
                new CharRefPToken({ open: SToken.fromString('&#') }),
                new TextPToken({ text: SToken.fromString('UBLIC') }),
             ],
-      });
+         });
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
@@ -776,7 +786,7 @@ describe('EntityExpander (unit)', () => {
 
       it('replaces multiple unassigned references to the same entity', (done) => {
          externalMap.publicName = 'I will not be used';
-         const unassignedVals = [ {
+         const unassignedVals: any = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('<!'),
@@ -788,18 +798,19 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('externalEntity'),
             })
-         } ];
+         }];
          const paramDecl = new ParameterEntityDeclarationPToken({
             open: SToken.fromString('<!'),
             parameter: SToken.fromString('%'),
             name: SToken.fromString('externalEntity'),
             externalId: {
                system: {
-                  value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
+                  value: [new TextPToken({ text: SToken.fromString('publicName') }),],
                }
             },
          });
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
@@ -818,7 +829,7 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('replaces multiple unassigned references to the different entities', (done) => {
-         const unassignedVals = [ {
+         const unassignedVals: any = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('<!'),
@@ -830,20 +841,21 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('internalEntity2'),
             })
-         } ];
+         }];
          const paramDecl = new ParameterEntityDeclarationPToken({
             open: SToken.fromString('<!'),
             parameter: SToken.fromString('%'),
             name: SToken.fromString('internalEntity'),
-            value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
+            value: [new TextPToken({ text: SToken.fromString('publicName') }),],
          });
          const paramDecl2 = new ParameterEntityDeclarationPToken({
             open: SToken.fromString('<!'),
             parameter: SToken.fromString('%'),
             name: SToken.fromString('internalEntity2'),
-            value: [ new TextPToken({ text: SToken.fromString('publicName') })],
+            value: [new TextPToken({ text: SToken.fromString('publicName') })],
          });
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
@@ -864,24 +876,25 @@ describe('EntityExpander (unit)', () => {
 
       it('will try to retrieve from an external reference', (done) => {
          externalMap.publicName = 'I will not be used';
-         const unassignedVals = [ {
+         const unassignedVals: any = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('externalEntity'),
             })
-         } ];
+         }];
          const paramDecl = new ParameterEntityDeclarationPToken({
             open: SToken.fromString('<!'),
             parameter: SToken.fromString('%'),
             name: SToken.fromString('externalEntity'),
             externalId: {
                system: {
-                  value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
+                  value: [new TextPToken({ text: SToken.fromString('publicName') }),],
                }
             },
          });
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
@@ -904,16 +917,18 @@ describe('EntityExpander (unit)', () => {
             open: SToken.fromString('%'),
             name: SToken.fromString('pe1'),
          });
-         const unassignedVals = [ {
+         const unassignedVals: any = [{
             type: UnassignedType.REFERENCE,
             token: refToPe1,
-         } ];
+         }];
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
             externalId: {
-               nextParamName: 'idType',
+               type: 'EXTERNAL_ID',
+               nextPropName: 'idType',
                unassigned: unassignedVals,
             },
          });
@@ -948,16 +963,18 @@ describe('EntityExpander (unit)', () => {
             open: SToken.fromString('%'),
             name: SToken.fromString('pe1'),
          });
-         const unassignedVals: UnassignedArray = [ {
+         const unassignedVals: UnassignedArray = [{
             type: UnassignedType.REFERENCE,
             token: refToPe1,
-         } ];
+         }];
          const notationDecl = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
             open: SToken.fromString('<!'),
             name: SToken.fromString('test'),
             unassigned: unassignedVals,
             externalId: {
-               nextParamName: 'idType',
+               type: 'EXTERNAL_ID',
+               nextPropName: 'idType',
                unassigned: unassignedVals,
             },
          });
@@ -1015,7 +1032,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect((results[0] as any).attributes[0].value).toEqual([ new TextPToken({ text: SToken.fromString('foo') }) ]);
+            expect((results[0] as any).attributes[0].value).toEqual([new TextPToken({ text: SToken.fromString('foo') })]);
             done();
          });
       });
@@ -1099,8 +1116,8 @@ describe('EntityExpander (unit)', () => {
                digits: SToken.fromString('38'),
                close: SToken.fromString(';'),
                openSpace: undefined,
-         	   hexMarkerSpace: undefined,
-         	   digitsSpace: undefined,
+               hexMarkerSpace: undefined,
+               digitsSpace: undefined,
             }));
             expect(attrValue[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
@@ -1252,7 +1269,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
+                     value: [new TextPToken({ text: SToken.fromString('publicName') }),],
                   }
                },
             }),
@@ -1285,7 +1302,7 @@ describe('EntityExpander (unit)', () => {
                digits: SToken.fromString('60'),
                close: SToken.fromString(';'),
                openSpace: undefined,
-         	   hexMarkerSpace: undefined,
+               hexMarkerSpace: undefined,
                digitsSpace: undefined,
                charCode: 60,
             }));
@@ -1303,7 +1320,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results[0]).toEqual(new XmlWarning(XmlWarning.ID.PREDEFINED_UNDECLARED, [ 'lt' ], input[0].open, input[0].open));
+            expect(results[0]).toEqual(new XmlWarning(XmlWarning.ID.PREDEFINED_UNDECLARED, ['lt'], input[0].open, input[0].open));
             done();
          });
       });
@@ -1324,7 +1341,7 @@ describe('EntityExpander (unit)', () => {
                digits: SToken.fromString('38'),
                close: SToken.fromString(';'),
                openSpace: undefined,
-         	   hexMarkerSpace: undefined,
+               hexMarkerSpace: undefined,
                digitsSpace: undefined,
                charCode: 38,
             }));
@@ -1411,7 +1428,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results[1]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_EXTERNAL, [ 'lt' ], input[0].open, input[0].open));
+            expect(results[1]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_EXTERNAL, ['lt'], input[0].open, input[0].open));
             done();
          });
       });
@@ -1458,7 +1475,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results[3]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, [ 'lt' ], input[0].open, input[0].open));
+            expect(results[3]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, ['lt'], input[0].open, input[0].open));
             done();
          });
       });
@@ -1531,7 +1548,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results[2]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, [ 'lt' ], input[0].open, input[0].open));
+            expect(results[2]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, ['lt'], input[0].open, input[0].open));
             done();
          });
       });
@@ -1576,7 +1593,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results[2]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, [ 'amp' ], input[0].open, input[0].open));
+            expect(results[2]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, ['amp'], input[0].open, input[0].open));
             done();
          });
       });
@@ -1749,7 +1766,7 @@ describe('EntityExpander (unit)', () => {
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
-               value: [ new TextPToken({ text: SToken.fromString('test') }) ],
+               value: [new TextPToken({ text: SToken.fromString('test') })],
             }),
             new GeneralEntityReferencePToken({
                open: SToken.fromString('&'),
@@ -1771,7 +1788,7 @@ describe('EntityExpander (unit)', () => {
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
-               value: [ new TextPToken({ text: SToken.fromString('') }) ],
+               value: [new TextPToken({ text: SToken.fromString('') })],
             }),
             new GeneralEntityReferencePToken({
                open: SToken.fromString('&'),
@@ -1795,7 +1812,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [new TextPToken({ text: SToken.fromString('systemUrl') }),],
                   }
                },
             }),
@@ -1821,12 +1838,12 @@ describe('EntityExpander (unit)', () => {
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('one'),
-               value: [ new TextPToken({ text: SToken.fromString('&two; ') }) ],
+               value: [new TextPToken({ text: SToken.fromString('&two; ') })],
             }),
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('two'),
-               value: [ new TextPToken({ text: SToken.fromString('&one; ') }) ],
+               value: [new TextPToken({ text: SToken.fromString('&one; ') })],
             }),
             new GeneralEntityReferencePToken({
                open: SToken.fromString('&'),
@@ -1902,7 +1919,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-     it('does not replace the reference if it has no name', (done) => {
+      it('does not replace the reference if it has no name', (done) => {
          const input = [
             new ParameterEntityReferencePToken({
                open: SToken.fromString('%'),
@@ -1916,7 +1933,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-     it('does not replace the reference if that reference is to an external entity and this is not validating', (done) => {
+      it('does not replace the reference if that reference is to an external entity and this is not validating', (done) => {
          const input = [
             new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
@@ -1968,7 +1985,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [new TextPToken({ text: SToken.fromString('systemUrl') }),],
                   }
                },
             }),
@@ -1997,20 +2014,20 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [new TextPToken({ text: SToken.fromString('systemUrl') }),],
                   }
                },
             }),
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
-               value: [ new ParameterEntityReferencePToken({
+               value: [new ParameterEntityReferencePToken({
                   open: SToken.fromString('%'),
                   name: SToken.fromString('foo'),
                }), new ParameterEntityReferencePToken({
                   open: SToken.fromString('%'),
                   name: SToken.fromString('foo'),
-               }) ],
+               })],
             })
          ];
 
@@ -2034,7 +2051,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [new TextPToken({ text: SToken.fromString('systemUrl') }),],
                   }
                },
             }),
@@ -2044,20 +2061,20 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('bar'),
                externalId: {
                   system: {
-                     value: [ new TextPToken({ text: SToken.fromString('systemUrl2') }), ],
+                     value: [new TextPToken({ text: SToken.fromString('systemUrl2') }),],
                   }
                },
             }),
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
-               value: [ new ParameterEntityReferencePToken({
+               value: [new ParameterEntityReferencePToken({
                   open: SToken.fromString('%'),
                   name: SToken.fromString('foo'),
                }), new ParameterEntityReferencePToken({
                   open: SToken.fromString('%'),
                   name: SToken.fromString('bar'),
-               }) ],
+               })],
             })
          ];
 

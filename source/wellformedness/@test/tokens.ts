@@ -35,7 +35,7 @@ const makeAttListDeclaration = () => new attListDeclaration.PToken({
    open: toSToken('<!'),
    elementName: toSToken('elementName'),
    postElementNameSpace: toSToken(' '),
-   attDefs: [ {
+   attDefs: [{
       name: toSToken('att1'),
       postNameSpace: toSToken(' '),
       type: toSToken('CDATA'),
@@ -43,7 +43,7 @@ const makeAttListDeclaration = () => new attListDeclaration.PToken({
       defaultType: toSToken('#REQUIRED'),
       postDefaultTypeSpace: toSToken(' '),
       value: [],
-   } ],
+   }],
    close: toSToken('>'),
 });
 
@@ -68,7 +68,7 @@ const makeCharRef = () => new CharRefPToken({
 
 const makeComment = () => new CommentPToken({
    open: toSToken('<!--'),
-   text: [ toSToken('commentText') ],
+   text: [toSToken('commentText')],
    close: toSToken('-->'),
 });
 
@@ -92,7 +92,7 @@ const makeNotationDeclaration = () => new NotationDeclarationPToken({
    declTypeSpace: toSToken(' '),
    name: toSToken('notationName'),
    nameSpace: toSToken(' '),
-   externalId: { externalId: true },
+   externalId: { type: 'EXTERNAL_ID' },
    externalIdSpace: toSToken(' '),
    close: toSToken('>'),
 });
@@ -151,7 +151,7 @@ const makeParameterEntityDeclaration = () => new ParameterEntityDeclarationPToke
    name: toSToken('entityName'),
    nameSpace: toSToken(' '),
    openQuote: toSToken('"'),
-   value: [ toSToken('value') ],
+   value: [toSToken('value')],
    closeQuote: toSToken('"'),
    close: toSToken('>'),
 });
@@ -167,7 +167,7 @@ const makeParameterExternalEntityDeclaration = () => new ParameterEntityDeclarat
       postIdTypeSpace: toSToken(' '),
       public: {
          openQuote: toSToken('"'),
-         value: [ new TextPToken({ text: toSToken('pub.xml') }) ],
+         value: [new TextPToken({ text: toSToken('pub.xml') })],
          closeQuote: toSToken('"'),
       },
    },

@@ -34,10 +34,10 @@ class MatchExtractor extends Extractor {
    }
 
    process(segment: Segment) {
-      const info = this._makeInfo(segment);
+      const info = this.makeInfo(segment);
       this._firstSegment = this._firstSegment || segment;
       this._firstIndex = this._firstIndex || segment.index;
-      this._segInfo.push(info);
+      this.segInfo.push(info);
 
       const segmentRemainder = segment.text.length - segment.index;
       const candidateRemainder = this._candidate.length - this._candIndex;
@@ -48,14 +48,14 @@ class MatchExtractor extends Extractor {
       if (segmentText !== candText) {
          this.state = Extractor.STATE.FAILURE;
       } else {
-         this._processText(segmentText, info);
+         this.processText(segmentText, info);
 
          this._candIndex += lengthToCompare;
          segment.index += lengthToCompare;
 
          if (this._candIndex >= this._candidate.length) {
             // Remove the segments that we are now certain we have consumed.
-            this._segInfo.forEach((info) => {
+            this.segInfo.forEach((info) => {
                if ((info.segment as Segment).atEnd()) { // typeHack
                   info.segment = { range: info.segment.range };
                }
@@ -70,21 +70,21 @@ class MatchExtractor extends Extractor {
          case Extractor.STATE.WORKING:
          case Extractor.STATE.FAILURE:
             this.state = Extractor.STATE.FAILURE;
-            this._text = [];
-            this._normalizedText = [];
+            this.text = [];
+            this.normalizedText = [];
 
             if (this._firstSegment) {
                this._firstSegment.index = this._firstIndex;
             }
 
-            this._segInfo.forEach((info) => {
+            this.segInfo.forEach((info) => {
                info.chars = 0;
                info.columns = 0;
                info.rows = 0;
             });
-            return this._finish();
+            return this.innerFinish();
          case Extractor.STATE.SUCCESS:
-            return this._finish();
+            return this.innerFinish();
       }
    }
 

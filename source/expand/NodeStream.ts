@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import { EntityMetaData } from 'basic';
 // import { ErrorCollector, XmlWarning, ValidityError, WellFormedError } from 'error';
@@ -65,13 +65,13 @@ type PToken = {
    unassigned?: UnassignedArray,
 };
 type DoneSignal = () => void;
-type EntityValueArray = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|ParameterEntityEndPToken|ParameterEntityStartPToken>; // same as literalValue, but with start and end
+type EntityValueArray = Array<TextPToken | GeneralEntityReferencePToken | ParameterEntityReferencePToken | ParameterEntityEndPToken | ParameterEntityStartPToken>; // same as literalValue, but with start and end
 type CommonAttributeXToken = {
    name: string,
    value: AttributeValueXToken,
 };
-type ExpandedLiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
-type ExpansionsMap = { [key: number]: LiteralValueXToken|GeneralEntityReferenceXToken };
+type ExpandedLiteralValueXToken = Array<TextXToken | CharRefXToken | GeneralEntityReferenceXToken | ParameterEntityReferenceXToken | GeneralEntityStartXToken | GeneralEntityEndXToken | ParameterEntityStartXToken | ParameterEntityEndXToken>;
+type ExpansionsMap = { [key: number]: LiteralValueXToken | GeneralEntityReferenceXToken };
 
 enum ProcessMode {
    VALIDATE,
@@ -87,7 +87,7 @@ type ExpandOptions = {
  !!!!
 \**********************************************************************/
 
-class NodeStream extends stream.Transform {
+class NodeStream extends Transform {
    private _entityManager: EntityManager;
    private _options: {};
    private _child: any;
@@ -302,10 +302,10 @@ class NodeStream extends stream.Transform {
 
       // @@@ don't expand if it is a standalone
       if (!entityToken || !entityToken.value) {
-         deliverExpanded([ {
+         deliverExpanded([{
             type: UnassignedType.REFERENCE,
             token: peRef,
-         } ]);
+         }]);
       } else {
          const expanded = this._entityValueToUnassignedArray((entityToken as any).value);
          expanded.unshift({
@@ -364,9 +364,9 @@ class NodeStream extends stream.Transform {
 
       // @@@ don't expand if it is in standalone
       if (!entityToken) {
-         deliverExpanded([ peRef ]);
+         deliverExpanded([peRef]);
       } else {
-         const expanded: EntityValueArray = [ new ParameterEntityStartPToken(peRef) ]
+         const expanded: EntityValueArray = [new ParameterEntityStartPToken(peRef)]
             .concat(entityToken.value);
          expanded.push(new ParameterEntityEndPToken(peRef));
 
@@ -739,7 +739,7 @@ class NodeStream extends stream.Transform {
 
       const sTokenStream = entityInfo.getStream();
 
-      literalValue.parse(sTokenStream, [ '&' ], (pTokenResult) => {
+      literalValue.parse(sTokenStream, ['&'], (pTokenResult) => {
          const xToken = literalValue.makeXTokenCompatible(pTokenResult);
 
          this._expandAttributeValue(xToken, (subXToken: Array<any>) => { // typeHack
@@ -831,25 +831,25 @@ class NodeStream extends stream.Transform {
 
    _addEntityDeclaration(edToken: ParameterEntityDeclarationXToken | GeneralEntityDeclarationXToken, done: DoneSignal) {
       if (edToken instanceof ParameterEntityDeclarationXToken) {
-      //    // §4.2 If the same entity is declared more than once, ... at user option,
-      //    // an XML processor may issue a warning if entities are declared multiple times.
-      //    if (this._entityManager.getParameterEntityToken(edToken.name)) {
-      //       const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
-      //       this.push(warning);
-      //       done();
-      //       return;
-      //    }
+         //    // §4.2 If the same entity is declared more than once, ... at user option,
+         //    // an XML processor may issue a warning if entities are declared multiple times.
+         //    if (this._entityManager.getParameterEntityToken(edToken.name)) {
+         //       const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
+         //       this.push(warning);
+         //       done();
+         //       return;
+         //    }
 
          this._entityManager.addParameterEntityFromInternalSubset(edToken);
       } else {
-      //    // §4.2 If the same entity is declared more than once, ... at user option,
-      //    // an XML processor may issue a warning if entities are declared multiple times.
-      //    if (this._entityManager.getEntityToken(edToken.name)) {
-      //       const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
-      //       this.push(warning);
-      //       done();
-      //       return;
-      //    }
+         //    // §4.2 If the same entity is declared more than once, ... at user option,
+         //    // an XML processor may issue a warning if entities are declared multiple times.
+         //    if (this._entityManager.getEntityToken(edToken.name)) {
+         //       const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
+         //       this.push(warning);
+         //       done();
+         //       return;
+         //    }
 
          this._entityManager.addEntityFromInternalSubset(edToken);
       }

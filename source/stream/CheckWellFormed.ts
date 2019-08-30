@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import { ErrorCollector, WellFormedError, } from 'error';
 import { getFirstSToken, PToken, } from 'token';
@@ -45,7 +45,7 @@ import { ContentChecker, DocumentChecker, MarkupDeclChecker } from 'wellformedne
  * DTD etc, consider them as errors or not). Finally, this will
  * report any markup declarations with unexpanded perefs as errors.
  */
-class CheckWellFormed extends stream.Transform {
+class CheckWellFormed extends Transform {
    private checker = new DocumentChecker({
       content: ContentChecker,
       dtd: MarkupDeclChecker,

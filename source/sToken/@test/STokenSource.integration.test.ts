@@ -26,7 +26,7 @@ describe('STokenSource (integration)', () => {
       it('delivers all the text until the specified terminator', (done) => {
          source.addText('test of\nall\r\nextractor', new Range(defaultLoc));
 
-         source.extract('all', [ 'or' ], (sToken) => {
+         source.extract('all', ['or'], (sToken) => {
             expect(sToken).toEqual(
                new SToken('test of\nall\nextract', 'test of\nall\r\nextract', new Range(defaultLoc, 0, 0, 0, 20, 2, 7)));
             done();
@@ -320,4 +320,46 @@ describe('STokenSource (integration)', () => {
 
    });
 
+
+   describe("@@@@", () => {
+      // There's a problem in MultiMatchExtractor
+      it("delivers a word terminated by a whitespace", done => {
+         source.addText("word1\n12");
+         source.addText("3 And this is\n until <things");
+
+         source.extractNoParams("word", wordToken => {
+            source.extractNoParams("char", charToken => {
+               source.extractNoParams("digit", digitToken => {
+                  source.extract("all", ["<"], allToken => {
+                     expect(wordToken).toEqual(
+                        new SToken(
+                           "word1",
+                           "word1",
+                           new Range(defaultLoc, 0, 0, 0, 5, 0, 5)
+                        )
+                     );
+                     expect(charToken).toEqual(
+                        new SToken("\n", "\n", new Range(defaultLoc, 5, 0, 5, 6, 1, 0))
+                     );
+                     expect(digitToken).toEqual(
+                        new SToken(
+                           "123",
+                           "123",
+                           new Range(defaultLoc, 6, 1, 0, 9, 1, 3)
+                        )
+                     );
+                     expect(allToken).toEqual(
+                        new SToken(
+                           " And this is\n until ",
+                           " And this is\n until ",
+                           new Range(defaultLoc, 9, 1, 3, 29, 2, 7)
+                        )
+                     );
+                     done();
+                  });
+               });
+            });
+         });
+      });
+   });
 });

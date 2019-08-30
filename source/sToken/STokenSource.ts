@@ -282,7 +282,9 @@ class STokenSource {
 
          currentRange = new Range(currentRange.location,
             currentRange.startIndex, currentRange.startRow, currentRange.startColumn,
-            currentRange.endIndex + info.chars, currentRange.endRow + info.rows, currentRange.endColumn + info.columns);
+            currentRange.endIndex + info.chars, currentRange.endRow + info.rows,
+            // NEED A test for the following.
+            info.rows === 0 ? currentRange.endColumn + info.columns : info.columns);
       }
 
       ranges.push(currentRange);

@@ -37,20 +37,20 @@ enum ExtractorState {
 \**********************************************************************/
 
 class Extractor {
-   protected _version: number;
-   protected _text: Array<string>;
-   protected _normalizedText: Array<string>;
-   protected _segInfo: Array<SegmentInfo>;
-   protected _lastProcessSawCr: boolean = false;
+   private lastProcessSawCr: boolean = false;
+   protected version: number;
+   protected text: Array<string>;
+   protected normalizedText: Array<string>;
+   protected segInfo: Array<SegmentInfo>;
    public state: ExtractorState;
 
    public static STATE = ExtractorState;
 
    constructor(version: number) {
-      this._version = version;
-      this._text = [];
-      this._normalizedText = [];
-      this._segInfo = [];
+      this.version = version;
+      this.text = [];
+      this.normalizedText = [];
+      this.segInfo = [];
       this.state = Extractor.STATE.WORKING;
    }
 
@@ -67,20 +67,20 @@ class Extractor {
       };
    };
 
-   _processText(originalText: string, info: SegmentInfo) {
+   protected processText(originalText: string, info: SegmentInfo) {
       // §2.11 This section does converson of line endings of various
       // sorts into a single \n.
-      const LINE_ENDING_REGEX = this._version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
+      const LINE_ENDING_REGEX = this.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
       let newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
-      if (this._lastProcessSawCr) {
+      if (this.lastProcessSawCr) {
          if (originalText[0] === '\n' ||
-            (this._version === 1.1 && originalText[0] === '\u0085')) {
+            (this.version === 1.1 && originalText[0] === '\u0085')) {
             newText = newText.substring(1);
          }
       }
 
-      this._lastProcessSawCr = false;
+      this.lastProcessSawCr = false;
       const newChars = originalText.length;
       let newColumns = originalText.length;
       let newRows = 0;
@@ -100,11 +100,11 @@ class Extractor {
          newColumns = (newText.length - lastIndex);
       }
 
-      this._text.push(originalText);
-      this._normalizedText.push(newText);
+      this.text.push(originalText);
+      this.normalizedText.push(newText);
 
       if (originalText[originalText.length - 1] === '\r') {
-         this._lastProcessSawCr = true;
+         this.lastProcessSawCr = true;
       }
 
       info.chars += newChars;
@@ -112,7 +112,7 @@ class Extractor {
       info.columns += newColumns;
    }
 
-   _makeInfo(segment: Segment): SegmentInfo {
+   protected makeInfo(segment: Segment): SegmentInfo {
       return {
          chars: 0,
          rows: 0,
@@ -121,11 +121,11 @@ class Extractor {
       };
    }
 
-   _finish(): ExtractResult {
+   protected innerFinish(): ExtractResult {
       return {
-         text: this._normalizedText.join(''),
-         original: this._text.join(''),
-         segments: this._segInfo,
+         text: this.normalizedText.join(''),
+         original: this.text.join(''),
+         segments: this.segInfo,
       };
    }
 

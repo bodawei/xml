@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import { ENTITY_META_DATA } from 'basic';
 import { WellFormedError } from 'error';
@@ -35,7 +35,7 @@ import {
    XMLDECL_PTOKEN,
 } from 'token';
 
-class PToXTokenStream extends stream.Transform {
+class PToXTokenStream extends Transform {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -84,7 +84,7 @@ class PToXTokenStream extends stream.Transform {
             this.push(pToken);
             break;
          default:
-            this.push(new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, [ `Unknown PToken type "${pToken.type}" encountered.` ]));
+            this.push(new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, [`Unknown PToken type "${pToken.type}" encountered.`]));
             this.push(pToken);
       }
 

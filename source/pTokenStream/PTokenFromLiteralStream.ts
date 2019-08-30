@@ -1,6 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import { STokenSource } from '../sToken';
 import {
@@ -18,7 +18,7 @@ type Options = {
  * This is used to parse EntityValue and AttributeValue literals. As such, it only
  * recognizes Text, CharRef, and (optionally) ParameterEntityReferences.
  */
-class PTokenFromLiteralStream extends stream.Transform {
+class PTokenFromLiteralStream extends Transform {
    private sTokenSource: STokenSource;
    private peRef: boolean;
    private terminators: Array<string>;
@@ -30,7 +30,7 @@ class PTokenFromLiteralStream extends stream.Transform {
 
       this.sTokenSource = sTokenSource;
       this.peRef = !!options.peRef;
-      this.terminators = this.peRef ? [ '&', '%' ] : [ '&' ];
+      this.terminators = this.peRef ? ['&', '%'] : ['&'];
    }
 
    _read() {

@@ -1,9 +1,9 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Readable } from 'stream';
 import { PToken } from 'token';
 
-function gatherStream(stream: stream.Readable, expect: (results: Array<PToken>) => void, done: () => void) {
+function gatherStream(stream: Readable, expect: (results: Array<PToken>) => void, done: () => void) {
    const cache: Array<PToken> = [];
 
    stream.on('data', (item: PToken) => {
@@ -17,12 +17,12 @@ function gatherStream(stream: stream.Readable, expect: (results: Array<PToken>) 
    });
 };
 
-function expectError(validator: stream.Readable, expected: any, done: () => void) {
+function expectError(validator: Readable, expected: any, done: () => void) {
    gatherStream(validator, (tokens) => {
       let arrayExpected = [];
 
       if (!Array.isArray(expected)) {
-         arrayExpected = [ expected ];
+         arrayExpected = [expected];
       }
 
       for (const expectedVal of arrayExpected) {

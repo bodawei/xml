@@ -45,15 +45,15 @@ class AllExtractor extends Extractor {
          return;
       }
 
-      const info = this._makeInfo(segment);
-      this._segInfo.push(info);
+      const info = this.makeInfo(segment);
+      this.segInfo.push(info);
 
       // Find all the text in the segment up to terminators or the end of the segment.
       this.terminatorRegEx.lastIndex = segment.index;
       const result = this.terminatorRegEx.exec(segment.text);
 
       if (result && result[0].length > 0) {
-         this._processText(result[0], info);
+         this.processText(result[0], info);
          segment.index += result[0].length;
 
          // If we've consumed the segment, update it to reflect that it is consumed
@@ -78,13 +78,13 @@ class AllExtractor extends Extractor {
 
          // Set up a sub-matcher to determine which terminator we matched.
          if (terminators.length > 1) {
-            matcher = new MultiMatchExtractor(this._version, terminators);
+            matcher = new MultiMatchExtractor(this.version, terminators);
          } else {
-            matcher = new MatchExtractor(this._version, terminators[0]);
+            matcher = new MatchExtractor(this.version, terminators[0]);
          }
 
          // And make this a peek so we don't consume it.
-         this._terminatorMatcher = new PeekExtractor(this._version, matcher);
+         this._terminatorMatcher = new PeekExtractor(this.version, matcher);
          this._processTerminatorMatcher(segment);
       }
    }
@@ -98,7 +98,7 @@ class AllExtractor extends Extractor {
 
          if (terminatorStatus !== Extractor.STATE.SUCCESS) {
             result.segments.shift();
-            result.segments.unshift(this._segInfo[this._segInfo.length - 1]);
+            result.segments.unshift(this.segInfo[this.segInfo.length - 1]);
 
             // Add all the segments, since we didn't use them after all.
             for (const info of result.segments) {
@@ -107,16 +107,16 @@ class AllExtractor extends Extractor {
          }
       }
 
-      this.state = this._text.length > 0 ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+      this.state = this.text.length > 0 ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
 
-      return this._finish();
+      return this.innerFinish();
    }
 
    private addRemainderOfSegment(info: SegmentInfo): void {
       const segment: Segment = info.segment as Segment;
       const remainderOfSegment = segment.text.substr(segment.index)
 
-      this._processText(remainderOfSegment, info);
+      this.processText(remainderOfSegment, info);
       segment.index = segment.text.length;
    }
 
@@ -146,7 +146,7 @@ class AllExtractor extends Extractor {
    _cleanupTerminatorMatcher() {
       const result = this._terminatorMatcher!.finish(); // typeHack
       delete this._terminatorMatcher;
-      const lastInfo = this._segInfo.pop();
+      const lastInfo = this.segInfo.pop();
 
       // We now know that the next character was a false match. So, skip over the character
       // and re-process the segment we just saw.
@@ -155,7 +155,7 @@ class AllExtractor extends Extractor {
 
       // Note that we might be at this point in this routine many times.
 
-      const newLastInfo = this._segInfo[this._segInfo.length - 1];
+      const newLastInfo = this.segInfo[this.segInfo.length - 1];
       newLastInfo.chars += lastInfo!.chars;
 
       if (newLastInfo.rows !== 0) {
@@ -172,7 +172,7 @@ class AllExtractor extends Extractor {
    }
 
    _addCharAndContinue(origSegment: Segment, info: SegmentInfo) {
-      this._processText(origSegment.text[origSegment.index], info);
+      this.processText(origSegment.text[origSegment.index], info);
       origSegment.index ++;
    }
 

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Readable } from 'stream';
 
 import { EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from 'extractor';
@@ -29,7 +29,7 @@ import { DocTypeStartPToken } from '../token/docTypeStart';
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
 
-class PTokenStream extends stream.Readable {
+class PTokenStream extends Readable {
    private _sTokenSource: STokenSource;
    private _elementStack: Array<Token>;
    private _inContent: boolean;
@@ -157,7 +157,7 @@ class PTokenStream extends stream.Readable {
                let terminators: Array<string> = [];
 
                if (this.waitingForInternalClose) {
-                  terminators = [ '%' ];
+                  terminators = ['%'];
                }
 
                parseCharData(this._sTokenSource, terminators, (result) => {
@@ -185,7 +185,7 @@ class PTokenStream extends stream.Readable {
                parseElementEnd(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-            parseInstruction(this._sTokenSource, markupStartSToken, this.emd, deliverParse);
+               parseInstruction(this._sTokenSource, markupStartSToken, this.emd, deliverParse);
                break;
             case '<!--':
                parseComment(this._sTokenSource, markupStartSToken, deliverParse);

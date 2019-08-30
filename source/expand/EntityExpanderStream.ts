@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 import { Token, EntityMetaData } from 'basic';
 import { EntityExpander, ExpandToken, STokenSourceProcessed, TokenProcessed } from './EntityExpander';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -46,7 +46,7 @@ function retrieveExternalEntity(externalId: ExternalId, entityMetaData: EntityMe
  EntityExpander.
 \**********************************************************************/
 
-class EntityExpanderStream extends stream.Transform {
+class EntityExpanderStream extends Transform {
    private entityExpander: EntityExpander;
 
    constructor(validating: boolean) {

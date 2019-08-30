@@ -30,7 +30,7 @@ class PeekExtractor extends Extractor {
    }
 
    process(segment: Segment) {
-      this._segInfo.push(this._makeInfo(segment));
+      this.segInfo.push(this.makeInfo(segment));
 
       if (this._firstIndex === -1) {
          this._firstIndex = segment.index;
@@ -44,8 +44,8 @@ class PeekExtractor extends Extractor {
       const result = this._subExtractor.finish();
       this.state = this._subExtractor.state;
 
-      for (let index = 0; index < this._segInfo.length; index++) {
-         const info = this._segInfo[index];
+      for (let index = 0; index < this.segInfo.length; index++) {
+         const info = this.segInfo[index];
          const subInfo = result.segments[index];
 
          info.chars = subInfo.chars;
@@ -54,11 +54,11 @@ class PeekExtractor extends Extractor {
          (info.segment as Segment).index = 0;   // typeHack
       }
 
-      if (this._segInfo[0]) {
-         (this._segInfo[0].segment as Segment).index = this._firstIndex; // typeHack
+      if (this.segInfo[0]) {
+         (this.segInfo[0].segment as Segment).index = this._firstIndex; // typeHack
       }
 
-      result.segments = this._segInfo;
+      result.segments = this.segInfo;
       return result;
    }
 

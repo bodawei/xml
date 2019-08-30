@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import { COMMENT_XTOKEN, CommentXToken } from '../token';
 
@@ -15,7 +15,7 @@ const DEC_REGEX = /^([0-9]+);(.*)$/;
    <!-- This is a test -->
  all other XmlTokens and errors are passed through without alteration.
 \**********************************************************************/
-class CommentFixingStream extends stream.Transform {
+class CommentFixingStream extends Transform {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -24,7 +24,7 @@ class CommentFixingStream extends stream.Transform {
       });
    }
 
-   _transform(token: any, encoding: string, callback:() => void) {
+   _transform(token: any, encoding: string, callback: () => void) {
       if (token.type === COMMENT_XTOKEN && token.text.indexOf('&#') !== -1) {
          token = replaceCharRefsInComment(token);
       }

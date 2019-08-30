@@ -18,7 +18,7 @@ describe('STokenSource (unit)', () => {
 
    class AllExtractor extends Extractor {
       process(segment: Segment) {
-         this._text.push(segment.text.substring(segment.index));
+         this.text.push(segment.text.substring(segment.index));
          segment.index = segment.text.length;
          this.segInfo.push({
             chars: segment.text.length,
@@ -31,13 +31,13 @@ describe('STokenSource (unit)', () => {
       }
 
       finish() {
-         if (this._text.length > 0) {
+         if (this.text.length > 0) {
             this.state = Extractor.STATE.SUCCESS;
          } else {
             this.state = Extractor.STATE.FAILURE;
          }
 
-         const combinedText = this._text.join('');
+         const combinedText = this.text.join('');
          return {
             text: combinedText,
             original: combinedText,
@@ -73,7 +73,7 @@ describe('STokenSource (unit)', () => {
 
          segment.index = str.length;
 
-         this._text.push(str);
+         this.text.push(str);
          this.segInfo.push(info);
 
          if (!segment.atEnd()) {
@@ -87,7 +87,7 @@ describe('STokenSource (unit)', () => {
 
       finish() {
          if (this.state !== Extractor.STATE.SUCCESS) {
-            this._text = [];
+            this.text = [];
             this.state = Extractor.STATE.FAILURE;
             return {
                segments: [],
@@ -96,7 +96,7 @@ describe('STokenSource (unit)', () => {
             };
          }
 
-         const combinedText = this._text.join('');
+         const combinedText = this.text.join('');
          return {
             text: combinedText,
             original: combinedText,

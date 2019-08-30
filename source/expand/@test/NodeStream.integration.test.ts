@@ -75,30 +75,30 @@ describe('NodeStream (integration)', () => {
       pTokenStream.endText();
    }
 
-  it('adds two levels of entities', (done) => {
+   it('adds two levels of entities', (done) => {
       expectProcessing('<?xml version="1.0"?><!DOCTYPE one ' +
          '[<!ENTITY child "&quot;grandchild&quot;">]><one>&child;</one>', (results) => {
-         matchTokenTypes(results, [
-            XmlDeclarationXToken,
-            DocTypeStartXToken,
-            InternalSubsetStartToken,
-            tokenNs.GeneralEntityDeclarationXToken,
-            InternalSubsetEndToken,
-            DocTypeEndXToken,
-            ElementStartXToken,
-            GeneralEntityStartXToken,
-            GeneralEntityStartXToken,
-            CharDataXToken,
-            GeneralEntityEndXToken,
-            CharDataXToken,
-            GeneralEntityStartXToken,
-            CharDataXToken,
-            GeneralEntityEndXToken,
-            GeneralEntityEndXToken,
-            ElementEndXToken,
-         ]);
-         done();
-      });
+            matchTokenTypes(results, [
+               XmlDeclarationXToken,
+               DocTypeStartXToken,
+               InternalSubsetStartToken,
+               tokenNs.GeneralEntityDeclarationXToken,
+               InternalSubsetEndToken,
+               DocTypeEndXToken,
+               ElementStartXToken,
+               GeneralEntityStartXToken,
+               GeneralEntityStartXToken,
+               CharDataXToken,
+               GeneralEntityEndXToken,
+               CharDataXToken,
+               GeneralEntityStartXToken,
+               CharDataXToken,
+               GeneralEntityEndXToken,
+               GeneralEntityEndXToken,
+               ElementEndXToken,
+            ]);
+            done();
+         });
    });
 
    it('adds the content of parameter entities, which can declare general entities', (done) => {
@@ -110,28 +110,28 @@ describe('NodeStream (integration)', () => {
       <one>
          &genEntity;
       </one>`, (results) => {
-         /* eslint-disable indent */
-         matchTokenTypes(results, [
-            XmlDeclarationXToken,
-            DocTypeStartXToken,
+            /* eslint-disable indent */
+            matchTokenTypes(results, [
+               XmlDeclarationXToken,
+               DocTypeStartXToken,
                InternalSubsetStartToken,
                tokenNs.ParameterEntityDeclarationXToken,
                ParameterEntityStartXToken,
-                  tokenNs.GeneralEntityDeclarationXToken,
+               tokenNs.GeneralEntityDeclarationXToken,
                ParameterEntityEndXToken,
                InternalSubsetEndToken,
-            DocTypeEndXToken,
-            ElementStartXToken,
+               DocTypeEndXToken,
+               ElementStartXToken,
                CharDataXToken,
                GeneralEntityStartXToken,
-                  CharDataXToken,
+               CharDataXToken,
                GeneralEntityEndXToken,
                CharDataXToken,
-            ElementEndXToken,
-         ]);
-         /* eslint-enable indent */
-         done();
-      });
+               ElementEndXToken,
+            ]);
+            /* eslint-enable indent */
+            done();
+         });
    });
 
    describe('ATTLIST declaration processing', () => {
@@ -141,11 +141,11 @@ describe('NodeStream (integration)', () => {
             <!ENTITY % middle "foo">
             <!ATTLIST %middle;>
          ]>`, (tokens) => {
-            const attListDecl = tokens[7] as AttListXToken; // typeHack
+               const attListDecl = tokens[7] as AttListXToken; // typeHack
 
-            expect(attListDecl.elementName).toEqual('foo');
-            done();
-         })
+               expect(attListDecl.elementName).toEqual('foo');
+               done();
+            })
       });
 
       it('expands an parameter entity that makes up an ENUMERATION', (done) => {
@@ -154,17 +154,17 @@ describe('NodeStream (integration)', () => {
             <!ENTITY % goodies "( four | five ) #REQUIRED">
             <!ATTLIST one attr1 %goodies;>
          ]>`, (tokens) => {
-            const attListDecl = tokens[9] as AttListXToken; // typeHack
+               const attListDecl = tokens[9] as AttListXToken; // typeHack
 
-            expect(attListDecl.attDefs[0]).toEqual({
-               name: 'attr1',
-               type: 'ENUMERATION',
-               enumeration: ['four', 'five'],
-               defaultType: '#REQUIRED',
-               value: [],
-            });
-            done();
-         })
+               expect(attListDecl.attDefs[0]).toEqual({
+                  name: 'attr1',
+                  type: 'ENUMERATION',
+                  enumeration: ['four', 'five'],
+                  defaultType: '#REQUIRED',
+                  value: [],
+               });
+               done();
+            })
       });
 
       it('expands entity references in attribute values', (done) => {
@@ -174,28 +174,28 @@ describe('NodeStream (integration)', () => {
             <!ATTLIST one
                attr1 CDATA "#&test;bar#">
          ]>`, (tokens) => {
-            const attListDecl = tokens[9] as AttListXToken; // typeHack
+               const attListDecl = tokens[9] as AttListXToken; // typeHack
 
-            expect(attListDecl.attDefs[0]).toEqual({
-               name: 'attr1',
-               type: 'CDATA',
-               defaultType: '',
-               value: [
-                  new TextXToken('#', new TextPToken({
-                     text: new SToken('#', '#', new Range(new EntityLocation(), 156, 4, 152, 157, 4, 153)),
-                  })),
-                  new GeneralEntityStartXToken('test'),
-                  new TextXToken('foo#', new TextPToken({
-                     text: new SToken('foo#', 'foo#', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)),
-                  })),
-                  new GeneralEntityEndXToken('test'),
-                  new TextXToken('bar#', new TextPToken({
-                     text: new SToken('bar#', 'bar#', new Range(new EntityLocation(), 163, 4, 159, 167, 4, 163)),
-                  })),
-               ],
-            });
-            done();
-         })
+               expect(attListDecl.attDefs[0]).toEqual({
+                  name: 'attr1',
+                  type: 'CDATA',
+                  defaultType: '',
+                  value: [
+                     new TextXToken('#', new TextPToken({
+                        text: new SToken('#', '#', new Range(new EntityLocation(), 156, 4, 28, 157, 4, 29)),
+                     })),
+                     new GeneralEntityStartXToken('test'),
+                     new TextXToken('foo#', new TextPToken({
+                        text: new SToken('foo#', 'foo#', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)),
+                     })),
+                     new GeneralEntityEndXToken('test'),
+                     new TextXToken('bar#', new TextPToken({
+                        text: new SToken('bar#', 'bar#', new Range(new EntityLocation(), 163, 4, 35, 167, 4, 39)),
+                     })),
+                  ],
+               });
+               done();
+            })
       });
 
    });
@@ -206,26 +206,26 @@ describe('NodeStream (integration)', () => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
             '<!ENTITY % middle "two">' +
             '<!ELEMENT one ( one | %middle; | three)>' +
-         ']>', (results) => {
-            const elementDecl = results[5] as ElementDeclaration;
+            ']>', (results) => {
+               const elementDecl = results[5] as ElementDeclaration;
 
-            expect(elementDecl.name).toEqual('one');
-            expect(elementDecl.children).toEqual({
-               names: [ {
-                  name: 'one',
-                  repeat: 'ONE',
-               }, {
-                  name: 'two',
-                  repeat: 'ONE',
-               }, {
-                  name: 'three',
-                  repeat: 'ONE',
-               } ],
-               listType: 'CHOICE',
-               repeat: 'ONE'
+               expect(elementDecl.name).toEqual('one');
+               expect(elementDecl.children).toEqual({
+                  names: [{
+                     name: 'one',
+                     repeat: 'ONE',
+                  }, {
+                     name: 'two',
+                     repeat: 'ONE',
+                  }, {
+                     name: 'three',
+                     repeat: 'ONE',
+                  }],
+                  listType: 'CHOICE',
+                  repeat: 'ONE'
+               });
+               done();
             });
-            done();
-         });
       });
 
       // it('reports a warning if entities are not paremthesis-balanced (§3.2.1)', (done) => {
@@ -247,14 +247,14 @@ describe('NodeStream (integration)', () => {
       it('expands an parameter entity values in an EntityValue', (done) => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one ' +
             '[<!ENTITY % peOne "two"><!ENTITY child "one%peOne;">]>', (results) => {
-            const valueArray: any = (results[5] as GeneralEntityDeclarationXToken).value; // typeHack
+               const valueArray: any = (results[5] as GeneralEntityDeclarationXToken).value; // typeHack
 
-            expect((valueArray[0] as any).text.str).toEqual('one');
-            expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
-            expect((valueArray[2] as any).text.str).toEqual('two');
-            expect(valueArray[3]).toEqual(new ParameterEntityEndPToken((valueArray[1] as any).referencePToken));
-            done();
-         });
+               expect((valueArray[0] as any).text.str).toEqual('one');
+               expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
+               expect((valueArray[2] as any).text.str).toEqual('two');
+               expect(valueArray[3]).toEqual(new ParameterEntityEndPToken((valueArray[1] as any).referencePToken));
+               done();
+            });
       });
 
       it('expands an parameter entity inside a parameter entity inside the EntityValue', (done) => {
@@ -262,20 +262,20 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % peTwo "inner">' +
             '<!ENTITY % peOne "(%peTwo;)">' +
             '<!ENTITY child "[%peOne;]">' +
-         ']>', (results) => {
-            const valueArray: any = (results[6] as GeneralEntityDeclarationXToken).value; // typeHack
+            ']>', (results) => {
+               const valueArray: any = (results[6] as GeneralEntityDeclarationXToken).value; // typeHack
 
-            expect((valueArray as any)[0].text.str).toEqual('[');
-            expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
-            expect(valueArray[2].text.str).toEqual('(');
-            expect(valueArray[3]).toEqual(new ParameterEntityStartPToken((valueArray[3] as any).referencePToken));
-            expect((valueArray[4] as any).text.str).toEqual('inner');
-            expect(valueArray[5]).toEqual(new ParameterEntityEndPToken((valueArray[3] as any).referencePToken));
-            expect((valueArray[6] as any).text.str).toEqual(')');
-            expect(valueArray[7]).toEqual(new ParameterEntityEndPToken((valueArray[1] as any).referencePToken));
-            expect((valueArray[8] as any).text.str).toEqual(']');
-            done();
-         });
+               expect((valueArray as any)[0].text.str).toEqual('[');
+               expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
+               expect(valueArray[2].text.str).toEqual('(');
+               expect(valueArray[3]).toEqual(new ParameterEntityStartPToken((valueArray[3] as any).referencePToken));
+               expect((valueArray[4] as any).text.str).toEqual('inner');
+               expect(valueArray[5]).toEqual(new ParameterEntityEndPToken((valueArray[3] as any).referencePToken));
+               expect((valueArray[6] as any).text.str).toEqual(')');
+               expect(valueArray[7]).toEqual(new ParameterEntityEndPToken((valueArray[1] as any).referencePToken));
+               expect((valueArray[8] as any).text.str).toEqual(']');
+               done();
+            });
       });
 
       it('expands a parameter entity that makes up the entity declaration body', (done) => {
@@ -284,14 +284,14 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % peOne "(%peTwo;)">' +
             '<!ENTITY % body \'child "[%peOne;]"\'>' +
             '<!ENTITY %body;>' +
-         ']>', (results) => {
-            const entityDecl = results[7] as GeneralEntityDeclarationXToken; // typeHack
-            const values: any = entityDecl.value;
+            ']>', (results) => {
+               const entityDecl = results[7] as GeneralEntityDeclarationXToken; // typeHack
+               const values: any = entityDecl.value;
 
-            expect(entityDecl.name).toEqual('child');
-            expect((values[0] as any).text.str).toEqual('[(inner)]');
-            done();
-         });
+               expect(entityDecl.name).toEqual('child');
+               expect((values[0] as any).text.str).toEqual('[(inner)]');
+               done();
+            });
       });
 
    });
@@ -303,13 +303,13 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % url "http://somewhere.com">' +
             '<!ENTITY % middle \'PUBLIC "%url;"\'>' +
             '<!NOTATION foo %middle;>' +
-         ']>', (results) => {
-            const notationDecl = results[6] as NotationDeclarationXToken; // typeHack
+            ']>', (results) => {
+               const notationDecl = results[6] as NotationDeclarationXToken; // typeHack
 
-            expect(notationDecl.name).toEqual('foo');
-            expect((notationDecl.externalId as any).publicId).toEqual('http://somewhere.com'); // typeHack
-            done();
-         });
+               expect(notationDecl.name).toEqual('foo');
+               expect((notationDecl.externalId as any).publicId).toEqual('http://somewhere.com'); // typeHack
+               done();
+            });
       });
 
    });
@@ -324,19 +324,19 @@ describe('NodeStream (integration)', () => {
       it('expands general entity references in attributes', (done) => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
             '<!ENTITY child "(child)">' +
-         ']>' +
-         '<one child="&child;"/>', (results) => {
-            const element = results[7] as ElementStartXToken; // typeHack
+            ']>' +
+            '<one child="&child;"/>', (results) => {
+               const element = results[7] as ElementStartXToken; // typeHack
 
-            expect(element.attributes[0].value).toEqual([
-               new GeneralEntityStartXToken('child'),
-               new TextXToken('(child)', new TextPToken({
-                  text: makeSToken('(child)'),
-               })),
-               new GeneralEntityEndXToken('child'),
-            ]);
-            done();
-         });
+               expect(element.attributes[0].value).toEqual([
+                  new GeneralEntityStartXToken('child'),
+                  new TextXToken('(child)', new TextPToken({
+                     text: makeSToken('(child)'),
+                  })),
+                  new GeneralEntityEndXToken('child'),
+               ]);
+               done();
+            });
       });
 
       it('expands a nested entity reference', (done) => {
@@ -346,38 +346,38 @@ describe('NodeStream (integration)', () => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
             '<!ENTITY child "(child)">' +
             '<!ENTITY parent "pre&child;mid&child;post">' +
-         ']>' +
-         '<one child="&child;" parent="&parent;"/>', (results) => {
-            const element = results[8] as ElementStartXToken; // typeHack
+            ']>' +
+            '<one child="&child;" parent="&parent;"/>', (results) => {
+               const element = results[8] as ElementStartXToken; // typeHack
 
-            expect(element.attributes[1].value).toEqual([
-               new GeneralEntityStartXToken('parent'),
-               new TextXToken('pre', new TextPToken({
-                  text: new SToken('pre', 'pre', new Range(new EntityLocation(),
-                     0, 0, 0, 3, 0, 3)),
-               })),
-               new GeneralEntityStartXToken('child'),
-               new TextXToken('(child)', new TextPToken({
-                  text: childStoken,
-               })),
-               new GeneralEntityEndXToken('child'),
-               new TextXToken('mid', new TextPToken({
-                  text: new SToken('mid', 'mid', new Range(new EntityLocation(),
-                     10, 0, 10, 13, 0, 13)),
-               })),
-               new GeneralEntityStartXToken('child'),
-               new TextXToken('(child)', new TextPToken({
-                  text: childStoken,
-               })),
-               new GeneralEntityEndXToken('child'),
-               new TextXToken('post', new TextPToken({
-                  text: new SToken('post', 'post', new Range(new EntityLocation(),
-                     20, 0, 20, 24, 0, 24)),
-               })),
-               new GeneralEntityEndXToken('parent'),
-            ]);
-            done();
-         });
+               expect(element.attributes[1].value).toEqual([
+                  new GeneralEntityStartXToken('parent'),
+                  new TextXToken('pre', new TextPToken({
+                     text: new SToken('pre', 'pre', new Range(new EntityLocation(),
+                        0, 0, 0, 3, 0, 3)),
+                  })),
+                  new GeneralEntityStartXToken('child'),
+                  new TextXToken('(child)', new TextPToken({
+                     text: childStoken,
+                  })),
+                  new GeneralEntityEndXToken('child'),
+                  new TextXToken('mid', new TextPToken({
+                     text: new SToken('mid', 'mid', new Range(new EntityLocation(),
+                        10, 0, 10, 13, 0, 13)),
+                  })),
+                  new GeneralEntityStartXToken('child'),
+                  new TextXToken('(child)', new TextPToken({
+                     text: childStoken,
+                  })),
+                  new GeneralEntityEndXToken('child'),
+                  new TextXToken('post', new TextPToken({
+                     text: new SToken('post', 'post', new Range(new EntityLocation(),
+                        20, 0, 20, 24, 0, 24)),
+                  })),
+                  new GeneralEntityEndXToken('parent'),
+               ]);
+               done();
+            });
       });
 
       // it('reports an error if an xml:lang attribute is bad', (done) => {

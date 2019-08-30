@@ -36,7 +36,7 @@ class MultiMatchExtractor extends Extractor {
          if (matchers[candidate]) {
             throw new Error(`"${candidate}" was specified twice.`);
          }
-         matchers[candidate] = new MatchExtractor(this._version, candidate);
+         matchers[candidate] = new MatchExtractor(this.version, candidate);
          return matchers;
       }, {} as MatcherMap);
       this._match = undefined;
@@ -50,7 +50,7 @@ class MultiMatchExtractor extends Extractor {
       }
       const startIndex = segment.index;
       let workingCount = 0;
-      this._segInfo.push(this._makeInfo(segment));
+      this.segInfo.push(this.makeInfo(segment));
 
       for (const candidate in this._matchers) {
          // We already have a match longer than candidate.
@@ -107,7 +107,7 @@ class MultiMatchExtractor extends Extractor {
 
    _finishWithFailure() {
       this.state = Extractor.STATE.FAILURE;
-      this._segInfo.forEach((info) => { (info.segment as Segment).index = 0; }); // typeHack
+      this.segInfo.forEach((info) => { (info.segment as Segment).index = 0; }); // typeHack
 
       if (this._firstSegment) {
          this._firstSegment.index = this._firstIndex;
@@ -116,7 +116,7 @@ class MultiMatchExtractor extends Extractor {
       return {
          text: '',
          original: '',
-         segments: this._segInfo,
+         segments: this.segInfo,
       };
    }
 
@@ -125,13 +125,13 @@ class MultiMatchExtractor extends Extractor {
       const result = (this._match as Extractor).finish(); // typeHack
       const newInfo = [];
 
-      for (let index = 0; index < this._segInfo.length; index++) {
+      for (let index = 0; index < this.segInfo.length; index++) {
          const usedInfo = result.segments[index];
 
          if (usedInfo) {
             newInfo.push(usedInfo);
          } else {
-            const unused = this._segInfo[index];
+            const unused = this.segInfo[index];
             (unused.segment as Segment).index = 0; // typeHack
             newInfo.push(unused);
          }

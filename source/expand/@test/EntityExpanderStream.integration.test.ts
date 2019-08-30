@@ -45,7 +45,7 @@ describe('EntityExpanderStream (integration)', () => {
    function getIndex(tokens: Array<PToken>, type: string): number {
       let found = -1;
 
-      for (let index = 0; index < tokens.length; index ++) {
+      for (let index = 0; index < tokens.length; index++) {
          const token = tokens[index];
 
          if (found === -1 && token.type === type) {
@@ -405,8 +405,8 @@ describe('EntityExpanderStream (integration)', () => {
          </one>`);
       pTokenStream.endText();
 
-      const expected = new WellFormedError(WellFormedError.ID.REFERENCE_INVALID_RECURSION, [ 'first' ],
-         new Offset(new EntityLocation(), 78, 2, 76), new Offset(new EntityLocation(), 77, 2, 75));
+      const expected = new WellFormedError(WellFormedError.ID.REFERENCE_INVALID_RECURSION, ['first'],
+         new Offset(new EntityLocation(), 78, 2, 31), new Offset(new EntityLocation(), 77, 2, 30));
       expectError(entityExpander, expected, done);
    });
 });

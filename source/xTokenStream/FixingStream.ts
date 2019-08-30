@@ -1,13 +1,13 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Transform } from 'stream';
 
 import * as tokenNs from 'token';
 import { ElementDeclaration, isXName } from '../token/elementDeclaration';
 import nameList, { XName, XNameList } from '../token/contentspec/nameList';
 
-const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
-const DEFAULT_TYPES = [ '#FIXED', '#REQUIRED', '#IMPLIED' ];
+const ATTR_TYPES = ['CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION'];
+const DEFAULT_TYPES = ['#FIXED', '#REQUIRED', '#IMPLIED'];
 
 /**********************************************************************\
  A simple stream that forces malformed XTokens to be correct.
@@ -21,7 +21,7 @@ const DEFAULT_TYPES = [ '#FIXED', '#REQUIRED', '#IMPLIED' ];
  encountered ends the stream so this will never get produced).
 \**********************************************************************/
 
-class FixingStream extends stream.Transform {
+class FixingStream extends Transform {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -30,7 +30,7 @@ class FixingStream extends stream.Transform {
       });
    }
 
-   _transform(token: any, encoding: string, callback: () => {}) {
+   _transform(token: any, encoding: string, callback: () => void) {
       if (token instanceof tokenNs.attListDeclaration.XToken) {
          adjustAttListDeclaration(token);
       } else if (token instanceof tokenNs.elementDeclaration.XToken) {
@@ -79,7 +79,7 @@ function adjustAttListDeclaration(token: any) {
  *  - If this is Mixed (first item is #PCDATA) flatten any hierarchical items,
  *    make sure it is a CHOICE list, and the repeat is correct.
  */
-const ALLOWED_CONTENT_SPEC_TYPES = [ 'ANY', 'EMPTY', 'CHILDREN' ];
+const ALLOWED_CONTENT_SPEC_TYPES = ['ANY', 'EMPTY', 'CHILDREN'];
 
 function adjustElementDeclaration(token: ElementDeclaration) {
    const contentSpecType = token.contentSpecType || '';
@@ -129,7 +129,7 @@ function putPCDataFirst(list: XNameList, topList: boolean): boolean {
    return seenPCData;
 }
 
-type SimpleMap = {[name:string]:boolean};
+type SimpleMap = { [name: string]: boolean };
 
 function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
    const listItem = list.names[0];
@@ -152,7 +152,7 @@ function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
       const seenNames: SimpleMap = {};
       const newNames: Array<XName> = [];
 
-      for (let index = 0; index <  list.names.length; index++) {
+      for (let index = 0; index < list.names.length; index++) {
          const item = list.names[index];
 
          if (isXName(item) && !seenNames[item.name]) {

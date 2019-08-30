@@ -93,12 +93,12 @@ describe('PeekExtractor', () => {
          };
          class TestExtractor extends Extractor {
             process(segment: Segment) {
-               this._text = this._text || [];
-               this._text.push(segment.text + 'normal');
+               this.text = this.text || [];
+               this.text.push(segment.text + 'normal');
             };
             finish(): ExtractResult {
                return {
-                  text: this._text.join(''),
+                  text: this.text.join(''),
                   original: '',
                   segments: [ dummySegInfo, dummySegInfo ],
                };
@@ -123,13 +123,13 @@ describe('PeekExtractor', () => {
          };
          class TestExtractor extends Extractor {
             process(segment: Segment) {
-               this._text = this._text || [];
-               this._text.push(segment.text + 'xx');
+               this.text = this.text || [];
+               this.text.push(segment.text + 'xx');
             };
             finish(): ExtractResult {
                return {
                   text: '',
-                  original: this._text.join(''),
+                  original: this.text.join(''),
                   segments: [ dummySegInfo, dummySegInfo ],
                };
             };

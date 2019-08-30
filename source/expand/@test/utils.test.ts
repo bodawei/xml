@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import stream from 'readable-stream';
+import { PassThrough } from 'stream';
 
 import { WellFormedError } from 'error';
 
@@ -12,7 +12,7 @@ describe('utils (unit)', () => {
    describe('expectError()', () => {
 
       it('succeeds if the specified error is found', (done) => {
-         const dummyStream = new stream.PassThrough({
+         const dummyStream = new PassThrough({
             objectMode: true,
          });
          const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
@@ -24,7 +24,7 @@ describe('utils (unit)', () => {
       });
 
       it('allows the expected to be an array', (done) => {
-         const dummyStream = new stream.PassThrough({
+         const dummyStream = new PassThrough({
             objectMode: true,
          });
          const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
@@ -32,7 +32,7 @@ describe('utils (unit)', () => {
          dummyStream.write(error);
          dummyStream.end();
 
-         expectError(dummyStream, [ error ], done);
+         expectError(dummyStream, [error], done);
       });
 
    });
