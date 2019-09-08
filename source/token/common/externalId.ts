@@ -281,9 +281,9 @@ function makeEntityLocation(pTokenPart: ExternalId | void) {
       return;
    }
 
-   const value = (pTokenPart.system && pTokenPart.system.value) ?
+   const value = (pTokenPart.system && pTokenPart.system.value && pTokenPart.system.value.length > 0) ?
       (pTokenPart.system.value[0] as any).text.str : undefined; // typeHack
-   const publicValue = (pTokenPart.public && pTokenPart.public.value) ?
+   const publicValue = (pTokenPart.public && pTokenPart.public.value && pTokenPart.public.value.length > 0) ?
       (pTokenPart.public.value[0] as any).text.str : undefined; // typeHack
 
    return new EntityLocation(value, publicValue);

@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.161.5",
+   "version": "0.161.6",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -62,7 +62,6 @@
       "phantomjs-prebuilt": "2.1.16",
       "text-table-formatter": "0.1.0",
       "ts-node": "^8.1.0",
-      "tsconfig-paths": "^3.8.0",
       "typescript": "^3.4.5",
       "xclap": "^0.2.33",
       "xclap-cli": "^0.1.3"
