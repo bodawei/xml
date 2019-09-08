@@ -205,7 +205,14 @@ function parseAttValue(source: STokenSource, pToken: AttListPToken, attDef: AttD
          pToken: attDef,
          geRef: true,
          charRef: true,
-      }, done);
+      }, (pToken) => {
+         source.extractNoParams('space', (space) => {
+            if (space) {
+               attDef.postValueSpace = space;
+            }
+            done(pToken);
+         });
+      });
    });
 
    unassigned.checkForPERef(source, callback);

@@ -299,6 +299,60 @@ describe('attListDeclaration (unit)', () => {
          expect(callback).toContainPTokenProps(aldPToken);
       });
 
+
+      fit('parses multiple attributes definitions with default values with space between them', () => {
+         const DUMMY_VALUE = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
+         literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
+            options.pToken.value = DUMMY_VALUE;
+            done();
+         });
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            MockSTokenSource.PEEK('"'),
+            [ '   ', 'space' ],
+            [ 'att2', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'space' ],
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ '>', 'match', '>' ],
+         ]);
+         const makeSToken = makeSTokenMaker(undefined); //, 23, 0, 23);
+         let aldPToken1: AttListPToken = new attListDeclaration.PToken({
+            open: toSToken('<!'),
+            elementName: makeSToken('elementName'),
+            postElementNameSpace: makeSToken(' '),
+            attDefs: [ {
+               name: makeSToken('att1'),
+               postNameSpace: makeSToken(' '),
+               type: makeSToken('CDATA'),
+               postTypeSpace: makeSToken(' '),
+               value: DUMMY_VALUE,
+               postValueSpace: makeSToken('   '),
+            }, {
+               name: makeSToken('att2'),
+               postNameSpace: makeSToken(' '),
+               type: makeSToken('CDATA'),
+               postTypeSpace: makeSToken(' '),
+               value: DUMMY_VALUE,
+            } ],
+            close: makeSToken('>'),
+         });
+
+         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         mockSource.respondInAsyncTime();
+
+         const params = callback.calls.argsFor(0)[0];
+         expect((params as any).attDefs).toEqual(aldPToken1.attDefs);
+      });
+
       it('parses a wordList for a NOTATION type', () => {
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],

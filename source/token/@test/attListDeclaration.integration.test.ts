@@ -15,6 +15,7 @@ import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import unassigned, { UnassignedType } from '../common/unassigned';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
+import { TextPToken } from '../text';
 
 describe('attListDeclaration (integration)', () => {
    let declarationPToken: AttListPToken;
@@ -58,6 +59,56 @@ describe('attListDeclaration (integration)', () => {
                   defaultType: makeSToken('#IMPLICIT'),
                   postDefaultTypeSpace: undefined,
                   value: [],
+               }],
+               close: makeSToken('>'),
+            }));
+            done();
+         });
+      });
+
+      fit('parses an ATTLIST with a couple attributes with default values', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName one CDATA "1"    two CDATA \'2\'three CDATA "3"    >');
+         source.endText();
+
+         attListDeclaration.parse(source, { open: SToken.fromString('<!') }, (result) => {
+            const makeSToken = makeSTokenMaker();
+            expect(result).toEqual(new attListDeclaration.PToken({
+               open: SToken.fromString('<!'),
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('one'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+                  openQuote: makeSToken('"'),
+                  value: [
+                     new TextPToken({ text: makeSToken('1') }),
+                  ],
+                  closeQuote: makeSToken('"'),
+                  postValueSpace: makeSToken('    '),
+               }, {
+                  name: makeSToken('two'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+                  openQuote: makeSToken('\''),
+                  value: [
+                     new TextPToken({ text: makeSToken('2') }),
+                  ],
+                  closeQuote: makeSToken('\''),
+               }, {
+                  name: makeSToken('three'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+                  openQuote: makeSToken('"'),
+                  value: [
+                     new TextPToken({ text: makeSToken('3') }),
+                  ],
+                  closeQuote: makeSToken('"'),
+                  postValueSpace: makeSToken('    '),
                }],
                close: makeSToken('>'),
             }));
