@@ -26,6 +26,8 @@ import {
    CommentPToken,
    ElementStartPToken,
    ElementEmptyPToken,
+   GeneralEntityStartPToken,
+   GeneralEntityEndPToken,
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
@@ -90,7 +92,7 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls comment.pTokenToXToken()', () => {
+   it('calls comment.toXToken()', () => {
       const pToken = new CommentPToken({ open: SToken.fromString('<!--') });
       spyOn(pToken, 'toXToken');
 
@@ -152,6 +154,26 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls geRef.toXToken()', () => {
       const pToken = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
+   it('calls geStart.toXToken()', () => {
+      const pToken = new GeneralEntityStartPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
+   it('calls geEnd.toXToken()', () => {
+      const pToken = new GeneralEntityEndPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));
       spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
