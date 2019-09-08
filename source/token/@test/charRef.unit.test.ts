@@ -13,7 +13,7 @@ import {
    parseCharRef,
 } from '../charRef';
 
-fdescribe('charRef (unit)', () => {
+describe('charRef (unit)', () => {
    let charRefPToken: CharRefPToken;
    let openSToken: SToken;
 

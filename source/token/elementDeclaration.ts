@@ -194,6 +194,7 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
       const nextValue: UnassignedValue | void = unValues.length > 0 ? unValues[0] : undefined;
 
       if (nextValue && nextValue.type === 'word' && nextValue.token.text && nextValue.token.text.str === '(') {
+         edPToken.children = edPToken.children || new NameListPToken();
          nameList.assignUnassigned(edPToken.children!, unValues);
       } else {
          unassigned.assignToProps(unValues, edPToken, edPToken.nextPropName, [

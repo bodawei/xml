@@ -371,13 +371,14 @@ describe('elementDeclaration (unit)', () => {
             },
          } ];
          elementPToken = new elementDeclaration.PToken({
-            children: new nameList.PToken(),
             unassigned: unassignedValues,
             nextPropName: 'contentSpec',
          });
 
          elementDeclaration.assignUnassigned(elementPToken);
 
+         // Adds the missing children.
+         expect(elementPToken.children).toEqual(new nameList.PToken());
          expect(nameList.assignUnassigned).toHaveBeenCalledWith(elementPToken.children, unassignedValues);
       });
 

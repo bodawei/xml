@@ -300,7 +300,7 @@ describe('attListDeclaration (unit)', () => {
       });
 
 
-      fit('parses multiple attributes definitions with default values with space between them', () => {
+      it('parses multiple attributes definitions with default values with space between them', () => {
          const DUMMY_VALUE = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
          literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
             options.pToken.value = DUMMY_VALUE;

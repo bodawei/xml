@@ -66,7 +66,7 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-      fit('parses an ATTLIST with a couple attributes with default values', (done) => {
+      it('parses an ATTLIST with a couple attributes with default values', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('elName one CDATA "1"    two CDATA \'2\'three CDATA "3"    >');
          source.endText();
