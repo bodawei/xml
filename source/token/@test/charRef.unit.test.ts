@@ -3,7 +3,7 @@
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
 import * as basic from 'basic';
-import { MockErrorCollector } from'error-test';
+import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError, XmlWarning } from 'error';
@@ -13,7 +13,7 @@ import {
    parseCharRef,
 } from '../charRef';
 
-describe('charRef (unit)', () => {
+fdescribe('charRef (unit)', () => {
    let charRefPToken: CharRefPToken;
    let openSToken: SToken;
 
@@ -38,12 +38,12 @@ describe('charRef (unit)', () => {
 
       it('extracts properties of a decimal character reference', () => {
          const mockSource = new MockSTokenSource([
-            [ undefined, 'space' ],
-            [ undefined, 'multi', [ 'x', 'X' ] ],
-            [ undefined, 'space' ],
-            [ '1234', 'digit', 10 ],
-            [ undefined, 'space' ],
-            [ ';', 'match', ';' ],
+            [undefined, 'space'],
+            [undefined, 'multi', ['x', 'X']],
+            [undefined, 'space'],
+            ['1234', 'digit', 10],
+            [undefined, 'space'],
+            [';', 'match', ';'],
          ]);
 
          parseCharRef(mockSource, openSToken, callback);
@@ -54,12 +54,12 @@ describe('charRef (unit)', () => {
 
       it('extracts properties of a hexadecimal character reference', () => {
          const mockSource = new MockSTokenSource([
-            [ undefined, 'space' ],
-            [ 'x', 'multi', [ 'x', 'X' ] ],
-            [ undefined, 'space' ],
-            [ '1f2', 'digit', 16 ],
-            [ undefined, 'space' ],
-            [ ';', 'match', ';' ],
+            [undefined, 'space'],
+            ['x', 'multi', ['x', 'X']],
+            [undefined, 'space'],
+            ['1f2', 'digit', 16],
+            [undefined, 'space'],
+            [';', 'match', ';'],
          ]);
          (charRefPToken as any).digits = new SToken('1f2', '1f2', new Range(new EntityLocation(), 1, 0, 1, 4, 0, 4));
          (charRefPToken as any).charCode = 498;
@@ -72,12 +72,12 @@ describe('charRef (unit)', () => {
 
       it('extracts properties of a char ref with many invalid spaces', () => {
          const mockSource = new MockSTokenSource([
-            [ ' ', 'space' ],
-            [ 'x', 'multi', [ 'x', 'X' ] ],
-            [ ' ', 'space' ],
-            [ '1f2', 'digit', 16 ],
-            [ ' ', 'space' ],
-            [ ';', 'match', ';' ],
+            [' ', 'space'],
+            ['x', 'multi', ['x', 'X']],
+            [' ', 'space'],
+            ['1f2', 'digit', 16],
+            [' ', 'space'],
+            [';', 'match', ';'],
          ]);
          const makeSToken = makeSTokenMaker();
          charRefPToken = new CharRefPToken({
@@ -89,6 +89,33 @@ describe('charRef (unit)', () => {
             digitsSpace: makeSToken(' '),
             close: makeSToken(';'),
             charCode: 498,
+         });
+
+         parseCharRef(mockSource, openSToken, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(charRefPToken);
+      });
+
+      it('extracts a character in the astral plane', () => {
+         const mockSource = new MockSTokenSource([
+            [' ', 'space'],
+            ['x', 'multi', ['x', 'X']],
+            [' ', 'space'],
+            ['1F600', 'digit', 16],
+            [' ', 'space'],
+            [';', 'match', ';'],
+         ]);
+         const makeSToken = makeSTokenMaker();
+         charRefPToken = new CharRefPToken({
+            open: openSToken,
+            openSpace: makeSToken(' '),
+            hexMarker: makeSToken('x'),
+            hexMarkerSpace: makeSToken(' '),
+            digits: makeSToken('1F600'),
+            digitsSpace: makeSToken(' '),
+            close: makeSToken(';'),
+            charCode: 0x1F600,
          });
 
          parseCharRef(mockSource, openSToken, callback);
@@ -125,7 +152,7 @@ describe('charRef (unit)', () => {
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_INVALID_CHAR,
-            params: [ '65535' ],
+            params: ['65535'],
             position: charRefPToken.digits,
             lastPosition: undefined,
          });
@@ -244,6 +271,19 @@ describe('charRef (unit)', () => {
          expect(xToken).toEqualProps({
             type: 'CHARREF_XTOKEN',
             char: 'A',
+            pToken: charRefPToken,
+         });
+      });
+
+      it('creates an XToken from an astral plane character', () => {
+         (charRefPToken as any).hexMarker = SToken.fromString('X');
+         (charRefPToken as any).digits = SToken.fromString('1F026'); // https://codepoints.net/U+1F026
+
+         const xToken = charRefPToken.toXToken();
+
+         expect(xToken).toEqualProps({
+            type: 'CHARREF_XTOKEN',
+            char: '🀦', // This is actually two entties in the utf8 array.
             pToken: charRefPToken,
          });
       });

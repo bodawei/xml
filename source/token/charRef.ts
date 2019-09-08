@@ -9,7 +9,7 @@ const CHARREF_XTOKEN = 'CHARREF_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken?: CharRefPToken) => void;
-type PreToken = { open: SToken, [ other: string ]: any };
+type PreToken = { open: SToken, [other: string]: any };
 
 class CharRefPToken {
    public readonly type: typeof CHARREF_PTOKEN = CHARREF_PTOKEN;
@@ -131,6 +131,14 @@ function checkWellFormed(pToken: CharRefPToken, ec: ErrorCollector, entityMetaDa
    ec.check(!pToken.close, WFEID.CHARREF_NO_CLOSE);
 }
 
+// https://dmitripavlutin.com/what-every-javascript-developer-should-know-about-unicode/
+function getSurrogatePair(astralCodePoint: number) {
+   let highSurrogate =
+      Math.floor((astralCodePoint - 0x10000) / 0x400) + 0xD800;
+   let lowSurrogate = (astralCodePoint - 0x10000) % 0x400 + 0xDC00;
+   return [highSurrogate, lowSurrogate];
+}
+
 /**********************************************************************\
  pTokenToXToken
 \**********************************************************************/
@@ -147,7 +155,12 @@ function pTokenToXToken(pToken: CharRefPToken): CharRefXToken {
          charNumber = parseInt(pToken.digits.str, 10);
       }
 
-      character = String.fromCharCode(charNumber);
+      if (charNumber > 0xFFFF) {
+         const chars = getSurrogatePair(charNumber);
+         character = String.fromCharCode(chars[0]) + String.fromCharCode(chars[1]);
+      } else {
+         character = String.fromCharCode(charNumber);
+      }
    }
 
 
@@ -170,7 +183,7 @@ function sTokensFromPToken(pToken: CharRefPToken): Array<SToken> {
       pToken.digitsSpace,
       pToken.close);
 
-      return builder.sTokenArray;
+   return builder.sTokenArray;
 }
 
 /**********************************************************************\
