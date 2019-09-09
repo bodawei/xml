@@ -9,8 +9,10 @@ import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
 import { defaultExtractors } from 'extractor';
 import { ExternalId } from 'source/token/common/externalId';
 
-function processSTokenSource(sTokenSource: STokenSource, expandToken: ExpandToken, done: STokenSourceProcessed) {
+function processSTokenSource(sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken, done: STokenSourceProcessed) {
    const pTokenStream = new PTokenStream(sTokenSource);
+
+   (pTokenStream as any)._inContent = inContent;
 
    pTokenStream.on('data', (token: Token) => {
       pTokenStream.pause();

@@ -53,7 +53,7 @@ import { UnassignedType, UnassignedArray } from "source/token/common/unassigned"
 import { CharRefPToken, CHARREF_PTOKEN } from "source/token/charRef";
 import { DocTypeStartPToken } from "source/token/docTypeStart";
 import { DocTypeEndPToken } from "source/token/docTypeEnd";
-import { ELEMENT_DECLARATION_PTOKEN } from "source/token/elementDeclaration";
+import { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken } from "source/token/elementDeclaration";
 // import { isNullOrUndefined } from "util";
 import { CharDataPToken } from "source/token/charData";
 import { expectError } from "./utils";
@@ -63,8 +63,10 @@ const toSToken = SToken.fromString;
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string } = {};
 
-   function processBody(sTokenSource: STokenSource, writeToken: ExpandToken, done: () => void) {
+   function processBody(sTokenSource: STokenSource, inContent: boolean, writeToken: ExpandToken, done: () => void) {
       const pTokenStream = new PTokenStream(sTokenSource);
+
+      (pTokenStream as any)._inContent = inContent;
 
       pTokenStream.on('data', (token: PToken) => {
          pTokenStream.pause();
@@ -2360,4 +2362,77 @@ describe('EntityExpander (unit)', () => {
 
    });
 
+   describe('Bugs found when working through xmlconf', () => {
+
+      it('ibm09v04 throws a stream.push after EOF', (done) => {
+         const input = [
+            new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               params: [{
+                  name: SToken.fromString('version'),
+                  value: SToken.fromString('1.0'),
+               }],
+               close: SToken.fromString('?>'),
+            }),
+            new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('student'),
+            }),
+            new ElementDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('student'),
+               children: {
+                  open: SToken.fromString('('),
+                  names: [{
+                     particle: {
+                        name: '#PCDATA'
+                     }
+                  }],
+               },
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('RealName'),
+               value: [
+                  new TextPToken({ text: SToken.fromString('SnowMan') }),
+               ],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('FullName'),
+               value: [
+                  new TextPToken({ text: SToken.fromString('&RealName;') }),
+               ],
+            }),
+            new DocTypeEndPToken({
+               docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
+               close: SToken.fromString('>'),
+            }),
+            new ElementStartPToken({
+               open: SToken.fromString('<'),
+               name: SToken.fromString('student'),
+            }),
+            new CharDataPToken({
+               text: SToken.fromString('My Name is '),
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('FullName'),
+            }),
+            new CharDataPToken({
+               text: SToken.fromString('. '),
+            }),
+            new ElementEndPToken({
+               open: SToken.fromString('</'),
+               name: SToken.fromString('student'),
+            }),
+         ];
+
+         doExpand(false, input, (results) => {
+            console.log(JSON.stringify(results, undefined, 3));
+            done();
+         });
+      });
+
+   });
 });
