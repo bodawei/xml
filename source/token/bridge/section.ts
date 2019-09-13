@@ -3,6 +3,7 @@
 import { STokenSource, SToken } from 'sToken';
 
 import { parseCdata, CdataPToken } from '../cdata';
+import { parseConditional, ConditionalPToken } from '../conditional';
 
 type SectionStart = {
    open: SToken,
@@ -10,7 +11,7 @@ type SectionStart = {
    sectionType?: SToken,
    sectionTypeSpace?: SToken,
 };
-type DeliverSection = (section: CdataPToken) => void;
+type DeliverSection = (section: CdataPToken | ConditionalPToken) => void;
 
 /**********************************************************************\
  parseSection() parses a "section", which is either a CDATA section or
@@ -39,7 +40,11 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
    source.extractNoParams('space', (typeSpace) => {
       sectionData.sectionTypeSpace = typeSpace;
       // revisit the checkWellFormed() cases when we add conditional sections
-      parseCdata(source, sectionData, deliverSection);
+      if (sectionData.sectionType && sectionData.sectionType.str === 'IGNORE') {
+         parseConditional(source, sectionData, deliverSection);
+      } else {
+         parseCdata(source, sectionData, deliverSection);
+      }
    });
 }
 

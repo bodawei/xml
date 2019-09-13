@@ -28,6 +28,7 @@ import {
    ElementEmptyPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
+   ConditionalPToken,
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
@@ -94,6 +95,16 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls comment.toXToken()', () => {
       const pToken = new CommentPToken({ open: SToken.fromString('<!--') });
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
+   it('calls conditional.toXToken()', () => {
+      const pToken = new ConditionalPToken({ open: SToken.fromString('<[') });
       spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);

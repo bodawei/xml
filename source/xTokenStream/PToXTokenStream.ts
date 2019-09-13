@@ -14,6 +14,7 @@ import {
    CHARDATA_PTOKEN,
    CHARREF_PTOKEN,
    COMMENT_PTOKEN,
+   CONDITIONAL_PTOKEN,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
@@ -61,6 +62,7 @@ class PToXTokenStream extends Transform {
          case CHARDATA_PTOKEN:
          case CHARREF_PTOKEN:
          case COMMENT_PTOKEN:
+         case CONDITIONAL_PTOKEN:
          case DOCTYPE_END_PTOKEN:
          case DOCTYPE_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
