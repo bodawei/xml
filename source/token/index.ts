@@ -18,6 +18,7 @@ import { CdataPToken } from './cdata';
 import { CharDataPToken } from './charData';
 import { CommentPToken } from './comment';
 import { ConditionalPToken } from './conditional';
+import { ConditionalClosePToken } from './conditionalClose';
 import { ProcessingInstructionPToken } from './processingInstruction';
 import { CharRefPToken } from './charRef';
 import { TextPToken } from './text';
@@ -56,6 +57,7 @@ export * from './charData';
 export * from './charRef';
 export * from './comment';
 export * from './conditional';
+export * from './conditionalClose';
 export * from './docTypeEnd';
 export * from './docTypeStart';
 export * from './elementEnd';
@@ -78,6 +80,7 @@ type PToken =
    | CdataPToken
    | CharDataPToken
    | CharRefPToken
+   | ConditionalClosePToken
    | ConditionalPToken
    | DocTypeStartPToken
    | DocTypeEndPToken

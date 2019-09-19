@@ -29,6 +29,7 @@ describe('conditional (unit)', () => {
          bracket: fromString('['),
          ignored: [ fromString('test text') ],
          close: fromString(']]>'),
+         incomplete: false,
       });
    });
 
@@ -39,13 +40,31 @@ describe('conditional (unit)', () => {
          callback = jasmine.createSpy('callbackSpy');
       });
 
-      it('returns simple values', () => {
+      it('returns simple values if type is IGNORE', () => {
          const mockSource = new MockSTokenSource([
             [ '[', 'match', '[' ],
             [ 'test text', 'all', [ '<![', ']]>' ] ],
             [ MockSTokenSource.PEEK(']'), 'peekChar' ],
             [ ']]>', 'match', ']]>' ],
          ]);
+
+         parseConditional(mockSource, sectionStart, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toEqualRangeless(conditionalPToken);
+      });
+
+      it('returns an incomplete parsing if type is INCLUDE', () => {
+         sectionStart.sectionType = fromString('INCLUDE');
+         const mockSource = new MockSTokenSource([
+            [ '[', 'match', '[' ],
+         ]);
+         conditionalPToken = new ConditionalPToken({
+            open: fromString('<!['),
+            sectionType: fromString('INCLUDE'),
+            bracket: fromString('['),
+            incomplete: true,
+         });
 
          parseConditional(mockSource, sectionStart, callback);
          mockSource.respondInAsyncTime();

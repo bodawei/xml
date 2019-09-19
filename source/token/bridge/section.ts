@@ -40,7 +40,7 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
    source.extractNoParams('space', (typeSpace) => {
       sectionData.sectionTypeSpace = typeSpace;
       // revisit the checkWellFormed() cases when we add conditional sections
-      if (sectionData.sectionType && sectionData.sectionType.str === 'IGNORE') {
+      if (sectionData.sectionType && sectionData.sectionType.str.toLowerCase() !== 'cdata') {
          parseConditional(source, sectionData, deliverSection);
       } else {
          parseCdata(source, sectionData, deliverSection);

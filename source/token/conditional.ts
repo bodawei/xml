@@ -36,10 +36,12 @@ class ConditionalPToken {
    public readonly bracket?: SToken;
    public readonly ignored?: ReadonlyArray<SToken>;
    public readonly close?: SToken;
+   public readonly incomplete: boolean
 
    constructor(param: ConditionalPToken | SectionStart) {
       Object.assign(this, param);
       this.open = param.open;
+      this.incomplete = 'incomplete' in param && param.incomplete === true;
    }
 
    // checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
@@ -64,25 +66,30 @@ class ConditionalPToken {
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
-   [18] CDSect  ::= CDStart CData CDEnd
-   [19] CDStart ::= '<![CDATA['
-   [20] CData   ::= (Char* - (Char* ']]>' Char*))
-   [21] CDEnd   ::= ']]>'
+   @@@@
 \**********************************************************************/
 
 function parseConditional(source: STokenSource, sectionStart: SectionStart, deliverPToken: DeliverPToken) {
    const props: any = Object.assign({ ignored: [] }, sectionStart);
 
-   source.extractToObject('match', '[', props, 'bracket');
+   source.extract('match', '[', (sToken) => {
+      props.bracket = sToken;
 
-   // Loop to gather all the strings of the ignored value
-   doLoop(processExcludeChunk, { source, props, depth: 0 }, (props: any) => {
-      source.extract('match', ']]>', (sToken) => {
-         props.close = sToken;
+      if (!sectionStart.sectionType || sectionStart.sectionType.str.toLowerCase() === 'ignore') {
+         // Loop to gather all the strings of the ignored value
+         doLoop(processExcludeChunk, { source, props, depth: 0 }, (props: any) => {
+            source.extract('match', ']]>', (sToken) => {
+               props.close = sToken;
+               deliverPToken(new ConditionalPToken(props));
+            });
+         })
+      } else {
+         props.incomplete = true;
          deliverPToken(new ConditionalPToken(props));
-      });
-   })
+      }
+   });
 }
+
 
 /*
  * Extract a string or a pair of strings from the source. These strings are:

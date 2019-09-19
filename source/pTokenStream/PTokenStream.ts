@@ -23,6 +23,8 @@ import {
    parseSpace,
    ELEMENT_START_PTOKEN,
    CharDataPToken,
+   ConditionalClosePToken,
+   ConditionalPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -37,6 +39,7 @@ class PTokenStream extends Readable {
    private _parsing: boolean = false;
    private emd: EntityMetaData;
    private waitingForInternalClose: boolean = false;
+   private conditionalIncludeDepth: number = 0;
    private startDocType?: DocTypeStartPToken;
 
    constructor(metaDataOrTokenSource: STokenSource | EntityMetaData) {
@@ -142,7 +145,17 @@ class PTokenStream extends Readable {
                parseParameterEntityReference(this._sTokenSource, deliverParse);
                break;
             case ']':
-               if (this.waitingForInternalClose) {
+               if (this.conditionalIncludeDepth > 0) {
+                  this._sTokenSource.extract('peekChar', [ ']]>' ], (sToken) => {
+                     if (sToken) {
+                        const conditionalClose = new ConditionalClosePToken({ open: sToken });
+                        this.conditionalIncludeDepth--;
+                        deliverParse(conditionalClose);
+                     } else {
+                        parseCharData(this._sTokenSource, [], deliverParse);
+                     }
+                  });
+               } else if (this.waitingForInternalClose) {
                   this.waitingForInternalClose = false;
                   this._parseClose(deliverParse);
                } else {
@@ -196,12 +209,16 @@ class PTokenStream extends Readable {
                      this.waitingForInternalClose = true;
                      this.startDocType = pToken;
                   }
-
                   deliverParse(pToken);
                });
                break;
             case '<![':
-               parseSection(this._sTokenSource, markupStartSToken, deliverParse);
+               parseSection(this._sTokenSource, markupStartSToken, (section) => {
+                  if (section instanceof ConditionalPToken && section.incomplete) {
+                     this.conditionalIncludeDepth++;
+                  }
+                  deliverParse(section);
+               });
                break;
          }
       });
