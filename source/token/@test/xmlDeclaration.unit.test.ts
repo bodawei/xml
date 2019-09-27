@@ -83,7 +83,7 @@ describe('xmlDeclaration (unit)', () => {
 
    });
 
-   describe('pToken.checkWellFormed()', () => {
+   fdescribe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
       let emd: EntityMetaData;
 
@@ -149,6 +149,18 @@ describe('xmlDeclaration (unit)', () => {
             id: WellFormedError.ID.XMLDECL_NO_TARGET,
             params: undefined,
             lastPosition: xmlDeclPToken.open,
+         });
+      });
+
+      it('reports an error if xml is the wrong case', () => {
+         (xmlDeclPToken as any).target.str = 'XmL';
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_TARGET_INVALID_CASE,
+            params: [ 'XmL' ],
+            position: xmlDeclPToken.target,
          });
       });
 

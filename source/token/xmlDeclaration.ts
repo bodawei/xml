@@ -108,7 +108,12 @@ function checkWellFormed(pToken: XmlDeclarationPToken, ec: ErrorCollector, entit
    ec.check(pToken.openSpace, WFEID.XMLDECL_SPACE_AFTER_OPEN);
 
    ec.setPos(pToken.target);
-   ec.check(!pToken.target, WFEID.XMLDECL_NO_TARGET);
+
+   if (pToken.target) {
+      ec.check(pToken.target.str !== 'xml', WFEID.XMLDECL_TARGET_INVALID_CASE, [ pToken.target.str ]);
+   } else {
+      ec.report(WFEID.XMLDECL_NO_TARGET);
+   }
    checkCharWellFormed(pToken.target, ec, entityMetaData);
 
    ec.setPos(pToken.targetSpace);
