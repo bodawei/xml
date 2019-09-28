@@ -129,6 +129,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
    let foundVersion = false;
    let foundEncoding = false;
    let foundStandalone = false;
+   let prevParam;
 
    for (const param of params) {
       const nameText = strOrBlank(param.name);
@@ -141,6 +142,10 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
 
       if (PARAM_NAMES.indexOf(lcName) !== -1) {
          ec.check(nameText !== lcName, WFEID.XMLDECL_PARAM_INVALID_CASE, [ lcName, nameText ]);
+      }
+
+      if (prevParam) {
+         ec.check(!prevParam.valueSpace, WFEID.XMLDECL_NO_SPACE_BETWEEN_PARAMS, [ nameText ]);
       }
 
       switch (lcName) {
@@ -184,6 +189,8 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
          default:
             ec.report(WFEID.XMLDECL_PARAM_UNKNOWN, [ nameText ]);
       }
+
+      prevParam = param;
    }
 
    // No need to test if version was found. Either have encoding or standalone (error) or no params.

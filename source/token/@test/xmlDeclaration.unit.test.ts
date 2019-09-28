@@ -13,7 +13,7 @@ import { InstructionStart } from '../bridge/instruction';
 import literal from '../common/literal';
 import * as entityInstr from '../common/entityInstruction';
 
-describe('xmlDeclaration (unit)', () => {
+fdescribe('xmlDeclaration (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
    let start: InstructionStart;
 
@@ -83,7 +83,7 @@ describe('xmlDeclaration (unit)', () => {
 
    });
 
-   fdescribe('pToken.checkWellFormed()', () => {
+   describe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
       let emd: EntityMetaData;
 
@@ -250,6 +250,37 @@ describe('xmlDeclaration (unit)', () => {
             id: WellFormedError.ID.XMLDECL_NO_CLOSE,
             params: undefined,
             lastPosition: xmlDeclPToken.targetSpace,
+         });
+      });
+
+      it('reports an error if a there is no space between parameters', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('1.0'),
+            }, {
+               name: SToken.fromString('standalone'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('yes'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_NO_SPACE_BETWEEN_PARAMS,
+            params: [ 'standalone' ],
+            position: xmlDeclPToken.params[1].name,
          });
       });
 
