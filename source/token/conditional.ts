@@ -44,9 +44,9 @@ class ConditionalPToken {
       this.incomplete = 'incomplete' in param && param.incomplete === true;
    }
 
-   // checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-   //    checkWellFormed(this, ec, entityMetaData);
-   // }
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
+      checkWellFormed(this, ec, entityMetaData);
+   }
 
    toXToken(): ConditionalXToken {
       return pTokenToXToken(this);
@@ -137,6 +137,30 @@ function doLoop<Result, Context>(func: (data: Context, func: (context: Context, 
 
    func(context, handleIt);
 }
+
+/**********************************************************************\
+ checkWellFormed()
+\**********************************************************************/
+
+function checkWellFormed(pToken: ConditionalPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+   if (!pToken) {
+      return;
+   }
+
+   const SECTION_TYPES = [ 'INCLUDE', 'IGNORE' ];
+
+   const sectionType = strOrBlank(pToken.sectionType);
+   const ucSectionType = sectionType.toUpperCase();
+   const knownSectionType = SECTION_TYPES.indexOf(ucSectionType) !== -1;
+
+   ec.setPos(pToken.sectionType);
+   ec.check(!knownSectionType, WFEID.CONDITIONAL_UNKNOWN, [ sectionType ]);
+
+   if (knownSectionType) {
+      ec.check(sectionType !== ucSectionType, WFEID.CONDITIONAL_INVALID_CASE, [ sectionType, ucSectionType ]);
+   }
+}
+
 
 /**********************************************************************\
  pTokenToXToken() converts a PToken into an XToken.

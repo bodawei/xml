@@ -74,4 +74,40 @@ describe('conditional (unit)', () => {
 
    });
 
+   describe('checkWellFormed()', () => {
+      let mockErrorCollector: MockErrorCollector;
+      let emd: EntityMetaData;
+
+      beforeEach(() => {
+         mockErrorCollector = new MockErrorCollector();
+         emd = new EntityMetaData();
+      });
+
+      it('reports an error if an unknown type is provided', () => {
+         (conditionalPToken.sectionType as any) = fromString('bogus'); // typehack
+
+         conditionalPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.CONDITIONAL_UNKNOWN,
+            params: [ 'bogus' ],
+            position: conditionalPToken.sectionType,
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports an error if a type is the wrong case', () => {
+         (conditionalPToken.sectionType as any) = fromString('ignore'); // typehack
+
+         conditionalPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.CONDITIONAL_INVALID_CASE,
+            params: [ 'ignore', 'IGNORE' ],
+            position: conditionalPToken.sectionType,
+            lastPosition: undefined,
+         });
+      });
+
+   });
 });
