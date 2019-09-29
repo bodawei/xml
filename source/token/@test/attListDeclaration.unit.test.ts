@@ -1516,7 +1516,7 @@ describe('attListDeclaration (unit)', () => {
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ENUMERATION,
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ATTTYPE,
             params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName!.str ],
             lastPosition: aldPToken.attDefs[0].postNameSpace,
          });

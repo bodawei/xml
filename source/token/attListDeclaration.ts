@@ -435,7 +435,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
 
       if (upperAttType === '') {
          if (!attDef.enumeration) {
-            ec.report(WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION, [ attName, elNameText ]);
+            ec.report(WFEID.ATTLISTDECL_ATTR_NO_ATTTYPE, [ attName, elNameText ]);
          } else {
             attDef.enumeration.checkWellFormed(ec, entityMetaData);
             ec.check(!attDef.enumeration.closeSpace, WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE, [ attName, elNameText ]);
