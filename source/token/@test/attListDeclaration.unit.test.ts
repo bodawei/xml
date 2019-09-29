@@ -1296,6 +1296,19 @@ describe('attListDeclaration (unit)', () => {
       //    expect(declaration.checkWellFormed).toHaveBeenCalledWith(aldPToken, mockErrorCollector, emd);
       // });
 
+      it('reports an error if the declaration type is not all caps', () => {
+         aldPToken.declType = SToken.fromString('attlist');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_DECLTYPE_INVALID,
+            params: [ 'attlist' ],
+            position: aldPToken.declType,
+            lastPosition: undefined,
+         });
+      });
+
       it('reports an error if there is no element name', () => {
          delete aldPToken.elementName;
 

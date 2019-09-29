@@ -189,10 +189,18 @@ function parseDefaultType(source: STokenSource, pToken: AttListPToken, attDef: A
       source.extractNoParams('peekChar', (charToken: SToken|void) => {
          if (charToken && charToken.str === '#') {
             source.extractToObject('word', [ '>', '%', '"', '\'' ], attDef, 'defaultType');
-            source.extractToObjectNoParams('space', attDef, 'postDefaultTypeSpace');
-         }
+            source.extractNoParams('space', (sToken) => {
+               attDef.postDefaultTypeSpace = sToken;
 
-         parseAttValue(source, pToken, attDef, done);
+               if (attDef.defaultType && attDef.defaultType.str.toLowerCase() === '#fixed') {
+                  parseAttValue(source, pToken, attDef, done);
+               } else {
+                  done(pToken);
+               }
+            });
+         } else {
+            parseAttValue(source, pToken, attDef, done);
+         }
       });
    });
 
@@ -375,6 +383,10 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
    // When you rework this, make sure you're doing all the text checking correctly.
 
    // declaration.checkWellFormed(pToken, ec, entityMetaData);
+   const declType = strOrBlank(pToken.declType);
+
+   ec.setPos(pToken.declType);
+   ec.check(declType !== 'ATTLIST', WFEID.ATTLISTDECL_DECLTYPE_INVALID, [ declType ]);
 
    const elNameText = strOrBlank(pToken.elementName);
 
@@ -469,12 +481,12 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
          ec.check(!attDef.openQuote, upperDefType === ''
             ? WFEID.ATTLISTDECL_ATTR_NO_VALUE
             : WFEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ attName, elNameText ]);
+       // @@@ need to check and complain if any entity refs are to external entities (general or parameter)
+       literal.checkWellFormed(attDef, ec, entityMetaData, WFEID.NOUN_ATTRIBUTE);
       } else {
+         // wtf?
          ec.check(attDef.openQuote, WFEID.ATTLISTDECL_ATTR_EXTRA_VALUE, [ attName, elNameText ]);
       }
-
-      // @@@ need to check and complain if any entity refs are to external entities (general or parameter)
-      literal.checkWellFormed(attDef, ec, entityMetaData, WFEID.NOUN_ATTRIBUTE);
    }
 
    ec.setPos(pToken.close);

@@ -13,7 +13,7 @@ import { InstructionStart } from '../bridge/instruction';
 import literal from '../common/literal';
 import * as entityInstr from '../common/entityInstruction';
 
-fdescribe('xmlDeclaration (unit)', () => {
+describe('xmlDeclaration (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
    let start: InstructionStart;
 
