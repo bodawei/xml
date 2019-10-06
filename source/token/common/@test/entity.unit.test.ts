@@ -4,19 +4,19 @@
 import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
+import { makeSTokenMaker, STokenMaker } from 'sToken-test';
 import { WellFormedError, XmlWarning } from 'error';
 
 import declaration from '../../bridge/baseDeclaration';
-import { GeneralEntityDeclarationPToken, GeneralEntityDeclarationXToken } from '../../generalEntityDeclaration';
-import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from '../../parameterEntityDeclaration';
+import { GeneralEntityDeclarationPToken } from '../../generalEntityDeclaration';
+import { ParameterEntityDeclarationPToken } from '../../parameterEntityDeclaration';
 import unassigned from '../unassigned';
 import externalId from '../externalId';
 import misc from '../misc';
 import literal from '../literal';
 import { assignUnassigned, checkWellFormed } from '../entity';
 
-describe('entityDeclaration (unit)', () => {
+describe('entity (unit)', () => {
    let genEntityDeclarationPToken: GeneralEntityDeclarationPToken;
    let paramGeneralEntityDeclarationPToken: ParameterEntityDeclarationPToken;
 
@@ -458,7 +458,7 @@ describe('entityDeclaration (unit)', () => {
             id: WellFormedError.ID.ENTITYDECL_NO_NAME,
             params: undefined,
             position: undefined,
-            lastPosition: undefined,   // normally would be the space after ENTITY, but it is mocked out
+            lastPosition: pToken.declType,
          });
       });
 

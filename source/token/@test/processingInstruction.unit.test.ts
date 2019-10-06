@@ -81,10 +81,11 @@ describe('processingInstruction (unit)', () => {
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
 
-      it('calls misc.checkCharWellFormed() on the target', () => {
+      it('calls misc.checkName() on the target', () => {
+         spyOn(misc, 'checkName');
          piPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd);
+         expect(misc.checkName).toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd, WellFormedError.ID.PI_TARGET_NAME_INVALID);
       });
 
       it('calls misc.checkCharWellFormed() on the instruction data', () => {

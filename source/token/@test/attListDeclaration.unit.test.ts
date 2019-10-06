@@ -31,6 +31,7 @@ describe('attListDeclaration (unit)', () => {
       const makeSToken = makeSTokenMaker();
       aldPToken = new attListDeclaration.PToken({
          open: toSToken('<!'),
+         declType: toSToken('ATTLIST'),
          elementName: makeSToken('elementName'),
          postElementNameSpace: makeSToken(' '),
          attDefs: [ {
@@ -43,7 +44,7 @@ describe('attListDeclaration (unit)', () => {
             value: [],
          } ],
          close: makeSToken('>'),
-      });
+      })
    });
 
    describe('AttListXToken()', () => {
@@ -109,7 +110,8 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs = [];
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -151,7 +153,8 @@ describe('attListDeclaration (unit)', () => {
          const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -167,11 +170,13 @@ describe('attListDeclaration (unit)', () => {
             [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('a'),
+            [ undefined, 'space' ],
             [ 'att2', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
             [ 'ID', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('>'),
+            [ undefined, 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ '>', 'match', '>' ],
          ]);
@@ -186,7 +191,8 @@ describe('attListDeclaration (unit)', () => {
          });
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -209,6 +215,7 @@ describe('attListDeclaration (unit)', () => {
             [ 'ID', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('a'),
+            [ undefined, 'space' ],
             [ 'att3', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
             [ 'IDREF', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
@@ -237,7 +244,8 @@ describe('attListDeclaration (unit)', () => {
          });
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -263,9 +271,9 @@ describe('attListDeclaration (unit)', () => {
          ]);
          const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
          aldPToken.close = makeSToken('>');
-         aldPToken.attDefs[0].value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -284,6 +292,7 @@ describe('attListDeclaration (unit)', () => {
             [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('"'),
+            [ undefined, 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ '>', 'match', '>' ],
          ]);
@@ -293,7 +302,8 @@ describe('attListDeclaration (unit)', () => {
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
          aldPToken.attDefs[0].value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -363,6 +373,7 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             // wordList parsing
             MockSTokenSource.PEEK('"'),
+            [ undefined, 'space'],
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
@@ -380,7 +391,8 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -396,6 +408,7 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             // namelist parsing
             MockSTokenSource.PEEK('"'),
+            [ undefined, 'space'],
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
@@ -423,6 +436,7 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             // wordList parsing
             MockSTokenSource.PEEK('"'),
+            [ undefined, 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
@@ -440,7 +454,8 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -456,6 +471,7 @@ describe('attListDeclaration (unit)', () => {
             MockSTokenSource.PEEK('('),
             // wordList parsing
             MockSTokenSource.PEEK('"'),
+            [ undefined, 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
@@ -471,7 +487,8 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -486,6 +503,7 @@ describe('attListDeclaration (unit)', () => {
             [ undefined, 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             MockSTokenSource.PEEK('('),
             MockSTokenSource.PEEK('"'),
+            [ undefined, 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
@@ -494,7 +512,8 @@ describe('attListDeclaration (unit)', () => {
             done();
          });
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          const expectedArgs = parseSpy.calls.argsFor(0);
@@ -512,6 +531,7 @@ describe('attListDeclaration (unit)', () => {
             [ undefined, 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             MockSTokenSource.PEEK('"'),
             MockSTokenSource.PEEK('"'),
+            [ undefined, 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
@@ -527,7 +547,8 @@ describe('attListDeclaration (unit)', () => {
          } ];
          delete aldPToken.close;
 
-         attListDeclaration.parse(mockSource, { open: SToken.fromString('<!') }, callback);
+         attListDeclaration.parse(mockSource,
+            { open: SToken.fromString('<!'), declType: toSToken('ATTLIST'), }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -1318,7 +1339,7 @@ describe('attListDeclaration (unit)', () => {
             id: WellFormedError.ID.ATTLISTDECL_NO_ELEMENT_NAME,
             params: undefined,
             position: undefined,
-            lastPosition: undefined,   // space after ATTLIST was mocked out
+            lastPosition: aldPToken.declType,
          });
       });
 
@@ -1694,6 +1715,7 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('calls literal.checkWellFormed() with the attribute data', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(literal.checkWellFormed)

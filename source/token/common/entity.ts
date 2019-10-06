@@ -132,7 +132,11 @@ function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntit
 
    const enNameText = strOrBlank(pToken.name);
 
-//   declaration.checkWellFormed((pToken as any), ec, entityMetaData); // TypeHack
+   //   declaration.checkWellFormed((pToken as any), ec, entityMetaData); // TypeHack
+   const declType = strOrBlank(pToken.declType);
+
+   ec.setPos(pToken.declType);
+   ec.check(declType !== 'ENTITY', WFEID.ENTITYDECL_DECLTYPE_INVALID, [ declType ]);
 
    ec.setPos(pToken.parameter);
    if (pToken.parameter) {
@@ -152,6 +156,9 @@ function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntit
       externalId.checkWellFormed(pToken.externalId, ec, entityMetaData);
 
       if (pToken instanceof GeneralEntityDeclarationPToken && pToken.nData) {
+         ec.setPos(pToken.externalIdSpace);
+         ec.check(!pToken.externalIdSpace, WFEID.ENTITYDECL_EXTERNALID_NO_SPACE, [ enNameText ]);
+
          ec.setPos(pToken.nData);
          ec.check(pToken.nData.str !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
             [ enNameText, pToken.nData.str ]);

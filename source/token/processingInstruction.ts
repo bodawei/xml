@@ -5,6 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import {
+   checkName,
    checkCharWellFormed,
    checkWellFormedNameRecommendation,
 } from './common/misc';
@@ -108,7 +109,7 @@ function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector
 
    ec.setPos(pToken.target);
    ec.check(!pToken.target, WFEID.PI_NO_TARGET);
-   checkCharWellFormed(pToken.target, ec, entityMetaData);
+   checkName(pToken.target, ec, entityMetaData, WFEID.PI_TARGET_NAME_INVALID);
    ec.check(hasXml, WFEID.PI_TARGET_HAS_XML, [ targetName ]);
    checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData, 'PI',
       XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);

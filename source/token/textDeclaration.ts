@@ -93,8 +93,15 @@ function checkWellFormed(pToken: TextDeclarationPToken, ec: ErrorCollector, enti
    ec.check(pToken.openSpace, WFEID.TEXTDECL_SPACE_AFTER_OPEN);
 
    ec.setPos(pToken.target);
-   ec.check(!pToken.target, WFEID.TEXTDECL_NO_TARGET);
    checkCharWellFormed(pToken.target, ec, entityMetaData);
+
+   if (pToken.target) {
+      const target = strOrBlank(pToken.target);
+      const lcTarget = target.toLowerCase();
+      ec.check(target !== lcTarget, WFEID.TEXTDECL_TARGET_INVALID_CASE, [ pToken.target.str ]);
+   } else {
+      ec.report(WFEID.TEXTDECL_NO_TARGET);
+   }
 
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);

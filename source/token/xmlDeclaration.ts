@@ -108,13 +108,14 @@ function checkWellFormed(pToken: XmlDeclarationPToken, ec: ErrorCollector, entit
    ec.check(pToken.openSpace, WFEID.XMLDECL_SPACE_AFTER_OPEN);
 
    ec.setPos(pToken.target);
-
+   checkCharWellFormed(pToken.target, ec, entityMetaData);
    if (pToken.target) {
-      ec.check(pToken.target.str !== 'xml', WFEID.XMLDECL_TARGET_INVALID_CASE, [ pToken.target.str ]);
+      const target = strOrBlank(pToken.target);
+      const lcTarget = target.toLowerCase();
+      ec.check(target !== lcTarget, WFEID.XMLDECL_TARGET_INVALID_CASE, [ pToken.target.str ]);
    } else {
       ec.report(WFEID.XMLDECL_NO_TARGET);
    }
-   checkCharWellFormed(pToken.target, ec, entityMetaData);
 
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.XMLDECL_NO_SPACE_AFTER_TARGET);
@@ -167,6 +168,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
 
             ec.setPos(param.nameSpace);
             ec.setPos(param.equal);
+            ec.check(!param.equal, WFEID.XMLDECL_ENCODING_NO_EQUAL);
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);

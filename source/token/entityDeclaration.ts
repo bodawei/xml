@@ -146,7 +146,12 @@ function parseExternalId(source: STokenSource, pToken: GeneralEntityDeclarationP
          }
 
          source.extractToObjectNoParams('space', pToken, 'externalIdSpace');
-         parseNData(source, pToken, done);
+
+         if (!pToken.parameter) {
+            parseNData(source, pToken, done);
+         } else {
+            done();
+         }
       });
    });
 

@@ -66,6 +66,7 @@ describe('textDeclaration (integration)', () => {
 
             result.checkWellFormed(ec, emd);
 
+            console.log(ec.getErrors());
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
          });

@@ -1,20 +1,14 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from 'basic';
-import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
-import { WellFormedError, XmlWarning } from 'error';
+import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
-import declaration from '../bridge/baseDeclaration';
 import { parseEntityDeclaration } from '../entityDeclaration';
-import { GeneralEntityDeclarationPToken, GeneralEntityDeclarationXToken } from '../generalEntityDeclaration';
-import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from '../parameterEntityDeclaration';
+import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
+import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
 import unassigned from '../common/unassigned';
-import { UnassignedArray } from '../common/unassigned';
 import externalId from '../common/externalId';
-import misc from '../common/misc';
 import literal from '../common/literal';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
@@ -147,7 +141,6 @@ describe('entityDeclaration (unit)', () => {
             [ undefined, 'match', ';' ],
             // externalId or literal would have been here
             [ undefined, 'space' ],
-            [ undefined, 'peekWord', [ '>' ] ],
             [ '>', 'match', '>' ],
          ]);
 
@@ -169,7 +162,6 @@ describe('entityDeclaration (unit)', () => {
             [ undefined, 'match', ';' ],
             // externalId or literal would have been here
             [ undefined, 'space' ],
-            [ undefined, 'peekWord', [ '>' ] ],
             [ '>', 'match', '>' ],
          ]);
 

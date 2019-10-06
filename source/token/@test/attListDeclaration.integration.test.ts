@@ -251,7 +251,7 @@ describe('attListDeclaration (integration)', () => {
                      close:  makeSToken(';'),
                   }),
                } ],
-               nextPropName: 'attValue',
+               nextPropName: 'name',
                close: makeSToken1('>'),
             }));
             done();
