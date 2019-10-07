@@ -146,10 +146,10 @@ class PTokenStream extends Readable {
                break;
             case ']':
                if (this.conditionalIncludeDepth > 0) {
-                  this._sTokenSource.extract('peekChar', [ ']]>' ], (sToken) => {
+                  this._sTokenSource.extract('match', ']]>', (sToken) => {
                      if (sToken) {
-                        const conditionalClose = new ConditionalClosePToken({ open: sToken });
                         this.conditionalIncludeDepth--;
+                        const conditionalClose = new ConditionalClosePToken({ open: sToken });
                         deliverParse(conditionalClose);
                      } else {
                         parseCharData(this._sTokenSource, [], deliverParse);
@@ -159,11 +159,24 @@ class PTokenStream extends Readable {
                   this.waitingForInternalClose = false;
                   this._parseClose(deliverParse);
                } else {
-                  parseCharData(this._sTokenSource, [], (charPToken) => {
-                     // We were looking for ]]> But I don't understand why. Indeed this
-                     // whole section needs some documentation
-                     deliverParse(charPToken);
+                  this._sTokenSource.extract('match', ']]>', (sToken) => {
+                     // Our trouble is if we are matching ]]> we'll never continue.  So, we
+                     if (sToken) {
+                        deliverParse(new CharDataPToken({ text: sToken }));
+                     } else {
+                        this._sTokenSource.extractNoParams('char', (sToken) => {
+                           // Our trouble is if we are matching ]]> we'll never continue.  So, we
+                           if (sToken) {
+                              deliverParse(new CharDataPToken({ text: sToken }));
+                           }
+                        });
+                     }
                   });
+                  // parseCharData(this._sTokenSource, [], (charPToken) => {
+                  //    // We were looking for ]]> But I don't understand why. Indeed this
+                  //    // whole section needs some documentation
+                  //    deliverParse(charPToken);
+                  // });
                }
                break;
             default:

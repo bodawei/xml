@@ -1077,7 +1077,8 @@ class EntityExpander {
       const inContent = entityDecl.type === 'GENERAL_ENTITY_DECLARATION_PTOKEN';
 
       if (entityDecl.externalId) {
-         const sTokenSource = this.processors.retrieveExternalEntity(entityDecl.externalId, this.emd);
+         const externalEntity = new EntityMetaData(EntityKind.EXTERNAL, this.emd.version, this.emd.revision, this.emd.location);
+         const sTokenSource = this.processors.retrieveExternalEntity(entityDecl.externalId, externalEntity);
          this.processors.processBody(sTokenSource, inContent, expandToken, entityProcessed);
          return;
       }

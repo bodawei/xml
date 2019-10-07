@@ -432,7 +432,7 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
             checkListWellFormed(entry.particle, ec, entityMetaData);
          } else {
             ec.setPos(undefined);
-            ec.check(!entry.particle, WFEID.NAMELIST_NO_NAME, [ index.toString() ]);
+            ec.check(!entry.particle || !entry.particle.name, WFEID.NAMELIST_NO_NAME, [ index.toString() ]);
          }
       }
 
@@ -443,8 +443,10 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
             delimType = entry.delimiter.str === ',' ? 'SEQUENCE' : 'CHOICE';
          }
 
-         if (delimType === 'SEQUENCE' && entry.delimiter.str !== ',') {
-            ec.report(WFEID.NAMELIST_BAD_SEQUENCE, [ index.toString(), entry.delimiter.str]);
+         if (delimType === 'SEQUENCE') {
+            if (entry.delimiter.str !== ',') {
+               ec.report(WFEID.NAMELIST_BAD_SEQUENCE, [ index.toString(), entry.delimiter.str]);
+            }
          } else if (entry.delimiter.str !== '|') {
             ec.report(WFEID.NAMELIST_BAD_CHOICE, [ index.toString(), entry.delimiter.str]);
          }

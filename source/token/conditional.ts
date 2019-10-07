@@ -159,6 +159,16 @@ function checkWellFormed(pToken: ConditionalPToken | void, ec: ErrorCollector, e
    if (knownSectionType) {
       ec.check(sectionType !== ucSectionType, WFEID.CONDITIONAL_INVALID_CASE, [ sectionType, ucSectionType ]);
    }
+
+   ec.setPos(pToken.bracket);
+   ec.check(!pToken.bracket, WFEID.CONDITIONAL_NO_SECOND_BRACKET);
+
+   if (pToken.incomplete) {
+      return;
+   }
+
+   ec.setPos(pToken.close);
+   ec.check(!pToken.close, WFEID.CONDITIONAL_NO_CLOSE);
 }
 
 

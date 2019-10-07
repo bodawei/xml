@@ -87,6 +87,7 @@ class PToXTokenStream extends Transform {
          case EXTERNAL_SUBSET_START_TOKEN:
          case EXTERNAL_SUBSET_END_TOKEN:
          case ENTITY_META_DATA:
+         case 'ERROR_TYPE':
             this.push(pToken);
             break;
          default:

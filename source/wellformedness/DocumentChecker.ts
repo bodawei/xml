@@ -57,6 +57,7 @@ const transitionsByState: StateTable = {
       [ELEMENT_EMPTY_PTOKEN]: State.ELEMENT,
    },
    [State.PROLOG_IN_DOCTYPE]: {
+      [SPACE_PTOKEN]: NO_CHANGE, // @@@ TEST
       [INTERNAL_SUBSET_START_TOKEN]: State.PROLOG_DTD,
       [EXTERNAL_SUBSET_START_TOKEN]: State.PROLOG_DTD,
       [DOCTYPE_END_PTOKEN]: State.PROLOG_TRAILING_MISC,

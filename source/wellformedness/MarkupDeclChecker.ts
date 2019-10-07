@@ -3,6 +3,8 @@
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import {
+   CONDITIONAL_PTOKEN,
+   CONDITIONAL_CLOSE_PTOKEN,
    COMMENT_PTOKEN,
    EXTERNAL_SUBSET_END_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
@@ -71,6 +73,7 @@ const transitionsByState: StateTable = {
       // conditional section will be here
    },
    [States.PARAM_START_EXTERNAL_SUBSET]: { // §2.8.0 [30]
+      [CONDITIONAL_PTOKEN]: States.EXTERNAL_SUBSET,
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [attListDecl.PTYPE]: States.EXTERNAL_SUBSET,
@@ -100,6 +103,8 @@ const transitionsByState: StateTable = {
       // PARAMETER_ENTITY_END_PTOKEN will need special handling
    },
    [States.EXTERNAL_SUBSET]: { // §2.8.0 [30], [31]
+      [CONDITIONAL_PTOKEN]: NO_CHANGE,
+      [CONDITIONAL_CLOSE_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [attListDecl.PTYPE]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,

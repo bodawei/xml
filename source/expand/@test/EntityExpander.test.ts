@@ -305,10 +305,11 @@ describe('EntityExpander (unit)', () => {
             expect((results[2] as any).attDefs[0].value).toEqual([
                new TextPToken({ text: SToken.fromString('foo') }),
                new GeneralEntityStartPToken(refToGe),
-               new TextPToken({ text: SToken.fromString('ge') }),
-               new ParameterEntityStartPToken(refToPe),
-               new TextPToken({ text: SToken.fromString('pe') }),
-               new ParameterEntityEndPToken(refToPe),
+               new CharDataPToken({ text: new SToken('gepe', 'gepe', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)) }),
+               // new TextPToken({ text: SToken.fromString('ge') }),
+               // new ParameterEntityStartPToken(refToPe),
+               // new TextPToken({ text: SToken.fromString('pe') }),
+               // new ParameterEntityEndPToken(refToPe),
                new GeneralEntityEndPToken(refToGe),
             ]);
             done();
@@ -1081,10 +1082,11 @@ describe('EntityExpander (unit)', () => {
             expect((results[2] as any).attributes[0].value).toEqual([
                new TextPToken({ text: SToken.fromString('foo') }),
                new GeneralEntityStartPToken(refToGe),
-               new TextPToken({ text: SToken.fromString('ge') }),
-               new ParameterEntityStartPToken(refToPe),
-               new TextPToken({ text: SToken.fromString('pe') }),
-               new ParameterEntityEndPToken(refToPe),
+               new CharDataPToken({ text: new SToken('gepe', 'gepe', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)) }),
+               // new TextPToken({ text: SToken.fromString('ge') }),
+               // new ParameterEntityStartPToken(refToPe),
+               // new TextPToken({ text: SToken.fromString('pe') }),
+               // new ParameterEntityEndPToken(refToPe),
                new GeneralEntityEndPToken(refToGe),
             ]);
             done();
@@ -1110,7 +1112,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             const attrValue = (results[0] as any).attributes[0].value;
-            console.log(JSON.stringify(attrValue, undefined, 5));
+            // console.log(JSON.stringify(attrValue, undefined, 5));
             expect(attrValue.length).toEqual(3);
             expect(attrValue[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
             expect(attrValue[1]).toEqualRangeless(new CharRefPToken({
@@ -2429,7 +2431,7 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(false, input, (results) => {
-            console.log(JSON.stringify(results, undefined, 3));
+            // console.log(JSON.stringify(results, undefined, 3));
             done();
          });
       });

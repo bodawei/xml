@@ -114,7 +114,8 @@ function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityM
       if (isTextPToken(item)) {
          ec.setPos(item.text);
          misc.checkCharWellFormed(item.text, ec, entityMetaData);
-      } else if (!(item instanceof GeneralEntityStartPToken || item instanceof GeneralEntityEndPToken)) {
+      } else if (!(item instanceof GeneralEntityStartPToken || item instanceof GeneralEntityEndPToken ||
+         item instanceof ParameterEntityStartPToken || item instanceof ParameterEntityEndPToken)) {
          item.checkWellFormed(ec, entityMetaData);
       }
    }

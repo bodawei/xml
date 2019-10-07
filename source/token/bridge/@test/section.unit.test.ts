@@ -5,6 +5,7 @@ import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as cdata from '../../cdata';
+import * as conditional from '../../conditional';
 import { SectionStart, parseSection } from '../section';
 
 describe('section (unit)', () => {
@@ -26,6 +27,9 @@ describe('section (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          spyOn(cdata, 'parseCdata').and.callFake((_1: any, start: any, cb: (x: any) => void) => {
+            cb(start);
+         });
+         spyOn(conditional, 'parseConditional').and.callFake((_1: any, start: any, cb: (x: any) => void) => {
             cb(start);
          });
       });

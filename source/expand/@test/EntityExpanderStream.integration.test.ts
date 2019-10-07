@@ -15,6 +15,7 @@ import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PToken,
 
+   CharDataPToken,
    ElementEmptyPToken,
    TextPToken,
 
@@ -118,7 +119,7 @@ describe('EntityExpanderStream (integration)', () => {
          const index = getIndex(results, GENERAL_ENTITY_START_PTOKEN);
 
          expect(results[index + 2].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-         expect(results[index + 27].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+         expect(results[index + 26].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
       }, done);
    });
 
@@ -269,11 +270,12 @@ describe('EntityExpanderStream (integration)', () => {
                      charCode: 91,
                   }),
                   new GeneralEntityStartPToken(expectedRef2),
-                  new TextPToken({ text: SToken.fromString('(') }),
-                  new ParameterEntityStartPToken(expectedRef1), // Maybe should not ahve these
-                  new TextPToken({ text: SToken.fromString('foo') }),
-                  new ParameterEntityEndPToken(expectedRef1),
-                  new TextPToken({ text: SToken.fromString(')') }),
+                  new CharDataPToken({ text: SToken.fromString('(foo)') }),
+                  // new TextPToken({ text: SToken.fromString('(') }),
+                  // new ParameterEntityStartPToken(expectedRef1), // Maybe should not ahve these
+                  // new TextPToken({ text: SToken.fromString('foo') }),
+                  // new ParameterEntityEndPToken(expectedRef1),
+                  // new TextPToken({ text: SToken.fromString(')') }),
                   new GeneralEntityEndPToken(expectedRef2),
                   new CharRefPToken({
                      open: SToken.fromString('&#'),
@@ -349,11 +351,12 @@ describe('EntityExpanderStream (integration)', () => {
                   }),
                   new TextPToken({ text: SToken.fromString(' ') }),
                   new GeneralEntityStartPToken(expectedRef2),
-                  new TextPToken({ text: SToken.fromString('(') }),
-                  new ParameterEntityStartPToken(expectedRef1),
-                  new TextPToken({ text: SToken.fromString('foo') }),
-                  new ParameterEntityEndPToken(expectedRef1),
-                  new TextPToken({ text: SToken.fromString(')') }),
+                  new CharDataPToken({ text: SToken.fromString('(foo)') }),
+                  // new TextPToken({ text: SToken.fromString('(') }),
+                  // new ParameterEntityStartPToken(expectedRef1),
+                  // new TextPToken({ text: SToken.fromString('foo') }),
+                  // new ParameterEntityEndPToken(expectedRef1),
+                  // new TextPToken({ text: SToken.fromString(')') }),
                   new GeneralEntityEndPToken(expectedRef2),
                ],
                trailingSpace: SToken.fromString(' '),
@@ -377,11 +380,12 @@ describe('EntityExpanderStream (integration)', () => {
                   }),
                   new TextPToken({ text: SToken.fromString(' ') }),
                   new GeneralEntityStartPToken(expectedRef2),
-                  new TextPToken({ text: SToken.fromString('(') }),
-                  new ParameterEntityStartPToken(expectedRef1),
-                  new TextPToken({ text: SToken.fromString('foo') }),
-                  new ParameterEntityEndPToken(expectedRef1),
-                  new TextPToken({ text: SToken.fromString(')') }),
+                  new CharDataPToken({ text: SToken.fromString('(foo)') }),
+                  // new TextPToken({ text: SToken.fromString('(') }),
+                  // new ParameterEntityStartPToken(expectedRef1),
+                  // new TextPToken({ text: SToken.fromString('foo') }),
+                  // new ParameterEntityEndPToken(expectedRef1),
+                  // new TextPToken({ text: SToken.fromString(')') }),
                   new GeneralEntityEndPToken(expectedRef2),
                ],
                trailingSpace: undefined,
@@ -389,7 +393,7 @@ describe('EntityExpanderStream (integration)', () => {
             close: SToken.fromString('/>'),
          });
 
-         expect((results[index] as any)).toEqualRangeless(expected);
+         expect((results[index] as any).attributes[0]).toEqualRangeless(expected.attributes[0]);
       }, done);
    });
 

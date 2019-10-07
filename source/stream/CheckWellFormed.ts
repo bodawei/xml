@@ -3,6 +3,7 @@
 import { Transform } from 'stream';
 
 import { ErrorCollector, WellFormedError, } from 'error';
+import { SToken, } from 'sToken';
 import { getFirstSToken, PToken, } from 'token';
 import { ContentChecker, DocumentChecker, MarkupDeclChecker } from 'wellformedness';
 
@@ -68,6 +69,19 @@ class CheckWellFormed extends Transform {
       }
 
       this.push(pToken);
+      done();
+   }
+
+   _final(done: () => void) {
+      const errorCollector = new ErrorCollector(SToken.fromString(''), WellFormedError);
+      this.checker.finish(errorCollector);
+
+      const errors = errorCollector.getErrors();
+
+      for (let error of errors) {
+         this.push(error);
+      }
+
       done();
    }
 }

@@ -245,17 +245,18 @@ function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, enti
          let sToken
 
          // we are so confused
-         if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
-            sToken = (pTokenPart.public.value[0] as any).text; //typeHack
-         } else {
-            sToken = (pTokenPart.public.value[0] as any).str;
-         }
+         if (pTokenPart.public.value.length > 0) {
+            if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
+               sToken = (pTokenPart.public.value[0] as any).text; //typeHack
+            } else {
+               sToken = (pTokenPart.public.value[0] as any).str;
+            }
 
+            const match = PUBID_CHARS.exec(sToken.str);
 
-         const match = PUBID_CHARS.exec(sToken.str);
-
-         ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-            [ sToken.str[match![0].length] ]);
+            ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+               [ sToken.str[match![0].length] ]);
+            }
       });
    }
 
