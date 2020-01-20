@@ -245,6 +245,8 @@ Spec is a little inconsistent about these:
 
 - §4.3.2 says that "A consequence of well-formedness in entities is that the logical and physical structures in an XML document are properly nested; no start-tag, end-tag... can begin in one entity and end in another".  The syntax productions in [39] and [43] certainly suggest that any start tag must also be balanced with an end tag in the same entity. This assumes that is so, even though the wording does not say that.
 
+- §4.2.2 says that a NDATA name must be declared.  It doesn't specify when that validity constraint is checked. One might expect either at declaration time (like param entity references) or at reference time. However, ibm tests valid/P54/ibm54v01 and invalid/P76/ibm76i01 contradict those.  This assume that this is done at end of DTD. 
+
 ## Parameter Entities
 - Can appear in an entity value literal
 - Can't appear in any other literal

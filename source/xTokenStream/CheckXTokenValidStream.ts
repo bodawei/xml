@@ -53,7 +53,6 @@ import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
-import EntityManager from '../expand/EntityManager';
 import { UnassignedType } from 'source/token/common/unassigned';
 
 type XToken = {
@@ -149,7 +148,6 @@ function getAttributeValueText(attribute: any): string {
 }
 
 class CheckXTokenValidStream extends Transform {
-   private entityManager: EntityManager;
    private paramEntitiesSeen: { [name: string]: any } = {}; // ick
    private generalEntitiesSeen: { [name: string]: any } = {};
    private entityInfo: EntityInfoMap = {};
@@ -169,12 +167,11 @@ class CheckXTokenValidStream extends Transform {
    private internalEntityDepth: number = 0;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(entityManager: EntityManager) {
+   constructor() {
       super({
          objectMode: true,
       });
 
-      this.entityManager = entityManager;
       this.docType = undefined;
       this.notations = {};
       this.attrDefsByElementName = {};
@@ -1281,6 +1278,20 @@ class CheckXTokenValidStream extends Transform {
             }
          });
       });
+
+      Object.values(this.generalEntitiesSeen).forEach((genEntity: GeneralEntityDeclarationXToken) => {
+         if (genEntity.notationDataName) {
+            const pTokenOpen = genEntity.pToken ? genEntity.pToken.open : undefined;
+            const nDataName = genEntity.notationDataName;
+  
+            // §4.2.2: Validity Constraint: Notation Declared
+            // The Name must match the declared name of a notation.
+            if (!this.notations[nDataName]) {
+               this.pushValidityError(ValidityError.ID.ENTITYDECL_UNDECLARED_NOTATION,
+                  [genEntity.name, nDataName], pTokenOpen);
+            }
+         }
+      });
    }
 
    private validateDocumentEnd() {
@@ -1470,8 +1481,6 @@ class CheckXTokenValidStream extends Transform {
                // (Also §4.4 row three of table, and mentioned in §4.1.0 Well-formedness constraint: Parsed Entity)
                for (let index = 0; index < names.length; index++) {
                   const token = this.generalEntitiesSeen[names[index]];
-                  // const token = this.entityManager.getEntityToken(names[index])
-
                   if (!token) {
                      undeclared.push(names[index]);
                   } else if (!token.notationDataName) {

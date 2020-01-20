@@ -41,7 +41,7 @@ describe('CheckXTokenValidStream (integration)', () => {
       const tokenizer = new PToXTokenStream();
 
       parser = new PTokenStream(new EntityMetaData());
-      validator = new CheckXTokenValidStream(entityManager);
+      validator = new CheckXTokenValidStream();
       replacer = new EntityExpandingStream(entityManager);
       (parser as any).pipe(tokenizer).pipe(replacer).pipe(validator); // typeHack
    });

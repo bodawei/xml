@@ -138,13 +138,9 @@ beforeEach(() => {
 
 describe('CheckXTokenValidStream (unit)', () => {
    let validator: CheckXTokenValidStream;
-   let fakeEntityManager: any;
 
    beforeEach(() => {
-      fakeEntityManager = {
-         getEntityToken() { },
-      };
-      validator = new CheckXTokenValidStream(fakeEntityManager);
+      validator = new CheckXTokenValidStream();
    });
 
    function gatherTokens(stream: Transform, cb: (tokens: any) => void) {
@@ -1154,6 +1150,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error when an ENTITY attribute is valid', (done) => {
                validator.write(elDecl);
+               validator.write(new NotationDeclarationXToken('nDataName'));
                validator.write(new GeneralEntityDeclarationXToken('goodName', [], undefined, 'nDataName'));
                validator.write(attListDecl);
                validator.write(startToken);
@@ -2596,6 +2593,17 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             validator.write(geDecl1);
             validator.write(geDecl2);
+            validator.end();
+
+            expectStream(validator, expected, done);
+         });
+
+         it('reports an error when a notation is named, but was not declared', (done) => {
+            const geDecl1 = new GeneralEntityDeclarationXToken('one', [], undefined, 'BadNDeclName');
+            const expected = new ValidityError(ValidityError.ID.ENTITYDECL_UNDECLARED_NOTATION, ['one', 'BadNDeclName']);
+
+            validator.write(geDecl1);
+            validator.write(new DocTypeEndXToken());
             validator.end();
 
             expectStream(validator, expected, done);
