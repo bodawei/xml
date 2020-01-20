@@ -115,7 +115,9 @@ function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector
       XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
 
    ec.setPos(pToken.targetSpace);
-   ec.check(!pToken.targetSpace, WFEID.PI_NO_SPACE_AFTER_TARGET, [ targetName ]);
+   if (pToken.instruction) {
+      ec.check(!pToken.targetSpace, WFEID.PI_NO_SPACE_AFTER_TARGET, [ targetName ]);
+   }
 
    ec.setPos(pToken.instruction);
    checkCharWellFormed(pToken.instruction, ec, entityMetaData);

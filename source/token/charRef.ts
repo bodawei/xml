@@ -119,7 +119,15 @@ function checkWellFormed(pToken: CharRefPToken, ec: ErrorCollector, entityMetaDa
     *    Characters referred to using character references must match the production for Char.
     */
    if (pToken.digits) {
-      const char = String.fromCharCode(pToken.charCode);
+      const charNumber = pToken.charCode;
+      let char;
+
+      if (charNumber > 0xFFFF) {
+         const chars = getSurrogatePair(charNumber);
+         char = String.fromCharCode(chars[0]) + String.fromCharCode(chars[1]);
+      } else {
+         char = String.fromCharCode(charNumber);
+      }
 
       ec.check(!isChar(char, entityMetaData.version), WFEID.CHARREF_INVALID_CHAR, [ pToken.charCode.toString() ]);
    }

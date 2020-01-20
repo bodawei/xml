@@ -11,13 +11,16 @@ import {
    CdataPToken,
    CharDataPToken,
    CharRefPToken,
+   ConditionalClosePToken,
    ElementEndPToken,
    ProcessingInstructionPToken,
    TextPToken,
    XmlDeclarationPToken,
    TextDeclarationPToken,
    GeneralEntityReferencePToken,
+   ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
+   ParameterEntityStartPToken,
    NotationDeclarationPToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
@@ -45,7 +48,7 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls declaration.pTokenToXToken()', () => {
       spyOn(declaration, 'pTokenToXToken');
-      const pToken = { type: declaration.PTYPE };
+      const pToken: any = { type: declaration.PTYPE };
 
       tokenStream.write(pToken);
       tokenStream.read();
@@ -55,7 +58,7 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls attListDeclaration.pTokenToXToken()', () => {
       spyOn(attListDeclaration, 'pTokenToXToken');
-      const pToken = { type: attListDeclaration.PTYPE };
+      const pToken: any = { type: attListDeclaration.PTYPE };
 
       tokenStream.write(pToken);
       tokenStream.read();
@@ -113,6 +116,16 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
+   it('calls conditionalClose.toXToken()', () => {
+      const pToken = new ConditionalClosePToken({ open: SToken.fromString(']]>') });
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
    it('calls ElementStartPToken.toXToken()', () => {
       const pToken = new ElementStartPToken({ open: SToken.fromString('<') });
       spyOn(pToken, 'toXToken');
@@ -145,12 +158,32 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls elementDeclaration.pTokenToXToken()', () => {
       spyOn(elementDeclaration, 'pTokenToXToken');
-      const pToken = { type: elementDeclaration.PTYPE };
+      const pToken: any = { type: elementDeclaration.PTYPE };
 
       tokenStream.write(pToken);
       tokenStream.read();
 
       expect(elementDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
+   });
+
+   it('calls peStart.toXToken() with a parameter entity reference', () => {
+      const pToken = new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('&') }));
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
+   it('calls peEnd.toXToken() with a parameter entity reference', () => {
+      const pToken = new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('&') }));
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls peRef.toXToken() with a parameter entity reference', () => {

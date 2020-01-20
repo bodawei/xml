@@ -392,7 +392,7 @@ describe('externalId (unit)', () => {
          externalId.assignUnassigned(externalIdToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ 'hi' ],
+            [ 'hi' ] as any,
             externalIdToken,
             'postIdTypeSpace', [
                { name: 'idType', type: 'word', allowed: /public|system/i  },
@@ -409,7 +409,7 @@ describe('externalId (unit)', () => {
          externalId.assignUnassigned(externalIdToken, {}, 'testPropName');
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ 'hi' ],
+            [ 'hi' ] as any,
             externalIdToken,
             'postIdTypeSpace', [
                { name: '__bogusWorkaround', type: 'space' },
@@ -426,7 +426,7 @@ describe('externalId (unit)', () => {
          externalId.assignUnassigned(externalIdToken, {}, 'testPropName');
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ 'hi' ],
+            [ 'hi' ] as any,
             externalIdToken,
             'idType', [
                { name: '__bogusWorkaround', type: 'space' },

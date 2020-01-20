@@ -121,8 +121,8 @@ class ContentChecker implements Checker {
 
          if (result === CHECKER_DONE) {
             delete this.embeddedChecker;
-            return;
          }
+         return;
       }
 
       switch(pToken.type) {

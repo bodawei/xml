@@ -81,7 +81,7 @@ describe('entity (unit)', () => {
       describe('unassigned in prolog', () => {
 
          it('calls unassigned.assignToProps() when the match is in the prolog', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'name',
@@ -100,7 +100,7 @@ describe('entity (unit)', () => {
          });
 
          it('calls externalId.assignUnassigned() if externalId in PERef', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'name',
@@ -121,7 +121,7 @@ describe('entity (unit)', () => {
          });
 
          it('calls unassigned.assignToProps() with the epilog', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'name',
@@ -140,7 +140,7 @@ describe('entity (unit)', () => {
          });
 
          it('moves any unused unassigned values into an .extra property', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'name',
@@ -156,7 +156,7 @@ describe('entity (unit)', () => {
       describe('unassigned is the ExternalId or the EntityValue', () => {
 
          it('does not unassigned.assignToProps() with the prolog', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
@@ -175,7 +175,7 @@ describe('entity (unit)', () => {
          });
 
          it('calls externalId.assignUnassigned() if externalId IS the peref', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
@@ -196,7 +196,7 @@ describe('entity (unit)', () => {
          });
 
          it('calls unassigned.assignToProps() with the epilog if we found an externalId', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
@@ -215,7 +215,7 @@ describe('entity (unit)', () => {
          });
 
          it('calls unassigned.assignToProps() if EntityValue IS the peref', () => {
-            const unassignedValue = [ {
+            const unassignedValue: any = [ {
                type: 'literal',
             } ];
             const declPToken = new GeneralEntityDeclarationPToken({
@@ -234,7 +234,7 @@ describe('entity (unit)', () => {
          });
 
          it('calls unassigned.assignToProps() if EntityValue IS the peref, and preceeded by space', () => {
-            const unassignedValue = [ {
+            const unassignedValue: any = [ {
                type: 'space',
                token: {}
             }, {
@@ -256,7 +256,7 @@ describe('entity (unit)', () => {
          });
 
          it('does not unassigned.assignToProps() with the epilog if we found an EntityValue', () => {
-            const unassignedValue = [ {
+            const unassignedValue: any = [ {
                type: 'literal',
             } ];
             const declPToken = new GeneralEntityDeclarationPToken({
@@ -281,7 +281,7 @@ describe('entity (unit)', () => {
       describe('unassigned inside externalId', () => {
 
          it('calls externalId.assignUnassigned() if externalId has an unassigned value', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                externalId: {
@@ -293,11 +293,11 @@ describe('entity (unit)', () => {
             assignUnassigned(declPToken);
 
             expect(externalId.assignUnassigned).toHaveBeenCalledWith(
-               declPToken.externalId, declPToken, 'nameSpace');
+               declPToken.externalId!, declPToken, 'nameSpace');
          });
 
          it('calls unassigned.assignToProps() if externalId has an unassigned value', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                externalId: {
@@ -319,7 +319,7 @@ describe('entity (unit)', () => {
          });
 
          it('removes any unassigned values in the externalId', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                externalId: {
@@ -340,7 +340,7 @@ describe('entity (unit)', () => {
       describe('unassigned inside epilog', () => {
 
          it('does not call externalId.assignUnassigned()', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                nextPropName: 'nData',
@@ -352,7 +352,7 @@ describe('entity (unit)', () => {
          });
 
          it('calls unassigned.assignToProps() only with the epilog values', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new GeneralEntityDeclarationPToken({
                unassigned: unassignedValue,
                externalId: {

@@ -221,7 +221,7 @@ describe('notationdeDeclaration (unit)', () => {
          notationPToken.assignUnassigned();
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            ['foo'],
+            ['foo'] as any,
             notationPToken,
             'name', [
                { name: 'declTypeSpace', type: 'space' },

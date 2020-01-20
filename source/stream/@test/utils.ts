@@ -19,7 +19,7 @@ function gatherStream(stream: Readable, expect: (results: Array<PToken>) => void
 
 function expectError(validator: Readable, expected: any, done: () => void) {
    gatherStream(validator, (tokens) => {
-      let arrayExpected = [];
+      let arrayExpected: Array<any> = [];
 
       if (!Array.isArray(expected)) {
          arrayExpected = [expected];

@@ -6,7 +6,7 @@ import { StringBundle } from 'basic';
 import messagesAndStrings from './derive/XmlWarning.json';
 import { BaseError, MessageCache, Position } from './BaseError';
 
-const WARNING_SUBTYPE = 'WELL_FORMED_ERROR';
+const WARNING_SUBTYPE = 'WARNING';
 const messages: MessageCache = {
    code: messagesAndStrings.code,
    message: new StringBundle(messagesAndStrings.message),

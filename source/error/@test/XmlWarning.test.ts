@@ -27,6 +27,12 @@ describe('XmlWarning', () => {
          }).toThrowError('The Error id "BOGUS" is not a legal id.');
       });
 
+      it('sets the the subtype', () => {
+         const warning = new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+
+         expect(warning.subtype).toEqual('WARNING');
+      });
+
       it('sets the id', () => {
          expect(new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).id)
             .toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);

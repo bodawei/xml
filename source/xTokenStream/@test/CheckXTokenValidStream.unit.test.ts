@@ -160,7 +160,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
    function expectStream(validator: CheckXTokenValidStream, expected: any, done: () => void) {
       gatherTokens(validator, (tokens) => {
-         let arrayExpected = [];
+         let arrayExpected: Array<any> = [];
 
          if (!Array.isArray(expected)) {
             arrayExpected = [expected];
@@ -1097,19 +1097,15 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an IDREFS references an ID that is never found', (done) => {
+               const elDecl2 = new elementDeclaration.XToken('testEl2', 'ANY', undefined);
                const openSToken = SToken.fromString('<');
-               attListDecl = new attListDeclaration.XToken('testEl', [{
+               const attListDecl2 = new attListDeclaration.XToken('testEl2', [{
                   name: 'idRefsAttr',
                   type: 'IDREFS',
                   value: [],
                   defaultType: '#REQUIRED',
-               }, {
-                  name: 'idAttr',
-                  type: 'ID',
-                  value: [],
-                  defaultType: '#REQUIRED',
                }]);
-               const secondStartToken = new ElementStartXToken('testEl', [{
+               const secondStartToken = new ElementStartXToken('testEl2', [{
                   name: 'idRefsAttr',
                   value: [
                      new TextXToken('goodName second third')
@@ -1119,14 +1115,17 @@ describe('CheckXTokenValidStream (unit)', () => {
                }));
 
                validator.write(elDecl);
+               validator.write(elDecl2);
                validator.write(attListDecl);
+               validator.write(attListDecl2);
                validator.write(secondStartToken);
                validator.write(startToken);
                validator.write(endElName);
+               validator.write(new ElementEndXToken('testEl2'));
                validator.end();
 
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
-                  ['second', 'testEl', 'idRefsAttr'], openSToken, openSToken);
+                  ['second', 'testEl2', 'idRefsAttr'], openSToken, openSToken);
                expectStream(validator, expected, done);
             });
 
@@ -1138,10 +1137,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             let startToken: ElementStartXToken;
 
             beforeEach(() => {
-               fakeEntityManager.getEntityToken = () => {
-                  return new GeneralEntityDeclarationXToken('goodName', [], undefined, 'notation');
-               };
-
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined);
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'entityAttr',
@@ -1159,6 +1154,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error when an ENTITY attribute is valid', (done) => {
                validator.write(elDecl);
+               validator.write(new GeneralEntityDeclarationXToken('goodName', [], undefined, 'nDataName'));
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
@@ -1224,8 +1220,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an ENTITY value names an unknown entity', (done) => {
-               fakeEntityManager.getEntityToken = () => undefined;
-
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -1237,10 +1231,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an ENTITY value names a parsed entity', (done) => {
-               fakeEntityManager.getEntityToken = () => {
-                  return new GeneralEntityDeclarationXToken('goodName', [], undefined, undefined);
-               };
-
+               validator.write(new GeneralEntityDeclarationXToken('goodName', [], undefined, undefined));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -1252,7 +1243,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if one or more ENTITIES names are unknown entities', (done) => {
-               fakeEntityManager.getEntityToken = () => undefined;
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
@@ -1267,6 +1257,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }]);
 
                validator.write(elDecl);
+               validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
@@ -1277,9 +1268,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an ENTITIES value names a parsed entity', (done) => {
-               fakeEntityManager.getEntityToken = () => {
-                  return new GeneralEntityDeclarationXToken('goodName', [], undefined, undefined);
-               };
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
@@ -1293,6 +1281,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                   ]
                }]);
 
+               validator.write(new GeneralEntityDeclarationXToken('one', [], undefined, undefined));
+               validator.write(new GeneralEntityDeclarationXToken('two', [], undefined, undefined));
+               validator.write(new GeneralEntityDeclarationXToken('three', [], undefined, undefined));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -3477,31 +3468,31 @@ describe('CheckXTokenValidStream (unit)', () => {
             const elementStartToken = new ElementStartXToken('one', []);
 
             const data: Array<[any, 1 | 1.1, 1 | 2 | 3 | 4 | 5 | 6, boolean]> = [
-               [commentToken, 1, 1, true],
-               [commentToken, 1, 2, true],
-               [commentToken, 1, 3, true],
+               [commentToken, 1, 1, false],
+               [commentToken, 1, 2, false],
+               [commentToken, 1, 3, false],
                [commentToken, 1, 4, false],
                [commentToken, 1, 5, false],
                [commentToken, 1, 6, false],
-               [commentToken, 1.1, 1, true],
+               [commentToken, 1.1, 1, false],
                [commentToken, 1.1, 2, false],
                [commentToken, 1.1, 3, false],
-               [piToken, 1, 1, true],
-               [piToken, 1, 2, true],
-               [piToken, 1, 3, true],
+               [piToken, 1, 1, false],
+               [piToken, 1, 2, false],
+               [piToken, 1, 3, false],
                [piToken, 1, 4, false],
                [piToken, 1, 5, false],
                [piToken, 1, 6, false],
-               [piToken, 1.1, 1, true],
+               [piToken, 1.1, 1, false],
                [piToken, 1.1, 2, false],
                [piToken, 1.1, 3, false],
-               [cDataToken, 1, 1, true],
-               [cDataToken, 1, 2, true],
-               [cDataToken, 1, 3, true],
+               [cDataToken, 1, 1, false],
+               [cDataToken, 1, 2, false],
+               [cDataToken, 1, 3, false],
                [cDataToken, 1, 4, false],
                [cDataToken, 1, 5, false],
                [cDataToken, 1, 6, false],
-               [cDataToken, 1.1, 1, true],
+               [cDataToken, 1.1, 1, false],
                [cDataToken, 1.1, 2, false],
                [cDataToken, 1.1, 3, false],
                [elementStartToken, 1, 1, false],
@@ -3759,7 +3750,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports an error if there is a comment found in mixed content  in 1.0/1 (§3.0.0)', (done) => {
+            it('reports no error if there is a comment found in mixed content  in 1.0/1 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3868,7 +3859,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectNoErrorsOrWarnings(validator, done);
             });
 
-            it('reports an error if a CDATA section found in 1.0/1 (§3.0.0)', (done) => {
+            it('reports no error if a CDATA section found in 1.0/1 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3885,8 +3876,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementEndXToken('one'));
                validator.end();
 
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, ['one']);
-               expectStream(validator, expected, done);
+               expectNoErrors(validator, done);
             });
 
             it('reports no error if a CDATA section found in 1.0/5 (§3.0.0)', (done) => {

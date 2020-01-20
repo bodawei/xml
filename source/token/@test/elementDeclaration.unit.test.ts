@@ -306,7 +306,7 @@ describe('elementDeclaration (unit)', () => {
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ 'foo' ],
+            [ 'foo' ] as any,
             elementPToken,
             'name', [
                { name: 'postDeclTypeSpace', type: 'space' },
@@ -324,7 +324,7 @@ describe('elementDeclaration (unit)', () => {
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ 'foo' ],
+            [ 'foo' ] as any,
             elementPToken,
             'contentSpec', [
                { name: 'contentSpec', type: 'word' },
@@ -341,7 +341,7 @@ describe('elementDeclaration (unit)', () => {
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ 'foo' ],
+            [ 'foo' ] as any,
             elementPToken,
             'contentSpec', [
                { name: 'contentSpec', type: 'word' },
@@ -350,7 +350,7 @@ describe('elementDeclaration (unit)', () => {
       });
 
       it('calls nameList.assignToProps() if we are mid-contentSpec', () => {
-         spyOn(nameList, 'assignUnassigned');
+         const nlSpy = spyOn(nameList, 'assignUnassigned');
          elementPToken = new elementDeclaration.PToken({
             children: new nameList.PToken(),
             unassigned: [ 'foo' ],
@@ -359,12 +359,12 @@ describe('elementDeclaration (unit)', () => {
 
          elementDeclaration.assignUnassigned(elementPToken);
 
-         expect(nameList.assignUnassigned).toHaveBeenCalledWith(elementPToken.children, [ 'foo' ]);
+         expect(nlSpy).toHaveBeenCalledWith(elementPToken.children!, [ 'foo' ] as any);
       });
 
       it('calls nameList.assignToProps() if we left off with a contentSpec, and the first value is "("', () => {
          spyOn(nameList, 'assignUnassigned');
-         const unassignedValues = [ {
+         const unassignedValues: any = [ {
             type: 'word',
             token: {
                text: SToken.fromString('('),
@@ -379,7 +379,7 @@ describe('elementDeclaration (unit)', () => {
 
          // Adds the missing children.
          expect(elementPToken.children).toEqual(new nameList.PToken());
-         expect(nameList.assignUnassigned).toHaveBeenCalledWith(elementPToken.children, unassignedValues);
+         expect(nameList.assignUnassigned).toHaveBeenCalledWith(elementPToken.children!, unassignedValues);
       });
 
       it('adds an "extra" property if the unassigned values are not consumed', () => {

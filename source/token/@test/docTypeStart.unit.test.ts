@@ -75,6 +75,7 @@ describe('docTypeStart (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
+      let declCheckWellFormedSpy: jasmine.Spy;
       let mockErrorCollector: MockErrorCollector;
       let emd: EntityMetaData;
 
@@ -82,7 +83,7 @@ describe('docTypeStart (unit)', () => {
          mockErrorCollector = new MockErrorCollector();
          emd = new EntityMetaData();
 
-         spyOn(declaration, 'checkWellFormed');
+         declCheckWellFormedSpy = spyOn(declaration, 'checkWellFormed');
          spyOn(misc, 'checkName');
          spyOn(externalId, 'checkWellFormed');
       });
@@ -90,7 +91,7 @@ describe('docTypeStart (unit)', () => {
       it('asks the declaration module to look for problems in the declaration part', () => {
          docTypeStartPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(declaration.checkWellFormed).toHaveBeenCalledWith(docTypeStartPToken, mockErrorCollector, emd);
+         expect(declCheckWellFormedSpy).toHaveBeenCalledWith(docTypeStartPToken, mockErrorCollector, emd);
       });
 
       it('asks the misc.checkName() to validate the name', () => {

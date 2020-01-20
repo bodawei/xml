@@ -473,9 +473,11 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
    const repeatStr = strOrBlank(pToken.repeat);
    if (isMixedType) {
       // 0 length is an "error", but we'll never know that because we identify MIXED by the first item
-      if (pToken.names.length === 1) {
-         ec.check(repeatStr !== '', WFEID.NAMELIST_MIXED_EXTRA_REPEAT, [ repeatStr ]);
-      } else if (pToken.names.length > 1 && repeatStr !== '*') {
+      // valid/P68/ibm68v02.xml and kin drew attention to the fact that this is actually ok.
+      // if (pToken.names.length === 1) {
+      //    ec.check(repeatStr !== '', WFEID.NAMELIST_MIXED_EXTRA_REPEAT, [ repeatStr ]);
+      // } else
+      if (pToken.names.length > 1 && repeatStr !== '*') {
          ec.report(WFEID.NAMELIST_MIXED_INVALID_REPEAT, [ repeatStr ]);
       }
    }

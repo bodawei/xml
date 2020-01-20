@@ -9,7 +9,7 @@ import { WellFormedError, XmlWarning } from 'error';
 
 import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration';
 import declaration from '../bridge/baseDeclaration';
-import unassigned, { UnassignedArray } from '../common/unassigned';
+import unassigned, { UnassignedArray, UnassignedValue } from '../common/unassigned';
 import literal from '../common/literal';
 import * as wordList from '../common/wordList';
 import misc from '../common/misc';
@@ -757,7 +757,7 @@ describe('attListDeclaration (unit)', () => {
       describe('unassigned in elementName', () => {
 
          it('calls unassigned.assignToProps() when the match is in the el name', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new attListDeclaration.PToken({
                open: toSToken('<!'),
                unassigned: unassignedValue,
@@ -784,7 +784,7 @@ describe('attListDeclaration (unit)', () => {
          });
 
          it('calls unassigned.assignToProps() with "xtra" if missing is name', () => {
-            const unassignedValue = [ 'foo' ];
+            const unassignedValue: any = [ 'foo' ];
             const declPToken = new attListDeclaration.PToken({
                open: toSToken('<!'),
                unassigned: unassignedValue,
@@ -1343,7 +1343,7 @@ describe('attListDeclaration (unit)', () => {
          });
       });
 
-      it('reports an error if there is no space after the element name', () => {
+      it('reports an error if there is no space after the element name and there are attdefs', () => {
          delete aldPToken.postElementNameSpace;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
@@ -1356,18 +1356,22 @@ describe('attListDeclaration (unit)', () => {
          });
       });
 
-      it('reports an error if there are no attribute definitions', () => {
+      it('reports no error if there is no space after the element name and there are no attdefs', () => {
+         delete aldPToken.postElementNameSpace;
+         aldPToken.attDefs = [];
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no error if there are no attribute definitions', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs = [];
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ATTLISTDECL_NO_ATTRIBUTES,
-            params: [ elName ],
-            position: undefined,
-            lastPosition: aldPToken.postElementNameSpace,
-         });
+         expect(mockErrorCollector.errors).toEqual([]);
       });
 
       it('calls misc.checkName() to report on name validity', () => {

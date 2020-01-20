@@ -395,11 +395,8 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
    misc.checkName(pToken.elementName, ec, entityMetaData, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
 
    ec.setPos(pToken.postElementNameSpace);
-   ec.check(!pToken.postElementNameSpace, WFEID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE);
-
-   if (pToken.attDefs.length < 1) {
-      ec.setPos(undefined);
-      ec.report(WFEID.ATTLISTDECL_NO_ATTRIBUTES, [ elNameText ]);
+   if (pToken.attDefs.length > 0) {
+      ec.check(!pToken.postElementNameSpace, WFEID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE);
    }
 
    const attNames: {

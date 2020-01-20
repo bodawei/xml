@@ -1214,19 +1214,30 @@ describe('nameList (unit)', () => {
             });
          });
 
-         it('reports an error if there is a repeat indicator on a #PCDATA list of 1 item', () => {
-            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
-            namePToken.name = SToken.fromString('#PCDATA');
-            nlPToken.names.pop(); // remove the second
-            nlPToken.repeat = SToken.fromString('*');
+         it('reports no error if there is a repeat indicator on a #PCDATA list of 1 item', () => {
+            nlPToken = new nameList.PToken({
+               open: SToken.fromString('('),
+               postOpenSpace: undefined,
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('#PCDATA'),
+                     postNameSpace: undefined,
+                     repeat: undefined,
+                     postRepeatSpace: undefined,
+                  },
+                  delimiter: undefined,
+                  postDelimiterSpace: undefined,
+               }],
+               close: SToken.fromString(')'),
+               postCloseSpace: undefined,
+               repeat: SToken.fromString('*'),
+               postRepeatSpace: undefined,
+            });
+
 
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
 
-            expect(mockErrorCollector).toReportError({
-               id: WellFormedError.ID.NAMELIST_MIXED_EXTRA_REPEAT,
-               params: [ '*' ],
-               position: nlPToken.repeat,
-            });
+            expect(mockErrorCollector.errors.length).toEqual(0);
          });
 
          it('reports an error if there is any non-* repeat indicator on a #PCDATA list of > 1 item', () => {

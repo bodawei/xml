@@ -39,6 +39,7 @@ import {
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    SPACE_XTOKEN,
+   TEXTDECL_XTOKEN,
    XMLDECL_XTOKEN,
 
    NotationDeclarationXToken,
@@ -149,8 +150,8 @@ function getAttributeValueText(attribute: any): string {
 
 class CheckXTokenValidStream extends Transform {
    private entityManager: EntityManager;
-   private paramEntitiesSeen: { [name: string]: boolean } = {};
-   private generalEntitiesSeen: { [name: string]: boolean } = {};
+   private paramEntitiesSeen: { [name: string]: any } = {}; // ick
+   private generalEntitiesSeen: { [name: string]: any } = {};
    private entityInfo: EntityInfoMap = {};
    private docType: XToken | void;
    private notations: { [name: string]: XToken };
@@ -365,14 +366,16 @@ class CheckXTokenValidStream extends Transform {
                // always ok
                break;
             case COMMENT_XTOKEN:
-               if (!isTolerantVersion) {
-                  this.pushValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
-               }
+               // called out by valid/P43/ibm43v01.xml as OK
+               // if (!isTolerantVersion) {
+               //    this.pushValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
+               // }
                break;
             case CDATA_XTOKEN:
-               if (!isTolerantVersion) {
-                  this.pushValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
-               }
+               // called out by valid/P43/ibm43v01.xml as OK
+               // if (!isTolerantVersion) {
+               //    this.pushValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
+               // }
                break;
             case CHARREF_XTOKEN:
             case CHARDATA_XTOKEN:
@@ -384,9 +387,10 @@ class CheckXTokenValidStream extends Transform {
                }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
-               if (!isTolerantVersion) {
-                  this.pushValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, sToken);
-               }
+               // called out by valid/P43/ibm43v01.xml as OK
+               // if (!isTolerantVersion) {
+               //    this.pushValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, sToken);
+               // }
                break;
             default:
                this.pushValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [declInfo.token.name], sToken);
@@ -423,11 +427,13 @@ class CheckXTokenValidStream extends Transform {
                // always ok
                break;
             case CDATA_XTOKEN:
-               if (!isTolerantVersion) {
-                  this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
-                     [declInfo.token.name], sToken);
-               }
+               // IBM valid/P19/ibm19v01.xml says that this isn't an error.
+               // if (!isTolerantVersion) {
+               //    this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
+               //       [declInfo.token.name], sToken);
+               // }
                break;
+            case TEXTDECL_XTOKEN: // note this and things below we're not checking that they're well formed (e.g. in the right place)
             case COMMENT_XTOKEN:
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
@@ -661,10 +667,6 @@ class CheckXTokenValidStream extends Transform {
          }
 
          if (xToken instanceof ElementStartXToken) {
-            if (this.currentContext) {
-               this.contentStack.push(this.currentContext);
-            }
-
             if (this.elementDeclarations[xToken.name]) {
                this.currentContext = {
                   declInfo: this.elementDeclarations[xToken.name],
@@ -685,11 +687,17 @@ class CheckXTokenValidStream extends Transform {
                   elementContentEntityRefStack: [],
                };
             }
+
+            if (this.currentContext) {
+               this.contentStack.push(this.currentContext);
+            }
+
          }
 
          this.validateElementStart(xToken);
       } else if (xToken instanceof ElementEndXToken) {
-         this.currentContext = this.contentStack.pop();
+         this.contentStack.pop();
+         this.currentContext = this.contentStack[this.contentStack.length -1];
 
          if (this.contentStack.length === 0) {
             this.validateDocumentEnd();
@@ -718,7 +726,7 @@ class CheckXTokenValidStream extends Transform {
          this.push(warning);
       }
 
-      seen[name] = true;
+      seen[name] = xToken;
    }
 
    private validateNotationDeclaration(notationDecl: NotationDeclarationXToken) {
@@ -847,7 +855,7 @@ class CheckXTokenValidStream extends Transform {
          //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
          if (defaultType !== '#IMPLIED' && defaultType !== '#REQUIRED') {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
-               [attList.elementName, attDef.name, ''], pToken.open);
+               [attList.elementName, attDef.name, defaultType], pToken.open);
          }
 
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
@@ -1404,7 +1412,7 @@ class CheckXTokenValidStream extends Transform {
                   delete this.unanchoredIDRefs[attrText];
                }
             } else if (attrDef.type === 'IDREF' || attrDef.type === 'IDREFS') {
-               const names = attrText.split(/ +/); // Can't happen once normalization happens
+               const names = attrDef.type === 'IDREF' ? [ attrText ] : attrText.split(/ +/);// Can't happen once normalization happens
                const badNames = [];
 
                // §3.3.1: Validity Constraint: IDREF
@@ -1435,7 +1443,7 @@ class CheckXTokenValidStream extends Transform {
                   this.pushValidityError(code, [badNames.join(', '), elStart.name, attrName], pTokenOpen);
                }
             } else if (attrDef.type === 'ENTITY' || attrDef.type === 'ENTITIES') {
-               const names = attrText.split(/ +/); // Can't happen once normalization happens
+               const names = attrDef.type === 'ENTITY' ? [ attrText ] : attrText.split(/ +/);// Can't happen once normalization happens
                const badNames = [];
 
                // §3.3.1: Validity Constraint: Entity Name
@@ -1461,7 +1469,8 @@ class CheckXTokenValidStream extends Transform {
                //    each Name must match the name of an unparsed entity declared in the DTD.
                // (Also §4.4 row three of table, and mentioned in §4.1.0 Well-formedness constraint: Parsed Entity)
                for (let index = 0; index < names.length; index++) {
-                  const token = this.entityManager.getEntityToken(names[index])
+                  const token = this.generalEntitiesSeen[names[index]];
+                  // const token = this.entityManager.getEntityToken(names[index])
 
                   if (!token) {
                      undeclared.push(names[index]);
@@ -1489,7 +1498,7 @@ class CheckXTokenValidStream extends Transform {
                   this.pushValidityError(code, [parsed.join(', '), elStart.name, attrName], pTokenOpen);
                }
             } else if (attrDef.type === 'NMTOKEN' || attrDef.type === 'NMTOKENS') {
-               const names = attrText.split(/ +/);
+               const names = attrDef.type === 'NMTOKEN' ? [ attrText ] : attrText.split(/ +/);
                const badNames = [];
 
                // §3.3.1: Validity Constraint: Name Token

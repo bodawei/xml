@@ -372,6 +372,18 @@ describe('util', () => {
             version: undefined,
             revision: 1,
             result: false,
+         }, {
+            description: 'accepts a character > 0xFFFF',
+            text: '\ud848\udcf2',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'rejects a three character string',
+            text: '123',
+            version: 1.0,
+            revision: 5,
+            result: false,
          },
       ] as Data).forEach((data) => {
          it(data.description, () => {
