@@ -343,13 +343,14 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('expands a parameter entity reference before assigning unassigned values', (done) => {
+         const peRef = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            name: SToken.fromString('pe1'),
+         });
          let didAssign = false;
          const unassignedVals = [{
             type: UnassignedType.REFERENCE,
-            token: new ParameterEntityReferencePToken({
-               open: SToken.fromString('%'),
-               name: SToken.fromString('pe1'),
-            }),
+            token: peRef,
          }];
          const input = [
             new ParameterEntityDeclarationPToken({
@@ -370,12 +371,19 @@ describe('EntityExpander (unit)', () => {
 
          spyOn(attListDeclaration, 'assignUnassigned').and.callFake((pToken: AttListPToken) => {
             didAssign = true;
-            expect(pToken.unassigned).toEqualRangeless([
+            expect(pToken.unassigned).toEqualRangeless([{
+                  type: UnassignedType.ENTITY_START,
+                  token: peRef,
+               },
                unassigned.wordFromSToken(SToken.fromString('attr1')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('CDATA')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('#REQUIRED')),
+               {
+                  type: UnassignedType.ENTITY_END,
+                  token: peRef,
+               },
             ]);
          });
 
@@ -385,6 +393,10 @@ describe('EntityExpander (unit)', () => {
             done();
          });
       });
+
+   });
+
+   describe('ELEMENT declaration', () => {
 
    });
 
@@ -599,13 +611,14 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('expands a parameter entity reference before assigning unassigned values', (done) => {
+         const peRef = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            name: SToken.fromString('pe1'),
+         });
          let didAssign = false;
          const unassignedVals = [{
             type: UnassignedType.REFERENCE,
-            token: new ParameterEntityReferencePToken({
-               open: SToken.fromString('%'),
-               name: SToken.fromString('pe1'),
-            }),
+            token: peRef,
          }];
          const entityDecl = new GeneralEntityDeclarationPToken({
             open: SToken.fromString('<!'),
@@ -639,7 +652,10 @@ describe('EntityExpander (unit)', () => {
 
          spyOn(entityDecl, 'assignUnassigned').and.callFake(() => {
             didAssign = true;
-            expect(entityDecl.unassigned).toEqualRangeless([
+            expect(entityDecl.unassigned).toEqualRangeless([{
+                  type: UnassignedType.ENTITY_START,
+                  token: peRef,
+               },
                unassigned.wordFromSToken(SToken.fromString('entityname')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                {
@@ -653,7 +669,10 @@ describe('EntityExpander (unit)', () => {
                      ],
                      closeQuote: SToken.fromString('"'),
                   },
-               }
+               },{
+                  type: UnassignedType.ENTITY_END,
+                  token: peRef,
+               },
             ]);
          });
 
@@ -782,7 +801,7 @@ describe('EntityExpander (unit)', () => {
          spyOn(notationDecl, 'assignUnassigned');
 
          doExpand(true, input, (results: any[]) => {
-            expect(results[1].unassigned[0].type).toEqual('word');
+            expect(results[1].unassigned[1].type).toEqual('word');
             done();
          });
       });
@@ -826,7 +845,7 @@ describe('EntityExpander (unit)', () => {
          spyOn(notationDecl, 'assignUnassigned');
 
          doExpand(true, input, (results: any[]) => {
-            expect(results[1].unassigned.length).toEqual(18); // not quite right.
+            expect(results[1].unassigned.length).toEqual(22); // not quite right.
             done();
          });
       });
@@ -872,7 +891,7 @@ describe('EntityExpander (unit)', () => {
          spyOn(notationDecl, 'assignUnassigned');
 
          doExpand(true, input, (results: any[]) => {
-            expect(results[2].unassigned.length).toEqual(2); // not quite right.
+            expect(results[2].unassigned.length).toEqual(6); // not quite right.
             done();
          });
       });
@@ -910,7 +929,7 @@ describe('EntityExpander (unit)', () => {
          spyOn(notationDecl, 'assignUnassigned');
 
          doExpand(true, input, (results: any[]) => {
-            expect(results[1].unassigned.length).toEqual(9);   // the parsing is wrong.
+            expect(results[1].unassigned.length).toEqual(11);   // the parsing is wrong.
             done();
          });
       });
@@ -950,8 +969,14 @@ describe('EntityExpander (unit)', () => {
          ];
 
          spyOn(notationDecl, 'assignUnassigned').and.callFake(() => {
-            expect(notationDecl.unassigned).toEqualRangeless([
-               unassigned.wordFromSToken(SToken.fromString('PUBLIC')),
+            expect(notationDecl.unassigned).toEqualRangeless([{
+                  type: UnassignedType.ENTITY_START,
+                  token: refToPe1,
+               }, 
+               unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
+                  type: UnassignedType.ENTITY_END,
+                  token: refToPe1,
+               },
             ]);
          });
 
@@ -1007,8 +1032,14 @@ describe('EntityExpander (unit)', () => {
          ];
 
          spyOn(notationDecl, 'assignUnassigned').and.callFake(() => {
-            expect(notationDecl.unassigned).toEqualRangeless([
-               unassigned.wordFromSToken(SToken.fromString('PUBLIC')),
+            expect(notationDecl.unassigned).toEqualRangeless([{
+                  type: UnassignedType.ENTITY_START,
+                  token: refToPe1,
+               },
+               unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
+                  type: UnassignedType.ENTITY_END,
+                  token: refToPe1,
+               },
             ]);
          });
 

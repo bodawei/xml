@@ -49,6 +49,7 @@ class ElementDeclarationPToken extends declaration.PToken {
    public unassigned?: UnassignedArray;
    public extra?: UnassignedArray;
    public nextPropName?: string;
+   public forValidation?: UnassignedArray;
 
    constructor(props?: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
@@ -174,6 +175,8 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
       return;
    }
 
+   edPToken.forValidation = unValues.slice(0); // Copy for future
+
    const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
 
    if (unexpandedRef.length !== 0) {
@@ -191,7 +194,11 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
    }
 
    if (edPToken.nextPropName === 'contentSpec') {
-      const nextValue: UnassignedValue | void = unValues.length > 0 ? unValues[0] : undefined;
+      unassigned.assignToProps(unValues, edPToken, 'postNameSpace', [  // must test
+         { name: 'postNameSpace', type: 'space' },
+      ]);
+
+      let nextValue: UnassignedValue | void = unValues.length > 0 ? unValues[0] : undefined;
 
       if (nextValue && nextValue.type === 'word' && nextValue.token.text && nextValue.token.text.str === '(') {
          edPToken.children = edPToken.children || new NameListPToken();

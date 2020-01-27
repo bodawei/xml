@@ -1,0 +1,6 @@
+<!ELEMENT a ANY>
+<!ELEMENT b ANY>
+<!ENTITY % cpa "( a | b">
+<!ENTITY % cpb ")">
+<!ENTITY % cp "%cpa;%cpb;">
+<!ELEMENT one %cp;>

@@ -1166,7 +1166,7 @@ class CheckXTokenValidStream extends Transform {
 
       const pToken = edXToken.pToken;
       const elName = edXToken.name;
-      const unassignedArray = pToken.unassigned || [];
+      const unassignedArray = pToken.forValidation || [];
       let insideContentSpec = !!pToken.children;
       let entityDepth = 0;
       let parenDepth = 0;
@@ -1184,6 +1184,29 @@ class CheckXTokenValidStream extends Transform {
                break;
             case UnassignedType.ENTITY_END:
                entityDepth--;
+               if (insideContentSpec && entityDepth === 0 && topEntityRef) {
+                  if (parenDepth !== 0) {
+                     const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+                        [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
+                     this.push(error);
+                  }
+      
+                  if (endedWithConnector) {
+                     const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+                        [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
+                     this.push(warning);
+                  }
+      
+                  if (!sawNonWhite) {
+                     const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+                        [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
+                     this.push(warning);
+                  }
+      
+                  sawNonWhite = false;
+                  endedWithConnector = false;
+                  topEntityRef = undefined;
+               }
                break;
             case 'word':
                const content = entry.token.text && entry.token.text.str;
@@ -1201,30 +1224,6 @@ class CheckXTokenValidStream extends Transform {
                sawNonWhite = true;
                endedWithConnector = false;
                break;
-         }
-
-         if (insideContentSpec && entityDepth === 0 && topEntityRef) {
-            if (parenDepth !== 0) {
-               const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-                  [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
-               this.push(error);
-            }
-
-            if (endedWithConnector) {
-               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
-               this.push(warning);
-            }
-
-            if (!sawNonWhite) {
-               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
-               this.push(warning);
-            }
-
-            sawNonWhite = false;
-            endedWithConnector = false;
-            topEntityRef = undefined;
          }
       }
    }

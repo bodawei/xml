@@ -1035,9 +1035,9 @@ const invalidErrorCodes: TestToErrorMap = {
    'ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
    'ibm41i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
    'ibm45i01.xml': 'ELEMENT_EXTRA_DECLARATION', // great
-   // 'ibm49i01.xml': '',
-   // 'ibm50i01.xml': '',
-   // 'ibm51i01.xml': '',
+   'ibm49i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
+   'ibm50i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
+   'ibm51i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
    'ibm51i03.xml': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // great
    'ibm56i01.xml': 'ELEMENTSTART_ID_NAME_INVALID', // great
    'ibm56i02.xml': 'ELEMENTSTART_ID_DUPLICATE', // great

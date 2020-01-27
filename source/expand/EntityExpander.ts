@@ -45,11 +45,11 @@ import { LiteralValuePToken } from 'source/token/common/literal';
 import { ExternalId } from 'source/token/common/externalId';
 import { AttListPToken } from 'source/token/attListDeclaration';
 import { ElementStartPToken, ElementEmptyPToken, ELEMENT_EMPTY_PTOKEN } from 'source/token/elementStart';
-import { UnassignedArray, UnassignedType } from 'source/token/common/unassigned';
+import { UnassignedArray, UnassignedEndEntity, UnassignedType } from 'source/token/common/unassigned';
 import { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned } from 'source/token/elementDeclaration';
 import { DocTypeStartPToken } from 'source/token/docTypeStart';
 import { DocTypeEndPToken } from 'source/token/docTypeEnd';
-import { XmlWarning, WellFormedError } from 'error';
+import { XmlWarning, WellFormedError, ValidityError } from 'error';
 
 type GeneralEntityInfo = {
    token: GeneralEntityDeclarationPToken;
@@ -1057,7 +1057,17 @@ class EntityExpander {
                const peInfo = this.paramEntitiesByName[strOrBlank(peRef.name)];
 
                if (peInfo && peInfo.unssignedCache) {
-                  newUnassigned = newUnassigned.concat(peInfo.unssignedCache);
+                  // This still has a problem.  If a parameter entity has a parameter entity in its declaration, taht gets lost before it gets here... but it isn't clear if that is OK or not.
+                  const start: UnassignedArray = [{
+                     type: UnassignedType.ENTITY_START,
+                     token: peRef,
+                  }];
+                  const end: UnassignedArray = [{
+                     type: UnassignedType.ENTITY_END,
+                     token: peRef,
+                  }];
+   
+                  newUnassigned = newUnassigned.concat(start, peInfo.unssignedCache, end);
                } else {
                   newUnassigned.push(element);
                }

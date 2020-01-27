@@ -131,7 +131,7 @@ const report = {
 
 const test = {
    _karmaPrecommit: `karma start ${BUILD_DIR}/karma-precommit.js --browsers ${BROWSERS.join(',')}`,
-   _karmaLive: `karma start ${BUILD_DIR}/karma-live.js --browsers ChromeHeadless`,
+   _karmaLive: `karma start ${BUILD_DIR}/karma-live.js --browsers Chrome`, // ChromeHeadless
 
    // NOTE!  This does not yet run with typescript at all.
    _nodeTest: `nyc --require="babel-register" --require="babel-polyfill" --report-dir="${NODE_COVERAGE_DIR}" jasmine --config=build/jasmine.json`,

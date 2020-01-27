@@ -332,6 +332,22 @@ describe('elementDeclaration (unit)', () => {
             ]);
       });
 
+      it('calls unassigned.assignToProps() with only a space if the nextPropName is "contentSpec"', () => {
+         elementPToken = new elementDeclaration.PToken({
+            unassigned: [ 'foo' ],
+            nextPropName: 'contentSpec',
+         });
+
+         elementDeclaration.assignUnassigned(elementPToken);
+
+         expect(unassigned.assignToProps).toHaveBeenCalledWith(
+            [ 'foo' ] as any,
+            elementPToken,
+            'postNameSpace', [
+               { name: 'postNameSpace', type: 'space' },
+            ]);
+      });
+
       it('calls unassigned.assignToProps() with the contentSpec if the nextPropName is "contentSpec"', () => {
          elementPToken = new elementDeclaration.PToken({
             unassigned: [ 'foo' ],
@@ -405,7 +421,7 @@ describe('elementDeclaration (unit)', () => {
          expect(elementPToken.extra).toBeUndefined();
       });
 
-      it('removes all unassigned and nextPropName values', () => {
+      it('removes all unassigned and nextPropName values but adds the unassigned to the forValidation', () => {
          elementPToken = new elementDeclaration.PToken({
             unassigned: [ 'foo' ],
             nextPropName: 'name',
@@ -415,6 +431,7 @@ describe('elementDeclaration (unit)', () => {
 
          expect(elementPToken).toEqual(new elementDeclaration.PToken({
             extra: [ 'foo' ],
+            forValidation: [ 'foo' ],
          }));
       });
 

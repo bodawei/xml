@@ -506,6 +506,7 @@ export default unassigned;
 export {
    UnassignedArray,
    UnassignedValue,
+   UnassignedEndEntity,
    DescriptorArray,
    Descriptor,
    UnassignedType,

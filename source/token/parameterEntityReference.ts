@@ -45,6 +45,7 @@ class ParameterEntityReferencePToken {
    constructor(param: ParameterEntityReferencePToken | ParamReference) {
       Object.assign(this, param);
       this.open = param.open;
+      this.type = PARAMETER_ENTITY_REFERENCE_PTOKEN;
    }
 
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {

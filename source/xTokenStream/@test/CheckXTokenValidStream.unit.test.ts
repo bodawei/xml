@@ -42,6 +42,7 @@ import {
    GeneralEntityReferencePToken,
    CharRefXToken,
    ParameterEntityReferenceXToken,
+   ParameterEntityReferencePToken,
 } from 'token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
@@ -2815,7 +2816,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new ElementStartPToken({ open: SToken.fromString('<'), name: SToken.fromString('testPE') }),
                   }, {
@@ -2845,7 +2846,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
@@ -2855,7 +2856,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
                const declToken = elementDeclaration.pTokenToXToken(pToken);
                const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  ['test', 'testPE'], (pToken as any).unassigned[0].token.open, pToken.open); // typeHack
+                  ['test', 'testPE'], (pToken as any).forValidation[0].token.open, pToken.open); // typeHack
 
                validator.write(declToken);
                validator.end();
@@ -2871,7 +2872,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
@@ -2884,7 +2885,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
                const declToken = elementDeclaration.pTokenToXToken(pToken);
                const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  ['test', 'testPE'], (pToken as any).unassigned[0].token.open, pToken.open);
+                  ['test', 'testPE'], (pToken as any).forValidation[0].token.open, pToken.open);
 
                validator.write(declToken);
                validator.end();
@@ -2892,7 +2893,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports no error when there is a literal and whitespace in the unassigned', (done) => {
+            it('reports no error when there is a literal and whitespace in the forValidation', (done) => {
                const pToken = new ElementDeclarationPToken({
                   open: SToken.fromString('<!'),
                   name: SToken.fromString('test'),
@@ -2900,7 +2901,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
@@ -2930,7 +2931,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
@@ -2945,7 +2946,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   }],
                });
                const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  ['test', 'testPE'], (pToken as any).unassigned[0].token.open, pToken.open);
+                  ['test', 'testPE'], (pToken as any).forValidation[0].token.open, pToken.open);
 
                validator.write(elementDeclaration.pTokenToXToken(pToken));
                validator.end();
@@ -2961,7 +2962,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
@@ -2976,12 +2977,53 @@ describe('CheckXTokenValidStream (unit)', () => {
                   }],
                });
                const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  ['test', 'testPE'], (pToken as any).unassigned[0].token.open, pToken.open);
+                  ['test', 'testPE'], (pToken as any).forValidation[0].token.open, pToken.open);
 
                validator.write(elementDeclaration.pTokenToXToken(pToken));
                validator.end();
 
                expectStream(validator, expected, done);
+            });
+
+            it('reports no validation error if parentheses are not balanced in sub-entities', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  forValidation: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: UnassignedType.ENTITY_START,
+                     token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: UnassignedType.WORD,
+                     token: new TextPToken({ text: SToken.fromString('(') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: UnassignedType.ENTITY_START,
+                     token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: UnassignedType.WORD,
+                     token: new TextPToken({ text: SToken.fromString(')') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+
+               validator.write(elementDeclaration.pTokenToXToken(pToken));
+               validator.end();
+
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports a validation error if parentheses are not balanced in the top entity', (done) => {
@@ -2992,7 +3034,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
@@ -3007,7 +3049,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   }],
                });
                const expected = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-                  ['test', 'testPE'], (pToken as any).unassigned[0].token.open, pToken.open);  //typeHack
+                  ['test', 'testPE'], (pToken as any).forValidation[0].token.open, pToken.open);  //typeHack
 
                validator.write(elementDeclaration.pTokenToXToken(pToken));
                validator.end();
@@ -3023,7 +3065,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      open: SToken.fromString('('),
                      names: [],
                   },
-                  unassigned: [{
+                  forValidation: [{
                      type: UnassignedType.ENTITY_START,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {

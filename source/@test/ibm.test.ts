@@ -171,7 +171,6 @@ describe('ibm tests', () => {
 
    fixTests();
 
-   let validCtr = 0;
    Object.keys(ibmValidTests).forEach(productionName => {
       Object.keys(ibmValidTests[productionName]).forEach(testName => {
          const skipTests: Array<string> = [];
@@ -192,11 +191,10 @@ describe('ibm tests', () => {
                let error = results.filter((token: any) => token.type === 'ERROR_TYPE' && token.subtype !== 'WARNING');
 
                if (error.length > 0) {
-                  validCtr ++;
-                  console.log('===>', error.length, `(${validCtr})`);
-                  console.log(`===> valid/${productionName}/${testName}`);
-                  console.log(error.map(item => `\t${(item as any).id}   (${(item as any).subtype})\n\t${(item as any).message}`).join('\n\t'));
+                  console.log(`valid/${productionName}/${testName} failed validity`);
+                  console.log(error.map((item: any) => `${item.id} : ${item.message}`).join('\n\t'));
                }
+               expect(error.length).toEqual(0);
             });
 
             gatherStream(toXml, (results) => {
@@ -302,16 +300,11 @@ describe('ibm tests', () => {
 
    for (const productionName in ibmInvalidTests) {
       for (const testName in ibmInvalidTests[productionName]) {
-         const skipTests: Array<string> = [
-            'ibm49i02.xml', // on disk but not in the docs or testcaes.xml file
-            'ibm49i01.xml', // parameter entity contains only part of a production
-            'ibm50i01.xml', // parameter entity contains only part of a production
-            'ibm51i01.xml', // parameter entity contains only part of a production
-            ];
+         const skipTests: Array<string> = [];
          const includeTests: Array<string> = [ ];
 
          if (skipTest(testName, skipTests, includeTests) || skipProduction(productionName)) {
-            return;
+            continue;
          }
 
          it(`passes invalid/${productionName}/${testName}`, (done) => {
@@ -337,9 +330,13 @@ describe('ibm tests', () => {
                   }, false);
 
                // Report unexpected errors.
-               if (!foundError && errors.length > 0) {
-                  console.log(`For invalid/${productionName}/${testName} found these errors:\n`);
-                  console.log(errors.map((item: any) => `${item.id} : ${item.message}`).join('\n\t'));
+               if (!foundError) {
+                  if (errors.length > 0) {
+                     console.log(`For invalid/${productionName}/${testName} found these errors:`);
+                     console.log(errors.map((item: any) => `${item.id} : ${item.message}`).join('\n\t'));
+                  } else {
+                     console.log(`For invalid/${productionName}/${testName} found no errors when we should have found ${invalidErrorCodes[testName]}`);
+                  }
                }
 
                expect(foundError).toEqual(true);
