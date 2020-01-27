@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { Transform } from 'stream';
@@ -6,9 +6,7 @@ import { Transform } from 'stream';
 import { EntityLocation, EntityMetaData, Offset } from 'basic';
 import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
-import { EntityExpandingStream } from '../../expand';
-
-import EntityManager from '../../expand/EntityManager';
+import { EntityExpanderStream } from '../../expand';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import PToXTokenStream from '../PToXTokenStream';
@@ -16,7 +14,7 @@ import PToXTokenStream from '../PToXTokenStream';
 describe('CheckXTokenValidStream (integration)', () => {
    let validator: CheckXTokenValidStream;
    let parser: PTokenStream;
-   let replacer: EntityExpandingStream;
+   let replacer: EntityExpanderStream;
 
    function gatherTokens(stream: Transform, cb: (tokens: any) => void) {
       const tokens: any = [];
@@ -37,13 +35,12 @@ describe('CheckXTokenValidStream (integration)', () => {
    }
 
    beforeEach(() => {
-      const entityManager = new EntityManager();
       const tokenizer = new PToXTokenStream();
 
       parser = new PTokenStream(new EntityMetaData());
       validator = new CheckXTokenValidStream();
-      replacer = new EntityExpandingStream(entityManager);
-      (parser as any).pipe(tokenizer).pipe(replacer).pipe(validator); // typeHack
+      replacer = new EntityExpanderStream(true);
+      (parser as any).pipe(replacer).pipe(tokenizer).pipe(validator); // typeHack
    });
 
    it('reports an error when the DOCTYPE and first element do not match', (done) => {
@@ -81,10 +78,7 @@ describe('CheckXTokenValidStream (integration)', () => {
       parser.addText('</one>');
       parser.endText();
 
-      gatherTokens(validator, (results) => {
-         expect(results[11]).toEqual(error);
-         done();
-      });
+      expectStream(validator, error, done);
    });
 
    it('reports an error when the an element type appears at an invalid place in the content', (done) => {

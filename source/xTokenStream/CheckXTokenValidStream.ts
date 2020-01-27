@@ -139,7 +139,7 @@ function getAttributeValueText(attribute: any): string {
    let newValue = '';
 
    rawValue.forEach((value: any) => { // typeHack
-      if (isTextXToken(value)) {
+      if (isTextXToken(value) || value.type === CHARDATA_XTOKEN) {
          newValue += value.text;
       }
    });
@@ -864,6 +864,7 @@ class CheckXTokenValidStream extends Transform {
                [attList.elementName, attDef.name, defaultText], pToken.open);
          }
       } else if (type === 'IDREF' || type === 'ENTITY') {
+
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ...of type IDREF or ENTITY must match the Name production;
