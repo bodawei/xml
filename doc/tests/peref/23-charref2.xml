@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!--
+   This fails because at the point of use, ge1 is incomplete. The parser assumes it
+   will find a complete entity in ge1
+-->
+<!DOCTYPE test [
+   <!ENTITY ge1 '&#38;'>
+   <!ENTITY ge2 'gt;'>
+]>
+<test>&ge1;&ge2;</test>

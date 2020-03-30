@@ -403,10 +403,6 @@ ordering of things is so weird. in 4.4.0 it says an unparsed entity reference sh
 - Why is an unparsed entity reference merely an "erorr" if in an entity value, but forbidden in an attribute value or content?
 
 
-
-
-
-
 # Entities
 The treatment of parameter entities can get really complex.  The relevant details are covered in sections
 2.8, 2.9, 4.1 and 5.1 of the standard. Most of this is straightforward. In many ways, the most crucial line in the stanard for non-validating (and standalone) processing is from §2.9 "...non-validating processors are not required to read them [parameter entities]". This has the somewhat surprising result that (depending on how you interpret "read", we can't expand parameter entity references anywhere in this mode.  The most surprising thing is that you can have parameter entities in markup delcarations in the internal subset if that declaration has gotten in there by way of a parameter entity.
@@ -445,3 +441,135 @@ Note that §2.4 in 1.0/1 said that you could have a & or < in the literal text o
 
 # Implementation
 * This doesn't scan all input to make sure it matches Char.  We check individual pieces. Often that is done indirectly.  Consider a nelement tag `<foo bar="baz"/>`. The `<`, ` `, `=`, and `/>` all are intrinsically good for just having been matched. `foo` and `bar` are checked to make sure they're legal names, and so are implicitily good.  We would only scan `baz`.
+
+
+
+
+---
+# NOTATION
+## Declarations
+- Notation declarations can be put anywhere in the internal or external DTD subset
+## References
+- Notations can be referenced from ENTITY declarations (`<!ENTITY ... NDATA notationName>`) that come either before or after the notation declaration
+- Notations can be referenced from ATTLIST attribute notation enumerations either before or after the notation declaration.
+- Notations can be referenced from ATTLIST attribute default values either before or after the notation declaration.
+- Notations can be referenced from attributes in element start tags in the content.
+
+# ELEMENT
+## Declarations
+- Element declarations can be put anywhere in the internal or external DTD subset
+## References
+- Element names can be referenced, of course, from the content portion of the document in start and end tags.  These are all (by definition) after all declarations.
+- Element names can be referenced from ATTLIST declarations (`<!ATTLIST elementName ...>`). their declarations can be before or after the ATTLIST declaration.
+- Element names can be referenced from content specs (children or mixed) in an element declaration. The named elements can be declared before or after (or not at all!) the element declaration
+
+# ATTLIST
+## Declarations
+- Attlist declarations can be put anywhere in the internal or external DTD subset
+## References
+- Attlists do not have a name, and so are not referenced anywhere
+- The individual attributes are referenced only from start (and empty) tags in the content of the document.
+
+# ENTITY
+## Declarations
+There are 8 kinds of entity declarations.
+
+### General entity
+|  | internal entity | external entity |
+|--|--|--|
+| internally declared | in internal subset `<!ENTITY foo "bar">` | in internal subset `<!ENTITY foo SYSTEM "foo.ent">` |
+| externally declared | in external subset `<!ENTITY foo "bar">`| in external subset `<!ENTITY foo SYSTEM "foo.ent">`|
+
+### Parameter entity
+|  | internal entity | external entity |
+|--|--|--|
+| internally declared | in internal subset `<!ENTITY % foo "bar">` | in internal subset `<!ENTITY % foo SYSTEM "foo.ent">` |
+| externally declared | in external subset `<!ENTITY % foo "bar">`| in external subset `<!ENTITY % foo SYSTEM "foo.ent">`|
+
+## References
+### General entity
+- in document content, between start and end tags.  By definiton this is always after the GE declarations
+- in attribute values of start/empty tags internal entities may be referenced. By definition this is after all declarations.
+- in general entity values: These can be before or after those entities are declared. indeed, if the entity is never referenced, the GE referenced in its value need not exist.
+- in attribute value defaults: These must follow the declaration of the general entity (§4.1)  (this is an odd requirement, in the overall scope of the specification)
+
+### Parameter entity
+- in the internal DTD subset between markup declarations. These must be after the declaration of the entity
+- in the external DTD subset between markup declarations. These must be after the declaration of the entity
+- In the external DTD subset within NOTATION, ATTLIST, ELEMENT and ENTITY markup declarations. (presumably anywhere after the `<!FOO` portion, always between space delimited boundaries, and in the case of ELEMENT declarations in restricted portions of the children production)
+- In the initial part of conditional sections (`<![%foo;[ ...`)
+- In entity values. In the declaration of internal entities, these must follow the declaration of the referenced entity (§4.1 and §4.5). In the bodies of external entity values, any PE refs must have been declared before this entity is used.
+
+
+# REPLACEMENT TEXT (§4.5)
+- internal entities expand char refs and pe refs
+- external do not do either.  
+
+# STANDALONE
+- Reminder, a standalone document does not mean that there are no markup declarations in external entities or subset, but just that such declarations can't affect the interpreation/validity of the document.
+
+
+# Summary of PERefs:
+- Internal entities have their perefs resolved at the point of declaration
+   - "resolved" means that the referenced entity is looked up. Thus it must already have been declared.
+- external entity A with a reference to entity B does not resolve B until A is used.
+- A character reference (once you find a &) must be entirely within one entity.
+- By 18 markup doesn't have to be so contained.
+
+In conclusion:
+- When we use an enternal entity, we must do the charref and peref resolution, but then we can dump the results into a parser and it is juse fine.  
+
+
+
+
+<!--
+   Revised hypothetical:
+
+   Issue: xmllint notices if a PE entity is not declared at the declaration of an entity value
+   Issue: xmllint doesn't allow % in an entity value
+
+   entity values are untouched until usage
+   At usage time, the algorithm is:
+      if content is a plain character, then ad that character to he parser
+      if content is a character reference, add that as a distinct character to the parser (essentially pass it through as a refence)
+      If it is a peref, then repeat, except that charrefs ar expanded to strings and addedto the parser value
+
+These can be used:
+- in dtd
+- in some markup declarations
+- in entity values
+
+
+
+NOTATIONS (4.7)
+   - no notes.
+   - xmllint NDATA values may be forward referenced
+ELEMENT (3.2)
+   - parsing
+      - Base parsing
+      - PERefExpansion parsing
+         These are both ok
+            <!ENTITY % fourfour "&#40;one&#41;">
+            <!ELEMENT four %fourfour;>
+            <!ENTITY % fivefive "&#37;fourfour;">
+            <!ELEMENT five %fivefive;>
+   - Questions:
+      √ Must PE Refs be before this?
+         xmllint barfs if it is not before (even if it is after it doesnot like it)
+         Note: toplevel pefefs must not have charrefs. but second order ones may
+      √ If the element declaration is never used, Do we care?
+         - how would you even know? (except for PERefs)
+      √ Must elment names be before this?
+         - can't tell from the spec. xmllint does not care. It honors it if it comes afterwards 
+            - Only warning if element is not declared (3.2)
+ENTITIES (4.1)
+   The declaration of a parameter entity must precede any reference to it.
+   Similarly, the declaration of a general entity must precede any
+   attribute-list declaration containing a default value with a direct
+   or indirect reference to that general entity.
+
+ATTLIST (3.3)
+   It is an error if an attribute value contains a reference to
+   an entity for which no declaration has been read.  (3.3.3)
+   - default entity names can be forward referenced
+-->

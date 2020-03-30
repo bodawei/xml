@@ -130,7 +130,7 @@ const report = {
 };
 
 const test = {
-   _karmaPrecommit: `karma start ${BUILD_DIR}/karma-precommit.js --browsers ${BROWSERS.join(',')}`,
+   _karmaPrecommit: `karma start ${BUILD_DIR}/karma-precommit.js --browsers ChromeHeadless`, // ${BROWSERS.join(',')}`,
    _karmaLive: `karma start ${BUILD_DIR}/karma-live.js --browsers Chrome`, // ChromeHeadless
 
    // NOTE!  This does not yet run with typescript at all.
@@ -149,12 +149,16 @@ const publicInterface = {
       '_clean',
       '_setup',
       '_deriveLocale',
-      '_eslint',
+      // '_eslint',
 //      '_nodeTest',
       '_karmaPrecommit', // Arguably should be running the dist/ code
       // '_buildPackage',
       // '_buildES5Files',
       '_makeCoverageSummary',
+      '_makeTestSummary',
+      '_printTestAndCoverageSummaries',
+   ],
+   hack: [
       '_makeTestSummary',
       '_printTestAndCoverageSummaries',
    ],

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!--
+   These two char refs have the same effect. Both introduce a > into the text.
+-->
+<!DOCTYPE test [
+   <!ENTITY ge1 '&gt;'>
+   <!ENTITY ge2 '&#38;gt;'>
+]>
+<test>&ge1;&ge2;</test>

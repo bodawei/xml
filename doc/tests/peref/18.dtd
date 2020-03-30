@@ -1,0 +1,8 @@
+<!ELEMENT test ANY>
+
+<!ENTITY % pe3 "&#60;!ENTITY one">
+<!ENTITY % pe4 ' "xxx">'>
+
+<!ENTITY % pe1 "%pe3;%pe4;">
+
+%pe1;

@@ -35,7 +35,7 @@ import {
    CHARDATA_PTOKEN,
 } from 'token';
 import { AttributePToken } from 'source/token/common/attribute';
-import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
+import { EntityValuePToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
 import { STokenSource, SToken, strOrBlank } from 'sToken';
 import { defaultExtractors } from 'extractor';
@@ -50,18 +50,19 @@ import { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned 
 import { DocTypeStartPToken } from 'source/token/docTypeStart';
 import { DocTypeEndPToken } from 'source/token/docTypeEnd';
 import { XmlWarning, WellFormedError, ValidityError } from 'error';
+// import { expandUnassigned } from './expandUnassined.ts.x';
 
 type GeneralEntityInfo = {
    token: GeneralEntityDeclarationPToken;
    isUnparsed: boolean;
    isInternal: boolean;
-   cache?: ExpandedLiteralValuePToken
+   cache?: EntityValuePToken
 };
 
 type ParameterEntityInfo = {
    token: ParameterEntityDeclarationPToken;
    isInternal: boolean;
-   cache?: ExpandedLiteralValuePToken
+   cache?: EntityValuePToken
    unssignedCache?: UnassignedArray,
 };
 
@@ -83,7 +84,7 @@ type Done = () => void;
 type ExpandToken = (token: PToken, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
 type ProcessBody = (sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken, done: STokenSourceProcessed) => void;
-type ProcessForEntityValue = (sTokenSource: STokenSource, done: (results: ExpandedLiteralValuePToken) => void) => void;
+type ProcessForEntityValue = (sTokenSource: STokenSource, done: (results: EntityValuePToken) => void) => void;
 type STokenSourceProcessed = () => void;
 type DeliverAToken = (token: Token) => boolean;
 type Processors = {
@@ -418,10 +419,23 @@ class EntityExpander {
     */
    private handleElementDeclaration(pToken: ElementDeclarationPToken, handled: TokenHandled) {
       this.expandUnassigned(pToken.unassigned, true, (newUnassigned) => {
-         pToken.unassigned = newUnassigned as any; // typeHack
-         assignUnassigned(pToken);
+            pToken.unassigned = newUnassigned as any; // typeHack
+            assignUnassigned(pToken);      // if (pToken.unassigned) {
+      //    expandUnassigned(pToken.unassigned, {
+      //       isElementDecl: true,
+      //       paramEntitiesByName: this.paramEntitiesByName,
+      //       retrieveExternalEntity: this.processors.retrieveExternalEntity,
+      //       emd: this.emd,
+      //    }, (newUnassigned) => {
+      //       pToken.unassigned = newUnassigned as any; // typeHack
+      //       assignUnassigned(pToken);
+      //       this.deliverAToken(pToken);
+      //       handled();
+      //    });
+      // } else {
          this.deliverAToken(pToken);
          handled();
+      // }
       });
    }
 
@@ -889,9 +903,9 @@ class EntityExpander {
       this.processEntity(info.token, processToken, entityProcessed);
    }
 
-   private expandEntityValue(value: ExpandedLiteralValuePToken, valueProcessed: (newValue: ExpandedLiteralValuePToken) => void) {
+   private expandEntityValue(value: EntityValuePToken, valueProcessed: (newValue: EntityValuePToken) => void) {
       this.retrieveExternalParameterEntities(value, () => {
-         let newValue: ExpandedLiteralValuePToken = [];
+         let newValue: EntityValuePToken = [];
 
          for (let element of value) {
             if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
@@ -913,7 +927,7 @@ class EntityExpander {
       });
    }
 
-   private retrieveExternalParameterEntities(value: ExpandedLiteralValuePToken, done: Done) {
+   private retrieveExternalParameterEntities(value: EntityValuePToken, done: Done) {
       const missingParameterEntities: Array<ParameterEntityInfo> = [];
 
       for (let element of value) {
@@ -945,7 +959,7 @@ class EntityExpander {
             // typeHack
             const sTokenSource = this.processors.retrieveExternalEntity(loopInfo.token.externalId!, this.emd);
 
-            this.processors.processForEntityValue(sTokenSource, (results: ExpandedLiteralValuePToken) => {
+            this.processors.processForEntityValue(sTokenSource, (results: EntityValuePToken) => {
                // Note: Could be getting a TextDecl here
                this.expandEntityValue(results, (newResult) => {
                   loopInfo.cache = newResult;

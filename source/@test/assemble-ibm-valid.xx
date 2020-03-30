@@ -1,0 +1,55 @@
+const fs = require('fs');
+
+
+function assembleValid(rootPath) {
+   const sets = fs.readdirSync(rootPath);
+   const results = {
+      tests: {},
+      resources: {}
+   };
+
+   sets.forEach(setName => {
+      if (setName === '.DS_Store') {
+         return;
+      }
+
+      results.tests[setName] = {};
+      results.resources[setName] = {};
+
+      const setPath = rootPath + '/' + setName;
+      const testFiles = fs.readdirSync(setPath);
+
+      testFiles.forEach(filename => {
+         const outExists = fs.existsSync(setPath + '/out/' + filename);
+
+         if (filename.indexOf('.xml') !== -1 && outExists) {
+            const input = fs.readFileSync(setPath + '/' + filename, { encoding: 'utf-8' });
+            const output = fs.readFileSync(setPath + '/out/' + filename, { encoding: 'utf-8' });
+
+            results.tests[setName][filename] = {
+               input,
+               output,
+            };
+         } else if (filename.indexOf('.ent') !== -1 || filename.indexOf('.dtd') !== -1) {
+            results.resources[setName][filename] = fs.readFileSync(setPath + '/' + filename, { encoding: 'utf-8' });
+         }
+      });
+   });
+
+   return results;
+}
+
+function assembleAll() {
+   const results10r3 = assembleValid('./xmlconf/ibm/valid');
+   const results11r1 = assembleValid('./xmlconf/ibm/xml-1.1/valid');
+
+   fs.writeFileSync('ibm-valid-10.ts', `const testData = ${JSON.stringify({
+      ibm: results10r3,
+   }, undefined, 4)}\nexport default testData;\n`);
+
+   fs.writeFileSync('ibm-valid-11.ts', `const testData = ${JSON.stringify({
+      ibm: results11r1,
+   }, undefined, 4)}\nexport default testData;\n`);
+}
+
+assembleAll();

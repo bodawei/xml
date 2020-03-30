@@ -1,0 +1,6 @@
+<!ELEMENT test ANY>
+
+<!ENTITY % peExt SYSTEM '19.ent'>
+<!ENTITY % peInt '(internal value)'>
+
+<!ENTITY ge "[%peExt;]">

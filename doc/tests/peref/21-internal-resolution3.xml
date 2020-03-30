@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!--
+See the DTD for details of this test
+-->   
+<!DOCTYPE test SYSTEM "./21.dtd">
+<test>&ge;</test>

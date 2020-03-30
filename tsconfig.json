@@ -45,7 +45,7 @@
    "include": [
       "build/**/*jasmine*.js",
       "source/**/*.js",
-      "source/**/*.ts"
+      "source/**/*.ts",
    ],
    "exclude": [
       "node_modules",

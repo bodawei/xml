@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+   This also fails because in ge3 we expect to find a complete reference in ge1.
+   You can change ge1 to &#38;#38; here or in 23 and it will work fine, then.
+-->
+<!DOCTYPE test [
+   <!ENTITY ge1 '&#38;'>
+   <!ENTITY ge2 'gt;'>
+   <!ENTITY ge3 '&ge1;&ge2;'>
+]>
+<test>&ge3;</test>

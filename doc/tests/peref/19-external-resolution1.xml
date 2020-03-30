@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!--
+Demonstrates that an external entity with PE ref's in it have those refs resolved at time of use.
+Notice that peExt refers to peInt which is declared after the declaration of the extrnal,
+but the use of the external is after the declaration of internal.
+-->   
+<!DOCTYPE test SYSTEM "./19.dtd">
+<test>&ge;</test>

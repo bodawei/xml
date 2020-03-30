@@ -1,6 +1,10 @@
-<!ELEMENT a ANY>
-<!ELEMENT b ANY>
-<!ENTITY % cpa "( a | b">
-<!ENTITY % cpb ")">
-<!ENTITY % cp "%cpa;%cpb;">
-<!ELEMENT one %cp;>
+<!-- 
+   While 16 shows that you can't have a content model cross PE refs in the element declaration,
+   this shows that the content model can cross PE refs if they are processed a level "above"
+   the element delcaration. That is, the rule from the standard only applies to the usage
+   in the element declaration, not recursively across all PE refs
+-->
+<!ENTITY % fiveA "&#40;one">
+<!ENTITY % fiveB "&#41;">
+<!ENTITY % fiveIndirect "%fiveA;%fiveB;">
+<!ELEMENT five %fiveIndirect;>

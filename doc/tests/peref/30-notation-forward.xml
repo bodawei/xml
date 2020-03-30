@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+   Demonstrates that a nontation reference can come before the notation is declared
+-->
+<!DOCTYPE test [
+   <!ELEMENT test ANY>
+   <!ATTLIST test
+      one ENTITY #IMPLIED
+      note NOTATION (notat) "notat"
+   >
+
+   <!ENTITY bogus SYSTEM "foo.txt" NDATA notat>
+   <!NOTATION notat SYSTEM "whatever.jpg">
+]>
+<test one="bogus" note="notat"></test>

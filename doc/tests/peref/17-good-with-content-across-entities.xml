@@ -1,5 +1,3 @@
 <?xml version="1.0"?>
-<!DOCTYPE one SYSTEM "./17.dtd">
-<one>
-<a/>
-</one>
+<!DOCTYPE five SYSTEM "./17.dtd">
+<five><one><a/></one></five>

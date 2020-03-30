@@ -1,0 +1,10 @@
+<!ELEMENT test ANY>
+
+<!ENTITY % pe1 '(This is an internal with a reference to PE2: %pe2;)'>
+
+<!--
+   Unlike 19 and 20, this demonstrates that a peref in an internal entity is resolved immediately, and not at use.
+-->
+<!ENTITY % pe2 '(internal value)'>
+
+<!ENTITY ge "[%pe1;]">

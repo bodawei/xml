@@ -77,6 +77,7 @@ type ExtractorContext = {
 \**********************************************************************/
 
 class STokenSource {
+   public errors: Array<Error>;
    private _info: EntityMetaData;
    private _extractorInfo: ExtractorMap;
    public _segments: Array<Segment>; // typeHack for testing
@@ -88,6 +89,7 @@ class STokenSource {
    private _resuming?: boolean;
 
    constructor(extractorInfo: ExtractorMap, info: EntityMetaData) {
+      this.errors = [];
       this._info = info;
       this._extractorInfo = extractorInfo;
 

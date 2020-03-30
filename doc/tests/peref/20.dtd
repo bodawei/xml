@@ -1,0 +1,12 @@
+<!ELEMENT test ANY>
+
+<!ENTITY % peExt SYSTEM '20.ent'>
+
+<!ENTITY ge "[%peExt;]">
+<!--
+   peInt is needed by the ge entity, immediately above, but it isn't declared yet.
+   The point of this is that we do not wait on expanding the peref in ge until the ge is used,
+   but instead at the point of declaration.
+-->
+
+<!ENTITY % peInt '(internal value)'>

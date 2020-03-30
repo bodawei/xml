@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!--
+   This also fails because in ge3 we expect to find a complete reference in ge1.
+   You can change ge1 to &#38;#38; here or in 23 and it will work fine, then.
+-->
+<!DOCTYPE test SYSTEM '25.dtd'>
+<test>&ge3;</test>

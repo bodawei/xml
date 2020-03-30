@@ -1,11 +1,15 @@
 {
    "name": "xt4j",
-   "version": "0.167.0",
+   "version": "0.168.0",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
    "license": "UNLICENCED",
    "private": true,
+   "scripts": {
+      "test": "xclap live",
+      "test:cover": "xclap precommit"
+   },
    "devDependencies": {
       "@types/jasmine": "^3.5.1",
       "@types/node": "^13.1.8",

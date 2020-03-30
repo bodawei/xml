@@ -10,6 +10,7 @@ import misc from './common/misc';
 import externalId, { ExternalId } from './common/externalId';
 import literal, { LiteralValuePToken } from './common/literal';
 import { UnassignedValue } from './common/unassigned';
+import { CharRefPToken } from './charRef';
 import { TextPToken } from './text';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
@@ -23,7 +24,7 @@ import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } fr
  declaration.
 \**********************************************************************/
 
-type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type EntityValuePToken = Array<TextPToken|CharRefPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
 
 /**********************************************************************\
  parse() extracts extracts the STokens that make up a general or
@@ -200,5 +201,5 @@ function parseClose(source: STokenSource, pToken: GeneralEntityDeclarationPToken
 export {
    parse as parseEntityDeclaration,
 
-   ExpandedLiteralValuePToken,
+   EntityValuePToken,
 };

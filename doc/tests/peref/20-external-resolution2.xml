@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!--
+This is the same as 19, but the internal declaration is declared after the use of the external entity
+which means it will error
+-->   
+<!DOCTYPE test SYSTEM "./20.dtd">
+<test>&ge;</test>

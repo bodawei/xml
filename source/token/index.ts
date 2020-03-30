@@ -73,6 +73,8 @@ export * from './text';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
+import { ExternalId } from './common/externalId';
+
 type PToken =
    | EntityMetaData
    | AttListPToken
@@ -132,6 +134,7 @@ export {
 
    unassigned,
    literalValue,
+   ExternalId,
    PToken,
 
    getFirstSToken,

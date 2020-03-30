@@ -1,0 +1,2 @@
+#! /bin/sh
+xmllint --loaddtd  --noent  --valid "$1"

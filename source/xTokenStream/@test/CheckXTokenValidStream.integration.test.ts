@@ -6,7 +6,7 @@ import { Transform } from 'stream';
 import { EntityLocation, EntityMetaData, Offset } from 'basic';
 import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
-import { EntityExpanderStream } from '../../expand';
+import { EntityExpanderStream } from '../../expand/index';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import PToXTokenStream from '../PToXTokenStream';

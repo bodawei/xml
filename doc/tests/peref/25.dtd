@@ -1,0 +1,10 @@
+<!ELEMENT test ANY>
+
+<!--
+   This is interesting because it shows that we can construct an entity reference
+   from multiple entities.
+-->
+<!ENTITY foo '(FOO)'>
+<!ENTITY % pe1 SYSTEM '25.ent'>
+<!ENTITY % pe2 'foo;'>
+<!ENTITY ge3 '%pe1;%pe2;'>
