@@ -9,13 +9,7 @@ import {
    ParameterEntityEndPToken,
 } from 'token';
 
-import { EntityProcessors, ParameterEntityInfo, ParameterEntityMap } from './types';
-
-type ExpandParams = {
-   entityCache: ParameterEntityMap,
-   utils: EntityProcessors,
-   emd: EntityMetaData,
-};
+import { ExpandParams, ParameterEntityInfo, ParameterEntityMap } from './types';
 
 type Done = (errors: Array<Error>) => void;
 
@@ -72,7 +66,7 @@ function populateMissingEntities(
       const sTokenSource: STokenSource =
          utils.retrieveExternalEntity(entityInfo.token.externalId!, emd);
 
-      utils.processForEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken) => {
+      utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken) => {
          expandEntityValue(entityValuePToken, expandParams, (expandedEntityValue) => {
             entityInfo.valueCache = expandedEntityValue;
             seekingCount --;
@@ -105,8 +99,8 @@ function expandEntityValue(
       value: EntityValuePToken,
       expandParams: ExpandParams,
       expanded: (newValue: EntityValuePToken, errors: Array<Error>) => void) {
-   const { entityCache } = expandParams;
-   const missingEntities = findUncachedEntities(value, entityCache);
+   const { peDeclCache } = expandParams;
+   const missingEntities = findUncachedEntities(value, peDeclCache);
 
    populateMissingEntities(missingEntities, expandParams, (errors: Array<Error>) => {
       let newValue: EntityValuePToken = [];
@@ -114,7 +108,7 @@ function expandEntityValue(
       for (let element of value) {
          if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
             const entryName = strOrBlank(element.name);
-            const peInfo = entryName === '' ? undefined : entityCache[entryName];
+            const peInfo = entryName === '' ? undefined : peDeclCache[entryName];
 
             if (peInfo) {
                newValue.push(new ParameterEntityStartPToken(element));

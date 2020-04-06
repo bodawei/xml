@@ -1,0 +1,136 @@
+/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* eslint-env jasmine */
+
+import { EntityMetaData } from 'basic';
+import { toSToken, STokenSource } from 'sToken';
+import {
+   ExternalId,
+
+   CharRefPToken,
+   EntityValuePToken,
+   ParameterEntityDeclarationPToken,
+   ParameterEntityEndPToken,
+   ParameterEntityReferencePToken,
+   ParameterEntityStartPToken,
+   TextPToken,
+   GeneralEntityReferencePToken,
+   GeneralEntityDeclarationPToken,
+   GeneralEntityEndPToken,
+   GeneralEntityStartPToken,
+} from 'token';
+
+import { ExpandRefParams, expandGeneralEntityReference } from '../expandGeneralEntityReference';
+
+fdescribe('expandGeneralEntityReference() (unit)', () => {
+
+   beforeEach(() => {
+   });
+
+   it('returns the parsing of a GE Ref for an attribute value', (done) => {
+      const results: Array<any> = [];
+      const testRefernce = new GeneralEntityReferencePToken({ open: toSToken('&'), name: toSToken('one') });
+      const testParams: ExpandRefParams = {
+         geDeclarationCache: {
+            one: {
+               token: new GeneralEntityDeclarationPToken({ start: toSToken('<!') }),
+               isInternal: true,
+               isUnparsed: false,
+               valueCache: [ new TextPToken({ text: toSToken('wowzers') }) ],
+            },
+         },
+         emd: new EntityMetaData(),
+         deliver(result: Array<any>) {
+            results.push(...result);
+         },
+      };
+
+      expandGeneralEntityReference(testRefernce, testParams, () => {
+         expect(results).toEqualRangeless([
+            new GeneralEntityStartPToken(testRefernce),
+            new TextPToken({ text: toSToken('wowzers') }),
+            new GeneralEntityEndPToken(testRefernce),
+         ]);
+         done();
+      });
+   }); 
+
+   it('returns the parsing of a GE Ref for an attribute value that contains an indirect GE Ref', (done) => {
+      const results: Array<any> = [];
+      const testRefernce = new GeneralEntityReferencePToken({ open: toSToken('&'), name: toSToken('one') });
+      const testInnerReference = new GeneralEntityReferencePToken({ open: toSToken('&'), name: toSToken('two'), close: toSToken(';'), nameSpace: undefined, openSpace: undefined });
+      const testParams: ExpandRefParams = {
+         geDeclarationCache: {
+            one: {
+               token: new GeneralEntityDeclarationPToken({ start: toSToken('<!') }),
+               isInternal: true,
+               isUnparsed: false,
+               valueCache: [
+                  new CharRefPToken({ open: toSToken('&#'), charCode: 38 }),
+                  new TextPToken({ text: toSToken('two;') }),
+               ],
+            },
+            two: {
+               token: new GeneralEntityDeclarationPToken({ start: toSToken('<!') }),
+               isInternal: true,
+               isUnparsed: false,
+               valueCache: [ new TextPToken({ text: toSToken('(two)') }) ],
+            },
+         },
+         emd: new EntityMetaData(),
+         deliver(result: Array<any>) {
+            results.push(...result);
+         },
+      };
+
+      expandGeneralEntityReference(testRefernce, testParams, () => {
+         expect(results).toEqualRangeless([
+            new GeneralEntityStartPToken(testRefernce),
+            new GeneralEntityStartPToken(testInnerReference),
+            new TextPToken({ text: toSToken('(two)') }),
+            new GeneralEntityEndPToken(testInnerReference),
+            new GeneralEntityEndPToken(testRefernce),
+         ]);
+         done();
+      });
+   }); 
+
+   it('returns the parsing of a GE Ref for an attribute value that contains a direct GE Ref', (done) => {
+      const results: Array<any> = [];
+      const testRefernce = new GeneralEntityReferencePToken({ open: toSToken('&'), name: toSToken('one') });
+      const testInnerReference = new GeneralEntityReferencePToken({ open: toSToken('&'), name: toSToken('two'), close: toSToken(';'), nameSpace: undefined, openSpace: undefined });
+      const testParams: ExpandRefParams = {
+         geDeclarationCache: {
+            one: {
+               token: new GeneralEntityDeclarationPToken({ start: toSToken('<!') }),
+               isInternal: true,
+               isUnparsed: false,
+               valueCache: [
+                  new TextPToken({ text: toSToken('&two;') }),
+               ],
+            },
+            two: {
+               token: new GeneralEntityDeclarationPToken({ start: toSToken('<!') }),
+               isInternal: true,
+               isUnparsed: false,
+               valueCache: [ new TextPToken({ text: toSToken('(two)') }) ],
+            },
+         },
+         emd: new EntityMetaData(),
+         deliver(result: Array<any>) {
+            results.push(...result);
+         },
+      };
+
+      expandGeneralEntityReference(testRefernce, testParams, () => {
+         expect(results).toEqualRangeless([
+            new GeneralEntityStartPToken(testRefernce),
+            new GeneralEntityStartPToken(testInnerReference),
+            new TextPToken({ text: toSToken('(two)') }),
+            new GeneralEntityEndPToken(testInnerReference),
+            new GeneralEntityEndPToken(testRefernce),
+         ]);
+         done();
+      });
+   }); 
+
+});

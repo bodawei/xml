@@ -1,0 +1,103 @@
+Expanding things. These all happen in entityExpander
+
+Remember: All internal entity declarations already have their values parsed as EntityValuePTokens
+AttList defaults should be parsed as an AttValuePToken (which is almost the same, but no PERef recotniation
+
+
+BACKLOG TASKS
+- Finish prepareEntityValue
+   - Extract tests from expandEntityValue.test.ts
+   - Do an integration test for expandEntityValue.test.ts
+   - Refactor out the prepareEntityValue from expandEntityValue
+   - Need a a basic Error for retrieval problems
+
+
+Each time an entity declaration is encountered:
+1) expandEntityValues
+   Whenever a PERef is encountered in an entity value, replaced by PEStart, <expanded contents>, PEEnd  if it is declared (validation will complain if not)
+      Since all previous internal PE Declaration values will already be expanded, we simply need to inline.
+      However, if there is an external PE
+*        need to load
+         parse as EntityValuePToken
+         expandEntityValues any PERefs in that.
+         then inline results with PEStart, <expanded content> PEEnd
+   End result: All Entity values are fully inlined
+   ** We should be doing WF Checks on the expansions.  We are not.
+   ** Where are we reporting missing references?  Those get eaten by our utility routines.
+
+2) expndPeRefInDTD
+   - The target of the ref may not exist.  Need to look it up and then do the following.
+   This will parse the PE EntityValuePToken as a normal PToken(Stream)
+      This should never cause anything to need to be loaded, as all PErefs should be ready by this point.
+      This involves taking a PERef's value and feedingthrough processSTokenSource() with a validity flag
+   - The resulting tokens should be WF checked.  That isn't happening.
+   ----
+   expandPERefInDtd(ref, caches, emd, itemDone)
+         itemDone({ type: item, token} | { type: done, errors: [])
+      prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+         if it is already there, just return
+         if it is not, load, parse,
+            recurse on PERefs
+      √ entityValueToSTokenSource(value);
+      wrapperProcessTokenSource:   Will build at least a PTokenStream, and possibly a checking Stream
+         Each token will come through
+
+
+3) PERefInMarkup
+   This will parse the PE EntityValuePToken as an unassigned thing.
+      This is not done as a (stream).
+      Crucially, this should be doing a WF check.
+      Also, the Entity declarations and attlist should have values parsed (!)
+   -----
+   expandMarkupDeclaration(markupDecl, caches, emd, checkwf, itemDone)
+      prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+         if it is already there, just return
+         if it is not, load, parse,
+            recurse on PERefs
+      √ entityValueToSTokenSource(value);
+      unassigned parsing
+
+
+4) AttributeValues
+   Loop through attvalue
+      - if a geref look up the relevant entity declaratin
+*        - load and parse if needed
+               - doing expandEntityValues in the process
+      - parse as att value
+         - That may have sub-gerefs that will need to be expanded as well
+      - The whole attvalue should maybe be WF checked somewhere.  That's probably all validity checking
+   ----
+   << we probably want to have a thing which takes a start, empty or attlist and process it>>
+   expandAttributeValue(attribute, caches, emd, itemDone)
+      loop over attribute things.  For any gerefs
+         prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+            if it is already there, just return
+            if it is not, load, parse,
+               recurse on PERefs
+         √ entityValueToSTokenSource(value);
+         do an attribute parsing
+      itemDone( carries the whole attribtue value)
+
+
+5) GeRefInBody
+      - if a geref look up the relevant entity declaratin
+*        - load and parse if needed
+               - doing expandEntityValues in the process
+      - parse as body
+         - May include other gerefs
+         - need to do wf checking here
+   ----
+   expandGerefInContent(ref, caches, emd, itemDone)
+         itemDone({ type: item, token} | { type: done, errors: [])
+      prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+         if it is already there, just return
+         if it is not, load, parse,
+            recurse on PERefs
+      √ entityValueToSTokenSource(value);
+      wrapperProcessTokenSource:   Will build at least a PTokenStream, and possibly a checking Stream
+         Each token will come through
+
+
+QUESTION 1: Should body go expansion go through entity expander or 
+
+

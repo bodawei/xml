@@ -119,7 +119,7 @@ fdescribe('expandEntityValue() (unit)', () => {
 
    it('returns an EntityValuePToken that references an external entity that needs to be retrieved', (done) => {
       params.utils.retrieveExternalEntity = (externalId, emd) => new STokenSource({}, emd);
-      params.utils.processForEntityValue = (sToken, done) => {
+      params.utils.processForEntityValue = (sTokenStream, done) => {
          done([ textPToken, textPToken ]);
       };
       const value: EntityValuePToken = [ textPToken, charRefPToken, peRefPToken ];
@@ -136,7 +136,7 @@ fdescribe('expandEntityValue() (unit)', () => {
       const peStartPToken2 = new ParameterEntityStartPToken(peRefPToken2);
       const peEndPToken2 = new ParameterEntityEndPToken(peRefPToken2)
       params.utils.retrieveExternalEntity = (externalId, emd) => new STokenSource({}, emd);
-      params.utils.processForEntityValue = (sToken, done) => {
+      params.utils.processForEntityValue = (sTokenStream, done) => {
          callbacks.push(done);
       }
       const value: EntityValuePToken = [ textPToken, peRefPToken2, charRefPToken, peRefPToken ];
@@ -151,9 +151,33 @@ fdescribe('expandEntityValue() (unit)', () => {
       callbacks[1]([ textPToken, textPToken, textPToken ]);
    });
 
+   it('returns an EntityValuePToken that references a pe entity that then references another', (done) => {
+      let call = 0;
+      const peRefPToken2 = new ParameterEntityReferencePToken({ open: toSToken('&'), name: toSToken('pe2') });
+      const peStartPToken2 = new ParameterEntityStartPToken(peRefPToken2);
+      const peEndPToken2 = new ParameterEntityEndPToken(peRefPToken2)
+      params.utils.retrieveExternalEntity = (externalId, emd) => new STokenSource({}, emd);
+      params.utils.processForEntityValue = (sTokenStream, done) => {
+         call ++;
+
+         if (call === 1) {
+            done([ textPToken, peRefPToken2, textPToken ]);
+         } else {
+            done([ textPToken ]);
+         }
+      }
+      const value: EntityValuePToken = [ textPToken, charRefPToken, peRefPToken ];
+
+      expandEntityValue(value, params, (result) => {
+         expect(result).toEqual([textPToken, charRefPToken, peStartPToken, textPToken,
+            peStartPToken2, textPToken, peEndPToken2, textPToken, peEndPToken]);
+         done();
+      });
+   });
+
    it('returns an EntityValuePToken with two references to a single external entity, while only trying to retrieve it one time', (done) => {
       params.utils.retrieveExternalEntity = (externalId, emd) => new STokenSource({}, emd);
-      params.utils.processForEntityValue = jasmine.createSpy('processForEntityValues').and.callFake((sToken, done) => {
+      params.utils.processForEntityValue = jasmine.createSpy('processForEntityValues').and.callFake((sTokenStream, done) => {
          done([ textPToken ]);
       });
       const value: EntityValuePToken = [ textPToken, peRefPToken, charRefPToken, peRefPToken ];
@@ -169,7 +193,7 @@ fdescribe('expandEntityValue() (unit)', () => {
       const externalId: any = { externalId: true };
       params.entityCache.pe1.token = new ParameterEntityDeclarationPToken({ open: toSToken('<!'), externalId });
       params.utils.retrieveExternalEntity = jasmine.createSpy('retrieveExternalEntity').and.returnValue(new STokenSource({}, new EntityMetaData()));
-      params.utils.processForEntityValue = jasmine.createSpy('processForEntityValues').and.callFake((sToken, done) => {
+      params.utils.processForEntityValue = jasmine.createSpy('processForEntityValues').and.callFake((sTokenStream, done) => {
          done([ textPToken ]);
       });
       const value: EntityValuePToken = [ textPToken, peRefPToken, charRefPToken, peRefPToken ];
@@ -183,7 +207,7 @@ fdescribe('expandEntityValue() (unit)', () => {
    it('calls processForEntityValue() withwith the token source from retrieveExternalEntity() and a callback function', (done) => {
       const sTokenSource = new STokenSource({}, new EntityMetaData());
       params.utils.retrieveExternalEntity = jasmine.createSpy('retrieveExternalEntity').and.returnValue(sTokenSource);
-      params.utils.processForEntityValue = jasmine.createSpy('processForEntityValues').and.callFake((sToken, done) => {
+      params.utils.processForEntityValue = jasmine.createSpy('processForEntityValues').and.callFake((sTokenStream, done) => {
          done([]);
       });
       const value: EntityValuePToken = [ textPToken, peRefPToken, charRefPToken, peRefPToken ];
@@ -204,7 +228,7 @@ fdescribe('expandEntityValue() (unit)', () => {
 
          return source;
       };
-      params.utils.processForEntityValue = (sToken, done) => {
+      params.utils.processForEntityValue = (sTokenStream, done) => {
          done([]);
       }
       const value: EntityValuePToken = [ textPToken, peRefPToken2, charRefPToken, peRefPToken ];
@@ -213,13 +237,12 @@ fdescribe('expandEntityValue() (unit)', () => {
          expect(errors).toEqual([new Error('Error #1'), new Error('Error #2')]);
          done();
       });
-
    });
 
    it('makes only one call back when external entity retrieval is synchronous', () => {
       const peRefPToken2 = new ParameterEntityReferencePToken({ open: toSToken('&'), name: toSToken('pe2') });
       params.utils.retrieveExternalEntity = (externalId, emd) => new STokenSource({}, emd);
-      params.utils.processForEntityValue = (sToken, done) => {
+      params.utils.processForEntityValue = (sTokenStream, done) => {
          done([]);
       }
       const value: EntityValuePToken = [ textPToken, peRefPToken2, charRefPToken, peRefPToken ];
