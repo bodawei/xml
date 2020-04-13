@@ -1,28 +1,27 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* eslint-env jasmine */
 
-type Handler = () => void;
+type Handler = (param: object) => void;
 
 class LoadingEmitter {
-   private listeners: Array<Handler>;
- 
-   constructor() {
-      this.listeners = [];
-   }
+    private listeners: Array<Handler>;
 
-   once(eventName: string, handler: Handler) {
-      this.listeners.push(handler);
-   }
+    constructor() {
+        this.listeners = [];
+    }
 
-   emit(eventName: string) {
-      const onceListeners = this.listeners;
-      this.listeners = [];
+    once(eventName: string, handler: Handler): void {
+        this.listeners.push(handler);
+    }
 
-      for (let listener of onceListeners) {
-         listener();
-      }
-   }
+    emit(eventName: string, param: object): void {
+        const onceListeners = this.listeners;
+        this.listeners = [];
+
+        for (const listener of onceListeners) {
+            listener(param);
+        }
+    }
 }
 
-export {
-   LoadingEmitter,
-}
+export { LoadingEmitter };

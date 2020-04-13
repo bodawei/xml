@@ -1,12 +1,10 @@
 import { EntityMetaData } from 'basic';
 import { STokenSource, strOrBlank } from 'sToken';
 import {
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-
-   EntityValuePToken,
-
-   ParameterEntityStartPToken,
-   ParameterEntityEndPToken,
+    PARAMETER_ENTITY_REFERENCE_PTOKEN,
+    EntityValuePToken,
+    ParameterEntityStartPToken,
+    ParameterEntityEndPToken,
 } from 'token';
 
 import { ExpandParams, ParameterEntityInfo, ParameterEntityMap } from './types';
@@ -17,21 +15,24 @@ type Done = (errors: Array<Error>) => void;
  * Simply sweep through an EntityValuePToken and return any ParameterEntityInfo's
  * found that do not already have a cached EntityValuePToken value.
  */
-function findUncachedEntities(value: EntityValuePToken, entityCache: ParameterEntityMap): Array<ParameterEntityInfo> {
-   const uncachedEntities: Array<ParameterEntityInfo> = [];
+function findUncachedEntities(
+    value: EntityValuePToken,
+    entityCache: ParameterEntityMap,
+): Array<ParameterEntityInfo> {
+    const uncachedEntities: Array<ParameterEntityInfo> = [];
 
-   for (let subToken of value) {
-      if (subToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-         const elementName = strOrBlank(subToken.name);
-         const peInfo = elementName !== '' && entityCache[elementName];
+    for (const subToken of value) {
+        if (subToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+            const elementName = strOrBlank(subToken.name);
+            const peInfo = elementName !== '' && entityCache[elementName];
 
-         if (peInfo && !peInfo.isInternal && !peInfo.valueCache) {
-            uncachedEntities.push(peInfo);
-         }
-      }
-   };
+            if (peInfo && !peInfo.isInternal && !peInfo.valueCache) {
+                uncachedEntities.push(peInfo);
+            }
+        }
+    }
 
-   return uncachedEntities;
+    return uncachedEntities;
 }
 
 /*
@@ -40,50 +41,52 @@ function findUncachedEntities(value: EntityValuePToken, entityCache: ParameterEn
  * the expandParams.entityCache entries for those entities.
  */
 function populateMissingEntities(
-      missingParameterEntities: Array<ParameterEntityInfo>,
-      expandParams: ExpandParams,
-      done: Done): void {
-   type SeekingMap = { [name: string]: boolean };
-   const { utils, emd } = expandParams;
-   const seeking: SeekingMap = {};
-   let seekingCount = missingParameterEntities.length;
-   let foundSomeToSeek = false;
-   const errors: Array<Error> = [];
+    missingParameterEntities: Array<ParameterEntityInfo>,
+    expandParams: ExpandParams,
+    done: Done,
+): void {
+    type SeekingMap = { [name: string]: boolean };
+    const { utils, emd } = expandParams;
+    const seeking: SeekingMap = {};
+    let seekingCount = missingParameterEntities.length;
+    let foundSomeToSeek = false;
+    const errors: Array<Error> = [];
 
-   for (let entityInfo of missingParameterEntities) {
-      if (seeking[entityInfo.name]) {
-         seekingCount --;
+    for (const entityInfo of missingParameterEntities) {
+        const entityName = strOrBlank(entityInfo.token.name);
 
-         if (seekingCount === 0) {
-            done(errors);
-         }
-         continue;
-      }
+        if (seeking[entityName]) {
+            seekingCount--;
 
-      foundSomeToSeek = true;
-      seeking[entityInfo.name] = true;
-
-      const sTokenSource: STokenSource =
-         utils.retrieveExternalEntity(entityInfo.token.externalId!, emd);
-
-      utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken) => {
-         expandEntityValue(entityValuePToken, expandParams, (expandedEntityValue) => {
-            entityInfo.valueCache = expandedEntityValue;
-            seekingCount --;
-
-            errors.push(...sTokenSource.errors);
-            
             if (seekingCount === 0) {
-               done(errors);
+                done(errors);
             }
-         });
-      });
-   }
+            continue;
+        }
 
-   if (!foundSomeToSeek) {
-      done(errors);
-   }
-};
+        foundSomeToSeek = true;
+        seeking[entityName] = true;
+
+        const { sTokenSource } = utils.retrieveExternalEntity(entityInfo.token.externalId!, emd);
+
+        utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken) => {
+            expandEntityValue(entityValuePToken, expandParams, (expandedEntityValue) => {
+                entityInfo.valueCache = expandedEntityValue;
+                seekingCount--;
+
+                errors.push(...sTokenSource.errors);
+
+                if (seekingCount === 0) {
+                    done(errors);
+                }
+            });
+        });
+    }
+
+    if (!foundSomeToSeek) {
+        done(errors);
+    }
+}
 
 /*
  * Given an entity value (either general or parameter) (which is, for reminder, a collection
@@ -91,42 +94,39 @@ function populateMissingEntities(
  * all the references and replace them with start/stop pairs and the contents of the referenced
  * tokens.  Return a copy of the expanded value along with any errors that might have happend
  * while doing that.
- * 
+ *
  * Note: This will modify the epandParams.entityCache.*.valueCache with the EntityValuePTokens
  * of any external parameter entities that this retrieved.
  */
 function expandEntityValue(
-      value: EntityValuePToken,
-      expandParams: ExpandParams,
-      expanded: (newValue: EntityValuePToken, errors: Array<Error>) => void) {
-   const { peDeclCache } = expandParams;
-   const missingEntities = findUncachedEntities(value, peDeclCache);
+    value: EntityValuePToken,
+    expandParams: ExpandParams,
+    expanded: (newValue: EntityValuePToken, errors: Array<Error>) => void,
+) {
+    const { peDeclCache } = expandParams;
+    const missingEntities = findUncachedEntities(value, peDeclCache);
 
-   populateMissingEntities(missingEntities, expandParams, (errors: Array<Error>) => {
-      let newValue: EntityValuePToken = [];
+    populateMissingEntities(missingEntities, expandParams, (errors: Array<Error>) => {
+        let newValue: EntityValuePToken = [];
 
-      for (let element of value) {
-         if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-            const entryName = strOrBlank(element.name);
-            const peInfo = entryName === '' ? undefined : peDeclCache[entryName];
+        for (const element of value) {
+            if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+                const entryName = strOrBlank(element.name);
+                const peInfo = entryName === '' ? undefined : peDeclCache[entryName];
 
-            if (peInfo) {
-               newValue.push(new ParameterEntityStartPToken(element));
-               newValue = newValue.concat(peInfo.valueCache || []);
-               newValue.push(new ParameterEntityEndPToken(element));
-               continue;
+                if (peInfo) {
+                    newValue.push(new ParameterEntityStartPToken(element));
+                    newValue = newValue.concat(peInfo.valueCache || []);
+                    newValue.push(new ParameterEntityEndPToken(element));
+                    continue;
+                }
             }
-         }
 
-         newValue.push(element);
-      };
+            newValue.push(element);
+        }
 
-      expanded(newValue, errors);
-   });
+        expanded(newValue, errors);
+    });
 }
 
-
-export {
-   ExpandParams, 
-   expandEntityValue,
-};
+export { ExpandParams, expandEntityValue };

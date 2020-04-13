@@ -4,6 +4,9 @@
     "editor.tabSize": 3,
     "editor.useTabStops": false,
     "editor.detectIndentation": false,
-    "editor.autoClosingBrackets": false,
+    "editor.autoClosingBrackets": "never",
     "editor.lightbulb.enabled": false,
+    "editor.codeActionsOnSave": {
+       "source.fixAll": true
+    }
 }

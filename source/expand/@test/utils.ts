@@ -12,40 +12,47 @@ type PTokenArray = Array<PToken>;
 // }
 
 function gatherStream(stream: Transform, expect: (results: PTokenArray) => void, done: () => void) {
-   const cache: PTokenArray = [];
+    const cache: PTokenArray = [];
 
-   stream.on('data', (item: PToken) => {
-      cache.push(item);
-   });
+    stream.on('data', (item: PToken) => {
+        cache.push(item);
+    });
 
-   stream.on('end', () => {
-      expect(cache);
+    stream.on('end', () => {
+        expect(cache);
 
-      done();
-   });
+        done();
+    });
 }
 
 function expectNoErrorsOrWarnings(validator: Transform, done: () => void) {
-   gatherStream(validator, (tokens: PTokenArray) => {
-      (expect(tokens) as any).toBeErrorAndWarningFree(); // typeHack
-      done();
-   }, done);
+    gatherStream(
+        validator,
+        (tokens: PTokenArray) => {
+            (expect(tokens) as any).toBeErrorAndWarningFree(); // typeHack
+            done();
+        },
+        done,
+    );
 }
 
 function expectError(validator: Transform, expected: any, done: () => void) {
-   gatherStream(validator, (tokens) => {
-      let arrayExpected = expected;
+    gatherStream(
+        validator,
+        (tokens) => {
+            let arrayExpected = expected;
 
-      if (!Array.isArray(expected)) {
-         arrayExpected = [expected];
-      }
+            if (!Array.isArray(expected)) {
+                arrayExpected = [expected];
+            }
 
-      for (const expectedVal of arrayExpected) {
-         (expect(tokens) as any).toHaveError(expectedVal); // typeHack
-      }
-   }, done);
+            for (const expectedVal of arrayExpected) {
+                (expect(tokens) as any).toHaveError(expectedVal); // typeHack
+            }
+        },
+        done,
+    );
 }
-
 
 // function expectNoErrors(validator: Transform, done: () => void) {
 //    gatherStream(validator, (tokens: PTokenArray) => {
@@ -55,8 +62,8 @@ function expectError(validator: Transform, expected: any, done: () => void) {
 // }
 
 export {
-   gatherStream,
-   expectNoErrorsOrWarnings,
-   expectError,
-   // expectNoErrors,
+    gatherStream,
+    expectNoErrorsOrWarnings,
+    expectError,
+    // expectNoErrors,
 };

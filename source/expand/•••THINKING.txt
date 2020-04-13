@@ -5,12 +5,18 @@ AttList defaults should be parsed as an AttValuePToken (which is almost the same
 
 
 BACKLOG TASKS
-- Finish prepareEntityValue
-   - Extract tests from expandEntityValue.test.ts
-   - Do an integration test for expandEntityValue.test.ts
-   - Refactor out the prepareEntityValue from expandEntityValue
-   - Need a a basic Error for retrieval problems
+>> OVERALL TAASK: Getting all the expansion cases covered by tailored functions
+√ get the setupReferencedEntity code working. 
+- Rebuild the expandEntityValue function to use the new one  (see below)
+- Then do the same for attribute values
+- Build system is collapsing around your ears.
+   - Need to stop tests from failing if TS errors
+   - Need a way to mock modules in tests
+   - Fix missing eslint rule
+   - eslint env jasmine should be able to be automatically added
+   - Need ts eslint rules
 
+We would benefit from having some kind of "countingDone()" fnction
 
 Each time an entity declaration is encountered:
 1) expandEntityValues
@@ -34,7 +40,7 @@ Each time an entity declaration is encountered:
    ----
    expandPERefInDtd(ref, caches, emd, itemDone)
          itemDone({ type: item, token} | { type: done, errors: [])
-      prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+      ? prepareEntityValue(ref, caches, done) 
          if it is already there, just return
          if it is not, load, parse,
             recurse on PERefs
@@ -50,7 +56,7 @@ Each time an entity declaration is encountered:
       Also, the Entity declarations and attlist should have values parsed (!)
    -----
    expandMarkupDeclaration(markupDecl, caches, emd, checkwf, itemDone)
-      prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+      ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
          if it is already there, just return
          if it is not, load, parse,
             recurse on PERefs
@@ -70,7 +76,7 @@ Each time an entity declaration is encountered:
    << we probably want to have a thing which takes a start, empty or attlist and process it>>
    expandAttributeValue(attribute, caches, emd, itemDone)
       loop over attribute things.  For any gerefs
-         prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+         ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
             if it is already there, just return
             if it is not, load, parse,
                recurse on PERefs
@@ -89,7 +95,7 @@ Each time an entity declaration is encountered:
    ----
    expandGerefInContent(ref, caches, emd, itemDone)
          itemDone({ type: item, token} | { type: done, errors: [])
-      prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+      ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
          if it is already there, just return
          if it is not, load, parse,
             recurse on PERefs

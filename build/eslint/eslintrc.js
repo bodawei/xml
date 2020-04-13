@@ -85,7 +85,7 @@ module.exports = {
          code: 120,
          tabWidth: 3,
       } ],
-      'max-block-comment-len': [ ERROR, 72 ],
+      // 'max-block-comment-len': [ ERROR, 72 ],
       'new-parens': ERROR,
       'no-array-constructor': ERROR,
       'no-lonely-if': ERROR,
@@ -128,4 +128,44 @@ module.exports = {
       es6: true,
       node: true,
    },
+   overrides: [ {
+      files: [ './source/expand/utils/**/*.ts' ],
+      parser: '@typescript-eslint/parser',
+      plugins: [
+         '@typescript-eslint',
+         'prettier',
+      ],
+      extends: [
+         'plugin:prettier/recommended',
+         'plugin:@typescript-eslint/eslint-recommended',
+         'plugin:@typescript-eslint/recommended',
+      ],
+      rules: {
+         'prettier/prettier': 'error',
+         'no-unused-vars': 'off',
+      },
+   }, {
+      files: [ './source/expand/utils/**/*.test.ts' ],
+      parser: '@typescript-eslint/parser',
+      plugins: [
+         '@typescript-eslint',
+         'prettier',
+      ],
+      extends: [
+         'plugin:prettier/recommended',
+         'plugin:@typescript-eslint/eslint-recommended',
+         'plugin:@typescript-eslint/recommended',
+      ],
+      rules: {
+         'prettier/prettier': 'error',
+         'no-unused-vars': 'off',
+         '@typescript-eslint/no-non-null-assertion': [ 'off' ],
+         '@typescript-eslint/no-empty-function': [ 'off' ],
+      },
+      env: {
+         jasmine: true,
+      },
+   } ],
+
 };
+
