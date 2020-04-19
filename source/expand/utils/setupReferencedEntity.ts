@@ -8,15 +8,17 @@ import {
 } from 'token';
 
 import { LoadingEmitter } from './LoadingEmitter';
-import { expandEntityValue } from '../expandEntityValue';
+import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
 
-type DoneInfo = { errors: Array<Error> };
-type Done = (result: DoneInfo) => void;
+type Done = (result: Array<Error>) => void;
 
 /*
  * Given an entity reference, make sure the referenced entity is in the cache,
  * and recursively retrieve any PE entities it's value references.
+ * The entity, and all of its referenced entities are not guaranteed to have been
+ * populated by the time this returns, since in some cases the entities may not be
+ * locatable.
  */
 function setupReferencedEntity(
     reference: ParameterEntityReferencePToken | GeneralEntityReferencePToken,
@@ -30,12 +32,10 @@ function setupReferencedEntity(
     const entityInfo = entityName !== '' && cache[entityName];
 
     if (!entityInfo || entityInfo.valueCache || entityInfo.loading) {
-        const results = { errors: [] };
-
         if (entityInfo && entityInfo.loading) {
-            entityInfo.loading.once('done', (localResults) => done(localResults as DoneInfo));
+            entityInfo.loading.once('done', (localResults) => done(localResults as Array<Error>));
         } else {
-            done(results);
+            done([]);
         }
 
         return;
@@ -54,14 +54,12 @@ function setupReferencedEntity(
             entityValuePToken,
             expandParams,
             (expandedEntityValue: EntityValuePToken) => {
-                const results = {
-                    errors: getErrors(),
-                };
+                const errors = getErrors();
                 entityInfo.valueCache = expandedEntityValue;
                 delete entityInfo.loading;
 
-                done(results);
-                loading.emit('done', results);
+                done(errors);
+                loading.emit('done', errors);
             },
         );
     });

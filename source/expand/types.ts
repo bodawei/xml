@@ -22,7 +22,7 @@ type GeneralEntityInfo = {
 type ParameterEntityInfo = {
     token: ParameterEntityDeclarationPToken;
     isInternal: boolean;
-    valueCache?: EntityValuePToken;
+    valueCache?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
     loading?: LoadingEmitter;
 };
 
@@ -42,6 +42,8 @@ type ProcessBody = (
     expandToken: ExpandToken,
     done: STokenSourceProcessed,
 ) => void;
+
+// This always returns an entityValeuePToken, even if sTokenSource has no content (e.g. has errors)
 type ProcessForEntityValue = (
     sTokenSource: STokenSource,
     done: (results: EntityValuePToken) => void,

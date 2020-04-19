@@ -67,7 +67,7 @@ fdescribe('setupReferencedEntity() (unit)', () => {
         params.peDeclCache.pe1.valueCache = [];
 
         setupReferencedEntity(peRefPToken, params, (result) => {
-            expect(result).toEqual({ errors: [] });
+            expect(result).toEqual([]);
             done();
         });
     });
@@ -170,13 +170,13 @@ fdescribe('setupReferencedEntity() (unit)', () => {
         callCount++;
         // Make a first call.  This will start to "retrieve" the sToken and the errors at this time
         setupReferencedEntity(peRefPToken, params, (results) => {
-            expect(results.errors).toEqual([new Error('1')]);
+            expect(results).toEqual([new Error('1')]);
         });
 
         // make the second call. This will short circuit and not retrieve.
         callCount++;
         setupReferencedEntity(peRefPToken, params, (results) => {
-            expect(results.errors).toEqual([new Error('1')]);
+            expect(results).toEqual([new Error('1')]);
             done();
         });
 

@@ -573,3 +573,7 @@ ATTLIST (3.3)
    an entity for which no declaration has been read.  (3.3.3)
    - default entity names can be forward referenced
 -->
+
+
+This makes the decision: if an entity can not be found, this will report an error, but it will also expand the entity as []
+However, a ref with no declaration will leave the reference in the file
