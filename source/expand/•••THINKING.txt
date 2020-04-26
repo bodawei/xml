@@ -7,14 +7,29 @@ AttList defaults should be parsed as an AttValuePToken (which is almost the same
 BACKLOG TASKS
 >> OVERALL TAASK: Getting all the expansion cases covered by tailored functions
 √ get the setupReferencedEntity code working. 
-- Rebuild the expandEntityValue function to use the new one  (see below)
-- Then do the same for attribute values
+√ Rebuild the expandEntityValue function to use the new one  (see below)
+√ Then do the same for attribute values
 - Build system is collapsing around your ears.
    - Need to stop tests from failing if TS errors
    - Need a way to mock modules in tests
    - Fix missing eslint rule
    - eslint env jasmine should be able to be automatically added
    - Need ts eslint rules
+attrValueTwoLevelExpansionWithPERef.xml:5: parser error : PEReferences forbidden in internal subset
+
+Make all xml errors derive from some error type
+-- no perefs i internal subset
+const whenDone = expandValue.bind(value, expandParams, expanded);
+const asyncBehavior = setupReferencedEntity.bind(expandParams);
+
+forEachAsync(missingEntities, asyncBehavior, whenDone);
+>>
+So, we pull the ge and we parse it (adding charrefs to the parse)
+   After that parse, if there is a geref, expand it and parse ....
+>> Attrs can not have external entities in them
+
+entirely not allowed in internal subset
+attValueExternalEntity.xml:4: parser error : PEReferences forbidden in internal subset
 
 We would benefit from having some kind of "countingDone()" fnction
 

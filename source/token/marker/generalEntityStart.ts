@@ -4,6 +4,7 @@ import { EntityMetaData } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
+import { EntityValuePToken } from '../entityDeclaration';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.
@@ -16,7 +17,7 @@ class GeneralEntityStartPToken {
    public readonly type: typeof GENERAL_ENTITY_START_PTOKEN = GENERAL_ENTITY_START_PTOKEN;
    public readonly referencePToken: GeneralEntityReferencePToken;
 
-   constructor(geReferencePToken: GeneralEntityReferencePToken) {
+   constructor(geReferencePToken: GeneralEntityReferencePToken, preparsedValue?: EntityValuePToken | void) {
       this.referencePToken = geReferencePToken;
    }
 

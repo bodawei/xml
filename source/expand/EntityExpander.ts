@@ -93,6 +93,7 @@ type Processors = {
    retrieveExternalEntity: (externalId: ExternalId, entityMetaData: EntityMetaData) => STokenSource,
 };
 
+// NEed to make sure a declaration that matches one of these names isn't different.
 // §4.6: This is our set of data to populate our "info" objects for the predefined entities.
 const PREDEFINED_ENTITIES = [{
    name: 'lt',

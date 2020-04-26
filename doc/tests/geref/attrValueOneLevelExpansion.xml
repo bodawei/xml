@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY two "two">
+   <!ATTLIST one a CDATA "DefaultValue">
+]>
+
+<one a="one &two; three">
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid attrValueOneLevelExpansion.xml
+]]>
+</one>

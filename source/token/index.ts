@@ -5,6 +5,7 @@ import declaration from './bridge/baseDeclaration';
 import attListDeclaration, { AttListPToken } from './attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from './elementDeclaration';
 
+import { AttributeValuePToken } from './common/attribute';
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
 import { XmlDeclarationPToken } from './xmlDeclaration';
@@ -75,7 +76,12 @@ export * from './xmlDeclaration';
 
 import { ExternalId } from './common/externalId';
 
+type XmlError = {
+   type: 'ERROR_TYPE',
+}
+
 type PToken =
+| XmlError
    | EntityMetaData
    | AttListPToken
    | CommentPToken
@@ -134,8 +140,10 @@ export {
 
    unassigned,
    literalValue,
+   AttributeValuePToken,
    ExternalId,
    PToken,
+   XmlError,
 
    getFirstSToken,
 };

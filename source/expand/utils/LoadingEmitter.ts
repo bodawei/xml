@@ -4,24 +4,24 @@
 type Handler = (param: object) => void;
 
 class LoadingEmitter {
-    private listeners: Array<Handler>;
+   private listeners: Array<Handler>;
 
-    constructor() {
-        this.listeners = [];
-    }
+   constructor() {
+      this.listeners = [];
+   }
 
-    once(eventName: string, handler: Handler): void {
-        this.listeners.push(handler);
-    }
+   once(eventName: string, handler: Handler): void {
+      this.listeners.push(handler);
+   }
 
-    emit(eventName: string, param: object): void {
-        const onceListeners = this.listeners;
-        this.listeners = [];
+   emit(eventName: string, param: object): void {
+      const onceListeners = this.listeners;
+      this.listeners = [];
 
-        for (const listener of onceListeners) {
-            listener(param);
-        }
-    }
+      for (const listener of onceListeners) {
+         listener(param);
+      }
+   }
 }
 
 export { LoadingEmitter };

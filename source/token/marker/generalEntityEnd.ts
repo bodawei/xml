@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
+import { EntityValuePToken } from '../entityDeclaration';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
 
 /**********************************************************************\
@@ -14,7 +15,7 @@ class GeneralEntityEndPToken {
    public readonly type: typeof GENERAL_ENTITY_END_PTOKEN = GENERAL_ENTITY_END_PTOKEN;
    public readonly referencePToken: GeneralEntityReferencePToken;
 
-   constructor(geReferencePToken: GeneralEntityReferencePToken) {
+   constructor(geReferencePToken: GeneralEntityReferencePToken, preparsedValue?: EntityValuePToken | void) {
       this.referencePToken = geReferencePToken;
    }
 

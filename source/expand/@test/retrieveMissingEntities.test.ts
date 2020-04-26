@@ -14,6 +14,7 @@ describe('retrieveMissingEntities() (unit)', () => {
          paramEntitiesByName: {
             one: {
                isInternal: false,
+               isUnparsed: false,
                token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!'), }),
             },
          },
@@ -28,6 +29,7 @@ describe('retrieveMissingEntities() (unit)', () => {
          expect(params.paramEntitiesByName).toEqual({
             one: {
                isInternal: false,
+               isUnparsed: false,
                token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!'), }),
             },
          });
@@ -42,6 +44,7 @@ describe('retrieveMissingEntities() (unit)', () => {
          expect(params.paramEntitiesByName).toEqual({
             one: {
                isInternal: false,
+               isUnparsed: false,
                token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!'), }),
                valueCache: [ new TextPToken({ text: SToken.fromString('whee') }) ]
             },

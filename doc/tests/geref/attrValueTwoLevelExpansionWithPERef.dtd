@@ -1,0 +1,2 @@
+<!ENTITY % point3 ".333">
+<!ENTITY two "two 2%point3; 2.66">

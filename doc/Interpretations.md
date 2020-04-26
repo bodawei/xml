@@ -577,3 +577,100 @@ ATTLIST (3.3)
 
 This makes the decision: if an entity can not be found, this will report an error, but it will also expand the entity as []
 However, a ref with no declaration will leave the reference in the file
+
+
+
+-----
+2.3.1 notes that you can have an entityvalue with "<" just fine.  It is legal.  It will just be invalid in all uses.
+   [ is that true?  even in a combination of pe's?]
+
+2.4: note that this says < may not appear anywhere except comment, pi or cdata. otherwise must be escaped.
+
+2.5
+- perefs not in comments
+2.6 not in pi's
+
+2.8
+- peref's anywhere in the dtd (internal and external subsets, and external parameter entities) EXCEPT literals and ignored conditionalsections, (but may be in entity value literals)
+
+2.8 
+- PE replacement text must contain whole markup declarations. those may not span  [in the internal subset]
+   << really? how to enforce? >>
+
+2.8 PE refs must not occur in internal markup declarations (but may appear where decls can happen)
+   -- What it means "in markup declarations" here means anywhere between <! and >, whether in literal or not.
+   -- 31-notInMarkupDeclarations.xml:10: parser error : PEReferences forbidden in internal subset
+Of course, entity decls in internal subset take precedence over external.
+
+2.9 external markup declaraton: markup occurs in the external subset or in a parameter entity
+
+3.1
+   ttriabute values ay not contain direct or indirect references to (value-external) entities.
+   Replacement text of entitiesmust not contain <
+
+3.2.1
+   PE RT must be nested within () groups in a content spec
+   PE RT should not have some non-blank, adn should not start or end with | or ,
+
+3.3.3
+   attr value normalization: char refs are added to the normalized value as their char, whitespace collapsed chars added, entity references, do the same for the replacement text
+
+3.3.3 - attr value may not have an entity with no declaratoin (wf error)
+
+3.4 in a conditional section has a peref, it must have whole conditional sections in it. not partial
+- again, pe refs are not recognized in ignore'd conditional sections
+- interesting that it notes that the keywoard can be a pe ref.
+
+4.0.0 entities
+   - pe and ge distinction. live in different name spaces
+     - remainder "plain" "entity" means ge.
+
+4.1
+   - parsed entities may not be recursively defined (either directly or indirectly)
+         - this happens easily with pe, as long as processor doesn't add until already loaded.
+         - should test
+   - perefs may not appear outside of dtd
+   - ge references may not contain name of an unparsed ge entity
+   - declaration of a param entity must preceed any reference to it
+   - ge decl must precede any attlist containing a default value with a direct or indirect reference to it
+   - non-validating do not need to read any general entity declarations occurring in param entities or in external subset
+   - internal entities are always parsed entities
+
+4.3.2
+   - external entities must match extParsedEnt
+   - Only parsed entities referenced direct or indirect in the doc must be well formed.
+   - internal and external parsed entities must match content
+      [but there are severe restrictions on some usage. and what does that mean...]
+   - nesting: general entities: the structures in the document must be properly nested (no start, end, empty, elemnt, comment, pi char ref or entity reference can cross)
+
+4.4
+   - reminder: external parsed general not allowed in attr value. pe refs ignored
+   - content: ignores pe, adds general
+   - in entity value: pe added, general ignored
+   in dtd - parameter: included, general not allwoed
+
+4.5
+- literal entity value is the value in the declaration, or the text in the entity
+internal: replacement text: content of entity after replacing char refs and pe refs.
+external: replacement text is content afte rreoving text decl, (but char refs and param refs not expanded
+- pe and ge refs must be entirely within the literal text
+
+4.6 < can be used as &#38;
+
+5 has to do with validation
+appendix D does more on entity reference expansion
+----
+
+?? extParsedEnt
+
+
+Constructing repalcement text:
+   - attribute value only has Gerefs, geStart/end, text and charrefs
+   - geref : constructing replacement text:
+      sequence of characters: text, charref chars, and geref. 
+         When you see the geref, replace with the same.
+         Note that a charref can't span the geref boundary. (but it can span the peref)
+         Which means each gref is a separate parsing context.
+         - need to protect against recursive.
+
+- Should expand allow for validating vs. not expansion?

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY pointtwo ".2">
+   <!ENTITY rest "pointtwo;">
+   <!ENTITY indirect "&#38;#38;&rest;">
+   <!ENTITY two "two 2&indirect; 2.66">
+   <!ATTLIST one a CDATA "DefaultValue">
+]>
+
+<one a="one &two; three">
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid attrValueWithGERefAcrossEntitiesProblem2.xml
+]]>
+</one>

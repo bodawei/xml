@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE one SYSTEM "./attrValueTwoLevelExpansionWithPERef.dtd" [
+   <!ELEMENT one ANY>
+   <!ATTLIST one a CDATA "DefaultValue">
+]>
+
+<one a="one &two; three">
+
+<![CDATA[
+ This is known to be bad:
+   xmllint --loaddtd  --noent  --valid attrValueTwoLevelExpansionWithPERef.xml
+]]>
+</one>

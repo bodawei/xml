@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY pointthree ".33">
+   <!ENTITY middle "&pointthree;">
+   <!ENTITY two "two 2&#38;middle; 2.66">
+   <!ATTLIST one a CDATA "DefaultValue">
+]>
+
+<one a="one &two; three">
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid attrValueThreeLevelExpansion.xml
+]]>
+</one>

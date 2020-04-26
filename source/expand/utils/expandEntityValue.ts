@@ -1,10 +1,11 @@
 import { strOrBlank } from 'sToken';
 import {
-    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-    EntityValuePToken,
-    ParameterEntityReferencePToken,
-    ParameterEntityStartPToken,
-    ParameterEntityEndPToken,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   EntityValuePToken,
+   ParameterEntityReferencePToken,
+   ParameterEntityStartPToken,
+   ParameterEntityEndPToken,
+   XmlError,
 } from 'token';
 
 import { ExpandParams, ParameterEntityMap } from '../types';
@@ -16,23 +17,23 @@ import { setupReferencedEntity } from './setupReferencedEntity';
  * found that do not already have a cached EntityValuePToken value.
  */
 function findUncachedEntities(
-    value: EntityValuePToken,
-    entityCache: ParameterEntityMap,
+   value: EntityValuePToken,
+   entityCache: ParameterEntityMap,
 ): Array<ParameterEntityReferencePToken> {
-    const uncachedEntities: Array<ParameterEntityReferencePToken> = [];
+   const uncachedEntities: Array<ParameterEntityReferencePToken> = [];
 
-    for (const subToken of value) {
-        if (subToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-            const elementName = strOrBlank(subToken.name);
-            const peInfo = elementName !== '' && entityCache[elementName];
+   for (const subToken of value) {
+      if (subToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+         const elementName = strOrBlank(subToken.name);
+         const peInfo = elementName !== '' && entityCache[elementName];
 
-            if (peInfo && !peInfo.isInternal && !peInfo.valueCache) {
-                uncachedEntities.push(subToken);
-            }
-        }
-    }
+         if (peInfo && !peInfo.isInternal && !peInfo.valueCache) {
+            uncachedEntities.push(subToken);
+         }
+      }
+   }
 
-    return uncachedEntities;
+   return uncachedEntities;
 }
 
 /*
@@ -44,31 +45,31 @@ function findUncachedEntities(
  *   - An entity reference to a missing declaration will be left unchanged
  */
 function expandValue(
-    value: EntityValuePToken,
-    expandParams: ExpandParams,
-    expanded: (newValue: EntityValuePToken, errors: Array<Error>) => void,
-    errors: Array<Error>,
+   value: EntityValuePToken,
+   expandParams: ExpandParams,
+   expanded: (newValue: EntityValuePToken, errors: Array<XmlError>) => void,
+   errors: Array<XmlError>,
 ): void {
-    const { peDeclCache } = expandParams;
-    let newValue: EntityValuePToken = [];
+   const { peDeclCache } = expandParams;
+   let newValue: EntityValuePToken = [];
 
-    for (const element of value) {
-        if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-            const entryName = strOrBlank(element.name);
-            const peInfo = entryName === '' ? undefined : peDeclCache[entryName];
+   for (const element of value) {
+      if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+         const entryName = strOrBlank(element.name);
+         const peInfo = entryName === '' ? undefined : peDeclCache[entryName];
 
-            if (peInfo) {
-                newValue.push(new ParameterEntityStartPToken(element));
-                newValue = newValue.concat(peInfo.valueCache!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
-                newValue.push(new ParameterEntityEndPToken(element));
-                continue;
-            }
-        }
+         if (peInfo) {
+            newValue.push(new ParameterEntityStartPToken(element));
+            newValue = newValue.concat(peInfo.valueCache!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            newValue.push(new ParameterEntityEndPToken(element));
+            continue;
+         }
+      }
 
-        newValue.push(element);
-    }
+      newValue.push(element);
+   }
 
-    expanded(newValue, errors);
+   expanded(newValue, errors);
 }
 
 /*
@@ -80,31 +81,34 @@ function expandValue(
  *
  * Note: This will modify the epandParams.entityCache.*.valueCache with the EntityValuePTokens
  * of any external parameter entities that this retrieved.
+ *
+ * NOTE: This avoids recursive calls by the caller not inserting a PE declaration into the
+ * cache until it has already called this to process the value.
  */
 function expandEntityValue(
-    value: EntityValuePToken,
-    expandParams: ExpandParams,
-    expanded: (newValue: EntityValuePToken, errors: Array<Error>) => void,
+   value: EntityValuePToken,
+   expandParams: ExpandParams,
+   expanded: (newValue: EntityValuePToken, errors: Array<XmlError>) => void,
 ): void {
-    const { peDeclCache } = expandParams;
-    const missingEntities = findUncachedEntities(value, peDeclCache);
-    let remainingEntities = missingEntities.length;
+   const { peDeclCache } = expandParams;
+   const missingEntities = findUncachedEntities(value, peDeclCache);
+   let remainingEntities = missingEntities.length;
 
-    if (remainingEntities === 0) {
-        expandValue(value, expandParams, expanded, []);
-        return;
-    }
+   if (remainingEntities === 0) {
+      expandValue(value, expandParams, expanded, []);
+      return;
+   }
 
-    for (const reference of missingEntities) {
-        // eslint-disable-next-line no-loop-func
-        setupReferencedEntity(reference, expandParams, (errors) => {
-            remainingEntities--;
+   for (const reference of missingEntities) {
+      // eslint-disable-next-line no-loop-func
+      setupReferencedEntity(reference, expandParams, (errors) => {
+         remainingEntities--;
 
-            if (remainingEntities === 0) {
-                expandValue(value, expandParams, expanded, errors);
-            }
-        });
-    }
+         if (remainingEntities === 0) {
+            expandValue(value, expandParams, expanded, errors);
+         }
+      });
+   }
 }
 
 export { ExpandParams, expandEntityValue };

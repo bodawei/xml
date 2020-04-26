@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE test [
+   <!ELEMENT test ANY>
+   <!ATTLIST test
+      one CDATA #IMPLIED
+      note CDATA "notat"
+   >
+
+   <!ENTITY % bad "not allowed">
+   <!ENTITY bar "%bad;">
+]>
+<test one="bogus" note="notat">
+<![CDATA[
+   Demonstrates that you can not have a peref in an entity value in an internal subset
+
+   xmllint --loaddtd  --noent  --valid 31-notInMarkupDeclarations.xml
+]]>
+</test>

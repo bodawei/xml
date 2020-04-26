@@ -2,6 +2,29 @@
 
 /* eslint-env jasmine */
 
+function toEqualShallowDifferent(util, customEqualityTesters) {
+   return {
+      compare: (actual, expected) => {
+         let pass = actual !== expected;
+         let message;
+
+         if (!pass) {
+            message = `Actual (${JSON.stringify(actual)}) is not the same value as expected (${JSON.stringify(expected)}).`;
+         } else if (!util.equals(actual, expected, customEqualityTesters)) {
+            pass = false;
+            message = `Actual is the same value as expected, but they are not equal (actual: ${JSON.stringify(actual)} and expected: ${JSON.stringify(expected)}).`;
+         } else {
+            message = `Actual is the same value as expected (${JSON.stringify(actual)}) and they are equal.`;
+         }
+
+         return {
+            pass: pass,
+            message: message,
+         };
+      },
+   };
+}
+
 function toEqualProps(util, customEqualityTesters) {
    return {
       compare: (actual, expected) => {
@@ -54,11 +77,11 @@ function toEqualShape(util, customEqualityTesters) {
                const expectedValue = expected[key];
 
                if (actualValue !== expectedValue) {
-                  mismatch[key] = [actualValue, expectedValue];
+                  mismatch[key] = [ actualValue, expectedValue ];
                   pass = false;
                }
             } else {
-               mismatch[key] = [undefined, expected[key]];
+               mismatch[key] = [ undefined, expected[key] ];
                pass = false;
             }
          });
@@ -136,14 +159,14 @@ console.json = function json() {
    for (let index = 0; index < arguments.length; index++) {
       console.debug(`ARG ${index}: ${JSON.stringify(arguments[index], undefined, 3)}`);
    }
-}
-
+};
 
 beforeEach(() => {
    jasmine.addMatchers({
       toEqualProps,
       toEqualShape,
       toBeInstanceOf,
+      toEqualShallowDifferent,
    });
 });
 
@@ -151,4 +174,5 @@ module.exports = {
    toEqualProps,
    toEqualShape,
    toBeInstanceOf,
+   toEqualShallowDifferent,
 };

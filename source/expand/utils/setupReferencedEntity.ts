@@ -2,16 +2,17 @@
 
 import { strOrBlank } from 'sToken';
 import {
-    EntityValuePToken,
-    ParameterEntityReferencePToken,
-    GeneralEntityReferencePToken,
+   EntityValuePToken,
+   ParameterEntityReferencePToken,
+   GeneralEntityReferencePToken,
+   XmlError,
 } from 'token';
 
 import { LoadingEmitter } from './LoadingEmitter';
 import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
 
-type Done = (result: Array<Error>) => void;
+type Done = (result: Array<XmlError>) => void;
 
 /*
  * Given an entity reference, make sure the referenced entity is in the cache,
@@ -21,48 +22,56 @@ type Done = (result: Array<Error>) => void;
  * locatable.
  */
 function setupReferencedEntity(
-    reference: ParameterEntityReferencePToken | GeneralEntityReferencePToken,
-    expandParams: ExpandParams,
-    done: Done,
+   reference: ParameterEntityReferencePToken | GeneralEntityReferencePToken,
+   expandParams: ExpandParams,
+   done: Done,
 ): void {
-    const { geDeclCache, peDeclCache, utils, emd } = expandParams;
-    const isPERef = reference instanceof ParameterEntityReferencePToken;
-    const cache = isPERef ? peDeclCache : geDeclCache;
-    const entityName = strOrBlank(reference.name);
-    const entityInfo = entityName !== '' && cache[entityName];
+   const { geDeclCache, peDeclCache, utils, emd } = expandParams;
+   const isPERef = reference instanceof ParameterEntityReferencePToken;
+   const cache = isPERef ? peDeclCache : geDeclCache;
+   const entityName = strOrBlank(reference.name);
+   const entityInfo = entityName !== '' && cache[entityName];
 
-    if (!entityInfo || entityInfo.valueCache || entityInfo.loading) {
-        if (entityInfo && entityInfo.loading) {
-            entityInfo.loading.once('done', (localResults) => done(localResults as Array<Error>));
-        } else {
-            done([]);
-        }
+   if (!entityInfo || entityInfo.valueCache || entityInfo.loading) {
+      if (entityInfo && entityInfo.loading) {
+         entityInfo.loading.once('done', (localResults) => done(localResults as Array<XmlError>));
+      } else {
+         done([]);
+      }
 
-        return;
-    }
+      return;
+   }
 
-    const loading = new LoadingEmitter();
-    const { sTokenSource, getErrors } = utils.retrieveExternalEntity(
-        entityInfo.token.externalId!,
-        emd,
-    );
+   const loading = new LoadingEmitter();
+   const { sTokenSource, getErrors } = utils.retrieveExternalEntity(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      entityInfo.token.externalId!,
+      emd,
+   );
 
-    entityInfo.loading = loading;
+   entityInfo.loading = loading;
 
-    utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken) => {
-        expandEntityValue(
-            entityValuePToken,
-            expandParams,
-            (expandedEntityValue: EntityValuePToken) => {
-                const errors = getErrors();
-                entityInfo.valueCache = expandedEntityValue;
-                delete entityInfo.loading;
+   utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken | void) => {
+      if (!entityValuePToken) {
+         const errors = getErrors();
+         done(errors);
+         loading.emit('done', errors);
+         return;
+      }
 
-                done(errors);
-                loading.emit('done', errors);
-            },
-        );
-    });
+      expandEntityValue(
+         entityValuePToken,
+         expandParams,
+         (expandedEntityValue: EntityValuePToken) => {
+            const errors = getErrors();
+            entityInfo.valueCache = expandedEntityValue;
+            delete entityInfo.loading;
+
+            done(errors);
+            loading.emit('done', errors);
+         },
+      );
+   });
 }
 
 export { setupReferencedEntity };

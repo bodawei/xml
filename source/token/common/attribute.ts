@@ -12,6 +12,8 @@ import literal, { LiteralPToken } from './literal';
 import { LiteralValuePToken } from './literalValue';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
+import { ParameterEntityStartPToken,  } from '../marker/parameterEntityStart';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStart';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from '../generalEntityReference';
@@ -31,7 +33,7 @@ interface AttributePToken extends LiteralPToken {
    trailingSpace?: SToken;
 };
 
-type AttributeValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
+type AttributeValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
 type AttributeValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 
 type AttributeXToken = {
@@ -157,7 +159,7 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, enti
          // has entity references, this won't do any checking.
          //
          if (attr.name.str.toLowerCase() === 'xml:lang') {
-            checkXmlLangWellFormed(attr.value, ec, entityMetaData);
+            checkXmlLangWellFormed(attr.value as any, ec, entityMetaData); // TypeHack
          }
 
          seenAttrNames[nameText] = true;

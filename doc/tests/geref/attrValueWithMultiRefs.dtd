@@ -1,0 +1,5 @@
+<!ENTITY pointtwo ".2">
+<!ENTITY % rest "pointtwo;">
+<!-- If we make rest a geref, then this barfs because there's no name for the & -->
+<!ENTITY indirect "&#38;%rest;">
+<!ENTITY two "two 2&indirect; 2.66">

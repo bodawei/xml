@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY foo "Broccoli">
+   <!ENTITY externalValue SYSTEM './13-internalExternalValueGeRef.ent'>
+   <!ENTITY internalValue "&#38;foo;">
+]>
+
+<one>
+Internal: &internalValue;
+External: &externalValue;
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid 13-internalExternalValueGeRef.xml
+]]>
+</one>

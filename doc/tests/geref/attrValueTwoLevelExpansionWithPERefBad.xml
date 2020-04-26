@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY % point3 ".333">
+   <!ENTITY two "two 2%point3; 2.66">
+   <!ATTLIST one a CDATA "DefaultValue">
+]>
+
+<one a="one &two; three">
+
+<![CDATA[
+ This is known to be bad:
+   xmllint --loaddtd  --noent  --valid attrValueTwoLevelExpansionWithPERefBad.xml
+]]>
+</one>

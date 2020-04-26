@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE one SYSTEM "./attrValueWithMultiRefs.dtd" [
+   <!ELEMENT one ANY>
+   <!ATTLIST one a CDATA "DefaultValue">
+]>
+
+<one a="one &two; three">
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid attrValueWithMultiRefs.xml
+]]>
+</one>

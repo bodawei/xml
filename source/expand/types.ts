@@ -2,10 +2,12 @@ import { EntityMetaData } from 'basic';
 import { STokenSource } from 'sToken';
 
 import {
+   AttributeValuePToken,
     EntityValuePToken,
     GeneralEntityDeclarationPToken,
     ParameterEntityDeclarationPToken,
     PToken,
+    XmlError,
 } from 'token';
 import { ExternalId } from 'source/token/common/externalId';
 
@@ -22,6 +24,7 @@ type GeneralEntityInfo = {
 type ParameterEntityInfo = {
     token: ParameterEntityDeclarationPToken;
     isInternal: boolean;
+    isUnparsed: boolean;
     valueCache?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
     loading?: LoadingEmitter;
 };
@@ -46,13 +49,12 @@ type ProcessBody = (
 // This always returns an entityValeuePToken, even if sTokenSource has no content (e.g. has errors)
 type ProcessForEntityValue = (
     sTokenSource: STokenSource,
-    done: (results: EntityValuePToken) => void,
+    done: (results: EntityValuePToken | void) => void,
 ) => void;
 type STokenSourceProcessed = () => void;
-type RetrievalError = Error;
 type RetrieveResults = {
     sTokenSource: STokenSource;
-    getErrors: () => Array<RetrievalError>;
+    getErrors: () => Array<XmlError>;
 };
 type EntityProcessors = {
     parseBody: ProcessBody;
@@ -61,6 +63,10 @@ type EntityProcessors = {
         externalId: ExternalId,
         entityMetaData: EntityMetaData,
     ) => RetrieveResults;
+    parseAttributeValue: (
+      sTokenSource: STokenSource,
+      done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+    ) => void;
 };
 
 type ExpandParams = {
@@ -73,8 +79,8 @@ type ExpandParams = {
 export {
     ExpandParams,
     RetrieveResults,
-    RetrievalError,
     EntityProcessors,
+    GeneralEntityInfo,
     ParameterEntityInfo,
     GeneralEntityMap,
     ParameterEntityMap,

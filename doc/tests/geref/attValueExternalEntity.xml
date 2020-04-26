@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ENTITY indirect SYSTEM './attValueExternalEntity.ent'>
+   <!ENTITY skip "&indirect;">
+   <!ENTITY two "two 2&skip; 2.66">
+   <!ELEMENT one ANY>
+   <!ATTLIST one a CDATA "DefaultValue">
+]>
+
+<one a="one &two; three">
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid attValueExternalEntity.xml
+]]>
+</one>
