@@ -9,6 +9,7 @@ BACKLOG TASKS
 √ get the setupReferencedEntity code working. 
 √ Rebuild the expandEntityValue function to use the new one  (see below)
 √ Then do the same for attribute values
+
 - Build system is collapsing around your ears.
    - Need to stop tests from failing if TS errors
    - Need a way to mock modules in tests

@@ -7,12 +7,14 @@
    "license": "UNLICENCED",
    "private": true,
    "scripts": {
+      "build:watch": "babel --no-babelrc --config-file ./build/babelrc-new.json5 --extensions '.ts' --watch 'source/**/*.ts' --out-dir ./temp/build/",
       "check": "prettier --write  'source/expand/utils/**/*.ts'",
       "test": "xclap live",
       "test:cover": "xclap precommit"
    },
    "devDependencies": {
-      "@babel/core": "^7.8.3",
+      "@babel/cli": "^7.8.4",
+      "@babel/core": "^7.9.0",
       "@babel/plugin-proposal-class-properties": "^7.8.3",
       "@babel/plugin-proposal-object-rest-spread": "^7.9.5",
       "@babel/preset-typescript": "^7.9.0",
