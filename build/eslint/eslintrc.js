@@ -129,7 +129,7 @@ module.exports = {
       node: true,
    },
    overrides: [ {
-      files: [ './source/expand/utils/**/*.ts' ],
+      files: [ './source/expand/**/*.ts' ],
       parser: '@typescript-eslint/parser',
       plugins: [
          '@typescript-eslint',
@@ -145,7 +145,7 @@ module.exports = {
          'no-unused-vars': 'off',
       },
    }, {
-      files: [ './source/expand/utils/**/*.test.ts' ],
+      files: [ './source/expand/**/*.test.ts' ],
       parser: '@typescript-eslint/parser',
       plugins: [
          '@typescript-eslint',

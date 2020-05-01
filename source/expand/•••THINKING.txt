@@ -1,17 +1,63 @@
+GOALS
+   - Get the expansion system finished and working
+      - Why: This has been a huge sinkhole of effort and thinking. Getitng it done will
+         free up alot of energy to finish the overall project
+
+FINISHED TASKS
+√ get the setupReferencedEntity code working. 
+√ Rebuild the expandEntityValue function to use the new one  (see below)
+√ Then do the same for attribute values
+
+IMMEDIATE TASKS
+- Document
+   - Put a whole readme describing the whole thinking around expansion,
+      the spec requirements and the architecture into a document. Also a "how to use me"
+- Implementation
+   - Probably handle the elment start and empty cases next, as you have the underlying implementation
+- Build
+   - Try to get testing to work so it doesn't fail every time you break it
+
+
+REFACTORING
+- I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
+- REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
+
+
+
+CLEAN UP THE BELOW
+===================
+
 Expanding things. These all happen in entityExpander
 
 Remember: All internal entity declarations already have their values parsed as EntityValuePTokens
 AttList defaults should be parsed as an AttValuePToken (which is almost the same, but no PERef recotniation
 
+I'm feeling stuck and scared
+   - The problem is I need to do more design, but I fundamentally want to be coding
+      I'd like to create the notion of an ExpandedPToken type which includes all PTokens
+         plus things introduced by the expansion process
+            GeneralEntityStart, etc, internal and external subset,s, plus our meta data types
+            The problem with this is that attributes are defined as PTokens but will have
+            those later.
+            One of our problems with this project is tryign to build too many layers of abstractoin in
+            We coudl be generating an expanded element start and end pretty easily with a different attribute type
+            YEt, we've also built ptokens with their own wel l formed checks. and conversion to xtokesn
+               We DELIBERATELY did that.  Which means the stance was that the tokens knew about their
+               whole life cycle.  But of course we didn't.
+               Really, this is more aligned with the vision of this.  BUt I'm not sure now is the time to do it.
+               That seems like a refactoring down the line.
+               Let's try to make that phase 2 of expansion.  We really need to get a stable expansion layer before redoing everything again.
 
-BACKLOG TASKS
->> OVERALL TAASK: Getting all the expansion cases covered by tailored functions
-√ get the setupReferencedEntity code working. 
-√ Rebuild the expandEntityValue function to use the new one  (see below)
-√ Then do the same for attribute values
+Real work
+- When expandBodyReference is done, add a test to "DOCTYPE declaration" to make sure it works.
+
 
 - Build system is collapsing around your ears.
    - Need to stop tests from failing if TS errors
+      - So, My current thought is to get rid of browserify.
+        - I have an alternate babel config which does TS.
+        - and it looks like I might be able to use: https://github.com/babel/karma-babel-preprocessor
+            I can't tell where the files are showing up, though, yet
    - Need a way to mock modules in tests
    - Fix missing eslint rule
    - eslint env jasmine should be able to be automatically added

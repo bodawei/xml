@@ -2,8 +2,8 @@
 
 import declaration from './bridge/baseDeclaration';
 
-import attListDeclaration, { AttListPToken } from './attListDeclaration';
-import elementDeclaration, { ElementDeclarationPToken } from './elementDeclaration';
+import attListDeclaration, { AttListPToken, ATTLISTDECL_PTOKEN_TYPE } from './attListDeclaration';
+import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN } from './elementDeclaration';
 
 import { AttributeValuePToken } from './common/attribute';
 import unassigned from './common/unassigned';
@@ -133,6 +133,12 @@ function getFirstSToken(pToken: PToken): SToken {
 }
 
 export {
+   ATTLISTDECL_PTOKEN_TYPE,
+   ELEMENT_DECLARATION_PTOKEN,
+
+   AttListPToken,
+   ElementDeclarationPToken,
+   
    declaration,
 
    attListDeclaration,

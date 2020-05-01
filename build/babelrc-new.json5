@@ -1,8 +1,0 @@
-{
-   presets: ["@babel/typescript"],
-   env: {
-      test: {
-         "plugins": ["istanbul"]
-      }
-   }
-}

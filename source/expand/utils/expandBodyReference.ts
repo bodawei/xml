@@ -1,213 +1,10 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenSource } from 'sToken';
-import {
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
-   AttributeValuePToken,
-   EntityValuePToken,
-   GeneralEntityStartPToken,
-   GeneralEntityEndPToken,
-   GeneralEntityReferencePToken,
-   XmlError,
-} from 'token';
+import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, PToken } from 'token';
 
-import { ExpandParams, GeneralEntityInfo } from '../types';
+import { ExpandParams, ExternalSubsetPToken } from '../types';
 
-import { doAsyncLoop } from './doAsyncLoop';
-import { entityValueToSTokenSource } from './entityValueToSTokenSource';
-import { lookupPredefinedValue } from './predefinedEntities';
-import { setupReferencedEntity } from './setupReferencedEntity';
-
-type ExpandAttrResult = (newValue: AttributeValuePToken, errors: Array<XmlError>) => void;
-
-type ParseResults = {
-   attFragment: AttributeValuePToken | void;
-   preparseValue: EntityValuePToken | void;
-   errors: Array<XmlError>;
-};
-
-/*
- * Finally, given a definitely populated geInfo.valueCache, parse the resulting
- * text as an attribute value, recursively expand it, and call back with
- * the results
- * */
-function parseEntityValue(
-   geInfo: GeneralEntityInfo,
-   expandParams: ExpandParams,
-   geRefChain: Array<string>,
-   errors: Array<XmlError>,
-   callback: (result: ParseResults) => void,
-): void {
-   const entityName = strOrBlank(geInfo.token.name);
-   const entityValue = geInfo.valueCache;
-   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-   const sTokenSource: STokenSource = entityValueToSTokenSource(entityValue!, expandParams.emd);
-
-   expandParams.utils.parseAttributeValue(sTokenSource, (attrValue, newErrors) => {
-      // If it still didn't parse into anything useful, abort.
-      if (!attrValue) {
-         callback({
-            attFragment: undefined,
-            preparseValue: entityValue,
-            errors: errors.concat(newErrors),
-         });
-         return;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      expandAttrInternal(
-         attrValue,
-         expandParams,
-         geRefChain.concat(entityName),
-         (expandedResults, expandErrors) => {
-            callback({
-               attFragment: expandedResults,
-               preparseValue: entityValue,
-               errors: errors.concat(newErrors, expandErrors),
-            });
-         },
-      );
-   });
-}
-
-/*
- * Perfrom several basic santity checks on the general entity reference we want
- * to expand, returning appropriate results if needed. If those checks pass,
- * defer to another routine to set up and process the entity value.
- */
-function expandGeRef(
-   expandParams: ExpandParams,
-   geRefChain: Array<string>,
-   geRef: GeneralEntityReferencePToken,
-   callback: (result: ParseResults) => void,
-): void {
-   const entityName = strOrBlank(geRef.name);
-   const geInfo = entityName === '' ? undefined : expandParams.geDeclCache[entityName];
-
-   // Stop processing if we find this entity reference is already being processed
-   if (entityName !== '' && geRefChain.includes(entityName)) {
-      callback({
-         attFragment: undefined,
-         preparseValue: undefined,
-         errors: [],
-      });
-      return;
-   }
-
-   // If there is no declaration, check if it is one of the predefined entities.
-   // return nothing or the predefined value
-   if (!geInfo) {
-      const predefinedValue = lookupPredefinedValue(entityName);
-      const castPredefined = predefinedValue as AttributeValuePToken | void;
-
-      callback({
-         attFragment: castPredefined,
-         preparseValue: predefinedValue,
-         errors: [],
-      });
-
-      return;
-   }
-
-   // If it is an unparsed entity, also abort
-   if (geInfo.isUnparsed) {
-      callback({
-         attFragment: undefined,
-         preparseValue: undefined,
-         errors: [],
-      });
-
-      return;
-   }
-
-   const localRefChain = [...geRefChain, entityName];
-
-   if (geInfo.valueCache) {
-      parseEntityValue(geInfo, expandParams, localRefChain, [], callback);
-      return;
-   }
-
-   // No valueCache, so try to load it.
-   setupReferencedEntity(geRef, expandParams, (newErrors) => {
-      const entityValue = geInfo.valueCache;
-
-      // If we still have to valueCache, something is amiss. Abort.
-      if (!entityValue) {
-         callback({
-            attFragment: undefined,
-            preparseValue: undefined,
-            errors: newErrors,
-         });
-         return;
-      }
-
-      parseEntityValue(geInfo, expandParams, localRefChain, newErrors, callback);
-   });
-}
-
-/*
- * This does the "outer" work of the expansion process. We
- * identify the general entity references in the attribute value
- * and then call another routine to expand each of those.
- * We then stitch the attribute value back together replacing
- * each general entity reference with its expanded contents.
- */
-function expandAttrInternal(
-   attValue: AttributeValuePToken,
-   expandParams: ExpandParams,
-   geRefChain: Array<string>,
-   expanded: ExpandAttrResult,
-): void {
-   const geRefs: Array<GeneralEntityReferencePToken> = [];
-
-   for (const element of attValue) {
-      if (element.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-         geRefs.push(element);
-      }
-   }
-
-   if (geRefs.length === 0) {
-      expanded(attValue, []);
-      return;
-   }
-
-   const expandRef = expandGeRef.bind(undefined, expandParams, geRefChain);
-
-   // Process expand all the geRefs potentially very asynchronously.
-   doAsyncLoop(geRefs, expandRef, (results) => {
-      const allErrors: Array<XmlError> = [];
-      const newValue: AttributeValuePToken = [];
-      let geRefIndex = 0;
-
-      // Now stitch the original attribute value together with expansions
-      for (const element of attValue) {
-         if (element.type !== GENERAL_ENTITY_REFERENCE_PTOKEN) {
-            newValue.push(element);
-            continue;
-         }
-
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         const { attFragment, preparseValue, errors } = results[geRefIndex];
-
-         geRefIndex++;
-         allErrors.push(...errors);
-
-         if (!attFragment) {
-            // For some reason couldn't expand. Just put it in the array
-            newValue.push(element);
-         } else {
-            // expanded! wrap the expanded contents with a start and end
-            newValue.push(
-               new GeneralEntityStartPToken(element, preparseValue),
-               ...attFragment,
-               new GeneralEntityEndPToken(element, preparseValue),
-            );
-         }
-      }
-
-      expanded(newValue, allErrors);
-   });
-}
+type ExpandReference = (pToken: PToken | void, handled: () => void) => void;
 
 /*
  * This takes General Entity Reference or a ParameterEntityReference in the body
@@ -320,12 +117,14 @@ Given a reference, expandParams, and a deliverExpandedToken
 
 
  */
-function expandAttributeValue(
-   value: AttributeValuePToken,
+function expandBodyReference(
+   pToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken | ExternalSubsetPToken,
    expandParams: ExpandParams,
-   expanded: ExpandAttrResult,
+   expanded: ExpandReference,
 ): void {
-   expandAttrInternal(value, expandParams, [], expanded);
+   expanded(undefined, () => {
+      //do nothing
+   });
 }
 
-export { expandAttributeValue };
+export { expandBodyReference };
