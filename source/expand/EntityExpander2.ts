@@ -54,82 +54,7 @@ enum State {
 }
 
 /**********************************************************************\
- An EntityExpander transforms a series of PTokens by replacing any
- general or parameter entity reference tokens it receives (either
- as tokens directly received, or embedded within entity declaration
- values, attribute declaration list default values, other within
- markup declarations, or in attribute values) with a series of
- tokens from the corresponding entity values.
 
- Philosophically, this sees itself as a neutral proessing stage in
- the overall pipeline of XML document handling. That is, it does
- not do any well formed or validation checks. However, for reasons
- discussed below, to make this stance work, it will introduce
- certain new tokens into the stream that are essentially metadata
- for well formed or validation checks later on. Because it may
- try to load external entities, and those loading processes may
- fail, this may introduce some XML Error's into the stream.
-
- EXPANSION
-
- Entity expansion is the heart of what makes full XML conformance
- a challenge. The rules around handling entities are surprisingly
- nuanced, and their combination can lead to some real complexities.
- It takes many reads of the specification to knit together the
- full picture, and this author has at times turned to xmllint
- on MacOS to verify some subtle details.
-
-
- ARCHITECTURE
-
- This class, like the rest of this project, is deliberately built
- to be neutral to how PTokens are delivered to it. Like the rest of
- the system, this could be harnessed into something using node.js
- strems to obtain and deliver tokens, or it could be ultimately
- living in a browser with a different mechamism. Like the rest of
- the system, this simply recieves tokens and uses a callback
- scheme to signal that it is done processing that. This does not
- use promises both because the system didn't use promises when it
- was started, and because some experiments have shown that promises
- can significantly drag the performance down since it requires a full
- event loop cycle to get back to the work, and given the
- "size" of the data flowing through this that can degrade performance
- significantly. The downside to this is one must be sensitive to the
- stack size that could emerge.
-
->> Should the internal and external subset tokens be being created here, or in the ptoken stream?
-
-
- Expand here means that the entity reference is replaced by an entity
- start PToken, followed by the PTokens that are derived from the
- entity value, followed by an entity end PToken.
-
- This behavior is specified across several sections of the standard,
- including §2.8, §2.9, §4.1 and §5.1.
-
- This does minimal checking on the overall well-formedness or validity
- of the series of PTokens. Indeed, this will readily expand things
- that are not well-formed or not valid (e.g. this will expand
- parameter entity references in markup declarations in the internal
- subset), relying on other proceses to dect and flag these violations.
-
- This does enforce a few constraints:
- 1) From §5.1: When in non-validating mode, this will not load any
-    external entities, including the external subset.
- 2) From §5.1: In non-validating/standalone=no mode, this will stop
-    "reading" any entity or attlist declarations encountered after
-    a parameter entity reference in the DTD.
- 3) From §3.1: This does not expand references to external entities
-    in attribute values.
- 4) From §2.9: This will not expand any parameter entities in the
-    internal DTD in non-validating or standalone mode.
-
- Note: It is important to note that within-markup declarations may
- not be fully expanded, especially when the validation mode is
- NON-VALIDATING. Of course, any other entity reference (in the DTD,
- in content, in an attribute or entity value) may not have been
- expanded for one reason or another (e.g. there is no declaration,
- or this is non-validating), but those are probably less surprising.
 \**********************************************************************/
 
 class EntityExpander {
@@ -212,16 +137,17 @@ class EntityExpander {
             expanded();
             break;
          case ATTLISTDECL_PTOKEN_TYPE:
+            this.handleAttListDeclaration(declarationPToken, expanded);
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
             // Temp hack to make start and end elements work
-            const name = strOrBlank(declarationPToken.name);
-            this.expandParams.geDeclCache[name] = {
-               token: declarationPToken,
-               isUnparsed: false,
-               isInternal: true,
-               valueCache: declarationPToken.value as any, // REFACTOR Type is bad in generaldeclarationentity
-            };
+            // const name = strOrBlank(declarationPToken.name);
+            // this.expandParams.geDeclCache[name] = {
+            //    token: declarationPToken,
+            //    isUnparsed: false,
+            //    isInternal: true,
+            //    valueCache: declarationPToken.value as any, // REFACTOR Type is bad in generaldeclarationentity
+            // };
             this.deliverToken(declarationPToken);
             expanded();
             break;
@@ -304,11 +230,15 @@ class EntityExpander {
       });
    }
 
+   /*
+    * For element start and empty tokens, we simply need to expand any general
+    * entity references that appear in their attributes.
+    */
    private handleElementStart(
       pToken: ElementStartPToken | ElementEmptyPToken,
       handled: TokenExpanded,
    ): void {
-      const expandParams = this.expandParams;
+      const attributeValues: Array<AttributeValuePToken> = [];
 
       if (pToken.attributes.length === 0) {
          this.deliverToken(pToken);
@@ -316,30 +246,52 @@ class EntityExpander {
          return;
       }
 
-      const attributeValues: Array<AttributeValuePToken> = pToken.attributes.map(
-         (attribute) => attribute.value,
-      ) as any; // REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
-
-      function process(attributeValue: AttributeValuePToken, callback: AttrExpanded): void {
-         expandAttributeValue(attributeValue, expandParams, callback);
-      }
+      const process = (attributeValue: AttributeValuePToken, callback: AttrExpanded): void => {
+         expandAttributeValue(attributeValue, this.expandParams, callback);
+      };
 
       const reassign = (results: Array<ExpandAttrResult>): void => {
-         const allErrors = [];
-         let index = 0;
-
-         for (const result of results) {
-            for (const err of result.errors) {
+         for (let index = 0; index < results.length; index++) {
+            for (const err of results[index].errors) {
                this.deliverToken(err);
             }
-            allErrors.push(...result.errors);
-            pToken.attributes[index].value = result.newValue as any; // REFACTOR/CLEANUP: Attribute values in AttributePToken is not the right type
-            index++;
+            pToken.attributes[index].value = results[index].newValue as any; // REFACTOR/CLEANUP: Attribute values in AttributePToken is not the right type
          }
 
          this.deliverToken(pToken);
          handled();
       };
+
+      for (const attribute of pToken.attributes) {
+         attributeValues.push(attribute.value as any); // REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
+      }
+
+      doAsyncLoop(attributeValues, process, reassign);
+   }
+
+   private handleAttListDeclaration(pToken: AttListPToken, handled: TokenExpanded): void {
+      const attributeValues: Array<AttributeValuePToken> = [];
+
+      const process = (attributeValue: AttributeValuePToken, callback: AttrExpanded): void => {
+         expandAttributeValue(attributeValue, this.expandParams, callback);
+      };
+
+      const reassign = (results: Array<ExpandAttrResult>): void => {
+         for (let index = 0; index < results.length; index++) {
+            for (const err of results[index].errors) {
+               this.deliverToken(err);
+            }
+
+            pToken.attDefs[index].value = results[index].newValue as any; // REFACTOR/CLEANUP: Attribute values in AttributePToken is not the right type
+         }
+
+         this.deliverToken(pToken);
+         handled();
+      };
+
+      for (const def of pToken.attDefs) {
+         attributeValues.push(def.value as any); // REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
+      }
 
       doAsyncLoop(attributeValues, process, reassign);
    }

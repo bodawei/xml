@@ -30,11 +30,17 @@ import {
    TextPToken,
    PToken,
    XmlError,
+   AttListPToken,
 } from 'token';
+
+// For mocking purposes
+// eslint-disable-next-line
+const expandAttributeValue = require('../utils/expandAttributeValue');
 
 import { EntityExpander } from '../EntityExpander2';
 
 import { ExpandToken, RetrieveResults } from '../types';
+import { WellFormedError } from 'error';
 
 fdescribe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string } = {};
@@ -337,13 +343,115 @@ fdescribe('EntityExpander (unit)', () => {
       });
    });
 
-   describe('element start', () => {
-      let startElement: ElementStartPToken;
+   describe('ATTLIST declaration', () => {
+      let attList: AttListPToken;
+      let expandAttributeSpy: jasmine.Spy;
 
       beforeEach(() => {
+         expandAttributeSpy = spyOn(expandAttributeValue, 'expandAttributeValue');
+         let index = 0;
+
+         attList = new AttListPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('student'),
+         });
+
+         expandAttributeSpy.and.callFake((value: any, params: any, cb: any) => {
+            const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
+               `${index}`,
+            ]);
+            index++;
+            cb({
+               newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
+               errors: [error],
+            });
+         });
+      });
+
+      it('processes the default attribute values of the ATTLIST PToken', (done) => {
+         attList = new AttListPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('student'),
+            attDefs: [
+               {
+                  name: toSToken('two'),
+                  value: [new CharRefPToken({ open: toSToken('&#') })],
+               },
+               {
+                  name: toSToken('three'),
+                  value: [new TextPToken({ text: toSToken('twoValue') })],
+               },
+            ],
+         });
+         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['0']);
+         const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['1']);
+         const expanded = new AttListPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('student'),
+            attDefs: [
+               {
+                  name: toSToken('two'),
+                  value: [new TextPToken({ text: toSToken('testValue #1') })],
+               },
+               {
+                  name: toSToken('three'),
+                  value: [new TextPToken({ text: toSToken('testValue #2') })],
+               },
+            ],
+         });
+
+         doExpand([attList], true, (results) => {
+            expect(results).toEqual([error1, error2, expanded]);
+            done();
+         });
+      });
+
+      it('calls the expandAttributeValue() routine with the value, expand params and a callback', (done) => {
+         attList = new AttListPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('student'),
+            attDefs: [
+               {
+                  name: toSToken('three'),
+                  value: [new TextPToken({ text: toSToken('twoValue') })],
+               },
+            ],
+         });
+         const expectedValue = [new TextPToken({ text: toSToken('twoValue') })];
+
+         doExpand([attList], true, () => {
+            const callArgs = expandAttributeSpy.calls.mostRecent().args;
+
+            expect(callArgs[0]).toEqual(expectedValue);
+            expect(callArgs[1].emd).not.toBeUndefined();
+            expect(callArgs[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+   });
+
+   describe('element start', () => {
+      let startElement: ElementStartPToken;
+      let expandAttributeSpy: jasmine.Spy;
+
+      beforeEach(() => {
+         expandAttributeSpy = spyOn(expandAttributeValue, 'expandAttributeValue');
+         let index = 0;
+
          startElement = new ElementStartPToken({
             open: toSToken('<'),
             name: toSToken('student'),
+         });
+
+         expandAttributeSpy.and.callFake((value: any, params: any, cb: any) => {
+            index++;
+            const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
+               `${index}`,
+            ]);
+            cb({
+               newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
+               errors: [error],
+            });
          });
       });
 
@@ -356,50 +464,12 @@ fdescribe('EntityExpander (unit)', () => {
          });
       });
 
-      it('returns an unaltered attribute when it has no entity references in the attribute value', (done) => {
-         startElement = new ElementStartPToken({
-            open: toSToken('<'),
-            name: toSToken('student'),
-            attributes: [
-               {
-                  name: toSToken('one'),
-                  value: [new TextPToken({ text: toSToken('one') })],
-               },
-               {
-                  name: toSToken('two'),
-                  value: [
-                     new CharRefPToken({ open: toSToken('&#') }),
-                     new TextPToken({ text: toSToken('one') }),
-                  ],
-               },
-            ],
-         });
-         const input = [startElement];
-
-         doExpand(input, true, (results) => {
-            expect(results).toEqual([startElement]);
-            done();
-         });
-      });
-
       it('returns the expanded general entity references when there is one in the attribute', (done) => {
-         const decl = new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('foo'),
-            value: [new TextPToken({ text: toSToken('inner') })],
-         });
-         const decl3 = new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('fooThree'),
-            value: [new TextPToken({ text: toSToken('inner') })],
-         });
+         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['1']);
+         const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['2']);
          const reference1 = new GeneralEntityReferencePToken({
             open: toSToken('&'),
             name: toSToken('foo'),
-         });
-         const reference3 = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
-            name: toSToken('fooThree'),
          });
          startElement = new ElementStartPToken({
             open: toSToken('<'),
@@ -415,7 +485,7 @@ fdescribe('EntityExpander (unit)', () => {
                },
                {
                   name: toSToken('three'),
-                  value: [reference3],
+                  value: [reference1],
                },
             ],
          });
@@ -425,28 +495,40 @@ fdescribe('EntityExpander (unit)', () => {
             attributes: [
                {
                   name: toSToken('two'),
-                  value: [
-                     new CharRefPToken({ open: toSToken('&#') }),
-                     new TextPToken({ text: toSToken('twoValue') }),
-                     new GeneralEntityStartPToken(reference1),
-                     // new TextPToken({ text: toSToken('inner') }),
-                     new GeneralEntityEndPToken(reference1),
-                  ],
+                  value: [new TextPToken({ text: toSToken('testValue #1') })],
                },
                {
                   name: toSToken('three'),
-                  value: [
-                     new GeneralEntityStartPToken(reference3),
-                     // new TextPToken({ text: toSToken('inner') }),
-                     new GeneralEntityEndPToken(reference3),
-                  ],
+                  value: [new TextPToken({ text: toSToken('testValue #2') })],
                },
             ],
          });
-         const input = [decl, decl3, startElement];
 
-         doExpand(input, true, (results) => {
-            expect(results).toEqual([decl, decl3, expandedStart]);
+         doExpand([startElement], true, (results) => {
+            expect(results).toEqual([error1, error2, expandedStart]);
+            done();
+         });
+      });
+
+      it('calls the expandAttributeValue() routine with the value, expand params and a callback', (done) => {
+         startElement = new ElementStartPToken({
+            open: toSToken('<'),
+            name: toSToken('student'),
+            attributes: [
+               {
+                  name: toSToken('two'),
+                  value: [new CharRefPToken({ open: toSToken('&#') })],
+               },
+            ],
+         });
+         const expectedValue = [new CharRefPToken({ open: toSToken('&#') })];
+
+         doExpand([startElement], true, () => {
+            const callArgs = expandAttributeSpy.calls.mostRecent().args;
+
+            expect(callArgs[0]).toEqual(expectedValue);
+            expect(callArgs[1].emd).not.toBeUndefined();
+            expect(callArgs[2]).toBeInstanceOf(Function);
             done();
          });
       });
