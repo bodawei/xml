@@ -37,7 +37,7 @@ import {
 // eslint-disable-next-line
 const expandAttributeValue = require('../utils/expandAttributeValue');
 
-import { EntityExpander } from '../EntityExpander2';
+import { EntityExpander } from '../EntityExpander';
 
 import { ExpandToken, RetrieveResults } from '../types';
 import { WellFormedError } from 'error';
@@ -144,6 +144,64 @@ fdescribe('EntityExpander (unit)', () => {
 
       processNextToken();
    }
+
+   describe('EntityMetaData', () => {
+      let emd: EntityMetaData;
+
+      beforeEach(() => {
+         emd = new EntityMetaData();
+      });
+
+      it('passes the EntityMetaData instance through', (done) => {
+         doExpand([emd], true, (results) => {
+            expect(results).toEqual([emd]);
+            done();
+         });
+      });
+
+      it('passes the EntityMetaData to the expandAttributeMetaData function', (done) => {
+         const expandAttributeSpy: jasmine.Spy = spyOn(
+            expandAttributeValue,
+            'expandAttributeValue',
+         );
+         expandAttributeSpy.and.callFake((value: any, params: any, cb: any) => {
+            cb({
+               newValue: [],
+               errors: [],
+            });
+         });
+         const startElement = new ElementStartPToken({
+            open: toSToken('<'),
+            name: toSToken('student'),
+            attributes: [
+               {
+                  name: toSToken('two'),
+                  value: [new CharRefPToken({ open: toSToken('&#') })],
+               },
+            ],
+         });
+
+         doExpand([emd, startElement], true, () => {
+            expect(expandAttributeSpy.calls.argsFor(0)[1].emd as any).toEqual(emd);
+            done();
+         });
+      });
+   });
+
+   describe('TextPToken', () => {
+      let textPToken: TextPToken;
+
+      beforeEach(() => {
+         textPToken = new TextPToken({ text: toSToken('foo') });
+      });
+
+      it('passes the EntityMetaData instance through', (done) => {
+         doExpand([textPToken], true, (results) => {
+            expect(results).toEqual([textPToken]);
+            done();
+         });
+      });
+   });
 
    describe('DOCTYPE declaration', () => {
       let docTypeStart: DocTypeStartPToken;

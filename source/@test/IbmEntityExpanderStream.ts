@@ -4,7 +4,7 @@ import { Token } from 'basic';
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
-import { EntityExpander, ExpandToken, STokenSourceProcessed, TokenProcessed } from '../expand/EntityExpander';
+import { EntityExpander, ExpandToken, STokenSourceProcessed, TokenProcessed } from '../expand/legacy/EntityExpander-draft2';
 import { PTokenFromLiteralStream } from 'pTokenStream';
 import { EntityValuePToken } from 'source/token/entityDeclaration';
 import { defaultExtractors } from 'extractor';

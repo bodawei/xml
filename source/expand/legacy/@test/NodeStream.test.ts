@@ -6,10 +6,10 @@ import { Transform } from 'stream';
 import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { ErrorCollector, ValidityError, WellFormedError, XmlWarning } from 'error';
 import { SToken, STokenSource } from 'sToken';
-import * as langAttribute from '../../token/common/langAttribute';
-import { UnassignedType } from '../../token/common/unassigned';
-import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
-import { ElementDeclarationPToken } from '../../token/elementDeclaration'; // hack
+import * as langAttribute from '../../../token/common/langAttribute';
+import { UnassignedType } from '../../../token/common/unassigned';
+import { AttListPToken, AttDefXToken } from '../../../token/attListDeclaration'; // hack
+import { ElementDeclarationPToken } from '../../../token/elementDeclaration'; // hack
 
 import NodeStream from '../NodeStream';
 import EntityManager from '../EntityManager';
@@ -47,7 +47,6 @@ type TokenArray = Array<Token>;
 const toSToken = SToken.fromString;
 
 describe('NodeStream (unit)', () => {
-
    function gatherResult(stream: Transform, expect: (result: Token) => void) {
       stream.on('data', (item: Token) => {
          expect(item);
@@ -91,9 +90,13 @@ describe('NodeStream (unit)', () => {
       });
 
       describe('sub-stream processing', () => {
-
          it('adds a start entity token to the stream', () => {
-            const declToken = new xToken.GeneralEntityDeclarationXToken('test', [], undefined, undefined);
+            const declToken = new xToken.GeneralEntityDeclarationXToken(
+               'test',
+               [],
+               undefined,
+               undefined,
+            );
             const refToken = new GeneralEntityReferenceXToken('test');
 
             nodeStream.write(declToken);
@@ -104,7 +107,12 @@ describe('NodeStream (unit)', () => {
          });
 
          it('adds a start entity token to the stream when it encounters a parameter entity ref', () => {
-            const declToken = new xToken.ParameterEntityDeclarationXToken('test', [], undefined, undefined);
+            const declToken = new xToken.ParameterEntityDeclarationXToken(
+               'test',
+               [],
+               undefined,
+               undefined,
+            );
             const refToken = new ParameterEntityReferenceXToken('test');
 
             nodeStream.write(declToken);
@@ -115,8 +123,16 @@ describe('NodeStream (unit)', () => {
          });
 
          it('passes a reference with no referent straight through', () => {
-            const declToken = new xToken.ParameterEntityDeclarationXToken('test', [], undefined, undefined);
-            const refToken: any = new ParameterEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('test') });
+            const declToken = new xToken.ParameterEntityDeclarationXToken(
+               'test',
+               [],
+               undefined,
+               undefined,
+            );
+            const refToken: any = new ParameterEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('test'),
+            });
             (declToken.value as any).push(refToken);
 
             nodeStream.write(declToken);
@@ -127,8 +143,16 @@ describe('NodeStream (unit)', () => {
          });
 
          it('does not expand an entity reference that has no name', () => {
-            const declToken = new xToken.ParameterEntityDeclarationXToken('test', [], undefined, undefined);
-            const refToken = new ParameterEntityReferencePToken({ open: SToken.fromString('&'), name: undefined });
+            const declToken = new xToken.ParameterEntityDeclarationXToken(
+               'test',
+               [],
+               undefined,
+               undefined,
+            );
+            const refToken = new ParameterEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: undefined,
+            });
             (declToken.value as any).push(refToken);
 
             nodeStream.write(declToken);
@@ -137,11 +161,9 @@ describe('NodeStream (unit)', () => {
                expect(result.value[0]).toEqual(refToken);
             });
          });
-
       });
 
       describe('DOCTYPE processing', () => {
-
          it('adds an internal subset marker to the stream when there is an internal subset', () => {
             const declToken = new DocTypeStartXToken('test', undefined, true);
 
@@ -159,7 +181,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.end;
 
             nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(null)
+            expect(nodeStream.read()).toEqual(null);
          });
 
          it('adds an end of internal subset marker when there is an internal subset', () => {
@@ -172,7 +194,7 @@ describe('NodeStream (unit)', () => {
 
             nodeStream.read(); // decl token
             nodeStream.read(); // internal start
-            expect(nodeStream.read()).toEqual(new InternalSubsetEndToken())
+            expect(nodeStream.read()).toEqual(new InternalSubsetEndToken());
          });
 
          it('adds an end of internal subset marker when there is no internal subset', () => {
@@ -184,7 +206,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.end;
 
             nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(declEndToken)
+            expect(nodeStream.read()).toEqual(declEndToken);
          });
 
          it('adds an external subset start marker if there is one', () => {
@@ -196,7 +218,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.end;
 
             nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(new ExternalSubsetStartToken())
+            expect(nodeStream.read()).toEqual(new ExternalSubsetStartToken());
          });
 
          it('adds an external subset end marker if there is one', () => {
@@ -227,11 +249,9 @@ describe('NodeStream (unit)', () => {
             expect(nodeStream.read()).toEqual(new ExternalSubsetEndToken());
             expect(nodeStream.read()).toEqual(declEndToken);
          });
-
       });
 
       describe('element declaration processing', () => {
-
          it('passes the element declaration through if there are no unassigned', (done) => {
             const pToken = new ElementDeclarationPToken({
                name: SToken.fromString('test'),
@@ -253,11 +273,13 @@ describe('NodeStream (unit)', () => {
                unassigned: unassignedVals,
             });
             const declToken = xToken.elementDeclaration.pTokenToXToken(pToken);
-            spyOn(xToken.elementDeclaration, 'assignUnassigned').and.callFake((pToken: ElementDeclarationPToken) => {
-               expect(pToken.unassigned).toEqual([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('ANY')),
-               ]);
-            });
+            spyOn(xToken.elementDeclaration, 'assignUnassigned').and.callFake(
+               (pToken: ElementDeclarationPToken) => {
+                  expect(pToken.unassigned).toEqual([
+                     xToken.unassigned.wordFromSToken(SToken.fromString('ANY')),
+                  ]);
+               },
+            );
 
             nodeStream.write(declToken);
 
@@ -610,10 +632,14 @@ describe('NodeStream (unit)', () => {
       });
 
       describe('entity declaration processing', () => {
-
          it('adds any general entity declarations to the entity manager', () => {
             spyOn(entityManager, 'addEntityFromInternalSubset');
-            const token = new xToken.GeneralEntityDeclarationXToken('fred', [], undefined, undefined);
+            const token = new xToken.GeneralEntityDeclarationXToken(
+               'fred',
+               [],
+               undefined,
+               undefined,
+            );
 
             nodeStream.write(token);
 
@@ -622,7 +648,12 @@ describe('NodeStream (unit)', () => {
 
          it('adds any parameter entity declarations to the entity manager', () => {
             spyOn(entityManager, 'addParameterEntityFromInternalSubset');
-            const token = new xToken.ParameterEntityDeclarationXToken('fred', [], undefined, undefined);
+            const token = new xToken.ParameterEntityDeclarationXToken(
+               'fred',
+               [],
+               undefined,
+               undefined,
+            );
 
             nodeStream.write(token);
 
@@ -632,9 +663,7 @@ describe('NodeStream (unit)', () => {
          it('leaves a simple EntityValue untouched', (done) => {
             const pToken = new GeneralEntityDeclarationPToken({
                name: SToken.fromString('generalEntityDeclaration'),
-               value: [
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') })
-               ],
+               value: [new ParameterEntityReferencePToken({ open: SToken.fromString('%') })],
             });
             const declToken = pToken.toXToken();
 
@@ -642,7 +671,7 @@ describe('NodeStream (unit)', () => {
 
             gatherResult(nodeStream, (token) => {
                expect((token as GeneralEntityDeclarationXToken).value).toEqual([
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') })
+                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
                ]);
 
                done();
@@ -664,9 +693,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.write(declToken);
 
             gatherResult(nodeStream, (token) => {
-               expect((token as GeneralEntityDeclarationXToken).value).toEqual([
-                  parentPeref,
-               ]);
+               expect((token as GeneralEntityDeclarationXToken).value).toEqual([parentPeref]);
 
                done();
             });
@@ -753,10 +780,19 @@ describe('NodeStream (unit)', () => {
             const parentDeclaration = new xToken.ParameterEntityDeclarationPToken({
                name: SToken.fromString('parentDecl'),
                value: [
-                  new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%') })),
+                  new ParameterEntityStartPToken(
+                     new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  ),
                   xToken.unassigned.wordFromSToken(
-                     new SToken('childValue', 'childValue', new Range(new EntityLocation(), 0, 0, 0, 9, 0, 9))),
-                  new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%') })),
+                     new SToken(
+                        'childValue',
+                        'childValue',
+                        new Range(new EntityLocation(), 0, 0, 0, 9, 0, 9),
+                     ),
+                  ),
+                  new ParameterEntityEndPToken(
+                     new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  ),
                ],
             });
             const parentToken = parentDeclaration.toXToken();
@@ -775,11 +811,16 @@ describe('NodeStream (unit)', () => {
             nodeStream.write(declToken);
 
             gatherResult(nodeStream, (token) => {
-               expect((token as any).value).toEqual([ // typeHack
+               expect((token as any).value).toEqual([
+                  // typeHack
                   new ParameterEntityStartPToken(parentPeref),
-                  new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%') })),
+                  new ParameterEntityStartPToken(
+                     new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  ),
                   parentDeclaration.value[1],
-                  new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%') })),
+                  new ParameterEntityEndPToken(
+                     new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  ),
                   new ParameterEntityEndPToken(parentPeref),
                ]);
 
@@ -790,9 +831,7 @@ describe('NodeStream (unit)', () => {
          it('handles unassigned values', (done) => {
             const declToken = new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<'),
-               unassigned: [
-                  xToken.unassigned.wordFromSToken(SToken.fromString('thename')),
-               ],
+               unassigned: [xToken.unassigned.wordFromSToken(SToken.fromString('thename'))],
                nextParamName: 'parameter',
             });
             spyOn(declToken, 'assignUnassigned').and.callFake(() => {
@@ -803,12 +842,20 @@ describe('NodeStream (unit)', () => {
             nodeStream.write(declToken.toXToken());
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.GeneralEntityDeclarationXToken('newName', [], undefined, '', new GeneralEntityDeclarationPToken({
-                  open: SToken.fromString('<'),
-                  name: SToken.fromString('newName'),
-                  nextParamName: 'parameter',
-                  assignUnassigned: declToken.assignUnassigned,
-               })));
+               expect(token).toEqual(
+                  new xToken.GeneralEntityDeclarationXToken(
+                     'newName',
+                     [],
+                     undefined,
+                     '',
+                     new GeneralEntityDeclarationPToken({
+                        open: SToken.fromString('<'),
+                        name: SToken.fromString('newName'),
+                        nextParamName: 'parameter',
+                        assignUnassigned: declToken.assignUnassigned,
+                     }),
+                  ),
+               );
 
                done();
             });
@@ -822,25 +869,37 @@ describe('NodeStream (unit)', () => {
                close: SToken.fromString(';'),
             });
             const declToken = new GeneralEntityDeclarationPToken({
-               unassigned: [{
-                  type: 'reference',
-                  token: peRef
-               }],
+               unassigned: [
+                  {
+                     type: 'reference',
+                     token: peRef,
+                  },
+               ],
                nextParamName: 'parameter',
             });
-            spyOn(declToken, 'assignUnassigned').and.callFake(() => { });
+            spyOn(declToken, 'assignUnassigned').and.callFake(() => {});
 
             nodeStream.write(declToken.toXToken());
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.GeneralEntityDeclarationXToken('', [], undefined, '', new GeneralEntityDeclarationPToken({
-                  unassigned: [{
-                     type: 'reference',
-                     token: peRef
-                  }],
-                  nextParamName: 'parameter',
-                  assignUnassigned: declToken.assignUnassigned,
-               })));
+               expect(token).toEqual(
+                  new xToken.GeneralEntityDeclarationXToken(
+                     '',
+                     [],
+                     undefined,
+                     '',
+                     new GeneralEntityDeclarationPToken({
+                        unassigned: [
+                           {
+                              type: 'reference',
+                              token: peRef,
+                           },
+                        ],
+                        nextParamName: 'parameter',
+                        assignUnassigned: declToken.assignUnassigned,
+                     }),
+                  ),
+               );
 
                done();
             });
@@ -859,29 +918,41 @@ describe('NodeStream (unit)', () => {
             });
 
             const declToken = new GeneralEntityDeclarationPToken({
-               unassigned: [{
-                  type: 'reference',
-                  token: peRef
-               }],
+               unassigned: [
+                  {
+                     type: 'reference',
+                     token: peRef,
+                  },
+               ],
                nextParamName: 'parameter',
             });
-            spyOn(declToken, 'assignUnassigned').and.callFake(() => { });
+            spyOn(declToken, 'assignUnassigned').and.callFake(() => {});
 
             nodeStream.write(declToken.toXToken());
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.GeneralEntityDeclarationXToken('', [], undefined, '', new GeneralEntityDeclarationPToken({
-                  unassigned: [{
-                     type: UnassignedType.ENTITY_START,
-                     token: peRef,
-                  },
-                  {
-                     type: UnassignedType.ENTITY_END,
-                     token: peRef,
-                  },],
-                  nextParamName: 'parameter',
-                  assignUnassigned: declToken.assignUnassigned,
-               })));
+               expect(token).toEqual(
+                  new xToken.GeneralEntityDeclarationXToken(
+                     '',
+                     [],
+                     undefined,
+                     '',
+                     new GeneralEntityDeclarationPToken({
+                        unassigned: [
+                           {
+                              type: UnassignedType.ENTITY_START,
+                              token: peRef,
+                           },
+                           {
+                              type: UnassignedType.ENTITY_END,
+                              token: peRef,
+                           },
+                        ],
+                        nextParamName: 'parameter',
+                        assignUnassigned: declToken.assignUnassigned,
+                     }),
+                  ),
+               );
 
                done();
             });
@@ -893,25 +964,37 @@ describe('NodeStream (unit)', () => {
                open: SToken.fromString('%'),
             });
             const declToken = new GeneralEntityDeclarationPToken({
-               unassigned: [{
-                  type: 'reference',
-                  token: peRef
-               }],
+               unassigned: [
+                  {
+                     type: 'reference',
+                     token: peRef,
+                  },
+               ],
                nextParamName: 'parameter',
             });
-            spyOn(declToken, 'assignUnassigned').and.callFake(() => { });
+            spyOn(declToken, 'assignUnassigned').and.callFake(() => {});
 
             nodeStream.write(declToken.toXToken());
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.GeneralEntityDeclarationXToken('', [], undefined, '', new GeneralEntityDeclarationPToken({
-                  unassigned: [{
-                     type: 'reference',
-                     token: peRef
-                  }],
-                  nextParamName: 'parameter',
-                  assignUnassigned: declToken.assignUnassigned,
-               })));
+               expect(token).toEqual(
+                  new xToken.GeneralEntityDeclarationXToken(
+                     '',
+                     [],
+                     undefined,
+                     '',
+                     new GeneralEntityDeclarationPToken({
+                        unassigned: [
+                           {
+                              type: 'reference',
+                              token: peRef,
+                           },
+                        ],
+                        nextParamName: 'parameter',
+                        assignUnassigned: declToken.assignUnassigned,
+                     }),
+                  ),
+               );
 
                done();
             });
@@ -950,7 +1033,8 @@ describe('NodeStream (unit)', () => {
             });
             spyOn(declToken, 'assignUnassigned').and.callFake(() => {
                expect(declToken.unassigned).toEqual([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
+                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
+                  {
                      type: UnassignedType.ENTITY_START,
                      token: refToSecond,
                   },
@@ -978,9 +1062,13 @@ describe('NodeStream (unit)', () => {
                value: [
                   xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   // third was expanded ealier in place.
-                  new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: refToThird.name! })),
+                  new ParameterEntityStartPToken(
+                     new ParameterEntityReferencePToken({ open: refToThird.name! }),
+                  ),
                   new TextPToken({ text: SToken.fromString('"http://somewhere.com"') }),
-                  new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: refToThird.name! })),
+                  new ParameterEntityEndPToken(
+                     new ParameterEntityReferencePToken({ open: refToThird.name! }),
+                  ),
                ],
             });
             const secondDeclXToken = secondDeclPToken.toXToken();
@@ -991,7 +1079,8 @@ describe('NodeStream (unit)', () => {
             });
             const declToken = new GeneralEntityDeclarationPToken({
                unassigned: [
-                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
+                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
+                  {
                      type: 'reference',
                      token: refToSecond,
                   },
@@ -1005,36 +1094,41 @@ describe('NodeStream (unit)', () => {
                   return;
                }
             });
-            spyOn(xToken.unassigned, 'parseAllValues').and.callFake((source: STokenSource, _2: any, callback: (val: any) => void) => {
-               callback([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
-                  {
-                     type: 'literal',
-                     token: {
-                        openQuote: SToken.fromString('"'),
-                        value: [SToken.fromString('http://somewhere.com')],
-                        closeQuote: SToken.fromString('"'),
-                     }
-                  },
-               ]);
-            });
+            spyOn(xToken.unassigned, 'parseAllValues').and.callFake(
+               (source: STokenSource, _2: any, callback: (val: any) => void) => {
+                  callback([
+                     xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
+                     {
+                        type: 'literal',
+                        token: {
+                           openQuote: SToken.fromString('"'),
+                           value: [SToken.fromString('http://somewhere.com')],
+                           closeQuote: SToken.fromString('"'),
+                        },
+                     },
+                  ]);
+               },
+            );
             spyOn(declToken, 'assignUnassigned').and.callFake(() => {
                expect(declToken.unassigned as any).toEqual([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
+                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
+                  {
                      type: UnassignedType.ENTITY_START,
                      token: refToSecond,
-                  }, xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
+                  },
+                  xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   {
                      type: UnassignedType.LITERAL,
                      token: {
                         openQuote: SToken.fromString('"'),
                         value: [SToken.fromString('http://somewhere.com')],
                         closeQuote: SToken.fromString('"'),
-                     }
-                  }, {
+                     },
+                  },
+                  {
                      type: UnassignedType.ENTITY_END,
                      token: refToSecond,
-                  }
+                  },
                ]);
             });
 
@@ -1084,11 +1178,9 @@ describe('NodeStream (unit)', () => {
          //       done();
          //    });
          // });
-
       });
 
       describe('notation declaration processing', () => {
-
          it('processes through the unassigned values', (done) => {
             const unassignedVals = [xToken.unassigned.wordFromSToken(SToken.fromString('public'))];
             const pToken = new NotationDeclarationPToken({
@@ -1115,7 +1207,9 @@ describe('NodeStream (unit)', () => {
          });
 
          it('handles the lack of an externalId', (done) => {
-            const unassignedVals = [xToken.unassigned.spaceFromSToken(SToken.fromString('theName'))];
+            const unassignedVals = [
+               xToken.unassigned.spaceFromSToken(SToken.fromString('theName')),
+            ];
             const pToken = new NotationDeclarationPToken({
                open: SToken.fromString('<!'),
                unassigned: unassignedVals,
@@ -1134,11 +1228,9 @@ describe('NodeStream (unit)', () => {
          });
 
          // Other testing is implicitly covered in entity declaration testing
-
       });
 
       describe('attlist declaration processing', () => {
-
          it('processes through the unassigned values', (done) => {
             const unassignedVals = [xToken.unassigned.wordFromSToken(SToken.fromString('elName'))];
             const pToken = new AttListPToken({
@@ -1147,11 +1239,13 @@ describe('NodeStream (unit)', () => {
                unassigned: unassignedVals,
             });
             const declToken = xToken.attListDeclaration.pTokenToXToken(pToken);
-            spyOn(xToken.attListDeclaration, 'assignUnassigned').and.callFake((pToken: AttListPToken) => {
-               expect(pToken.unassigned).toEqual([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('elName')),
-               ]);
-            });
+            spyOn(xToken.attListDeclaration, 'assignUnassigned').and.callFake(
+               (pToken: AttListPToken) => {
+                  expect(pToken.unassigned).toEqual([
+                     xToken.unassigned.wordFromSToken(SToken.fromString('elName')),
+                  ]);
+               },
+            );
 
             nodeStream.write(declToken);
 
@@ -1180,11 +1274,13 @@ describe('NodeStream (unit)', () => {
                isParsable: true,
                getStream() {
                   return 'x' as any;
-               }
+               },
             });
-            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([new TextPToken({ text: SToken.fromString('') })]);
-            });
+            spyOn(xToken.literalValue, 'parse').and.callFake(
+               (_1: any, _2: any, cb: (x: any) => void) => {
+                  cb([new TextPToken({ text: SToken.fromString('') })]);
+               },
+            );
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [new TextXToken('one')];
             });
@@ -1192,9 +1288,7 @@ describe('NodeStream (unit)', () => {
                name: 'foo',
                type: 'test',
                defaultType: 'test',
-               value: [
-                  new GeneralEntityReferenceXToken('refName'),
-               ],
+               value: [new GeneralEntityReferenceXToken('refName')],
             };
             const def2: AttDefXToken = {
                name: 'foo',
@@ -1248,7 +1342,6 @@ describe('NodeStream (unit)', () => {
       });
 
       describe('element processing', () => {
-
          it('processes an element with no attributes without problems', (done) => {
             const elementStart = new ElementStartXToken('one', []);
             const expected = new ElementStartXToken('one', []);
@@ -1262,14 +1355,18 @@ describe('NodeStream (unit)', () => {
          });
 
          it('passes attributes through with no content', (done) => {
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [],
-            }]);
-            const expected = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [],
-            }]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [],
+               },
+            ]);
+            const expected = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
@@ -1280,20 +1377,26 @@ describe('NodeStream (unit)', () => {
          });
 
          it('passes attributes through that are only text', (done) => {
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [new TextXToken('one')],
-            }, {
-               name: 'two',
-               value: [new TextXToken('foo')],
-            }]);
-            const expected = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [new TextXToken('one')],
-            }, {
-               name: 'two',
-               value: [new TextXToken('foo')],
-            }]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [new TextXToken('one')],
+               },
+               {
+                  name: 'two',
+                  value: [new TextXToken('foo')],
+               },
+            ]);
+            const expected = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [new TextXToken('one')],
+               },
+               {
+                  name: 'two',
+                  value: [new TextXToken('foo')],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
@@ -1310,28 +1413,32 @@ describe('NodeStream (unit)', () => {
                isParsable: true,
                getStream() {
                   return 'x' as any;
-               }
+               },
             });
-            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([new TextPToken({ text: SToken.fromString('') })]);
-            });
+            spyOn(xToken.literalValue, 'parse').and.callFake(
+               (_1: any, _2: any, cb: (x: any) => void) => {
+                  cb([new TextPToken({ text: SToken.fromString('') })]);
+               },
+            );
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [new TextXToken('one')];
             });
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [
-                  new GeneralEntityReferenceXToken('refName'),
-               ],
-            }]);
-            const expected = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [
-                  new GeneralEntityStartXToken('refName'),
-                  new TextXToken('one'),
-                  new GeneralEntityEndXToken('refName'),
-               ],
-            }]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [new GeneralEntityReferenceXToken('refName')],
+               },
+            ]);
+            const expected = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [
+                     new GeneralEntityStartXToken('refName'),
+                     new TextXToken('one'),
+                     new GeneralEntityEndXToken('refName'),
+                  ],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
@@ -1343,23 +1450,27 @@ describe('NodeStream (unit)', () => {
 
          it('passes an general entity that can not be parsed through unchanged', (done) => {
             spyOn(entityManager, 'getEntityInfo').and.returnValue(undefined);
-            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([new TextPToken({ text: SToken.fromString('') })]);
-            });
+            spyOn(xToken.literalValue, 'parse').and.callFake(
+               (_1: any, _2: any, cb: (x: any) => void) => {
+                  cb([new TextPToken({ text: SToken.fromString('') })]);
+               },
+            );
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [new TextXToken('one')];
             });
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [
-                  new GeneralEntityReferenceXToken('refName'),
-               ],
-            }]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [new GeneralEntityReferenceXToken('refName')],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
             gatherResult(nodeStream, (results) => {
-               expect(elementStart.attributes[0].value[0]).toEqual(new GeneralEntityReferenceXToken('refName'));
+               expect(elementStart.attributes[0].value[0]).toEqual(
+                  new GeneralEntityReferenceXToken('refName'),
+               );
                done();
             });
          });
@@ -1421,34 +1532,39 @@ describe('NodeStream (unit)', () => {
          // This test switches the low level parsing to being async so we can
          // make sure the higher level code still handles this.
          it('replaces a general entity asynchronously', (done) => {
-            let asyncCallback: Function = () => { };
+            let asyncCallback: Function = () => {};
             spyOn(entityManager, 'getEntityInfo').and.returnValue({
                isParameter: false,
                isInternal: true,
                isParsable: true,
                getStream() {
                   return 'x' as any;
-               }
+               },
             });
-            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               asyncCallback = cb;
-            });
-            spyOn(xToken.literalValue, 'makeXTokenCompatible')
-               .and.returnValue([new TextXToken('one')]);
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [
-                  new GeneralEntityReferenceXToken('refName'),
-               ],
-            }]);
-            const expected = new ElementStartXToken('one', [{
-               name: 'foo',
-               value: [
-                  new GeneralEntityStartXToken('refName'),
-                  new TextXToken('one'),
-                  new GeneralEntityEndXToken('refName'),
-               ],
-            }]);
+            spyOn(xToken.literalValue, 'parse').and.callFake(
+               (_1: any, _2: any, cb: (x: any) => void) => {
+                  asyncCallback = cb;
+               },
+            );
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.returnValue([
+               new TextXToken('one'),
+            ]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [new GeneralEntityReferenceXToken('refName')],
+               },
+            ]);
+            const expected = new ElementStartXToken('one', [
+               {
+                  name: 'foo',
+                  value: [
+                     new GeneralEntityStartXToken('refName'),
+                     new TextXToken('one'),
+                     new GeneralEntityEndXToken('refName'),
+                  ],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
@@ -1467,40 +1583,44 @@ describe('NodeStream (unit)', () => {
                isParsable: true,
                getStream() {
                   return 'x' as any;
-               }
+               },
             });
-            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([new TextPToken({ text: SToken.fromString('') })]);
-            });
+            spyOn(xToken.literalValue, 'parse').and.callFake(
+               (_1: any, _2: any, cb: (x: any) => void) => {
+                  cb([new TextPToken({ text: SToken.fromString('') })]);
+               },
+            );
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [new TextXToken('one')];
             });
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'firstAttribute',
-               value: [
-                  new GeneralEntityReferenceXToken('refName'),
-               ],
-            }, {
-               name: 'secondAttribute',
-               value: [
-                  new GeneralEntityReferenceXToken('refName'),
-               ],
-            }]);
-            const expected = new ElementStartXToken('one', [{
-               name: 'firstAttribute',
-               value: [
-                  new GeneralEntityStartXToken('refName'),
-                  new TextXToken('one'),
-                  new GeneralEntityEndXToken('refName'),
-               ],
-            }, {
-               name: 'secondAttribute',
-               value: [
-                  new GeneralEntityStartXToken('refName'),
-                  new TextXToken('one'),
-                  new GeneralEntityEndXToken('refName'),
-               ],
-            }]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'firstAttribute',
+                  value: [new GeneralEntityReferenceXToken('refName')],
+               },
+               {
+                  name: 'secondAttribute',
+                  value: [new GeneralEntityReferenceXToken('refName')],
+               },
+            ]);
+            const expected = new ElementStartXToken('one', [
+               {
+                  name: 'firstAttribute',
+                  value: [
+                     new GeneralEntityStartXToken('refName'),
+                     new TextXToken('one'),
+                     new GeneralEntityEndXToken('refName'),
+                  ],
+               },
+               {
+                  name: 'secondAttribute',
+                  value: [
+                     new GeneralEntityStartXToken('refName'),
+                     new TextXToken('one'),
+                     new GeneralEntityEndXToken('refName'),
+                  ],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
@@ -1517,32 +1637,38 @@ describe('NodeStream (unit)', () => {
                isParsable: true,
                getStream() {
                   return 'x' as any;
-               }
+               },
             });
-            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([new TextPToken({ text: SToken.fromString('') })]);
-            });
+            spyOn(xToken.literalValue, 'parse').and.callFake(
+               (_1: any, _2: any, cb: (x: any) => void) => {
+                  cb([new TextPToken({ text: SToken.fromString('') })]);
+               },
+            );
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [new TextXToken('one')];
             });
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'firstAttribute',
-               value: [
-                  new TextXToken('some text'),
-                  new GeneralEntityReferenceXToken('refName'),
-                  new TextXToken('more text'),
-               ],
-            }]);
-            const expected = new ElementStartXToken('one', [{
-               name: 'firstAttribute',
-               value: [
-                  new TextXToken('some text'),
-                  new GeneralEntityStartXToken('refName'),
-                  new TextXToken('one'),
-                  new GeneralEntityEndXToken('refName'),
-                  new TextXToken('more text'),
-               ],
-            }]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'firstAttribute',
+                  value: [
+                     new TextXToken('some text'),
+                     new GeneralEntityReferenceXToken('refName'),
+                     new TextXToken('more text'),
+                  ],
+               },
+            ]);
+            const expected = new ElementStartXToken('one', [
+               {
+                  name: 'firstAttribute',
+                  value: [
+                     new TextXToken('some text'),
+                     new GeneralEntityStartXToken('refName'),
+                     new TextXToken('one'),
+                     new GeneralEntityEndXToken('refName'),
+                     new TextXToken('more text'),
+                  ],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
@@ -1560,11 +1686,15 @@ describe('NodeStream (unit)', () => {
                isParsable: true,
                getStream() {
                   return 'x' as any;
-               }
+               },
             });
-            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([ /* PTokens for text, entity ref and text */]);
-            });
+            spyOn(xToken.literalValue, 'parse').and.callFake(
+               (_1: any, _2: any, cb: (x: any) => void) => {
+                  cb([
+                     /* PTokens for text, entity ref and text */
+                  ]);
+               },
+            );
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                callCount++;
                if (callCount === 1) {
@@ -1577,28 +1707,32 @@ describe('NodeStream (unit)', () => {
                   return [new TextXToken('inner')];
                }
             });
-            const elementStart = new ElementStartXToken('one', [{
-               name: 'testAttribute',
-               value: [
-                  new TextXToken('some text'),
-                  new GeneralEntityReferenceXToken('parent'),
-                  new TextXToken('more text'),
-               ],
-            }]);
-            const expected = new ElementStartXToken('one', [{
-               name: 'testAttribute',
-               value: [
-                  new TextXToken('some text'),
-                  new GeneralEntityStartXToken('parent'),
-                  new TextXToken('pre '),
-                  new GeneralEntityStartXToken('child'),
-                  new TextXToken('inner'),
-                  new GeneralEntityEndXToken('child'),
-                  new TextXToken(' post'),
-                  new GeneralEntityEndXToken('parent'),
-                  new TextXToken('more text'),
-               ],
-            }]);
+            const elementStart = new ElementStartXToken('one', [
+               {
+                  name: 'testAttribute',
+                  value: [
+                     new TextXToken('some text'),
+                     new GeneralEntityReferenceXToken('parent'),
+                     new TextXToken('more text'),
+                  ],
+               },
+            ]);
+            const expected = new ElementStartXToken('one', [
+               {
+                  name: 'testAttribute',
+                  value: [
+                     new TextXToken('some text'),
+                     new GeneralEntityStartXToken('parent'),
+                     new TextXToken('pre '),
+                     new GeneralEntityStartXToken('child'),
+                     new TextXToken('inner'),
+                     new GeneralEntityEndXToken('child'),
+                     new TextXToken(' post'),
+                     new GeneralEntityEndXToken('parent'),
+                     new TextXToken('more text'),
+                  ],
+               },
+            ]);
 
             nodeStream.write(elementStart);
 
@@ -1717,11 +1851,9 @@ describe('NodeStream (unit)', () => {
          //       done();
          //    });
          // });
-
       });
 
       describe('references', () => {
-
          it('passes an unknown reference through', () => {
             const token = new GeneralEntityReferenceXToken('testReference');
 
@@ -1739,11 +1871,9 @@ describe('NodeStream (unit)', () => {
          //    expect(nodeStream.read().message).toEqual(new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
          //       [ token.name ]).message);
          // });
-
       });
 
       describe('non-validating (§2.9, §4.1, §5.0, §5.1, §5.2)', () => {
-
          it('entity declarations are recognized before a reference to a parameter entity when non-validating', (done) => {
             nodeStream = new NodeStream(entityManager, { validating: false });
             nodeStream.write(new ParameterEntityDeclarationXToken('paramEntity', []));
@@ -1784,15 +1914,13 @@ describe('NodeStream (unit)', () => {
             nodeStream.end();
 
             gatherResults(nodeStream, (results) => {
-               expect(results[0]).toEqual(paramReference) // later note: we don't pass the declaration through!???
+               expect(results[0]).toEqual(paramReference); // later note: we don't pass the declaration through!???
                done();
             });
          });
-
       });
 
       describe('standalone=yes (§2.9, §4.1, §5.0, §5.1, §5.2)', () => {
-
          it('entity declarations are recognized before a reference to a parameter entity when standalone=yes', (done) => {
             const nodeStream = new NodeStream(entityManager, { validating: false });
             // nodeStream.write(new XmlDeclarationXToken(1.0, 'USASCII', true));
@@ -1840,9 +1968,6 @@ describe('NodeStream (unit)', () => {
                done();
             });
          });
-
       });
-
    });
-
 });

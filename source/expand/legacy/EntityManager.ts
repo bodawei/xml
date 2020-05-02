@@ -10,7 +10,7 @@ import {
 } from 'token';
 
 type EntityMap = {
-   [name: string]: any,
+   [name: string]: any;
 };
 
 const DEFAULT_ENTITY = 'DefaultEntity';
@@ -29,16 +29,36 @@ class EntityManager {
    constructor() {
       this._entityMap = {};
 
-      const ltEntity = new GeneralEntityDeclarationXToken('lt',
-         [ new TextPToken({ text: SToken.fromString('&#60;') }) ], undefined, undefined);
-      const gtEntity = new GeneralEntityDeclarationXToken('gt',
-         [ new TextPToken({ text: SToken.fromString('>') }) ], undefined, undefined);
-      const ampEntity = new GeneralEntityDeclarationXToken('amp',
-         [ new TextPToken({ text: SToken.fromString('&#38;') }) ], undefined, undefined);
-      const aposEntity = new GeneralEntityDeclarationXToken('apos',
-         [ new TextPToken({ text: SToken.fromString('\'') }) ], undefined, undefined);
-      const quotEntity = new GeneralEntityDeclarationXToken('quot',
-         [ new TextPToken({ text: SToken.fromString('"') }) ], undefined, undefined);
+      const ltEntity = new GeneralEntityDeclarationXToken(
+         'lt',
+         [new TextPToken({ text: SToken.fromString('&#60;') })],
+         undefined,
+         undefined,
+      );
+      const gtEntity = new GeneralEntityDeclarationXToken(
+         'gt',
+         [new TextPToken({ text: SToken.fromString('>') })],
+         undefined,
+         undefined,
+      );
+      const ampEntity = new GeneralEntityDeclarationXToken(
+         'amp',
+         [new TextPToken({ text: SToken.fromString('&#38;') })],
+         undefined,
+         undefined,
+      );
+      const aposEntity = new GeneralEntityDeclarationXToken(
+         'apos',
+         [new TextPToken({ text: SToken.fromString("'") })],
+         undefined,
+         undefined,
+      );
+      const quotEntity = new GeneralEntityDeclarationXToken(
+         'quot',
+         [new TextPToken({ text: SToken.fromString('"') })],
+         undefined,
+         undefined,
+      );
 
       this._internalAdd(ltEntity, DEFAULT_ENTITY, false);
       this._internalAdd(gtEntity, DEFAULT_ENTITY, false);
@@ -111,8 +131,15 @@ class EntityManager {
          return;
       }
 
-      const source = new STokenSource(defaultExtractors as any, // typeHack
-         new EntityMetaData(EntityKind.EXTERNALSUBSET, undefined, undefined, this._externalEntityLocation));
+      const source = new STokenSource(
+         defaultExtractors as any, // typeHack
+         new EntityMetaData(
+            EntityKind.EXTERNALSUBSET,
+            undefined,
+            undefined,
+            this._externalEntityLocation,
+         ),
+      );
       return source;
    }
 
@@ -121,7 +148,11 @@ class EntityManager {
     information
    \**********************************************************************/
 
-   _internalAdd(token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken, source: string, isParameter: boolean) {
+   _internalAdd(
+      token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken,
+      source: string,
+      isParameter: boolean,
+   ) {
       if (!this._entityMap[token.name]) {
          this._entityMap[token.name] = new EntityEntry();
       }
@@ -211,10 +242,10 @@ class EntityEntry {
       let collection;
 
       if (isParameter) {
-         collection = this._parameter[INTERNAL_SUBSET] ||
-            this._parameter[EXTERNAL_SUBSET];
+         collection = this._parameter[INTERNAL_SUBSET] || this._parameter[EXTERNAL_SUBSET];
       } else {
-         collection = this._general[INTERNAL_SUBSET] ||
+         collection =
+            this._general[INTERNAL_SUBSET] ||
             this._general[EXTERNAL_SUBSET] ||
             this._general[DEFAULT_ENTITY];
       }

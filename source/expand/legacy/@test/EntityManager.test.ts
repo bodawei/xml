@@ -24,7 +24,11 @@ describe('EntityManager (unit)', () => {
       expectEntityToMatch(source, expected, done);
    }
 
-   function expectParameterNameToLookupValue(name: string, expected: string | void, done: () => void) {
+   function expectParameterNameToLookupValue(
+      name: string,
+      expected: string | void,
+      done: () => void,
+   ) {
       const source = manager.getParameterEntity(name);
 
       expectEntityToMatch(source, expected, done);
@@ -42,27 +46,42 @@ describe('EntityManager (unit)', () => {
       }
    }
 
-   function pTokenToXToken(name: string, str: string = '', location?: EntityLocation, notationName?: string): GeneralEntityDeclarationXToken {
-      return new GeneralEntityDeclarationXToken(name,
-         [ new TextPToken({ text: SToken.fromString(str) }) ], location, notationName);
+   function pTokenToXToken(
+      name: string,
+      str = '',
+      location?: EntityLocation,
+      notationName?: string,
+   ): GeneralEntityDeclarationXToken {
+      return new GeneralEntityDeclarationXToken(
+         name,
+         [new TextPToken({ text: SToken.fromString(str) })],
+         location,
+         notationName,
+      );
    }
 
-   function makePEToken(name: string, str: string, location?: EntityLocation, notationName?: string): ParameterEntityDeclarationXToken {
-      return new ParameterEntityDeclarationXToken(name, [ new TextPToken({ text: SToken.fromString(str) }) ], location);
+   function makePEToken(
+      name: string,
+      str: string,
+      location?: EntityLocation,
+      notationName?: string,
+   ): ParameterEntityDeclarationXToken {
+      return new ParameterEntityDeclarationXToken(
+         name,
+         [new TextPToken({ text: SToken.fromString(str) })],
+         location,
+      );
    }
 
    describe('construction', () => {
-
       it('does not throw an exception', () => {
          expect(() => {
             new EntityManager();
          }).not.toThrow();
       });
-
    });
 
    describe('addEntityFromInternalSubset', () => {
-
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
          manager.addEntityFromInternalSubset(pTokenToXToken('testName', 'testValue'));
 
@@ -75,11 +94,9 @@ describe('EntityManager (unit)', () => {
 
          expectNameToLookupValue('name', 'one', done);
       });
-
    });
 
    describe('addEntityFromExternalSubset', () => {
-
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
          manager.addEntityFromExternalSubset(pTokenToXToken('testName', 'testValue'));
 
@@ -92,11 +109,9 @@ describe('EntityManager (unit)', () => {
 
          expectNameToLookupValue('name', 'one', done);
       });
-
    });
 
    describe('add*Entity interaction', () => {
-
       it('can add internal and external entities, but only the first internal is returned', (done) => {
          manager.addEntityFromInternalSubset(pTokenToXToken('testName', 'one'));
          manager.addEntityFromInternalSubset(pTokenToXToken('testName', 'two'));
@@ -119,11 +134,9 @@ describe('EntityManager (unit)', () => {
 
          expectParameterNameToLookupValue('test', 'one', done);
       });
-
    });
 
    describe('addParameterEntityFromInternalSubset()', () => {
-
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
          manager.addParameterEntityFromInternalSubset(makePEToken('bar', 'baz'));
 
@@ -136,11 +149,9 @@ describe('EntityManager (unit)', () => {
 
          expectParameterNameToLookupValue('test', 'one', done);
       });
-
    });
 
    describe('addEntityFromExternalSubset()', () => {
-
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
          manager.addParameterEntityFromExternalSubset(makePEToken('bar', 'baz'));
 
@@ -153,11 +164,9 @@ describe('EntityManager (unit)', () => {
 
          expectParameterNameToLookupValue('test', 'one', done);
       });
-
    });
 
    describe('getEntity', () => {
-
       it('returns undefined when called with an entity name that does not exist', (done) => {
          expectNameToLookupValue('test', undefined, done);
       });
@@ -179,11 +188,9 @@ describe('EntityManager (unit)', () => {
 
          expectNameToLookupValue('test', undefined, done);
       });
-
    });
 
    describe('getParameterEntity', () => {
-
       it('returns undefined when called with an entity name that does not exist', (done) => {
          expectParameterNameToLookupValue('noName', undefined, done);
       });
@@ -193,33 +200,27 @@ describe('EntityManager (unit)', () => {
 
          expectParameterNameToLookupValue('test', 'two', done);
       });
-
    });
 
    describe('getEntityToken', () => {
-
       it('returns the token asked for', () => {
          const token = pTokenToXToken('test', 'two');
          manager.addEntityFromInternalSubset(token);
 
          expect(manager.getEntityToken('test')).toEqual(token);
       });
-
    });
 
    describe('getParameterEntityToken', () => {
-
       it('returns the token asked for', () => {
          const token = makePEToken('test', 'two');
          manager.addParameterEntityFromInternalSubset(token);
 
          expect(manager.getParameterEntityToken('test')).toEqual(token);
       });
-
    });
 
    describe('getEntityInfo()', () => {
-
       it('returns nothing if the entity does not exist', () => {
          expect(manager.getEntityInfo('test')).toBeUndefined();
       });
@@ -272,11 +273,9 @@ describe('EntityManager (unit)', () => {
 
          expect(manager.getEntityInfo('test')!.isParsable).toBe(true);
       });
-
    });
 
    describe('getParameterEntityInfo', () => {
-
       it('returns an object with a getStream() function', () => {
          const token = makePEToken('test', 'two');
          manager.addParameterEntityFromInternalSubset(token);
@@ -290,11 +289,9 @@ describe('EntityManager (unit)', () => {
 
          expect(manager.getParameterEntityInfo('test')!.isParameter).toBe(true);
       });
-
    });
 
    describe('setExternalSubsetEntity()', () => {
-
       it('adds a token for the specified location', () => {
          manager.setExternalSubsetEntity(new EntityLocation('system', 'public'));
 
@@ -302,21 +299,17 @@ describe('EntityManager (unit)', () => {
 
          expect(source).not.toBeUndefined();
       });
-
    });
 
    describe('getExternalSubsetEntity()', () => {
-
       it('is undefined if no external entity has been set yet', () => {
          const source = manager.getExternalSubsetEntity();
 
          expect(source).toBeUndefined();
       });
-
    });
 
    describe('default entities', () => {
-
       it('includes "lt"', (done) => {
          expectNameToLookupValue('lt', '&#60;', done);
       });
@@ -334,7 +327,7 @@ describe('EntityManager (unit)', () => {
       });
 
       it('includes "apos"', (done) => {
-         expectNameToLookupValue('apos', '\'', done);
+         expectNameToLookupValue('apos', "'", done);
       });
 
       it('adds an external so it overrides the default', (done) => {
@@ -349,5 +342,4 @@ describe('EntityManager (unit)', () => {
          expectNameToLookupValue('amp', 'one', done);
       });
    });
-
 });

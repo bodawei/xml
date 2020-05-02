@@ -5,9 +5,9 @@ import { Transform } from 'stream';
 import { EntityMetaData } from 'basic';
 // import { ErrorCollector, XmlWarning, ValidityError, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
-import { PTokenStream } from '../pTokenStream';
+import { PTokenStream } from '../../pTokenStream';
 import { SToken, STokenSource } from 'sToken';
-import { PToXTokenStream } from '../xTokenStream';
+import { PToXTokenStream } from '../../xTokenStream';
 import {
    DOCTYPE_END_XTOKEN,
    DOCTYPE_START_XTOKEN,
@@ -15,13 +15,11 @@ import {
    ELEMENT_START_XTOKEN,
    TEXT_PTOKEN,
    XMLDECL_XTOKEN,
-
    attListDeclaration,
    elementDeclaration,
    ParameterEntityEndPToken,
    unassigned,
    literalValue,
-
    ExternalSubsetEndToken,
    ExternalSubsetStartToken,
    InternalSubsetEndToken,
@@ -31,11 +29,9 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartPToken,
    ParameterEntityStartXToken,
-
    ElementEmptyXToken,
    ElementStartXToken,
    XmlDeclarationXToken,
-
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    PARAMETER_ENTITY_DECLARATION_XTOKEN,
@@ -48,40 +44,55 @@ import {
    ParameterEntityDeclarationXToken,
    NotationDeclarationXToken,
 } from 'token';
-import { AttributeValueXToken } from '../token/common/attribute'; // badRef
-import { AttListXToken } from '../token/attListDeclaration'; // badRef
-import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
-import { TextPToken, TextXToken } from '../token/text'; // badRef
+import { AttributeValueXToken } from '../../token/common/attribute'; // badRef
+import { AttListXToken } from '../../token/attListDeclaration'; // badRef
+import { ElementDeclaration } from '../../token/elementDeclaration'; // badRef
+import { TextPToken, TextXToken } from '../../token/text'; // badRef
 
 import EntityManager from './EntityManager';
-import { UnassignedArray, UnassignedType } from '../token/common/unassigned';
-import { LiteralValueXToken } from '../token/common/literal';
+import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
+import { LiteralValueXToken } from '../../token/common/literal';
 import { DocTypeStartXToken } from 'source/token/docTypeStart';
 import { CharRefXToken } from 'source/token/charRef';
 
 type XToken = { type: string };
 type PToken = {
-   type: string,
-   unassigned?: UnassignedArray,
+   type: string;
+   unassigned?: UnassignedArray;
 };
 type DoneSignal = () => void;
-type EntityValueArray = Array<TextPToken | GeneralEntityReferencePToken | ParameterEntityReferencePToken | ParameterEntityEndPToken | ParameterEntityStartPToken>; // same as literalValue, but with start and end
+type EntityValueArray = Array<
+   | TextPToken
+   | GeneralEntityReferencePToken
+   | ParameterEntityReferencePToken
+   | ParameterEntityEndPToken
+   | ParameterEntityStartPToken
+>; // same as literalValue, but with start and end
 type CommonAttributeXToken = {
-   name: string,
-   value: AttributeValueXToken,
+   name: string;
+   value: AttributeValueXToken;
 };
-type ExpandedLiteralValueXToken = Array<TextXToken | CharRefXToken | GeneralEntityReferenceXToken | ParameterEntityReferenceXToken | GeneralEntityStartXToken | GeneralEntityEndXToken | ParameterEntityStartXToken | ParameterEntityEndXToken>;
+type ExpandedLiteralValueXToken = Array<
+   | TextXToken
+   | CharRefXToken
+   | GeneralEntityReferenceXToken
+   | ParameterEntityReferenceXToken
+   | GeneralEntityStartXToken
+   | GeneralEntityEndXToken
+   | ParameterEntityStartXToken
+   | ParameterEntityEndXToken
+>;
 type ExpansionsMap = { [key: number]: LiteralValueXToken | GeneralEntityReferenceXToken };
 
 enum ProcessMode {
    VALIDATE,
    NON_VALIDATING,
    STANDALONE,
-};
+}
 
 type ExpandOptions = {
-   validating?: boolean,
-}
+   validating?: boolean;
+};
 
 /**********************************************************************\
  !!!!
@@ -93,7 +104,7 @@ class NodeStream extends Transform {
    private _child: any;
    private docTypeStart?: DocTypeStartXToken;
    private processMode: ProcessMode;
-   private skipDeclarations: boolean = false; // §5.1
+   private skipDeclarations = false; // §5.1
 
    constructor(entityManager: EntityManager, options: ExpandOptions = {}) {
       super({
@@ -105,7 +116,8 @@ class NodeStream extends Transform {
       this._child = undefined;
 
       this._child = undefined;
-      this.processMode = options.validating === false ? ProcessMode.NON_VALIDATING : ProcessMode.VALIDATE;
+      this.processMode =
+         options.validating === false ? ProcessMode.NON_VALIDATING : ProcessMode.VALIDATE;
 
       // Protect the 'this' of callbacks.
       this._childData = this._childData.bind(this);
@@ -115,11 +127,15 @@ class NodeStream extends Transform {
    _transform(xToken: XToken, encoding: string, callback: () => void) {
       // May want to give an error if emd is not document, and non-validating
 
-      if (xToken instanceof GeneralEntityReferenceXToken || xToken instanceof ParameterEntityReferenceXToken) {
-         const isPeRef = (xToken instanceof ParameterEntityReferenceXToken);
-         const getter = isPeRef ? this._entityManager.getParameterEntity : this._entityManager.getEntity;
+      if (
+         xToken instanceof GeneralEntityReferenceXToken ||
+         xToken instanceof ParameterEntityReferenceXToken
+      ) {
+         const isPeRef = xToken instanceof ParameterEntityReferenceXToken;
+         const getter = isPeRef
+            ? this._entityManager.getParameterEntity
+            : this._entityManager.getEntity;
          const declarationSource = getter.call(this._entityManager, xToken.name);
-
 
          // §5.1: Except when standalone="yes", [non-validating processors] must not
          // process entity declarations or attribute-list declarations encountered after
@@ -130,10 +146,16 @@ class NodeStream extends Transform {
          }
 
          if (declarationSource) {
-            if (isPeRef && (this.processMode === ProcessMode.STANDALONE || this.processMode === ProcessMode.NON_VALIDATING)) {
+            if (
+               isPeRef &&
+               (this.processMode === ProcessMode.STANDALONE ||
+                  this.processMode === ProcessMode.NON_VALIDATING)
+            ) {
                // no need to expand in either of these cases.
             } else {
-               const tokenType: any = isPeRef ? ParameterEntityStartXToken : GeneralEntityStartXToken;
+               const tokenType: any = isPeRef
+                  ? ParameterEntityStartXToken
+                  : GeneralEntityStartXToken;
                this.push(new tokenType(xToken.name));
                const pTokenStream = new PTokenStream(declarationSource);
                const tokenizer = new PToXTokenStream();
@@ -146,7 +168,7 @@ class NodeStream extends Transform {
 
                this._child.stream.on('data', this._childData);
                this._child.stream.on('end', this._childDone);
-               (pTokenStream as any).pipe(tokenizer).pipe(this._child.stream);   // typeHack
+               (pTokenStream as any).pipe(tokenizer).pipe(this._child.stream); // typeHack
                return;
             }
          } else {
@@ -158,13 +180,16 @@ class NodeStream extends Transform {
             // This means one with a DTD, or an external DTD, or param references, it need not match a declaration (though validity will catch those)
             // This has nothing to do with validating or not, interestingly.
             // however,  parameter entity reference will stop all further processing if this is non-validating
-
             // const startToken = xToken.pToken && xToken.pToken.open;
             // const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
             //    [ xToken.name ], startToken, startToken);
             // this.push(error);
          }
-      } else if ((xToken instanceof GeneralEntityDeclarationXToken || xToken instanceof ParameterEntityDeclarationXToken) && !this.skipDeclarations) {
+      } else if (
+         (xToken instanceof GeneralEntityDeclarationXToken ||
+            xToken instanceof ParameterEntityDeclarationXToken) &&
+         !this.skipDeclarations
+      ) {
          this._processEntityDeclaration(xToken, callback);
          return;
       } else if (xToken instanceof elementDeclaration.XToken && !this.skipDeclarations) {
@@ -177,7 +202,7 @@ class NodeStream extends Transform {
          this._processAttListDeclaration(xToken, callback);
          return;
       } else if (xToken.type === ELEMENT_START_XTOKEN || xToken.type === ELEMENT_EMPTY_XTOKEN) {
-         this._processElementStart((xToken as ElementStartXToken), callback);
+         this._processElementStart(xToken as ElementStartXToken, callback);
          return;
       } else if (xToken.type === DOCTYPE_END_XTOKEN) {
          if (this.docTypeStart && this.docTypeStart.hasInternalSubset) {
@@ -189,7 +214,10 @@ class NodeStream extends Transform {
             this.push(new ExternalSubsetEndToken());
          }
       } else if (xToken.type === XMLDECL_XTOKEN) {
-         if (this.processMode === ProcessMode.NON_VALIDATING && (xToken as XmlDeclarationXToken).standalone) {
+         if (
+            this.processMode === ProcessMode.NON_VALIDATING &&
+            (xToken as XmlDeclarationXToken).standalone
+         ) {
             this.processMode = ProcessMode.STANDALONE;
          }
       }
@@ -212,7 +240,7 @@ class NodeStream extends Transform {
    }
 
    _childDone() {
-      const isPeRef = (this._child.xToken instanceof ParameterEntityReferenceXToken);
+      const isPeRef = this._child.xToken instanceof ParameterEntityReferenceXToken;
       const tokenType = isPeRef ? ParameterEntityEndXToken : GeneralEntityEndXToken;
 
       this._child.stream.removeListener('data', this._childData);
@@ -234,7 +262,10 @@ class NodeStream extends Transform {
     * find an entity reference, and then expand that, and pass
     * the leading items and the expanded value back to the caller.
     */
-   _expandThroughNextPERef(unassignedArray: UnassignedArray /* always defined */, deliverExpanded: (expanded: UnassignedArray, other?: UnassignedArray) => void) {
+   _expandThroughNextPERef(
+      unassignedArray: UnassignedArray /* always defined */,
+      deliverExpanded: (expanded: UnassignedArray, other?: UnassignedArray) => void,
+   ) {
       const preExpanded: UnassignedArray = [];
 
       while (unassignedArray.length > 0) {
@@ -257,7 +288,10 @@ class NodeStream extends Transform {
     * Same as above, but for entity values @@@@
     * Could we essentially do the above, and then post-process by unwraping the unassigned objects?
     */
-   _expandThroughNextPERefInEntityValue(entityValueArray: EntityValueArray, deliverExpanded: (expanded: EntityValueArray, other?: EntityValueArray) => void) {
+   _expandThroughNextPERefInEntityValue(
+      entityValueArray: EntityValueArray,
+      deliverExpanded: (expanded: EntityValueArray, other?: EntityValueArray) => void,
+   ) {
       if (!entityValueArray || entityValueArray.length === 0) {
          deliverExpanded([]);
          return;
@@ -269,10 +303,15 @@ class NodeStream extends Transform {
          const item = entityValueArray.shift();
 
          // @@ dont do this if it is a parameter and this is standalone. Not clear an entity reference is even allowed here.
-         if (item!.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {  // typeHack
-            this._expandPERefFullyInEntityValue(item as ParameterEntityReferencePToken, (expandedItem) => {   // This is going to be a problem
-               deliverExpanded(preExpanded, expandedItem);
-            });
+         if (item!.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+            // typeHack
+            this._expandPERefFullyInEntityValue(
+               item as ParameterEntityReferencePToken,
+               (expandedItem) => {
+                  // This is going to be a problem
+                  deliverExpanded(preExpanded, expandedItem);
+               },
+            );
             return;
          } else {
             preExpanded.push(item!); // typeHack
@@ -296,16 +335,23 @@ class NodeStream extends Transform {
     * CRUCIALLY, right now this assumes the entity value is delivered
     * synchronously, which is not true in the long term.
     */
-   _expandPERefFully(peRef: ParameterEntityReferencePToken, deliverExpanded: (expanded: UnassignedArray) => void) {
-      const itemName = peRef.name && peRef.name.str || '';
-      const entityToken: ParameterEntityDeclarationPToken = this._entityManager.getParameterEntityToken(itemName);
+   _expandPERefFully(
+      peRef: ParameterEntityReferencePToken,
+      deliverExpanded: (expanded: UnassignedArray) => void,
+   ) {
+      const itemName = (peRef.name && peRef.name.str) || '';
+      const entityToken: ParameterEntityDeclarationPToken = this._entityManager.getParameterEntityToken(
+         itemName,
+      );
 
       // @@@ don't expand if it is a standalone
       if (!entityToken || !entityToken.value) {
-         deliverExpanded([{
-            type: UnassignedType.REFERENCE,
-            token: peRef,
-         }]);
+         deliverExpanded([
+            {
+               type: UnassignedType.REFERENCE,
+               token: peRef,
+            },
+         ]);
       } else {
          const expanded = this._entityValueToUnassignedArray((entityToken as any).value);
          expanded.unshift({
@@ -358,16 +404,20 @@ class NodeStream extends Transform {
     * CRUCIALLY, right now this assumes the entity value is delivered
     * synchronously, which is not true i nthe long term.
     */
-   _expandPERefFullyInEntityValue(peRef: ParameterEntityReferencePToken, deliverExpanded: (expanded: EntityValueArray) => void) {
-      const itemName = peRef.name && peRef.name.str || '';
+   _expandPERefFullyInEntityValue(
+      peRef: ParameterEntityReferencePToken,
+      deliverExpanded: (expanded: EntityValueArray) => void,
+   ) {
+      const itemName = (peRef.name && peRef.name.str) || '';
       const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
       // @@@ don't expand if it is in standalone
       if (!entityToken) {
          deliverExpanded([peRef]);
       } else {
-         const expanded: EntityValueArray = [new ParameterEntityStartPToken(peRef)]
-            .concat(entityToken.value);
+         const expanded: EntityValueArray = [new ParameterEntityStartPToken(peRef)].concat(
+            entityToken.value,
+         );
          expanded.push(new ParameterEntityEndPToken(peRef));
 
          deliverExpanded(expanded);
@@ -382,34 +432,50 @@ class NodeStream extends Transform {
     * Given an unassigned array, replace any PE reference PTokens with
     * their values, and deliver the expanded unassigned array to the caller.
     */
-   _expandPERefsInUnassignedValue(pToken: PToken | void, includeNameListChars: boolean, done: DoneSignal) {
+   _expandPERefsInUnassignedValue(
+      pToken: PToken | void,
+      includeNameListChars: boolean,
+      done: DoneSignal,
+   ) {
       if (!pToken || !pToken.unassigned) {
          done();
          return;
       }
 
-      this._expandThroughNextPERef(pToken.unassigned, (leadingUnassignedValues, possiblyExpandedPERef) => {
-         if (!possiblyExpandedPERef) {
-            pToken.unassigned = leadingUnassignedValues;
-            done();
-            return;
-         }
+      this._expandThroughNextPERef(
+         pToken.unassigned,
+         (leadingUnassignedValues, possiblyExpandedPERef) => {
+            if (!possiblyExpandedPERef) {
+               pToken.unassigned = leadingUnassignedValues;
+               done();
+               return;
+            }
 
-         const startOrRef = possiblyExpandedPERef.shift()!;
-         const end = possiblyExpandedPERef.pop() || [];
+            const startOrRef = possiblyExpandedPERef.shift()!;
+            const end = possiblyExpandedPERef.pop() || [];
 
-         this._parsePERefTexts(possiblyExpandedPERef, includeNameListChars, (values) => {
-            pToken.unassigned = leadingUnassignedValues.concat(startOrRef, values, end, pToken.unassigned!);
-            done();
-         });
-      });
+            this._parsePERefTexts(possiblyExpandedPERef, includeNameListChars, (values) => {
+               pToken.unassigned = leadingUnassignedValues.concat(
+                  startOrRef,
+                  values,
+                  end,
+                  pToken.unassigned!,
+               );
+               done();
+            });
+         },
+      );
    }
 
    /*
     * Break down the text values in the pereferences into normal
     * unassigned values.
     */
-   _parsePERefTexts(peRefContents: UnassignedArray, includeNameListChars: boolean, deliverValues: (parsed: UnassignedArray) => void) {
+   _parsePERefTexts(
+      peRefContents: UnassignedArray,
+      includeNameListChars: boolean,
+      deliverValues: (parsed: UnassignedArray) => void,
+   ) {
       const source = new STokenSource(defaultExtractors as any, new EntityMetaData()); // typeHack
 
       for (let index = 0; index < peRefContents.length; index++) {
@@ -621,7 +687,11 @@ class NodeStream extends Transform {
       });
    }
 
-   _expandAttributeValues(attributeArray: ReadonlyArray<CommonAttributeXToken>, openSToken: SToken | void, done: DoneSignal) {
+   _expandAttributeValues(
+      attributeArray: ReadonlyArray<CommonAttributeXToken>,
+      openSToken: SToken | void,
+      done: DoneSignal,
+   ) {
       let attrsRemaining = attributeArray.length;
       const self = this;
 
@@ -644,7 +714,10 @@ class NodeStream extends Transform {
       }
    }
 
-   _expandAttributeValue(attrValue: AttributeValueXToken, attrExpanded: (expanded: AttributeValueXToken) => void) {
+   _expandAttributeValue(
+      attrValue: AttributeValueXToken,
+      attrExpanded: (expanded: AttributeValueXToken) => void,
+   ) {
       if (attrValue.length === 0) {
          attrExpanded(attrValue);
          return;
@@ -655,7 +728,10 @@ class NodeStream extends Transform {
       const expansions: ExpansionsMap = {};
       const self = this;
 
-      function referenceExpanded(refData: LiteralValueXToken | GeneralEntityReferenceXToken, refIndex: number) {
+      function referenceExpanded(
+         refData: LiteralValueXToken | GeneralEntityReferenceXToken,
+         refIndex: number,
+      ) {
          expansions[refIndex] = refData;
          count--;
 
@@ -669,7 +745,7 @@ class NodeStream extends Transform {
 
          if (item.type === GENERAL_ENTITY_REFERENCE_XTOKEN) {
             count++;
-            this._expandReference((item as GeneralEntityReferenceXToken), index, referenceExpanded); // typeHack
+            this._expandReference(item as GeneralEntityReferenceXToken, index, referenceExpanded); // typeHack
          }
       }
 
@@ -679,7 +755,11 @@ class NodeStream extends Transform {
       }
    }
 
-   _buildExpandedAttrValue(originalAttrValue: AttributeValueXToken, expansions: ExpansionsMap, attrExpanded: (expanded: AttributeValueXToken) => void) {
+   _buildExpandedAttrValue(
+      originalAttrValue: AttributeValueXToken,
+      expansions: ExpansionsMap,
+      attrExpanded: (expanded: AttributeValueXToken) => void,
+   ) {
       let newValue: AttributeValueXToken = [];
 
       for (let index = 0; index < originalAttrValue.length; index++) {
@@ -719,7 +799,14 @@ class NodeStream extends Transform {
    //    }
    // }
 
-   _expandReference(entityRef: GeneralEntityReferenceXToken, indexInAttr: number, referenceExpanded: (expanded: LiteralValueXToken | GeneralEntityReferenceXToken, index: number) => void) {
+   _expandReference(
+      entityRef: GeneralEntityReferenceXToken,
+      indexInAttr: number,
+      referenceExpanded: (
+         expanded: LiteralValueXToken | GeneralEntityReferenceXToken,
+         index: number,
+      ) => void,
+   ) {
       const entityInfo = this._entityManager.getEntityInfo(entityRef.name);
       if (!entityInfo) {
          referenceExpanded(entityRef, indexInAttr);
@@ -742,7 +829,8 @@ class NodeStream extends Transform {
       literalValue.parse(sTokenStream, ['&'], (pTokenResult) => {
          const xToken = literalValue.makeXTokenCompatible(pTokenResult);
 
-         this._expandAttributeValue(xToken, (subXToken: Array<any>) => { // typeHack
+         this._expandAttributeValue(xToken, (subXToken: Array<any>) => {
+            // typeHack
             subXToken.unshift(new GeneralEntityStartXToken(entityRef.name));
             subXToken.push(new GeneralEntityEndXToken(entityRef.name));
             referenceExpanded(subXToken, indexInAttr);
@@ -754,7 +842,10 @@ class NodeStream extends Transform {
     Entity Declaration processing
    \**********************************************************************/
 
-   _processEntityDeclaration(edToken: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken, done: DoneSignal) {
+   _processEntityDeclaration(
+      edToken: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken,
+      done: DoneSignal,
+   ) {
       const isParameterEntity = edToken.type === PARAMETER_ENTITY_DECLARATION_XTOKEN;
       const isExternalEntity = edToken.externalLoc;
 
@@ -788,7 +879,10 @@ class NodeStream extends Transform {
       // need not read any parameter entities. And of course this also
       // says a non-validating processor need not read any external entities.
 
-      if (this.processMode === ProcessMode.NON_VALIDATING && (isParameterEntity || isExternalEntity)) {
+      if (
+         this.processMode === ProcessMode.NON_VALIDATING &&
+         (isParameterEntity || isExternalEntity)
+      ) {
          done();
          return;
       }
@@ -809,14 +903,17 @@ class NodeStream extends Transform {
          }
 
          // @@ this can only happen in the external subset
-         this._expandPeRefsInEntityValue((edToken.value as EntityValueArray), (newValue) => {
+         this._expandPeRefsInEntityValue(edToken.value as EntityValueArray, (newValue) => {
             (edToken as any).value = newValue; // typeHack
             this._addEntityDeclaration(edToken, done);
          });
       });
    }
 
-   _expandPeRefsInEntityValue(entityValue: EntityValueArray, deliverExpanded: (expanded: EntityValueArray) => void) {
+   _expandPeRefsInEntityValue(
+      entityValue: EntityValueArray,
+      deliverExpanded: (expanded: EntityValueArray) => void,
+   ) {
       this._expandThroughNextPERefInEntityValue(entityValue, (before, expandedPERef) => {
          if (!expandedPERef) {
             deliverExpanded(before);
@@ -829,7 +926,10 @@ class NodeStream extends Transform {
       });
    }
 
-   _addEntityDeclaration(edToken: ParameterEntityDeclarationXToken | GeneralEntityDeclarationXToken, done: DoneSignal) {
+   _addEntityDeclaration(
+      edToken: ParameterEntityDeclarationXToken | GeneralEntityDeclarationXToken,
+      done: DoneSignal,
+   ) {
       if (edToken instanceof ParameterEntityDeclarationXToken) {
          //    // §4.2 If the same entity is declared more than once, ... at user option,
          //    // an XML processor may issue a warning if entities are declared multiple times.
@@ -878,7 +978,6 @@ class NodeStream extends Transform {
          done();
       });
    }
-
 }
 
 export default NodeStream;

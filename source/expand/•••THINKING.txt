@@ -7,18 +7,22 @@ FINISHED TASKS
 √ get the setupReferencedEntity code working. 
 √ Rebuild the expandEntityValue function to use the new one  (see below)
 √ Then do the same for attribute values
-
+√ Probably handle the elment start and empty cases next, as you have the underlying implementation
 IMMEDIATE TASKS
 - Document
    - Put a whole readme describing the whole thinking around expansion,
       the spec requirements and the architecture into a document. Also a "how to use me"
+- Implementation
+   - Need to do general entity declarations next
+      - and start an integration test
+   - double check external entity expansion
+   - Parameter entity declarations
+   - If integration test passes, need to clean up the expandAttributeValue code
+- Build
+   - Try to get testing to work so it doesn't fail every time you break it
          - This looks promising: https://www.npmjs.com/package/jasmine-ts
          - https://www.npmjs.com/package/tsconfig-paths
          - https://stackoverflow.com/questions/48568671/how-to-run-jasmine-tests-in-watch-mode-for-typescript
-- Implementation
-   - Probably handle the elment start and empty cases next, as you have the underlying implementation
-- Build
-   - Try to get testing to work so it doesn't fail every time you break it
 
 
 Today
@@ -32,6 +36,22 @@ REFACTORING
 
 CLEAN UP THE BELOW
 ===================
+
+* XML: For expander #2, you should map out the whole structure in detail.  The cutDown EntityExpanderTake3 is a good start on thinking about this, but the lesson from the attribute expander is doing all the planning up front is better.
+    * Most of the details are in our head at this point, so we can write the whole assumption.
+    * WE CAN ignore standalone now.  But it looks like we care about validating.
+    * We don’t have the unassigned figured out yet
+    * We should move attribute expansion out into another routine.
+    * Note the kinds of expansion:
+        1. External subset [stream]
+        2. PE Refs in internal entity values [?]
+        3. PE Refs in markup [?]
+        4. PE  refs in body [stream]
+        5. √ GERef’s in attributes [?]
+        5. √ GERef’s in attribute defs
+        7. GE refs in body [stream]
+
+
 
 Expanding things. These all happen in entityExpander
 

@@ -5,12 +5,10 @@ import { PassThrough } from 'stream';
 
 import { WellFormedError } from 'error';
 
-import { expectError } from './utils';
+import { expectError } from './beforeEach';
 
 describe('utils (unit)', () => {
-
    describe('expectError()', () => {
-
       it('succeeds if the specified error is found', (done) => {
          const dummyStream = new PassThrough({
             objectMode: true,
@@ -34,7 +32,5 @@ describe('utils (unit)', () => {
 
          expectError(dummyStream, [error], done);
       });
-
    });
-
 });

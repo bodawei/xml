@@ -15,11 +15,16 @@ describe('retrieveMissingEntities() (unit)', () => {
             one: {
                isInternal: false,
                isUnparsed: false,
-               token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!'), }),
+               token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!') }),
             },
          },
-         retrieveExternalEntity: (externalId: any, emd: EntityMetaData) => { return {} as any },
-         processForEntityValue: (sTokenSource: STokenSource, done: (results: EntityValuePToken) => void) => {},
+         retrieveExternalEntity: (externalId: any, emd: EntityMetaData) => {
+            return {} as any;
+         },
+         processForEntityValue: (
+            sTokenSource: STokenSource,
+            done: (results: EntityValuePToken) => void,
+         ) => {},
          emd: new EntityMetaData(),
       };
    });
@@ -30,7 +35,7 @@ describe('retrieveMissingEntities() (unit)', () => {
             one: {
                isInternal: false,
                isUnparsed: false,
-               token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!'), }),
+               token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!') }),
             },
          });
          done();
@@ -38,19 +43,20 @@ describe('retrieveMissingEntities() (unit)', () => {
    });
 
    it('does not change the param entity set if the name passed is already present', (done) => {
-      params.paramEntitiesByName.one.valueCache = [ new TextPToken({ text: SToken.fromString('whee') }) ];
+      params.paramEntitiesByName.one.valueCache = [
+         new TextPToken({ text: SToken.fromString('whee') }),
+      ];
 
       retrieveMissingEntities(['one'], params, () => {
          expect(params.paramEntitiesByName).toEqual({
             one: {
                isInternal: false,
                isUnparsed: false,
-               token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!'), }),
-               valueCache: [ new TextPToken({ text: SToken.fromString('whee') }) ]
+               token: new ParameterEntityDeclarationPToken({ open: SToken.fromString('<!') }),
+               valueCache: [new TextPToken({ text: SToken.fromString('whee') })],
             },
          });
          done();
       });
    });
-
 });

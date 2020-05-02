@@ -2,14 +2,24 @@
 
 import { Transform } from 'stream';
 import { Token, EntityMetaData } from 'basic';
-import { EntityExpander, ExpandToken, STokenSourceProcessed, TokenProcessed } from './EntityExpander';
+import {
+   EntityExpander,
+   ExpandToken,
+   STokenSourceProcessed,
+   TokenProcessed,
+} from './EntityExpander-draft2';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { EntityValuePToken } from 'source/token/entityDeclaration';
 import { defaultExtractors } from 'extractor';
 import { ExternalId } from 'source/token/common/externalId';
 
-function processSTokenSource(sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken, done: STokenSourceProcessed) {
+function processSTokenSource(
+   sTokenSource: STokenSource,
+   inContent: boolean,
+   expandToken: ExpandToken,
+   done: STokenSourceProcessed,
+) {
    const pTokenStream = new PTokenStream(sTokenSource);
 
    (pTokenStream as any)._inContent = inContent;
@@ -23,9 +33,12 @@ function processSTokenSource(sTokenSource: STokenSource, inContent: boolean, exp
    });
 }
 
-function processForEntityValue(sTokenSource: STokenSource, done: (result: EntityValuePToken) => void) {
+function processForEntityValue(
+   sTokenSource: STokenSource,
+   done: (result: EntityValuePToken) => void,
+) {
    const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
-   const results: EntityValuePToken = []
+   const results: EntityValuePToken = [];
 
    pTokenStream.on('data', (token: Token) => {
       results.push(token as any);
@@ -68,6 +81,4 @@ class EntityExpanderStream extends Transform {
    }
 }
 
-export {
-   EntityExpanderStream,
-};
+export { EntityExpanderStream };

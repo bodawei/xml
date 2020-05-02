@@ -1,3 +1,4 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-export { EntityExpanderStream } from './EntityExpanderStream';
+export { EntityExpander } from './EntityExpander';
+export { EntityExpanderStream } from './legacy/EntityExpanderStream';
