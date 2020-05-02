@@ -12,16 +12,22 @@ IMMEDIATE TASKS
 - Document
    - Put a whole readme describing the whole thinking around expansion,
       the spec requirements and the architecture into a document. Also a "how to use me"
+         - This looks promising: https://www.npmjs.com/package/jasmine-ts
+         - https://www.npmjs.com/package/tsconfig-paths
+         - https://stackoverflow.com/questions/48568671/how-to-run-jasmine-tests-in-watch-mode-for-typescript
 - Implementation
    - Probably handle the elment start and empty cases next, as you have the underlying implementation
 - Build
    - Try to get testing to work so it doesn't fail every time you break it
 
 
+Today
+- element start and end need to be able to hand attributes to a routine which then calls the attribute handler.
+
 REFACTORING
 - I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
 - REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
-
+- AttributeValuePToken should get pushed down into attribute
 
 
 CLEAN UP THE BELOW
@@ -59,6 +65,7 @@ Real work
         - and it looks like I might be able to use: https://github.com/babel/karma-babel-preprocessor
             I can't tell where the files are showing up, though, yet
    - Need a way to mock modules in tests
+      https://github.com/jasmine/jasmine/issues/1414
    - Fix missing eslint rule
    - eslint env jasmine should be able to be automatically added
    - Need ts eslint rules

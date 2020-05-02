@@ -59,8 +59,8 @@ fdescribe('expandAttributeValue() (unit)', () => {
    });
 
    it('calls back with a copy of the attribute value when it contains no general entity references', (done) => {
-      expandAttributeValue([textPToken], params, (result) => {
-         expect(result).toEqualShallowDifferent([textPToken]);
+      expandAttributeValue([textPToken], params, ({ newValue }) => {
+         expect(newValue).toEqualShallowDifferent([textPToken]);
          done();
       });
    });
@@ -72,7 +72,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       });
 
       expandAttributeValue([textPToken, bogus], params, (result) => {
-         expect(result).toEqual([textPToken, bogus]);
+         expect(result.newValue).toEqual([textPToken, bogus]);
          done();
       });
    });
@@ -85,7 +85,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       const ltEntityValue = lookupPredefinedValue('lt');
 
       expandAttributeValue([textPToken, ltRef], params, (result) => {
-         expect(result).toEqual([
+         expect(result.newValue).toEqual([
             textPToken,
             new GeneralEntityStartPToken(ltRef, ltEntityValue),
             ...(ltEntityValue as AttributeValuePToken),
@@ -99,7 +99,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       params.geDeclCache.ge1.isUnparsed = true;
 
       expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result).toEqual([textPToken, geRefPToken]);
+         expect(result.newValue).toEqual([textPToken, geRefPToken]);
          done();
       });
    });
@@ -113,7 +113,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       };
 
       expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result).toEqual([textPToken, geRefPToken]);
+         expect(result.newValue).toEqual([textPToken, geRefPToken]);
          done();
       });
    });
@@ -124,7 +124,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       });
 
       expandAttributeValue([textPToken, namlessGERef], params, (result) => {
-         expect(result).toEqual([textPToken, namlessGERef]);
+         expect(result.newValue).toEqual([textPToken, namlessGERef]);
          done();
       });
    });
@@ -140,7 +140,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       };
 
       expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result).toEqual([
+         expect(result.newValue).toEqual([
             textPToken,
             new GeneralEntityStartPToken(geRefPToken, [sourceToken]),
             pToken,
@@ -160,7 +160,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       };
 
       expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result).toEqual([
+         expect(result.newValue).toEqual([
             textPToken,
             new GeneralEntityStartPToken(geRefPToken, [pToken]),
             pToken,
@@ -177,7 +177,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       };
 
       expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result).toEqual([textPToken, geRefPToken]);
+         expect(result.newValue).toEqual([textPToken, geRefPToken]);
          done();
       });
    });
@@ -193,7 +193,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
       };
 
       expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result).toEqual([
+         expect(result.newValue).toEqual([
             textPToken,
             new GeneralEntityStartPToken(geRefPToken, [pToken]),
             pToken,
@@ -210,7 +210,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
             name: toSToken('bogus'),
          });
 
-         expandAttributeValue([textPToken, bogus], params, (result, errors) => {
+         expandAttributeValue([textPToken, bogus], params, ({ errors }) => {
             expect(errors).toEqual([]);
             done();
          });
@@ -225,8 +225,8 @@ fdescribe('expandAttributeValue() (unit)', () => {
             done([textPToken], [attrError]);
          };
 
-         expandAttributeValue([textPToken, geRefPToken], params, (result, error) => {
-            expect(error).toEqual([attrError]);
+         expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
+            expect(errors).toEqual([attrError]);
             done();
          });
       });
@@ -247,8 +247,8 @@ fdescribe('expandAttributeValue() (unit)', () => {
             done([textPToken], []);
          };
 
-         expandAttributeValue([textPToken, geRefPToken], params, (result, error) => {
-            expect(error).toEqual([loadingError]);
+         expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
+            expect(errors).toEqual([loadingError]);
             done();
          });
       });
@@ -285,8 +285,8 @@ fdescribe('expandAttributeValue() (unit)', () => {
          done([textPToken], [attrError2]);
       };
 
-      expandAttributeValue([textPToken, geRefPToken], params, (result, error) => {
-         expect(error).toEqual([attrError1, loadingError, attrError2]);
+      expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
+         expect(errors).toEqual([attrError1, loadingError, attrError2]);
          done();
       });
    });

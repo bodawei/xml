@@ -18,7 +18,11 @@ import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { lookupPredefinedValue } from './predefinedEntities';
 import { setupReferencedEntity } from './setupReferencedEntity';
 
-type ExpandAttrResult = (newValue: AttributeValuePToken, errors: Array<XmlError>) => void;
+type ExpandAttrResult = {
+   newValue: AttributeValuePToken;
+   errors: Array<XmlError>;
+};
+type AttrExpanded = (result: ExpandAttrResult) => void;
 
 type ParseResults = {
    attFragment: AttributeValuePToken | void;
@@ -55,18 +59,14 @@ function parseEntityValue(
       }
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      expandAttrInternal(
-         attrValue,
-         expandParams,
-         geRefChain.concat(entityName),
-         (expandedResults, expandErrors) => {
-            callback({
-               attFragment: expandedResults,
-               preparseValue: entityValue,
-               errors: errors.concat(newErrors, expandErrors),
-            });
-         },
-      );
+      expandAttrInternal(attrValue, expandParams, geRefChain.concat(entityName), (result) => {
+         const { newValue, errors: moreErrors } = result;
+         callback({
+            attFragment: newValue,
+            preparseValue: entityValue,
+            errors: errors.concat(newErrors, moreErrors),
+         });
+      });
    });
 }
 
@@ -156,7 +156,7 @@ function expandAttrInternal(
    attValue: AttributeValuePToken,
    expandParams: ExpandParams,
    geRefChain: Array<string>,
-   expanded: ExpandAttrResult,
+   expanded: AttrExpanded,
 ): void {
    const geRefs: Array<GeneralEntityReferencePToken> = [];
 
@@ -167,7 +167,7 @@ function expandAttrInternal(
    }
 
    if (geRefs.length === 0) {
-      expanded(attValue, []);
+      expanded({ newValue: attValue, errors: [] });
       return;
    }
 
@@ -205,7 +205,7 @@ function expandAttrInternal(
          }
       }
 
-      expanded(newValue, allErrors);
+      expanded({ newValue, errors: allErrors });
    });
 }
 
@@ -318,9 +318,9 @@ function expandAttrInternal(
 function expandAttributeValue(
    value: AttributeValuePToken,
    expandParams: ExpandParams,
-   expanded: ExpandAttrResult,
+   expanded: AttrExpanded,
 ): void {
    expandAttrInternal(value, expandParams, [], expanded);
 }
 
-export { expandAttributeValue };
+export { expandAttributeValue, AttrExpanded, ExpandAttrResult };

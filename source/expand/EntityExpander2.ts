@@ -1,18 +1,25 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_META_DATA, EntityKind, EntityLocation, EntityMetaData } from 'basic';
+import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    AttListPToken,
+   AttributeValuePToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementDeclarationPToken,
+   ElementStartPToken,
+   ElementEmptyPToken,
    ExternalSubsetEndToken,
    ExternalSubsetStartToken,
    GeneralEntityDeclarationPToken,
@@ -25,7 +32,9 @@ import {
 
 import { EntityProcessors, ExpandParams } from './types';
 
+import { doAsyncLoop } from './utils/doAsyncLoop';
 import { expandBodyReference } from './utils/expandBodyReference';
+import { expandAttributeValue, AttrExpanded, ExpandAttrResult } from './utils/expandAttributeValue';
 
 type DeclToken =
    | AttListPToken
@@ -165,13 +174,13 @@ class EntityExpander {
          case NOTATION_DECLARATION_PTOKEN:
             this.handleDeclaration(pToken, expanded);
             break;
-         // case ELEMENT_START_PTOKEN:
-         // case ELEMENT_EMPTY_PTOKEN:
-         //    this.handleElementStart(pToken as ElementStartPToken, expanded);
-         //    break;
-         // case GENERAL_ENTITY_REFERENCE_PTOKEN:
-         //    this.handleGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
-         //    break;
+         case ELEMENT_START_PTOKEN:
+         case ELEMENT_EMPTY_PTOKEN:
+            this.handleElementStart(pToken, expanded);
+            break;
+         case GENERAL_ENTITY_REFERENCE_PTOKEN:
+            // this.handleGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
+            break;
          // case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          //    this.handleParameterEntityReference(pToken as ParameterEntityReferencePToken, expanded);
          //    break;
@@ -205,6 +214,16 @@ class EntityExpander {
          case ATTLISTDECL_PTOKEN_TYPE:
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
+            // Temp hack to make start and end elements work
+            const name = strOrBlank(declarationPToken.name);
+            this.expandParams.geDeclCache[name] = {
+               token: declarationPToken,
+               isUnparsed: false,
+               isInternal: true,
+               valueCache: declarationPToken.value as any, // REFACTOR Type is bad in generaldeclarationentity
+            };
+            this.deliverToken(declarationPToken);
+            expanded();
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             break;
@@ -283,6 +302,46 @@ class EntityExpander {
          done(); // acknowledge we are done with the callback from expandBodyReference()
          handled(); // and mark the end of processing of the DOCTYPE end token
       });
+   }
+
+   private handleElementStart(
+      pToken: ElementStartPToken | ElementEmptyPToken,
+      handled: TokenExpanded,
+   ): void {
+      const expandParams = this.expandParams;
+
+      if (pToken.attributes.length === 0) {
+         this.deliverToken(pToken);
+         handled();
+         return;
+      }
+
+      const attributeValues: Array<AttributeValuePToken> = pToken.attributes.map(
+         (attribute) => attribute.value,
+      ) as any; // REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
+
+      function process(attributeValue: AttributeValuePToken, callback: AttrExpanded): void {
+         expandAttributeValue(attributeValue, expandParams, callback);
+      }
+
+      const reassign = (results: Array<ExpandAttrResult>): void => {
+         const allErrors = [];
+         let index = 0;
+
+         for (const result of results) {
+            for (const err of result.errors) {
+               this.deliverToken(err);
+            }
+            allErrors.push(...result.errors);
+            pToken.attributes[index].value = result.newValue as any; // REFACTOR/CLEANUP: Attribute values in AttributePToken is not the right type
+            index++;
+         }
+
+         this.deliverToken(pToken);
+         handled();
+      };
+
+      doAsyncLoop(attributeValues, process, reassign);
    }
 }
 
