@@ -1,10 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, EntityMetaData } from 'basic';
+import { Token, EntityLocation, EntityMetaData, Range } from 'basic';
+import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, SToken, STokenSource } from 'sToken';
 import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
@@ -27,6 +28,8 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    NotationDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    TextPToken,
    PToken,
    XmlError,
@@ -36,7 +39,6 @@ import {
 import { EntityExpander } from '../EntityExpander';
 
 import { ExpandToken, RetrieveResults } from '../types';
-import { WellFormedError } from 'error';
 
 fdescribe('EntityExpander (integration)', () => {
    const externalMap: { [publicName: string]: string } = {};
@@ -99,7 +101,15 @@ fdescribe('EntityExpander (integration)', () => {
       sTokenSource: STokenSource,
       done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
    ): void {
-      done([], []);
+      const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false });
+      const results: AttributeValuePToken = [];
+
+      pTokenStream.on('data', (token: Token) => {
+         results.push(token as any);
+      });
+      pTokenStream.on('end', () => {
+         done(results, []);
+      });
    }
 
    function doExpand(
@@ -141,5 +151,75 @@ fdescribe('EntityExpander (integration)', () => {
       processNextToken();
    }
 
-   it('expands attributes in tags', (done) => {});
+   it('expands general entity references in attributes', (done) => {
+      const decl0 = new ParameterEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('second'),
+         value: [new TextPToken('middle')],
+      });
+      const decl1 = new GeneralEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('first'),
+         value: [
+            new TextPToken('('),
+            new ParameterEntityReferencePToken({
+               open: toSToken('%'),
+               name: toSToken('second'),
+            }),
+            new TextPToken(')'),
+         ],
+      });
+      const start = new ElementStartPToken({
+         open: toSToken('<'),
+         name: toSToken('expandTest'),
+         attributes: [
+            {
+               name: toSToken('one'),
+               value: [
+                  new GeneralEntityReferencePToken({
+                     open: toSToken('&'),
+                     name: toSToken('first'),
+                  }),
+               ],
+            },
+         ],
+      });
+      const ref1 = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('first'),
+      });
+      const expanded = new ElementStartPToken({
+         open: toSToken('<'),
+         name: toSToken('expandTest'),
+         attributes: [
+            {
+               name: toSToken('one'),
+               value: [
+                  new GeneralEntityStartPToken(ref1),
+                  new TextPToken({
+                     text: new SToken(
+                        '(middle)',
+                        '(middle)',
+                        new Range(
+                           new EntityLocation('dummy meta data to keep TypeScript happy'),
+                           0,
+                           0,
+                           0,
+                           8,
+                           0,
+                           8,
+                        ),
+                     ),
+                  }),
+                  new GeneralEntityEndPToken(ref1),
+               ],
+            },
+         ],
+      });
+
+      doExpand([decl0, decl1, start], true, (results) => {
+         expect(results).toEqual([decl0, decl1, expanded]);
+         done();
+      });
+   });
 });

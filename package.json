@@ -10,7 +10,8 @@
       "build:watch": "babel --no-babelrc --config-file ./build/babelrc-new.json5 --extensions '.ts' --watch 'source/**/*.ts' --out-dir ./temp/build/",
       "check": "prettier --write  'source/expand/**/*.ts'",
       "test": "xclap live",
-      "test:cover": "xclap precommit"
+      "test:cover": "xclap precommit",
+      "nodetest": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/new-jasmine.json'"
    },
    "devDependencies": {
       "@babel/cli": "^7.8.4",
@@ -84,6 +85,9 @@
       "xclap-cli": "^0.1.3"
    },
    "dependencies": {
-      "bcp47-validate": "^1.0.0"
+      "bcp47-validate": "^1.0.0",
+      "jasmine-ts": "^0.3.0",
+      "nodemon": "^2.0.3",
+      "tsconfig-paths": "^3.9.0"
    }
 }

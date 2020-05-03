@@ -1,0 +1,19 @@
+{
+   "spec_dir": ".",
+ 
+   "spec_files": [
+      "source/expand/@test/*test.ts"
+   ],
+ 
+   "helpers": [
+      "build/beforeEach*.js",
+      "source/error/@test/helper.ts",
+      "source/token/@test/beforeEach.ts",
+      "source/sToken/@test/beforeEach.d.ts",
+      "source/sToken/@test/beforeEach.ts"
+   ],
+ 
+   "stopSpecOnExpectationFailure": false,
+ 
+   "random": false
+ }

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource, strOrBlank, STokenArrayBuilder } from 'sToken';
+import { SToken, STokenSource, strOrBlank, STokenArrayBuilder, toSToken } from 'sToken';
 
 type DeliverPToken = (token: TextPToken|void) => void;
 
@@ -32,8 +32,16 @@ class TextPToken {
    public readonly type: typeof TEXT_PTOKEN = TEXT_PTOKEN;
    public readonly text: SToken;
 
-   constructor(props: TextPToken | { text: SToken }) {
-      this.text = props.text;
+   constructor(props: TextPToken | { text: SToken } | string) {
+      let text: SToken;
+
+      if (typeof props === 'string') {
+         text = toSToken(props);
+      } else {
+         text = props.text;
+      }
+
+      this.text = text;
    }
 
    toXToken() {

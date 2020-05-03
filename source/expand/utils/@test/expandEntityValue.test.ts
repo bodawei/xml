@@ -33,7 +33,6 @@ fdescribe('expandEntityValue() (unit)', () => {
             pe1: {
                token: new ParameterEntityDeclarationPToken({ open: toSToken('<!') }),
                isInternal: false,
-               isUnparsed: false,
             },
          },
          geDeclCache: {

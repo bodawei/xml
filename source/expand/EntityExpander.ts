@@ -20,6 +20,7 @@ import {
    ElementDeclarationPToken,
    ElementStartPToken,
    ElementEmptyPToken,
+   EntityValuePToken,
    ExternalSubsetEndToken,
    ExternalSubsetStartToken,
    GeneralEntityDeclarationPToken,
@@ -28,12 +29,15 @@ import {
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    PToken,
+   XmlError,
 } from 'token';
 
-import { EntityProcessors, ExpandParams } from './types';
+import { EntityProcessors, ExpandParams, GeneralEntityInfo, ParameterEntityInfo } from './types';
 
 import { doAsyncLoop } from './utils/doAsyncLoop';
 import { expandBodyReference } from './utils/expandBodyReference';
+import { expandEntityValue } from './utils/expandEntityValue';
+import { LoadingEmitter } from './utils/LoadingEmitter';
 import { expandAttributeValue, AttrExpanded, ExpandAttrResult } from './utils/expandAttributeValue';
 
 type DeclToken =
@@ -140,20 +144,10 @@ class EntityExpander {
          case ATTLISTDECL_PTOKEN_TYPE:
             this.handleAttListDeclaration(declarationPToken, expanded);
             break;
-         // case GENERAL_ENTITY_DECLARATION_PTOKEN:
-         //    // Temp hack to make start and end elements work
-         //    // const name = strOrBlank(declarationPToken.name);
-         //    // this.expandParams.geDeclCache[name] = {
-         //    //    token: declarationPToken,
-         //    //    isUnparsed: false,
-         //    //    isInternal: true,
-         //    //    valueCache: declarationPToken.value as any, // REFACTOR Type is bad in generaldeclarationentity
-         //    // };
-         //    this.deliverToken(declarationPToken);
-         //    expanded();
-         //    break;
-         // case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-         //    break;
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            this.handleEntityDeclaration(declarationPToken, expanded);
+            break;
       }
    }
 
@@ -312,6 +306,92 @@ class EntityExpander {
       };
 
       doAsyncLoop(attributeValues, process, reassign);
+   }
+
+   /*
+    * Processing an entity declaration involves two steps:
+    * Setting up a cache entry for it, but not yet "installing" that
+    * entry.
+    * If it is a value-internal entity, then we expand its value and
+    * add that to the cache entry.
+    *
+    * Note that we do not actually set up the cache entry until the
+    * value has been expanded (if it is going to be), so that it is not
+    * possible to have the entity refer to itself.
+    */
+   private handleEntityDeclaration(
+      pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+      handled: TokenExpanded,
+   ): void {
+      const name = strOrBlank(pToken.name);
+      let cache: GeneralEntityInfo | ParameterEntityInfo;
+
+      if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN) {
+         cache = this.expandParams.geDeclCache[name];
+      } else {
+         cache = this.expandParams.peDeclCache[name];
+      }
+
+      if (name === '' || cache) {
+         this.deliverToken(pToken);
+         handled();
+         return;
+      }
+
+      if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN) {
+         cache = {
+            token: pToken,
+            isInternal: !pToken.externalId,
+            isUnparsed: !!pToken.nData,
+         };
+      } else {
+         cache = {
+            token: pToken,
+            isInternal: !pToken.externalId,
+         };
+      }
+
+      // Store the cache entry in the overall cache only when we are done
+      // doing all value processing. This prevents recursive uses of the declaration.
+      const cacheAndDeliver = (): void => {
+         if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN) {
+            this.expandParams.geDeclCache[name] = cache as GeneralEntityInfo; // TS no smart enough.
+         } else {
+            this.expandParams.peDeclCache[name] = cache as ParameterEntityInfo;
+         }
+
+         this.deliverToken(pToken);
+         handled();
+      };
+
+      if (!cache.isInternal) {
+         cacheAndDeliver();
+         return;
+      }
+
+      const emitter: LoadingEmitter = new LoadingEmitter();
+      cache.loading = emitter;
+
+      // REFACTOR/CLEANUP again types do not match correctly
+      expandEntityValue(
+         pToken.value as any,
+         this.expandParams,
+         (newValue: EntityValuePToken, errors: Array<XmlError>): void => {
+            this.deliverErrors(errors);
+            cache.valueCache = newValue;
+            delete cache.loading;
+
+            cacheAndDeliver();
+
+            emitter.emit('done', []);
+         },
+      );
+   }
+
+   deliverErrors(errors: Array<XmlError>): void {
+      for (const err of errors) {
+         this.deliverToken(err);
+      }
    }
 }
 

@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import { Token, EntityMetaData } from 'basic';
+import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { toSToken, STokenSource } from 'sToken';
@@ -27,6 +28,7 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    NotationDeclarationPToken,
+   ParameterEntityDeclarationPToken,
    TextPToken,
    PToken,
    XmlError,
@@ -36,11 +38,12 @@ import {
 // For mocking purposes
 // eslint-disable-next-line
 const expandAttributeValue = require('../utils/expandAttributeValue');
+// eslint-disable-next-line
+const expandEntityValueModule = require('../utils/expandEntityValue');
 
 import { EntityExpander } from '../EntityExpander';
 
-import { ExpandToken, RetrieveResults } from '../types';
-import { WellFormedError } from 'error';
+import { ExpandToken, ExpandParams, RetrieveResults } from '../types';
 
 fdescribe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string } = {};
@@ -483,6 +486,147 @@ fdescribe('EntityExpander (unit)', () => {
             expect(callArgs[0]).toEqual(expectedValue);
             expect(callArgs[1].emd).not.toBeUndefined();
             expect(callArgs[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+   });
+
+   describe('ENTITY declaration', () => {
+      let geDecl: GeneralEntityDeclarationPToken;
+      let peDecl: ParameterEntityDeclarationPToken;
+      let expandEntityValueSpy: jasmine.Spy;
+
+      beforeEach(() => {
+         expandEntityValueSpy = spyOn(expandEntityValueModule, 'expandEntityValue');
+         let index = 0;
+
+         expandEntityValueSpy.and.callFake((pToken: any, params: any, cb: any) => {
+            const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
+               `${index}`,
+            ]);
+            index++;
+            cb([new TextPToken({ text: toSToken(`testValue #${index}`) })], [error]);
+         });
+      });
+
+      it('calls expandEntityValue() with the general entity value and a set up cache', (done) => {
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+
+         doExpand([geDecl], true, () => {
+            const args = expandEntityValueSpy.calls.argsFor(0);
+
+            expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
+            expect(args[1].geDeclCache).toEqual({
+               student: {
+                  token: geDecl,
+                  isInternal: true,
+                  isUnparsed: false,
+                  valueCache: [new TextPToken({ text: toSToken(`testValue #1`) })], // By the time we evaluate this, that will have been added
+               },
+            });
+            expect(args[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('calls expandEntityValue() with the parameter entity value and a set up cache', (done) => {
+         peDecl = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+
+         doExpand([peDecl], true, () => {
+            const args = expandEntityValueSpy.calls.argsFor(0);
+
+            expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
+            expect(args[1].peDeclCache).toEqual({
+               student: {
+                  token: peDecl,
+                  isInternal: true,
+                  valueCache: [new TextPToken({ text: toSToken(`testValue #1`) })], // By the time we evaluate this, that will have been added
+               },
+            });
+            expect(args[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('delivers the geDecl along with any errors that happened while expanding its value', (done) => {
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['0']);
+
+         doExpand([geDecl], true, (results) => {
+            expect(results).toEqual([error1, geDecl]);
+            done();
+         });
+      });
+
+      it('does not expand the entity value if this is an external entity', (done) => {
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            externalId: {},
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+
+         doExpand([geDecl], true, () => {
+            expect(expandEntityValueSpy).not.toHaveBeenCalled();
+            done();
+         });
+      });
+
+      it('does not expand the entity value if this entity has no name', (done) => {
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+
+         doExpand([geDecl], true, () => {
+            expect(expandEntityValueSpy).not.toHaveBeenCalled();
+            done();
+         });
+      });
+
+      it('does not expand the entity value if this entity is already in the cache', (done) => {
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+
+         doExpand([geDecl, geDecl], true, () => {
+            expect(expandEntityValueSpy).toHaveBeenCalledTimes(1);
+            done();
+         });
+      });
+
+      it('does not set up the cache entry until after calling expandEntityValue()', (done) => {
+         let cacheEntries: Array<string>;
+         let afterCallParams: ExpandParams;
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+
+         expandEntityValueSpy.and.callFake((pToken: any, params: ExpandParams, cb: any) => {
+            cacheEntries = Object.keys(params.geDeclCache);
+            afterCallParams = params;
+            cb([new TextPToken({ text: toSToken(`testValue`) })], []);
+         });
+
+         doExpand([geDecl, geDecl], true, () => {
+            expect(cacheEntries).toEqual([]);
+            expect(Object.keys(afterCallParams.geDeclCache)).toEqual(['student']);
             done();
          });
       });

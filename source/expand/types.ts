@@ -24,7 +24,6 @@ type GeneralEntityInfo = {
 type ParameterEntityInfo = {
    token: ParameterEntityDeclarationPToken;
    isInternal: boolean;
-   isUnparsed: boolean;
    valueCache?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
    loading?: LoadingEmitter;
 };

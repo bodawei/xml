@@ -8,30 +8,51 @@ FINISHED TASKS
 √ Rebuild the expandEntityValue function to use the new one  (see below)
 √ Then do the same for attribute values
 √ Probably handle the elment start and empty cases next, as you have the underlying implementation
+√ element start and end need to be able to hand attributes to a routine which then calls the attribute handler.
+√ Need to do general entity declarations next
+√ and start an integration test
+√ Parameter entity declarations
+√ set up package script
+
 IMMEDIATE TASKS
 - Document
    - Put a whole readme describing the whole thinking around expansion,
       the spec requirements and the architecture into a document. Also a "how to use me"
 - Implementation
-   - Need to do general entity declarations next
-      - and start an integration test
+   - Do general entity streaming expansion. this meanse parseBody(), but then the setup process needs to work well.
    - double check external entity expansion
-   - Parameter entity declarations
-   - If integration test passes, need to clean up the expandAttributeValue code
 - Build
    - Try to get testing to work so it doesn't fail every time you break it
          - This looks promising: https://www.npmjs.com/package/jasmine-ts
          - https://www.npmjs.com/package/tsconfig-paths
          - https://stackoverflow.com/questions/48568671/how-to-run-jasmine-tests-in-watch-mode-for-typescript
+      ./node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/new-jasmine.json 
+       - ts-node, jasmine-ts tsconfig-paths
+         - Seems promising, except that we're still having problem importing json.
+            [eval].ts:4:17 - error TS2732: Cannot find module '/Users/bodawei/active/hacking/xml/source/error/derive/ValidityError.json'. Consider using '--resolveJsonModule' to import module with '.json' extension
+         - What is the "register" that ts-node is doing.
+      ./node_modules/.bin/nodemon --exec   './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/new-jasmine.json' 
+         This works, albeit with some errors. HAd to make two changes to tsconfig
+                  "resolveJsonModule": true,
+      "esModuleInterop": true,
+      NEXT STEP:
 
-
+         - Set up better reporters
+         - Then figure out what all this is doing and why it is working (or not working)
+      
 Today
-- element start and end need to be able to hand attributes to a routine which then calls the attribute handler.
+
 
 REFACTORING
+- Need to clean up the expandAttributeValue code
 - I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
 - REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
 - AttributeValuePToken should get pushed down into attribute
+- QUestion: Should setup be setting up the valueCache for all?  The  key is all the loading stuff.
+         -- Back to the thought the cache should be a class and handles its own value loading.  Though, we need to get to the streaming case for this to really make sense.
+- expandEntityValue should probably change callbck to deliver a single value.
+- we aren't passing a dictate to expandEnitityValue to ask it not to load external entities.  same with setup.
+- WE are protecting against recursive calls in the entity setup by setting up the cache after value processing, not by actually looking. This feels icky.
 
 
 CLEAN UP THE BELOW
@@ -44,11 +65,11 @@ CLEAN UP THE BELOW
     * We should move attribute expansion out into another routine.
     * Note the kinds of expansion:
         1. External subset [stream]
-        2. PE Refs in internal entity values [?]
-        3. PE Refs in markup [?]
+        2. √ PE Refs in internal entity values [?] <-- I think ? means non-streaming
+        3. PE Refs in markup decls [?]
         4. PE  refs in body [stream]
         5. √ GERef’s in attributes [?]
-        5. √ GERef’s in attribute defs
+        5. √ GERef’s in attribute defs [?]
         7. GE refs in body [stream]
 
 
