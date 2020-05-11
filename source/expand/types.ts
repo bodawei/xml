@@ -11,6 +11,7 @@ import {
    XmlError,
 } from 'token';
 
+import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
 import { LoadingEmitter } from './utils/LoadingEmitter';
 
 type GeneralEntityInfo = {
@@ -36,28 +37,21 @@ type ParameterEntityMap = {
    [entityName: string]: ParameterEntityInfo;
 };
 
-type ExpandToken = (token: PToken, tokenProcessed: TokenHandled) => void;
+type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
-type ProcessBody = (
-   sTokenSource: STokenSource,
-   inContent: boolean,
-   expandToken: ExpandToken,
-   done: STokenSourceProcessed,
-) => void;
 
 // This always returns an entityValeuePToken, even if sTokenSource has no content (e.g. has errors)
-type ProcessForEntityValue = (
-   sTokenSource: STokenSource,
-   done: (results: EntityValuePToken | void) => void,
-) => void;
 type STokenSourceProcessed = () => void;
 type RetrieveResults = {
    sTokenSource: STokenSource;
    getErrors: () => Array<XmlError>;
 };
 type EntityProcessors = {
-   parseBody: ProcessBody;
-   parseEntityValue: ProcessForEntityValue;
+   parseBody: (sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken) => void;
+   parseEntityValue: (
+      sTokenSource: STokenSource,
+      done: (results: EntityValuePToken | void) => void,
+   ) => void;
    retrieveExternalEntity: (
       externalId: ExternalId,
       entityMetaData: EntityMetaData,
@@ -68,13 +62,8 @@ type EntityProcessors = {
    ) => void;
 };
 
-type ExternalSubsetPToken = {
-   type: 'EXTERNAL_SUBSET';
-   externalId: ExternalId;
-};
-
 type ExpandParams = {
-   externalSubset?: ExternalSubsetPToken;
+   externalSubset?: ExternalDtdSubsetPseudoToken;
    peDeclCache: ParameterEntityMap;
    geDeclCache: GeneralEntityMap;
    utils: EntityProcessors;
@@ -82,7 +71,6 @@ type ExpandParams = {
 };
 
 export {
-   ExternalSubsetPToken,
    ExpandParams,
    RetrieveResults,
    EntityProcessors,

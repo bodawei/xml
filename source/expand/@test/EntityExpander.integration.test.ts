@@ -47,7 +47,6 @@ fdescribe('EntityExpander (integration)', () => {
       sTokenSource: STokenSource,
       inContent: boolean,
       writeToken: ExpandToken,
-      done: () => void,
    ): void {
       const pTokenStream = new PTokenStream(sTokenSource);
 
@@ -60,7 +59,9 @@ fdescribe('EntityExpander (integration)', () => {
          });
       });
       pTokenStream.on('end', () => {
-         done();
+         writeToken(undefined, () => {
+            pTokenStream.resume();
+         });
       });
    }
 

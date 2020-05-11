@@ -1,0 +1,31 @@
+<!ENTITY % one "one">
+<!ENTITY % two "two and %one;">
+<!ENTITY three "three and %two;">
+
+<!--
+We can not even declare this, since as soon as we encounter badtwo, it complains because it doesn't know badone
+<!ENTITY % badtwo "two and %badone;">
+<!ENTITY % badone "one">
+<!ENTITY badthree "three and %badtwo;">
+
+And this does not work for the same reason
+
+<!ENTITY badthree "three and %badtwo;">
+<!ENTITY % badone "one">
+<!ENTITY % badtwo "two and %badone;">
+
+-->
+
+<!--
+   This complains, even though twoExt references oneExt.
+   the error is on threeExt's processing, which means at the point we encounter threeExt, we process
+   the whole chain of PE's
+
+<!ENTITY % twoExt SYSTEM './33-ordering.ent'>
+<!ENTITY threeExt "threeExt and  and %twoExt;">
+<!ENTITY % oneExt "oneExt">
+
+-->
+
+<!ENTITY threeFullyExt SYSTEM './33-ordering-two.ent'>
+<!ENTITY % oneExt "oneExt">

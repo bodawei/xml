@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE one SYSTEM './33-ordering.ext' [
+   <!ELEMENT one ANY>
+]>
+
+<one>
+
+&three;
+&threeFullyExt;
+
+<![CDATA[
+Output:
+We seem to completely barf on even the declaration of threeExt even though we never even reference it.
+So, for internal entities, we are fully following the entity values, even if they are external, at the point of declaration.
+
+threeFullyExt is a shocker for me. It means we can't have parameter entities in external general entities. A reading of 4.5.0 suggests that this is so. 
+
+
+   xmllint --loaddtd  --noent  --valid 33-ordering.xml
+]]>
+</one>

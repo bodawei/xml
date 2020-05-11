@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, EntityMetaData } from 'basic';
+import { Token, EntityMetaData, ENTITY_META_DATA } from 'basic';
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -9,6 +9,7 @@ import { toSToken, STokenSource } from 'sToken';
 import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
@@ -52,7 +53,6 @@ fdescribe('EntityExpander (unit)', () => {
       sTokenSource: STokenSource,
       inContent: boolean,
       writeToken: ExpandToken,
-      done: () => void,
    ): void {
       const pTokenStream = new PTokenStream(sTokenSource);
 
@@ -65,7 +65,7 @@ fdescribe('EntityExpander (unit)', () => {
          });
       });
       pTokenStream.on('end', () => {
-         done();
+         writeToken(undefined, () => {});
       });
    }
 
@@ -91,6 +91,7 @@ fdescribe('EntityExpander (unit)', () => {
       const sTokenSource = new STokenSource(defaultExtractors, entityMetaData);
 
       const str = externalMap[(externalId.system!.value[0] as any).text.str];
+
       sTokenSource.addText(str);
       sTokenSource.endText();
 
@@ -277,6 +278,7 @@ fdescribe('EntityExpander (unit)', () => {
       });
 
       it('adds external subset markers when there is an externalId', (done) => {
+         externalMap.systemFoo = '<!ENTITY foo "bar">';
          docTypeStart = new DocTypeStartPToken({
             open: toSToken('<!'),
             name: toSToken('root'),
@@ -294,6 +296,8 @@ fdescribe('EntityExpander (unit)', () => {
             expect(types).toEqual([
                DOCTYPE_START_PTOKEN,
                EXTERNAL_SUBSET_START_TOKEN,
+               ENTITY_META_DATA,
+               GENERAL_ENTITY_DECLARATION_PTOKEN,
                EXTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
@@ -324,6 +328,8 @@ fdescribe('EntityExpander (unit)', () => {
                NOTATION_DECLARATION_PTOKEN,
                INTERNAL_SUBSET_END_TOKEN,
                EXTERNAL_SUBSET_START_TOKEN,
+               ENTITY_META_DATA,
+               GENERAL_ENTITY_DECLARATION_PTOKEN,
                EXTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);

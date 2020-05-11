@@ -1,0 +1,36 @@
+
+<!-- Note the order here. the 3's indirectly reference 1, which isn't defined until later -->
+<!ENTITY % externalValue3 SYSTEM './32-internalExternalRef3.ent'>
+<!ENTITY % internal3 'internal3: &#37;internal1;'>
+
+<!ENTITY % externalValue1 SYSTEM './32-internalExternalRef1.ent'>
+<!ENTITY % externalValue2 SYSTEM './32-internalExternalRef2.ent'>
+
+<!ENTITY % internal1 'internal1'>
+<!ENTITY % internal2 'internal2: %internal1;'>
+
+<!ENTITY ext1 "%externalValue1;">
+<!ENTITY ext2 "%externalValue2;">
+<!ENTITY ext3 "%externalValue3;">
+<!ENTITY int1 "%internal1;">
+<!ENTITY int2 "%internal2;">
+<!ENTITY int3 "&#37;internal3;">
+
+
+
+<!ENTITY % dtdText '<!ENTITY definedInDtd "I was defined in the DTD">'>
+<!ENTITY % dtdText1 '<!ENTITY definedInDtd1 "I was #1 defined in the DTD">'>
+<!ENTITY % dtdItem "&#37;dtdText;">
+<!ENTITY % dtdItemExt1 SYSTEM "./32-internalExternalRef4.ent">
+<!ENTITY % dtdItemExt2 SYSTEM "./32-internalExternalRef5.ent">
+
+%dtdItem;
+%dtdItemExt2;
+
+<!-- This does not work
+%dtdItemExt1;
+
+It gives this error:
+32-internalExternalRef4.ent:1: parser error : Content error in the external subset
+&#37;dtdText;
+-->

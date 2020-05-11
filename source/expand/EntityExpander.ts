@@ -13,6 +13,7 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    AttListPToken,
    AttributeValuePToken,
    DocTypeEndPToken,
@@ -24,21 +25,26 @@ import {
    ExternalSubsetEndToken,
    ExternalSubsetStartToken,
    GeneralEntityDeclarationPToken,
+   GeneralEntityEndPToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityEndPToken,
+   ParameterEntityStartPToken,
    PToken,
    XmlError,
+   GeneralEntityStartPToken,
 } from 'token';
 
 import { EntityProcessors, ExpandParams, GeneralEntityInfo, ParameterEntityInfo } from './types';
 
 import { doAsyncLoop } from './utils/doAsyncLoop';
-import { expandBodyReference } from './utils/expandBodyReference';
-import { expandEntityValue } from './utils/expandEntityValue';
-import { LoadingEmitter } from './utils/LoadingEmitter';
 import { expandAttributeValue, AttrExpanded, ExpandAttrResult } from './utils/expandAttributeValue';
+import { expandEntityValue } from './utils/expandEntityValue';
+import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
+import { LoadingEmitter } from './utils/LoadingEmitter';
+import { streamEntityReference } from './utils/streamEntityReference';
 
 type DeclToken =
    | AttListPToken
@@ -95,7 +101,7 @@ class EntityExpander {
             this.handleDocTypeStart(pToken as DocTypeStartPToken, expanded);
             break;
          case DOCTYPE_END_PTOKEN:
-            this.handleDocTypeEnd(pToken as DocTypeEndPToken, expanded);
+            this.handleDocTypeEnd(pToken, expanded);
             break;
          case ATTLISTDECL_PTOKEN_TYPE:
          case ELEMENT_DECLARATION_PTOKEN:
@@ -108,12 +114,27 @@ class EntityExpander {
          case ELEMENT_EMPTY_PTOKEN:
             this.handleElementStart(pToken, expanded);
             break;
-         // case GENERAL_ENTITY_REFERENCE_PTOKEN:
-         //    // this.handleGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
-         //    break;
-         // case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-         //    this.handleParameterEntityReference(pToken as ParameterEntityReferencePToken, expanded);
-         //    break;
+         case GENERAL_ENTITY_REFERENCE_PTOKEN:
+         case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+            // Might want to hold off in case we can not find the entity
+            if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+               this.deliverToken(new GeneralEntityStartPToken(pToken));
+            } else {
+               this.deliverToken(new ParameterEntityStartPToken(pToken));
+            }
+            streamEntityReference(pToken, this.expandParams, (result, handled) => {
+               if (!result) {
+                  if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+                     this.deliverToken(new GeneralEntityEndPToken(pToken));
+                  } else {
+                     this.deliverToken(new ParameterEntityEndPToken(pToken));
+                  }
+                  expanded();
+               } else {
+                  this.expandToken(result, handled);
+               }
+            });
+            break;
          default:
             this.deliverToken(pToken);
             expanded();
@@ -173,10 +194,7 @@ class EntityExpander {
       }
 
       if (pToken.externalId && this.loadExternalEntities) {
-         this.expandParams.externalSubset = {
-            type: 'EXTERNAL_SUBSET',
-            externalId: pToken.externalId,
-         };
+         this.expandParams.externalSubset = new ExternalDtdSubsetPseudoToken(pToken.externalId);
       }
 
       handled();
@@ -212,7 +230,7 @@ class EntityExpander {
       this.state = State.IN_EXTERNAL_SUBSET;
       this.deliverToken(new ExternalSubsetStartToken());
 
-      expandBodyReference(externalSubsetToken, this.expandParams, (result, done) => {
+      streamEntityReference(externalSubsetToken, this.expandParams, (result, done) => {
          if (result) {
             this.expandToken(result, done);
             return;
@@ -241,7 +259,7 @@ class EntityExpander {
       }
 
       // REFACTOR/CLEANUP: default type is wrong.
-      this.expandAttributeValue(pToken.attributes as any, (results) => {
+      this.expandAttributeValueObjects(pToken.attributes as any, (results) => {
          for (let index = 0; index < results.length; index++) {
             pToken.attributes[index].value = results[index]; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
          }
@@ -261,7 +279,7 @@ class EntityExpander {
     */
    private handleAttListDeclaration(pToken: AttListPToken, handled: TokenExpanded): void {
       // REFACTOR/CLEANUP: default type is wrong.
-      this.expandAttributeValue(pToken.attDefs as any, (results) => {
+      this.expandAttributeValueObjects(pToken.attDefs as any, (results) => {
          for (let index = 0; index < results.length; index++) {
             pToken.attDefs[index].value = results[index]; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
          }
@@ -277,7 +295,7 @@ class EntityExpander {
     * deliver any errors into the output stream, and return the modified values
     * back to the caller.
     */
-   private expandAttributeValue(
+   private expandAttributeValueObjects(
       valueObjects: Array<AttrValueObj>,
       expanded: (resuts: Array<AttributeValuePToken>) => void,
    ): void {

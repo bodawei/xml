@@ -19,8 +19,12 @@ IMMEDIATE TASKS
    - Put a whole readme describing the whole thinking around expansion,
       the spec requirements and the architecture into a document. Also a "how to use me"
 - Implementation
-   - Do general entity streaming expansion. this meanse parseBody(), but then the setup process needs to work well.
-   - double check external entity expansion
+   - In EntityExpanderStream.integration
+      - Add a case test for each of the other expansion cases.
+         The goal here is to have some sanity checking that the overall system
+         is basically working.  Once that is done, start doing a combination of
+            - refactoring tasks
+            - code examination and cleanup
 - Build
    - Try to get testing to work so it doesn't fail every time you break it
          - This looks promising: https://www.npmjs.com/package/jasmine-ts
@@ -36,14 +40,37 @@ IMMEDIATE TASKS
                   "resolveJsonModule": true,
       "esModuleInterop": true,
       NEXT STEP:
-
          - Set up better reporters
          - Then figure out what all this is doing and why it is working (or not working)
-      
-Today
+            ./node_modules/.bin/ts-node <-- what is this doing?  Does the ts compiler not transpile the paths?
+            -r  <-- tells node to load this module before starting on user code
+            tsconfig-paths/register  <-- patches the global module object to replace "source/foo/bar" with the typescript path
+            ./node_modules/.bin/jasmine --config=./build/new-jasmine.json 
+
+
+GE and PE expansion:
+Given a GE or PERef: say: Send me the  parsed replacement text.
+   internal -> entityValuePtoken -> EntityValuePToken -> Body tokens
+   external -> EntityValuePToken (streamed) -> Body tokens
+
+   streamReferencedEntity
+      - given areference
+         look up declaration
+            if inline, feed into an sTokenStrem
+            if external start to load into sTokenStream  (retrieveExternalEntity)
+      Need to know if we are in the dtd or the content. so e can pass that to the parser
+
+Conclusion, this is paretty good
+
+   QUESTION IF we reference a PE Decl in the dtd, will it merge pe declarations, such that an escaped %foo; can cross and still be expanded?
+Feed this back.
+
+
+
 
 
 REFACTORING
+- toEqualRangeless isn't working... why not?
 - Need to clean up the expandAttributeValue code
 - I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
 - REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
@@ -53,6 +80,22 @@ REFACTORING
 - expandEntityValue should probably change callbck to deliver a single value.
 - we aren't passing a dictate to expandEnitityValue to ask it not to load external entities.  same with setup.
 - WE are protecting against recursive calls in the entity setup by setting up the cache after value processing, not by actually looking. This feels icky.
+- need to pass the validate flag, need to pass the chain of entities, and need to pass back the before-consumption PE's
+- streaming has no idea about what its context is. how to prevent recursion?
+- Atttend to errors going through the whole system
+   => Development problem.  We're feeling wobbly with external.  how to know what you are doing next? When it gets biggerthan your head, using tests to drive this
+- Handling of externalId in EntityExpanderStream is crazy
+- Extra EMD in       it('adds external subset markers when there is an externalId', (done) => {
+- The following did not produce an XML Error in the stream output
+         <!DOCTYPE one [
+            <!ENTITY % internalPE "<!ENTITY one 'my content'>">
+            %internalPE;
+            <!ELEMENT one EMPTY>
+            >
+         ]>
+         <one>&one;</one>`);
+- Where should the path to the entity in the integration test be relative to?
+- need to be passing inContent correctly in streamEntityReference
 
 
 CLEAN UP THE BELOW

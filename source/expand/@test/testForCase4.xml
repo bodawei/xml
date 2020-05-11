@@ -1,0 +1,3 @@
+<!ENTITY % grandparent "ExternalGrandma ">
+<!ENTITY % parent "ExternalParent to %grandparent;">
+<!ENTITY child "ExternalChild to %parent;">

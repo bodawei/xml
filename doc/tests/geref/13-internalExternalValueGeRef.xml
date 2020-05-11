@@ -11,6 +11,10 @@ Internal: &internalValue;
 External: &externalValue;
 
 <![CDATA[
+Output:
+Internal: Broccoli
+External: &amp;foo;
+
    xmllint --loaddtd  --noent  --valid 13-internalExternalValueGeRef.xml
 ]]>
 </one>

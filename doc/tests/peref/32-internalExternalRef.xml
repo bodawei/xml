@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE one SYSTEM './32-internalExternalRef.ext' [
+   <!ELEMENT one ANY>
+]>
+
+<one>
+External1: &ext1;
+External2: &ext2;
+External3: &ext3;
+Internal1: &int1;
+Internal2: &int2;
+Internal3: &int3;
+
+Defined in DTD: &definedInDtd;
+Defined in external DTD: &definedInDtd1;
+Referenced in content: %internal;
+
+<![CDATA[
+Output:
+External1: external1
+External2: in two: external1
+External3: in three: %externalValue1;
+Internal1: internal1
+Internal2: internal2: internal1
+Internal3: %internal3;
+
+Defined in DTD: I was defined in the DTD
+Defined in external DTD: I was #1 defined in the DTD
+Referenced in content: %internal;
+
+Conclusions:
+- The differences in parsing between the the value-internal processing is significant when something is used in the DTD, but not in the non-dtd,
+   because the processor will not try to interpret an PE ref in the content.
+- So, my interpretation is that reading an external entity will parse parameter entities and char refs.
+   As these come out, of course the PE refs are replaced by their referenced text.  So we get charref, text, charref text
+   If this is delivered to the content, (e.g. &ext3; and &int3; here) the char refs are treated as % which are just inlined as regular text.
+      (just as you can put %foo; in the text and it will be ignored)
+- What is more interesting is the value-internal entities.  in these cases, the character references become characters at the poitn of processing.
+   - again, in content this is ignored (&int3). However, %dtdItem; expands completely fine, since in the DTD the character is escaped and so happy to be used.
+      in contrast, dtdItemExt2 produces an error because what comes out is a charref, which we can't use here.
+
+So, the processing model is this:
+   On encounter:
+      value-internal: replace charrefs and prefefs
+      value-external: nothing
+   On use
+      value-internal: process with charrefs acting as characters
+      value-external: process
+
+
+   xmllint --loaddtd  --noent  --valid 32-internalExternalRef.xml
+]]>
+</one>
