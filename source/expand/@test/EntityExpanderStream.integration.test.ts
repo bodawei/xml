@@ -35,7 +35,6 @@ import {
    ParameterEntityReferencePToken,
    ParameterEntityEndPToken,
    GeneralEntityReferencePToken,
-   GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    ParameterEntityDeclarationPToken,
 } from 'token';
@@ -45,7 +44,7 @@ import { AttListPToken, ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDecl
 import { CharRefPToken } from 'source/token/charRef';
 import { WellFormedError } from 'error';
 
-fdescribe('EntityExpanderStream (integration)', () => {
+describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let entityExpander: EntityExpanderStream;
 
@@ -205,6 +204,27 @@ fdescribe('EntityExpanderStream (integration)', () => {
                expect((results[index] as any).text.str).toEqual(
                   'ExternalChild to ExternalParent to ExternalGrandma ',
                );
+            },
+            done,
+         );
+      });
+   });
+
+   describe('Case 5: Expansion of parameter entity references in markup declarations but not in literals', () => {
+      fit('expands', (done) => {
+         pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one SYSTEM "./source/expand/@test/testForCase5.xml" [
+            <!ELEMENT one EMPTY>
+         ]>
+         <one>&epandedEntity;</one>`);
+         pTokenStream.endText();
+
+         gatherStream(
+            entityExpander,
+            (results) => {
+               const index = getIndex(results, CHARDATA_PTOKEN);
+
+               expect((results[index] as any).text.str).toEqual('unassigned works');
             },
             done,
          );

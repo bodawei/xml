@@ -35,12 +35,15 @@ import {
    PToken,
    XmlError,
    GeneralEntityStartPToken,
+   attListDeclaration,
 } from 'token';
 
 import { EntityProcessors, ExpandParams, GeneralEntityInfo, ParameterEntityInfo } from './types';
+import { assignUnassigned } from 'source/token/elementDeclaration';
 
 import { doAsyncLoop } from './utils/doAsyncLoop';
 import { expandAttributeValue, AttrExpanded, ExpandAttrResult } from './utils/expandAttributeValue';
+import { expandUnassigned } from './utils/expandUnassigned';
 import { expandEntityValue } from './utils/expandEntityValue';
 import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
 import { LoadingEmitter } from './utils/LoadingEmitter';
@@ -148,11 +151,26 @@ class EntityExpander {
          return;
       }
 
-      // this.expandUnassigned(pToken.unassigned, true, (newUnassigned) => {
-      //    pToken.unassigned = newUnassigned as any;
-      //    assignUnassigned(pToken);
-      //    this.processExpandedDeclaration(declarationPToken, expanded);
-      // });
+      expandUnassigned(declarationPToken.unassigned, this.expandParams, (results) => {
+         (declarationPToken.unassigned as any) = results.newValue;
+
+         switch (declarationPToken.type) {
+            case ELEMENT_DECLARATION_PTOKEN:
+               assignUnassigned(declarationPToken);
+               break;
+            case NOTATION_DECLARATION_PTOKEN:
+               declarationPToken.assignUnassigned();
+               break;
+            case ATTLISTDECL_PTOKEN_TYPE:
+               attListDeclaration.assignUnassigned(declarationPToken);
+               break;
+            case GENERAL_ENTITY_DECLARATION_PTOKEN:
+            case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+               declarationPToken.assignUnassigned();
+               break;
+         }
+         this.processExpandedDeclaration(declarationPToken, expanded);
+      });
    }
 
    private processExpandedDeclaration(declarationPToken: DeclToken, expanded: TokenExpanded): void {

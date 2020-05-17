@@ -1,0 +1,2 @@
+<!ENTITY % entityDeclarationContent "epandedEntity 'unassigned works'">
+<!ENTITY %entityDeclarationContent;>
