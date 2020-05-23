@@ -6,6 +6,10 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { CHARREF_PTOKEN, TEXT_PTOKEN, EntityValuePToken } from 'token';
 
+/*
+ * Given an EntityValuePToken, extract all the textual information in it and insert that
+ * into an STokenSource, returning that.
+ */
 function entityValueToSTokenSource(
    entityValue: EntityValuePToken,
    emd: EntityMetaData,

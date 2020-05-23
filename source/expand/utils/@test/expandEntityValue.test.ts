@@ -1,6 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
+import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
    GeneralEntityDeclarationPToken,
@@ -14,12 +15,14 @@ import {
 
 import { expandEntityValue } from '../expandEntityValue';
 import { ExpandParams, RetrieveResults } from '../../types';
-import { WellFormedError } from 'error';
+import { EntityDetails } from '../EntityDetails';
 
-fdescribe('expandEntityValue() (unit)', () => {
+describe('expandEntityValue() (unit)', () => {
+   let entityDetails: EntityDetails;
    let params: ExpandParams;
    let textPToken: TextPToken;
    let peRefPToken: ParameterEntityReferencePToken;
+   let peDecl: ParameterEntityDeclarationPToken;
 
    beforeEach(() => {
       textPToken = new TextPToken({ text: toSToken('foo') });
@@ -28,20 +31,19 @@ fdescribe('expandEntityValue() (unit)', () => {
          name: toSToken('pe1'),
       });
 
+      peDecl = new ParameterEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('pe1'),
+         externalId: {} as any,
+      });
+      entityDetails = new EntityDetails();
+      entityDetails.addEntity(peDecl);
+      entityDetails.addEntity(
+         new GeneralEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('ge1') }),
+      );
+
       params = {
-         peDeclCache: {
-            pe1: {
-               token: new ParameterEntityDeclarationPToken({ open: toSToken('<!') }),
-               isInternal: false,
-            },
-         },
-         geDeclCache: {
-            ge1: {
-               token: new GeneralEntityDeclarationPToken({ open: toSToken('<!') }),
-               isInternal: false,
-               isUnparsed: false,
-            },
-         },
+         entityDetails,
          utils: {
             parseBody: (): void => {
                return undefined;
@@ -77,7 +79,7 @@ fdescribe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with an expanded entity value when the referenced entity is already present', (done) => {
-      params.peDeclCache.pe1.valueCache = [textPToken];
+      entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
       expandEntityValue([textPToken, peRefPToken], params, (result) => {
          expect(result).toEqual([
@@ -91,7 +93,7 @@ fdescribe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with an expanded entity value when the referenced entity is already present', (done) => {
-      params.peDeclCache.pe1.valueCache = [textPToken];
+      entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
       expandEntityValue([textPToken, peRefPToken], params, (result) => {
          expect(result).toEqual([

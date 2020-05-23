@@ -1,47 +1,14 @@
 import { EntityMetaData } from 'basic';
 import { STokenSource } from 'sToken';
 
-import {
-   AttributeValuePToken,
-   EntityValuePToken,
-   ExternalId,
-   GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken,
-   PToken,
-   XmlError,
-} from 'token';
+import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
+import { EntityDetails } from './utils/EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
-import { LoadingEmitter } from './utils/LoadingEmitter';
-
-type GeneralEntityInfo = {
-   token: GeneralEntityDeclarationPToken;
-   isUnparsed: boolean;
-   isInternal: boolean;
-   valueCache?: EntityValuePToken;
-   loading?: LoadingEmitter;
-};
-
-type ParameterEntityInfo = {
-   token: ParameterEntityDeclarationPToken;
-   isInternal: boolean;
-   valueCache?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
-   loading?: LoadingEmitter;
-};
-
-type GeneralEntityMap = {
-   [entityName: string]: GeneralEntityInfo;
-};
-
-type ParameterEntityMap = {
-   [entityName: string]: ParameterEntityInfo;
-};
 
 type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
 
-// This always returns an entityValeuePToken, even if sTokenSource has no content (e.g. has errors)
-type STokenSourceProcessed = () => void;
 type RetrieveResults = {
    sTokenSource: STokenSource;
    getErrors: () => Array<XmlError>;
@@ -63,20 +30,10 @@ type EntityProcessors = {
 };
 
 type ExpandParams = {
-   externalSubset?: ExternalDtdSubsetPseudoToken;
-   peDeclCache: ParameterEntityMap;
-   geDeclCache: GeneralEntityMap;
-   utils: EntityProcessors;
    emd: EntityMetaData;
+   externalSubset?: ExternalDtdSubsetPseudoToken;
+   entityDetails: EntityDetails;
+   utils: EntityProcessors;
 };
 
-export {
-   ExpandParams,
-   RetrieveResults,
-   EntityProcessors,
-   GeneralEntityInfo,
-   ParameterEntityInfo,
-   GeneralEntityMap,
-   ParameterEntityMap,
-   ExpandToken,
-};
+export { ExpandParams, RetrieveResults, EntityProcessors, ExpandToken };

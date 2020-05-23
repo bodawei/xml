@@ -7,3 +7,4 @@ export { default as Range } from './Range';
 export * from './StringBundle';
 export * from './token';
 export * from './chars';
+export * from './doAsyncLoop';

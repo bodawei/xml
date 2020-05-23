@@ -8,7 +8,8 @@ import {
    XmlError,
 } from 'token';
 
-import { ExpandParams, ParameterEntityMap } from '../types';
+import { ExpandParams } from '../types';
+import { EntityDetails } from './EntityDetails';
 
 import { setupReferencedEntity } from './setupReferencedEntity';
 
@@ -18,14 +19,14 @@ import { setupReferencedEntity } from './setupReferencedEntity';
  */
 function findUncachedEntities(
    value: EntityValuePToken,
-   entityCache: ParameterEntityMap,
+   entityDetails: EntityDetails,
 ): Array<ParameterEntityReferencePToken> {
    const uncachedEntities: Array<ParameterEntityReferencePToken> = [];
 
    for (const subToken of value) {
       if (subToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          const elementName = strOrBlank(subToken.name);
-         const peInfo = elementName !== '' && entityCache[elementName];
+         const peInfo = entityDetails.getPeDetails(elementName);
 
          if (peInfo && !peInfo.isInternal && !peInfo.valueCache) {
             uncachedEntities.push(subToken);
@@ -50,13 +51,12 @@ function expandValue(
    expanded: (newValue: EntityValuePToken, errors: Array<XmlError>) => void,
    errors: Array<XmlError>,
 ): void {
-   const { peDeclCache } = expandParams;
    let newValue: EntityValuePToken = [];
 
    for (const element of value) {
       if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          const entryName = strOrBlank(element.name);
-         const peInfo = entryName === '' ? undefined : peDeclCache[entryName];
+         const peInfo = expandParams.entityDetails.getPeDetails(entryName);
 
          if (peInfo) {
             newValue.push(new ParameterEntityStartPToken(element));
@@ -90,8 +90,7 @@ function expandEntityValue(
    expandParams: ExpandParams,
    expanded: (newValue: EntityValuePToken, errors: Array<XmlError>) => void,
 ): void {
-   const { peDeclCache } = expandParams;
-   const missingEntities = findUncachedEntities(value, peDeclCache);
+   const missingEntities = findUncachedEntities(value, expandParams.entityDetails);
    let remainingEntities = missingEntities.length;
 
    if (remainingEntities === 0) {

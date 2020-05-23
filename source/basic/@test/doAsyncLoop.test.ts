@@ -4,7 +4,7 @@ import { doAsyncLoop } from '../doAsyncLoop';
 
 type Callback = (result: string) => void;
 
-fdescribe('doAsyncLoop() (unit)', () => {
+describe('doAsyncLoop() (unit)', () => {
    beforeEach(() => {});
 
    it('calls the processor with all the results', (done) => {

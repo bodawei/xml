@@ -1,6 +1,5 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank } from 'sToken';
 import {
    EntityValuePToken,
    ParameterEntityReferencePToken,
@@ -8,7 +7,6 @@ import {
    XmlError,
 } from 'token';
 
-import { LoadingEmitter } from './LoadingEmitter';
 import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
 
@@ -26,15 +24,12 @@ function setupReferencedEntity(
    expandParams: ExpandParams,
    done: Done,
 ): void {
-   const { geDeclCache, peDeclCache, utils, emd } = expandParams;
-   const isPERef = reference instanceof ParameterEntityReferencePToken;
-   const cache = isPERef ? peDeclCache : geDeclCache;
-   const entityName = strOrBlank(reference.name);
-   const entityInfo = entityName !== '' && cache[entityName];
+   const { entityDetails, utils, emd } = expandParams;
+   const entityInfo = entityDetails.getReferencedDetails(reference);
 
-   if (!entityInfo || entityInfo.valueCache || entityInfo.loading) {
-      if (entityInfo && entityInfo.loading) {
-         entityInfo.loading.once('done', (localResults) => done(localResults as Array<XmlError>));
+   if (!entityInfo || entityInfo.valueCache || entityInfo.isLoading) {
+      if (entityInfo && entityInfo.isLoading) {
+         entityDetails.waitForLoading(entityInfo.token, (info) => done(info.errors));
       } else {
          done([]);
       }
@@ -42,20 +37,18 @@ function setupReferencedEntity(
       return;
    }
 
-   const loading = new LoadingEmitter();
    const { sTokenSource, getErrors } = utils.retrieveExternalEntity(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       entityInfo.token.externalId!,
       emd,
    );
 
-   entityInfo.loading = loading;
+   entityDetails.loadingEntity(entityInfo.token);
 
+   entityDetails.waitForLoading(entityInfo.token, (info) => done(info.errors));
    utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken | void) => {
       if (!entityValuePToken) {
-         const errors = getErrors();
-         done(errors);
-         loading.emit('done', errors);
+         entityDetails.updateDeclaredValue(entityInfo.token, entityInfo.valueCache, getErrors());
          return;
       }
 
@@ -63,12 +56,7 @@ function setupReferencedEntity(
          entityValuePToken,
          expandParams,
          (expandedEntityValue: EntityValuePToken) => {
-            const errors = getErrors();
-            entityInfo.valueCache = expandedEntityValue;
-            delete entityInfo.loading;
-
-            done(errors);
-            loading.emit('done', errors);
+            entityDetails.updateDeclaredValue(entityInfo.token, expandedEntityValue, getErrors());
          },
       );
    });

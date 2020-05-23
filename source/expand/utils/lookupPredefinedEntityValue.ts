@@ -5,7 +5,7 @@ import { CharRefPToken, EntityValuePToken, TextPToken } from 'token';
 
 type NameToEntityValue = { [entityName: string]: EntityValuePToken };
 
-// §4.6: This is our set of data to populate our "info" objects for the predefined entities.
+// §4.6.0: This is our set of data to populate our "info" objects for the predefined entities.
 const PREDEFINED_ENTITIES: NameToEntityValue = {
    lt: [
       new CharRefPToken({
@@ -41,8 +41,8 @@ const PREDEFINED_ENTITIES: NameToEntityValue = {
    ],
 };
 
-function lookupPredefinedValue(name: string): EntityValuePToken | void {
+function lookupPredefinedEntityValue(name: string): EntityValuePToken | void {
    return PREDEFINED_ENTITIES[name];
 }
 
-export { lookupPredefinedValue };
+export { lookupPredefinedEntityValue };

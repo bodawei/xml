@@ -3,7 +3,7 @@
 import declaration from './bridge/baseDeclaration';
 
 import attListDeclaration, { AttListPToken, ATTLISTDECL_PTOKEN_TYPE } from './attListDeclaration';
-import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN } from './elementDeclaration';
+import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned } from './elementDeclaration';
 
 import { AttributeValuePToken } from './common/attribute';
 import unassigned from './common/unassigned';
@@ -143,6 +143,7 @@ export {
 
    attListDeclaration,
    elementDeclaration,
+   assignUnassigned as assignElementDeclarationUnassigned,
 
    unassigned,
    literalValue,

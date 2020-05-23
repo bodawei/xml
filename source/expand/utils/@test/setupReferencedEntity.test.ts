@@ -15,8 +15,11 @@ import {
 import { setupReferencedEntity } from '../setupReferencedEntity';
 import { ExpandParams, RetrieveResults } from '../../types';
 import { WellFormedError } from 'error';
+import { EntityDetails } from '../EntityDetails';
 
-fdescribe('setupReferencedEntity() (unit)', () => {
+describe('setupReferencedEntity() (unit)', () => {
+   let entityDetails: EntityDetails;
+   let peDecl: ParameterEntityDeclarationPToken;
    let params: ExpandParams;
    let textPToken: TextPToken;
    let peRefPToken: ParameterEntityReferencePToken;
@@ -33,20 +36,18 @@ fdescribe('setupReferencedEntity() (unit)', () => {
          name: toSToken('ge1'),
       });
 
+      peDecl = new ParameterEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('pe1'),
+      });
+      entityDetails = new EntityDetails();
+      entityDetails.addEntity(peDecl);
+      entityDetails.addEntity(
+         new GeneralEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('ge1') }),
+      );
+
       params = {
-         peDeclCache: {
-            pe1: {
-               token: new ParameterEntityDeclarationPToken({ open: toSToken('<!') }),
-               isInternal: false,
-            },
-         },
-         geDeclCache: {
-            ge1: {
-               token: new GeneralEntityDeclarationPToken({ open: toSToken('<!') }),
-               isInternal: false,
-               isUnparsed: false,
-            },
-         },
+         entityDetails,
          utils: {
             parseBody: (): void => {
                return undefined;
@@ -67,7 +68,7 @@ fdescribe('setupReferencedEntity() (unit)', () => {
    });
 
    it('calls back with no errors hwn asked to process a parameter entity token', (done) => {
-      params.peDeclCache.pe1.valueCache = [];
+      entityDetails.updateDeclaredValue(peDecl, [], []);
 
       setupReferencedEntity(peRefPToken, params, (result) => {
          expect(result).toEqual([]);
@@ -77,14 +78,17 @@ fdescribe('setupReferencedEntity() (unit)', () => {
 
    it('addds an expanded entity to the cache when called with a known entity', (done) => {
       setupReferencedEntity(peRefPToken, params, () => {
-         expect(params.peDeclCache.pe1.valueCache).toEqual([textPToken]);
+         const details = entityDetails.getPeDetails('pe1');
+         expect((details as any).valueCache).toEqual([textPToken]);
          done();
       });
    });
 
    it('addds an expanded general entity to the cache when called with a known general entity', (done) => {
       setupReferencedEntity(geRefPToken, params, () => {
-         expect(params.geDeclCache.ge1.valueCache).toEqual([textPToken]);
+         const details = entityDetails.getGeDetails('ge1');
+
+         expect((details as any).valueCache).toEqual([textPToken]);
          done();
       });
    });
@@ -101,9 +105,12 @@ fdescribe('setupReferencedEntity() (unit)', () => {
 
    it('does not do any further processing when the entity was not declared', (done) => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
-      delete params.peDeclCache.pe1;
+      const peBadRefPToken = new ParameterEntityReferencePToken({
+         open: toSToken('%'),
+         name: toSToken('bogus'),
+      });
 
-      setupReferencedEntity(peRefPToken, params, () => {
+      setupReferencedEntity(peBadRefPToken, params, () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
          done();
       });
@@ -111,7 +118,7 @@ fdescribe('setupReferencedEntity() (unit)', () => {
 
    it('does not do any further processing when the entity has a value cached', (done) => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
-      params.peDeclCache.pe1.valueCache = [];
+      entityDetails.updateDeclaredValue(peDecl, [], []);
 
       setupReferencedEntity(peRefPToken, params, () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();

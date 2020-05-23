@@ -211,7 +211,7 @@ describe('EntityExpanderStream (integration)', () => {
    });
 
    describe('Case 5: Expansion of parameter entity references in markup declarations but not in literals', () => {
-      fit('expands', (done) => {
+      it('expands', (done) => {
          pTokenStream.addText(`<?xml version="1.0"?>
          <!DOCTYPE one SYSTEM "./source/expand/@test/testForCase5.xml" [
             <!ELEMENT one EMPTY>

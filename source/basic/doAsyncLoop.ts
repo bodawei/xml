@@ -1,8 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 /*
- * Utility routine for iterating over an aray, where each iteration involves
- * a potentially asynchronous call to a routine with a callback.
+ * Utility for iterating over an aray, where each iteration involves
+ * a potentially asynchronous call to a processing function that will
+ * call back with the results.
  *
  * Given an array of elements (Input)
  *   Call a processor with that input and a callback function.

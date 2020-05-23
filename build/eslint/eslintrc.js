@@ -145,7 +145,10 @@ module.exports = {
          'no-unused-vars': 'off',
       },
    }, {
-      files: [ './source/expand/**/*.test.ts' ],
+      files: [
+         './source/basic/**/*.test.ts',
+         './source/expand/**/*.test.ts',
+      ],
       parser: '@typescript-eslint/parser',
       plugins: [
          '@typescript-eslint',
@@ -168,4 +171,3 @@ module.exports = {
    } ],
 
 };
-

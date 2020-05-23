@@ -13,16 +13,87 @@ FINISHED TASKS
 √ and start an integration test
 √ Parameter entity declarations
 √ set up package script
+√ need to pull out all the entity details from the spec
+√ Do a rough draft of expand in-markup parameter entity references and build a test for it.
+x GE and PE expansion:
+x Given a GE or PERef: say: Send me the  parsed replacement text.
+x   internal -> entityValuePtoken -> EntityValuePToken -> Body tokens
+x   external -> EntityValuePToken (streamed) -> Body tokens
+x streamReferencedEntity
+x      - given areference
+x         look up declaration
+x            if inline, feed into an sTokenStrem
+x            if external start to load into sTokenStream  (retrieveExternalEntity)
+x      Need to know if we are in the dtd or the content. so e can pass that to the parser
+x Need to clean up the expandAttributeValue code
+
 
 IMMEDIATE TASKS
 - Document
    - Put a whole readme describing the whole thinking around expansion,
-      NEXT: need to pull out all the entity details from the spec
+         - Describe where the parsing happens.  It is still hard to readon about.
+         - Document caching, as such, happens at internal time, or use.
          Probably add a "how to use me" section
          Also reflect on what dependencies This has on serving packages.
 - Implementation
-   - Do a rough draft of expand in-markup parameter entity references and build a test for it.
-   
+   - Principals
+      - callbacks
+      - do not use isntanceof on types. Allow for ducktypes.  However, use types for TS typing
+   - CLEANUP
+      - EntityExpander
+         - expandAttributeValueObjects() should moved into a utility
+         - expandEntityValue should be handling the recursion.
+         - think we need an internal call to expandPToken which carries the array of entities we are in the middle of Expanding
+         - setupReferencedEntity also needs a better name.  and maybe we need a parallel setupEntityDeclaration
+            - prepare intrnal
+         - expandEntityValue should become expandPERefsInEntityValue (?) (it also does charrefs though)
+            - It should take an "onbehalfof" and use that to set the cache. 
+         - Maybe our word "expand" is not clear enough, as it is not clear when it involves parsing and when not
+               - I think it means replaceReferences (with what?)
+         - Where is it we are depending on the cache not having the entry to avoid infintie recursion?
+               - Maybe THIS is what should be doing the expansion -- no. I want it to be fundamentally dumb.
+            Cache type:
+               addPE(declToken, value)
+               addGE(decl, value)
+               setExternalGeValue(name|decl|ref, value)
+               setExternalPeValue(name|decl|ref, value)
+               getInfoForReference(ref);
+               hasInfoForDeclaration(decl);
+               getGEInfo(name)
+               getPEInfo(name)
+         - Where is the error reporting from docTypeEnd?  and entityreference?
+         - Make sure unit and integration tests are good
+      √- entityValueToSTokenSource
+      √- lookupPredefinedEntityValue
+      - expandAttributeValue
+         - Why is this so distinct from expandEntityValue? (duh)
+      - setupReferencedEntity
+      - streamEntityReference
+         - This is done with the external subset
+      - LoadingEmitter
+      - ExternalDtdSubsetPseudoToken
+      - expandUnassigned
+      - expandEntityValue
+   - Research
+      - What should we be diong with ranges in entityValueToSTokenSource()?
+         Can an Stoken have multiple ranges in an entity value ptoken?  Remind me what the rule for ranges is.
+            <!ENTITY % onea "&#37;tw">
+            <!ENTITY % oneb "o;">
+            <!ENTITY % two "foo">
+            <!ENTITY % three "%onea;%oneb;">
+            <!ENTITY % four "%three;">  <-- I think it willl  get parsed here. into an actual reference wich will be expanded here
+            <!ENTITY ge "%four;">
+      - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
+         - even if we don't implement it, we should make sure we can do that.
+   - QUESTIONS
+      - Should we be able to stream tokens to an entity value? All are in memory, whcih seems necessary, but problematic
+      - SHould move internal/external subset start and end into expand?
+   - No mocking
+      - entityValueToSTokenSource()'s tests actually use a real stokenstream.  OK?
+   - later work
+      - Unassigned cleanup
+         - EntityExpander think unassigned can be undefined. we're also assigning to it
+
 - Build
    - Try to get testing to work so it doesn't fail every time you break it
          - This looks promising: https://www.npmjs.com/package/jasmine-ts
@@ -46,30 +117,16 @@ IMMEDIATE TASKS
             ./node_modules/.bin/jasmine --config=./build/new-jasmine.json 
 
 
-GE and PE expansion:
-Given a GE or PERef: say: Send me the  parsed replacement text.
-   internal -> entityValuePtoken -> EntityValuePToken -> Body tokens
-   external -> EntityValuePToken (streamed) -> Body tokens
 
-   streamReferencedEntity
-      - given areference
-         look up declaration
-            if inline, feed into an sTokenStrem
-            if external start to load into sTokenStream  (retrieveExternalEntity)
-      Need to know if we are in the dtd or the content. so e can pass that to the parser
+QUESTION IF we reference a PE Decl in the dtd, will it merge pe declarations, such that an escaped %foo; can cross and still be expanded?
 
-Conclusion, this is paretty good
-
-   QUESTION IF we reference a PE Decl in the dtd, will it merge pe declarations, such that an escaped %foo; can cross and still be expanded?
-Feed this back.
-
-
+REFACTORING
+- EntityExpander could just be a function that returns a function.  Do we actually need a class?
 
 
 
 REFACTORING
 - toEqualRangeless isn't working... why not?
-- Need to clean up the expandAttributeValue code
 - I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
 - REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
 - AttributeValuePToken should get pushed down into attribute

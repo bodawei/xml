@@ -15,7 +15,6 @@ import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    AttListPToken,
-   AttributeValuePToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementDeclarationPToken,
@@ -26,28 +25,29 @@ import {
    ExternalSubsetStartToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityEndPToken,
+   GeneralEntityReferencePToken,
+   GeneralEntityStartPToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityEndPToken,
+   ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
    PToken,
    XmlError,
-   GeneralEntityStartPToken,
    attListDeclaration,
+   assignElementDeclarationUnassigned,
 } from 'token';
 
-import { EntityProcessors, ExpandParams, GeneralEntityInfo, ParameterEntityInfo } from './types';
-import { assignUnassigned } from 'source/token/elementDeclaration';
-
-import { doAsyncLoop } from './utils/doAsyncLoop';
-import { expandAttributeValue, AttrExpanded, ExpandAttrResult } from './utils/expandAttributeValue';
-import { expandUnassigned } from './utils/expandUnassigned';
+import { expandAttributes } from './utils/expandAttributes';
 import { expandEntityValue } from './utils/expandEntityValue';
+import { expandUnassigned } from './utils/expandUnassigned';
 import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
-import { LoadingEmitter } from './utils/LoadingEmitter';
 import { streamEntityReference } from './utils/streamEntityReference';
+
+import { EntityProcessors, ExpandParams } from './types';
+import { EntityDetails } from './utils/EntityDetails';
 
 type DeclToken =
    | AttListPToken
@@ -55,9 +55,8 @@ type DeclToken =
    | GeneralEntityDeclarationPToken
    | NotationDeclarationPToken
    | ParameterEntityDeclarationPToken;
-type AttrValueObj = { value: AttributeValuePToken };
 
-type TokenExpanded = () => void;
+type PTokenExpanded = () => void;
 type DeliverPToken = (token: PToken) => void;
 
 enum State {
@@ -68,7 +67,21 @@ enum State {
 }
 
 /**********************************************************************\
+ This is the entrypoint to entity expanding. it has semantics similar
+ to a node.js stream: hand it a token to be expanded, and it will
+ call the expanded() callback when it is done expanding that.
 
+ The caller should not call expandPToken() until the expanded() callback
+ has been invoked.  Thus, it is the responsibility of the caller to
+ manage flow control.
+
+ This will introduce an InternalSubsetStartToken, and an
+ InternalSubsetEndToken before and after the internal subset (only if
+ it exists) as well as an ExternalSubsetStart/EndToken around the
+ external subset.
+
+ If validating, passed to the constructor, is false, this will not
+ load external entities.
 \**********************************************************************/
 
 class EntityExpander {
@@ -80,8 +93,7 @@ class EntityExpander {
    constructor(validating: boolean, handoffToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = handoffToken;
       this.expandParams = {
-         peDeclCache: {},
-         geDeclCache: {},
+         entityDetails: new EntityDetails(),
          utils: processors,
          emd: new EntityMetaData(
             EntityKind.DOCUMENT,
@@ -90,10 +102,11 @@ class EntityExpander {
             new EntityLocation('dummy meta data to keep TypeScript happy'),
          ),
       };
+
       this.loadExternalEntities = validating;
    }
 
-   public expandToken(pToken: PToken, expanded: TokenExpanded): void {
+   public expandPToken(pToken: PToken, expanded: PTokenExpanded): void {
       switch (pToken.type) {
          case ENTITY_META_DATA:
             this.expandParams.emd = pToken;
@@ -119,74 +132,11 @@ class EntityExpander {
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            // Might want to hold off in case we can not find the entity
-            if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-               this.deliverToken(new GeneralEntityStartPToken(pToken));
-            } else {
-               this.deliverToken(new ParameterEntityStartPToken(pToken));
-            }
-            streamEntityReference(pToken, this.expandParams, (result, handled) => {
-               if (!result) {
-                  if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-                     this.deliverToken(new GeneralEntityEndPToken(pToken));
-                  } else {
-                     this.deliverToken(new ParameterEntityEndPToken(pToken));
-                  }
-                  expanded();
-               } else {
-                  this.expandToken(result, handled);
-               }
-            });
+            this.handleEntityReference(pToken, expanded);
             break;
          default:
             this.deliverToken(pToken);
             expanded();
-      }
-   }
-
-   private handleDeclaration(declarationPToken: DeclToken, expanded: TokenExpanded): void {
-      // REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
-      if (!declarationPToken.unassigned || declarationPToken.unassigned.length === 0) {
-         this.processExpandedDeclaration(declarationPToken, expanded);
-         return;
-      }
-
-      expandUnassigned(declarationPToken.unassigned, this.expandParams, (results) => {
-         (declarationPToken.unassigned as any) = results.newValue;
-
-         switch (declarationPToken.type) {
-            case ELEMENT_DECLARATION_PTOKEN:
-               assignUnassigned(declarationPToken);
-               break;
-            case NOTATION_DECLARATION_PTOKEN:
-               declarationPToken.assignUnassigned();
-               break;
-            case ATTLISTDECL_PTOKEN_TYPE:
-               attListDeclaration.assignUnassigned(declarationPToken);
-               break;
-            case GENERAL_ENTITY_DECLARATION_PTOKEN:
-            case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-               declarationPToken.assignUnassigned();
-               break;
-         }
-         this.processExpandedDeclaration(declarationPToken, expanded);
-      });
-   }
-
-   private processExpandedDeclaration(declarationPToken: DeclToken, expanded: TokenExpanded): void {
-      switch (declarationPToken.type) {
-         case ELEMENT_DECLARATION_PTOKEN:
-         case NOTATION_DECLARATION_PTOKEN:
-            this.deliverToken(declarationPToken);
-            expanded();
-            break;
-         case ATTLISTDECL_PTOKEN_TYPE:
-            this.handleAttListDeclaration(declarationPToken, expanded);
-            break;
-         case GENERAL_ENTITY_DECLARATION_PTOKEN:
-         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-            this.handleEntityDeclaration(declarationPToken, expanded);
-            break;
       }
    }
 
@@ -203,7 +153,7 @@ class EntityExpander {
     *
     * Declaration: §2.8.0 [28]
     */
-   private handleDocTypeStart(pToken: DocTypeStartPToken, handled: TokenExpanded): void {
+   private handleDocTypeStart(pToken: DocTypeStartPToken, handled: PTokenExpanded): void {
       this.deliverToken(pToken);
 
       if (pToken.openSubset) {
@@ -211,7 +161,7 @@ class EntityExpander {
          this.deliverToken(new InternalSubsetStartToken());
       }
 
-      if (pToken.externalId && this.loadExternalEntities) {
+      if (pToken.externalId) {
          this.expandParams.externalSubset = new ExternalDtdSubsetPseudoToken(pToken.externalId);
       }
 
@@ -231,14 +181,14 @@ class EntityExpander {
     *
     * Declaration: §2.8.0 [28]
     */
-   private handleDocTypeEnd(pToken: DocTypeEndPToken, handled: TokenExpanded): void {
+   private handleDocTypeEnd(pToken: DocTypeEndPToken, handled: PTokenExpanded): void {
       if (this.state === State.IN_INTERNAL_SUBSET) {
          this.deliverToken(new InternalSubsetEndToken());
       }
 
       const externalSubsetToken = this.expandParams.externalSubset;
 
-      if (!externalSubsetToken) {
+      if (!externalSubsetToken || !this.loadExternalEntities) {
          this.state = State.IN_CONTENT;
          this.deliverToken(pToken);
          handled();
@@ -248,17 +198,74 @@ class EntityExpander {
       this.state = State.IN_EXTERNAL_SUBSET;
       this.deliverToken(new ExternalSubsetStartToken());
 
-      streamEntityReference(externalSubsetToken, this.expandParams, (result, done) => {
+      streamEntityReference(externalSubsetToken, this.expandParams, (result, nextPTokenDone) => {
          if (result) {
-            this.expandToken(result, done);
+            this.expandPToken(result, nextPTokenDone);
             return;
          }
+
          this.deliverToken(new ExternalSubsetEndToken());
          this.state = State.IN_CONTENT;
          this.deliverToken(pToken);
-         done(); // acknowledge we are done with the callback from expandBodyReference()
+         nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
          handled(); // and mark the end of processing of the DOCTYPE end token
       });
+   }
+
+   private handleDeclaration(declarationPToken: DeclToken, handled: PTokenExpanded): void {
+      // UNASSIGNED REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
+      if (!declarationPToken.unassigned || declarationPToken.unassigned.length === 0) {
+         this.processExpandedDeclaration(declarationPToken, handled);
+         return;
+      }
+
+      expandUnassigned(declarationPToken.unassigned, this.expandParams, (results) => {
+         // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
+         (declarationPToken.unassigned as any) = results.newValue;
+
+         switch (declarationPToken.type) {
+            case ELEMENT_DECLARATION_PTOKEN:
+               assignElementDeclarationUnassigned(declarationPToken);
+               break;
+            case NOTATION_DECLARATION_PTOKEN:
+               declarationPToken.assignUnassigned();
+               break;
+            case ATTLISTDECL_PTOKEN_TYPE:
+               attListDeclaration.assignUnassigned(declarationPToken);
+               break;
+            case GENERAL_ENTITY_DECLARATION_PTOKEN:
+            case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+               declarationPToken.assignUnassigned();
+               break;
+         }
+
+         this.processExpandedDeclaration(declarationPToken, handled);
+      });
+   }
+
+   /*
+    * With any unassigned values in the declaration expanded, we can now proceed with
+    * doing any further expansion of parameter entities in the declarations.
+    */
+   private processExpandedDeclaration(
+      declarationPToken: DeclToken,
+      expanded: PTokenExpanded,
+   ): void {
+      switch (declarationPToken.type) {
+         case ELEMENT_DECLARATION_PTOKEN:
+         case NOTATION_DECLARATION_PTOKEN:
+            // Nothing more needs to be done for these
+            this.deliverToken(declarationPToken);
+            expanded();
+            break;
+         case ATTLISTDECL_PTOKEN_TYPE:
+            this.handleAttListDeclaration(declarationPToken, expanded);
+            break;
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            this.handleEntityDeclaration(declarationPToken, expanded);
+            break;
+      }
    }
 
    /*
@@ -267,7 +274,7 @@ class EntityExpander {
     */
    private handleElementStart(
       pToken: ElementStartPToken | ElementEmptyPToken,
-      handled: TokenExpanded,
+      handled: PTokenExpanded,
    ): void {
       // Optimize for a common case of having no attributes
       if (pToken.attributes.length === 0) {
@@ -277,9 +284,10 @@ class EntityExpander {
       }
 
       // REFACTOR/CLEANUP: default type is wrong.
-      this.expandAttributeValueObjects(pToken.attributes as any, (results) => {
+      expandAttributes(pToken.attributes as any, this.expandParams, (results) => {
          for (let index = 0; index < results.length; index++) {
-            pToken.attributes[index].value = results[index]; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+            pToken.attributes[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+            this.deliverErrors(results[index].errors);
          }
 
          this.deliverToken(pToken);
@@ -295,53 +303,17 @@ class EntityExpander {
     *    The declaration of a general entity must precede any reference to it which
     *    appears in a default value in an attribute-list declaration.
     */
-   private handleAttListDeclaration(pToken: AttListPToken, handled: TokenExpanded): void {
+   private handleAttListDeclaration(pToken: AttListPToken, handled: PTokenExpanded): void {
       // REFACTOR/CLEANUP: default type is wrong.
-      this.expandAttributeValueObjects(pToken.attDefs as any, (results) => {
+      expandAttributes(pToken.attDefs as any, this.expandParams, (results) => {
          for (let index = 0; index < results.length; index++) {
-            pToken.attDefs[index].value = results[index]; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+            pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+            this.deliverErrors(results[index].errors);
          }
 
          this.deliverToken(pToken);
          handled();
       });
-   }
-
-   /*
-    * Given either a set of attributes, or a set of attribute definition, extract
-    * each of the values and expand any general entity references in them.
-    * deliver any errors into the output stream, and return the modified values
-    * back to the caller.
-    */
-   private expandAttributeValueObjects(
-      valueObjects: Array<AttrValueObj>,
-      expanded: (resuts: Array<AttributeValuePToken>) => void,
-   ): void {
-      const attributeValues: Array<AttributeValuePToken> = [];
-
-      for (const valueObj of valueObjects) {
-         attributeValues.push(valueObj.value);
-      }
-
-      const process = (attributeValue: AttributeValuePToken, callback: AttrExpanded): void => {
-         expandAttributeValue(attributeValue, this.expandParams, callback);
-      };
-
-      const reassign = (results: Array<ExpandAttrResult>): void => {
-         const newValues: Array<AttributeValuePToken> = [];
-
-         for (let index = 0; index < results.length; index++) {
-            for (const err of results[index].errors) {
-               this.deliverToken(err);
-            }
-
-            newValues.push(results[index].newValue);
-         }
-
-         expanded(newValues);
-      };
-
-      doAsyncLoop(attributeValues, process, reassign);
    }
 
    /*
@@ -357,74 +329,73 @@ class EntityExpander {
     */
    private handleEntityDeclaration(
       pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-      handled: TokenExpanded,
+      handled: PTokenExpanded,
    ): void {
       const name = strOrBlank(pToken.name);
-      let cache: GeneralEntityInfo | ParameterEntityInfo;
+      const hasEntry = this.expandParams.entityDetails.hasEntity(pToken);
 
-      if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN) {
-         cache = this.expandParams.geDeclCache[name];
-      } else {
-         cache = this.expandParams.peDeclCache[name];
-      }
-
-      if (name === '' || cache) {
+      if (name === '' || hasEntry) {
          this.deliverToken(pToken);
          handled();
          return;
       }
 
-      if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN) {
-         cache = {
-            token: pToken,
-            isInternal: !pToken.externalId,
-            isUnparsed: !!pToken.nData,
-         };
-      } else {
-         cache = {
-            token: pToken,
-            isInternal: !pToken.externalId,
-         };
-      }
-
-      // Store the cache entry in the overall cache only when we are done
-      // doing all value processing. This prevents recursive uses of the declaration.
-      const cacheAndDeliver = (): void => {
-         if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN) {
-            this.expandParams.geDeclCache[name] = cache as GeneralEntityInfo; // TS no smart enough.
-         } else {
-            this.expandParams.peDeclCache[name] = cache as ParameterEntityInfo;
-         }
-
+      if (pToken.externalId) {
+         this.expandParams.entityDetails.addEntity(pToken);
          this.deliverToken(pToken);
          handled();
-      };
-
-      if (!cache.isInternal) {
-         cacheAndDeliver();
          return;
       }
-
-      const emitter: LoadingEmitter = new LoadingEmitter();
-      cache.loading = emitter;
 
       // REFACTOR/CLEANUP again types do not match correctly
       expandEntityValue(
          pToken.value as any,
          this.expandParams,
          (newValue: EntityValuePToken, errors: Array<XmlError>): void => {
+            // Store the cache entry in the overall cache only when we are done
+            // doing all value processing. This prevents recursive uses of the declaration.
+            this.expandParams.entityDetails.addEntity(pToken, newValue);
+
             this.deliverErrors(errors);
-            cache.valueCache = newValue;
-            delete cache.loading;
-
-            cacheAndDeliver();
-
-            emitter.emit('done', []);
+            this.deliverToken(pToken);
+            handled();
          },
       );
    }
 
-   deliverErrors(errors: Array<XmlError>): void {
+   handleEntityReference(
+      pToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken,
+      handled: PTokenExpanded,
+   ): void {
+      let start: GeneralEntityStartPToken | ParameterEntityStartPToken;
+      let end: GeneralEntityEndPToken | ParameterEntityEndPToken;
+      let seenOneResult = false;
+
+      if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+         start = new GeneralEntityStartPToken(pToken);
+         end = new GeneralEntityEndPToken(pToken);
+      } else {
+         start = new ParameterEntityStartPToken(pToken);
+         end = new ParameterEntityEndPToken(pToken);
+      }
+
+      streamEntityReference(pToken, this.expandParams, (result, done) => {
+         // how do you distinguish a failure to lookup vs. an empty one?
+         if (!result) {
+            this.deliverToken(end);
+            handled();
+         } else {
+            if (!seenOneResult) {
+               this.deliverToken(start);
+               seenOneResult = true;
+            }
+
+            this.expandPToken(result, done);
+         }
+      });
+   }
+
+   private deliverErrors(errors: Array<XmlError>): void {
       for (const err of errors) {
          this.deliverToken(err);
       }

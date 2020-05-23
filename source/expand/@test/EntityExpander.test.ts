@@ -26,8 +26,6 @@ import {
    ExternalId,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
-   GeneralEntityEndPToken,
-   GeneralEntityStartPToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    TextPToken,
@@ -46,7 +44,7 @@ import { EntityExpander } from '../EntityExpander';
 
 import { ExpandToken, ExpandParams, RetrieveResults } from '../types';
 
-fdescribe('EntityExpander (unit)', () => {
+describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string } = {};
 
    function parseBody(
@@ -143,7 +141,7 @@ fdescribe('EntityExpander (unit)', () => {
          const nextToken = unsent[0];
          unsent.shift();
 
-         entityExpander.expandToken(nextToken as any, processNextToken);
+         entityExpander.expandPToken(nextToken as any, processNextToken);
       }
 
       processNextToken();
@@ -526,14 +524,7 @@ fdescribe('EntityExpander (unit)', () => {
             const args = expandEntityValueSpy.calls.argsFor(0);
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
-            expect(args[1].geDeclCache).toEqual({
-               student: {
-                  token: geDecl,
-                  isInternal: true,
-                  isUnparsed: false,
-                  valueCache: [new TextPToken({ text: toSToken(`testValue #1`) })], // By the time we evaluate this, that will have been added
-               },
-            });
+            expect(args[1].entityDetails.hasEntity(geDecl)).toEqual(true);
             expect(args[2]).toBeInstanceOf(Function);
             done();
          });
@@ -550,13 +541,7 @@ fdescribe('EntityExpander (unit)', () => {
             const args = expandEntityValueSpy.calls.argsFor(0);
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
-            expect(args[1].peDeclCache).toEqual({
-               student: {
-                  token: peDecl,
-                  isInternal: true,
-                  valueCache: [new TextPToken({ text: toSToken(`testValue #1`) })], // By the time we evaluate this, that will have been added
-               },
-            });
+            expect(args[1].entityDetails.hasEntity(peDecl)).toEqual(true);
             expect(args[2]).toBeInstanceOf(Function);
             done();
          });
@@ -616,7 +601,7 @@ fdescribe('EntityExpander (unit)', () => {
       });
 
       it('does not set up the cache entry until after calling expandEntityValue()', (done) => {
-         let cacheEntries: Array<string>;
+         let hasGeDecl: boolean;
          let afterCallParams: ExpandParams;
          geDecl = new GeneralEntityDeclarationPToken({
             open: toSToken('<!'),
@@ -625,14 +610,14 @@ fdescribe('EntityExpander (unit)', () => {
          });
 
          expandEntityValueSpy.and.callFake((pToken: any, params: ExpandParams, cb: any) => {
-            cacheEntries = Object.keys(params.geDeclCache);
+            hasGeDecl = params.entityDetails.hasEntity(geDecl);
             afterCallParams = params;
             cb([new TextPToken({ text: toSToken(`testValue`) })], []);
          });
 
          doExpand([geDecl, geDecl], true, () => {
-            expect(cacheEntries).toEqual([]);
-            expect(Object.keys(afterCallParams.geDeclCache)).toEqual(['student']);
+            expect(hasGeDecl).toEqual(false);
+            expect(afterCallParams.entityDetails.hasEntity(geDecl)).toEqual(true);
             done();
          });
       });

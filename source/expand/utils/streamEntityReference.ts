@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenSource } from 'sToken';
+import { STokenSource } from 'sToken';
 import {
    ParameterEntityReferencePToken,
    GeneralEntityReferencePToken,
@@ -32,7 +32,7 @@ function streamEntityReference(
    expandParams: ExpandParams,
    deliverToken: DeliverToken,
 ): void {
-   const { geDeclCache, peDeclCache, utils, emd } = expandParams;
+   const { entityDetails, utils, emd } = expandParams;
    let sTokenSource: STokenSource;
    let getErrors: () => Array<XmlError>;
    let inContent = true;
@@ -45,10 +45,7 @@ function streamEntityReference(
       ));
       inContent = false;
    } else {
-      const isPERef = reference instanceof ParameterEntityReferencePToken;
-      const cache = isPERef ? peDeclCache : geDeclCache;
-      const entityName = strOrBlank(reference.name);
-      const entityInfo = entityName !== '' && cache[entityName];
+      const entityInfo = entityDetails.getReferencedDetails(reference);
 
       if (!entityInfo) {
          deliverToken(undefined, (): void => {

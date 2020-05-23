@@ -1,26 +1,14 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenSource } from 'sToken';
-import {
-   PARAMETER_ENTITY_END_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   PARAMETER_ENTITY_START_PTOKEN,
-   TEXT_PTOKEN,
-   EntityValuePToken,
-   ParameterEntityStartPToken,
-   ParameterEntityEndPToken,
-   ParameterEntityReferencePToken,
-   XmlError,
-   unassigned,
-} from 'token';
+import { doAsyncLoop } from 'basic';
+import { strOrBlank } from 'sToken';
+import { EntityValuePToken, ParameterEntityReferencePToken, XmlError, unassigned } from 'token';
 
 import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
 
-import { ExpandParams, GeneralEntityInfo } from '../types';
+import { ExpandParams } from '../types';
 
-import { doAsyncLoop } from './doAsyncLoop';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
-import { lookupPredefinedValue } from './predefinedEntities';
 import { setupReferencedEntity } from './setupReferencedEntity';
 
 type ExpandAttrResult = {
@@ -47,7 +35,7 @@ function expandPeRef(
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(peRef.name);
-   const peInfo = entityName === '' ? undefined : expandParams.peDeclCache[entityName];
+   const peInfo = expandParams.entityDetails.getPeDetails(entityName);
 
    // Stop processing if we find this entity reference is already being processed
    if (entityName !== '' && peRefChain.includes(entityName)) {

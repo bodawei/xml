@@ -9,7 +9,7 @@ import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
-import { ExpandToken, RetrieveResults } from './types';
+import { ExpandToken, RetrieveResults } from '../expand/types';
 
 function parseBody(sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken): void {
    const pTokenStream = new PTokenStream(sTokenSource);
@@ -101,7 +101,7 @@ class EntityExpanderStream extends Transform {
    }
 
    _transform(token: PToken, encoding: string, done: () => void): void {
-      this.entityExpander.expandToken(token, done);
+      this.entityExpander.expandPToken(token, done);
    }
 }
 

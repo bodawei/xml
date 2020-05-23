@@ -15,9 +15,11 @@ import {
 import { expandAttributeValue } from '../expandAttributeValue';
 import { ExpandParams, RetrieveResults } from '../../types';
 import { WellFormedError } from 'error';
-import { lookupPredefinedValue } from '../predefinedEntities';
+import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
+import { EntityDetails } from '../EntityDetails';
 
-fdescribe('expandAttributeValue() (unit)', () => {
+describe('expandAttributeValue() (unit)', () => {
+   let entityDetails: EntityDetails;
    let params: ExpandParams;
    let textPToken: TextPToken;
    let text2PToken: TextPToken;
@@ -31,16 +33,18 @@ fdescribe('expandAttributeValue() (unit)', () => {
          name: toSToken('ge1'),
       });
 
+      entityDetails = new EntityDetails();
+      entityDetails.addEntity(
+         new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('ge1'),
+            value: [text2PToken],
+         }),
+         [text2PToken],
+      );
+
       params = {
-         peDeclCache: {},
-         geDeclCache: {
-            ge1: {
-               token: new GeneralEntityDeclarationPToken({ open: toSToken('<!') }),
-               isInternal: true,
-               isUnparsed: false,
-               valueCache: [text2PToken],
-            },
-         },
+         entityDetails,
          utils: {
             parseBody: (): void => undefined,
             parseEntityValue: (sTokenSource, done): void => {
@@ -82,7 +86,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
          open: toSToken('&'),
          name: toSToken('lt'),
       });
-      const ltEntityValue = lookupPredefinedValue('lt');
+      const ltEntityValue = lookupPredefinedEntityValue('lt');
 
       expandAttributeValue([textPToken, ltRef], params, (result) => {
          expect(result.newValue).toEqual([
@@ -96,10 +100,20 @@ fdescribe('expandAttributeValue() (unit)', () => {
    });
 
    it('calls back with the original GE Ref when the declaration is of an unparsed entity', (done) => {
-      params.geDeclCache.ge1.isUnparsed = true;
+      const unparsedRef = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('unparsed'),
+      });
+      entityDetails.addEntity(
+         new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('unparsed'),
+            nData: toSToken('NDATA'),
+         }),
+      );
 
-      expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result.newValue).toEqual([textPToken, geRefPToken]);
+      expandAttributeValue([textPToken, unparsedRef], params, (result) => {
+         expect(result.newValue).toEqual([textPToken, unparsedRef]);
          done();
       });
    });
@@ -171,19 +185,28 @@ fdescribe('expandAttributeValue() (unit)', () => {
    });
 
    it('calls back with the a with the parsed contents when the entity can not be loaded', (done) => {
-      delete params.geDeclCache.ge1.valueCache;
+      const unloadable = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('unloadable'),
+      });
+      entityDetails.addEntity(
+         new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('unloadable'),
+         }),
+      );
+
       params.utils.parseEntityValue = (sTokenSource, done): void => {
          done();
       };
 
-      expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result.newValue).toEqual([textPToken, geRefPToken]);
+      expandAttributeValue([textPToken, unloadable], params, (result) => {
+         expect(result.newValue).toEqual([textPToken, unloadable]);
          done();
       });
    });
 
    it('calls back with the entity parsed as an attribute value when the general entity is loaded', (done) => {
-      delete params.geDeclCache.ge1.valueCache;
       const pToken = new TextPToken({ text: toSToken('INNER PARSE') });
       params.utils.parseAttributeValue = (
          sTokenSource: STokenSource,
@@ -232,7 +255,17 @@ fdescribe('expandAttributeValue() (unit)', () => {
       });
 
       it('calls back with errors from loading an external entity', (done) => {
-         delete params.geDeclCache.ge1.valueCache;
+         const geExternalRefPToken = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('external'),
+         });
+         entityDetails.addEntity(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('external'),
+               externalId: {} as any,
+            }),
+         );
          const loadingError = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
          params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
             return {
@@ -247,7 +280,7 @@ fdescribe('expandAttributeValue() (unit)', () => {
             done([textPToken], []);
          };
 
-         expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
+         expandAttributeValue([textPToken, geExternalRefPToken], params, ({ errors }) => {
             expect(errors).toEqual([loadingError]);
             done();
          });
@@ -263,11 +296,12 @@ fdescribe('expandAttributeValue() (unit)', () => {
          name: toSToken('ge2'),
       });
       let ctr = 0;
-      params.geDeclCache.ge2 = {
-         token: new GeneralEntityDeclarationPToken({ open: toSToken('<!') }),
-         isInternal: true,
-         isUnparsed: false,
-      };
+      entityDetails.addEntity(
+         new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('ge2'),
+         }),
+      );
       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
          return {
             sTokenSource: new STokenSource({}, entityMetaData),

@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { doAsyncLoop } from 'basic';
 import { strOrBlank, STokenSource } from 'sToken';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -11,12 +12,12 @@ import {
    XmlError,
 } from 'token';
 
-import { ExpandParams, GeneralEntityInfo } from '../types';
+import { ExpandParams } from '../types';
 
-import { doAsyncLoop } from './doAsyncLoop';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
-import { lookupPredefinedValue } from './predefinedEntities';
+import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 import { setupReferencedEntity } from './setupReferencedEntity';
+import { GeneralEntityInfo } from './EntityDetails';
 
 type ExpandAttrResult = {
    newValue: AttributeValuePToken;
@@ -82,7 +83,7 @@ function expandGeRef(
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(geRef.name);
-   const geInfo = entityName === '' ? undefined : expandParams.geDeclCache[entityName];
+   const geInfo = expandParams.entityDetails.getGeDetails(entityName);
 
    // Stop processing if we find this entity reference is already being processed
    if (entityName !== '' && geRefChain.includes(entityName)) {
@@ -97,7 +98,7 @@ function expandGeRef(
    // If there is no declaration, check if it is one of the predefined entities.
    // return nothing or the predefined value
    if (!geInfo) {
-      const predefinedValue = lookupPredefinedValue(entityName);
+      const predefinedValue = lookupPredefinedEntityValue(entityName);
       const castPredefined = predefinedValue as AttributeValuePToken | void;
 
       callback({

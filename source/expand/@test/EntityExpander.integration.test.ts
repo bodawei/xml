@@ -40,7 +40,7 @@ import { EntityExpander } from '../EntityExpander';
 
 import { ExpandToken, RetrieveResults } from '../types';
 
-fdescribe('EntityExpander (integration)', () => {
+describe('EntityExpander (integration)', () => {
    const externalMap: { [publicName: string]: string } = {};
 
    function parseBody(
@@ -146,7 +146,7 @@ fdescribe('EntityExpander (integration)', () => {
          const nextToken = unsent[0];
          unsent.shift();
 
-         entityExpander.expandToken(nextToken as any, processNextToken);
+         entityExpander.expandPToken(nextToken as any, processNextToken);
       }
 
       processNextToken();
