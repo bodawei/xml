@@ -1,15 +1,14 @@
-/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, EntityMetaData, ENTITY_META_DATA } from 'basic';
+import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
-import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { toSToken, STokenSource } from 'sToken';
 import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   ERROR_TYPE,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
@@ -23,7 +22,6 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
    EntityValuePToken,
-   ExternalId,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    NotationDeclarationPToken,
@@ -34,64 +32,27 @@ import {
    AttListPToken,
 } from 'token';
 
-// For mocking purposes
-// eslint-disable-next-line
-const expandAttributeValue = require('../utils/expandAttributeValue');
-// eslint-disable-next-line
-const expandEntityValueModule = require('../utils/expandEntityValue');
-
+import * as expandAttributes from '../utils/expandAttributes';
+import * as expandEntityValueModule from '../utils/expandEntityValue';
+import * as streamEntityReference from '../utils/streamEntityReference';
+import * as expandUnassigned from '../utils/expandUnassigned';
+import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
 import { EntityExpander } from '../EntityExpander';
-
-import { ExpandToken, ExpandParams, RetrieveResults } from '../types';
+import { ExpandParams, RetrieveResults } from '../types';
 
 describe('EntityExpander (unit)', () => {
-   const externalMap: { [publicName: string]: string } = {};
+   let expandUnassignedSpy: jasmine.Spy;
 
-   function parseBody(
-      sTokenSource: STokenSource,
-      inContent: boolean,
-      writeToken: ExpandToken,
-   ): void {
-      const pTokenStream = new PTokenStream(sTokenSource);
+   beforeEach(() => {
+      expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
+   });
 
-      (pTokenStream as any)._inContent = inContent;
-
-      pTokenStream.on('data', (token: PToken) => {
-         pTokenStream.pause();
-         writeToken(token, () => {
-            pTokenStream.resume();
-         });
-      });
-      pTokenStream.on('end', () => {
-         writeToken(undefined, () => {});
-      });
+   function harvestTypes(results: Array<PToken>): Array<string> {
+      return results.map((element) => element.type);
    }
 
-   function parseEntityValue(
-      sTokenSource: STokenSource,
-      done: (results: EntityValuePToken | void) => void,
-   ): void {
-      const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
-      const results: EntityValuePToken = [];
-
-      pTokenStream.on('data', (token: Token) => {
-         results.push(token as any);
-      });
-      pTokenStream.on('end', () => {
-         done(results);
-      });
-   }
-
-   function retrieveExternalEntity(
-      externalId: ExternalId,
-      entityMetaData: EntityMetaData,
-   ): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors, entityMetaData);
-
-      const str = externalMap[(externalId.system!.value[0] as any).text.str];
-
-      sTokenSource.addText(str);
-      sTokenSource.endText();
+   function retrieveExternalEntity(): RetrieveResults {
+      const sTokenSource = new STokenSource(defaultExtractors, {} as any);
 
       return {
          sTokenSource,
@@ -109,39 +70,29 @@ describe('EntityExpander (unit)', () => {
    }
 
    function doExpand(
-      tokens: Array<Token>,
+      tokens: Array<PToken>,
       validate: boolean,
-      allDone: (results: Array<Token>) => void,
+      allDone: (results: Array<PToken>) => void,
    ): void {
-      const results: Array<Token> = [];
+      const results: Array<PToken> = [];
       const unsent = tokens.slice(0);
 
-      function pushToken(result: Token | void): boolean {
-         if (result) {
-            results.push(result);
-         }
-
-         return true;
-      }
-
-      const entityExpander = new EntityExpander(validate, pushToken, {
-         parseBody,
-         parseEntityValue,
+      const entityExpander = new EntityExpander(validate, results.push.bind(results), {
+         parseBody: (): void => {},
+         parseEntityValue: (): void => {},
          retrieveExternalEntity,
          parseAttributeValue,
       });
 
       function processNextToken(): void {
-         if (unsent.length === 0) {
-            allDone(results);
+         const nextToken = unsent.shift();
 
+         if (!nextToken) {
+            allDone(results);
             return;
          }
 
-         const nextToken = unsent[0];
-         unsent.shift();
-
-         entityExpander.expandPToken(nextToken as any, processNextToken);
+         entityExpander.expandPToken(nextToken, processNextToken);
       }
 
       processNextToken();
@@ -161,16 +112,15 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('passes the EntityMetaData to the expandAttributeMetaData function', (done) => {
-         const expandAttributeSpy: jasmine.Spy = spyOn(
-            expandAttributeValue,
-            'expandAttributeValue',
-         );
+      it('passes the EntityMetaData to the utility functions in the expandParams', (done) => {
+         const expandAttributeSpy: jasmine.Spy = spyOn(expandAttributes, 'expandAttributes');
          expandAttributeSpy.and.callFake((value: any, params: any, cb: any) => {
-            cb({
-               newValue: [],
-               errors: [],
-            });
+            cb([
+               {
+                  newValue: [],
+                  errors: [],
+               },
+            ]);
          });
          const startElement = new ElementStartPToken({
             open: toSToken('<'),
@@ -184,20 +134,20 @@ describe('EntityExpander (unit)', () => {
          });
 
          doExpand([emd, startElement], true, () => {
-            expect(expandAttributeSpy.calls.argsFor(0)[1].emd as any).toEqual(emd);
+            expect(expandAttributeSpy.calls.argsFor(0)[1].emd).toEqual(emd);
             done();
          });
       });
    });
 
-   describe('TextPToken', () => {
+   describe('passes most token types through unchanged', () => {
       let textPToken: TextPToken;
 
       beforeEach(() => {
          textPToken = new TextPToken({ text: toSToken('foo') });
       });
 
-      it('passes the EntityMetaData instance through', (done) => {
+      it('passes the PToken through', (done) => {
          doExpand([textPToken], true, (results) => {
             expect(results).toEqual([textPToken]);
             done();
@@ -221,12 +171,8 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('adds no internal or external entity markers if there are none', (done) => {
-         const input = [docTypeStart, docTypeEnd];
-
-         doExpand(input, true, (results) => {
-            const types = results.map((element) => element.type);
-
-            expect(types).toEqual([DOCTYPE_START_PTOKEN, DOCTYPE_END_PTOKEN]);
+         doExpand([docTypeStart, docTypeEnd], true, (results) => {
+            expect(harvestTypes(results)).toEqual([DOCTYPE_START_PTOKEN, DOCTYPE_END_PTOKEN]);
             done();
          });
       });
@@ -237,12 +183,9 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('root'),
             openSubset: toSToken('['),
          });
-         const input = [docTypeStart, docTypeEnd];
 
-         doExpand(input, true, (results) => {
-            const types = results.map((element) => element.type);
-
-            expect(types).toEqual([
+         doExpand([docTypeStart, docTypeEnd], true, (results) => {
+            expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
                INTERNAL_SUBSET_START_TOKEN,
                INTERNAL_SUBSET_END_TOKEN,
@@ -259,12 +202,9 @@ describe('EntityExpander (unit)', () => {
             openSubset: toSToken('['),
          });
          const notation = new NotationDeclarationPToken({ open: toSToken('<!') });
-         const input = [docTypeStart, notation, docTypeEnd];
 
-         doExpand(input, true, (results) => {
-            const types = results.map((element) => element.type);
-
-            expect(types).toEqual([
+         doExpand([docTypeStart, notation, docTypeEnd], true, (results) => {
+            expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
                INTERNAL_SUBSET_START_TOKEN,
                NOTATION_DECLARATION_PTOKEN,
@@ -275,8 +215,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('adds external subset markers when there is an externalId', (done) => {
-         externalMap.systemFoo = '<!ENTITY foo "bar">';
+      it('calls the streamEntityReference() function with the subset token, prams and a callback', (done) => {
          docTypeStart = new DocTypeStartPToken({
             open: toSToken('<!'),
             name: toSToken('root'),
@@ -286,16 +225,50 @@ describe('EntityExpander (unit)', () => {
                },
             },
          });
-         const input = [docTypeStart, docTypeEnd];
+         const streamEntityReferenceSpy: jasmine.Spy = spyOn(
+            streamEntityReference,
+            'streamEntityReference',
+         );
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(undefined, () => {});
+         });
 
-         doExpand(input, true, (results) => {
-            const types = results.map((element) => element.type);
+         doExpand([docTypeStart, docTypeEnd], true, (results) => {
+            const args = streamEntityReferenceSpy.calls.argsFor(0);
 
-            expect(types).toEqual([
+            expect(args[0].type).toEqual(EXTERNAL_DTD_PSEUDO_TOKEN);
+            expect(args[1].entityDetails).not.toBeUndefined();
+            expect(args[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('adds external subset markers when there is an externalId', (done) => {
+         docTypeStart = new DocTypeStartPToken({
+            open: toSToken('<!'),
+            name: toSToken('root'),
+            externalId: {
+               system: {
+                  value: [new TextPToken({ text: toSToken('systemFoo') })],
+               },
+            },
+         });
+         const streamEntityReferenceSpy: jasmine.Spy = spyOn(
+            streamEntityReference,
+            'streamEntityReference',
+         );
+         const notation = new NotationDeclarationPToken({ open: toSToken('<!') });
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(notation, () => {
+               callback(undefined, () => {});
+            });
+         });
+
+         doExpand([docTypeStart, docTypeEnd], true, (results) => {
+            expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
                EXTERNAL_SUBSET_START_TOKEN,
-               ENTITY_META_DATA,
-               GENERAL_ENTITY_DECLARATION_PTOKEN,
+               NOTATION_DECLARATION_PTOKEN,
                EXTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
@@ -315,19 +288,25 @@ describe('EntityExpander (unit)', () => {
                },
             },
          });
-         const input = [docTypeStart, notation, docTypeEnd];
+         const streamEntityReferenceSpy: jasmine.Spy = spyOn(
+            streamEntityReference,
+            'streamEntityReference',
+         );
+         const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(error, () => {
+               callback(undefined, () => {});
+            });
+         });
 
-         doExpand(input, true, (results) => {
-            const types = results.map((element) => element.type);
-
-            expect(types).toEqual([
+         doExpand([docTypeStart, notation, docTypeEnd], true, (results) => {
+            expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
                INTERNAL_SUBSET_START_TOKEN,
                NOTATION_DECLARATION_PTOKEN,
                INTERNAL_SUBSET_END_TOKEN,
                EXTERNAL_SUBSET_START_TOKEN,
-               ENTITY_META_DATA,
-               GENERAL_ENTITY_DECLARATION_PTOKEN,
+               ERROR_TYPE,
                EXTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
@@ -347,18 +326,77 @@ describe('EntityExpander (unit)', () => {
                },
             },
          });
-         const input = [docTypeStart, notation, docTypeEnd];
 
-         doExpand(input, false, (results) => {
-            const types = results.map((element) => element.type);
-
-            expect(types).toEqual([
+         doExpand([docTypeStart, notation, docTypeEnd], false, (results) => {
+            expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
                INTERNAL_SUBSET_START_TOKEN,
                NOTATION_DECLARATION_PTOKEN,
                INTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
+            done();
+         });
+      });
+   });
+
+   describe('declarations', () => {
+      let notation: NotationDeclarationPToken;
+
+      beforeEach(() => {
+         notation = new NotationDeclarationPToken({
+            type: 'NOTATION_DECLARATION_PTOKEN',
+            open: toSToken('<!'),
+            name: toSToken('test'),
+            externalId: {
+               type: 'EXTERNAL_ID',
+            },
+         });
+      });
+
+      it('passes a declaration with unassigned values through', (done) => {
+         (notation.unassigned as any) = [1];
+         (notation.assignUnassigned as any) = () => {};
+
+         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+            callback({ newValue: [2], errors: [] });
+         });
+
+         doExpand([notation], true, (results) => {
+            expect(results).toEqual([notation]);
+            done();
+         });
+      });
+
+      it('passes a declaration with unassigned values to the expandUnassigned() utility', (done) => {
+         (notation.unassigned as any) = [1];
+         (notation.assignUnassigned as any) = () => {};
+
+         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+            callback({ newValue: [], errors: [] });
+         });
+
+         doExpand([notation], true, () => {
+            const params = expandUnassignedSpy.calls.argsFor(0);
+
+            expect(params[0]).toEqual([1]);
+            expect(params[1].entityDetails).not.toBeUndefined();
+            expect(params[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('delivers any errors encountered while expanding the unassigned', (done) => {
+         (notation.unassigned as any) = [1];
+         (notation.assignUnassigned as any) = jasmine.createSpy();
+         const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
+
+         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+            callback({ newValue: [2], errors: [error] });
+         });
+
+         doExpand([notation], true, (results) => {
+            expect(harvestTypes(results)).toEqual([ERROR_TYPE, NOTATION_DECLARATION_PTOKEN]);
             done();
          });
       });
@@ -379,10 +417,23 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('passes a declaration with no unassigned values through without changes', (done) => {
-         const input = [notation];
-
-         doExpand(input, true, (results) => {
+         doExpand([notation], true, (results) => {
             expect(results).toEqual([notation]);
+            done();
+         });
+      });
+
+      it('asks the notation to assign any newly unassigned values to itself', (done) => {
+         (notation.unassigned as any) = [1];
+         (notation.assignUnassigned as any) = jasmine.createSpy();
+
+         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+            callback({ newValue: [2], errors: [] });
+         });
+
+         doExpand([notation], true, () => {
+            expect(notation.assignUnassigned).toHaveBeenCalled();
+            expect(notation.unassigned).toEqual([2] as any);
             done();
          });
       });
@@ -406,35 +457,47 @@ describe('EntityExpander (unit)', () => {
             done();
          });
       });
+
+      it('asks the element to assign any newly unassigned values to itself', (done) => {
+         (elementDecl.unassigned as any) = [1];
+         (elementDecl.assignUnassigned as any) = jasmine.createSpy();
+
+         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+            callback({ newValue: [2], errors: [] });
+         });
+
+         doExpand([elementDecl], true, () => {
+            expect(elementDecl.assignUnassigned).toHaveBeenCalled();
+            expect(elementDecl.unassigned).toEqual([2] as any);
+            done();
+         });
+      });
    });
 
    describe('ATTLIST declaration', () => {
-      let attList: AttListPToken;
       let expandAttributeSpy: jasmine.Spy;
 
       beforeEach(() => {
-         expandAttributeSpy = spyOn(expandAttributeValue, 'expandAttributeValue');
+         expandAttributeSpy = spyOn(expandAttributes, 'expandAttributes');
          let index = 0;
 
-         attList = new AttListPToken({
-            open: toSToken('<!'),
-            elementName: toSToken('student'),
-         });
+         expandAttributeSpy.and.callFake((value: Array<object>, params: object, cb: Function) => {
+            const result = value.map(() => {
+               const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
+               index++;
 
-         expandAttributeSpy.and.callFake((value: any, params: any, cb: any) => {
-            const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
-               `${index}`,
-            ]);
-            index++;
-            cb({
-               newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
-               errors: [error],
+               return {
+                  newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
+                  errors: [new WellFormedError(code, [`${index}`])],
+               };
             });
+
+            cb(result);
          });
       });
 
       it('processes the default attribute values of the ATTLIST PToken', (done) => {
-         attList = new AttListPToken({
+         const attList = new AttListPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
             attDefs: [
@@ -448,8 +511,8 @@ describe('EntityExpander (unit)', () => {
                },
             ],
          });
-         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['0']);
-         const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['1']);
+         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['1']);
+         const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['2']);
          const expanded = new AttListPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
@@ -471,8 +534,8 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('calls the expandAttributeValue() routine with the value, expand params and a callback', (done) => {
-         attList = new AttListPToken({
+      it('calls the expandAttributes() routine with the attDefs, expand params and a callback', (done) => {
+         const attList = new AttListPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
             attDefs: [
@@ -482,14 +545,33 @@ describe('EntityExpander (unit)', () => {
                },
             ],
          });
-         const expectedValue = [new TextPToken({ text: toSToken('twoValue') })];
 
          doExpand([attList], true, () => {
             const callArgs = expandAttributeSpy.calls.mostRecent().args;
 
-            expect(callArgs[0]).toEqual(expectedValue);
+            expect(callArgs[0]).toEqual(attList.attDefs);
             expect(callArgs[1].emd).not.toBeUndefined();
             expect(callArgs[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('asks the AttListPToken to assign any newly unassigned values to itself', (done) => {
+         const attList = new AttListPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('student'),
+            attDefs: [],
+            unassigned: [1] as any,
+            assignUnassigned: jasmine.createSpy(),
+         });
+
+         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+            callback({ newValue: [2], errors: [] });
+         });
+
+         doExpand([attList], true, () => {
+            expect(attList.assignUnassigned).toHaveBeenCalled();
+            expect(attList.unassigned).toEqual([2] as any);
             done();
          });
       });
@@ -504,16 +586,21 @@ describe('EntityExpander (unit)', () => {
          expandEntityValueSpy = spyOn(expandEntityValueModule, 'expandEntityValue');
          let index = 0;
 
-         expandEntityValueSpy.and.callFake((pToken: any, params: any, cb: any) => {
-            const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
-               `${index}`,
-            ]);
-            index++;
-            cb([new TextPToken({ text: toSToken(`testValue #${index}`) })], [error]);
-         });
+         expandEntityValueSpy.and.callFake(
+            (pToken: EntityValuePToken, params: object, cb: Function) => {
+               const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
+                  `${index}`,
+               ]);
+               index++;
+               cb({
+                  newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
+                  errors: [error],
+               });
+            },
+         );
       });
 
-      it('calls expandEntityValue() with the general entity value and a set up cache', (done) => {
+      it('calls expandEntityValue() with the general entity value, expandParams and a callback', (done) => {
          geDecl = new GeneralEntityDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('student'),
@@ -524,13 +611,13 @@ describe('EntityExpander (unit)', () => {
             const args = expandEntityValueSpy.calls.argsFor(0);
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
-            expect(args[1].entityDetails.hasEntity(geDecl)).toEqual(true);
+            expect(args[1].entityDetails).not.toBeUndefined();
             expect(args[2]).toBeInstanceOf(Function);
             done();
          });
       });
 
-      it('calls expandEntityValue() with the parameter entity value and a set up cache', (done) => {
+      it('calls expandEntityValue() with the parameter entity value, expandParams and a callback', (done) => {
          peDecl = new ParameterEntityDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('student'),
@@ -541,7 +628,7 @@ describe('EntityExpander (unit)', () => {
             const args = expandEntityValueSpy.calls.argsFor(0);
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
-            expect(args[1].entityDetails.hasEntity(peDecl)).toEqual(true);
+            expect(args[1].entityDetails).not.toBeUndefined();
             expect(args[2]).toBeInstanceOf(Function);
             done();
          });
@@ -587,7 +674,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('does not expand the entity value if this entity is already in the cache', (done) => {
+      it('does not expand the entity value if this entity is already in the entity details', (done) => {
          geDecl = new GeneralEntityDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('student'),
@@ -600,7 +687,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('does not set up the cache entry until after calling expandEntityValue()', (done) => {
+      it('does not set up the value in entity details until after calling expandEntityValue()', (done) => {
          let hasGeDecl: boolean;
          let afterCallParams: ExpandParams;
          geDecl = new GeneralEntityDeclarationPToken({
@@ -612,12 +699,32 @@ describe('EntityExpander (unit)', () => {
          expandEntityValueSpy.and.callFake((pToken: any, params: ExpandParams, cb: any) => {
             hasGeDecl = params.entityDetails.hasEntity(geDecl);
             afterCallParams = params;
-            cb([new TextPToken({ text: toSToken(`testValue`) })], []);
+            cb({ newValue: [new TextPToken({ text: toSToken(`testValue`) })], errors: [] });
          });
 
          doExpand([geDecl, geDecl], true, () => {
             expect(hasGeDecl).toEqual(false);
             expect(afterCallParams.entityDetails.hasEntity(geDecl)).toEqual(true);
+            done();
+         });
+      });
+
+      it('asks the entity declaration to assign any newly unassigned values to itself', (done) => {
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+            unassigned: [1] as any,
+            assignUnassigned: jasmine.createSpy(),
+         });
+
+         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+            callback({ newValue: [2], errors: [] });
+         });
+
+         doExpand([geDecl], true, () => {
+            expect(geDecl.assignUnassigned).toHaveBeenCalled();
+            expect(geDecl.unassigned).toEqual([2] as any);
             done();
          });
       });
@@ -628,7 +735,7 @@ describe('EntityExpander (unit)', () => {
       let expandAttributeSpy: jasmine.Spy;
 
       beforeEach(() => {
-         expandAttributeSpy = spyOn(expandAttributeValue, 'expandAttributeValue');
+         expandAttributeSpy = spyOn(expandAttributes, 'expandAttributes');
          let index = 0;
 
          startElement = new ElementStartPToken({
@@ -636,22 +743,23 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('student'),
          });
 
-         expandAttributeSpy.and.callFake((value: any, params: any, cb: any) => {
-            index++;
-            const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
-               `${index}`,
-            ]);
-            cb({
-               newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
-               errors: [error],
+         expandAttributeSpy.and.callFake((value: Array<object>, params: object, cb: Function) => {
+            const result = value.map(() => {
+               const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
+               index++;
+
+               return {
+                  newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
+                  errors: [new WellFormedError(code, [`${index}`])],
+               };
             });
+
+            cb(result);
          });
       });
 
       it('passes a the element through with no changes when it has no attributes', (done) => {
-         const input = [startElement];
-
-         doExpand(input, true, (results) => {
+         doExpand([startElement], true, (results) => {
             expect(results).toEqual([startElement]);
             done();
          });
@@ -703,7 +811,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('calls the expandAttributeValue() routine with the value, expand params and a callback', (done) => {
+      it('calls the expandAttribute() routine with the value, expand params and a callback', (done) => {
          startElement = new ElementStartPToken({
             open: toSToken('<'),
             name: toSToken('student'),
@@ -714,13 +822,12 @@ describe('EntityExpander (unit)', () => {
                },
             ],
          });
-         const expectedValue = [new CharRefPToken({ open: toSToken('&#') })];
 
          doExpand([startElement], true, () => {
             const callArgs = expandAttributeSpy.calls.mostRecent().args;
 
-            expect(callArgs[0]).toEqual(expectedValue);
-            expect(callArgs[1].emd).not.toBeUndefined();
+            expect(callArgs[0]).toEqual(startElement.attributes);
+            expect(callArgs[1].entityDetails).not.toBeUndefined();
             expect(callArgs[2]).toBeInstanceOf(Function);
             done();
          });

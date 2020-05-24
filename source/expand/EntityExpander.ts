@@ -14,7 +14,9 @@ import {
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   assignElementDeclarationUnassigned,
    AttListPToken,
+   attListDeclaration,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementDeclarationPToken,
@@ -36,8 +38,6 @@ import {
    ParameterEntityStartPToken,
    PToken,
    XmlError,
-   attListDeclaration,
-   assignElementDeclarationUnassigned,
 } from 'token';
 
 import { expandAttributes } from './utils/expandAttributes';
@@ -69,18 +69,19 @@ enum State {
 /**********************************************************************\
  This is the entrypoint to entity expanding. it has semantics similar
  to a node.js stream: hand it a token to be expanded, and it will
- call the expanded() callback when it is done expanding that.
+ call the expanded() callback when it is done expanding it.
 
  The caller should not call expandPToken() until the expanded() callback
  has been invoked.  Thus, it is the responsibility of the caller to
- manage flow control.
+ buffer any values that arrive on its doorstep before this has
+ called the callback.
 
  This will introduce an InternalSubsetStartToken, and an
  InternalSubsetEndToken before and after the internal subset (only if
  it exists) as well as an ExternalSubsetStart/EndToken around the
  external subset.
 
- If validating, passed to the constructor, is false, this will not
+ If validating (passed to the constructor) is false, this will not
  load external entities.
 \**********************************************************************/
 
@@ -90,8 +91,8 @@ class EntityExpander {
    private loadExternalEntities: boolean;
    private state = State.AT_START;
 
-   constructor(validating: boolean, handoffToken: DeliverPToken, processors: EntityProcessors) {
-      this.deliverToken = handoffToken;
+   constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
+      this.deliverToken = deliverPToken;
       this.expandParams = {
          entityDetails: new EntityDetails(),
          utils: processors,
@@ -170,7 +171,8 @@ class EntityExpander {
 
    /*
     * When we reach the end of the DOCTYPE declaration, we've finished
-    * the interal subset, if any. If there is an external subset,
+    * the interal subset, if any. So, send the end token if we were
+    * delivering an internal subset. If there is an external subset,
     * introduce pseudo PTokens for the start and end, and retrieve the
     * contents and place between them. Notably, the external subset could
     * arbitrarily large, so as each token is parsed from it, we feed
@@ -212,6 +214,13 @@ class EntityExpander {
       });
    }
 
+   /*
+    * Declarations can have parameter entity references within them.
+    *    e.g. <!NOTATION %moreDetails;>
+    * if that happens, we must first expand that parameter entity reference
+    * and construct the full declaration token using the data from that
+    * parameter entity before we can actually process the declaration.
+    */
    private handleDeclaration(declarationPToken: DeclToken, handled: PTokenExpanded): void {
       // UNASSIGNED REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
       if (!declarationPToken.unassigned || declarationPToken.unassigned.length === 0) {
@@ -223,22 +232,9 @@ class EntityExpander {
          // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
          (declarationPToken.unassigned as any) = results.newValue;
 
-         switch (declarationPToken.type) {
-            case ELEMENT_DECLARATION_PTOKEN:
-               assignElementDeclarationUnassigned(declarationPToken);
-               break;
-            case NOTATION_DECLARATION_PTOKEN:
-               declarationPToken.assignUnassigned();
-               break;
-            case ATTLISTDECL_PTOKEN_TYPE:
-               attListDeclaration.assignUnassigned(declarationPToken);
-               break;
-            case GENERAL_ENTITY_DECLARATION_PTOKEN:
-            case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-               declarationPToken.assignUnassigned();
-               break;
-         }
+         declarationPToken.assignUnassigned();
 
+         this.deliverErrors(results.errors);
          this.processExpandedDeclaration(declarationPToken, handled);
       });
    }
@@ -269,6 +265,72 @@ class EntityExpander {
    }
 
    /*
+    * For ATTLIST tokens, the default values need to be expanded at declaration time,
+    * not at use (which is a bit of a surprise).
+    *
+    * §4.1.0 Well-formedness constraint: Entity Declared
+    *    The declaration of a general entity must precede any reference to it which
+    *    appears in a default value in an attribute-list declaration.
+    */
+   private handleAttListDeclaration(pToken: AttListPToken, handled: PTokenExpanded): void {
+      // REFACTOR/CLEANUP: default type is wrong.
+      expandAttributes(pToken.attDefs as any, this.expandParams, (results) => {
+         for (let index = 0; index < results.length; index++) {
+            pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+            this.deliverErrors(results[index].errors);
+         }
+
+         this.deliverToken(pToken);
+         handled();
+      });
+   }
+
+   /*
+    * Processing an entity declaration involves several considerations:
+    * - If an entity is declared multiple times, only the first is honored (§4.2.0)
+    * - If the entity value is external, then we proceed, without loading or
+    *   examining its value at this time.
+    * - If it is internal, we will expand its value immediately.
+    *   Note that we store the expanded value for later use.
+    *
+    * This IS a possible risk to the overall goal of being able to process
+    * arbitrarily large documents, since it is conceivable that the expanded
+    * entity would be gigabytes in size. Thus, it is easy to see that this
+    * might eventually be implemented in a way to verify that the full
+    * tree of parameter entities are syntactically well formed, while not
+    * storing the value.
+    */
+   private handleEntityDeclaration(
+      pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+      handled: PTokenExpanded,
+   ): void {
+      const name = strOrBlank(pToken.name);
+      const hasEntry = this.expandParams.entityDetails.hasEntity(pToken);
+
+      if (name === '' || hasEntry) {
+         this.deliverToken(pToken);
+         handled();
+         return;
+      }
+
+      if (pToken.externalId) {
+         this.expandParams.entityDetails.addEntity(pToken);
+         this.deliverToken(pToken);
+         handled();
+         return;
+      }
+
+      // REFACTOR/CLEANUP again types do not match correctly
+      expandEntityValue(pToken.value as any, this.expandParams, (result): void => {
+         this.expandParams.entityDetails.addEntity(pToken, result.newValue);
+
+         this.deliverErrors(result.errors);
+         this.deliverToken(pToken);
+         handled();
+      });
+   }
+
+   /*
     * For element start and empty tokens, we simply need to expand any general
     * entity references that appear in their attributes.
     */
@@ -293,74 +355,6 @@ class EntityExpander {
          this.deliverToken(pToken);
          handled();
       });
-   }
-
-   /*
-    * For ATTLIST tokens, the default values need to be expanded at declaration time,
-    * not at use (which is a bit of a surprise).
-    *
-    * §4.1.0 Well-formedness constraint: Entity Declared
-    *    The declaration of a general entity must precede any reference to it which
-    *    appears in a default value in an attribute-list declaration.
-    */
-   private handleAttListDeclaration(pToken: AttListPToken, handled: PTokenExpanded): void {
-      // REFACTOR/CLEANUP: default type is wrong.
-      expandAttributes(pToken.attDefs as any, this.expandParams, (results) => {
-         for (let index = 0; index < results.length; index++) {
-            pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
-            this.deliverErrors(results[index].errors);
-         }
-
-         this.deliverToken(pToken);
-         handled();
-      });
-   }
-
-   /*
-    * Processing an entity declaration involves two steps:
-    * Setting up a cache entry for it, but not yet "installing" that
-    * entry.
-    * If it is a value-internal entity, then we expand its value and
-    * add that to the cache entry.
-    *
-    * Note that we do not actually set up the cache entry until the
-    * value has been expanded (if it is going to be), so that it is not
-    * possible to have the entity refer to itself.
-    */
-   private handleEntityDeclaration(
-      pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-      handled: PTokenExpanded,
-   ): void {
-      const name = strOrBlank(pToken.name);
-      const hasEntry = this.expandParams.entityDetails.hasEntity(pToken);
-
-      if (name === '' || hasEntry) {
-         this.deliverToken(pToken);
-         handled();
-         return;
-      }
-
-      if (pToken.externalId) {
-         this.expandParams.entityDetails.addEntity(pToken);
-         this.deliverToken(pToken);
-         handled();
-         return;
-      }
-
-      // REFACTOR/CLEANUP again types do not match correctly
-      expandEntityValue(
-         pToken.value as any,
-         this.expandParams,
-         (newValue: EntityValuePToken, errors: Array<XmlError>): void => {
-            // Store the cache entry in the overall cache only when we are done
-            // doing all value processing. This prevents recursive uses of the declaration.
-            this.expandParams.entityDetails.addEntity(pToken, newValue);
-
-            this.deliverErrors(errors);
-            this.deliverToken(pToken);
-            handled();
-         },
-      );
    }
 
    handleEntityReference(

@@ -13,6 +13,11 @@ import { EntityDetails } from './EntityDetails';
 
 import { setupReferencedEntity } from './setupReferencedEntity';
 
+type ExpandedResult = {
+   newValue: EntityValuePToken;
+   errors: Array<XmlError>;
+};
+
 /*
  * Simply sweep through an EntityValuePToken and return any ParameterEntityInfo's
  * found that do not already have a cached EntityValuePToken value.
@@ -48,7 +53,7 @@ function findUncachedEntities(
 function expandValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
-   expanded: (newValue: EntityValuePToken, errors: Array<XmlError>) => void,
+   expanded: (result: ExpandedResult) => void,
    errors: Array<XmlError>,
 ): void {
    let newValue: EntityValuePToken = [];
@@ -69,7 +74,7 @@ function expandValue(
       newValue.push(element);
    }
 
-   expanded(newValue, errors);
+   expanded({ newValue, errors });
 }
 
 /*
@@ -88,7 +93,7 @@ function expandValue(
 function expandEntityValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
-   expanded: (newValue: EntityValuePToken, errors: Array<XmlError>) => void,
+   expanded: (result: ExpandedResult) => void,
 ): void {
    const missingEntities = findUncachedEntities(value, expandParams.entityDetails);
    let remainingEntities = missingEntities.length;

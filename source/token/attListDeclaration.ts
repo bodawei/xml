@@ -67,6 +67,10 @@ class AttListPToken {
       this.open = basePToken.open
    }
 
+   assignUnassigned() {
+      assignUnassigned(this);
+   }
+
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
       checkWellFormed(this, ec, entityMetaData);
    }

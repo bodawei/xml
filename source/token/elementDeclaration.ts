@@ -77,6 +77,10 @@ class ElementDeclarationPToken extends declaration.PToken {
       return results;
    }
 
+   assignUnassigned() {
+      assignUnassigned(this);
+   }
+
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
       checkWellFormed(this, ec, entityMetaData);
    }

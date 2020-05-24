@@ -1,0 +1,59 @@
+
+   function parseBody(
+      sTokenSource: STokenSource,
+      inContent: boolean,
+      writeToken: ExpandToken,
+   ): void {
+      const pTokenStream = new PTokenStream(sTokenSource);
+
+      pTokenStream.on('data', (token: PToken) => {
+         pTokenStream.pause();
+         writeToken(token, () => {
+            pTokenStream.resume();
+         });
+      });
+      pTokenStream.on('end', () => {
+         writeToken(undefined, () => {});
+      });
+   }
+
+   function parseEntityValue(
+      sTokenSource: STokenSource,
+      done: (results: EntityValuePToken | void) => void,
+   ): void {
+      const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
+      const results: EntityValuePToken = [];
+
+      pTokenStream.on('data', (token: Token) => {
+         results.push(token as any);
+      });
+      pTokenStream.on('end', () => {
+         done(results);
+      });
+   }
+
+   function retrieveExternalEntity(
+      externalId: ExternalId,
+      entityMetaData: EntityMetaData,
+   ): RetrieveResults {
+      const sTokenSource = new STokenSource(defaultExtractors, entityMetaData);
+
+      const str = externalMap[(externalId.system!.value[0] as any).text.str];
+
+      sTokenSource.addText(str);
+      sTokenSource.endText();
+
+      return {
+         sTokenSource,
+         getErrors(): Array<XmlError> {
+            return [];
+         },
+      };
+   }
+
+   function parseAttributeValue(
+      sTokenSource: STokenSource,
+      done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   ): void {
+      done([], []);
+   }

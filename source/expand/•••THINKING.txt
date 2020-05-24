@@ -26,7 +26,16 @@ x            if inline, feed into an sTokenStrem
 x            if external start to load into sTokenStream  (retrieveExternalEntity)
 x      Need to know if we are in the dtd or the content. so e can pass that to the parser
 x Need to clean up the expandAttributeValue code
-
+x expandAttributeValueObjects() should moved into a utility
+x            Cache type:
+x               addPE(declToken, value)
+x               addGE(decl, value)
+x               setExternalGeValue(name|decl|ref, value)
+x               setExternalPeValue(name|decl|ref, value)
+x               getInfoForReference(ref);
+x               hasInfoForDeclaration(decl);
+x               getGEInfo(name)
+x               getPEInfo(name)
 
 IMMEDIATE TASKS
 - Document
@@ -40,8 +49,14 @@ IMMEDIATE TASKS
       - callbacks
       - do not use isntanceof on types. Allow for ducktypes.  However, use types for TS typing
    - CLEANUP
+      - Later cleanup
+         - unassigned is undefined and should be immutable
+         - attribute values seem to have parameter entity tokens in their definition, but they'll never have that
+         - Need to be able to construct a new attlist decl with new values without modifying the one in place
+         - Also have a problem with the definitio nof an entity declaration. doesn't match EntityValuePToken
       - EntityExpander
-         - expandAttributeValueObjects() should moved into a utility
+         - streamEntityReference() in externalSubsettoken:
+            - Should purge the EMD, I think.
          - expandEntityValue should be handling the recursion.
          - think we need an internal call to expandPToken which carries the array of entities we are in the middle of Expanding
          - setupReferencedEntity also needs a better name.  and maybe we need a parallel setupEntityDeclaration
@@ -52,15 +67,6 @@ IMMEDIATE TASKS
                - I think it means replaceReferences (with what?)
          - Where is it we are depending on the cache not having the entry to avoid infintie recursion?
                - Maybe THIS is what should be doing the expansion -- no. I want it to be fundamentally dumb.
-            Cache type:
-               addPE(declToken, value)
-               addGE(decl, value)
-               setExternalGeValue(name|decl|ref, value)
-               setExternalPeValue(name|decl|ref, value)
-               getInfoForReference(ref);
-               hasInfoForDeclaration(decl);
-               getGEInfo(name)
-               getPEInfo(name)
          - Where is the error reporting from docTypeEnd?  and entityreference?
          - Make sure unit and integration tests are good
       √- entityValueToSTokenSource

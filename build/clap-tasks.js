@@ -150,7 +150,7 @@ const publicInterface = {
       '_setup',
       '_deriveLocale',
       // '_eslint',
-//      '_nodeTest',
+      //      '_nodeTest',
       '_karmaPrecommit', // Arguably should be running the dist/ code
       // '_buildPackage',
       // '_buildES5Files',
@@ -176,18 +176,18 @@ module.exports = Object.assign({},
    test,
    publicInterface
 );
-   // "compilerOptions": {
-   //    "allowJs": true,
-   //    "target": "es5",
-   //    "sourceMap": true,
-   //    "outDir": "./temp/typescript"
-   // },
-   // "include": [
-   //    "build/**/*jasmine*.js",
-   //    "source/**/*.js",
-   //    "build/**/*jasmine*.ts",
-   //    "source/**/*.ts"
-   // ]
+// "compilerOptions": {
+//    "allowJs": true,
+//    "target": "es5",
+//    "sourceMap": true,
+//    "outDir": "./temp/typescript"
+// },
+// "include": [
+//    "build/**/*jasmine*.js",
+//    "source/**/*.js",
+//    "build/**/*jasmine*.ts",
+//    "source/**/*.ts"
+// ]
 // {
 //     "compilerOptions": {
 //       "allowJs": true,

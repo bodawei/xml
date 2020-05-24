@@ -52,13 +52,10 @@ function setupReferencedEntity(
          return;
       }
 
-      expandEntityValue(
-         entityValuePToken,
-         expandParams,
-         (expandedEntityValue: EntityValuePToken) => {
-            entityDetails.updateDeclaredValue(entityInfo.token, expandedEntityValue, getErrors());
-         },
-      );
+      expandEntityValue(entityValuePToken, expandParams, (results) => {
+         // losing errors
+         entityDetails.updateDeclaredValue(entityInfo.token, results.newValue, getErrors());
+      });
    });
 }
 

@@ -20,7 +20,7 @@ const config = {
    basePath: '.',
    reportSlowerThan: 1000,
    browsers: [ 'Chrome' ],
-   captureTimeout: 20000,     // If browser does not capture in given timeout [ms], kill it
+   captureTimeout: 20000, // If browser does not capture in given timeout [ms], kill it
    autoWatch: false,
    singleRun: true,
    files: [
@@ -32,10 +32,10 @@ const config = {
    ],
    exclude: [
    ],
-   preprocessors: prepro,   // See the setup of this below.
+   preprocessors: prepro, // See the setup of this below.
    frameworks: [
       'jasmine',
-      'karma-typescript',  // while this is loaded either way, it needs to be listed here for some reason
+      'karma-typescript', // while this is loaded either way, it needs to be listed here for some reason
    ],
 
    reporters: [ 'progress', 'karma-typescript' ],

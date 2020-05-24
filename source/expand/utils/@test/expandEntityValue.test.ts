@@ -65,15 +65,15 @@ describe('expandEntityValue() (unit)', () => {
 
    it('calls back with an shallow copied unchanged value when given an entity value with no references', (done) => {
       expandEntityValue([textPToken], params, (result) => {
-         expect(result).toEqual([textPToken]);
-         expect(result).not.toBe([textPToken]);
+         expect(result).toEqual({ errors: [], newValue: [textPToken] });
+         expect(result.newValue).not.toBe([textPToken]);
          done();
       });
    });
 
    it('calls back with no errors when given an entity value with no references', (done) => {
-      expandEntityValue([textPToken], params, (result, errors) => {
-         expect(errors).toEqual([]);
+      expandEntityValue([textPToken], params, (result) => {
+         expect(result.errors).toEqual([]);
          done();
       });
    });
@@ -82,12 +82,15 @@ describe('expandEntityValue() (unit)', () => {
       entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
       expandEntityValue([textPToken, peRefPToken], params, (result) => {
-         expect(result).toEqual([
-            textPToken,
-            new ParameterEntityStartPToken(peRefPToken),
-            textPToken,
-            new ParameterEntityEndPToken(peRefPToken),
-         ]);
+         expect(result).toEqual({
+            errors: [],
+            newValue: [
+               textPToken,
+               new ParameterEntityStartPToken(peRefPToken),
+               textPToken,
+               new ParameterEntityEndPToken(peRefPToken),
+            ],
+         });
          done();
       });
    });
@@ -96,27 +99,33 @@ describe('expandEntityValue() (unit)', () => {
       entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
       expandEntityValue([textPToken, peRefPToken], params, (result) => {
-         expect(result).toEqual([
-            textPToken,
-            new ParameterEntityStartPToken(peRefPToken),
-            textPToken,
-            new ParameterEntityEndPToken(peRefPToken),
-         ]);
+         expect(result).toEqual({
+            errors: [],
+            newValue: [
+               textPToken,
+               new ParameterEntityStartPToken(peRefPToken),
+               textPToken,
+               new ParameterEntityEndPToken(peRefPToken),
+            ],
+         });
          done();
       });
    });
 
    it('calls back with an expanded entity value when the referenced entity is referenced twice', (done) => {
       expandEntityValue([peRefPToken, textPToken, peRefPToken], params, (result) => {
-         expect(result).toEqual([
-            new ParameterEntityStartPToken(peRefPToken),
-            textPToken,
-            new ParameterEntityEndPToken(peRefPToken),
-            textPToken,
-            new ParameterEntityStartPToken(peRefPToken),
-            textPToken,
-            new ParameterEntityEndPToken(peRefPToken),
-         ]);
+         expect(result).toEqual({
+            errors: [],
+            newValue: [
+               new ParameterEntityStartPToken(peRefPToken),
+               textPToken,
+               new ParameterEntityEndPToken(peRefPToken),
+               textPToken,
+               new ParameterEntityStartPToken(peRefPToken),
+               textPToken,
+               new ParameterEntityEndPToken(peRefPToken),
+            ],
+         });
          done();
       });
    });
@@ -128,18 +137,19 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
          return {
             sTokenSource: new STokenSource({}, entityMetaData),
-            getErrors: (): Array<XmlError> => [
-               new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
-            ],
+            getErrors: (): Array<XmlError> => [],
          };
       };
 
       expandEntityValue([textPToken, peRefPToken], params, (result) => {
-         expect(result).toEqual([
-            textPToken,
-            new ParameterEntityStartPToken(peRefPToken),
-            new ParameterEntityEndPToken(peRefPToken),
-         ]);
+         expect(result).toEqual({
+            errors: [],
+            newValue: [
+               textPToken,
+               new ParameterEntityStartPToken(peRefPToken),
+               new ParameterEntityEndPToken(peRefPToken),
+            ],
+         });
          done();
       });
    });
@@ -157,8 +167,8 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([textPToken, peRefPToken], params, (result, errors) => {
-         expect(errors).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
+      expandEntityValue([textPToken, peRefPToken], params, (result) => {
+         expect(result.errors).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
          done();
       });
    });
@@ -170,7 +180,7 @@ describe('expandEntityValue() (unit)', () => {
       });
 
       expandEntityValue([peRefPToken, textPToken], params, (result) => {
-         expect(result).toEqual([peRefPToken, textPToken]);
+         expect(result).toEqual({ errors: [], newValue: [peRefPToken, textPToken] });
          done();
       });
    });
@@ -182,7 +192,7 @@ describe('expandEntityValue() (unit)', () => {
       });
 
       expandEntityValue([peRefPToken, textPToken], params, (result) => {
-         expect(result).toEqual([peRefPToken, textPToken]);
+         expect(result).toEqual({ errors: [], newValue: [peRefPToken, textPToken] });
          done();
       });
    });

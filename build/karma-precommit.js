@@ -10,7 +10,7 @@ const OUT_DIR = BASE_PATH + '/temp/';
 
 module.exports = function karmaConfig(config) {
    const theConfig = Object.assign({}, base, {
-      logLevel: config.LOG_ERROR, // also: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
+      logLevel: config.LOG_DEBUG, // also: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
 
       reporters: [ 'progress', 'karma-typescript', 'yajson' ],
 
@@ -38,8 +38,8 @@ module.exports = function karmaConfig(config) {
                statements: [ 99, 100 ],
                functions: [ 99, 100 ],
                branches: [ 99, 100 ],
-               lines: [ 99, 100 ]
-             }
+               lines: [ 99, 100 ],
+            },
          },
          reports: {
             json: {
@@ -64,8 +64,8 @@ module.exports = function karmaConfig(config) {
             statements: [ 99, 100 ],
             functions: [ 99, 100 ],
             branches: [ 99, 100 ],
-            lines: [ 99, 100 ]
-         }
+            lines: [ 99, 100 ],
+         },
       },
    });
 

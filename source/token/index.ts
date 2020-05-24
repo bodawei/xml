@@ -76,6 +76,8 @@ export * from './xmlDeclaration';
 
 import { ExternalId } from './common/externalId';
 
+const ERROR_TYPE = 'ERROR_TYPE';
+
 type XmlError = {
    type: 'ERROR_TYPE',
 }
@@ -135,6 +137,7 @@ function getFirstSToken(pToken: PToken): SToken {
 export {
    ATTLISTDECL_PTOKEN_TYPE,
    ELEMENT_DECLARATION_PTOKEN,
+   ERROR_TYPE,
 
    AttListPToken,
    ElementDeclarationPToken,

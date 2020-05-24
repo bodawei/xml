@@ -2,10 +2,10 @@ import { EntityMetaData } from 'basic';
 import { STokenSource, strOrBlank } from 'sToken';
 import { EntityValuePToken } from 'token';
 
-import { ParameterEntityInfo, ParameterEntityMap } from '../types';
+// import { ParameterEntityInfo, ParameterEntityMap } from '../types';
 
 type ExpandUnassignedProps = {
-   paramEntitiesByName: ParameterEntityMap;
+   paramEntitiesByName: any;
    retrieveExternalEntity: (externalId: any, emd: EntityMetaData) => STokenSource;
    processForEntityValue: (
       sTokenSource: STokenSource,
@@ -14,11 +14,8 @@ type ExpandUnassignedProps = {
    emd: EntityMetaData;
 };
 
-function filterMissingPEs(
-   names: Array<string>,
-   peByName: ParameterEntityMap,
-): Array<ParameterEntityInfo> {
-   const neededPEs: Array<ParameterEntityInfo> = [];
+function filterMissingPEs(names: Array<string>, peByName: any): Array<any> {
+   const neededPEs: Array<any> = [];
 
    for (const name of names) {
       const peInfo = peByName[name];
@@ -56,13 +53,15 @@ function retrieveMissingEntities(
       if (missingPEInfo.isInternal) {
          (missingPEInfo as any).ppEntityValue = missingPEInfo.token.value as any; // typehack
       } else {
-         let sTokenSource: STokenSource;
-
          working = true;
          workingCount++;
-         sTokenSource = props.retrieveExternalEntity(missingPEInfo.token.externalId!, props.emd);
+         const sTokenSource = props.retrieveExternalEntity(
+            missingPEInfo.token.externalId!,
+            props.emd,
+         );
 
-         props.processForEntityValue(sTokenSource, (result) => {
+         // eslint-disable-next-line
+         props.processForEntityValue(sTokenSource, (result: any) => {
             (missingPEInfo as any).ppEntityValue = result;
             // Must recursively retrieve missing values and then fold those in
             // The latter should be a pre-defined routine as it should have been used in the internal ones at the point of encountering them
