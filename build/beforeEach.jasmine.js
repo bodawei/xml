@@ -9,10 +9,10 @@ function toEqualShallowDifferent(util, customEqualityTesters) {
          let message;
 
          if (!pass) {
-            message = `Actual (${JSON.stringify(actual)}) is not the same value as expected (${JSON.stringify(expected)}).`;
+            message = `Actual and expected are the same instance: ${JSON.stringify(actual)}`;
          } else if (!util.equals(actual, expected, customEqualityTesters)) {
             pass = false;
-            message = `Actual is the same value as expected, but they are not equal (actual: ${JSON.stringify(actual)} and expected: ${JSON.stringify(expected)}).`;
+            message = `Actual is the same value as expected, but they are not identical (actual: ${JSON.stringify(actual)} and expected: ${JSON.stringify(expected)}).`;
          } else {
             message = `Actual is the same value as expected (${JSON.stringify(actual)}) and they are equal.`;
          }

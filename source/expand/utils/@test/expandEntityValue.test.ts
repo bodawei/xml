@@ -11,6 +11,7 @@ import {
    ParameterEntityStartPToken,
    TextPToken,
    XmlError,
+   EXTERNAL_ID,
 } from 'token';
 
 import { expandEntityValue } from '../expandEntityValue';
@@ -34,7 +35,7 @@ describe('expandEntityValue() (unit)', () => {
       peDecl = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('pe1'),
-         externalId: {} as any,
+         externalId: { type: EXTERNAL_ID },
       });
       entityDetails = new EntityDetails();
       entityDetails.addEntity(peDecl);
@@ -65,8 +66,7 @@ describe('expandEntityValue() (unit)', () => {
 
    it('calls back with an shallow copied unchanged value when given an entity value with no references', (done) => {
       expandEntityValue([textPToken], params, [], (result) => {
-         expect(result).toEqual({ errors: [], newValue: [textPToken] });
-         expect(result.newValue).not.toBe([textPToken]);
+         expect(result.newValue).toEqualShallowDifferent([textPToken]);
          done();
       });
    });
@@ -74,23 +74,6 @@ describe('expandEntityValue() (unit)', () => {
    it('calls back with no errors when given an entity value with no references', (done) => {
       expandEntityValue([textPToken], params, [], (result) => {
          expect(result.errors).toEqual([]);
-         done();
-      });
-   });
-
-   it('calls back with an expanded entity value when the referenced entity is already present', (done) => {
-      entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
-
-      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
-         expect(result).toEqual({
-            errors: [],
-            newValue: [
-               textPToken,
-               new ParameterEntityStartPToken(peRefPToken),
-               textPToken,
-               new ParameterEntityEndPToken(peRefPToken),
-            ],
-         });
          done();
       });
    });

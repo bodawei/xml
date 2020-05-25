@@ -354,7 +354,7 @@ describe('EntityExpander (unit)', () => {
          (notation.unassigned as any) = [1];
          (notation.assignUnassigned as any) = () => {};
 
-         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [2], errors: [] });
          });
 
@@ -368,7 +368,7 @@ describe('EntityExpander (unit)', () => {
          (notation.unassigned as any) = [1];
          (notation.assignUnassigned as any) = () => {};
 
-         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [], errors: [] });
          });
 
@@ -377,7 +377,9 @@ describe('EntityExpander (unit)', () => {
 
             expect(params[0]).toEqual([1]);
             expect(params[1].entityDetails).not.toBeUndefined();
-            expect(params[2]).toBeInstanceOf(Function);
+            expect(params[2]).toEqual([]);
+            expect(params[3]).toEqual(false);
+            expect(params[4]).toBeInstanceOf(Function);
             done();
          });
       });
@@ -387,7 +389,7 @@ describe('EntityExpander (unit)', () => {
          (notation.assignUnassigned as any) = jasmine.createSpy();
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
 
-         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [2], errors: [error] });
          });
 
@@ -423,7 +425,7 @@ describe('EntityExpander (unit)', () => {
          (notation.unassigned as any) = [1];
          (notation.assignUnassigned as any) = jasmine.createSpy();
 
-         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [2], errors: [] });
          });
 
@@ -458,13 +460,29 @@ describe('EntityExpander (unit)', () => {
          (elementDecl.unassigned as any) = [1];
          (elementDecl.assignUnassigned as any) = jasmine.createSpy();
 
-         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [2], errors: [] });
          });
 
          doExpand([elementDecl], true, () => {
             expect(elementDecl.assignUnassigned).toHaveBeenCalled();
             expect(elementDecl.unassigned).toEqual([2] as any);
+            done();
+         });
+      });
+
+      it('passes tells expandUnassigned to treat this as an element for parsing purposes', (done) => {
+         (elementDecl.unassigned as any) = [1];
+         (elementDecl.assignUnassigned as any) = jasmine.createSpy();
+
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
+            callback({ newValue: [], errors: [] });
+         });
+
+         doExpand([elementDecl], true, () => {
+            const params = expandUnassignedSpy.calls.argsFor(0);
+
+            expect(params[3]).toEqual(true);
             done();
          });
       });
@@ -561,7 +579,7 @@ describe('EntityExpander (unit)', () => {
             assignUnassigned: jasmine.createSpy(),
          });
 
-         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [2], errors: [] });
          });
 
@@ -718,7 +736,7 @@ describe('EntityExpander (unit)', () => {
             assignUnassigned: jasmine.createSpy(),
          });
 
-         expandUnassignedSpy.and.callFake((unassigned, params, callback) => {
+         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [2], errors: [] });
          });
 

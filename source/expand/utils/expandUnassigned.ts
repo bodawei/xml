@@ -7,7 +7,6 @@ import { EntityValuePToken, ParameterEntityReferencePToken, XmlError, unassigned
 import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
 
 import { ExpandParams } from '../types';
-
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { addProtoReplacementText } from './addProtoReplacementText';
 
@@ -23,63 +22,34 @@ type ParseResults = {
    errors: Array<XmlError>;
 };
 
-/*
- * Perfrom several basic santity checks on the general entity reference we want
- * to expand, returning appropriate results if needed. If those checks pass,
- * defer to another routine to set up and process the entity value.
- */
 function expandPeRef(
    expandParams: ExpandParams,
    peRefChain: Array<string>,
+   isElementDecl: boolean,
    peRef: ParameterEntityReferencePToken,
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(peRef.name);
    const peInfo = expandParams.entityDetails.getPEDetails(entityName);
-
-   // Stop processing if we find this entity reference is already being processed
-   if (entityName !== '' && peRefChain.includes(entityName)) {
-      callback({
-         unassignedFragment: undefined,
-         preparseValue: undefined,
-         errors: [],
-      });
-      return;
-   }
-
-   // If there is no declaration, check if it is one of the predefined entities.
-   // return nothing or the predefined value
-   if (!peInfo) {
-      callback({
-         unassignedFragment: undefined,
-         preparseValue: undefined,
-         errors: [],
-      });
-
-      return;
-   }
-
    const localRefChain = [...peRefChain, entityName];
+   const result = {
+      unassignedFragment: undefined,
+      preparseValue: undefined,
+      errors: [],
+   };
 
-   if (peInfo.protoReplacementText) {
-      const sTokenSource = entityValueToSTokenSource(peInfo.protoReplacementText, expandParams.emd);
-      unassigned.parseAllValues(sTokenSource, false, (results?: UnassignedArray) => {
-         callback({
-            unassignedFragment: results,
-            preparseValue: undefined,
-            errors: [],
-         });
-      });
+   if (!peInfo || peRefChain.includes(entityName)) {
+      callback(result);
       return;
    }
 
-   // No valueCache, so try to load it.
-   addProtoReplacementText(peRef, expandParams, [], (newErrors) => {
+   addProtoReplacementText(peRef, expandParams, localRefChain, (newErrors) => {
       const sTokenSource = entityValueToSTokenSource(
          peInfo.protoReplacementText || [],
          expandParams.emd,
       );
-      unassigned.parseAllValues(sTokenSource, false, (results?: UnassignedArray) => {
+
+      unassigned.parseAllValues(sTokenSource, isElementDecl, (results?: UnassignedArray) => {
          callback({
             unassignedFragment: results,
             preparseValue: undefined,
@@ -90,16 +60,14 @@ function expandPeRef(
 }
 
 /*
- * This does the "outer" work of the expansion process. We
- * identify the general entity references in the attribute value
- * and then call another routine to expand each of those.
- * We then stitch the attribute value back together replacing
- * each general entity reference with its expanded contents.
+ * Given an unassigned array, locate all the parameter entity references in
+ * it, and then replace each with the expanded contents.
  */
-function expandUnassignedInternal(
+function expandUnassigned(
    value: UnassignedArray,
    expandParams: ExpandParams,
    peRefChain: Array<string>,
+   isElementDecl: boolean,
    expanded: UnassignedExpanded,
 ): void {
    const peRefs: Array<ParameterEntityReferencePToken> = [];
@@ -111,11 +79,11 @@ function expandUnassignedInternal(
    }
 
    if (peRefs.length === 0) {
-      expanded({ newValue: value, errors: [] });
+      expanded({ newValue: [...value], errors: [] });
       return;
    }
 
-   const expandRef = expandPeRef.bind(undefined, expandParams, peRefChain);
+   const expandRef = expandPeRef.bind(undefined, expandParams, peRefChain, isElementDecl);
 
    // Process expand all the peRefs potentially very asynchronously.
    doAsyncLoop(peRefs, expandRef, (results) => {
@@ -123,15 +91,14 @@ function expandUnassignedInternal(
       const newValue: UnassignedArray = [];
       let peRefIndex = 0;
 
-      // Now stitch the original attribute value together with expansions
+      // Insert the expanded values in place of the references
       for (const element of value) {
          if (element.type !== UnassignedType.REFERENCE) {
             newValue.push(element);
             continue;
          }
 
-         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         const { unassignedFragment, preparseValue, errors } = results[peRefIndex];
+         const { unassignedFragment, errors } = results[peRefIndex];
 
          peRefIndex++;
          allErrors.push(...errors);
@@ -140,7 +107,6 @@ function expandUnassignedInternal(
             // For some reason couldn't expand. Just put it in the array
             newValue.push(element);
          } else {
-            // expanded! wrap the expanded contents with a start and end
             newValue.push(
                {
                   type: UnassignedType.ENTITY_START,
@@ -157,16 +123,6 @@ function expandUnassignedInternal(
 
       expanded({ newValue, errors: allErrors });
    });
-}
-
-/*
- */
-function expandUnassigned(
-   value: UnassignedArray,
-   expandParams: ExpandParams,
-   expanded: UnassignedExpanded,
-): void {
-   expandUnassignedInternal(value, expandParams, [], expanded);
 }
 
 export { expandUnassigned, UnassignedExpanded, ExpandAttrResult };

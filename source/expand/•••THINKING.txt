@@ -217,6 +217,8 @@ x   - do not use isntanceof on types. Allow for ducktypes.  However, use types f
 x   - We are keeping entity values in memory, including expansion, when they are rooted in internal. this might be a problem.
 x Why isn't toEqualRangeless etc not working
 x Need coverage reporting urgently
+x- expandUnassigned
+x         - need to make sure to do special handling for element
 
 GOALS
    - Get the expansion system finished and working
@@ -235,20 +237,17 @@ DOCUMENT
 IMPLEMENTATION
    - CLEANUP
       - Later cleanup
-         - Seriously need to think about retrieveExternalEntity error conditions
          - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.
-         - NOTE: we are storing the preparsed values in the start and end tokens.
-         - We're assuming that if reading an entity fails, we put no data i nthe protoReplacementText
-            - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
-      - EntityExpander
+         - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
          - Who should be purging the emd's?
-         - EntityExpander could just be a function that returns a function.  Do we actually need a class?
-      - expandUnassigned
-         - need to make sure to do special handling for element
-      - expandEntityValue
-         - what happens to content we parse
+      - Loss of PE ref detail
+         - expandEntityValue
+         - NOTE: we are storing the preparsed values in the start and end tokens.
       - Don't load external entities
+         - Seriously need to think about retrieveExternalEntity error conditions
          - need this in addProtoReplacementText
+         - Unsurprisingly, also expandEntityValue
+         - unassgined.  PArsing can return no results?
       - Recursion problem
          - streamEntityReference needs to deal with this
          - Are we still depending on the "don't put it in the cache" to avoid recursion?
@@ -285,6 +284,7 @@ BUILD
             ./node_modules/.bin/jasmine --config=./build/new-jasmine.json 
 
 FUTURE REFACTORING
+   - EntityExpander could just be a function that returns a function.  Do we actually need a class?
    - What is a ptoken again?
       - Should move the internal/external subset markers into expand, no?
       - Future refactoring: At this point I don't think ptokens should know about either conversion to

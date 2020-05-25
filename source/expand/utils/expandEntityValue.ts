@@ -20,30 +20,30 @@ type ExpandedResult = {
 
 /*
  * Simply sweep through an EntityValuePToken and return any ParameterEntityInfo's
- * found that do not already have a cached EntityValuePToken value.
+ * found that do not already have replacement text in thedetails.
  */
-function findUncachedEntities(
+function entitiesWithoutReplacementText(
    value: EntityValuePToken,
    entityDetails: EntityDetails,
 ): Array<ParameterEntityReferencePToken> {
-   const uncachedEntities: Array<ParameterEntityReferencePToken> = [];
+   const withoutRT: Array<ParameterEntityReferencePToken> = [];
 
    for (const subToken of value) {
       if (subToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          const elementName = strOrBlank(subToken.name);
-         const peInfo = entityDetails.getPEDetails(elementName);
+         const details = entityDetails.getPEDetails(elementName);
 
-         if (peInfo && !peInfo.isInternal && !peInfo.protoReplacementText) {
-            uncachedEntities.push(subToken);
+         if (details && !details.protoReplacementText) {
+            withoutRT.push(subToken);
          }
       }
    }
 
-   return uncachedEntities;
+   return withoutRT;
 }
 
 /*
- * When we gt here, we are assured that all parameter entities have been loaded
+ * When we get here, we are assured that all parameter entities have been loaded
  * and expanded. Thus, we can finally expand the entity value
  *
  * Important notes:
@@ -61,12 +61,15 @@ function expandValue(
    for (const element of value) {
       if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          const entryName = strOrBlank(element.name);
-         const peInfo = expandParams.entityDetails.getPEDetails(entryName);
+         const details = expandParams.entityDetails.getPEDetails(entryName);
 
-         if (peInfo) {
-            newValue.push(new ParameterEntityStartPToken(element));
-            newValue = newValue.concat(peInfo.protoReplacementText!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
-            newValue.push(new ParameterEntityEndPToken(element));
+         if (details) {
+            newValue = [
+               ...newValue,
+               new ParameterEntityStartPToken(element),
+               ...details.protoReplacementText!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+               new ParameterEntityEndPToken(element),
+            ];
             continue;
          }
       }
@@ -84,11 +87,8 @@ function expandValue(
  * tokens.  Return a copy of the expanded value along with any errors that might have happend
  * while doing that.
  *
- * Note: This will modify the epandParams.entityCache.*.valueCache with the EntityValuePTokens
+ * Note: This will modify the epandParams.entityDetails with the EntityValuePTokens
  * of any external parameter entities that this retrieved.
- *
- * NOTE: This avoids recursive calls by the caller not inserting a PE declaration into the
- * cache until it has already called this to process the value.
  */
 function expandEntityValue(
    value: EntityValuePToken,
@@ -96,21 +96,23 @@ function expandEntityValue(
    peRefChain: Array<string>,
    expanded: (result: ExpandedResult) => void,
 ): void {
-   const missingEntities = findUncachedEntities(value, expandParams.entityDetails);
-   let remainingEntities = missingEntities.length;
+   const allErrors: Array<XmlError> = [];
+   const entitiesWithoutRT = entitiesWithoutReplacementText(value, expandParams.entityDetails);
+   let remainingEntities = entitiesWithoutRT.length;
 
    if (remainingEntities === 0) {
       expandValue(value, expandParams, expanded, []);
       return;
    }
 
-   for (const reference of missingEntities) {
+   for (const reference of entitiesWithoutRT) {
       // eslint-disable-next-line no-loop-func
       addProtoReplacementText(reference, expandParams, [], (errors) => {
+         allErrors.push(...errors);
          remainingEntities--;
 
          if (remainingEntities === 0) {
-            expandValue(value, expandParams, expanded, errors);
+            expandValue(value, expandParams, expanded, allErrors);
          }
       });
    }

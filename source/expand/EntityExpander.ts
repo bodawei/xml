@@ -20,19 +20,13 @@ import {
    ElementDeclarationPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   ExternalSubsetEndToken,
-   ExternalSubsetStartToken,
    GeneralEntityDeclarationPToken,
-   GeneralEntityEndPToken,
    GeneralEntityReferencePToken,
-   GeneralEntityStartPToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
-   ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
-   ParameterEntityStartPToken,
    PToken,
    XmlError,
 } from 'token';
@@ -221,15 +215,23 @@ class EntityExpander {
          return;
       }
 
-      expandUnassigned(declarationPToken.unassigned, this.expandParams, (results) => {
-         // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
-         (declarationPToken.unassigned as any) = results.newValue;
+      const isElementDeclaration = declarationPToken.type === ELEMENT_DECLARATION_PTOKEN;
 
-         declarationPToken.assignUnassigned();
+      expandUnassigned(
+         declarationPToken.unassigned,
+         this.expandParams,
+         [],
+         isElementDeclaration,
+         (results) => {
+            // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
+            (declarationPToken.unassigned as any) = results.newValue;
 
-         this.deliverErrors(results.errors);
-         this.processExpandedDeclaration(declarationPToken, handled);
-      });
+            declarationPToken.assignUnassigned();
+
+            this.deliverErrors(results.errors);
+            this.processExpandedDeclaration(declarationPToken, handled);
+         },
+      );
    }
 
    /*
