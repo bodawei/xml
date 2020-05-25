@@ -64,7 +64,7 @@ describe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with an shallow copied unchanged value when given an entity value with no references', (done) => {
-      expandEntityValue([textPToken], params, (result) => {
+      expandEntityValue([textPToken], params, [], (result) => {
          expect(result).toEqual({ errors: [], newValue: [textPToken] });
          expect(result.newValue).not.toBe([textPToken]);
          done();
@@ -72,7 +72,7 @@ describe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with no errors when given an entity value with no references', (done) => {
-      expandEntityValue([textPToken], params, (result) => {
+      expandEntityValue([textPToken], params, [], (result) => {
          expect(result.errors).toEqual([]);
          done();
       });
@@ -81,7 +81,7 @@ describe('expandEntityValue() (unit)', () => {
    it('calls back with an expanded entity value when the referenced entity is already present', (done) => {
       entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
-      expandEntityValue([textPToken, peRefPToken], params, (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
          expect(result).toEqual({
             errors: [],
             newValue: [
@@ -98,7 +98,7 @@ describe('expandEntityValue() (unit)', () => {
    it('calls back with an expanded entity value when the referenced entity is already present', (done) => {
       entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
-      expandEntityValue([textPToken, peRefPToken], params, (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
          expect(result).toEqual({
             errors: [],
             newValue: [
@@ -113,7 +113,7 @@ describe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with an expanded entity value when the referenced entity is referenced twice', (done) => {
-      expandEntityValue([peRefPToken, textPToken, peRefPToken], params, (result) => {
+      expandEntityValue([peRefPToken, textPToken, peRefPToken], params, [], (result) => {
          expect(result).toEqual({
             errors: [],
             newValue: [
@@ -141,7 +141,7 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([textPToken, peRefPToken], params, (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
          expect(result).toEqual({
             errors: [],
             newValue: [
@@ -167,7 +167,7 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([textPToken, peRefPToken], params, (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
          expect(result.errors).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
          done();
       });
@@ -179,7 +179,7 @@ describe('expandEntityValue() (unit)', () => {
          name: toSToken('peBogus'),
       });
 
-      expandEntityValue([peRefPToken, textPToken], params, (result) => {
+      expandEntityValue([peRefPToken, textPToken], params, [], (result) => {
          expect(result).toEqual({ errors: [], newValue: [peRefPToken, textPToken] });
          done();
       });
@@ -191,7 +191,7 @@ describe('expandEntityValue() (unit)', () => {
          name: undefined,
       });
 
-      expandEntityValue([peRefPToken, textPToken], params, (result) => {
+      expandEntityValue([peRefPToken, textPToken], params, [], (result) => {
          expect(result).toEqual({ errors: [], newValue: [peRefPToken, textPToken] });
          done();
       });

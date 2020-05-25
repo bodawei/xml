@@ -1,6 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
+import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
    EntityValuePToken,
@@ -10,14 +11,15 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
    XmlError,
+   EXTERNAL_ID,
 } from 'token';
 
-import { setupReferencedEntity } from '../setupReferencedEntity';
 import { ExpandParams, RetrieveResults } from '../../types';
-import { WellFormedError } from 'error';
 import { EntityDetails } from '../EntityDetails';
+import * as expandEntityValue from '../expandEntityValue';
+import { addProtoReplacementText } from '../addProtoReplacementText';
 
-describe('setupReferencedEntity() (unit)', () => {
+describe('addProtoReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
    let peDecl: ParameterEntityDeclarationPToken;
    let params: ExpandParams;
@@ -35,16 +37,19 @@ describe('setupReferencedEntity() (unit)', () => {
          open: toSToken('&'),
          name: toSToken('ge1'),
       });
-
       peDecl = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('pe1'),
+         externalId: { type: EXTERNAL_ID },
+      });
+      const geDecl = new GeneralEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('ge1'),
+         externalId: { type: EXTERNAL_ID },
       });
       entityDetails = new EntityDetails();
       entityDetails.addEntity(peDecl);
-      entityDetails.addEntity(
-         new GeneralEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('ge1') }),
-      );
+      entityDetails.addEntity(geDecl);
 
       params = {
          entityDetails,
@@ -65,19 +70,25 @@ describe('setupReferencedEntity() (unit)', () => {
          },
          emd: new EntityMetaData(),
       };
+
+      spyOn(expandEntityValue, 'expandEntityValue').and.callFake(
+         (pToken: any, expandParams: any, chain: any, cb: Function) => {
+            cb({ newValue: [textPToken], errors: [] });
+         },
+      );
    });
 
-   it('calls back with no errors hwn asked to process a parameter entity token', (done) => {
+   it('calls back with no errors when asked to process a parameter entity token', (done) => {
       entityDetails.updateDeclaredValue(peDecl, [], []);
 
-      setupReferencedEntity(peRefPToken, params, (result) => {
+      addProtoReplacementText(peRefPToken, params, [], (result) => {
          expect(result).toEqual([]);
          done();
       });
    });
 
-   it('addds an expanded entity to the cache when called with a known entity', (done) => {
-      setupReferencedEntity(peRefPToken, params, () => {
+   it('addds an expanded parameter entity to the cache when called with a known entity', (done) => {
+      addProtoReplacementText(peRefPToken, params, [], () => {
          const details = entityDetails.getPEDetails('pe1');
          expect((details as any).protoReplacementText).toEqual([textPToken]);
          done();
@@ -85,9 +96,8 @@ describe('setupReferencedEntity() (unit)', () => {
    });
 
    it('addds an expanded general entity to the cache when called with a known general entity', (done) => {
-      setupReferencedEntity(geRefPToken, params, () => {
+      addProtoReplacementText(geRefPToken, params, [], () => {
          const details = entityDetails.getGEDetails('ge1');
-
          expect((details as any).protoReplacementText).toEqual([textPToken]);
          done();
       });
@@ -97,7 +107,7 @@ describe('setupReferencedEntity() (unit)', () => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
       peRefPToken = new ParameterEntityReferencePToken({ open: toSToken('&') });
 
-      setupReferencedEntity(peRefPToken, params, () => {
+      addProtoReplacementText(peRefPToken, params, [], () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
          done();
       });
@@ -110,23 +120,23 @@ describe('setupReferencedEntity() (unit)', () => {
          name: toSToken('bogus'),
       });
 
-      setupReferencedEntity(peBadRefPToken, params, () => {
+      addProtoReplacementText(peBadRefPToken, params, [], () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
          done();
       });
    });
 
-   it('does not do any further processing when the entity has a value cached', (done) => {
+   it('does not do any further processing when the entity already has replacement text defined', (done) => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
       entityDetails.updateDeclaredValue(peDecl, [], []);
 
-      setupReferencedEntity(peRefPToken, params, () => {
+      addProtoReplacementText(peRefPToken, params, [], () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
          done();
       });
    });
 
-   it('does not do any further processing when the entity is already being loaded', (done) => {
+   it('calls back to all callers when the first call has finished', (done) => {
       let done1: (value: EntityValuePToken) => void;
       let callCount = 0;
       params.utils.parseEntityValue = (other, localDone): void => {
@@ -137,14 +147,14 @@ describe('setupReferencedEntity() (unit)', () => {
       };
 
       // Make the first call.  This will store the done function, above wand wait for the second
-      setupReferencedEntity(peRefPToken, params, () => {
+      addProtoReplacementText(peRefPToken, params, [], () => {
          callCount++;
          expect(callCount).toEqual(1);
       });
 
       // make the second call. This will set up the second call back which will
       // be invoked below
-      setupReferencedEntity(peRefPToken, params, () => {
+      addProtoReplacementText(peRefPToken, params, [], () => {
          callCount++;
          expect(callCount).toEqual(2);
          done();
@@ -157,7 +167,7 @@ describe('setupReferencedEntity() (unit)', () => {
       done1([textPToken]);
    });
 
-   it('does not do any further processing when the entity is already being loaded 2', (done) => {
+   it('delivers parsing errors to call callers', (done) => {
       let done1: (value: EntityValuePToken) => void;
       let callCount = 0;
       done1 = (): void => {
@@ -179,13 +189,13 @@ describe('setupReferencedEntity() (unit)', () => {
 
       callCount++;
       // Make a first call.  This will start to "retrieve" the sToken and the errors at this time
-      setupReferencedEntity(peRefPToken, params, (results) => {
+      addProtoReplacementText(peRefPToken, params, [], (results) => {
          expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
       });
 
       // make the second call. This will short circuit and not retrieve.
       callCount++;
-      setupReferencedEntity(peRefPToken, params, (results) => {
+      addProtoReplacementText(peRefPToken, params, [], (results) => {
          expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
          done();
       });
@@ -207,7 +217,7 @@ describe('setupReferencedEntity() (unit)', () => {
          localDone(undefined); // <-- heart of the test
       };
 
-      setupReferencedEntity(peRefPToken, params, (results) => {
+      addProtoReplacementText(peRefPToken, params, [], (results) => {
          expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
          done();
       });

@@ -80,9 +80,15 @@ class EntityDetails {
       return hasEntry;
    }
 
+   /*
+    * Note that by convention all value-internal entities will
+    * have their value passed as the second parameter here whenever
+    * that entity is added here.
+    */
+
    public addEntity(
       pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-      expandedValue?: EntityValuePToken,
+      expandedInternalValue?: EntityValuePToken,
    ): void {
       const name = strOrBlank(pToken.name);
 
@@ -99,8 +105,8 @@ class EntityDetails {
             waiters: [],
          };
 
-         if (expandedValue) {
-            this.geDetails[name].protoReplacementText = expandedValue;
+         if (expandedInternalValue) {
+            this.geDetails[name].protoReplacementText = expandedInternalValue;
          }
       } else {
          this.peDetails[name] = {
@@ -110,8 +116,8 @@ class EntityDetails {
             waiters: [],
          };
 
-         if (expandedValue) {
-            this.peDetails[name].protoReplacementText = expandedValue;
+         if (expandedInternalValue) {
+            this.peDetails[name].protoReplacementText = expandedInternalValue;
          }
       }
    }

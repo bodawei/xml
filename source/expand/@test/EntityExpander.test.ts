@@ -267,16 +267,14 @@ describe('EntityExpander (unit)', () => {
          doExpand([docTypeStart, docTypeEnd], true, (results) => {
             expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
-               EXTERNAL_SUBSET_START_TOKEN,
                NOTATION_DECLARATION_PTOKEN,
-               EXTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
             done();
          });
       });
 
-      it('adds an internal and external subset markers if both are there', (done) => {
+      it('adds an internal and calls processing of the xternal subset if both subsets are mentioned', (done) => {
          const notation = new NotationDeclarationPToken({ open: toSToken('<!') });
          docTypeStart = new DocTypeStartPToken({
             open: toSToken('<!'),
@@ -305,9 +303,7 @@ describe('EntityExpander (unit)', () => {
                INTERNAL_SUBSET_START_TOKEN,
                NOTATION_DECLARATION_PTOKEN,
                INTERNAL_SUBSET_END_TOKEN,
-               EXTERNAL_SUBSET_START_TOKEN,
                ERROR_TYPE,
-               EXTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
             done();
@@ -587,7 +583,7 @@ describe('EntityExpander (unit)', () => {
          let index = 0;
 
          expandEntityValueSpy.and.callFake(
-            (pToken: EntityValuePToken, params: object, cb: Function) => {
+            (pToken: EntityValuePToken, params: object, chain: any, cb: Function) => {
                const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
                   `${index}`,
                ]);
@@ -612,7 +608,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(Function);
+            expect(args[2]).toEqual([]);
+            expect(args[3]).toBeInstanceOf(Function);
             done();
          });
       });
@@ -629,7 +626,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(Function);
+            expect(args[2]).toEqual(['student']);
+            expect(args[3]).toBeInstanceOf(Function);
             done();
          });
       });
@@ -696,11 +694,13 @@ describe('EntityExpander (unit)', () => {
             value: [new CharRefPToken({ open: toSToken('&#') })],
          });
 
-         expandEntityValueSpy.and.callFake((pToken: any, params: ExpandParams, cb: any) => {
-            hasGeDecl = params.entityDetails.hasEntity(geDecl);
-            afterCallParams = params;
-            cb({ newValue: [new TextPToken({ text: toSToken(`testValue`) })], errors: [] });
-         });
+         expandEntityValueSpy.and.callFake(
+            (pToken: any, params: ExpandParams, chain: any, cb: any) => {
+               hasGeDecl = params.entityDetails.hasEntity(geDecl);
+               afterCallParams = params;
+               cb({ newValue: [new TextPToken({ text: toSToken(`testValue`) })], errors: [] });
+            },
+         );
 
          doExpand([geDecl, geDecl], true, () => {
             expect(hasGeDecl).toEqual(false);

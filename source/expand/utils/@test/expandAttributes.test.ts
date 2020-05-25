@@ -16,7 +16,7 @@ import { expandAttributes } from '../expandAttributes';
 import { ExpandParams, RetrieveResults, AttributeValueResults } from '../../types';
 import { WellFormedError } from 'error';
 import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
-import * as setupReferencedEntity from '../setupReferencedEntity';
+import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
 
 describe('expandAttributes() (unit)', () => {
@@ -229,9 +229,9 @@ describe('expandAttributes() (unit)', () => {
             name: toSToken('unloadable'),
          }),
       );
-      const setupReferncedEntitySpy = spyOn(setupReferencedEntity, 'setupReferencedEntity');
+      const setupReferncedEntitySpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
       setupReferncedEntitySpy.and.callFake(
-         (a: any, b: any, callback: (result: Array<XmlError>) => void) => {
+         (a: any, b: any, chain: any, callback: (result: Array<XmlError>) => void) => {
             callback([attrError]);
          },
       );
@@ -308,9 +308,9 @@ describe('expandAttributes() (unit)', () => {
             }),
          );
          const loadingError = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
-         const setupReferncedEntitySpy = spyOn(setupReferencedEntity, 'setupReferencedEntity');
+         const setupReferncedEntitySpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
          setupReferncedEntitySpy.and.callFake(
-            (a: any, b: any, callback: (result: Array<XmlError>) => void) => {
+            (a: any, b: any, chain: any, callback: (result: Array<XmlError>) => void) => {
                callback([loadingError]);
             },
          );
@@ -343,9 +343,9 @@ describe('expandAttributes() (unit)', () => {
       });
       let ctr = 0;
       entityDetails.addEntity(get2Decl);
-      const setupReferncedEntitySpy = spyOn(setupReferencedEntity, 'setupReferencedEntity');
+      const setupReferncedEntitySpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
       setupReferncedEntitySpy.and.callFake(
-         (a: any, b: any, callback: (result: Array<XmlError>) => void) => {
+         (a: any, b: any, chain: any, callback: (result: Array<XmlError>) => void) => {
             entityDetails.updateDeclaredValue(get2Decl, [ge2Value], []);
             callback([loadingError]);
          },

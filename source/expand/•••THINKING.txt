@@ -1,8 +1,3 @@
-GOALS
-   - Get the expansion system finished and working
-      - Why: This has been a huge sinkhole of effort and thinking. Getitng it done will
-         free up alot of energy to finish the overall project
-
 FINISHED TASKS
 √ get the setupReferencedEntity code working. 
 √ Rebuild the expandEntityValue function to use the new one  (see below)
@@ -37,46 +32,226 @@ x               hasInfoForDeclaration(decl);
 x               getGEInfo(name)
 x               getPEInfo(name)
 x Maybe our word "expand" is not clear enough, as it is not clear when it involves parsing and when not
-               - I think it means replaceReferences (with what?)
+x               - I think it means replaceReferences (with what?)
 x Where is the error reporting from docTypeEnd?  and entityreference?
 x Make sure unit and integration tests are good
+x LoadingEmitter
+√- entityValueToSTokenSource
+√- lookupPredefinedEntityValue
+√- expandAttributeValue
+x No mocking
+x      - entityValueToSTokenSource()'s tests actually use a real stokenstream.  OK?
+x later work
+x      - Unassigned cleanup
+x         - EntityExpander think unassigned can be undefined. we're also assigning to it
+x Should we be able to stream tokens to an entity value? All are in memory, whcih seems necessary, but problematic
+x Expanding things. These all happen in entityExpander
+x Remember: All internal entity declarations already have their values parsed as EntityValuePTokens
+x AttList defaults should be parsed as an AttValuePToken (which is almost the same, but no PERef recotniation
+x I'm feeling stuck and scared
+x   - The problem is I need to do more design, but I fundamentally want to be coding
+x      I'd like to create the notion of an ExpandedPToken type which includes all PTokens
+x         plus things introduced by the expansion process
+x            GeneralEntityStart, etc, internal and external subset,s, plus our meta data types
+x            The problem with this is that attributes are defined as PTokens but will have
+x            those later.
+x            One of our problems with this project is tryign to build too many layers of abstractoin in
+x            We coudl be generating an expanded element start and end pretty easily with a different attribute type
+x            YEt, we've also built ptokens with their own wel l formed checks. and conversion to xtokesn
+x               We DELIBERATELY did that.  Which means the stance was that the tokens knew about their
+x               whole life cycle.  But of course we didn't.
+x               Really, this is more aligned with the vision of this.  BUt I'm not sure now is the time to do it.
+x               That seems like a refactoring down the line.
+x               Let's try to make that phase 2 of expansion.  We really need to get a stable expansion layer before redoing everything again.
+xReal work
+x- When expandBodyReference is done, add a test to "DOCTYPE declaration" to make sure it works.
+x Build system is collapsing around your ears.
+x   - Need to stop tests from failing if TS errors
+x      - So, My current thought is to get rid of browserify.
+x        - I have an alternate babel config which does TS.
+x        - and it looks like I might be able to use: https://github.com/babel/karma-babel-preprocessor
+x            I can't tell where the files are showing up, though, yet
+x   - Need a way to mock modules in tests
+x      https://github.com/jasmine/jasmine/issues/1414
+x   - Fix missing eslint rule
+x   - eslint env jasmine should be able to be automatically added
+x   - Need ts eslint rules
+x attrValueTwoLevelExpansionWithPERef.xml:5: parser error : PEReferences forbidden in internal subset
+xMake all xml errors derive from some error type
+x-- no perefs i internal subset
+xconst whenDone = expandValue.bind(value, expandParams, expanded);
+xconst asyncBehavior = setupReferencedEntity.bind(expandParams);
+xforEachAsync(missingEntities, asyncBehavior, whenDone);
+xSo, we pull the ge and we parse it (adding charrefs to the parse)
+x   After that parse, if there is a geref, expand it and parse ....
+x>> Attrs can not have external entities in them
+xentirely not allowed in internal subset
+xattValueExternalEntity.xml:4: parser error : PEReferences forbidden in internal subset
+xWe would benefit from having some kind of "countingDone()" fnction
+x* XML: For expander #2, you should map out the whole structure in detail.  The cutDown EntityExpanderTake3 is a good start on thinking about this, but the lesson from the attribute expander is doing all the planning up front is better.
+x    * Most of the details are in our head at this point, so we can write the whole assumption.
+x    * WE CAN ignore standalone now.  But it looks like we care about validating.
+x    * We don’t have the unassigned figured out yet
+x    * We should move attribute expansion out into another routine.
+x    * Note the kinds of expansion:
+x        1. External subset [stream]
+x        2. √ PE Refs in internal entity values [?] <-- I think ? means non-streaming
+x        3. PE Refs in markup decls [?]
+x        4. PE  refs in body [stream]
+x        5. √ GERef’s in attributes [?]
+x        5. √ GERef’s in attribute defs [?]
+x        7. GE refs in body [stream]
+xEach time an entity declaration is encountered:
+x1) expandEntityValues
+x   Whenever a PERef is encountered in an entity value, replaced by PEStart, <expanded contents>, PEEnd  if it is declared (validation will complain if not)
+x      Since all previous internal PE Declaration values will already be expanded, we simply need to inline.
+x      However, if there is an external PE
+x*        need to load
+x         parse as EntityValuePToken
+x         expandEntityValues any PERefs in that.
+x         then inline results with PEStart, <expanded content> PEEnd
+x   End result: All Entity values are fully inlined
+x   ** We should be doing WF Checks on the expansions.  We are not.
+x   ** Where are we reporting missing references?  Those get eaten by our utility routines.
+x2) expndPeRefInDTD
+x   - The target of the ref may not exist.  Need to look it up and then do the following.
+x   This will parse the PE EntityValuePToken as a normal PToken(Stream)
+x      This should never cause anything to need to be loaded, as all PErefs should be ready by this point.
+x      This involves taking a PERef's value and feedingthrough processSTokenSource() with a validity flag
+x   - The resulting tokens should be WF checked.  That isn't happening.
+x   ----
+x   expandPERefInDtd(ref, caches, emd, itemDone)
+x         itemDone({ type: item, token} | { type: done, errors: [])
+x      ? prepareEntityValue(ref, caches, done) 
+x         if it is already there, just return
+x         if it is not, load, parse,
+x            recurse on PERefs
+x      √ entityValueToSTokenSource(value);
+x      wrapperProcessTokenSource:   Will build at least a PTokenStream, and possibly a checking Stream
+x         Each token will come through
+x3) PERefInMarkup
+x   This will parse the PE EntityValuePToken as an unassigned thing.
+x      This is not done as a (stream).
+x      Crucially, this should be doing a WF check.
+x      Also, the Entity declarations and attlist should have values parsed (!)
+x   -----
+x   expandMarkupDeclaration(markupDecl, caches, emd, checkwf, itemDone)
+x      ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+x         if it is already there, just return
+x         if it is not, load, parse,
+x            recurse on PERefs
+x      √ entityValueToSTokenSource(value);
+x      unassigned parsing
+x4) AttributeValues
+x   Loop through attvalue
+x      - if a geref look up the relevant entity declaratin
+x*        - load and parse if needed
+x               - doing expandEntityValues in the process
+x      - parse as att value
+x         - That may have sub-gerefs that will need to be expanded as well
+x      - The whole attvalue should maybe be WF checked somewhere.  That's probably all validity checking
+x   ----
+x   << we probably want to have a thing which takes a start, empty or attlist and process it>>
+x   expandAttributeValue(attribute, caches, emd, itemDone)
+x      loop over attribute things.  For any gerefs
+x         ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+x            if it is already there, just return
+x            if it is not, load, parse,
+x               recurse on PERefs
+x         √ entityValueToSTokenSource(value);
+x         do an attribute parsing
+x      itemDone( carries the whole attribtue value)
+x5) GeRefInBody
+x      - if a geref look up the relevant entity declaratin
+x*        - load and parse if needed
+x               - doing expandEntityValues in the process
+x      - parse as body
+x         - May include other gerefs
+x         - need to do wf checking here
+x   ----
+x   expandGerefInContent(ref, caches, emd, itemDone)
+x         itemDone({ type: item, token} | { type: done, errors: [])
+x      ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
+x         if it is already there, just return
+x         if it is not, load, parse,
+x            recurse on PERefs
+x      √ entityValueToSTokenSource(value);
+x      wrapperProcessTokenSource:   Will build at least a PTokenStream, and possibly a checking Stream
+x         Each token will come through
+x QUESTION 1: Should body go expansion go through entity expander or 
+x- we aren't passing a dictate to expandEnitityValue to ask it not to load external entities.  same with setup.
+xREFACTORING
+x- toEqualRangeless isn't working... why not?
+x- I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
+x- REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
+x- AttributeValuePToken should get pushed down into attribute
+x- QUestion: Should setup be setting up the valueCache for all?  The  key is all the loading stuff.
+x         -- Back to the thought the cache should be a class and handles its own value loading.  Though, we need to get to the streaming case for this to really make sense.
+x- expandEntityValue should probably change callbck to deliver a single value.
+x- WE are protecting against recursive calls in the entity setup by setting up the cache after value processing, not by actually looking. This feels icky.
+x- need to pass the validate flag, need to pass the chain of entities, and need to pass back the before-consumption PE's
+x- streaming has no idea about what its context is. how to prevent recursion?
+x- Atttend to errors going through the whole system
+x   => Development problem.  We're feeling wobbly with external.  how to know what you are doing next? When it gets biggerthan your head, using tests to drive this
+x- Handling of externalId in EntityExpanderStream is crazy
+x- Extra EMD in       it('adds external subset markers when there is an externalId', (done) => {
+x- Where should the path to the entity in the integration test be relative to?
+x- need to be passing inContent correctly in streamEntityReference
+x Digest the legacy
+x streamEntityReference
+x         - What happens to content we parse?
+x         - And are we sure to tell it when it should or should not be identifing pe references?
+x         - need to prevent recursion
+x - ExternalDtdSubsetPseudoToken
+x- setupReferencedEntity
+x         - Should be passing a flag saying: don't load external entities.  In fact, whole system should be checked for taht
+x- think we need an internal call to expandPToken which carries the array of entities we are in the middle of Expanding
+x- It looks likw we aren't doing the right thing wrt prsing inContent or not in streamEntityReference
+x- integration tests
+x   - attributes
+x   - Attributes with recursive gerefs
+x   - attributes with refs to external entities (not allowed, but we can do)
+x- Principals
+x   - callbacks
+x   - do not use isntanceof on types. Allow for ducktypes.  However, use types for TS typing
+x   - We are keeping entity values in memory, including expansion, when they are rooted in internal. this might be a problem.
+x Why isn't toEqualRangeless etc not working
+x Need coverage reporting urgently
 
-IMMEDIATE TASKS
-- Document
-   - Put a whole readme describing the whole thinking around expansion,
-         - Describe where the parsing happens.  It is still hard to readon about.
-         - Document caching, as such, happens at internal time, or use.
-         Probably add a "how to use me" section
-         Also reflect on what dependencies This has on serving packages.
-- Implementation
-   - Principals
-      - callbacks
-      - do not use isntanceof on types. Allow for ducktypes.  However, use types for TS typing
+GOALS
+   - Get the expansion system finished and working
+      - Why: This has been a huge sinkhole of effort and thinking. Getitng it done will
+         free up alot of energy to finish the overall project
+
+DOCUMENT
+- Put a whole readme describing the whole thinking around expansion,
+      - Describe where the parsing happens.  It is still hard to readon about.
+      - Document caching, as such, happens at internal time, or use.
+      Probably add a "how to use me" section
+      Also reflect on what dependencies This has on serving packages.
+  - In architecture, talk about what goes into the EntityDetails and not
+  - Also document what comes out, especially for all the expansion cases.
+
+IMPLEMENTATION
    - CLEANUP
       - Later cleanup
-         - unassigned is undefined and should be immutable
-         - attribute values seem to have parameter entity tokens in their definition, but they'll never have that
-         - Need to be able to construct a new attlist decl with new values without modifying the one in place
-         - Also have a problem with the definitio nof an entity declaration. doesn't match EntityValuePToken
+         - Seriously need to think about retrieveExternalEntity error conditions
          - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.
-      - EntityExpander
-         - Who should be purging the emd's?
-         - expandEntityValue should be handling the recursion.
-         - think we need an internal call to expandPToken which carries the array of entities we are in the middle of Expanding
-         - Where is it we are depending on the cache not having the entry to avoid infintie recursion?
-               - Maybe THIS is what should be doing the expansion -- no. I want it to be fundamentally dumb.
-      √- entityValueToSTokenSource
-      √- lookupPredefinedEntityValue
-      - expandAttributeValue
          - NOTE: we are storing the preparsed values in the start and end tokens.
          - We're assuming that if reading an entity fails, we put no data i nthe protoReplacementText
-      - setupReferencedEntity
-      - streamEntityReference
-         - This is done with the external subset
-      - LoadingEmitter
-      - ExternalDtdSubsetPseudoToken
+            - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
+      - EntityExpander
+         - Who should be purging the emd's?
+         - EntityExpander could just be a function that returns a function.  Do we actually need a class?
       - expandUnassigned
+         - need to make sure to do special handling for element
       - expandEntityValue
+         - what happens to content we parse
+      - Don't load external entities
+         - need this in addProtoReplacementText
+      - Recursion problem
+         - streamEntityReference needs to deal with this
+         - Are we still depending on the "don't put it in the cache" to avoid recursion?
    - Research
       - What should we be diong with ranges in entityValueToSTokenSource()?
          Can an Stoken have multiple ranges in an entity value ptoken?  Remind me what the rule for ranges is.
@@ -86,18 +261,7 @@ IMMEDIATE TASKS
             <!ENTITY % three "%onea;%oneb;">
             <!ENTITY % four "%three;">  <-- I think it willl  get parsed here. into an actual reference wich will be expanded here
             <!ENTITY ge "%four;">
-      - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
-         - even if we don't implement it, we should make sure we can do that.
-   - QUESTIONS
-      - Should we be able to stream tokens to an entity value? All are in memory, whcih seems necessary, but problematic
-      - SHould move internal/external subset start and end into expand?
-   - No mocking
-      - entityValueToSTokenSource()'s tests actually use a real stokenstream.  OK?
-   - later work
-      - Unassigned cleanup
-         - EntityExpander think unassigned can be undefined. we're also assigning to it
-
-- Build
+BUILD
    - Try to get testing to work so it doesn't fail every time you break it
          - This looks promising: https://www.npmjs.com/package/jasmine-ts
          - https://www.npmjs.com/package/tsconfig-paths
@@ -111,6 +275,7 @@ IMMEDIATE TASKS
          This works, albeit with some errors. HAd to make two changes to tsconfig
                   "resolveJsonModule": true,
       "esModuleInterop": true,
+      - What is this? https://github.com/babel/karma-babel-preprocessor
       NEXT STEP:
          - Set up better reporters
          - Then figure out what all this is doing and why it is working (or not working)
@@ -119,202 +284,25 @@ IMMEDIATE TASKS
             tsconfig-paths/register  <-- patches the global module object to replace "source/foo/bar" with the typescript path
             ./node_modules/.bin/jasmine --config=./build/new-jasmine.json 
 
+FUTURE REFACTORING
+   - What is a ptoken again?
+      - Should move the internal/external subset markers into expand, no?
+      - Future refactoring: At this point I don't think ptokens should know about either conversion to
+         xtokens or well formed checks.
+   - how to handle: Handling of externalId in EntityExpanderStream is crazy
+   - I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
+   - unassigned is undefined and should be immutable
+   - attribute values seem to have parameter entity tokens in their definition, but they'll never have that
+   - Need to be able to construct a new attlist decl with new values without modifying the one in place
+   - Also have a problem with the definitio nof an entity declaration. doesn't match EntityValuePToken
 
-
-QUESTION IF we reference a PE Decl in the dtd, will it merge pe declarations, such that an escaped %foo; can cross and still be expanded?
-
-REFACTORING
-- EntityExpander could just be a function that returns a function.  Do we actually need a class?
-
-
-
-REFACTORING
-- toEqualRangeless isn't working... why not?
-- I don't think docTypeEnd needs the reference to the docTypeStart comping out of the ptoken processing.Individual stages can hang onto it if they want
-- REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
-- AttributeValuePToken should get pushed down into attribute
-- QUestion: Should setup be setting up the valueCache for all?  The  key is all the loading stuff.
-         -- Back to the thought the cache should be a class and handles its own value loading.  Though, we need to get to the streaming case for this to really make sense.
-- expandEntityValue should probably change callbck to deliver a single value.
-- we aren't passing a dictate to expandEnitityValue to ask it not to load external entities.  same with setup.
-- WE are protecting against recursive calls in the entity setup by setting up the cache after value processing, not by actually looking. This feels icky.
-- need to pass the validate flag, need to pass the chain of entities, and need to pass back the before-consumption PE's
-- streaming has no idea about what its context is. how to prevent recursion?
-- Atttend to errors going through the whole system
-   => Development problem.  We're feeling wobbly with external.  how to know what you are doing next? When it gets biggerthan your head, using tests to drive this
-- Handling of externalId in EntityExpanderStream is crazy
-- Extra EMD in       it('adds external subset markers when there is an externalId', (done) => {
-- The following did not produce an XML Error in the stream output
-         <!DOCTYPE one [
-            <!ENTITY % internalPE "<!ENTITY one 'my content'>">
-            %internalPE;
-            <!ELEMENT one EMPTY>
-            >
-         ]>
-         <one>&one;</one>`);
-- Where should the path to the entity in the integration test be relative to?
-- need to be passing inContent correctly in streamEntityReference
-
-
-CLEAN UP THE BELOW
-===================
-
-* XML: For expander #2, you should map out the whole structure in detail.  The cutDown EntityExpanderTake3 is a good start on thinking about this, but the lesson from the attribute expander is doing all the planning up front is better.
-    * Most of the details are in our head at this point, so we can write the whole assumption.
-    * WE CAN ignore standalone now.  But it looks like we care about validating.
-    * We don’t have the unassigned figured out yet
-    * We should move attribute expansion out into another routine.
-    * Note the kinds of expansion:
-        1. External subset [stream]
-        2. √ PE Refs in internal entity values [?] <-- I think ? means non-streaming
-        3. PE Refs in markup decls [?]
-        4. PE  refs in body [stream]
-        5. √ GERef’s in attributes [?]
-        5. √ GERef’s in attribute defs [?]
-        7. GE refs in body [stream]
-
-
-
-Expanding things. These all happen in entityExpander
-
-Remember: All internal entity declarations already have their values parsed as EntityValuePTokens
-AttList defaults should be parsed as an AttValuePToken (which is almost the same, but no PERef recotniation
-
-I'm feeling stuck and scared
-   - The problem is I need to do more design, but I fundamentally want to be coding
-      I'd like to create the notion of an ExpandedPToken type which includes all PTokens
-         plus things introduced by the expansion process
-            GeneralEntityStart, etc, internal and external subset,s, plus our meta data types
-            The problem with this is that attributes are defined as PTokens but will have
-            those later.
-            One of our problems with this project is tryign to build too many layers of abstractoin in
-            We coudl be generating an expanded element start and end pretty easily with a different attribute type
-            YEt, we've also built ptokens with their own wel l formed checks. and conversion to xtokesn
-               We DELIBERATELY did that.  Which means the stance was that the tokens knew about their
-               whole life cycle.  But of course we didn't.
-               Really, this is more aligned with the vision of this.  BUt I'm not sure now is the time to do it.
-               That seems like a refactoring down the line.
-               Let's try to make that phase 2 of expansion.  We really need to get a stable expansion layer before redoing everything again.
-
-Real work
-- When expandBodyReference is done, add a test to "DOCTYPE declaration" to make sure it works.
-
-
-- Build system is collapsing around your ears.
-   - Need to stop tests from failing if TS errors
-      - So, My current thought is to get rid of browserify.
-        - I have an alternate babel config which does TS.
-        - and it looks like I might be able to use: https://github.com/babel/karma-babel-preprocessor
-            I can't tell where the files are showing up, though, yet
-   - Need a way to mock modules in tests
-      https://github.com/jasmine/jasmine/issues/1414
-   - Fix missing eslint rule
-   - eslint env jasmine should be able to be automatically added
-   - Need ts eslint rules
-attrValueTwoLevelExpansionWithPERef.xml:5: parser error : PEReferences forbidden in internal subset
-
-Make all xml errors derive from some error type
--- no perefs i internal subset
-const whenDone = expandValue.bind(value, expandParams, expanded);
-const asyncBehavior = setupReferencedEntity.bind(expandParams);
-
-forEachAsync(missingEntities, asyncBehavior, whenDone);
->>
-So, we pull the ge and we parse it (adding charrefs to the parse)
-   After that parse, if there is a geref, expand it and parse ....
->> Attrs can not have external entities in them
-
-entirely not allowed in internal subset
-attValueExternalEntity.xml:4: parser error : PEReferences forbidden in internal subset
-
-We would benefit from having some kind of "countingDone()" fnction
-
-Each time an entity declaration is encountered:
-1) expandEntityValues
-   Whenever a PERef is encountered in an entity value, replaced by PEStart, <expanded contents>, PEEnd  if it is declared (validation will complain if not)
-      Since all previous internal PE Declaration values will already be expanded, we simply need to inline.
-      However, if there is an external PE
-*        need to load
-         parse as EntityValuePToken
-         expandEntityValues any PERefs in that.
-         then inline results with PEStart, <expanded content> PEEnd
-   End result: All Entity values are fully inlined
-   ** We should be doing WF Checks on the expansions.  We are not.
-   ** Where are we reporting missing references?  Those get eaten by our utility routines.
-
-2) expndPeRefInDTD
-   - The target of the ref may not exist.  Need to look it up and then do the following.
-   This will parse the PE EntityValuePToken as a normal PToken(Stream)
-      This should never cause anything to need to be loaded, as all PErefs should be ready by this point.
-      This involves taking a PERef's value and feedingthrough processSTokenSource() with a validity flag
-   - The resulting tokens should be WF checked.  That isn't happening.
-   ----
-   expandPERefInDtd(ref, caches, emd, itemDone)
-         itemDone({ type: item, token} | { type: done, errors: [])
-      ? prepareEntityValue(ref, caches, done) 
-         if it is already there, just return
-         if it is not, load, parse,
-            recurse on PERefs
-      √ entityValueToSTokenSource(value);
-      wrapperProcessTokenSource:   Will build at least a PTokenStream, and possibly a checking Stream
-         Each token will come through
-
-
-3) PERefInMarkup
-   This will parse the PE EntityValuePToken as an unassigned thing.
-      This is not done as a (stream).
-      Crucially, this should be doing a WF check.
-      Also, the Entity declarations and attlist should have values parsed (!)
-   -----
-   expandMarkupDeclaration(markupDecl, caches, emd, checkwf, itemDone)
-      ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
-         if it is already there, just return
-         if it is not, load, parse,
-            recurse on PERefs
-      √ entityValueToSTokenSource(value);
-      unassigned parsing
-
-
-4) AttributeValues
-   Loop through attvalue
-      - if a geref look up the relevant entity declaratin
-*        - load and parse if needed
-               - doing expandEntityValues in the process
-      - parse as att value
-         - That may have sub-gerefs that will need to be expanded as well
-      - The whole attvalue should maybe be WF checked somewhere.  That's probably all validity checking
-   ----
-   << we probably want to have a thing which takes a start, empty or attlist and process it>>
-   expandAttributeValue(attribute, caches, emd, itemDone)
-      loop over attribute things.  For any gerefs
-         ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
-            if it is already there, just return
-            if it is not, load, parse,
-               recurse on PERefs
-         √ entityValueToSTokenSource(value);
-         do an attribute parsing
-      itemDone( carries the whole attribtue value)
-
-
-5) GeRefInBody
-      - if a geref look up the relevant entity declaratin
-*        - load and parse if needed
-               - doing expandEntityValues in the process
-      - parse as body
-         - May include other gerefs
-         - need to do wf checking here
-   ----
-   expandGerefInContent(ref, caches, emd, itemDone)
-         itemDone({ type: item, token} | { type: done, errors: [])
-      ? prepareEntityValue(ref, caches, done)  <-- we need a countingDone function. Something like debounce
-         if it is already there, just return
-         if it is not, load, parse,
-            recurse on PERefs
-      √ entityValueToSTokenSource(value);
-      wrapperProcessTokenSource:   Will build at least a PTokenStream, and possibly a checking Stream
-         Each token will come through
-
-
-QUESTION 1: Should body go expansion go through entity expander or 
-
-
+OTHER BUGS
+- Validator
+      - The following did not produce an XML Error in the stream output (note the extra > )
+               <!DOCTYPE one [
+                  <!ENTITY % internalPE "<!ENTITY one 'my content'>">
+                  %internalPE;
+                  <!ELEMENT one EMPTY>
+                  >
+               ]>
+               <one>&one;</one>`);

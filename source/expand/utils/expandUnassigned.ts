@@ -9,7 +9,7 @@ import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
 import { ExpandParams } from '../types';
 
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
-import { setupReferencedEntity } from './setupReferencedEntity';
+import { addProtoReplacementText } from './addProtoReplacementText';
 
 type ExpandAttrResult = {
    newValue: UnassignedArray;
@@ -74,7 +74,7 @@ function expandPeRef(
    }
 
    // No valueCache, so try to load it.
-   setupReferencedEntity(peRef, expandParams, (newErrors) => {
+   addProtoReplacementText(peRef, expandParams, [], (newErrors) => {
       const sTokenSource = entityValueToSTokenSource(
          peInfo.protoReplacementText || [],
          expandParams.emd,

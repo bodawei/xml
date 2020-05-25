@@ -4,14 +4,16 @@ import { Token } from 'basic';
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
-import { EntityExpander, ExpandToken, STokenSourceProcessed, TokenProcessed } from '../expand/legacy/EntityExpander-draft2';
+import { PToken } from 'token';
+import { EntityExpander } from '../expand/EntityExpander';
 import { PTokenFromLiteralStream } from 'pTokenStream';
 import { EntityValuePToken } from 'source/token/entityDeclaration';
 import { defaultExtractors } from 'extractor';
 import { ExternalId } from 'source/token/common/externalId';
+import { RetrieveResults } from 'source/expand/types';
 
 
-function processBody(sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken, done: STokenSourceProcessed) {
+function parseBody(sTokenSource: STokenSource, inContent: boolean, expandToken: (a: any, b: any) => void) {
    const pTokenStream = new PTokenStream(sTokenSource);
    let seenEnd = false;
    let paused = false;
@@ -20,7 +22,7 @@ function processBody(sTokenSource: STokenSource, inContent: boolean, expandToken
 
    function checkit() {
       if (seenEnd && !paused) {
-         done();
+         expandToken(undefined, () => {});
       }
    }
 
@@ -39,7 +41,7 @@ function processBody(sTokenSource: STokenSource, inContent: boolean, expandToken
    });
 }
 
-function processForEntityValue(sTokenSource: STokenSource, done: (result: EntityValuePToken) => void) {
+function parseEntityValue(sTokenSource: STokenSource, done: (result: EntityValuePToken) => void) {
    const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
    const results: EntityValuePToken = []
 
@@ -72,7 +74,7 @@ function findEntity(pName: string, name: string, resources: any): string {
 }
 
 
-function retrieveExternalEntity(resources: any, externalId: ExternalId, entityMetaData: EntityMetaData) {
+function retrieveExternalEntity(resources: any, externalId: ExternalId, entityMetaData: EntityMetaData): RetrieveResults {
    const parts = entityMetaData.location.systemId.match(/.*\/([Pp][0-9]+a?)\/[^\/]+/);
    const production = parts ? parts[1] : '';
    const systemInfo = externalId.system;
@@ -103,7 +105,10 @@ function retrieveExternalEntity(resources: any, externalId: ExternalId, entityMe
    }
    source.endText();
 
-   return source;
+   return {
+      sTokenSource: source,
+      getErrors() { return [] },
+   };
 }
 
 /**********************************************************************\
@@ -120,14 +125,15 @@ class IbmEntityExpanderStream extends Transform {
       });
 
       this.entityExpander = new EntityExpander(validating, this.push.bind(this), {
-         processBody,
-         processForEntityValue,
+         parseBody,
+         parseEntityValue,
          retrieveExternalEntity: retrieveExternalEntity.bind(undefined, resources),
+         parseAttributeValue: (() => {}) as any
       });
    }
 
-   _transform(token: Token, encoding: string, done: TokenProcessed) {
-      this.entityExpander.expandToken(token, done);
+   _transform(token: PToken, encoding: string, done: () => void) {
+      this.entityExpander.expandPToken(token, done);
    }
 }
 

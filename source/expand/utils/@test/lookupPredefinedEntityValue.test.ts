@@ -19,6 +19,7 @@ describe('lookupPredefinedEntityValue() (unit)', () => {
          new CharRefPToken({
             open: toSToken('&#'),
             digits: toSToken('38'),
+            close: toSToken(';'),
          }),
          new TextPToken({ text: toSToken('#60;') }),
       ]);
@@ -31,6 +32,7 @@ describe('lookupPredefinedEntityValue() (unit)', () => {
          new CharRefPToken({
             open: toSToken('&#'),
             digits: toSToken('38'),
+            close: toSToken(';'),
          }),
          new TextPToken({ text: toSToken('#38;') }),
       ]);
@@ -43,6 +45,7 @@ describe('lookupPredefinedEntityValue() (unit)', () => {
          new CharRefPToken({
             open: toSToken('&#'),
             digits: toSToken('62'),
+            close: toSToken(';'),
          }),
       ]);
    });
@@ -54,6 +57,7 @@ describe('lookupPredefinedEntityValue() (unit)', () => {
          new CharRefPToken({
             open: toSToken('&#'),
             digits: toSToken('39'),
+            close: toSToken(';'),
          }),
       ]);
    });
@@ -65,6 +69,7 @@ describe('lookupPredefinedEntityValue() (unit)', () => {
          new CharRefPToken({
             open: toSToken('&#'),
             digits: toSToken('34'),
+            close: toSToken(';'),
          }),
       ]);
    });

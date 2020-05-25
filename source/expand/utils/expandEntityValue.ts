@@ -11,7 +11,7 @@ import {
 import { ExpandParams } from '../types';
 import { EntityDetails } from './EntityDetails';
 
-import { setupReferencedEntity } from './setupReferencedEntity';
+import { addProtoReplacementText } from './addProtoReplacementText';
 
 type ExpandedResult = {
    newValue: EntityValuePToken;
@@ -93,6 +93,7 @@ function expandValue(
 function expandEntityValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
+   peRefChain: Array<string>,
    expanded: (result: ExpandedResult) => void,
 ): void {
    const missingEntities = findUncachedEntities(value, expandParams.entityDetails);
@@ -105,7 +106,7 @@ function expandEntityValue(
 
    for (const reference of missingEntities) {
       // eslint-disable-next-line no-loop-func
-      setupReferencedEntity(reference, expandParams, (errors) => {
+      addProtoReplacementText(reference, expandParams, [], (errors) => {
          remainingEntities--;
 
          if (remainingEntities === 0) {

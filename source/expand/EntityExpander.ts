@@ -41,7 +41,6 @@ import { EntityDetails } from './utils/EntityDetails';
 import { expandAttributes } from './utils/expandAttributes';
 import { expandEntityValue } from './utils/expandEntityValue';
 import { expandUnassigned } from './utils/expandUnassigned';
-import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
 import { streamEntityReference } from './utils/streamEntityReference';
 import { EntityProcessors, ExpandParams } from './types';
 
@@ -194,7 +193,6 @@ class EntityExpander {
       }
 
       this.state = State.IN_EXTERNAL_SUBSET;
-      this.deliverToken(new ExternalSubsetStartToken());
 
       streamEntityReference(externalSubsetToken, this.expandParams, (result, nextPTokenDone) => {
          if (result) {
@@ -202,7 +200,6 @@ class EntityExpander {
             return;
          }
 
-         this.deliverToken(new ExternalSubsetEndToken());
          this.state = State.IN_CONTENT;
          this.deliverToken(pToken);
          nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
@@ -267,6 +264,8 @@ class EntityExpander {
     * §4.1.0 Well-formedness constraint: Entity Declared
     *    The declaration of a general entity must precede any reference to it which
     *    appears in a default value in an attribute-list declaration.
+    *
+    * The default handling is declared in §2.3 [10] and §3.3.2 [60]
     */
    private handleAttListDeclaration(pToken: AttListPToken, handled: PTokenExpanded): void {
       // REFACTOR/CLEANUP: default type is wrong.
@@ -295,6 +294,8 @@ class EntityExpander {
     * might eventually be implemented in a way to verify that the full
     * tree of parameter entities are syntactically well formed, while not
     * storing the value.
+    *
+    * §2.8.0, §4.4.5 and §4.5 all discuss parameter entities in an EntityValue.
     */
    private handleEntityDeclaration(
       pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
@@ -302,6 +303,7 @@ class EntityExpander {
    ): void {
       const name = strOrBlank(pToken.name);
       const hasEntry = this.expandParams.entityDetails.hasEntity(pToken);
+      const chain = pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN ? [name] : [];
 
       if (name === '' || hasEntry) {
          this.deliverToken(pToken);
@@ -317,7 +319,7 @@ class EntityExpander {
       }
 
       // REFACTOR/CLEANUP again types do not match correctly
-      expandEntityValue(pToken.value as any, this.expandParams, (result): void => {
+      expandEntityValue(pToken.value as any, this.expandParams, chain, (result): void => {
          this.expandParams.entityDetails.addEntity(pToken, result.newValue);
 
          this.deliverErrors(result.errors);
@@ -357,29 +359,11 @@ class EntityExpander {
       pToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken,
       handled: PTokenExpanded,
    ): void {
-      let start: GeneralEntityStartPToken | ParameterEntityStartPToken;
-      let end: GeneralEntityEndPToken | ParameterEntityEndPToken;
-      let seenOneResult = false;
-
-      if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-         start = new GeneralEntityStartPToken(pToken);
-         end = new GeneralEntityEndPToken(pToken);
-      } else {
-         start = new ParameterEntityStartPToken(pToken);
-         end = new ParameterEntityEndPToken(pToken);
-      }
-
       streamEntityReference(pToken, this.expandParams, (result, done) => {
          // how do you distinguish a failure to lookup vs. an empty one?
          if (!result) {
-            this.deliverToken(end);
             handled();
          } else {
-            if (!seenOneResult) {
-               this.deliverToken(start);
-               seenOneResult = true;
-            }
-
             this.expandPToken(result, done);
          }
       });

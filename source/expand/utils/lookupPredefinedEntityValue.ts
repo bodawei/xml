@@ -11,6 +11,7 @@ const PREDEFINED_ENTITIES: NameToEntityValue = {
       new CharRefPToken({
          open: toSToken('&#'),
          digits: toSToken('38'),
+         close: toSToken(';'),
       }),
       new TextPToken({ text: toSToken('#60;') }),
    ],
@@ -18,6 +19,7 @@ const PREDEFINED_ENTITIES: NameToEntityValue = {
       new CharRefPToken({
          open: toSToken('&#'),
          digits: toSToken('38'),
+         close: toSToken(';'),
       }),
       new TextPToken({ text: toSToken('#38;') }),
    ],
@@ -25,18 +27,21 @@ const PREDEFINED_ENTITIES: NameToEntityValue = {
       new CharRefPToken({
          open: toSToken('&#'),
          digits: toSToken('62'),
+         close: toSToken(';'),
       }),
    ],
    apos: [
       new CharRefPToken({
          open: toSToken('&#'),
          digits: toSToken('39'),
+         close: toSToken(';'),
       }),
    ],
    quot: [
       new CharRefPToken({
          open: toSToken('&#'),
          digits: toSToken('34'),
+         close: toSToken(';'),
       }),
    ],
 };

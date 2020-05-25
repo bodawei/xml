@@ -14,7 +14,7 @@ import {
 
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
-import { setupReferencedEntity } from './setupReferencedEntity';
+import { addProtoReplacementText } from './addProtoReplacementText';
 import { GEDetails } from './EntityDetails';
 import { ExpandParams } from '../types';
 
@@ -111,7 +111,12 @@ function expandGeRef(
       return;
    }
 
-   // Stop processing if we find this entity reference is already being processed, or it is unparsed
+   /*
+    * §4.1.0: Well-Formedness Constraint: No Recursion
+    *     A parsed entity must not contain a recursive reference
+    *     to itself, either directly or indirectly.
+    * §4.4.0 unparsed entities may not be referenced in content
+    */
    if (geRefChain.includes(entityName) || geDetails.isUnparsed) {
       geRefExpanded(result);
       return;
@@ -122,10 +127,9 @@ function expandGeRef(
       return;
    }
 
-   setupReferencedEntity(geRef, expandParams, (newErrors) => {
+   addProtoReplacementText(geRef, expandParams, [], (newErrors) => {
       if (!geDetails.protoReplacementText) {
          result.errors = newErrors;
-
          geRefExpanded(result);
          return;
       }
