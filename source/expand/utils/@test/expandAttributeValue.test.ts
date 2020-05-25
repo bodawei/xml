@@ -99,229 +99,229 @@ describe('expandAttributeValue() (unit)', () => {
       });
    });
 
-   it('calls back with the original GE Ref when the declaration is of an unparsed entity', (done) => {
-      const unparsedRef = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
-         name: toSToken('unparsed'),
-      });
-      entityDetails.addEntity(
-         new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('unparsed'),
-            nData: toSToken('NDATA'),
-         }),
-      );
+   // it('calls back with the original GE Ref when the declaration is of an unparsed entity', (done) => {
+   //    const unparsedRef = new GeneralEntityReferencePToken({
+   //       open: toSToken('&'),
+   //       name: toSToken('unparsed'),
+   //    });
+   //    entityDetails.addEntity(
+   //       new GeneralEntityDeclarationPToken({
+   //          open: toSToken('<!'),
+   //          name: toSToken('unparsed'),
+   //          nData: toSToken('NDATA'),
+   //       }),
+   //    );
 
-      expandAttributeValue([textPToken, unparsedRef], params, (result) => {
-         expect(result.newValue).toEqual([textPToken, unparsedRef]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, unparsedRef], params, (result) => {
+   //       expect(result.newValue).toEqual([textPToken, unparsedRef]);
+   //       done();
+   //    });
+   // });
 
-   it('calls back with the original refernce if it can not be parsed for some reason', (done) => {
-      params.utils.parseAttributeValue = (
-         sTokenSource: STokenSource,
-         done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
-      ): void => {
-         done(undefined, []);
-      };
+   // it('calls back with the original refernce if it can not be parsed for some reason', (done) => {
+   //    params.utils.parseAttributeValue = (
+   //       sTokenSource: STokenSource,
+   //       done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   //    ): void => {
+   //       done(undefined, []);
+   //    };
 
-      expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result.newValue).toEqual([textPToken, geRefPToken]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, geRefPToken], params, (result) => {
+   //       expect(result.newValue).toEqual([textPToken, geRefPToken]);
+   //       done();
+   //    });
+   // });
 
-   it('calls back with the original refernce if it has no name', (done) => {
-      const namlessGERef = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
-      });
+   // it('calls back with the original refernce if it has no name', (done) => {
+   //    const namlessGERef = new GeneralEntityReferencePToken({
+   //       open: toSToken('&'),
+   //    });
 
-      expandAttributeValue([textPToken, namlessGERef], params, (result) => {
-         expect(result.newValue).toEqual([textPToken, namlessGERef]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, namlessGERef], params, (result) => {
+   //       expect(result.newValue).toEqual([textPToken, namlessGERef]);
+   //       done();
+   //    });
+   // });
 
-   it('calls back with the a copy of the general entity reference when this is a recursive call', (done) => {
-      const pToken = geRefPToken;
-      const sourceToken = new TextPToken({ text: toSToken('&ge1;') });
-      params.utils.parseAttributeValue = (
-         sTokenSource: STokenSource,
-         done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
-      ): void => {
-         done([pToken], []);
-      };
+   // it('calls back with the a copy of the general entity reference when this is a recursive call', (done) => {
+   //    const pToken = geRefPToken;
+   //    const sourceToken = new TextPToken({ text: toSToken('&ge1;') });
+   //    params.utils.parseAttributeValue = (
+   //       sTokenSource: STokenSource,
+   //       done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   //    ): void => {
+   //       done([pToken], []);
+   //    };
 
-      expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result.newValue).toEqual([
-            textPToken,
-            new GeneralEntityStartPToken(geRefPToken, [sourceToken]),
-            pToken,
-            new GeneralEntityEndPToken(geRefPToken, [sourceToken]),
-         ]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, geRefPToken], params, (result) => {
+   //       expect(result.newValue).toEqual([
+   //          textPToken,
+   //          new GeneralEntityStartPToken(geRefPToken, [sourceToken]),
+   //          pToken,
+   //          new GeneralEntityEndPToken(geRefPToken, [sourceToken]),
+   //       ]);
+   //       done();
+   //    });
+   // });
 
-   it('calls back with the entity parsed as an attribute value when the general entity exists', (done) => {
-      const pToken = new TextPToken({ text: toSToken('INNER PARSE') });
-      params.utils.parseAttributeValue = (
-         sTokenSource: STokenSource,
-         done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
-      ): void => {
-         done([pToken], []);
-      };
+   // it('calls back with the entity parsed as an attribute value when the general entity exists', (done) => {
+   //    const pToken = new TextPToken({ text: toSToken('INNER PARSE') });
+   //    params.utils.parseAttributeValue = (
+   //       sTokenSource: STokenSource,
+   //       done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   //    ): void => {
+   //       done([pToken], []);
+   //    };
 
-      expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result.newValue).toEqual([
-            textPToken,
-            new GeneralEntityStartPToken(geRefPToken, [pToken]),
-            pToken,
-            new GeneralEntityEndPToken(geRefPToken, [pToken]),
-         ]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, geRefPToken], params, (result) => {
+   //       expect(result.newValue).toEqual([
+   //          textPToken,
+   //          new GeneralEntityStartPToken(geRefPToken, [pToken]),
+   //          pToken,
+   //          new GeneralEntityEndPToken(geRefPToken, [pToken]),
+   //       ]);
+   //       done();
+   //    });
+   // });
 
-   it('calls back with the a with the parsed contents when the entity can not be loaded', (done) => {
-      const unloadable = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
-         name: toSToken('unloadable'),
-      });
-      entityDetails.addEntity(
-         new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('unloadable'),
-         }),
-      );
+   // it('calls back with the a with the parsed contents when the entity can not be loaded', (done) => {
+   //    const unloadable = new GeneralEntityReferencePToken({
+   //       open: toSToken('&'),
+   //       name: toSToken('unloadable'),
+   //    });
+   //    entityDetails.addEntity(
+   //       new GeneralEntityDeclarationPToken({
+   //          open: toSToken('<!'),
+   //          name: toSToken('unloadable'),
+   //       }),
+   //    );
 
-      params.utils.parseEntityValue = (sTokenSource, done): void => {
-         done();
-      };
+   //    params.utils.parseEntityValue = (sTokenSource, done): void => {
+   //       done();
+   //    };
 
-      expandAttributeValue([textPToken, unloadable], params, (result) => {
-         expect(result.newValue).toEqual([textPToken, unloadable]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, unloadable], params, (result) => {
+   //       expect(result.newValue).toEqual([textPToken, unloadable]);
+   //       done();
+   //    });
+   // });
 
-   it('calls back with the entity parsed as an attribute value when the general entity is loaded', (done) => {
-      const pToken = new TextPToken({ text: toSToken('INNER PARSE') });
-      params.utils.parseAttributeValue = (
-         sTokenSource: STokenSource,
-         done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
-      ): void => {
-         done([pToken], []);
-      };
+   // it('calls back with the entity parsed as an attribute value when the general entity is loaded', (done) => {
+   //    const pToken = new TextPToken({ text: toSToken('INNER PARSE') });
+   //    params.utils.parseAttributeValue = (
+   //       sTokenSource: STokenSource,
+   //       done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   //    ): void => {
+   //       done([pToken], []);
+   //    };
 
-      expandAttributeValue([textPToken, geRefPToken], params, (result) => {
-         expect(result.newValue).toEqual([
-            textPToken,
-            new GeneralEntityStartPToken(geRefPToken, [pToken]),
-            pToken,
-            new GeneralEntityEndPToken(geRefPToken, [pToken]),
-         ]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, geRefPToken], params, (result) => {
+   //       expect(result.newValue).toEqual([
+   //          textPToken,
+   //          new GeneralEntityStartPToken(geRefPToken, [pToken]),
+   //          pToken,
+   //          new GeneralEntityEndPToken(geRefPToken, [pToken]),
+   //       ]);
+   //       done();
+   //    });
+   // });
 
-   describe('error reporting', () => {
-      it('calls back with no errors when there is no declaration', (done) => {
-         const bogus = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
-            name: toSToken('bogus'),
-         });
+   // describe('error reporting', () => {
+   //    it('calls back with no errors when there is no declaration', (done) => {
+   //       const bogus = new GeneralEntityReferencePToken({
+   //          open: toSToken('&'),
+   //          name: toSToken('bogus'),
+   //       });
 
-         expandAttributeValue([textPToken, bogus], params, ({ errors }) => {
-            expect(errors).toEqual([]);
-            done();
-         });
-      });
+   //       expandAttributeValue([textPToken, bogus], params, ({ errors }) => {
+   //          expect(errors).toEqual([]);
+   //          done();
+   //       });
+   //    });
 
-      it('calls back with errors from parsing the geref contents as an attribute value', (done) => {
-         const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
-         params.utils.parseAttributeValue = (
-            sTokenSource: STokenSource,
-            done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
-         ): void => {
-            done([textPToken], [attrError]);
-         };
+   //    it('calls back with errors from parsing the geref contents as an attribute value', (done) => {
+   //       const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
+   //       params.utils.parseAttributeValue = (
+   //          sTokenSource: STokenSource,
+   //          done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   //       ): void => {
+   //          done([textPToken], [attrError]);
+   //       };
 
-         expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
-            expect(errors).toEqual([attrError]);
-            done();
-         });
-      });
+   //       expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
+   //          expect(errors).toEqual([attrError]);
+   //          done();
+   //       });
+   //    });
 
-      it('calls back with errors from loading an external entity', (done) => {
-         const geExternalRefPToken = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
-            name: toSToken('external'),
-         });
-         entityDetails.addEntity(
-            new GeneralEntityDeclarationPToken({
-               open: toSToken('<!'),
-               name: toSToken('external'),
-               externalId: {} as any,
-            }),
-         );
-         const loadingError = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
-         params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
-            return {
-               sTokenSource: new STokenSource({}, entityMetaData),
-               getErrors: (): Array<XmlError> => [loadingError],
-            };
-         };
-         params.utils.parseAttributeValue = (
-            sTokenSource: STokenSource,
-            done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
-         ): void => {
-            done([textPToken], []);
-         };
+   //    it('calls back with errors from loading an external entity', (done) => {
+   //       const geExternalRefPToken = new GeneralEntityReferencePToken({
+   //          open: toSToken('&'),
+   //          name: toSToken('external'),
+   //       });
+   //       entityDetails.addEntity(
+   //          new GeneralEntityDeclarationPToken({
+   //             open: toSToken('<!'),
+   //             name: toSToken('external'),
+   //             externalId: {} as any,
+   //          }),
+   //       );
+   //       const loadingError = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
+   //       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+   //          return {
+   //             sTokenSource: new STokenSource({}, entityMetaData),
+   //             getErrors: (): Array<XmlError> => [loadingError],
+   //          };
+   //       };
+   //       params.utils.parseAttributeValue = (
+   //          sTokenSource: STokenSource,
+   //          done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   //       ): void => {
+   //          done([textPToken], []);
+   //       };
 
-         expandAttributeValue([textPToken, geExternalRefPToken], params, ({ errors }) => {
-            expect(errors).toEqual([loadingError]);
-            done();
-         });
-      });
-   });
+   //       expandAttributeValue([textPToken, geExternalRefPToken], params, ({ errors }) => {
+   //          expect(errors).toEqual([loadingError]);
+   //          done();
+   //       });
+   //    });
+   // });
 
-   it('calls back with errors from two levels of entity reference parsing and a loading error', (done) => {
-      const attrError1 = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
-      const attrError2 = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
-      const loadingError = new WellFormedError(WellFormedError.ID.TOKEN_INVALID_CONTEXT, ['foo']);
-      const ge2RefPToken = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
-         name: toSToken('ge2'),
-      });
-      let ctr = 0;
-      entityDetails.addEntity(
-         new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('ge2'),
-         }),
-      );
-      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
-         return {
-            sTokenSource: new STokenSource({}, entityMetaData),
-            getErrors: (): Array<XmlError> => [loadingError],
-         };
-      };
-      params.utils.parseAttributeValue = (
-         sTokenSource: STokenSource,
-         done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
-      ): void => {
-         if (ctr === 0) {
-            ctr++;
-            done([ge2RefPToken], [attrError1]);
-         }
-         done([textPToken], [attrError2]);
-      };
+   // it('calls back with errors from two levels of entity reference parsing and a loading error', (done) => {
+   //    const attrError1 = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
+   //    const attrError2 = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
+   //    const loadingError = new WellFormedError(WellFormedError.ID.TOKEN_INVALID_CONTEXT, ['foo']);
+   //    const ge2RefPToken = new GeneralEntityReferencePToken({
+   //       open: toSToken('&'),
+   //       name: toSToken('ge2'),
+   //    });
+   //    let ctr = 0;
+   //    entityDetails.addEntity(
+   //       new GeneralEntityDeclarationPToken({
+   //          open: toSToken('<!'),
+   //          name: toSToken('ge2'),
+   //       }),
+   //    );
+   //    params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+   //       return {
+   //          sTokenSource: new STokenSource({}, entityMetaData),
+   //          getErrors: (): Array<XmlError> => [loadingError],
+   //       };
+   //    };
+   //    params.utils.parseAttributeValue = (
+   //       sTokenSource: STokenSource,
+   //       done: (results: any) => void,
+   //    ): void => {
+   //       if (ctr === 0) {
+   //          ctr++;
+   //          done({ newValue: [ge2RefPToken], errors: [attrError1] });
+   //       }
+   //       done({ newValue: [textPToken], errors: [attrError2] });
+   //    };
 
-      expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
-         expect(errors).toEqual([attrError1, loadingError, attrError2]);
-         done();
-      });
-   });
+   //    expandAttributeValue([textPToken, geRefPToken], params, ({ errors }) => {
+   //       expect(errors).toEqual([attrError1, loadingError, attrError2]);
+   //       done();
+   //    });
+   // });
 });

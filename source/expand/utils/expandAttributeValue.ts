@@ -17,7 +17,7 @@ import { ExpandParams } from '../types';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 import { setupReferencedEntity } from './setupReferencedEntity';
-import { GeneralEntityInfo } from './EntityDetails';
+import { GEDetails } from './EntityDetails';
 
 type ExpandAttrResult = {
    newValue: AttributeValuePToken;
@@ -37,37 +37,42 @@ type ParseResults = {
  * the results
  * */
 function parseEntityValue(
-   geInfo: GeneralEntityInfo,
+   geInfo: GEDetails,
    expandParams: ExpandParams,
    geRefChain: Array<string>,
    errors: Array<XmlError>,
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(geInfo.token.name);
-   const entityValue = geInfo.valueCache;
+   const entityValue = geInfo.protoReplacementText;
    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
    const sTokenSource: STokenSource = entityValueToSTokenSource(entityValue!, expandParams.emd);
 
-   expandParams.utils.parseAttributeValue(sTokenSource, (attrValue, newErrors) => {
+   expandParams.utils.parseAttributeValue(sTokenSource, (results) => {
       // If it still didn't parse into anything useful, abort.
-      if (!attrValue) {
+      if (!results.newValue) {
          callback({
             attFragment: undefined,
             preparseValue: entityValue,
-            errors: errors.concat(newErrors),
+            errors: errors.concat(results.errors),
          });
          return;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      expandAttrInternal(attrValue, expandParams, geRefChain.concat(entityName), (result) => {
-         const { newValue, errors: moreErrors } = result;
-         callback({
-            attFragment: newValue,
-            preparseValue: entityValue,
-            errors: errors.concat(newErrors, moreErrors),
-         });
-      });
+      expandAttrInternal(
+         results.newValue,
+         expandParams,
+         geRefChain.concat(entityName),
+         (result) => {
+            const { newValue, errors: moreErrors } = result;
+            callback({
+               attFragment: newValue,
+               preparseValue: entityValue,
+               errors: errors.concat(results.errors, moreErrors),
+            });
+         },
+      );
    });
 }
 
@@ -83,7 +88,7 @@ function expandGeRef(
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(geRef.name);
-   const geInfo = expandParams.entityDetails.getGeDetails(entityName);
+   const geInfo = expandParams.entityDetails.getGEDetails(entityName);
 
    // Stop processing if we find this entity reference is already being processed
    if (entityName !== '' && geRefChain.includes(entityName)) {
@@ -123,14 +128,14 @@ function expandGeRef(
 
    const localRefChain = [...geRefChain, entityName];
 
-   if (geInfo.valueCache) {
+   if (geInfo.protoReplacementText) {
       parseEntityValue(geInfo, expandParams, localRefChain, [], callback);
       return;
    }
 
    // No valueCache, so try to load it.
    setupReferencedEntity(geRef, expandParams, (newErrors) => {
-      const entityValue = geInfo.valueCache;
+      const entityValue = geInfo.protoReplacementText;
 
       // If we still have to valueCache, something is amiss. Abort.
       if (!entityValue) {

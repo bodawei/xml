@@ -38,7 +38,7 @@ import * as streamEntityReference from '../utils/streamEntityReference';
 import * as expandUnassigned from '../utils/expandUnassigned';
 import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
 import { EntityExpander } from '../EntityExpander';
-import { ExpandParams, RetrieveResults } from '../types';
+import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
 
 describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
@@ -64,9 +64,9 @@ describe('EntityExpander (unit)', () => {
 
    function parseAttributeValue(
       sTokenSource: STokenSource,
-      done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+      done: (results: AttributeValueResults) => void,
    ): void {
-      done([], []);
+      done({ newValue: [], errors: [] });
    }
 
    function doExpand(

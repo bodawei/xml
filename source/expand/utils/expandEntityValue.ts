@@ -31,9 +31,9 @@ function findUncachedEntities(
    for (const subToken of value) {
       if (subToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          const elementName = strOrBlank(subToken.name);
-         const peInfo = entityDetails.getPeDetails(elementName);
+         const peInfo = entityDetails.getPEDetails(elementName);
 
-         if (peInfo && !peInfo.isInternal && !peInfo.valueCache) {
+         if (peInfo && !peInfo.isInternal && !peInfo.protoReplacementText) {
             uncachedEntities.push(subToken);
          }
       }
@@ -61,11 +61,11 @@ function expandValue(
    for (const element of value) {
       if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          const entryName = strOrBlank(element.name);
-         const peInfo = expandParams.entityDetails.getPeDetails(entryName);
+         const peInfo = expandParams.entityDetails.getPEDetails(entryName);
 
          if (peInfo) {
             newValue.push(new ParameterEntityStartPToken(element));
-            newValue = newValue.concat(peInfo.valueCache!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            newValue = newValue.concat(peInfo.protoReplacementText!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
             newValue.push(new ParameterEntityEndPToken(element));
             continue;
          }

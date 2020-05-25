@@ -54,8 +54,11 @@ function streamEntityReference(
          return;
       }
 
-      if (entityInfo.valueCache) {
-         sTokenSource = entityValueToSTokenSource(entityInfo.valueCache, expandParams.emd);
+      if (entityInfo.protoReplacementText) {
+         sTokenSource = entityValueToSTokenSource(
+            entityInfo.protoReplacementText,
+            expandParams.emd,
+         );
          getErrors = (): Array<XmlError> => [];
       } else {
          ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(

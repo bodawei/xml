@@ -14,15 +14,12 @@ import {
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   assignElementDeclarationUnassigned,
    AttListPToken,
-   attListDeclaration,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementDeclarationPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   EntityValuePToken,
    ExternalSubsetEndToken,
    ExternalSubsetStartToken,
    GeneralEntityDeclarationPToken,
@@ -40,14 +37,13 @@ import {
    XmlError,
 } from 'token';
 
+import { EntityDetails } from './utils/EntityDetails';
 import { expandAttributes } from './utils/expandAttributes';
 import { expandEntityValue } from './utils/expandEntityValue';
 import { expandUnassigned } from './utils/expandUnassigned';
 import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
 import { streamEntityReference } from './utils/streamEntityReference';
-
 import { EntityProcessors, ExpandParams } from './types';
-import { EntityDetails } from './utils/EntityDetails';
 
 type DeclToken =
    | AttListPToken
@@ -163,7 +159,7 @@ class EntityExpander {
       }
 
       if (pToken.externalId) {
-         this.expandParams.externalSubset = new ExternalDtdSubsetPseudoToken(pToken.externalId);
+         this.expandParams.entityDetails.addExternalSubset(pToken.externalId);
       }
 
       handled();
@@ -188,7 +184,7 @@ class EntityExpander {
          this.deliverToken(new InternalSubsetEndToken());
       }
 
-      const externalSubsetToken = this.expandParams.externalSubset;
+      const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
 
       if (!externalSubsetToken || !this.loadExternalEntities) {
          this.state = State.IN_CONTENT;

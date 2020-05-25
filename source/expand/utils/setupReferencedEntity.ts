@@ -27,7 +27,7 @@ function setupReferencedEntity(
    const { entityDetails, utils, emd } = expandParams;
    const entityInfo = entityDetails.getReferencedDetails(reference);
 
-   if (!entityInfo || entityInfo.valueCache || entityInfo.isLoading) {
+   if (!entityInfo || entityInfo.protoReplacementText || entityInfo.isLoading) {
       if (entityInfo && entityInfo.isLoading) {
          entityDetails.waitForLoading(entityInfo.token, (info) => done(info.errors));
       } else {
@@ -48,7 +48,11 @@ function setupReferencedEntity(
    entityDetails.waitForLoading(entityInfo.token, (info) => done(info.errors));
    utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken | void) => {
       if (!entityValuePToken) {
-         entityDetails.updateDeclaredValue(entityInfo.token, entityInfo.valueCache, getErrors());
+         entityDetails.updateDeclaredValue(
+            entityInfo.token,
+            entityInfo.protoReplacementText,
+            getErrors(),
+         );
          return;
       }
 

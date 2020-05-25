@@ -319,5 +319,6 @@ const externalId = {
 export default externalId;
 
 export {
+   EXTERNAL_ID,
    ExternalId,
 };

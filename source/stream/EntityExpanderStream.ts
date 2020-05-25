@@ -9,7 +9,7 @@ import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
-import { ExpandToken, RetrieveResults } from '../expand/types';
+import { AttributeValueResults, ExpandToken, RetrieveResults } from '../expand/types';
 
 function parseBody(sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken): void {
    const pTokenStream = new PTokenStream(sTokenSource);
@@ -35,7 +35,6 @@ function parseEntityValue(
    const results: EntityValuePToken = [];
 
    pTokenStream.on('data', (token: any) => {
-      // typehack
       results.push(token);
    });
    pTokenStream.on('end', () => {
@@ -65,7 +64,7 @@ function retrieveExternalEntity(
 
 function parseAttributeValue(
    sTokenSource: STokenSource,
-   done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+   done: (results: AttributeValueResults) => void,
 ): void {
    const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false });
    const results: AttributeValuePToken = [];
@@ -75,7 +74,7 @@ function parseAttributeValue(
       results.push(token);
    });
    pTokenStream.on('end', () => {
-      done(results, []);
+      done({ newValue: results, errors: [] });
    });
 }
 

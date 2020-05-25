@@ -74,7 +74,7 @@ export * from './text';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
-import { ExternalId } from './common/externalId';
+import { EXTERNAL_ID, ExternalId } from './common/externalId';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
@@ -151,6 +151,7 @@ export {
    unassigned,
    literalValue,
    AttributeValuePToken,
+   EXTERNAL_ID,
    ExternalId,
    PToken,
    XmlError,

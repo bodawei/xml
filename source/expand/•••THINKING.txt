@@ -36,6 +36,10 @@ x               getInfoForReference(ref);
 x               hasInfoForDeclaration(decl);
 x               getGEInfo(name)
 x               getPEInfo(name)
+x Maybe our word "expand" is not clear enough, as it is not clear when it involves parsing and when not
+               - I think it means replaceReferences (with what?)
+x Where is the error reporting from docTypeEnd?  and entityreference?
+x Make sure unit and integration tests are good
 
 IMMEDIATE TASKS
 - Document
@@ -54,25 +58,18 @@ IMMEDIATE TASKS
          - attribute values seem to have parameter entity tokens in their definition, but they'll never have that
          - Need to be able to construct a new attlist decl with new values without modifying the one in place
          - Also have a problem with the definitio nof an entity declaration. doesn't match EntityValuePToken
+         - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.
       - EntityExpander
-         - streamEntityReference() in externalSubsettoken:
-            - Should purge the EMD, I think.
+         - Who should be purging the emd's?
          - expandEntityValue should be handling the recursion.
          - think we need an internal call to expandPToken which carries the array of entities we are in the middle of Expanding
-         - setupReferencedEntity also needs a better name.  and maybe we need a parallel setupEntityDeclaration
-            - prepare intrnal
-         - expandEntityValue should become expandPERefsInEntityValue (?) (it also does charrefs though)
-            - It should take an "onbehalfof" and use that to set the cache. 
-         - Maybe our word "expand" is not clear enough, as it is not clear when it involves parsing and when not
-               - I think it means replaceReferences (with what?)
          - Where is it we are depending on the cache not having the entry to avoid infintie recursion?
                - Maybe THIS is what should be doing the expansion -- no. I want it to be fundamentally dumb.
-         - Where is the error reporting from docTypeEnd?  and entityreference?
-         - Make sure unit and integration tests are good
       √- entityValueToSTokenSource
       √- lookupPredefinedEntityValue
       - expandAttributeValue
-         - Why is this so distinct from expandEntityValue? (duh)
+         - NOTE: we are storing the preparsed values in the start and end tokens.
+         - We're assuming that if reading an entity fails, we put no data i nthe protoReplacementText
       - setupReferencedEntity
       - streamEntityReference
          - This is done with the external subset

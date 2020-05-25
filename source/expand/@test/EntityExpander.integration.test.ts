@@ -2,43 +2,28 @@
 /* eslint-env jasmine */
 
 import { Token, EntityLocation, EntityMetaData, Range } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import {
-   DOCTYPE_END_PTOKEN,
-   DOCTYPE_START_PTOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
-   EXTERNAL_SUBSET_START_TOKEN,
-   EXTERNAL_SUBSET_END_TOKEN,
-   NOTATION_DECLARATION_PTOKEN,
    AttributeValuePToken,
-   CharRefPToken,
-   DocTypeEndPToken,
-   DocTypeStartPToken,
-   ElementDeclarationPToken,
    ElementStartPToken,
-   ElementEmptyPToken,
    EntityValuePToken,
    ExternalId,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
    PToken,
    XmlError,
-   AttListPToken,
 } from 'token';
 
 import { EntityExpander } from '../EntityExpander';
 
-import { ExpandToken, RetrieveResults } from '../types';
+import { AttributeValueResults, ExpandToken, RetrieveResults } from '../types';
 
 describe('EntityExpander (integration)', () => {
    const externalMap: { [publicName: string]: string } = {};
@@ -100,7 +85,7 @@ describe('EntityExpander (integration)', () => {
 
    function parseAttributeValue(
       sTokenSource: STokenSource,
-      done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+      done: (results: AttributeValueResults) => void,
    ): void {
       const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false });
       const results: AttributeValuePToken = [];
@@ -109,7 +94,7 @@ describe('EntityExpander (integration)', () => {
          results.push(token as any);
       });
       pTokenStream.on('end', () => {
-         done(results, []);
+         done({ newValue: results, errors: [] });
       });
    }
 

@@ -78,17 +78,17 @@ describe('setupReferencedEntity() (unit)', () => {
 
    it('addds an expanded entity to the cache when called with a known entity', (done) => {
       setupReferencedEntity(peRefPToken, params, () => {
-         const details = entityDetails.getPeDetails('pe1');
-         expect((details as any).valueCache).toEqual([textPToken]);
+         const details = entityDetails.getPEDetails('pe1');
+         expect((details as any).protoReplacementText).toEqual([textPToken]);
          done();
       });
    });
 
    it('addds an expanded general entity to the cache when called with a known general entity', (done) => {
       setupReferencedEntity(geRefPToken, params, () => {
-         const details = entityDetails.getGeDetails('ge1');
+         const details = entityDetails.getGEDetails('ge1');
 
-         expect((details as any).valueCache).toEqual([textPToken]);
+         expect((details as any).protoReplacementText).toEqual([textPToken]);
          done();
       });
    });

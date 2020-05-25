@@ -35,7 +35,7 @@ function expandPeRef(
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(peRef.name);
-   const peInfo = expandParams.entityDetails.getPeDetails(entityName);
+   const peInfo = expandParams.entityDetails.getPEDetails(entityName);
 
    // Stop processing if we find this entity reference is already being processed
    if (entityName !== '' && peRefChain.includes(entityName)) {
@@ -61,8 +61,8 @@ function expandPeRef(
 
    const localRefChain = [...peRefChain, entityName];
 
-   if (peInfo.valueCache) {
-      const sTokenSource = entityValueToSTokenSource(peInfo.valueCache, expandParams.emd);
+   if (peInfo.protoReplacementText) {
+      const sTokenSource = entityValueToSTokenSource(peInfo.protoReplacementText, expandParams.emd);
       unassigned.parseAllValues(sTokenSource, false, (results?: UnassignedArray) => {
          callback({
             unassignedFragment: results,
@@ -75,7 +75,10 @@ function expandPeRef(
 
    // No valueCache, so try to load it.
    setupReferencedEntity(peRef, expandParams, (newErrors) => {
-      const sTokenSource = entityValueToSTokenSource(peInfo.valueCache || [], expandParams.emd);
+      const sTokenSource = entityValueToSTokenSource(
+         peInfo.protoReplacementText || [],
+         expandParams.emd,
+      );
       unassigned.parseAllValues(sTokenSource, false, (results?: UnassignedArray) => {
          callback({
             unassignedFragment: results,

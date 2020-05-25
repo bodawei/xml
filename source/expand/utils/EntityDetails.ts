@@ -1,7 +1,10 @@
+/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+
 import { strOrBlank } from 'sToken';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    EntityValuePToken,
+   ExternalId,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
@@ -12,36 +15,49 @@ import {
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 
 type LoadingResult = {
-   details: GeneralEntityInfo | ParameterEntityInfo | void;
+   details: InternalGEDetails | InternalPEDetails | void;
    errors: Array<XmlError>;
 };
 type LoadingCallback = (result: LoadingResult) => void;
 
-type GeneralEntityInfo = {
+type InternalGEDetails = {
    token: GeneralEntityDeclarationPToken;
    isUnparsed: boolean;
    isInternal: boolean;
    isLoading: boolean;
-   valueCache?: EntityValuePToken;
+   protoReplacementText?: EntityValuePToken;
    waiters: Array<LoadingCallback>;
 };
 
-type ParameterEntityInfo = {
+type InternalPEDetails = {
    token: ParameterEntityDeclarationPToken;
    isInternal: boolean;
    isLoading: boolean;
-   valueCache?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
+   protoReplacementText?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
    waiters: Array<LoadingCallback>;
 };
 
 type GeneralEntityMap = {
-   [entityName: string]: GeneralEntityInfo;
+   [entityName: string]: InternalGEDetails;
 };
 
 type ParameterEntityMap = {
-   [entityName: string]: ParameterEntityInfo;
+   [entityName: string]: InternalPEDetails;
 };
 
+// No reason for anyone externally to see the waiters property.
+type PEDetails = Readonly<Omit<InternalPEDetails, 'waiters'>>;
+type GEDetails = Readonly<Omit<InternalGEDetails, 'waiters'>>;
+
+/*
+ * This simple class keeps track of all the entity declarations and the
+ * constructed equivalent of the replacement text of value-internal entities,
+ * or the replacement text equivalent of entities needed to construct the
+ * replacement text of those value-internal entities.
+ *
+ * Its main purpose is to pull this data management out of the various
+ * routines that use this data.
+ */
 class EntityDetails {
    private externalSubset?: ExternalDtdSubsetPseudoToken;
    private geDetails: GeneralEntityMap;
@@ -70,7 +86,7 @@ class EntityDetails {
    ): void {
       const name = strOrBlank(pToken.name);
 
-      if (this.hasEntity(pToken)) {
+      if (this.hasEntity(pToken) || name === '') {
          return;
       }
 
@@ -84,7 +100,7 @@ class EntityDetails {
          };
 
          if (expandedValue) {
-            this.geDetails[name].valueCache = expandedValue;
+            this.geDetails[name].protoReplacementText = expandedValue;
          }
       } else {
          this.peDetails[name] = {
@@ -95,36 +111,34 @@ class EntityDetails {
          };
 
          if (expandedValue) {
-            this.peDetails[name].valueCache = expandedValue;
+            this.peDetails[name].protoReplacementText = expandedValue;
          }
       }
    }
 
-   public getGeDetails(name: string): GeneralEntityInfo | void {
-      // Recall that !'' is the same as !undefined
-      if (!name) {
-         return;
-      }
-
-      return this.geDetails[name];
+   public getGEDetails(name: string): GEDetails | void {
+      return this.getInternalGEDetails(name);
    }
 
-   public getPeDetails(name: string): ParameterEntityInfo | void {
-      // Recall that !'' is the same as !undefined
-      if (!name) {
-         return;
-      }
-
-      return this.peDetails[name];
+   public getPEDetails(name: string): PEDetails | void {
+      return this.getInternalPEDetails(name);
    }
 
    public getReferencedDetails(
       reference: ParameterEntityReferencePToken | GeneralEntityReferencePToken,
-   ): GeneralEntityInfo | ParameterEntityInfo | void {
+   ): GEDetails | PEDetails | void {
       const isPERef = reference instanceof ParameterEntityReferencePToken;
       const entityName = strOrBlank(reference.name);
 
-      return isPERef ? this.getPeDetails(entityName) : this.getGeDetails(entityName);
+      return isPERef ? this.getPEDetails(entityName) : this.getGEDetails(entityName);
+   }
+
+   public addExternalSubset(externalId: ExternalId): void {
+      this.externalSubset = new ExternalDtdSubsetPseudoToken(externalId);
+   }
+
+   public getExternalSubsetReference(): ExternalDtdSubsetPseudoToken | void {
+      return this.externalSubset;
    }
 
    public loadingEntity(
@@ -134,7 +148,7 @@ class EntityDetails {
 
       if (!details) {
          throw new Error(
-            'Internal error: Trying to load the value of a declaration that has not been seen',
+            'Internal error: Trying to load the value of a declaration that has not been seen.',
          );
       }
 
@@ -169,7 +183,7 @@ class EntityDetails {
       details.isLoading = false;
 
       if (newValue) {
-         details.valueCache = newValue;
+         details.protoReplacementText = newValue;
       }
 
       if (details.waiters.length > 0) {
@@ -182,14 +196,34 @@ class EntityDetails {
       }
    }
 
+   private getInternalGEDetails(name: string): InternalGEDetails | void {
+      // Recall that !'' is the same as !undefined
+      if (!name) {
+         return;
+      }
+
+      return this.geDetails[name];
+   }
+
+   private getInternalPEDetails(name: string): InternalPEDetails | void {
+      // Recall that !'' is the same as !undefined
+      if (!name) {
+         return;
+      }
+
+      return this.peDetails[name];
+   }
+
    private getDeclarationDetails(
       reference: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-   ): GeneralEntityInfo | ParameterEntityInfo | void {
+   ): InternalGEDetails | InternalPEDetails | void {
       const isPERef = reference instanceof ParameterEntityDeclarationPToken;
       const entityName = strOrBlank(reference.name);
 
-      return isPERef ? this.getPeDetails(entityName) : this.getGeDetails(entityName);
+      return isPERef
+         ? this.getInternalPEDetails(entityName)
+         : this.getInternalGEDetails(entityName);
    }
 }
 
-export { EntityDetails, GeneralEntityInfo };
+export { EntityDetails, GEDetails };

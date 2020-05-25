@@ -4,7 +4,6 @@ import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
-import { ExternalDtdSubsetPseudoToken } from './utils/ExternalDtdSubsetPseudoToken';
 
 type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
@@ -13,6 +12,11 @@ type RetrieveResults = {
    sTokenSource: STokenSource;
    getErrors: () => Array<XmlError>;
 };
+type AttributeValueResults = {
+   newValue: AttributeValuePToken | void;
+   errors: Array<XmlError>;
+};
+
 type EntityProcessors = {
    parseBody: (sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken) => void;
    parseEntityValue: (
@@ -25,15 +29,14 @@ type EntityProcessors = {
    ) => RetrieveResults;
    parseAttributeValue: (
       sTokenSource: STokenSource,
-      done: (results: AttributeValuePToken | void, errors: Array<XmlError>) => void,
+      done: (results: AttributeValueResults) => void,
    ) => void;
 };
 
 type ExpandParams = {
    emd: EntityMetaData;
-   externalSubset?: ExternalDtdSubsetPseudoToken;
    entityDetails: EntityDetails;
    utils: EntityProcessors;
 };
 
-export { ExpandParams, RetrieveResults, EntityProcessors, ExpandToken };
+export { AttributeValueResults, ExpandParams, RetrieveResults, EntityProcessors, ExpandToken };
