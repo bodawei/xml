@@ -170,4 +170,29 @@ describe('expandUnassigned() (unit)', () => {
          done();
       });
    });
+
+   it('returns the original reference if the replacement text could not be constructed', (done) => {
+      const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
+      const peDecl2 = new ParameterEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('pe2'),
+      });
+      const peRef2 = new ParameterEntityReferencePToken({
+         open: toSToken('%'),
+         name: toSToken('pe2'),
+      });
+      entityDetails.addEntity(peDecl2);
+      const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: peRef2 }];
+      addSpy.and.callFake((ref: any, expand: any, chain: any, cb: any) => {
+         cb([attrError]);
+      });
+
+      expandUnassigned(unassignedValue, params, [], false, (result) => {
+         expect(result).toEqual({
+            newValue: [{ type: UnassignedType.REFERENCE, token: peRef2 }],
+            errors: [attrError],
+         });
+         done();
+      });
+   });
 });

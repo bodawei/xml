@@ -235,23 +235,18 @@ DOCUMENT
   - Also document what comes out, especially for all the expansion cases.
 
 IMPLEMENTATION
-   - CLEANUP
-      - Later cleanup
-         - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.
-         - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
-         - Who should be purging the emd's?
-      - Loss of PE ref detail
-         - expandEntityValue
-         - NOTE: we are storing the preparsed values in the start and end tokens.
-      - Don't load external entities
-         - Seriously need to think about retrieveExternalEntity error conditions
-         - need this in addProtoReplacementText
-         - Unsurprisingly, also expandEntityValue
-         - unassgined.  PArsing can return no results?
-      - Recursion problem
-         - streamEntityReference needs to deal with this
-         - Are we still depending on the "don't put it in the cache" to avoid recursion?
-   - Research
+   - Get ibm tests working again
+   - Loss of PE ref detail
+      - expandEntityValue
+      - NOTE: we are storing the preparsed values in the start and end tokens.
+   - Don't load external entities
+      - Seriously need to think about retrieveExternalEntity error conditions
+      - need this in addProtoReplacementText
+      - Unsurprisingly, also expandEntityValue
+      - unassgined.  PArsing can return no results?
+   - Recursion problem
+      - streamEntityReference needs to deal with this
+      - Are we still depending on the "don't put it in the cache" to avoid recursion?
       - What should we be diong with ranges in entityValueToSTokenSource()?
          Can an Stoken have multiple ranges in an entity value ptoken?  Remind me what the rule for ranges is.
             <!ENTITY % onea "&#37;tw">
@@ -260,6 +255,10 @@ IMPLEMENTATION
             <!ENTITY % three "%onea;%oneb;">
             <!ENTITY % four "%three;">  <-- I think it willl  get parsed here. into an actual reference wich will be expanded here
             <!ENTITY ge "%four;">
+   - Later cleanup
+      - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.
+      - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
+      - Who should be purging the emd's and textdecl's
 BUILD
    - Try to get testing to work so it doesn't fail every time you break it
          - This looks promising: https://www.npmjs.com/package/jasmine-ts

@@ -30,22 +30,28 @@ function expandPeRef(
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(peRef.name);
-   const peInfo = expandParams.entityDetails.getPEDetails(entityName);
+   const details = expandParams.entityDetails.getPEDetails(entityName);
    const localRefChain = [...peRefChain, entityName];
-   const result = {
+   const result: ParseResults = {
       unassignedFragment: undefined,
       preparseValue: undefined,
       errors: [],
    };
 
-   if (!peInfo || peRefChain.includes(entityName)) {
+   if (!details || peRefChain.includes(entityName)) {
       callback(result);
       return;
    }
 
    addProtoReplacementText(peRef, expandParams, localRefChain, (newErrors) => {
+      if (!details.protoReplacementText) {
+         result.errors = newErrors;
+         callback(result);
+         return;
+      }
+
       const sTokenSource = entityValueToSTokenSource(
-         peInfo.protoReplacementText || [],
+         details.protoReplacementText,
          expandParams.emd,
       );
 
@@ -99,6 +105,7 @@ function expandUnassigned(
          }
 
          const { unassignedFragment, errors } = results[peRefIndex];
+         console.log('unassignedFragment, unassignedFragment)', unassignedFragment);
 
          peRefIndex++;
          allErrors.push(...errors);
