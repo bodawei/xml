@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import { strOrBlank } from 'sToken';
+import { strOrBlank, SToken } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
@@ -19,18 +19,23 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
-
    PToken,
    InternalSubsetStartToken,
    ParameterEntityStartPToken,
    ExternalSubsetStartToken,
    attListDeclaration,
-
    getFirstSToken,
 } from 'token';
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import { ELEMENT_DECLARATION_PTOKEN } from 'source/token/elementDeclaration';
-import { CHECKER_DONE, CheckState, Checker, scanAttributeValues, checkParameterEntity, isParamEntityExternal } from './checkUtils';
+import {
+   CHECKER_DONE,
+   CheckState,
+   Checker,
+   scanAttributeValues,
+   checkParameterEntity,
+   isParamEntityExternal,
+} from './checkUtils';
 
 enum States {
    PRE = 'PRE',
@@ -40,16 +45,16 @@ enum States {
    EXTERNAL_SUBSET_START = 'EXTERNAL_SUBSET_START',
    EXTERNAL_SUBSET = 'EXTERNAL_SUBSET',
    DONE = 'DONE',
-};
-
-type StateTable = {
-   [ startState: string ]: {
-      [tokenType: string]: States | typeof NO_CHANGE,
-   },
 }
 
 const WFID = WellFormedError.ID;
 const NO_CHANGE = '---INTERNAL---MARKER---';
+
+type StateTable = {
+   [startState: string]: {
+      [tokenType: string]: States | typeof NO_CHANGE;
+   };
+};
 
 const transitionsByState: StateTable = {
    [States.PRE]: {
@@ -57,7 +62,8 @@ const transitionsByState: StateTable = {
       [EXTERNAL_SUBSET_START_TOKEN]: States.EXTERNAL_SUBSET_START,
       // [PARAMETER_ENTITY_START_PTOKEN]: This will depend on the context
    },
-   [States.EXTERNAL_SUBSET_START]: { // §2.8.0 [30]
+   [States.EXTERNAL_SUBSET_START]: {
+      // §2.8.0 [30]
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [attListDecl.PTYPE]: States.EXTERNAL_SUBSET,
@@ -72,7 +78,8 @@ const transitionsByState: StateTable = {
       // EXTERNAL_SUBSET_END also needs special handling
       // conditional section will be here
    },
-   [States.PARAM_START_EXTERNAL_SUBSET]: { // §2.8.0 [30]
+   [States.PARAM_START_EXTERNAL_SUBSET]: {
+      // §2.8.0 [30]
       [CONDITIONAL_PTOKEN]: States.EXTERNAL_SUBSET,
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
@@ -88,7 +95,8 @@ const transitionsByState: StateTable = {
       // PARAMETER_ENTITY_END_PTOKEN will need special handling
       // conditional section will be here
    },
-   [States.PARAM_START_INTERNAL_SUBSET]: { // §2.8.0 [30]
+   [States.PARAM_START_INTERNAL_SUBSET]: {
+      // §2.8.0 [30]
       [TEXTDECL_PTOKEN]: States.INTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [attListDecl.PTYPE]: States.INTERNAL_SUBSET,
@@ -102,7 +110,8 @@ const transitionsByState: StateTable = {
       [SPACE_PTOKEN]: States.INTERNAL_SUBSET,
       // PARAMETER_ENTITY_END_PTOKEN will need special handling
    },
-   [States.EXTERNAL_SUBSET]: { // §2.8.0 [30], [31]
+   [States.EXTERNAL_SUBSET]: {
+      // §2.8.0 [30], [31]
       [CONDITIONAL_PTOKEN]: NO_CHANGE,
       [CONDITIONAL_CLOSE_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
@@ -117,7 +126,8 @@ const transitionsByState: StateTable = {
       // conditional section will be here
       // EXTERNAL_SUBSET_END also needs special handling
    },
-   [States.INTERNAL_SUBSET]: { // §2.8.0 [28a], [28b], [29]
+   [States.INTERNAL_SUBSET]: {
+      // §2.8.0 [28a], [28b], [29]
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [attListDecl.PTYPE]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
@@ -129,8 +139,8 @@ const transitionsByState: StateTable = {
       [SPACE_PTOKEN]: NO_CHANGE,
       // INTERNAL_SUBSET_END also needs special handling
    },
-   [States.DONE]: {}
-}
+   [States.DONE]: {},
+};
 
 /*
  * This class checks well-formedness constraints on PTokens within a DTD portion of an
@@ -149,11 +159,11 @@ const transitionsByState: StateTable = {
 class MarkupDeclChecker implements Checker {
    private state: States = States.PRE;
    private start!: InternalSubsetStartToken | ExternalSubsetStartToken | ParameterEntityStartPToken;
-   private inExternalSubset: boolean = false;
+   private inExternalSubset = false;
    private checkState: CheckState;
    private embeddedChecker?: MarkupDeclChecker;
 
-   constructor(checkState: CheckState, inExternalSubset: boolean = false) {
+   constructor(checkState: CheckState, inExternalSubset = false) {
       this.checkState = checkState;
       this.inExternalSubset = inExternalSubset;
    }
@@ -170,7 +180,37 @@ class MarkupDeclChecker implements Checker {
             this.start = pToken;
          }
       } else if (this.state === States.DONE) {
-         throw new Error('Internal error: Passed a token to MarkupDeclChecker when it was already done.');
+         throw new Error(
+            'Internal error: Passed a token to MarkupDeclChecker when it was already done.',
+         );
+      }
+
+      // §4.1.0: Well-formedness constraint: No Recursion
+      //    A parsed entity must not contain a recursive reference to itself,
+      //    either directly or indirectly.
+      if (this.state !== States.PRE && this.start.type === PARAMETER_ENTITY_START_PTOKEN) {
+         const startName = strOrBlank(this.start.referencePToken.name);
+         let entityName: string | void;
+         let open: SToken | void;
+
+         if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
+            entityName = strOrBlank(pToken.referencePToken.name);
+            open = pToken.referencePToken.open;
+         }
+
+         if (pToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+            entityName = strOrBlank(pToken.name);
+            open = pToken.open;
+         }
+
+         if (entityName !== undefined) {
+            errorCollector.check(
+               startName === entityName,
+               WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+               [entityName],
+               open,
+            );
+         }
       }
 
       if (this.embeddedChecker) {
@@ -182,22 +222,36 @@ class MarkupDeclChecker implements Checker {
          return;
       }
 
-      switch(pToken.type) {
+      switch (pToken.type) {
          case attListDeclaration.PTYPE:
-            scanAttributeValues((pToken as AttListPToken).attDefs, this.checkState.generalDecls,
-               this.checkState, errorCollector);
+            scanAttributeValues(
+               (pToken as AttListPToken).attDefs,
+               this.checkState.generalDecls,
+               this.checkState,
+               errorCollector,
+            );
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
-            checkParameterEntity(pToken, this.checkState.paramDecls, this.checkState, errorCollector);
-            this.checkState.peRefCount ++; // Related to §4.1.0 Entity declared
+            checkParameterEntity(
+               pToken,
+               this.checkState.paramDecls,
+               this.checkState,
+               errorCollector,
+            );
+            this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
             // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
             break;
          case PARAMETER_ENTITY_START_PTOKEN:
             if (this.state === States.PRE) {
                // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
-               checkParameterEntity(pToken.referencePToken, this.checkState.paramDecls, this.checkState, errorCollector);
-               this.checkState.peRefCount ++; // Related to §4.1.0 Entity declared
+               checkParameterEntity(
+                  pToken.referencePToken,
+                  this.checkState.paramDecls,
+                  this.checkState,
+                  errorCollector,
+               );
+               this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
                // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
             } else {
                this.embeddedChecker = new MarkupDeclChecker(this.checkState, this.inExternalSubset);
@@ -215,7 +269,8 @@ class MarkupDeclChecker implements Checker {
 
       this.transition(pToken, errorCollector);
 
-      if ((this.state as any) === States.DONE) { // typeHack - this.transition may change the state
+      if ((this.state as any) === States.DONE) {
+         // typeHack - this.transition may change the state
          return CHECKER_DONE;
       }
    }
@@ -229,16 +284,22 @@ class MarkupDeclChecker implements Checker {
 
       if (pToken.type === PARAMETER_ENTITY_START_PTOKEN && this.state === States.PRE) {
          if (isParamEntityExternal(pToken.referencePToken, this.checkState.paramDecls)) {
-            newState = this.inExternalSubset ? States.PARAM_START_EXTERNAL_SUBSET : States.PARAM_START_INTERNAL_SUBSET;
+            newState = this.inExternalSubset
+               ? States.PARAM_START_EXTERNAL_SUBSET
+               : States.PARAM_START_INTERNAL_SUBSET;
          } else {
             newState = this.inExternalSubset ? States.EXTERNAL_SUBSET : States.INTERNAL_SUBSET;
          }
-      } else {
-         if (this.start && (pToken.type === PARAMETER_ENTITY_END_PTOKEN && this.start.type === PARAMETER_ENTITY_START_PTOKEN) ||
-            (pToken.type === INTERNAL_SUBSET_END_TOKEN && this.start.type === INTERNAL_SUBSET_START_TOKEN) ||
-            (pToken.type === EXTERNAL_SUBSET_END_TOKEN && this.start.type === EXTERNAL_SUBSET_START_TOKEN)) {
-            newState = States.DONE;
-         }
+      } else if (
+         (this.start &&
+            pToken.type === PARAMETER_ENTITY_END_PTOKEN &&
+            this.start.type === PARAMETER_ENTITY_START_PTOKEN) ||
+         (pToken.type === INTERNAL_SUBSET_END_TOKEN &&
+            this.start.type === INTERNAL_SUBSET_START_TOKEN) ||
+         (pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
+            this.start.type === EXTERNAL_SUBSET_START_TOKEN)
+      ) {
+         newState = States.DONE;
       }
 
       if (!newState) {
@@ -253,9 +314,7 @@ class MarkupDeclChecker implements Checker {
       }
 
       return !!newState;
-    }
+   }
 }
 
-export {
-   MarkupDeclChecker,
-};
+export { MarkupDeclChecker };

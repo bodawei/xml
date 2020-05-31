@@ -1,4 +1,3 @@
-
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
@@ -13,7 +12,6 @@ import {
    ELEMENT_START_PTOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_START_TOKEN,
-
    CdataPToken,
    CommentPToken,
    DocTypeEndPToken,
@@ -51,7 +49,13 @@ import {
    makeInternalSubsetStart,
    makeElementStart,
    makeElementEnd,
-   makeElementEmpty
+   makeElementEmpty,
+   makeGeneralEntityEnd,
+   makeGeneralEntityReference,
+   makeGeneralEntityStart,
+   makeParameterEntityStart,
+   makeParameterEntityReference,
+   makeParameterEntityEnd,
 } from './tokens';
 
 describe('DocumentChecker (unit)', () => {
@@ -65,7 +69,7 @@ describe('DocumentChecker (unit)', () => {
    let ec: MockErrorCollector;
    let metaData: EntityMetaData;
    let textDecl: TextDeclarationPToken;
-   let xmlDecl: XmlDeclarationPToken ;
+   let xmlDecl: XmlDeclarationPToken;
    let docTypeStart: DocTypeStartPToken;
    let docTypeEnd: DocTypeEndPToken;
    let elementEnd: ElementEndPToken;
@@ -84,7 +88,7 @@ describe('DocumentChecker (unit)', () => {
       }
 
       check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
-         subParams = arguments;
+         subParams = arguments; // eslint-disable-line prefer-rest-params
          if (pToken.type === ELEMENT_EMPTY_PTOKEN) {
             return CHECKER_DONE;
          }
@@ -93,9 +97,12 @@ describe('DocumentChecker (unit)', () => {
             return undefined;
          }
 
-         if (this.lastSeen && (this.lastSeen.type === INTERNAL_SUBSET_START_TOKEN
-               || this.lastSeen.type === EXTERNAL_SUBSET_START_TOKEN
-               || this.lastSeen.type === ELEMENT_START_PTOKEN)) {
+         if (
+            this.lastSeen &&
+            (this.lastSeen.type === INTERNAL_SUBSET_START_TOKEN ||
+               this.lastSeen.type === EXTERNAL_SUBSET_START_TOKEN ||
+               this.lastSeen.type === ELEMENT_START_PTOKEN)
+         ) {
             return CHECKER_DONE;
          }
 
@@ -109,7 +116,7 @@ describe('DocumentChecker (unit)', () => {
       ec = new MockErrorCollector();
       checker = new DocumentChecker({
          content: MockChecker,
-         dtd: MockChecker
+         dtd: MockChecker,
       });
 
       metaData = new EntityMetaData();
@@ -132,7 +139,6 @@ describe('DocumentChecker (unit)', () => {
    });
 
    describe('check()', () => {
-
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
          const cwfSpy = spyOn(xmlDecl, 'checkWellFormed');
          checker.check(metaData, ec);
@@ -153,7 +159,6 @@ describe('DocumentChecker (unit)', () => {
       });
 
       describe('dtd subchecker', () => {
-
          it('calls with the token and error collector', () => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
@@ -252,11 +257,9 @@ describe('DocumentChecker (unit)', () => {
 
             expect(subState).toEqual(expected);
          });
-
       });
 
       describe('content subchecker', () => {
-
          it('calls content sub-checker with the token and error collector', () => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
@@ -356,11 +359,9 @@ describe('DocumentChecker (unit)', () => {
 
             expect(subState).toEqual(expected);
          });
-
       });
 
       describe('initial state', () => {
-
          it('reports no error when an XML Declaration is found at the start', () => {
             checker.check(xmlDecl, ec);
 
@@ -420,11 +421,9 @@ describe('DocumentChecker (unit)', () => {
                position: xmlDecl.open,
             });
          });
-
       });
 
       describe('post XML Declaration', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
          });
@@ -484,11 +483,9 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
 
       describe('in DOCTYPE', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
@@ -582,11 +579,9 @@ describe('DocumentChecker (unit)', () => {
                position: elementStart.open,
             });
          });
-
       });
 
       describe('post DOCTYPE', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
             checker.check(docTypeStart, ec);
@@ -642,11 +637,9 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
 
       describe('in ELEMENT', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
             checker.check(docTypeStart, ec);
@@ -661,11 +654,9 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
 
       describe('in TRAILING MISC', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
             checker.check(docTypeStart, ec);
@@ -727,15 +718,11 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
-
    });
 
    describe('finish()', () => {
-
       describe('initial state', () => {
-
          it('reports an error if called before anything has been processed', () => {
             checker.finish(ec);
 
@@ -745,11 +732,9 @@ describe('DocumentChecker (unit)', () => {
                position: undefined,
             });
          });
-
       });
 
       describe('post XML Declaration', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
          });
@@ -763,11 +748,9 @@ describe('DocumentChecker (unit)', () => {
                position: xmlDecl.close,
             });
          });
-
       });
 
       describe('in DOCTYPE', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
@@ -783,11 +766,9 @@ describe('DocumentChecker (unit)', () => {
                position: docTypeStart.openSubset,
             });
          });
-
       });
 
       describe('post DOCTYPE', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
             checker.check(docTypeStart, ec);
@@ -815,11 +796,9 @@ describe('DocumentChecker (unit)', () => {
                position: elementStart.close,
             });
          });
-
       });
 
       describe('in TRAILING MISC', () => {
-
          beforeEach(() => {
             checker.check(xmlDecl, ec);
             checker.check(docTypeStart, ec);
@@ -842,9 +821,6 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
-
    });
-
 });

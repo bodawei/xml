@@ -129,7 +129,7 @@ module.exports = {
       node: true,
    },
    overrides: [ {
-      files: [ './source/expand/**/*.ts' ],
+      files: [ './source/expand/**/*.ts', './source/wellformedness/**/*.ts' ],
       parser: '@typescript-eslint/parser',
       plugins: [
          '@typescript-eslint',

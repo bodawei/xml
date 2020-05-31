@@ -227,9 +227,6 @@ describe('ibm tests22', () => {
             'ibm62n07.xml', // Need to handle include conditional sections (nesting!) in external subset
             'ibm66n03.xml', // This is a violation of intent, but is actually OK.
 
-            'ibm68n09.xml', // recursive general entity reference inline
-            'ibm68n10.xml', // recursive general entity reference inline
-
             'ibm69n02.xml', // not checking parameter entity start's parameter entity references in checker
             'ibm69n03.xml', // not checking parameter entity start's parameter entity references in checker
             'ibm69n04.xml', // not checking parameter entity start's parameter entity references in checker

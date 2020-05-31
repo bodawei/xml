@@ -27,9 +27,26 @@ import { MarkupDeclChecker } from '../MarkupDeclChecker';
 import * as checkUtils from '../checkUtils';
 import { CheckState, CHECKER_DONE } from '../checkUtils';
 
-import { makeTextDecl, makeParameterEntityDeclaration, makeComment, makeAttListDeclaration, makeParameterEntityReference, makeExternalSubsetEnd, makeExternalSubsetStart, makeInternalSubsetEnd, makeInternalSubsetStart, makeParameterExternalEntityDeclaration, makeGeneralEntityDeclaration, makeGeneralEntityReference, makeSpace, makeProcessingInstruction, makeNotationDeclaration, makeElementDeclaration } from './tokens';
+import {
+   makeTextDecl,
+   makeParameterEntityDeclaration,
+   makeComment,
+   makeAttListDeclaration,
+   makeParameterEntityReference,
+   makeExternalSubsetEnd,
+   makeExternalSubsetStart,
+   makeInternalSubsetEnd,
+   makeInternalSubsetStart,
+   makeParameterExternalEntityDeclaration,
+   makeGeneralEntityDeclaration,
+   makeGeneralEntityReference,
+   makeSpace,
+   makeProcessingInstruction,
+   makeNotationDeclaration,
+   makeElementDeclaration,
+} from './tokens';
 
-describe('MarkupDeclChecker (unit)', () => {
+fdescribe('MarkupDeclChecker (unit)', () => {
    let ec: MockErrorCollector;
    let checker: MarkupDeclChecker;
    let checkState: CheckState;
@@ -85,13 +102,12 @@ describe('MarkupDeclChecker (unit)', () => {
    }
 
    describe('starting', () => {
-
       it('can be started with a parameter entity start token', () => {
          checkState.paramDecls.entityName = parameterEntityDeclaration;
 
          checker = new MarkupDeclChecker(checkState);
 
-         checker.check(parameterEntityStart, ec)
+         checker.check(parameterEntityStart, ec);
 
          expect(ec.errors).toEqual([]);
       });
@@ -99,11 +115,11 @@ describe('MarkupDeclChecker (unit)', () => {
       it('reports an error it is started with something other than an internal or external subset', () => {
          checker = new MarkupDeclChecker(checkState);
 
-         checker.check(comment, ec)
+         checker.check(comment, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
-            params: [ comment.type ],
+            params: [comment.type],
             position: comment.open,
          });
       });
@@ -114,13 +130,13 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(parameterEntityStart, ec);
          checker.check(parameterEntityEnd, ec);
 
-         expect(() => checker.check(comment, ec)).toThrowError(/Passed a token to MarkupDeclChecker/);
+         expect(() => checker.check(comment, ec)).toThrowError(
+            /Passed a token to MarkupDeclChecker/,
+         );
       });
-
    });
 
    describe('internal subset', () => {
-
       beforeEach(() => {
          ec = new MockErrorCollector();
          checker = new MarkupDeclChecker(checkState);
@@ -134,12 +150,12 @@ describe('MarkupDeclChecker (unit)', () => {
       it('reports an error if a textdecl appears after an internal subset start', () => {
          checker = new MarkupDeclChecker(checkState);
 
-         checker.check(internalSubsetStart, ec)
-         checker.check(textDecl, ec)
+         checker.check(internalSubsetStart, ec);
+         checker.check(textDecl, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
-            params: [ textDecl.type ],
+            params: [textDecl.type],
             position: textDecl.open,
          });
       });
@@ -153,7 +169,9 @@ describe('MarkupDeclChecker (unit)', () => {
       it('reports an error if called after an internal subset closed it', () => {
          checker.check(internalSubsetEnd, ec);
 
-         expect(() => checker.check(comment, ec)).toThrowError(/Passed a token to MarkupDeclChecker/);
+         expect(() => checker.check(comment, ec)).toThrowError(
+            /Passed a token to MarkupDeclChecker/,
+         );
       });
 
       it('reports no errors when all DTD tokens appear', () => {
@@ -179,11 +197,11 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports an error if a textdecl appears after an internal parameter entity start', () => {
-            checker.check(textDecl, ec)
+            checker.check(textDecl, ec);
 
             expect(ec).toReportError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
-               params: [ textDecl.type ],
+               params: [textDecl.type],
                position: textDecl.open,
             });
          });
@@ -197,7 +215,6 @@ describe('MarkupDeclChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
 
       describe('with external parameter entity', () => {
@@ -217,7 +234,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no error if a textdecl appears after an external parameter entity start', () => {
-            checker.check(textDecl, ec)
+            checker.check(textDecl, ec);
 
             expect(ec.errors).toEqual([]);
          });
@@ -231,13 +248,10 @@ describe('MarkupDeclChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
-
    });
 
    describe('external subset', () => {
-
       beforeEach(() => {
          checker = new MarkupDeclChecker(checkState);
          checker.check(externalSubsetStart, ec);
@@ -246,7 +260,7 @@ describe('MarkupDeclChecker (unit)', () => {
       it('can be started with an external subset start token', () => {
          checker = new MarkupDeclChecker(checkState);
 
-         checker.check(externalSubsetStart, ec)
+         checker.check(externalSubsetStart, ec);
 
          expect(ec.errors).toEqual([]);
       });
@@ -254,25 +268,25 @@ describe('MarkupDeclChecker (unit)', () => {
       it('reports no error if a textdecl appears after an external subset start', () => {
          checker = new MarkupDeclChecker(checkState);
 
-         checker.check(externalSubsetStart, ec)
-         checker.check(textDecl, ec)
+         checker.check(externalSubsetStart, ec);
+         checker.check(textDecl, ec);
 
          expect(ec.errors).toEqual([]);
       });
 
       it('reports an error if a textdecl appears after a textdecl', () => {
-         checker.check(textDecl, ec)
-         checker.check(textDecl, ec)
+         checker.check(textDecl, ec);
+         checker.check(textDecl, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
-            params: [ textDecl.type ],
+            params: [textDecl.type],
             position: textDecl.open,
          });
       });
 
       it('reports no errors when all DTD tokens appear', () => {
-         checker.check(textDecl, ec)
+         checker.check(textDecl, ec);
          addAllTokens(checker, ec);
 
          expect(ec.errors).toEqual([]);
@@ -287,7 +301,9 @@ describe('MarkupDeclChecker (unit)', () => {
       it('closes an external subset', () => {
          checker.check(externalSubsetEnd, ec);
 
-         expect(() => checker.check(comment, ec)).toThrowError(/Passed a token to MarkupDeclChecker/);
+         expect(() => checker.check(comment, ec)).toThrowError(
+            /Passed a token to MarkupDeclChecker/,
+         );
       });
 
       describe('with internal parameter entity', () => {
@@ -307,11 +323,11 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports an error if a textdecl appears after an internal parameter entity start', () => {
-            checker.check(textDecl, ec)
+            checker.check(textDecl, ec);
 
             expect(ec).toReportError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
-               params: [ textDecl.type ],
+               params: [textDecl.type],
                position: textDecl.open,
             });
          });
@@ -325,13 +341,13 @@ describe('MarkupDeclChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
 
       describe('with external parameter entity', () => {
-
          beforeEach(() => {
-            const internalParameterEntityStartPToken = new ParameterEntityStartPToken(paramEntityRef);
+            const internalParameterEntityStartPToken = new ParameterEntityStartPToken(
+               paramEntityRef,
+            );
             checker.check(externalParamEntityDecl, ec);
             checker.check(internalParameterEntityStartPToken, ec);
          });
@@ -343,7 +359,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no error if a textdecl appears after an external parameter entity start', () => {
-            checker.check(textDecl, ec)
+            checker.check(textDecl, ec);
 
             expect(ec.errors).toEqual([]);
          });
@@ -357,42 +373,45 @@ describe('MarkupDeclChecker (unit)', () => {
 
             expect(ec.errors).toEqual([]);
          });
-
       });
-
    });
 
    describe('ATTLIST', () => {
-
       it('calls scanAttributeValues() on the attributes in the ATTLIST', () => {
          const spy = spyOn(checkUtils, 'scanAttributeValues');
          checker = new MarkupDeclChecker(checkState);
 
-         checker.check(internalSubsetStart, ec)
-         checker.check(attributeListDeclaration, ec)
+         checker.check(internalSubsetStart, ec);
+         checker.check(attributeListDeclaration, ec);
 
-         expect(spy).toHaveBeenCalledWith(attributeListDeclaration.attDefs, {}, new CheckState(), ec);
+         expect(spy).toHaveBeenCalledWith(
+            attributeListDeclaration.attDefs,
+            {},
+            new CheckState(),
+            ec,
+         );
       });
 
       describe('attribute content', () => {
-
          xit('reports an error in the case of unbalanced entity starts and ends', () => {
             const generalEntityStartTwo = new GeneralEntityStartPToken(generalEntityReference);
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart, generalEntityStartTwo, generalEntityEnd],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [generalEntityStart, generalEntityStartTwo, generalEntityEnd],
+                  },
+               ],
             });
             const checker = new MarkupDeclChecker(checkState);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec).toReportError({
                id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
-               params: [ 'testRef', 'second' ],
+               params: ['testRef', 'second'],
                position: generalEntityEnd.referencePToken.open,
             });
          });
@@ -402,16 +421,22 @@ describe('MarkupDeclChecker (unit)', () => {
             const generalEntityEndTwo = new GeneralEntityEndPToken(generalEntityReference);
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart, generalEntityStartTwo, generalEntityEndTwo, generalEntityEnd],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [
+                        generalEntityStart,
+                        generalEntityStartTwo,
+                        generalEntityEndTwo,
+                        generalEntityEnd,
+                     ],
+                  },
+               ],
             });
             const checker = new MarkupDeclChecker(checkState);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
-
 
             expect(ec).toNotReportError(WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED);
          });
@@ -419,16 +444,20 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports no error if a declared reference is found (§4.1.0)', () => {
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [generalEntityStart],
+                  },
+               ],
             });
             const state = new CheckState();
-            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!') });
+            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+            });
             const checker = new MarkupDeclChecker(state);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec.errors).toEqual([]);
@@ -437,20 +466,22 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports an error if an undeclared reference is found (§4.1.0)', () => {
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [generalEntityStart],
+                  },
+               ],
             });
             const state = new CheckState();
             const checker = new MarkupDeclChecker(state);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec).toReportError({
                id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-               params: [ 'testRef' ],
+               params: ['testRef'],
                position: generalEntityReference.open,
             });
          });
@@ -458,16 +489,18 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports no error if an undeclared reference is found but there is an external subset (logically wrong, but matches the spec) (§4.1.0)', () => {
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [generalEntityStart],
+                  },
+               ],
             });
             const state = new CheckState();
             state.hasExternalDTD = true;
             const checker = new MarkupDeclChecker(state);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec.errors).toEqual([]);
@@ -476,16 +509,18 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports no error if an undeclared reference is found, no external subset, but there are perefs before the attlist (§4.1.0)', () => {
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [generalEntityStart],
+                  },
+               ],
             });
             const state = new CheckState();
             state.peRefCount = 1;
             const checker = new MarkupDeclChecker(state);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec.errors).toEqual([]);
@@ -494,21 +529,26 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports an error if an entity references an external entiy (§3.1.0)', () => {
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [generalEntityStart],
+                  },
+               ],
             });
             const state = new CheckState();
-            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!'), externalId: {} });
+            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               externalId: {},
+            });
             const checker = new MarkupDeclChecker(state);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec).toReportError({
                id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
-               params: [ 'testRef' ],
+               params: ['testRef'],
                position: generalEntityStart.referencePToken.open,
             });
          });
@@ -516,86 +556,135 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports an error when unparsed entity referenced from attr value (§4.1.0)', () => {
             const attList = new AttListPToken({
                open: toSToken('<'),
-               attDefs: [{
-                  name: toSToken('first'),
-                  value: [generalEntityStart],
-               }],
+               attDefs: [
+                  {
+                     name: toSToken('first'),
+                     value: [generalEntityStart],
+                  },
+               ],
             });
             const state = new CheckState();
-            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!'), nDataName: toSToken('foo') });
+            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               nDataName: toSToken('foo'),
+            });
             const checker = new MarkupDeclChecker(state);
 
-            checker.check(internalSubsetStart, ec)
+            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec).toReportError({
                id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
-               params: [ 'testRef' ],
+               params: ['testRef'],
                position: generalEntityStart.referencePToken.open,
             });
          });
-
       });
-
    });
 
    describe('general entity declaration', () => {
-
       it('adds a general entity declaration to the generalDecls', () => {
          checker = new MarkupDeclChecker(checkState, true);
 
-         checker.check(internalSubsetStart, ec)
-         checker.check(generalEntityDeclaration, ec)
+         checker.check(internalSubsetStart, ec);
+         checker.check(generalEntityDeclaration, ec);
 
          expect(checkState.generalDecls.genDecl).toEqual(generalEntityDeclaration);
       });
-
    });
 
    describe('parameter entity reference', () => {
-
       it('marks that we do not have all declarations after encountering a PE ref in an internal subset', () => {
          checker = new MarkupDeclChecker(checkState, true);
 
-         checker.check(internalSubsetStart, ec)
-         checker.check(paramEntityRef, ec)
+         checker.check(internalSubsetStart, ec);
+         checker.check(paramEntityRef, ec);
 
          expect(checkState.peRefCount).toEqual(1);
       });
-
    });
 
    describe('embedded parameter entity', () => {
-
       it('returns done after going through a parameter entity and then ending the subset', () => {
          checker = new MarkupDeclChecker(checkState);
-         checker.check(externalSubsetStart, ec)
-         checker.check(comment, ec)
-         checker.check(parameterEntityStart, ec)
-         checker.check(comment, ec)
-         checker.check(parameterEntityEnd, ec)
-         checker.check(comment, ec)
+         checker.check(externalSubsetStart, ec);
+         checker.check(comment, ec);
+         checker.check(parameterEntityStart, ec);
+         checker.check(comment, ec);
+         checker.check(parameterEntityEnd, ec);
+         checker.check(comment, ec);
 
-         const result = checker.check(externalSubsetEnd, ec)
+         const result = checker.check(externalSubsetEnd, ec);
 
          expect(result).toEqual(CHECKER_DONE);
       });
 
       it('returns done after going through an external param entity ref and then ending the subset', () => {
          checker = new MarkupDeclChecker(checkState);
-         checker.check(externalSubsetStart, ec)
-         checker.check(externalParamEntityDecl, ec)
-         checker.check(comment, ec)
-         checker.check(parameterEntityStart, ec)
-         checker.check(comment, ec)
-         checker.check(parameterEntityEnd, ec)
-         checker.check(comment, ec)
+         checker.check(externalSubsetStart, ec);
+         checker.check(externalParamEntityDecl, ec);
+         checker.check(comment, ec);
+         checker.check(parameterEntityStart, ec);
+         checker.check(comment, ec);
+         checker.check(parameterEntityEnd, ec);
+         checker.check(comment, ec);
 
-         const result = checker.check(externalSubsetEnd, ec)
+         const result = checker.check(externalSubsetEnd, ec);
 
          expect(result).toEqual(CHECKER_DONE);
       });
 
-   });
+      it('reports a recursive error if a parameter entity start matches the name of this checker start (§4.1.0)', () => {
+         const peRef2 = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('entityName'),
+         });
+         const peStart2 = new ParameterEntityStartPToken(peRef2);
+         checker = new MarkupDeclChecker(checkState);
 
+         checker.check(parameterEntityStart, ec);
+         checker.check(peStart2, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['entityName'],
+            position: peRef2.open,
+         });
+      });
+
+      it('does not report a recursive error if a parameter entity start matches the name of this checker start (§4.1.0)', () => {
+         const peRef2 = new ParameterEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('entityName2'),
+         });
+         const peStart2 = new ParameterEntityStartPToken(peRef2);
+         checker = new MarkupDeclChecker(checkState);
+
+         checker.check(generalEntityStart, ec);
+         checker.check(peStart2, ec);
+
+         expect(ec).not.toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['entityName2'],
+            position: peRef2.open,
+         });
+      });
+
+      it('reports a recursive error if a parameter entity reference matches the name of this checker start (§4.1.0)', () => {
+         const peRef2 = new ParameterEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('entityName'),
+         });
+         checker = new MarkupDeclChecker(checkState);
+
+         checker.check(parameterEntityStart, ec);
+         checker.check(peRef2, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['entityName'],
+            position: peRef2.open,
+         });
+      });
+   });
 });

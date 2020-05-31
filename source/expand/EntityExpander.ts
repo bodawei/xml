@@ -80,6 +80,7 @@ class EntityExpander {
    private loadExternalEntities: boolean;
    private state = State.AT_START;
    private bug2 = false;
+   private entityNameStack: Array<string>;
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = deliverPToken;
@@ -95,6 +96,7 @@ class EntityExpander {
       };
 
       this.loadExternalEntities = validating;
+      this.entityNameStack = [];
    }
 
    public expandPToken(pToken: PToken, expanded: PTokenExpanded): void {
@@ -365,14 +367,31 @@ class EntityExpander {
       pToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken,
       handled: PTokenExpanded,
    ): void {
+      const name = strOrBlank(pToken.name);
+      const isPERef = pToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN;
+      // Keep a stack of "typed" names. It's illegal to have a GE in a PE etc, but this processor does not care
+      const typedName = `${isPERef ? 'PE' : 'GE'} ${name}`;
       let countSeen = 0;
+
+      // §4.1.0: Well-formedness constraint: No Recursion
+      //    A parsed entity must not contain a recursive reference to itself,
+      //    either directly or indirectly.
+      if (this.entityNameStack.indexOf(typedName) !== -1) {
+         this.deliverToken(pToken);
+         handled();
+         return;
+      }
+
+      this.entityNameStack.push(typedName);
+
       streamEntityReference(pToken, this.expandParams, (result, done) => {
-         // how do you distinguish a failure to lookup vs. an empty one?
          if (!result) {
             // BUG 1
             if (countSeen === 0) {
                this.deliverToken(pToken);
             }
+
+            this.entityNameStack.pop();
             handled();
          } else {
             countSeen++;

@@ -10,7 +10,6 @@ import {
    GENERAL_ENTITY_END_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    TEXTDECL_PTOKEN,
-
    CdataPToken,
    CommentPToken,
    ElementEndPToken,
@@ -47,7 +46,10 @@ describe('ContentChecker (unit)', () => {
       elementStart = new ElementStartPToken({ open: toSToken('<'), name: toSToken('test') });
       elementEnd = new ElementEndPToken({ open: toSToken('</'), name: toSToken('test') });
       elementEmpty = new ElementEmptyPToken({ open: toSToken('<'), name: toSToken('test') });
-      generalEntityReference = new GeneralEntityReferencePToken({ open: toSToken('&'), name: toSToken('testRef')});
+      generalEntityReference = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('testRef'),
+      });
       generalEntityStart = new GeneralEntityStartPToken(generalEntityReference);
       generalEntityEnd = new GeneralEntityEndPToken(generalEntityReference);
 
@@ -55,16 +57,17 @@ describe('ContentChecker (unit)', () => {
       ec = new MockErrorCollector();
    });
 
-   function makeChecker(state: CheckState = new CheckState(), hasAll: boolean = true) {
+   function makeChecker(state: CheckState = new CheckState(), hasAll = true) {
       return new ContentChecker(state);
    }
 
    describe('misc', () => {
-
       it('throws an error if called with something other than an entity or element start', () => {
          const checker = makeChecker();
 
-         expect(() => checker.check(generalEntityReference, ec)).toThrowError(/Must first call check/);
+         expect(() => checker.check(generalEntityReference, ec)).toThrowError(
+            /Must first call check/,
+         );
       });
 
       it('throws an error if called after it is already done', () => {
@@ -72,13 +75,13 @@ describe('ContentChecker (unit)', () => {
 
          checker.check(elementEmpty, ec);
 
-         expect(() => checker.check(generalEntityReference, ec)).toThrowError(/Passed a token to ContentChecker/);
+         expect(() => checker.check(generalEntityReference, ec)).toThrowError(
+            /Passed a token to ContentChecker/,
+         );
       });
-
    });
 
    describe('stacking of elements', () => {
-
       it('reports done if the first token is an empty element', () => {
          const checker = makeChecker();
 
@@ -117,7 +120,10 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an unbalanced message if name of an end element does not match what is on the stack', () => {
-         const unbalancedElement = new ElementEndPToken({ open: toSToken('</'), name: toSToken('bogus') });
+         const unbalancedElement = new ElementEndPToken({
+            open: toSToken('</'),
+            name: toSToken('bogus'),
+         });
          const checker = makeChecker();
 
          checker.check(elementStart, ec);
@@ -125,14 +131,20 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
-            params: [ 'test', 'bogus' ],
+            params: ['test', 'bogus'],
             position: unbalancedElement.open,
          });
       });
 
       it('reports an unbalanced message if there are multiple closes that do not match the current stack value', () => {
-         const unbalancedEnd = new ElementEndPToken({ open: toSToken('</'), name: toSToken('bogus') });
-         const unbalancedEnd2 = new ElementEndPToken({ open: toSToken('</'), name: toSToken('bogus2') });
+         const unbalancedEnd = new ElementEndPToken({
+            open: toSToken('</'),
+            name: toSToken('bogus'),
+         });
+         const unbalancedEnd2 = new ElementEndPToken({
+            open: toSToken('</'),
+            name: toSToken('bogus2'),
+         });
          const checker = makeChecker();
 
          checker.check(elementStart, ec);
@@ -141,7 +153,7 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
-            params: [ 'test', 'bogus2' ],
+            params: ['test', 'bogus2'],
             position: unbalancedEnd2.open,
          });
       });
@@ -154,14 +166,20 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
-            params: [ '', 'test' ],
+            params: ['', 'test'],
             position: elementEnd.open,
          });
       });
 
       it('reports done after multiple unbalanced ends and then the correct end', () => {
-         const unbalancedEnd = new ElementEndPToken({ open: toSToken('</'), name: toSToken('bogus') });
-         const unbalancedEnd2 = new ElementEndPToken({ open: toSToken('</'), name: toSToken('bogus2') });
+         const unbalancedEnd = new ElementEndPToken({
+            open: toSToken('</'),
+            name: toSToken('bogus'),
+         });
+         const unbalancedEnd2 = new ElementEndPToken({
+            open: toSToken('</'),
+            name: toSToken('bogus2'),
+         });
          const checker = makeChecker();
 
          checker.check(elementStart, ec);
@@ -172,13 +190,67 @@ describe('ContentChecker (unit)', () => {
          expect(result).toEqual(CHECKER_DONE);
       });
 
+      it('reports a recursive error if a general entity start matches the name of this checker start (§4.1.0)', () => {
+         const geRef2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('testRef'),
+         });
+         const geStart2 = new GeneralEntityStartPToken(geRef2);
+         const checker = makeChecker();
+
+         checker.check(generalEntityStart, ec);
+         checker.check(geStart2, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['testRef'],
+            position: geRef2.open,
+         });
+      });
+
+      it('does not report a recursive error if a general entity start matches the name of this checker start (§4.1.0)', () => {
+         const geRef2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('testRef2'),
+         });
+         const geStart2 = new GeneralEntityStartPToken(geRef2);
+         const checker = makeChecker();
+
+         checker.check(generalEntityStart, ec);
+         checker.check(geStart2, ec);
+
+         expect(ec).not.toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['testRef2'],
+            position: geRef2.open,
+         });
+      });
+
+      it('reports a recursive error if a general entity reference matches the name of this checker start (§4.1.0)', () => {
+         const geRef2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('testRef'),
+         });
+         const checker = makeChecker();
+
+         checker.check(generalEntityStart, ec);
+         checker.check(geRef2, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['testRef'],
+            position: geRef2.open,
+         });
+      });
    });
 
    describe('token context', () => {
-
       it('reports no errors if a TextDecl is found after a general entity start, and it is an external entity', () => {
          const state = new CheckState();
-         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!'), externalId: {} });
+         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            externalId: {},
+         });
          const checker = makeChecker(state);
 
          checker.check(generalEntityStart, ec);
@@ -251,14 +323,18 @@ describe('ContentChecker (unit)', () => {
             position: notationDecl.open,
          });
       });
-
    });
 
    describe('entity treatment', () => {
-
       it('reports no error if a general entity reference has a related declaration (§4.1.0)', () => {
-         const entityDecl = new GeneralEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('test') });
-         const ref = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('test') });
+         const entityDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('test'),
+         });
+         const ref = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('test'),
+         });
          const state = new CheckState();
          state.generalDecls.test = entityDecl;
          const checker = makeChecker(state);
@@ -270,8 +346,14 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an error if a general entity reference is to an unparsed entity (§4.1.0)', () => {
-         const entityDecl = new GeneralEntityDeclarationPToken({ open: toSToken('<!'), nDataName: toSToken('jpeg') });
-         const unparsedReference = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('unparsed') });
+         const entityDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            nDataName: toSToken('jpeg'),
+         });
+         const unparsedReference = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('unparsed'),
+         });
          const state = new CheckState();
          state.generalDecls.unparsed = entityDecl;
          const checker = makeChecker(state);
@@ -281,13 +363,16 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
-            params: [ 'unparsed' ],
+            params: ['unparsed'],
             position: unparsedReference.open,
          });
       });
 
       it('reports no error if a general entity reference has no related delcaration and standalone is false (§4.1.0)', () => {
-         const noDeclRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('noDecl') });
+         const noDeclRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('noDecl'),
+         });
          const state = new CheckState();
          state.isStandalone = false;
          state.peRefCount = 1;
@@ -300,7 +385,10 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an error when there is a reference but no dtd (§4.1.0)', () => {
-         const badRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('test') });
+         const badRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('test'),
+         });
          const state = new CheckState();
          state.hasNoDTD = true;
          const checker = makeChecker(state);
@@ -310,13 +398,16 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'test' ],
+            params: ['test'],
             position: badRef.open,
          });
       });
 
       it('reports an error if a general entity reference has no related declaration and standalone is true (§4.1.0)', () => {
-         const noDeclRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('noDecl') });
+         const noDeclRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('noDecl'),
+         });
          const state = new CheckState();
          state.isStandalone = true;
          const checker = makeChecker(state);
@@ -326,7 +417,7 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'noDecl' ],
+            params: ['noDecl'],
             position: noDeclRef.open,
          });
       });
@@ -340,13 +431,16 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
-            params: [ GENERAL_ENTITY_END_PTOKEN ],
+            params: [GENERAL_ENTITY_END_PTOKEN],
             position: generalEntityReference.open,
          });
       });
 
       it('reports an error if a general entity start is for an undeclared entity (§4.1.0) (do not see how this can happen)', () => {
-         const noDeclRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('noDecl') });
+         const noDeclRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('noDecl'),
+         });
          const noDeclStart = new GeneralEntityStartPToken(noDeclRef);
          const checker = makeChecker();
 
@@ -355,13 +449,16 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'noDecl' ],
+            params: ['noDecl'],
             position: noDeclRef.open,
          });
       });
 
       it('reports no error when an undeclared ge ref, but we do not have all decls (§4.1.0)', () => {
-         const noDeclRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('noDecl') });
+         const noDeclRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('noDecl'),
+         });
          const state = new CheckState();
          state.peRefCount = 1;
          const checker = makeChecker(state);
@@ -373,7 +470,10 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports no error when an undeclared ge ref, but it is a predefined one (§4.1.0)', () => {
-         const noDeclRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('lt') });
+         const noDeclRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('lt'),
+         });
          const state = new CheckState();
          state.peRefCount = 0;
          const checker = makeChecker(state);
@@ -385,7 +485,10 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports no error when an undeclared ge ref, but there is an external subset (§4.1.0)', () => {
-         const noDeclRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('test') });
+         const noDeclRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('test'),
+         });
          const state = new CheckState();
          state.hasExternalDTD = true;
          const checker = makeChecker(state);
@@ -397,7 +500,10 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an error if a general entity reference is found, and there is only an internal dtd with no perefs, but no declaration found (§4.1.0)', () => {
-         const noDeclRef = new GeneralEntityReferencePToken({ open: toSToken('<'),  name: toSToken('noDecl') });
+         const noDeclRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('noDecl'),
+         });
          const state = new CheckState();
          state.hasExternalDTD = false;
          const checker = makeChecker(state);
@@ -407,7 +513,7 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'noDecl' ],
+            params: ['noDecl'],
             position: noDeclRef.open,
          });
       });
@@ -458,7 +564,10 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an error if a general entity end is found that does not match the first', () => {
-         const badRef = new GeneralEntityReferencePToken({ open: toSToken('<'), name: toSToken('other'), });
+         const badRef = new GeneralEntityReferencePToken({
+            open: toSToken('<'),
+            name: toSToken('other'),
+         });
          const bogusEnd = new GeneralEntityEndPToken(badRef);
          const checker = makeChecker();
 
@@ -471,11 +580,9 @@ describe('ContentChecker (unit)', () => {
             position: badRef.open,
          });
       });
-
    });
 
    describe('attribute content', () => {
-
       it('reports an error in the case of unbalanced entity starts and ends', () => {
          const refTwo = new GeneralEntityReferencePToken({
             open: toSToken('&'),
@@ -484,10 +591,12 @@ describe('ContentChecker (unit)', () => {
          const generalEntityStartTwo = new GeneralEntityStartPToken(refTwo);
          const unbalancedElement = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart, generalEntityStartTwo, generalEntityEnd],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityStart, generalEntityStartTwo, generalEntityEnd],
+               },
+            ],
          });
          const checker = makeChecker();
 
@@ -495,7 +604,7 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
-            params: [ 'testRef', 'second' ],
+            params: ['testRef', 'second'],
             position: generalEntityEnd.referencePToken.open,
          });
       });
@@ -503,10 +612,17 @@ describe('ContentChecker (unit)', () => {
       it('reports no errors when entity start and ends are properly blanced', () => {
          const unbalancedElement = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart, generalEntityStart, generalEntityEnd, generalEntityEnd],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [
+                     generalEntityStart,
+                     generalEntityStart,
+                     generalEntityEnd,
+                     generalEntityEnd,
+                  ],
+               },
+            ],
          });
          const checker = makeChecker();
 
@@ -518,10 +634,12 @@ describe('ContentChecker (unit)', () => {
       it('reports no error if a declared reference is found (§4.1.0)', () => {
          const undeclaredRef = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityReference],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityReference],
+               },
+            ],
          });
          const state = new CheckState();
          state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!') });
@@ -535,10 +653,12 @@ describe('ContentChecker (unit)', () => {
       it('reports an error if an undeclared reference is found', () => {
          const undeclaredRef = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityReference],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityReference],
+               },
+            ],
          });
          const checker = makeChecker();
 
@@ -546,7 +666,7 @@ describe('ContentChecker (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityReference.open,
          });
       });
@@ -554,10 +674,12 @@ describe('ContentChecker (unit)', () => {
       it('reports no error if an undeclared reference is found but there is an external subset (§4.1.0)', () => {
          const undeclaredRef = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityReference],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityReference],
+               },
+            ],
          });
          const state = new CheckState();
          state.hasExternalDTD = true;
@@ -571,20 +693,25 @@ describe('ContentChecker (unit)', () => {
       it('reports an error if an entity references an external entiy (§3.1.0)', () => {
          const withExternalRef = new ElementEmptyPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityStart],
+               },
+            ],
          });
          const state = new CheckState();
-         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!'), externalId: {} });
+         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            externalId: {},
+         });
          const checker = makeChecker(state);
 
          checker.check(withExternalRef, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
          });
       });
@@ -592,24 +719,27 @@ describe('ContentChecker (unit)', () => {
       it('reports an error when unparsed entity referenced from attr value (§4.1.0)', () => {
          const withUnparsedRef = new ElementEmptyPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityStart],
+               },
+            ],
          });
          const state = new CheckState();
-         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!'), nDataName: toSToken('foo') });
+         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            nDataName: toSToken('foo'),
+         });
          const checker = makeChecker(state);
 
          checker.check(withUnparsedRef, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
          });
       });
-
    });
-
 });

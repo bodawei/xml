@@ -15,31 +15,38 @@ import {
    GENERAL_ENTITY_START_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    TEXTDECL_PTOKEN,
-
    ElementEmptyPToken,
    ElementStartPToken,
    GeneralEntityStartPToken,
    PToken,
    getFirstSToken,
 } from 'token';
-import { strOrBlank } from 'sToken';
-import { CHECKER_DONE, Checker, CheckState, scanAttributeValues, GeneralEntitiesInfo, checkGeneralEntity } from './checkUtils';
+import { strOrBlank, SToken } from 'sToken';
+import {
+   CHECKER_DONE,
+   Checker,
+   CheckState,
+   scanAttributeValues,
+   GeneralEntitiesInfo,
+   checkGeneralEntity,
+} from './checkUtils';
 
 enum State {
    PRE = 'PRE',
    ENTITY_START = 'ENTITY_START',
    CONTENT = 'CONTENT',
    DONE = 'DONE',
-};
-
-type StateTable = {
-   [ startState: string ]: {
-      [tokenType: string]: State | typeof NO_CHANGE,
-   },
 }
 
-const WFID = WellFormedError.ID;
 const NO_CHANGE = '---INTERNAL---MARKER---';
+
+type StateTable = {
+   [startState: string]: {
+      [tokenType: string]: State | typeof NO_CHANGE;
+   };
+};
+
+const WFID = WellFormedError.ID;
 
 const transitionsByState: StateTable = {
    [State.PRE]: {
@@ -70,8 +77,8 @@ const transitionsByState: StateTable = {
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
       [COMMENT_PTOKEN]: NO_CHANGE,
    },
-   [State.DONE]: {}
-}
+   [State.DONE]: {},
+};
 
 /*
  * This class checks well-formedness constraints on PTokens within a "content" portion of
@@ -106,14 +113,50 @@ class ContentChecker implements Checker {
 
    check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
       if (this.state === State.PRE) {
-         if (pToken.type !== ELEMENT_START_PTOKEN &&
-            pToken.type !== ELEMENT_EMPTY_PTOKEN && pToken.type !== GENERAL_ENTITY_START_PTOKEN) {
-            throw new Error('Must first call check() with an element start, empty element or general entity start.');
+         if (
+            pToken.type !== ELEMENT_START_PTOKEN &&
+            pToken.type !== ELEMENT_EMPTY_PTOKEN &&
+            pToken.type !== GENERAL_ENTITY_START_PTOKEN
+         ) {
+            throw new Error(
+               'Must first call check() with an element start, empty element or general entity start.',
+            );
          }
 
          this.start = pToken;
       } else if (this.state === State.DONE) {
-         throw new Error('Internal error: Passed a token to ContentChecker when it was already done.');
+         throw new Error(
+            'Internal error: Passed a token to ContentChecker when it was already done.',
+         );
+      }
+
+      // §4.1.0: Well-formedness constraint: No Recursion
+      //    A parsed entity must not contain a recursive reference to itself,
+      //    either directly or indirectly.
+      if (this.start.type === GENERAL_ENTITY_START_PTOKEN && this.state !== State.PRE) {
+         const startName = strOrBlank(this.start.referencePToken.name);
+         let entityName: string | void;
+         let open: SToken | void;
+
+         if (pToken.type === GENERAL_ENTITY_START_PTOKEN) {
+            entityName = strOrBlank(pToken.referencePToken.name);
+            open = pToken.referencePToken.open;
+         }
+
+         if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+            entityName = strOrBlank(pToken.name);
+            open = pToken.open;
+         }
+
+         console.log('entity', entityName, startName);
+         if (entityName !== undefined) {
+            errorCollector.check(
+               startName === entityName,
+               WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+               [entityName],
+               open,
+            );
+         }
       }
 
       if (this.embeddedChecker) {
@@ -125,16 +168,24 @@ class ContentChecker implements Checker {
          return;
       }
 
-      switch(pToken.type) {
+      switch (pToken.type) {
          case ELEMENT_START_PTOKEN:
             const nameText = strOrBlank(pToken.name);
             this.elementNameStack.push(nameText);
-            scanAttributeValues(pToken.attributes, this.checkState.generalDecls,
-               this.checkState, errorCollector);
+            scanAttributeValues(
+               pToken.attributes,
+               this.checkState.generalDecls,
+               this.checkState,
+               errorCollector,
+            );
             break;
          case ELEMENT_EMPTY_PTOKEN:
-            scanAttributeValues(pToken.attributes, this.checkState.generalDecls,
-               this.checkState, errorCollector);
+            scanAttributeValues(
+               pToken.attributes,
+               this.checkState.generalDecls,
+               this.checkState,
+               errorCollector,
+            );
             break;
          case ELEMENT_END_PTOKEN:
             const endNameText = strOrBlank(pToken.name);
@@ -144,8 +195,11 @@ class ContentChecker implements Checker {
             //    The Name in an element's end-tag must match the element type in the start-tag.
             // Also production [39] says that start and end must match within the same entity.
             if (lastElement !== endNameText) {
-               errorCollector.report(WFID.ELEMENT_UNBALANCED, [ lastElement || '', endNameText ],
-                  pToken.open);
+               errorCollector.report(
+                  WFID.ELEMENT_UNBALANCED,
+                  [lastElement || '', endNameText],
+                  pToken.open,
+               );
             } else {
                this.elementNameStack.pop();
 
@@ -162,8 +216,13 @@ class ContentChecker implements Checker {
                return;
             }
 
-            checkGeneralEntity(pToken.referencePToken, false, this.checkState.generalDecls,
-               this.checkState, errorCollector);
+            checkGeneralEntity(
+               pToken.referencePToken,
+               false,
+               this.checkState.generalDecls,
+               this.checkState,
+               errorCollector,
+            );
             break;
          case GENERAL_ENTITY_END_PTOKEN:
             if (this.start && this.start.type === GENERAL_ENTITY_START_PTOKEN) {
@@ -172,11 +231,14 @@ class ContentChecker implements Checker {
 
                if (startReferenceName === endReferenceName) {
                   if (this.elementNameStack.length !== 0) {
-                     const lastElement = this.elementNameStack[this.elementNameStack.length -1];
+                     const lastElement = this.elementNameStack[this.elementNameStack.length - 1];
 
                      // §4.3.2: (implicitly) the elements in an entity must be properly nested.
-                     errorCollector.report(WFID.ELEMENT_UNBALANCED, [ lastElement, pToken.type ],
-                        pToken.referencePToken.open);
+                     errorCollector.report(
+                        WFID.ELEMENT_UNBALANCED,
+                        [lastElement, pToken.type],
+                        pToken.referencePToken.open,
+                     );
                   }
 
                   this.state = State.DONE;
@@ -185,15 +247,20 @@ class ContentChecker implements Checker {
             }
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
-            checkGeneralEntity(pToken, false, this.checkState.generalDecls,
-               this.checkState, errorCollector);
+            checkGeneralEntity(
+               pToken,
+               false,
+               this.checkState.generalDecls,
+               this.checkState,
+               errorCollector,
+            );
             break;
-
       }
 
       this.transition(pToken, errorCollector);
 
-      if ((this.state as any) === State.DONE) { // typeHack - this.transition may change the state
+      if ((this.state as any) === State.DONE) {
+         // typeHack - this.transition may change the state
          return CHECKER_DONE;
       }
    }
@@ -227,9 +294,6 @@ class ContentChecker implements Checker {
 
       return !!newState;
    }
-
 }
 
-export {
-   ContentChecker,
-};
+export { ContentChecker };

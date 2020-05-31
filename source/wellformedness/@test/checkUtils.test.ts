@@ -20,7 +20,7 @@ import {
    checkGeneralEntity,
    checkParameterEntity,
    isParamEntityExternal,
-   CheckState
+   CheckState,
 } from '../checkUtils';
 
 describe('checkUtils (unit)', () => {
@@ -32,14 +32,16 @@ describe('checkUtils (unit)', () => {
 
    beforeEach(() => {
       state = new CheckState();
-      generalEntityReference = new GeneralEntityReferencePToken({ open: toSToken('&'), name: toSToken('testRef')});
+      generalEntityReference = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('testRef'),
+      });
       generalEntityStart = new GeneralEntityStartPToken(generalEntityReference);
       generalEntityEnd = new GeneralEntityEndPToken(generalEntityReference);
       ec = new MockErrorCollector();
    });
 
    describe('scanAttributeValues()', () => {
-
       it('reports an error in the case of unbalanced entity starts and ends', () => {
          const refTwo = new GeneralEntityReferencePToken({
             open: toSToken('&'),
@@ -48,17 +50,19 @@ describe('checkUtils (unit)', () => {
          const generalEntityStartTwo = new GeneralEntityStartPToken(refTwo);
          const unbalancedElement = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart, generalEntityStartTwo, generalEntityEnd],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityStart, generalEntityStartTwo, generalEntityEnd],
+               },
+            ],
          });
 
          scanAttributeValues(unbalancedElement.attributes, {}, state, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
-            params: [ 'testRef', 'second' ],
+            params: ['testRef', 'second'],
             position: generalEntityEnd.referencePToken.open,
          });
       });
@@ -66,10 +70,17 @@ describe('checkUtils (unit)', () => {
       it('reports no errors when entity start and ends are properly blanced', () => {
          const unbalancedElement = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart, generalEntityStart, generalEntityEnd, generalEntityEnd],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [
+                     generalEntityStart,
+                     generalEntityStart,
+                     generalEntityEnd,
+                     generalEntityEnd,
+                  ],
+               },
+            ],
          });
 
          scanAttributeValues(unbalancedElement.attributes, {}, state, ec);
@@ -80,17 +91,19 @@ describe('checkUtils (unit)', () => {
       it('reports an error if an undeclared reference is found', () => {
          const undeclaredRef = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityReference],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityReference],
+               },
+            ],
          });
 
          scanAttributeValues(undeclaredRef.attributes, {}, state, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityReference.open,
          });
       });
@@ -98,10 +111,12 @@ describe('checkUtils (unit)', () => {
       it('reports no error if an undeclared reference is found, but not all declarations are known', () => {
          const undeclaredRef = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityReference],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityReference],
+               },
+            ],
          });
          state.peRefCount = 1;
 
@@ -113,10 +128,12 @@ describe('checkUtils (unit)', () => {
       it('reports no error if an undeclared reference is found, but it is a predefined one', () => {
          const undeclaredRef = new ElementStartPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityReference],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityReference],
+               },
+            ],
          });
          (generalEntityReference as any).name = toSToken('lt');
 
@@ -128,19 +145,29 @@ describe('checkUtils (unit)', () => {
       it('reports an error if an entity references an external entiy (§3.1.0)', () => {
          const withExternalRef = new ElementEmptyPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityStart],
+               },
+            ],
          });
 
-         scanAttributeValues(withExternalRef.attributes, {
-            testRef: new GeneralEntityDeclarationPToken({ open: toSToken('<!'), externalId: {} }),
-         }, state, ec);
+         scanAttributeValues(
+            withExternalRef.attributes,
+            {
+               testRef: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  externalId: {},
+               }),
+            },
+            state,
+            ec,
+         );
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
          });
       });
@@ -148,33 +175,41 @@ describe('checkUtils (unit)', () => {
       it('reports an error if an entity references an unparsed entity (§4.1.0)', () => {
          const withUnparsedRef = new ElementEmptyPToken({
             open: toSToken('<'),
-            attributes: [{
-               name: toSToken('first'),
-               value: [generalEntityStart],
-            }],
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityStart],
+               },
+            ],
          });
 
-         scanAttributeValues(withUnparsedRef.attributes, {
-            testRef: new GeneralEntityDeclarationPToken({ open: toSToken('<!'), nDataName: toSToken('foo') }),
-         }, state, ec);
+         scanAttributeValues(
+            withUnparsedRef.attributes,
+            {
+               testRef: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  nDataName: toSToken('foo'),
+               }),
+            },
+            state,
+            ec,
+         );
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
          });
       });
-
    });
 
    describe('checkGeneralEntity()', () => {
-
       it('reports an error if an undeclared reference is found (§4.1.0)', () => {
          checkGeneralEntity(generalEntityReference, false, {}, state, ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityReference.open,
          });
       });
@@ -195,33 +230,49 @@ describe('checkUtils (unit)', () => {
       });
 
       it('reports an error if an entity references an unparsed entity (§4.1.0)', () => {
-         checkGeneralEntity(generalEntityReference, false, {
-            testRef: new GeneralEntityDeclarationPToken({ open: toSToken('<!'), nDataName: toSToken('foo') }),
-         }, state, ec);
+         checkGeneralEntity(
+            generalEntityReference,
+            false,
+            {
+               testRef: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  nDataName: toSToken('foo'),
+               }),
+            },
+            state,
+            ec,
+         );
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityReference.open,
          });
       });
 
       it('reports an error if an attribute has a reference to an external entity (§3.1.0)', () => {
-         checkGeneralEntity(generalEntityReference, true, {
-            testRef: new GeneralEntityDeclarationPToken({ open: toSToken('<!'), externalId: {} }),
-         }, state, ec);
+         checkGeneralEntity(
+            generalEntityReference,
+            true,
+            {
+               testRef: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  externalId: {},
+               }),
+            },
+            state,
+            ec,
+         );
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: generalEntityReference.open,
          });
       });
-
    });
 
    describe('isParamEntityExternal()', () => {
-
       it('reports true if the param entity reference is to an external declaration', () => {
          const refTwo = new ParameterEntityReferencePToken({
             open: toSToken('%'),
@@ -229,7 +280,11 @@ describe('checkUtils (unit)', () => {
          });
 
          const result = isParamEntityExternal(refTwo, {
-            second: new ParameterEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('second'), externalId: {} }),
+            second: new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('second'),
+               externalId: {},
+            }),
          });
 
          expect(result).toEqual(true);
@@ -242,16 +297,17 @@ describe('checkUtils (unit)', () => {
          });
 
          const result = isParamEntityExternal(refTwo, {
-            second: new ParameterEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('second') }),
+            second: new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('second'),
+            }),
          });
 
          expect(result).toEqual(false);
       });
-
    });
 
    describe('checkParameterEntity()', () => {
-
       it('reports an error if the specified parameter entity has no declaration', () => {
          const peRef = new ParameterEntityReferencePToken({
             open: toSToken('%'),
@@ -262,7 +318,7 @@ describe('checkUtils (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            params: [ 'testRef' ],
+            params: ['testRef'],
             position: peRef.open,
          });
       });
@@ -273,9 +329,17 @@ describe('checkUtils (unit)', () => {
             name: toSToken('testRef'),
          });
 
-         checkParameterEntity(peRef, {
-            testRef: new ParameterEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('testRef') }),
-         }, state, ec);
+         checkParameterEntity(
+            peRef,
+            {
+               testRef: new ParameterEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  name: toSToken('testRef'),
+               }),
+            },
+            state,
+            ec,
+         );
 
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
@@ -291,7 +355,5 @@ describe('checkUtils (unit)', () => {
 
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
-
    });
-
 });

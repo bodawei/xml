@@ -1,45 +1,43 @@
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
-import { strOrBlank } from "sToken";
+import { strOrBlank } from 'sToken';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
-
    GeneralEntityReferencePToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
-
    PToken,
 } from 'token';
 import { AttributePToken } from 'source/token/common/attribute';
 
 type GeneralEntitiesInfo = {
    [name: string]: GeneralEntityDeclarationPToken;
-}
+};
 
 type ParameterEntitiesInfo = {
    [name: string]: ParameterEntityDeclarationPToken;
-}
+};
 
 type EntityInfo = {
-   generalDecls: GeneralEntitiesInfo,
-   paramDecls: ParameterEntitiesInfo,
-   hasAllDecls: boolean,
-   peRefCount: number,
+   generalDecls: GeneralEntitiesInfo;
+   paramDecls: ParameterEntitiesInfo;
+   hasAllDecls: boolean;
+   peRefCount: number;
 };
 
 interface CheckerConstructor {
-   new(checkState: CheckState): Checker;
+   new (checkState: CheckState): Checker;
 }
 
 interface Checker {
    check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE;
-};
+}
 
 const WFID = WellFormedError.ID;
-const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
+const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 const CHECKER_DONE = '**Checker Done**';
 
 class CheckState {
@@ -47,21 +45,26 @@ class CheckState {
    public generalDecls: GeneralEntitiesInfo = {};
    public paramDecls: ParameterEntitiesInfo = {};
    // public hasAllDecls: boolean = true; // if not validating, a peref got in the way.
-   public peRefCount: number = 0;
-   public isStandalone: boolean = false;
-   public hasNoDTD: boolean = false;
-   public hasExternalDTD: boolean = false;
+   public peRefCount = 0;
+   public isStandalone = false;
+   public hasNoDTD = false;
+   public hasExternalDTD = false;
 }
 
 /*
  * Examine the contents of the attribute values for any well-formedness problems
  */
-function scanAttributeValues(attributes: Array<AttributePToken> , entityDecls: GeneralEntitiesInfo, state: CheckState, ec: ErrorCollector) {
+function scanAttributeValues(
+   attributes: Array<AttributePToken>,
+   entityDecls: GeneralEntitiesInfo,
+   state: CheckState,
+   ec: ErrorCollector,
+) {
    const refNameStack: Array<string> = [];
 
    for (const att of attributes) {
       for (const val of att.value) {
-         switch(val.type) {
+         switch (val.type) {
             case GENERAL_ENTITY_REFERENCE_PTOKEN:
                checkGeneralEntity(val, true, entityDecls, state, ec);
                break;
@@ -73,13 +76,16 @@ function scanAttributeValues(attributes: Array<AttributePToken> , entityDecls: G
                break;
             case GENERAL_ENTITY_END_PTOKEN:
                const name = strOrBlank(val.referencePToken.name);
-               const topName = refNameStack[refNameStack.length -1];
+               const topName = refNameStack[refNameStack.length - 1];
 
                if (name === topName) {
                   refNameStack.pop();
                } else {
-                  ec.report(WFID.ATTRIBUTE_REFERENCE_UNBALANCED, [ name, topName ],
-                     val.referencePToken.open);
+                  ec.report(
+                     WFID.ATTRIBUTE_REFERENCE_UNBALANCED,
+                     [name, topName],
+                     val.referencePToken.open,
+                  );
                }
                break;
          }
@@ -137,21 +143,31 @@ function scanAttributeValues(attributes: Array<AttributePToken> , entityDecls: G
  *    is no declaration, then it is a validation error, and not a well-formedness
  *    error.
  */
-function checkGeneralEntity(pToken: GeneralEntityReferencePToken, inAtt: boolean,
-      entityDecls: GeneralEntitiesInfo, state: CheckState, ec: ErrorCollector) {
+function checkGeneralEntity(
+   pToken: GeneralEntityReferencePToken,
+   inAtt: boolean,
+   entityDecls: GeneralEntitiesInfo,
+   state: CheckState,
+   ec: ErrorCollector,
+) {
    const name = strOrBlank(pToken.name);
    const genEntityDecl = entityDecls[name];
    const declarationExists = !!genEntityDecl;
    const isPredefinedEntity = PROTECTED_ENTITIES.indexOf(name) !== -1;
-   const mustHaveDeclaration = state.isStandalone || state.hasNoDTD || (!state.hasExternalDTD && state.peRefCount === 0); // @@@@ Test this
+   const mustHaveDeclaration =
+      state.isStandalone || state.hasNoDTD || (!state.hasExternalDTD && state.peRefCount === 0); // @@@@ Test this
 
    if (genEntityDecl) {
       if (inAtt) {
          // §3.1.0: Well-Formedness Constraint: No External Entity References
          //    Attribute values must not contain direct or indirect entity
          //    references to external entities.
-         ec.check(genEntityDecl && genEntityDecl.externalId,
-            WFID.ATTRIBUTE_INVALID_REFERENCE, [ name ], pToken.open);
+         ec.check(
+            genEntityDecl && genEntityDecl.externalId,
+            WFID.ATTRIBUTE_INVALID_REFERENCE,
+            [name],
+            pToken.open,
+         );
       }
 
       // §4.1.0: Well-Formedness Constraint: Parsed Entity
@@ -163,7 +179,7 @@ function checkGeneralEntity(pToken: GeneralEntityReferencePToken, inAtt: boolean
 
    // §4.1.0 See long comment above.
    if (!declarationExists && !isPredefinedEntity && mustHaveDeclaration) {
-      ec.report(WFID.REFERENCE_NO_DECLARATION, [ name ], pToken.open);
+      ec.report(WFID.REFERENCE_NO_DECLARATION, [name], pToken.open);
    }
 }
 
@@ -175,15 +191,21 @@ function checkGeneralEntity(pToken: GeneralEntityReferencePToken, inAtt: boolean
  * hereafter we can't have seen any others. I think one could mount a reasonable argument
  * that this is not a check that should be made.
  */
-function checkParameterEntity(pToken: ParameterEntityReferencePToken, entityDecls: ParameterEntitiesInfo, state: CheckState, ec: ErrorCollector) {
+function checkParameterEntity(
+   pToken: ParameterEntityReferencePToken,
+   entityDecls: ParameterEntitiesInfo,
+   state: CheckState,
+   ec: ErrorCollector,
+) {
    const name = strOrBlank(pToken.name);
    const paramEntityDecl = entityDecls[name];
    const declarationExists = !!paramEntityDecl;
-   const mustHaveDeclaration = state.isStandalone || state.hasNoDTD || (!state.hasExternalDTD && state.peRefCount === 0); // @@@@ Test this
+   const mustHaveDeclaration =
+      state.isStandalone || state.hasNoDTD || (!state.hasExternalDTD && state.peRefCount === 0); // @@@@ Test this
 
    // §4.1.0 See long comment above.
    if (!declarationExists && mustHaveDeclaration) {
-      ec.report(WFID.REFERENCE_NO_DECLARATION, [ name ], pToken.open);
+      ec.report(WFID.REFERENCE_NO_DECLARATION, [name], pToken.open);
    }
 }
 
@@ -191,7 +213,10 @@ function checkParameterEntity(pToken: ParameterEntityReferencePToken, entityDecl
  * Return true if the specified reference is associated with a declartion of an external parameter
  * entity.  Returns false if we don't know or it is definitely internal.
  */
-function isParamEntityExternal(pToken: ParameterEntityReferencePToken, entityDecls: ParameterEntitiesInfo) {
+function isParamEntityExternal(
+   pToken: ParameterEntityReferencePToken,
+   entityDecls: ParameterEntitiesInfo,
+) {
    const name = strOrBlank(pToken.name);
    const paramEntityDecl = entityDecls[name];
    const declarationExists = !!paramEntityDecl;
@@ -204,10 +229,8 @@ export {
    CheckerConstructor,
    GeneralEntitiesInfo,
    ParameterEntitiesInfo,
-
    CheckState,
    CHECKER_DONE,
-
    scanAttributeValues,
    checkGeneralEntity,
    checkParameterEntity,

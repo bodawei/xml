@@ -11,10 +11,7 @@ import {
    ERROR_TYPE,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
-   EXTERNAL_SUBSET_START_TOKEN,
-   EXTERNAL_SUBSET_END_TOKEN,
    NOTATION_DECLARATION_PTOKEN,
-   AttributeValuePToken,
    CharRefPToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
@@ -30,6 +27,7 @@ import {
    PToken,
    XmlError,
    AttListPToken,
+   ParameterEntityReferencePToken,
 } from 'token';
 
 import * as expandAttributes from '../utils/expandAttributes';
@@ -867,6 +865,126 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(input, true, (results) => {
             expect(results).toEqual([emptyElement]);
+            done();
+         });
+      });
+   });
+
+   describe('entity references', () => {
+      let geRef: GeneralEntityReferencePToken;
+      let streamEntityReferenceSpy: jasmine.Spy;
+
+      beforeEach(() => {
+         streamEntityReferenceSpy = spyOn(streamEntityReference, 'streamEntityReference');
+
+         geRef = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('root'),
+         });
+      });
+
+      it('calls the streamEntityReference() function with the ref token, prams and a callback', (done) => {
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(undefined, () => {});
+         });
+
+         doExpand([geRef], true, () => {
+            const args = streamEntityReferenceSpy.calls.argsFor(0);
+
+            expect(args[0]).toEqual(geRef);
+            expect(args[1].entityDetails).not.toBeUndefined();
+            expect(args[2]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('returns the geRef if it is not expanded', (done) => {
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(undefined, () => {});
+         });
+
+         doExpand([geRef], true, (results) => {
+            expect(harvestTypes(results)).toEqual([geRef.type]);
+            done();
+         });
+      });
+
+      it('returns any intermediate tokens rather than the GE Ref if there are any', (done) => {
+         const text = new TextPToken({ text: toSToken('foo') });
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(text, () => {
+               callback(undefined, () => {});
+            });
+         });
+
+         doExpand([geRef], true, (results) => {
+            expect(harvestTypes(results)).toEqual([text.type]);
+            done();
+         });
+      });
+
+      it('does not call expander if already in a GE Ref with the same name (stop recursion) (§4.1.0)', (done) => {
+         const geRef2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('root'),
+         });
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(geRef2, () => {
+               callback(undefined, () => {});
+            });
+         });
+
+         doExpand([geRef], true, (results) => {
+            expect(streamEntityReferenceSpy).toHaveBeenCalledTimes(1);
+            expect(harvestTypes(results)).toEqual([geRef2.type]);
+            done();
+         });
+      });
+
+      it('does not call expander if already in a PE Ref with the same name (stop recursion) (§4.1.0)', (done) => {
+         const peRef1 = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('root'),
+         });
+         const peRef2 = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('root'),
+         });
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            callback(peRef2, () => {
+               callback(undefined, () => {});
+            });
+         });
+
+         doExpand([peRef1], true, (results) => {
+            expect(streamEntityReferenceSpy).toHaveBeenCalledTimes(1);
+            expect(harvestTypes(results)).toEqual([peRef2.type]);
+            done();
+         });
+      });
+
+      it('does not consider a PE Ref and a GE Ref with the same name to be a risk for mutual recursion (§4.1.0)', (done) => {
+         // This scenario (a GE inside of a PE) can't happen in an ordinary document. But this processor does not, and should not, care
+         const peRef1 = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('root'),
+         });
+         const text = new TextPToken({ text: toSToken('foo') });
+         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+            if (token === peRef1) {
+               callback(geRef, () => {
+                  callback(undefined, () => {});
+               });
+            } else {
+               callback(text, () => {
+                  callback(undefined, () => {});
+               });
+            }
+         });
+
+         doExpand([peRef1], true, (results) => {
+            expect(streamEntityReferenceSpy).toHaveBeenCalledTimes(2);
+            expect(harvestTypes(results)).toEqual([text.type]);
             done();
          });
       });

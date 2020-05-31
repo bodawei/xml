@@ -7,7 +7,6 @@
  
    "helpers": [
       "build/beforeEach*.js",
-      "source/error/@test/beforeEachMatchers.js",
       "source/error/@test/helper.ts",
       "source/error/@test/beforeEach.ts",
       "source/token/@test/beforeEach.ts",

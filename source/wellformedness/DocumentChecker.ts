@@ -11,25 +11,32 @@ import {
    INTERNAL_SUBSET_START_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
+   PARAMETER_ENTITY_END_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   GENERAL_ENTITY_START_PTOKEN,
+   GENERAL_ENTITY_END_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
    SPACE_PTOKEN,
    XMLDECL_PTOKEN,
-
    PToken,
-
    getFirstSToken,
 } from 'token';
 
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
+import { strOrBlank, SToken } from 'sToken';
+
+const NO_CHANGE = '---INTERNAL---MARKER---';
 
 type StateTable = {
-   [ startState: string ]: {
-      [tokenType: string]: State | typeof NO_CHANGE,
-   },
-}
+   [startState: string]: {
+      [tokenType: string]: State | typeof NO_CHANGE;
+   };
+};
 
 type CheckerMap = {
-   content: CheckerConstructor,
-   dtd: CheckerConstructor,
+   content: CheckerConstructor;
+   dtd: CheckerConstructor;
 };
 
 enum State {
@@ -40,9 +47,7 @@ enum State {
    PROLOG_TRAILING_MISC = 'PROLOG_TRAILING_MISC', // §2.8.0: Production [22]
    ELEMENT = 'ELEMENT', // §2.1.0: Production [1]
    TRAILING_MISC = 'TRAILING_MISC', // §2.1.0: Production [1]
-};
-
-const NO_CHANGE = '---INTERNAL---MARKER---';
+}
 
 const transitionsByState: StateTable = {
    [State.START]: {
@@ -79,7 +84,13 @@ const transitionsByState: StateTable = {
       [COMMENT_PTOKEN]: NO_CHANGE,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
       [SPACE_PTOKEN]: NO_CHANGE,
-   }
+   },
+};
+
+enum EntityType {
+   DOCUMENT,
+   GENERAL,
+   PARAMETER,
 }
 
 /*
@@ -95,8 +106,10 @@ class DocumentChecker {
    private checkState: CheckState = new CheckState();
    private subChecker?: Checker;
    private checkers: CheckerMap;
-   private internalSubsetSeen: boolean = false;
-   private externalSubsetSeen: boolean = false;
+   private internalSubsetSeen = false;
+   private externalSubsetSeen = false;
+   private inEntity: EntityType = EntityType.DOCUMENT;
+   private entityNameStack: Array<string> = [];
 
    constructor(checkerMap: CheckerMap) {
       this.checkers = checkerMap;
@@ -112,7 +125,10 @@ class DocumentChecker {
 
       if (pToken.type === DOCTYPE_END_PTOKEN) {
          // Report errors with the starting context of the DOCTYPE start
-         const specialErrorCollector = new ErrorCollector(pToken.docTypeStartPToken.open, WellFormedError);
+         const specialErrorCollector = new ErrorCollector(
+            pToken.docTypeStartPToken.open,
+            WellFormedError,
+         );
          pToken.checkWellFormed(specialErrorCollector, this.checkState.emd);
          errorCollector.appendFrom(specialErrorCollector);
       } else if ((pToken as any).checkWellFormed) {
@@ -135,7 +151,7 @@ class DocumentChecker {
          return;
       }
 
-      switch(pToken.type) {
+      switch (pToken.type) {
          case XMLDECL_PTOKEN:
             if (this.state === State.START) {
                // §4.1.0: WFC Entiy Declared requires us to know if we're standalone
@@ -184,15 +200,15 @@ class DocumentChecker {
       this.transition(pToken, errorCollector);
    }
 
-   public finish(ec: ErrorCollector) {
+   public finish(ec: ErrorCollector): void {
       if (this.state !== State.TRAILING_MISC) {
          ec.report(WellFormedError.ID.DOC_END_EARLY);
       }
    }
 
-   private transition(pToken: PToken, ec: ErrorCollector) {
+   private transition(pToken: PToken, ec: ErrorCollector): void {
       const transitions = transitionsByState[this.state];
-      const newState  = transitions && transitions[pToken.type];
+      const newState = transitions && transitions[pToken.type];
       let badSubset = false;
 
       if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
@@ -204,11 +220,9 @@ class DocumentChecker {
       if (newState && !badSubset) {
          this.state = newState === NO_CHANGE ? this.state : newState;
       } else {
-         ec.report(WellFormedError.ID.TOKEN_INVALID_CONTEXT, [ pToken.type ], getFirstSToken(pToken));
+         ec.report(WellFormedError.ID.TOKEN_INVALID_CONTEXT, [pToken.type], getFirstSToken(pToken));
       }
    }
 }
 
-export {
-   DocumentChecker,
-};
+export { DocumentChecker };
