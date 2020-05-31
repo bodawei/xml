@@ -66,7 +66,7 @@ function parseAttributeValue(
    sTokenSource: STokenSource,
    done: (results: AttributeValueResults) => void,
 ): void {
-   const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false });
+   const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false, geRef: true });
    const results: AttributeValuePToken = [];
 
    pTokenStream.on('data', (token: any) => {

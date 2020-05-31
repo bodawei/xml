@@ -2,14 +2,12 @@
    "spec_dir": ".",
  
    "spec_files": [
-      "source/begin/@test/*test.ts",
-      "source/expand/@test/*test.ts",
-      "source/expand/utils/@test/*test.ts",
-      "source/stream/@test/*test.ts"
+      "source/**/*test.ts"
    ],
  
    "helpers": [
       "build/beforeEach*.js",
+      "source/error/@test/beforeEachMatchers.js",
       "source/error/@test/helper.ts",
       "source/error/@test/beforeEach.ts",
       "source/token/@test/beforeEach.ts",

@@ -79,6 +79,7 @@ class EntityExpander {
    private expandParams: ExpandParams;
    private loadExternalEntities: boolean;
    private state = State.AT_START;
+   private bug2 = false;
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = deliverPToken;
@@ -99,8 +100,11 @@ class EntityExpander {
    public expandPToken(pToken: PToken, expanded: PTokenExpanded): void {
       switch (pToken.type) {
          case ENTITY_META_DATA:
-            this.expandParams.emd = pToken;
-            this.deliverToken(pToken);
+            if (!this.bug2) {
+               this.bug2 = true;
+               this.expandParams.emd = pToken;
+               this.deliverToken(pToken);
+            }
             expanded();
             break;
          case DOCTYPE_START_PTOKEN:
@@ -361,11 +365,17 @@ class EntityExpander {
       pToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken,
       handled: PTokenExpanded,
    ): void {
+      let countSeen = 0;
       streamEntityReference(pToken, this.expandParams, (result, done) => {
          // how do you distinguish a failure to lookup vs. an empty one?
          if (!result) {
+            // BUG 1
+            if (countSeen === 0) {
+               this.deliverToken(pToken);
+            }
             handled();
          } else {
+            countSeen++;
             this.expandPToken(result, done);
          }
       });

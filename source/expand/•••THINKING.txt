@@ -219,6 +219,7 @@ x Why isn't toEqualRangeless etc not working
 x Need coverage reporting urgently
 x- expandUnassigned
 x         - need to make sure to do special handling for element
+x Get ibm tests working again
 
 GOALS
    - Get the expansion system finished and working
@@ -235,7 +236,9 @@ DOCUMENT
   - Also document what comes out, especially for all the expansion cases.
 
 IMPLEMENTATION
-   - Get ibm tests working again
+      - Bug one: EntityExpander when streaming, if can't find the entity, it will barf
+      - Bug2 EMD's from sub entits clobber the one for the doc in the entity expander
+      - Bug 3: Add geRef to PTokenFromLiteralStream
    - Loss of PE ref detail
       - expandEntityValue
       - NOTE: we are storing the preparsed values in the start and end tokens.

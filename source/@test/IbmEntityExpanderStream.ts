@@ -4,14 +4,13 @@ import { Token } from 'basic';
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
-import { PToken } from 'token';
+import { AttributeValuePToken, PToken } from 'token';
 import { EntityExpander } from '../expand/EntityExpander';
 import { PTokenFromLiteralStream } from 'pTokenStream';
 import { EntityValuePToken } from 'source/token/entityDeclaration';
 import { defaultExtractors } from 'extractor';
 import { ExternalId } from 'source/token/common/externalId';
-import { RetrieveResults } from 'source/expand/types';
-
+import { AttributeValueResults, RetrieveResults } from 'source/expand/types';
 
 function parseBody(sTokenSource: STokenSource, inContent: boolean, expandToken: (a: any, b: any) => void) {
    const pTokenStream = new PTokenStream(sTokenSource);
@@ -111,6 +110,23 @@ function retrieveExternalEntity(resources: any, externalId: ExternalId, entityMe
    };
 }
 
+function parseAttributeValue(
+   sTokenSource: STokenSource,
+   done: (results: AttributeValueResults) => void,
+): void {
+   const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false, geRef: true });
+   const results: AttributeValuePToken = [];
+
+   pTokenStream.on('data', (token: any) => {
+      // typehack
+      results.push(token);
+   });
+   pTokenStream.on('end', () => {
+      done({ newValue: results, errors: [] });
+   });
+}
+
+
 /**********************************************************************\
  An EntityExpanderStream is simply a stream wrapper around an
  EntityExpander.
@@ -128,7 +144,7 @@ class IbmEntityExpanderStream extends Transform {
          parseBody,
          parseEntityValue,
          retrieveExternalEntity: retrieveExternalEntity.bind(undefined, resources),
-         parseAttributeValue: (() => {}) as any
+         parseAttributeValue,
       });
    }
 

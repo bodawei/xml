@@ -105,7 +105,6 @@ function expandUnassigned(
          }
 
          const { unassignedFragment, errors } = results[peRefIndex];
-         console.log('unassignedFragment, unassignedFragment)', unassignedFragment);
 
          peRefIndex++;
          allErrors.push(...errors);
