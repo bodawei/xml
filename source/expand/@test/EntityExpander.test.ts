@@ -37,6 +37,7 @@ import * as expandUnassigned from '../utils/expandUnassigned';
 import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
 import { EntityExpander } from '../EntityExpander';
 import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
+import { EntityNameStack } from '../utils/EntityNameStack';
 
 describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
@@ -112,7 +113,7 @@ describe('EntityExpander (unit)', () => {
 
       it('passes the EntityMetaData to the utility functions in the expandParams', (done) => {
          const expandAttributeSpy: jasmine.Spy = spyOn(expandAttributes, 'expandAttributes');
-         expandAttributeSpy.and.callFake((value: any, params: any, cb: any) => {
+         expandAttributeSpy.and.callFake((value: any, params: any, stack: any, cb: any) => {
             cb([
                {
                   newValue: [],
@@ -375,7 +376,7 @@ describe('EntityExpander (unit)', () => {
 
             expect(params[0]).toEqual([1]);
             expect(params[1].entityDetails).not.toBeUndefined();
-            expect(params[2]).toEqual([]);
+            expect(params[2]).toBeInstanceOf(EntityNameStack);
             expect(params[3]).toEqual(false);
             expect(params[4]).toBeInstanceOf(Function);
             done();
@@ -493,19 +494,21 @@ describe('EntityExpander (unit)', () => {
          expandAttributeSpy = spyOn(expandAttributes, 'expandAttributes');
          let index = 0;
 
-         expandAttributeSpy.and.callFake((value: Array<object>, params: object, cb: Function) => {
-            const result = value.map(() => {
-               const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
-               index++;
+         expandAttributeSpy.and.callFake(
+            (value: Array<object>, params: object, stack: EntityNameStack, cb: Function) => {
+               const result = value.map(() => {
+                  const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
+                  index++;
 
-               return {
-                  newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
-                  errors: [new WellFormedError(code, [`${index}`])],
-               };
-            });
+                  return {
+                     newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
+                     errors: [new WellFormedError(code, [`${index}`])],
+                  };
+               });
 
-            cb(result);
-         });
+               cb(result);
+            },
+         );
       });
 
       it('processes the default attribute values of the ATTLIST PToken', (done) => {
@@ -563,7 +566,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(callArgs[0]).toEqual(attList.attDefs);
             expect(callArgs[1].emd).not.toBeUndefined();
-            expect(callArgs[2]).toBeInstanceOf(Function);
+            expect(callArgs[2]).toBeInstanceOf(EntityNameStack);
+            expect(callArgs[3]).toBeInstanceOf(Function);
             done();
          });
       });
@@ -624,7 +628,7 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toEqual([]);
+            expect(args[2]).toBeInstanceOf(EntityNameStack);
             expect(args[3]).toBeInstanceOf(Function);
             done();
          });
@@ -642,7 +646,7 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toEqual(['student']);
+            expect(args[2].hasPEName('student')).toEqual(true);
             expect(args[3]).toBeInstanceOf(Function);
             done();
          });
@@ -759,19 +763,21 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('student'),
          });
 
-         expandAttributeSpy.and.callFake((value: Array<object>, params: object, cb: Function) => {
-            const result = value.map(() => {
-               const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
-               index++;
+         expandAttributeSpy.and.callFake(
+            (value: Array<object>, params: object, stack: EntityNameStack, cb: Function) => {
+               const result = value.map(() => {
+                  const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
+                  index++;
 
-               return {
-                  newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
-                  errors: [new WellFormedError(code, [`${index}`])],
-               };
-            });
+                  return {
+                     newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
+                     errors: [new WellFormedError(code, [`${index}`])],
+                  };
+               });
 
-            cb(result);
-         });
+               cb(result);
+            },
+         );
       });
 
       it('passes a the element through with no changes when it has no attributes', (done) => {
@@ -844,7 +850,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(callArgs[0]).toEqual(startElement.attributes);
             expect(callArgs[1].entityDetails).not.toBeUndefined();
-            expect(callArgs[2]).toBeInstanceOf(Function);
+            expect(callArgs[2]).toBeInstanceOf(EntityNameStack);
+            expect(callArgs[3]).toBeInstanceOf(Function);
             done();
          });
       });

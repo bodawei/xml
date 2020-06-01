@@ -12,6 +12,7 @@ import { ExpandParams } from '../types';
 import { EntityDetails } from './EntityDetails';
 
 import { addProtoReplacementText } from './addProtoReplacementText';
+import { EntityNameStack } from './EntityNameStack';
 
 type ExpandedResult = {
    newValue: EntityValuePToken;
@@ -53,10 +54,11 @@ function entitiesWithoutReplacementText(
 function expandValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
-   expanded: (result: ExpandedResult) => void,
+   nameStack: EntityNameStack,
    errors: Array<XmlError>,
+   expanded: (result: ExpandedResult) => void,
 ): void {
-   let newValue: EntityValuePToken = [];
+   const newValue: EntityValuePToken = [];
 
    for (const element of value) {
       if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
@@ -64,12 +66,18 @@ function expandValue(
          const details = expandParams.entityDetails.getPEDetails(entryName);
 
          if (details) {
-            newValue = [
-               ...newValue,
-               new ParameterEntityStartPToken(element),
-               ...details.protoReplacementText!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-               new ParameterEntityEndPToken(element),
-            ];
+            // §4.1.0: Well-formedness constraint: No Recursion
+            //    A parsed entity must not contain a recursive reference to itself,
+            //    either directly or indirectly.
+            if (nameStack.hasName(element)) {
+               newValue.push(element);
+            } else {
+               newValue.push(
+                  new ParameterEntityStartPToken(element),
+                  ...details.protoReplacementText!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
+                  new ParameterEntityEndPToken(element),
+               );
+            }
             continue;
          }
       }
@@ -93,7 +101,7 @@ function expandValue(
 function expandEntityValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
-   peRefChain: Array<string>,
+   nameStack: EntityNameStack,
    expanded: (result: ExpandedResult) => void,
 ): void {
    const allErrors: Array<XmlError> = [];
@@ -101,18 +109,18 @@ function expandEntityValue(
    let remainingEntities = entitiesWithoutRT.length;
 
    if (remainingEntities === 0) {
-      expandValue(value, expandParams, expanded, []);
+      expandValue(value, expandParams, nameStack, [], expanded);
       return;
    }
 
    for (const reference of entitiesWithoutRT) {
       // eslint-disable-next-line no-loop-func
-      addProtoReplacementText(reference, expandParams, [], (errors) => {
+      addProtoReplacementText(reference, expandParams, nameStack, (errors) => {
          allErrors.push(...errors);
          remainingEntities--;
 
          if (remainingEntities === 0) {
-            expandValue(value, expandParams, expanded, allErrors);
+            expandValue(value, expandParams, nameStack, allErrors, expanded);
          }
       });
    }

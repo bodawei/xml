@@ -18,6 +18,7 @@ import { WellFormedError } from 'error';
 import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
+import { EntityNameStack } from '../EntityNameStack';
 
 describe('expandAttributes() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -64,7 +65,7 @@ describe('expandAttributes() (unit)', () => {
    });
 
    it('calls back with a copy of the set of attribute values when it contains no general entity references', (done) => {
-      expandAttributes([{ value: [textPToken] }], params, (result) => {
+      expandAttributes([{ value: [textPToken] }], params, new EntityNameStack(), (result) => {
          expect(result).toEqualShallowDifferent([{ newValue: [textPToken], errors: [] }]);
          done();
       });
@@ -76,10 +77,15 @@ describe('expandAttributes() (unit)', () => {
          name: toSToken('bogus'),
       });
 
-      expandAttributes([{ value: [textPToken, bogus] }], params, (result) => {
-         expect(result[0].newValue).toEqual([textPToken, bogus]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, bogus] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([textPToken, bogus]);
+            done();
+         },
+      );
    });
 
    it('calls back with multiple attribute values populated', (done) => {
@@ -91,6 +97,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, bogus] }, { value: [textPToken, bogus] }],
          params,
+         new EntityNameStack(),
          (result) => {
             expect(result[0].newValue).toEqual([textPToken, bogus]);
             expect(result[1].newValue).toEqual([textPToken, bogus]);
@@ -106,15 +113,20 @@ describe('expandAttributes() (unit)', () => {
       });
       const ltEntityValue = lookupPredefinedEntityValue('lt');
 
-      expandAttributes([{ value: [textPToken, ltRef] }], params, (result) => {
-         expect(result[0].newValue).toEqual([
-            textPToken,
-            new GeneralEntityStartPToken(ltRef, ltEntityValue),
-            ...(ltEntityValue as AttributeValuePToken),
-            new GeneralEntityEndPToken(ltRef, ltEntityValue),
-         ]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, ltRef] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([
+               textPToken,
+               new GeneralEntityStartPToken(ltRef, ltEntityValue),
+               ...(ltEntityValue as AttributeValuePToken),
+               new GeneralEntityEndPToken(ltRef, ltEntityValue),
+            ]);
+            done();
+         },
+      );
    });
 
    it('calls back with the original GE Ref when the declaration is of an unparsed entity', (done) => {
@@ -130,10 +142,15 @@ describe('expandAttributes() (unit)', () => {
          }),
       );
 
-      expandAttributes([{ value: [textPToken, unparsedRef] }], params, (result) => {
-         expect(result[0].newValue).toEqual([textPToken, unparsedRef]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, unparsedRef] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([textPToken, unparsedRef]);
+            done();
+         },
+      );
    });
 
    it('calls back with the original refernce if it can not be parsed for some reason', (done) => {
@@ -144,10 +161,15 @@ describe('expandAttributes() (unit)', () => {
          done({ newValue: undefined, errors: [] });
       };
 
-      expandAttributes([{ value: [textPToken, geRefPToken] }], params, (result) => {
-         expect(result[0].newValue).toEqual([textPToken, geRefPToken]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, geRefPToken] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([textPToken, geRefPToken]);
+            done();
+         },
+      );
    });
 
    it('calls back with the original refernce if it has no name', (done) => {
@@ -155,13 +177,18 @@ describe('expandAttributes() (unit)', () => {
          open: toSToken('&'),
       });
 
-      expandAttributes([{ value: [textPToken, namlessGERef] }], params, (result) => {
-         expect(result[0].newValue).toEqual([textPToken, namlessGERef]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, namlessGERef] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([textPToken, namlessGERef]);
+            done();
+         },
+      );
    });
 
-   it('calls back with the a copy of the general entity reference when this is a recursive call', (done) => {
+   it('calls back with the a copy of the general entity reference when there is a recursive call within the attribute itsel (§4.1.0)', (done) => {
       const firstGeRefPToken = new GeneralEntityReferencePToken({
          open: toSToken('&'),
          name: toSToken('ge2'),
@@ -186,15 +213,46 @@ describe('expandAttributes() (unit)', () => {
          done({ newValue: [anotherGeRefPToken], errors: [] });
       };
 
-      expandAttributes([{ value: [textPToken, firstGeRefPToken] }], params, (result) => {
-         expect(result[0].newValue).toEqual([
-            textPToken,
-            new GeneralEntityStartPToken(firstGeRefPToken, [sourceToken]),
-            anotherGeRefPToken,
-            new GeneralEntityEndPToken(firstGeRefPToken, [sourceToken]),
-         ]);
-         done();
+      expandAttributes(
+         [{ value: [textPToken, firstGeRefPToken] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([
+               textPToken,
+               new GeneralEntityStartPToken(firstGeRefPToken, [sourceToken]),
+               anotherGeRefPToken,
+               new GeneralEntityEndPToken(firstGeRefPToken, [sourceToken]),
+            ]);
+            done();
+         },
+      );
+   });
+
+   it('calls back with the a copy of the general entity reference when there is recursive call from outside the attribute (§4.1.0)', (done) => {
+      const anotherGeRefPToken = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('ge2'),
       });
+      const sourceToken = new TextPToken({ text: toSToken('&ge2;') });
+      entityDetails.addEntity(
+         new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('ge2'),
+            value: [sourceToken],
+         }),
+         [sourceToken],
+      );
+
+      expandAttributes(
+         [{ value: [textPToken, anotherGeRefPToken] }],
+         params,
+         new EntityNameStack().cloneWithGEName('ge2'),
+         (result) => {
+            expect(result[0].newValue).toEqual([textPToken, anotherGeRefPToken]);
+            done();
+         },
+      );
    });
 
    it('calls back with the entity parsed as an attribute value when the general entity exists', (done) => {
@@ -206,15 +264,20 @@ describe('expandAttributes() (unit)', () => {
          done({ newValue: [pToken], errors: [] });
       };
 
-      expandAttributes([{ value: [textPToken, geRefPToken] }], params, (result) => {
-         expect(result[0].newValue).toEqual([
-            textPToken,
-            new GeneralEntityStartPToken(geRefPToken, [text2PToken]),
-            pToken,
-            new GeneralEntityEndPToken(geRefPToken, [text2PToken]),
-         ]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, geRefPToken] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([
+               textPToken,
+               new GeneralEntityStartPToken(geRefPToken, [text2PToken]),
+               pToken,
+               new GeneralEntityEndPToken(geRefPToken, [text2PToken]),
+            ]);
+            done();
+         },
+      );
    });
 
    it('calls back with the parsed contents when the entity can not be loaded', (done) => {
@@ -236,15 +299,20 @@ describe('expandAttributes() (unit)', () => {
          },
       );
 
-      expandAttributes([{ value: [textPToken, unloadable] }], params, (result) => {
-         expect(result).toEqual([
-            {
-               newValue: [textPToken, unloadable],
-               errors: [attrError],
-            },
-         ]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, unloadable] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result).toEqual([
+               {
+                  newValue: [textPToken, unloadable],
+                  errors: [attrError],
+               },
+            ]);
+            done();
+         },
+      );
    });
 
    it('calls back with the entity parsed as an attribute value when the general entity is loaded', (done) => {
@@ -256,15 +324,20 @@ describe('expandAttributes() (unit)', () => {
          done({ newValue: [pToken], errors: [] });
       };
 
-      expandAttributes([{ value: [textPToken, geRefPToken] }], params, (result) => {
-         expect(result[0].newValue).toEqual([
-            textPToken,
-            new GeneralEntityStartPToken(geRefPToken, [pToken]),
-            pToken,
-            new GeneralEntityEndPToken(geRefPToken, [pToken]),
-         ]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, geRefPToken] }],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result[0].newValue).toEqual([
+               textPToken,
+               new GeneralEntityStartPToken(geRefPToken, [pToken]),
+               pToken,
+               new GeneralEntityEndPToken(geRefPToken, [pToken]),
+            ]);
+            done();
+         },
+      );
    });
 
    describe('error reporting', () => {
@@ -274,10 +347,15 @@ describe('expandAttributes() (unit)', () => {
             name: toSToken('bogus'),
          });
 
-         expandAttributes([{ value: [textPToken, bogus] }], params, (results) => {
-            expect(results[0].errors).toEqual([]);
-            done();
-         });
+         expandAttributes(
+            [{ value: [textPToken, bogus] }],
+            params,
+            new EntityNameStack(),
+            (results) => {
+               expect(results[0].errors).toEqual([]);
+               done();
+            },
+         );
       });
 
       it('calls back with errors from parsing the geref contents as an attribute value', (done) => {
@@ -289,10 +367,15 @@ describe('expandAttributes() (unit)', () => {
             done({ newValue: [textPToken], errors: [attrError] });
          };
 
-         expandAttributes([{ value: [textPToken, geRefPToken] }], params, (result) => {
-            expect(result[0].errors).toEqual([attrError]);
-            done();
-         });
+         expandAttributes(
+            [{ value: [textPToken, geRefPToken] }],
+            params,
+            new EntityNameStack(),
+            (result) => {
+               expect(result[0].errors).toEqual([attrError]);
+               done();
+            },
+         );
       });
 
       it('calls back with errors from loading an external entity', (done) => {
@@ -321,10 +404,15 @@ describe('expandAttributes() (unit)', () => {
             done({ newValue: [textPToken], errors: [] });
          };
 
-         expandAttributes([{ value: [textPToken, geExternalRefPToken] }], params, (results) => {
-            expect(results[0].errors).toEqual([loadingError]);
-            done();
-         });
+         expandAttributes(
+            [{ value: [textPToken, geExternalRefPToken] }],
+            params,
+            new EntityNameStack(),
+            (results) => {
+               expect(results[0].errors).toEqual([loadingError]);
+               done();
+            },
+         );
       });
    });
 
@@ -362,9 +450,14 @@ describe('expandAttributes() (unit)', () => {
          done({ newValue: [textPToken], errors: [attrError2] });
       };
 
-      expandAttributes([{ value: [textPToken, geRefPToken] }], params, (results) => {
-         expect(results[0].errors).toEqual([attrError1, loadingError, attrError2]);
-         done();
-      });
+      expandAttributes(
+         [{ value: [textPToken, geRefPToken] }],
+         params,
+         new EntityNameStack(),
+         (results) => {
+            expect(results[0].errors).toEqual([attrError1, loadingError, attrError2]);
+            done();
+         },
+      );
    });
 });

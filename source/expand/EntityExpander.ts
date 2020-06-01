@@ -37,6 +37,7 @@ import { expandEntityValue } from './utils/expandEntityValue';
 import { expandUnassigned } from './utils/expandUnassigned';
 import { streamEntityReference } from './utils/streamEntityReference';
 import { EntityProcessors, ExpandParams } from './types';
+import { EntityNameStack } from './utils/EntityNameStack';
 
 type DeclToken =
    | AttListPToken
@@ -80,7 +81,7 @@ class EntityExpander {
    private loadExternalEntities: boolean;
    private state = State.AT_START;
    private bug2 = false;
-   private entityNameStack: Array<string>;
+   private entityNameStack: EntityNameStack = new EntityNameStack();
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = deliverPToken;
@@ -96,7 +97,6 @@ class EntityExpander {
       };
 
       this.loadExternalEntities = validating;
-      this.entityNameStack = [];
    }
 
    public expandPToken(pToken: PToken, expanded: PTokenExpanded): void {
@@ -226,7 +226,7 @@ class EntityExpander {
       expandUnassigned(
          declarationPToken.unassigned,
          this.expandParams,
-         [],
+         this.entityNameStack,
          isElementDeclaration,
          (results) => {
             // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
@@ -277,15 +277,20 @@ class EntityExpander {
     */
    private handleAttListDeclaration(pToken: AttListPToken, handled: PTokenExpanded): void {
       // REFACTOR/CLEANUP: default type is wrong.
-      expandAttributes(pToken.attDefs as any, this.expandParams, (results) => {
-         for (let index = 0; index < results.length; index++) {
-            pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
-            this.deliverErrors(results[index].errors);
-         }
+      expandAttributes(
+         pToken.attDefs as any,
+         this.expandParams,
+         this.entityNameStack,
+         (results) => {
+            for (let index = 0; index < results.length; index++) {
+               pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+               this.deliverErrors(results[index].errors);
+            }
 
-         this.deliverToken(pToken);
-         handled();
-      });
+            this.deliverToken(pToken);
+            handled();
+         },
+      );
    }
 
    /*
@@ -311,7 +316,10 @@ class EntityExpander {
    ): void {
       const name = strOrBlank(pToken.name);
       const hasEntry = this.expandParams.entityDetails.hasEntity(pToken);
-      const chain = pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN ? [name] : [];
+      const chain =
+         pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN
+            ? this.entityNameStack.cloneWithPEName(name)
+            : this.entityNameStack.cloneWithGEName(name);
 
       if (name === '' || hasEntry) {
          this.deliverToken(pToken);
@@ -352,37 +360,38 @@ class EntityExpander {
       }
 
       // REFACTOR/CLEANUP: default type is wrong.
-      expandAttributes(pToken.attributes as any, this.expandParams, (results) => {
-         for (let index = 0; index < results.length; index++) {
-            pToken.attributes[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
-            this.deliverErrors(results[index].errors);
-         }
+      expandAttributes(
+         pToken.attributes as any,
+         this.expandParams,
+         this.entityNameStack,
+         (results) => {
+            for (let index = 0; index < results.length; index++) {
+               pToken.attributes[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+               this.deliverErrors(results[index].errors);
+            }
 
-         this.deliverToken(pToken);
-         handled();
-      });
+            this.deliverToken(pToken);
+            handled();
+         },
+      );
    }
 
    handleEntityReference(
       pToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken,
       handled: PTokenExpanded,
    ): void {
-      const name = strOrBlank(pToken.name);
-      const isPERef = pToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN;
-      // Keep a stack of "typed" names. It's illegal to have a GE in a PE etc, but this processor does not care
-      const typedName = `${isPERef ? 'PE' : 'GE'} ${name}`;
       let countSeen = 0;
 
       // §4.1.0: Well-formedness constraint: No Recursion
       //    A parsed entity must not contain a recursive reference to itself,
       //    either directly or indirectly.
-      if (this.entityNameStack.indexOf(typedName) !== -1) {
+      if (this.entityNameStack.hasName(pToken)) {
          this.deliverToken(pToken);
          handled();
          return;
       }
 
-      this.entityNameStack.push(typedName);
+      this.entityNameStack.pushName(pToken);
 
       streamEntityReference(pToken, this.expandParams, (result, done) => {
          if (!result) {
@@ -391,7 +400,7 @@ class EntityExpander {
                this.deliverToken(pToken);
             }
 
-            this.entityNameStack.pop();
+            this.entityNameStack.popName(pToken);
             handled();
          } else {
             countSeen++;

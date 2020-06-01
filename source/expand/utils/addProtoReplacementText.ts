@@ -11,6 +11,7 @@ import {
 import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
 import { strOrBlank } from 'sToken';
+import { EntityNameStack } from './EntityNameStack';
 
 type Done = (result: Array<XmlError>) => void;
 
@@ -28,11 +29,13 @@ type Done = (result: Array<XmlError>) => void;
  * one step away from being the replacementText for the entity (the step away
  * being to have the various "metadata" like pe ref start tokens removed, and
  * all the text values put together).
+ *
+ * NOTE: nameStack is where the reference is found, but does not include it.
  */
 function addProtoReplacementText(
    reference: ParameterEntityReferencePToken | GeneralEntityReferencePToken,
    expandParams: ExpandParams,
-   peRefChain: Array<string>,
+   nameStack: EntityNameStack,
    done: Done,
 ): void {
    const { entityDetails, utils, emd } = expandParams;
@@ -54,10 +57,10 @@ function addProtoReplacementText(
    entityDetails.waitForLoading(details.token, (info) => done(info.errors));
 
    utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken | void) => {
-      const newChain =
+      const newStack =
          reference.type === PARAMETER_ENTITY_REFERENCE_PTOKEN
-            ? [...peRefChain, strOrBlank(reference.name)]
-            : peRefChain;
+            ? nameStack.cloneWithPEName(strOrBlank(reference.name))
+            : nameStack.cloneWithGEName(strOrBlank(reference.name));
 
       if (!entityValuePToken) {
          entityDetails.updateDeclaredValue(
@@ -68,7 +71,7 @@ function addProtoReplacementText(
          return;
       }
 
-      expandEntityValue(entityValuePToken, expandParams, newChain, (results) => {
+      expandEntityValue(entityValuePToken, expandParams, newStack, (results) => {
          entityDetails.updateDeclaredValue(details.token, results.newValue, [
             ...getErrors(),
             ...results.errors,

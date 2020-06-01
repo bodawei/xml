@@ -9,6 +9,7 @@ import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
 import { ExpandParams } from '../types';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { addProtoReplacementText } from './addProtoReplacementText';
+import { EntityNameStack } from './EntityNameStack';
 
 type ExpandAttrResult = {
    newValue: UnassignedArray;
@@ -24,26 +25,28 @@ type ParseResults = {
 
 function expandPeRef(
    expandParams: ExpandParams,
-   peRefChain: Array<string>,
+   nameStack: EntityNameStack,
    isElementDecl: boolean,
    peRef: ParameterEntityReferencePToken,
    callback: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(peRef.name);
    const details = expandParams.entityDetails.getPEDetails(entityName);
-   const localRefChain = [...peRefChain, entityName];
    const result: ParseResults = {
       unassignedFragment: undefined,
       preparseValue: undefined,
       errors: [],
    };
 
-   if (!details || peRefChain.includes(entityName)) {
+   // §4.1.0: Well-formedness constraint: No Recursion
+   //    A parsed entity must not contain a recursive reference to itself,
+   //    either directly or indirectly.
+   if (!details || nameStack.hasPEName(entityName)) {
       callback(result);
       return;
    }
 
-   addProtoReplacementText(peRef, expandParams, localRefChain, (newErrors) => {
+   addProtoReplacementText(peRef, expandParams, nameStack, (newErrors) => {
       if (!details.protoReplacementText) {
          result.errors = newErrors;
          callback(result);
@@ -72,7 +75,7 @@ function expandPeRef(
 function expandUnassigned(
    value: UnassignedArray,
    expandParams: ExpandParams,
-   peRefChain: Array<string>,
+   nameStack: EntityNameStack,
    isElementDecl: boolean,
    expanded: UnassignedExpanded,
 ): void {
@@ -89,7 +92,7 @@ function expandUnassigned(
       return;
    }
 
-   const expandRef = expandPeRef.bind(undefined, expandParams, peRefChain, isElementDecl);
+   const expandRef = expandPeRef.bind(undefined, expandParams, nameStack, isElementDecl);
 
    // Process expand all the peRefs potentially very asynchronously.
    doAsyncLoop(peRefs, expandRef, (results) => {

@@ -17,6 +17,7 @@ import {
 import { expandEntityValue } from '../expandEntityValue';
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
+import { EntityNameStack } from '../EntityNameStack';
 
 describe('expandEntityValue() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -65,14 +66,14 @@ describe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with an shallow copied unchanged value when given an entity value with no references', (done) => {
-      expandEntityValue([textPToken], params, [], (result) => {
+      expandEntityValue([textPToken], params, new EntityNameStack(), (result) => {
          expect(result.newValue).toEqualShallowDifferent([textPToken]);
          done();
       });
    });
 
    it('calls back with no errors when given an entity value with no references', (done) => {
-      expandEntityValue([textPToken], params, [], (result) => {
+      expandEntityValue([textPToken], params, new EntityNameStack(), (result) => {
          expect(result.errors).toEqual([]);
          done();
       });
@@ -81,7 +82,7 @@ describe('expandEntityValue() (unit)', () => {
    it('calls back with an expanded entity value when the referenced entity is already present', (done) => {
       entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
-      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
          expect(result).toEqual({
             errors: [],
             newValue: [
@@ -96,21 +97,26 @@ describe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with an expanded entity value when the referenced entity is referenced twice', (done) => {
-      expandEntityValue([peRefPToken, textPToken, peRefPToken], params, [], (result) => {
-         expect(result).toEqual({
-            errors: [],
-            newValue: [
-               new ParameterEntityStartPToken(peRefPToken),
-               textPToken,
-               new ParameterEntityEndPToken(peRefPToken),
-               textPToken,
-               new ParameterEntityStartPToken(peRefPToken),
-               textPToken,
-               new ParameterEntityEndPToken(peRefPToken),
-            ],
-         });
-         done();
-      });
+      expandEntityValue(
+         [peRefPToken, textPToken, peRefPToken],
+         params,
+         new EntityNameStack(),
+         (result) => {
+            expect(result).toEqual({
+               errors: [],
+               newValue: [
+                  new ParameterEntityStartPToken(peRefPToken),
+                  textPToken,
+                  new ParameterEntityEndPToken(peRefPToken),
+                  textPToken,
+                  new ParameterEntityStartPToken(peRefPToken),
+                  textPToken,
+                  new ParameterEntityEndPToken(peRefPToken),
+               ],
+            });
+            done();
+         },
+      );
    });
 
    it('calls back with a value with a raw reference when it can not be found', (done) => {
@@ -124,7 +130,7 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
          expect(result).toEqual({
             errors: [],
             newValue: [
@@ -150,7 +156,7 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([textPToken, peRefPToken], params, [], (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
          expect(result.errors).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
          done();
       });
@@ -162,8 +168,11 @@ describe('expandEntityValue() (unit)', () => {
          name: toSToken('peBogus'),
       });
 
-      expandEntityValue([peRefPToken, textPToken], params, [], (result) => {
-         expect(result).toEqual({ errors: [], newValue: [peRefPToken, textPToken] });
+      expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
+         expect(result).toEqual({
+            errors: [],
+            newValue: [peRefPToken, textPToken],
+         });
          done();
       });
    });
@@ -174,8 +183,71 @@ describe('expandEntityValue() (unit)', () => {
          name: undefined,
       });
 
-      expandEntityValue([peRefPToken, textPToken], params, [], (result) => {
-         expect(result).toEqual({ errors: [], newValue: [peRefPToken, textPToken] });
+      expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
+         expect(result).toEqual({
+            errors: [],
+            newValue: [peRefPToken, textPToken],
+         });
+         done();
+      });
+   });
+
+   it('does not expand a reference when is already in the process of being expanded (§4.1.0)', (done) => {
+      peRefPToken = new ParameterEntityReferencePToken({
+         open: toSToken('%'),
+         name: toSToken('already'),
+      });
+
+      expandEntityValue(
+         [peRefPToken, textPToken],
+         params,
+         new EntityNameStack().cloneWithPEName('already'),
+         (result) => {
+            expect(result).toEqual({
+               errors: [],
+               newValue: [peRefPToken, textPToken],
+            });
+            done();
+         },
+      );
+   });
+
+   it('does not expand a reference that then references itself (§4.1.0)', (done) => {
+      peRefPToken = new ParameterEntityReferencePToken({
+         open: toSToken('%'),
+         name: toSToken('recur'),
+      });
+      const second = new ParameterEntityReferencePToken({
+         open: toSToken('%'),
+         name: toSToken('recur'),
+      });
+      peDecl = new ParameterEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('recur'),
+         value: [second],
+      });
+      entityDetails.addEntity(peDecl);
+      entityDetails.updateDeclaredValue(peDecl, [second], []);
+      params.utils.parseEntityValue = (sTokenSource, done): void => {
+         done([second]);
+      };
+      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+         return {
+            sTokenSource: new STokenSource({}, entityMetaData),
+            getErrors: (): Array<XmlError> => [],
+         };
+      };
+
+      expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
+         expect(result).toEqual({
+            errors: [],
+            newValue: [
+               new ParameterEntityStartPToken(peRefPToken),
+               second,
+               new ParameterEntityEndPToken(peRefPToken),
+               textPToken,
+            ],
+         });
          done();
       });
    });

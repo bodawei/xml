@@ -18,6 +18,7 @@ import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import * as expandEntityValue from '../expandEntityValue';
 import { addProtoReplacementText } from '../addProtoReplacementText';
+import { EntityNameStack } from '../EntityNameStack';
 
 describe('addProtoReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -26,6 +27,7 @@ describe('addProtoReplacementText() (unit)', () => {
    let textPToken: TextPToken;
    let peRefPToken: ParameterEntityReferencePToken;
    let geRefPToken: GeneralEntityReferencePToken;
+   let expandEntitValueSpy: jasmine.Spy;
 
    beforeEach(() => {
       textPToken = new TextPToken({ text: toSToken('foo') });
@@ -71,7 +73,7 @@ describe('addProtoReplacementText() (unit)', () => {
          emd: new EntityMetaData(),
       };
 
-      spyOn(expandEntityValue, 'expandEntityValue').and.callFake(
+      expandEntitValueSpy = spyOn(expandEntityValue, 'expandEntityValue').and.callFake(
          (pToken: any, expandParams: any, chain: any, cb: Function) => {
             cb({ newValue: [textPToken], errors: [] });
          },
@@ -81,14 +83,14 @@ describe('addProtoReplacementText() (unit)', () => {
    it('calls back with no errors when asked to process a parameter entity token', (done) => {
       entityDetails.updateDeclaredValue(peDecl, [], []);
 
-      addProtoReplacementText(peRefPToken, params, [], (result) => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (result) => {
          expect(result).toEqual([]);
          done();
       });
    });
 
    it('addds an expanded parameter entity to the cache when called with a known entity', (done) => {
-      addProtoReplacementText(peRefPToken, params, [], () => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
          const details = entityDetails.getPEDetails('pe1');
          expect((details as any).protoReplacementText).toEqual([textPToken]);
          done();
@@ -96,7 +98,7 @@ describe('addProtoReplacementText() (unit)', () => {
    });
 
    it('addds an expanded general entity to the cache when called with a known general entity', (done) => {
-      addProtoReplacementText(geRefPToken, params, [], () => {
+      addProtoReplacementText(geRefPToken, params, new EntityNameStack(), () => {
          const details = entityDetails.getGEDetails('ge1');
          expect((details as any).protoReplacementText).toEqual([textPToken]);
          done();
@@ -107,7 +109,7 @@ describe('addProtoReplacementText() (unit)', () => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
       peRefPToken = new ParameterEntityReferencePToken({ open: toSToken('&') });
 
-      addProtoReplacementText(peRefPToken, params, [], () => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
          done();
       });
@@ -120,7 +122,7 @@ describe('addProtoReplacementText() (unit)', () => {
          name: toSToken('bogus'),
       });
 
-      addProtoReplacementText(peBadRefPToken, params, [], () => {
+      addProtoReplacementText(peBadRefPToken, params, new EntityNameStack(), () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
          done();
       });
@@ -130,7 +132,7 @@ describe('addProtoReplacementText() (unit)', () => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
       entityDetails.updateDeclaredValue(peDecl, [], []);
 
-      addProtoReplacementText(peRefPToken, params, [], () => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
          done();
       });
@@ -147,14 +149,14 @@ describe('addProtoReplacementText() (unit)', () => {
       };
 
       // Make the first call.  This will store the done function, above wand wait for the second
-      addProtoReplacementText(peRefPToken, params, [], () => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
          callCount++;
          expect(callCount).toEqual(1);
       });
 
       // make the second call. This will set up the second call back which will
       // be invoked below
-      addProtoReplacementText(peRefPToken, params, [], () => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
          callCount++;
          expect(callCount).toEqual(2);
          done();
@@ -165,6 +167,20 @@ describe('addProtoReplacementText() (unit)', () => {
 
       // Now, trigger the stored call, and both calls will happen
       done1([textPToken]);
+   });
+
+   it('calls expandEntityValue with the name of the paramenter entity in the name stack (§4.1.0)', (done) => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
+         expect(expandEntitValueSpy.calls.argsFor(0)[2].hasPEName('pe1')).toEqual(true);
+         done();
+      });
+   });
+
+   it('calls expandEntityValue with the name of the general entity in the name stack (§4.1.0)', (done) => {
+      addProtoReplacementText(geRefPToken, params, new EntityNameStack(), () => {
+         expect(expandEntitValueSpy.calls.argsFor(0)[2].hasGEName('ge1')).toEqual(true);
+         done();
+      });
    });
 
    it('delivers parsing errors to call callers', (done) => {
@@ -189,13 +205,13 @@ describe('addProtoReplacementText() (unit)', () => {
 
       callCount++;
       // Make a first call.  This will start to "retrieve" the sToken and the errors at this time
-      addProtoReplacementText(peRefPToken, params, [], (results) => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (results) => {
          expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
       });
 
       // make the second call. This will short circuit and not retrieve.
       callCount++;
-      addProtoReplacementText(peRefPToken, params, [], (results) => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (results) => {
          expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
          done();
       });
@@ -217,7 +233,7 @@ describe('addProtoReplacementText() (unit)', () => {
          localDone(undefined); // <-- heart of the test
       };
 
-      addProtoReplacementText(peRefPToken, params, [], (results) => {
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (results) => {
          expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
          done();
       });

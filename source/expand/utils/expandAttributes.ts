@@ -17,6 +17,7 @@ import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { GEDetails } from './EntityDetails';
 import { ExpandParams } from '../types';
+import { EntityNameStack } from './EntityNameStack';
 
 type AttrValueObj = { value: AttributeValuePToken };
 
@@ -40,11 +41,10 @@ type ParseResults = {
 function parseEntityValueAsAttributeValue(
    geDetails: GEDetails,
    expandParams: ExpandParams,
-   geRefChain: Array<string>,
+   nameStack: EntityNameStack,
    errors: Array<XmlError>,
    callback: (result: ParseResults) => void,
 ): void {
-   const entityName = strOrBlank(geDetails.token.name);
    const entityValue = geDetails.protoReplacementText;
    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
    const sTokenSource: STokenSource = entityValueToSTokenSource(entityValue!, expandParams.emd);
@@ -67,18 +67,13 @@ function parseEntityValueAsAttributeValue(
        * general entity references in it that need to be expanded.
        */
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      expandOneAttribute(
-         result.newValue,
-         expandParams,
-         [...geRefChain, entityName],
-         (recurResults) => {
-            callback({
-               expandedFragment: recurResults.newValue,
-               preparseValue: entityValue,
-               errors: [...errors, ...result.errors, ...recurResults.errors],
-            });
-         },
-      );
+      expandOneAttribute(result.newValue, expandParams, nameStack, (recurResults) => {
+         callback({
+            expandedFragment: recurResults.newValue,
+            preparseValue: entityValue,
+            errors: [...errors, ...result.errors, ...recurResults.errors],
+         });
+      });
    });
 }
 
@@ -88,13 +83,12 @@ function parseEntityValueAsAttributeValue(
  */
 function expandGeRef(
    expandParams: ExpandParams,
-   geRefChain: Array<string>,
+   nameStack: EntityNameStack,
    geRef: GeneralEntityReferencePToken,
    geRefExpanded: (result: ParseResults) => void,
 ): void {
    const entityName = strOrBlank(geRef.name);
    const geDetails = expandParams.entityDetails.getGEDetails(entityName);
-   const newRefChain = [...geRefChain, entityName];
    const result: ParseResults = {
       expandedFragment: undefined,
       preparseValue: undefined,
@@ -117,17 +111,19 @@ function expandGeRef(
     *     to itself, either directly or indirectly.
     * §4.4.0 unparsed entities may not be referenced in content
     */
-   if (geRefChain.includes(entityName) || geDetails.isUnparsed) {
+   if (nameStack.hasGEName(entityName) || geDetails.isUnparsed) {
       geRefExpanded(result);
       return;
    }
+
+   const newRefChain = nameStack.cloneWithGEName(entityName);
 
    if (geDetails.protoReplacementText) {
       parseEntityValueAsAttributeValue(geDetails, expandParams, newRefChain, [], geRefExpanded);
       return;
    }
 
-   addProtoReplacementText(geRef, expandParams, [], (newErrors) => {
+   addProtoReplacementText(geRef, expandParams, nameStack, (newErrors) => {
       if (!geDetails.protoReplacementText) {
          result.errors = newErrors;
          geRefExpanded(result);
@@ -154,7 +150,7 @@ function expandGeRef(
 function expandOneAttribute(
    attValue: AttributeValuePToken,
    expandParams: ExpandParams,
-   geRefChain: Array<string>,
+   nameStack: EntityNameStack,
    expanded: AttrExpanded,
 ): void {
    const geRefs: Array<GeneralEntityReferencePToken> = [];
@@ -171,7 +167,7 @@ function expandOneAttribute(
       return;
    }
 
-   doAsyncLoop(geRefs, expandGeRef.bind(undefined, expandParams, geRefChain), (expandedDetails) => {
+   doAsyncLoop(geRefs, expandGeRef.bind(undefined, expandParams, nameStack), (expandedDetails) => {
       const allErrors: Array<XmlError> = [];
       const newValue: AttributeValuePToken = [];
       let geRefIndex = 0;
@@ -220,6 +216,7 @@ function expandOneAttribute(
 function expandAttributes(
    valueObjects: Array<AttrValueObj>,
    expandParams: ExpandParams,
+   nameStack: EntityNameStack,
    expanded: (results: Array<ExpandAttrResult>) => void,
 ): void {
    const attributeValues: Array<AttributeValuePToken> = [];
@@ -229,7 +226,7 @@ function expandAttributes(
    }
 
    function process(attributeValue: AttributeValuePToken, callback: AttrExpanded): void {
-      expandOneAttribute(attributeValue, expandParams, [], callback);
+      expandOneAttribute(attributeValue, expandParams, nameStack, callback);
    }
 
    doAsyncLoop(attributeValues, process, expanded);

@@ -20,6 +20,7 @@ import { ExpandParams, RetrieveResults } from '../../types';
 import { WellFormedError } from 'error';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
+import { EntityNameStack } from '../EntityNameStack';
 import { expandUnassigned } from '../expandUnassigned';
 
 describe('expandUnassigned() (unit)', () => {
@@ -77,7 +78,7 @@ describe('expandUnassigned() (unit)', () => {
    it('calls back with a copy of the unassigned value', (done) => {
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.WORD, token: textPToken }];
 
-      expandUnassigned(unassignedValue, params, [], false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
          expect(result.newValue).toEqualShallowDifferent(unassignedValue);
          done();
       });
@@ -90,13 +91,13 @@ describe('expandUnassigned() (unit)', () => {
       });
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: bogus }];
 
-      expandUnassigned(unassignedValue, params, [], false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
          expect(result.newValue).toEqualShallowDifferent(unassignedValue);
          done();
       });
    });
 
-   it('calls back with the original PE Ref when there is no declaration', (done) => {
+   it('calls back with the original PE Ref when we already in the process of processing a pe ref with that name (§4.1.0)', (done) => {
       const peDecl = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('peInProgress'),
@@ -106,12 +107,14 @@ describe('expandUnassigned() (unit)', () => {
          name: toSToken('peInProgress'),
       });
       entityDetails.addEntity(peDecl, [textPToken]);
+      const nameStack = new EntityNameStack();
+      nameStack.pushPEName('peInProgress');
       const unassignedValue: UnassignedArray = [
          { type: UnassignedType.REFERENCE, token: peInProgress },
       ];
 
-      expandUnassigned(unassignedValue, params, ['peInProgress'], false, (result) => {
-         expect(result.newValue).toEqualShallowDifferent(unassignedValue);
+      expandUnassigned(unassignedValue, params, nameStack, false, (result) => {
+         expect(result.newValue).toEqual(unassignedValue);
          done();
       });
    });
@@ -119,7 +122,7 @@ describe('expandUnassigned() (unit)', () => {
    it('passes the contents of the protoReplacementText to unassigned.parseAllValues()', (done) => {
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: peRef }];
 
-      expandUnassigned(unassignedValue, params, [], false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
          expect(result.newValue).toEqual([
             { type: UnassignedType.ENTITY_START, token: peRef },
             { type: UnassignedType.WORD, token: text2PToken },
@@ -144,7 +147,7 @@ describe('expandUnassigned() (unit)', () => {
          { type: UnassignedType.REFERENCE, token: peRef2 },
       ];
 
-      expandUnassigned(unassignedValue, params, [], false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
          expect(result.newValue).toEqual([
             { type: UnassignedType.ENTITY_START, token: peRef },
             { type: UnassignedType.WORD, token: text2PToken },
@@ -165,7 +168,7 @@ describe('expandUnassigned() (unit)', () => {
          cb([attrError]);
       });
 
-      expandUnassigned(unassignedValue, params, [], false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
          expect(result.errors).toEqual([attrError]);
          done();
       });
@@ -187,7 +190,7 @@ describe('expandUnassigned() (unit)', () => {
          cb([attrError]);
       });
 
-      expandUnassigned(unassignedValue, params, [], false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
          expect(result).toEqual({
             newValue: [{ type: UnassignedType.REFERENCE, token: peRef2 }],
             errors: [attrError],

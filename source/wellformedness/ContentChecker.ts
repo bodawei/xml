@@ -148,7 +148,6 @@ class ContentChecker implements Checker {
             open = pToken.open;
          }
 
-         console.log('entity', entityName, startName);
          if (entityName !== undefined) {
             errorCollector.check(
                startName === entityName,

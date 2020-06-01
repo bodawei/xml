@@ -46,7 +46,7 @@ import {
    makeElementDeclaration,
 } from './tokens';
 
-fdescribe('MarkupDeclChecker (unit)', () => {
+describe('MarkupDeclChecker (unit)', () => {
    let ec: MockErrorCollector;
    let checker: MarkupDeclChecker;
    let checkState: CheckState;
