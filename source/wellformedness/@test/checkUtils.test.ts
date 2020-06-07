@@ -58,7 +58,7 @@ describe('checkUtils (unit)', () => {
             ],
          });
 
-         scanAttributeValues(unbalancedElement.attributes, {}, state, ec);
+         scanAttributeValues(unbalancedElement.attributes, {}, state, [], ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
@@ -83,7 +83,7 @@ describe('checkUtils (unit)', () => {
             ],
          });
 
-         scanAttributeValues(unbalancedElement.attributes, {}, state, ec);
+         scanAttributeValues(unbalancedElement.attributes, {}, state, [], ec);
 
          expect(ec).toNotReportError(WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED);
       });
@@ -99,7 +99,7 @@ describe('checkUtils (unit)', () => {
             ],
          });
 
-         scanAttributeValues(undeclaredRef.attributes, {}, state, ec);
+         scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
 
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
@@ -120,7 +120,7 @@ describe('checkUtils (unit)', () => {
          });
          state.peRefCount = 1;
 
-         scanAttributeValues(undeclaredRef.attributes, {}, state, ec);
+         scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
 
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
@@ -137,7 +137,7 @@ describe('checkUtils (unit)', () => {
          });
          (generalEntityReference as any).name = toSToken('lt');
 
-         scanAttributeValues(undeclaredRef.attributes, {}, state, ec);
+         scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
 
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
@@ -162,6 +162,7 @@ describe('checkUtils (unit)', () => {
                }),
             },
             state,
+            [],
             ec,
          );
 
@@ -192,6 +193,7 @@ describe('checkUtils (unit)', () => {
                }),
             },
             state,
+            [],
             ec,
          );
 
@@ -199,6 +201,164 @@ describe('checkUtils (unit)', () => {
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
+         });
+      });
+
+      it('reports an error there is a recursive general entity start in an attribute value (§4.1.0)', () => {
+         const ge1 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('one'),
+         });
+         const ge1Start = new GeneralEntityStartPToken(ge1);
+         const ge2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('two'),
+         });
+         const ge2Start = new GeneralEntityStartPToken(ge2);
+         const ge1B = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('one'),
+         });
+         const ge1BStart = new GeneralEntityStartPToken(ge1B);
+
+         const emptyElement = new ElementEmptyPToken({
+            open: toSToken('<'),
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [ge1Start, ge2Start, ge1BStart],
+               },
+            ],
+         });
+
+         scanAttributeValues(
+            emptyElement.attributes,
+            {
+               one: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+               }),
+               two: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+               }),
+            },
+            state,
+            [],
+            ec,
+         );
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['one'],
+            position: ge1B.open,
+         });
+      });
+
+      it('reports an error there is a recursive general entity reference in an attribute value (§4.1.0)', () => {
+         const ge1 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('one'),
+         });
+         const ge1Start = new GeneralEntityStartPToken(ge1);
+         const ge2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('two'),
+         });
+         const ge2Start = new GeneralEntityStartPToken(ge2);
+         const ge1B = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: toSToken('one'),
+         });
+
+         const emptyElement = new ElementEmptyPToken({
+            open: toSToken('<'),
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [ge1Start, ge2Start, ge1B],
+               },
+            ],
+         });
+
+         scanAttributeValues(
+            emptyElement.attributes,
+            {
+               one: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+               }),
+               two: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+               }),
+            },
+            state,
+            [],
+            ec,
+         );
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['one'],
+            position: ge1B.open,
+         });
+      });
+
+      it('reports an error when an attribute value has a general entity start that the attribute, itself, is within (§4.1.0)', () => {
+         const emptyElement = new ElementEmptyPToken({
+            open: toSToken('<'),
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityStart],
+               },
+            ],
+         });
+
+         scanAttributeValues(
+            emptyElement.attributes,
+            {
+               one: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+               }),
+            },
+            state,
+            ['testRef'],
+            ec,
+         );
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['testRef'],
+            position: generalEntityReference.open,
+         });
+      });
+
+      // This seems impossible, but lets check anyway
+      it('reports an error when an attribute value has a general entity reference that the attribute, itself, is within (§4.1.0)', () => {
+         const emptyElement = new ElementEmptyPToken({
+            open: toSToken('<'),
+            attributes: [
+               {
+                  name: toSToken('first'),
+                  value: [generalEntityReference],
+               },
+            ],
+         });
+
+         scanAttributeValues(
+            emptyElement.attributes,
+            {
+               one: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+               }),
+            },
+            state,
+            ['testRef'],
+            ec,
+         );
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['testRef'],
+            position: generalEntityReference.open,
          });
       });
    });

@@ -163,7 +163,7 @@ class MarkupDeclChecker implements Checker {
    private checkState: CheckState;
    private embeddedChecker?: MarkupDeclChecker;
 
-   constructor(checkState: CheckState, inExternalSubset = false) {
+   constructor(checkState: CheckState, peContext: Array<string>, inExternalSubset = false) {
       this.checkState = checkState;
       this.inExternalSubset = inExternalSubset;
    }
@@ -228,6 +228,7 @@ class MarkupDeclChecker implements Checker {
                (pToken as AttListPToken).attDefs,
                this.checkState.generalDecls,
                this.checkState,
+               [], // not possible to have general entity context here
                errorCollector,
             );
             break;
@@ -254,7 +255,11 @@ class MarkupDeclChecker implements Checker {
                this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
                // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
             } else {
-               this.embeddedChecker = new MarkupDeclChecker(this.checkState, this.inExternalSubset);
+               this.embeddedChecker = new MarkupDeclChecker(
+                  this.checkState,
+                  [],
+                  this.inExternalSubset,
+               );
                this.embeddedChecker.check(pToken, errorCollector);
                return;
             }

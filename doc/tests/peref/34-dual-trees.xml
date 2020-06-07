@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE one SYSTEM './34-dual-trees.ent' [
+   <!ELEMENT one ANY>
+]>
+
+<one>
+
+&threeGE;
+&four;
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid 34-dual-trees.xml
+
+   Gives more of a hint about when parsing should happen.
+   the definition for threeGE and threePE is two parameter entities whose
+   repalcement text is %one;
+
+   in threeGE, that's the final text.  We don't parse the text again.
+   in threePE, that text is also not parsed but in four it is then parsed.
+]]>
+</one>

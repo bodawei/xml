@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY one "&three;">
+   <!ENTITY two "&one;">
+   <!ENTITY three "&two;">
+]>
+
+<one foo="&three;">
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid 14-recursionB.xml
+
+Output:
+   14-recursionB.xml:9: parser error : Detected an entity reference loop
+   <one foo="&three;">
+]]>
+</one>

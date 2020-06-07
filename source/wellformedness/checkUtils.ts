@@ -1,6 +1,6 @@
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
-import { strOrBlank } from 'sToken';
+import { strOrBlank, SToken } from 'sToken';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -29,8 +29,10 @@ type EntityInfo = {
 };
 
 interface CheckerConstructor {
-   new (checkState: CheckState): Checker;
+   new (checkState: CheckState, geContext: Array<string>): Checker;
 }
+
+const CHECKER_DONE = '**Checker Done**';
 
 interface Checker {
    check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE;
@@ -38,7 +40,6 @@ interface Checker {
 
 const WFID = WellFormedError.ID;
 const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
-const CHECKER_DONE = '**Checker Done**';
 
 class CheckState {
    public emd: EntityMetaData = new EntityMetaData();
@@ -49,48 +50,6 @@ class CheckState {
    public isStandalone = false;
    public hasNoDTD = false;
    public hasExternalDTD = false;
-}
-
-/*
- * Examine the contents of the attribute values for any well-formedness problems
- */
-function scanAttributeValues(
-   attributes: Array<AttributePToken>,
-   entityDecls: GeneralEntitiesInfo,
-   state: CheckState,
-   ec: ErrorCollector,
-) {
-   const refNameStack: Array<string> = [];
-
-   for (const att of attributes) {
-      for (const val of att.value) {
-         switch (val.type) {
-            case GENERAL_ENTITY_REFERENCE_PTOKEN:
-               checkGeneralEntity(val, true, entityDecls, state, ec);
-               break;
-            case GENERAL_ENTITY_START_PTOKEN:
-               const genEntityName = strOrBlank(val.referencePToken.name);
-
-               refNameStack.push(genEntityName);
-               checkGeneralEntity(val.referencePToken, true, entityDecls, state, ec);
-               break;
-            case GENERAL_ENTITY_END_PTOKEN:
-               const name = strOrBlank(val.referencePToken.name);
-               const topName = refNameStack[refNameStack.length - 1];
-
-               if (name === topName) {
-                  refNameStack.pop();
-               } else {
-                  ec.report(
-                     WFID.ATTRIBUTE_REFERENCE_UNBALANCED,
-                     [name, topName],
-                     val.referencePToken.open,
-                  );
-               }
-               break;
-         }
-      }
-   }
 }
 
 /*
@@ -149,7 +108,7 @@ function checkGeneralEntity(
    entityDecls: GeneralEntitiesInfo,
    state: CheckState,
    ec: ErrorCollector,
-) {
+): void {
    const name = strOrBlank(pToken.name);
    const genEntityDecl = entityDecls[name];
    const declarationExists = !!genEntityDecl;
@@ -184,6 +143,69 @@ function checkGeneralEntity(
 }
 
 /*
+ * Examine the contents of the attribute values for any well-formedness problems
+ */
+function scanAttributeValues(
+   attributes: Array<AttributePToken>,
+   entityDecls: GeneralEntitiesInfo,
+   state: CheckState,
+   geContext: Array<string>,
+   ec: ErrorCollector,
+): void {
+   const refNameStack: Array<string> = [];
+
+   for (const att of attributes) {
+      for (const val of att.value) {
+         switch (val.type) {
+            case GENERAL_ENTITY_REFERENCE_PTOKEN:
+               const entityName = strOrBlank(val.name);
+
+               // §4.1.0: Well-formedness constraint: No Recursion
+               //    A parsed entity must not contain a recursive reference to itself,
+               //    either directly or indirectly.
+               ec.check(
+                  refNameStack.includes(entityName) || geContext.includes(entityName),
+                  WFID.REFERENCE_INVALID_RECURSION,
+                  [entityName],
+                  val.open,
+               );
+               checkGeneralEntity(val, true, entityDecls, state, ec);
+               break;
+            case GENERAL_ENTITY_START_PTOKEN:
+               const geEntityName = strOrBlank(val.referencePToken.name);
+
+               // §4.1.0: Well-formedness constraint: No Recursion
+               //    A parsed entity must not contain a recursive reference to itself,
+               //    either directly or indirectly.
+               ec.check(
+                  refNameStack.includes(geEntityName) || geContext.includes(geEntityName),
+                  WFID.REFERENCE_INVALID_RECURSION,
+                  [geEntityName],
+                  val.referencePToken.open,
+               );
+               refNameStack.push(geEntityName);
+               checkGeneralEntity(val.referencePToken, true, entityDecls, state, ec);
+               break;
+            case GENERAL_ENTITY_END_PTOKEN:
+               const name = strOrBlank(val.referencePToken.name);
+               const topName = refNameStack[refNameStack.length - 1];
+
+               if (name === topName) {
+                  refNameStack.pop();
+               } else {
+                  ec.report(
+                     WFID.ATTRIBUTE_REFERENCE_UNBALANCED,
+                     [name, topName],
+                     val.referencePToken.open,
+                  );
+               }
+               break;
+         }
+      }
+   }
+}
+
+/*
  * Much the same as the above. though this is a bit controversial. If we think we should have
  * seen all declarations with a non-validating entity, then we can check whether this parameter
  * entity reference has a related entity declaration. This is a bit of a borderline test since
@@ -196,7 +218,7 @@ function checkParameterEntity(
    entityDecls: ParameterEntitiesInfo,
    state: CheckState,
    ec: ErrorCollector,
-) {
+): void {
    const name = strOrBlank(pToken.name);
    const paramEntityDecl = entityDecls[name];
    const declarationExists = !!paramEntityDecl;

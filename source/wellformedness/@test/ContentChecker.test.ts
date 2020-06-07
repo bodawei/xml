@@ -58,7 +58,7 @@ describe('ContentChecker (unit)', () => {
    });
 
    function makeChecker(state: CheckState = new CheckState(), hasAll = true) {
-      return new ContentChecker(state);
+      return new ContentChecker(state, []);
    }
 
    describe('misc', () => {

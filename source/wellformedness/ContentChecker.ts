@@ -105,10 +105,12 @@ class ContentChecker implements Checker {
    private elementNameStack: Array<string> = [];
    private embeddedChecker?: ContentChecker;
    private checkState: CheckState;
+   private geContext: Array<string>;
 
-   constructor(checkState: CheckState) {
+   constructor(checkState: CheckState, geContext: Array<string>) {
       this.checkState = checkState;
       this.state = State.PRE;
+      this.geContext = [...geContext];
    }
 
    check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
@@ -130,34 +132,6 @@ class ContentChecker implements Checker {
          );
       }
 
-      // §4.1.0: Well-formedness constraint: No Recursion
-      //    A parsed entity must not contain a recursive reference to itself,
-      //    either directly or indirectly.
-      if (this.start.type === GENERAL_ENTITY_START_PTOKEN && this.state !== State.PRE) {
-         const startName = strOrBlank(this.start.referencePToken.name);
-         let entityName: string | void;
-         let open: SToken | void;
-
-         if (pToken.type === GENERAL_ENTITY_START_PTOKEN) {
-            entityName = strOrBlank(pToken.referencePToken.name);
-            open = pToken.referencePToken.open;
-         }
-
-         if (pToken.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-            entityName = strOrBlank(pToken.name);
-            open = pToken.open;
-         }
-
-         if (entityName !== undefined) {
-            errorCollector.check(
-               startName === entityName,
-               WellFormedError.ID.REFERENCE_INVALID_RECURSION,
-               [entityName],
-               open,
-            );
-         }
-      }
-
       if (this.embeddedChecker) {
          const result = this.embeddedChecker.check(pToken, errorCollector);
 
@@ -175,6 +149,7 @@ class ContentChecker implements Checker {
                pToken.attributes,
                this.checkState.generalDecls,
                this.checkState,
+               this.geContext,
                errorCollector,
             );
             break;
@@ -183,6 +158,7 @@ class ContentChecker implements Checker {
                pToken.attributes,
                this.checkState.generalDecls,
                this.checkState,
+               this.geContext,
                errorCollector,
             );
             break;
@@ -210,9 +186,22 @@ class ContentChecker implements Checker {
             break;
          case GENERAL_ENTITY_START_PTOKEN:
             if (this.state !== State.PRE) {
-               this.embeddedChecker = new ContentChecker(this.checkState);
+               this.embeddedChecker = new ContentChecker(this.checkState, this.geContext);
                this.embeddedChecker.check(pToken, errorCollector);
                return;
+            }
+
+            const entityName = strOrBlank(pToken.referencePToken.name);
+
+            if (entityName !== undefined) {
+               errorCollector.check(
+                  this.geContext.includes(entityName),
+                  WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+                  [entityName],
+                  pToken.referencePToken.open,
+               );
+
+               this.geContext.push(entityName);
             }
 
             checkGeneralEntity(
@@ -246,6 +235,17 @@ class ContentChecker implements Checker {
             }
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
+            const refName = strOrBlank(pToken.name);
+
+            if (refName !== undefined) {
+               errorCollector.check(
+                  this.geContext.includes(refName),
+                  WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+                  [refName],
+                  pToken.open,
+               );
+            }
+
             checkGeneralEntity(
                pToken,
                false,

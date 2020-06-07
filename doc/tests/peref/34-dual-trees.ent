@@ -1,0 +1,6 @@
+<!ENTITY % one "one">
+<!ENTITY % twoA "&#38;#37;o">
+<!ENTITY % twoB "ne;">
+<!ENTITY % threePE "%twoA;%twoB;">
+<!ENTITY threeGE "%twoA;%twoB;">
+<!ENTITY four "%threePE;">

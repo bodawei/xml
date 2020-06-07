@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY one "&three;">
+   <!ENTITY two "&one;">
+   <!ENTITY three "&two;">
+]>
+
+<one>
+&three;
+
+<![CDATA[
+
+   xmllint --loaddtd  --noent  --valid 34-dual-trees.xml
+]]>
+</one>
+~/active/hacking/xml/doc/tests/geref (master ✘)✹✭ ᐅ xmllint --loaddtd  --noent  --valid 14-recursionA.xml
+Entity: line 1: parser error : Detected an entity reference loop
+&one;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&two;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&three;
+       ^
+Entity: line 1: parser error : Detected an entity reference loop
+&one;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&two;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&three;
+       ^
+Entity: line 1: parser error : Detected an entity reference loop
+&one;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&two;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&three;
+       ^
+Entity: line 1: parser error : Detected an entity reference loop
+&one;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&two;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&three;
+       ^
+Entity: line 1: parser error : Detected an entity reference loop
+&one;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&two;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&three;
+       ^
+Entity: line 1: parser error : Detected an entity reference loop
+&one;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&two;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&three;
+       ^
+Entity: line 1: parser error : Detected an entity reference loop
+&one;
+     ^
+Entity: line 1: parser error : Detected an entity reference loop
+&two;
+     ^
+14-recursionA.xml:10: parser error : Detected an entity reference loop
+&three;
+
+
+   xmllint --loaddtd  --noent  --valid 14-recursionA.xml
+]]>
+</one>

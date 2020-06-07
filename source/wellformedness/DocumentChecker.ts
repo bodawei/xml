@@ -176,7 +176,7 @@ class DocumentChecker {
             }
 
             if (this.state === State.PROLOG_DTD) {
-               this.subChecker = new this.checkers.dtd(this.checkState);
+               this.subChecker = new this.checkers.dtd(this.checkState, []);
                this.subChecker.check(pToken, errorCollector);
             }
             return;
@@ -185,7 +185,7 @@ class DocumentChecker {
             this.transition(pToken, errorCollector);
 
             if (this.state === State.ELEMENT) {
-               const checker = new this.checkers.content(this.checkState);
+               const checker = new this.checkers.content(this.checkState, []);
                const result = checker.check(pToken, errorCollector);
 
                if (result === CHECKER_DONE) {
