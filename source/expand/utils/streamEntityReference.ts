@@ -66,6 +66,13 @@ function streamEntityReference(
    let start: PToken;
    let end: PToken;
 
+   if (!expandParams.loadExternalEntities) {
+      deliverToken(undefined, (): void => {
+         // do nothing
+      });
+      return;
+   }
+
    if (reference.type === EXTERNAL_DTD_PSEUDO_TOKEN) {
       ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(reference.externalId, emd));
       inContent = false;

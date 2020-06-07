@@ -41,7 +41,12 @@ function addProtoReplacementText(
    const { entityDetails, utils, emd } = expandParams;
    const details = entityDetails.getReferencedDetails(reference);
 
-   if (!details || details.protoReplacementText || !details.token.externalId) {
+   if (
+      !details ||
+      details.protoReplacementText ||
+      !details.token.externalId ||
+      !expandParams.loadExternalEntities
+   ) {
       done([]);
       return;
    }

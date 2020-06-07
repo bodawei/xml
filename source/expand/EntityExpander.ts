@@ -78,7 +78,6 @@ enum State {
 class EntityExpander {
    private deliverToken: DeliverPToken;
    private expandParams: ExpandParams;
-   private loadExternalEntities: boolean;
    private state = State.AT_START;
    private bug2 = false;
    private entityNameStack: EntityNameStack = new EntityNameStack();
@@ -86,17 +85,16 @@ class EntityExpander {
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = deliverPToken;
       this.expandParams = {
-         entityDetails: new EntityDetails(),
-         utils: processors,
          emd: new EntityMetaData(
             EntityKind.DOCUMENT,
             1.0,
             5,
             new EntityLocation('dummy meta data to keep TypeScript happy'),
          ),
+         entityDetails: new EntityDetails(),
+         loadExternalEntities: validating,
+         utils: processors,
       };
-
-      this.loadExternalEntities = validating;
    }
 
    public expandPToken(pToken: PToken, expanded: PTokenExpanded): void {
@@ -185,7 +183,7 @@ class EntityExpander {
 
       const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
 
-      if (!externalSubsetToken || !this.loadExternalEntities) {
+      if (!externalSubsetToken || !this.expandParams.loadExternalEntities) {
          this.state = State.IN_CONTENT;
          this.deliverToken(pToken);
          handled();

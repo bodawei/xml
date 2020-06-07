@@ -46,7 +46,9 @@ describe('expandAttributes() (unit)', () => {
       );
 
       params = {
+         emd: new EntityMetaData(),
          entityDetails,
+         loadExternalEntities: true,
          utils: {
             parseBody: (): void => undefined,
             parseEntityValue: (sTokenSource, done): void => {
@@ -60,7 +62,6 @@ describe('expandAttributes() (unit)', () => {
             },
             parseAttributeValue: (): void => {},
          },
-         emd: new EntityMetaData(),
       };
    });
 

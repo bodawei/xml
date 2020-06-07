@@ -39,6 +39,7 @@ describe('streamEntityReference() (unit)', () => {
 
       params = {
          entityDetails,
+         loadExternalEntities: true,
          utils: {
             parseBody: (): void => {
                return undefined;
@@ -90,6 +91,16 @@ describe('streamEntityReference() (unit)', () => {
             textPToken,
             new ExternalSubsetEndToken(),
          ]);
+         done();
+      });
+   });
+
+   it('does not deliver the external DTD tokens when loadExternalEntities is false', (done) => {
+      params.loadExternalEntities = false;
+      const input = entityDetails.getExternalSubsetReference() as any;
+
+      gatherResults(input, (results: Array<PToken>) => {
+         expect(results).toEqual([]);
          done();
       });
    });
@@ -178,6 +189,19 @@ describe('streamEntityReference() (unit)', () => {
             textPToken,
             new GeneralEntityEndPToken(geRef),
          ]);
+         done();
+      });
+   });
+
+   it('does not deliver any entity content when loadExternalEntities is false', (done) => {
+      params.loadExternalEntities = false;
+      const geRef = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('ge'),
+      });
+
+      gatherResults(geRef, (results: Array<PToken>) => {
+         expect(results).toEqual([]);
          done();
       });
    });

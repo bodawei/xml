@@ -54,7 +54,9 @@ describe('addProtoReplacementText() (unit)', () => {
       entityDetails.addEntity(geDecl);
 
       params = {
+         emd: new EntityMetaData(),
          entityDetails,
+         loadExternalEntities: true,
          utils: {
             parseBody: (): void => {
                return undefined;
@@ -70,7 +72,6 @@ describe('addProtoReplacementText() (unit)', () => {
             },
             parseAttributeValue: (): void => {},
          },
-         emd: new EntityMetaData(),
       };
 
       expandEntitValueSpy = spyOn(expandEntityValue, 'expandEntityValue').and.callFake(
@@ -107,7 +108,7 @@ describe('addProtoReplacementText() (unit)', () => {
 
    it('does not do any further processing when the entity has no name', (done) => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
-      peRefPToken = new ParameterEntityReferencePToken({ open: toSToken('&') });
+      peRefPToken = new ParameterEntityReferencePToken({ open: toSToken('%') });
 
       addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
@@ -131,6 +132,20 @@ describe('addProtoReplacementText() (unit)', () => {
    it('does not do any further processing when the entity already has replacement text defined', (done) => {
       const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
       entityDetails.updateDeclaredValue(peDecl, [], []);
+
+      addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
+         expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();
+         done();
+      });
+   });
+
+   it('does not do any further processing when loadExternalEntities is false', (done) => {
+      params.loadExternalEntities = false;
+      const retrieveExternalEntitySpy = spyOn(params.utils, 'retrieveExternalEntity');
+      peRefPToken = new ParameterEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('pe1'),
+      });
 
       addProtoReplacementText(peRefPToken, params, new EntityNameStack(), () => {
          expect(retrieveExternalEntitySpy).not.toHaveBeenCalled();

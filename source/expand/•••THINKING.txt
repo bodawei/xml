@@ -223,8 +223,12 @@ x Get ibm tests working again
 x streamEntityReference needs to deal with this
 x            // 'ibm68n09.xml', // recursive general entity reference inline
 x            'ibm68n10.xml', // recursive general entity reference inline
-x Are we still depending on the "don't put it in the cache" to avoid recursion?
-
+xattValueExternalEntity Are we still depending on the "don't put it in the cache" to avoid recursion?
+x Loss of PE ref detail <-- Not clear we need this. Will add when we find a cause
+x      - expandEntityValue
+x      - NOTE: we are storing the preparsed values in the start and end tokens.
+x      - need this in addProtoReplacementText
+x      - Unsurprisingly, also expandEntityValue
 GOALS
    - Get the expansion system finished and working
       - Why: This has been a huge sinkhole of effort and thinking. Getitng it done will
@@ -240,20 +244,25 @@ DOCUMENT
   - Also document what comes out, especially for all the expansion cases.
 
 IMPLEMENTATION
-      - Bug one: EntityExpander when streaming, if can't find the entity, it will barf
-      - Bug2 EMD's from sub entits clobber the one for the doc in the entity expander
-      - Bug 3: Add geRef to PTokenFromLiteralStream
-   - Loss of PE ref detail
-      - expandEntityValue
-      - NOTE: we are storing the preparsed values in the start and end tokens.
-   - Don't load external entities
-      - Seriously need to think about retrieveExternalEntity error conditions
-      - need this in addProtoReplacementText
-      - Unsurprisingly, also expandEntityValue
-      - unassgined.  PArsing can return no results?
    - Recursion problem
-      - Need to handle in attributes
-      - need to handle in entity decl
+      - Need to do WF checks for entity values and attribute values.
+         - in scanAttributeValues we easily have the ability to check for recursive GE refs
+            - Best to also pass in context
+            - We have no way to check pe refs that contributed to id
+               - Envision getting a meta data thing for any entity.  the checker should track these and then scan them too
+         - The above would work for attlist as well
+         - 
+      √ in body, we don't have this, but we could be passing in the context.
+      √ need to handle in entity decl
+         - This is a serious problem. we don't have the expanded, and the expanded is invisible.
+            - We need this also for external.
+   - Don't load external entities
+      - Need to do validation
+   - Bug one: EntityExpander when streaming, if can't find the entity, it will barf
+   - Bug2 EMD's from sub entits clobber the one for the doc in the entity expander
+   - Bug 3: Add geRef to PTokenFromLiteralStream
+   - Seriously need to think about retrieveExternalEntity error conditions
+   - unassgined.  PArsing can return no results?
    - Later cleanup
       - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.
       - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
@@ -267,6 +276,7 @@ IMPLEMENTATION
             <!ENTITY % four "%three;">  <-- I think it willl  get parsed here. into an actual reference wich will be expanded here
             <!ENTITY ge "%four;">
 BUILD
+   - Why is ! not working?
    - Try to get testing to work so it doesn't fail every time you break it
          - This looks promising: https://www.npmjs.com/package/jasmine-ts
          - https://www.npmjs.com/package/tsconfig-paths

@@ -36,6 +36,7 @@ type EntityProcessors = {
 type ExpandParams = {
    emd: EntityMetaData;
    entityDetails: EntityDetails;
+   loadExternalEntities: boolean;
    utils: EntityProcessors;
 };
 

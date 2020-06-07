@@ -45,7 +45,9 @@ describe('expandEntityValue() (unit)', () => {
       );
 
       params = {
+         emd: new EntityMetaData(),
          entityDetails,
+         loadExternalEntities: true,
          utils: {
             parseBody: (): void => {
                return undefined;
@@ -61,7 +63,6 @@ describe('expandEntityValue() (unit)', () => {
             },
             parseAttributeValue: (): void => {},
          },
-         emd: new EntityMetaData(),
       };
    });
 
