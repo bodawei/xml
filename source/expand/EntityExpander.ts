@@ -35,7 +35,7 @@ import { EntityDetails } from './utils/EntityDetails';
 import { expandAttributes } from './utils/expandAttributes';
 import { expandEntityValue } from './utils/expandEntityValue';
 import { expandUnassigned } from './utils/expandUnassigned';
-import { streamEntityReference } from './utils/streamEntityReference';
+import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 import { EntityProcessors, ExpandParams } from './types';
 import { EntityNameStack } from './utils/EntityNameStack';
 
@@ -192,17 +192,21 @@ class EntityExpander {
 
       this.state = State.IN_EXTERNAL_SUBSET;
 
-      streamEntityReference(externalSubsetToken, this.expandParams, (result, nextPTokenDone) => {
-         if (result) {
-            this.expandPToken(result, nextPTokenDone);
-            return;
-         }
+      streamParsedReplacementText(
+         externalSubsetToken,
+         this.expandParams,
+         (result, nextPTokenDone) => {
+            if (result) {
+               this.expandPToken(result, nextPTokenDone);
+               return;
+            }
 
-         this.state = State.IN_CONTENT;
-         this.deliverToken(pToken);
-         nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
-         handled(); // and mark the end of processing of the DOCTYPE end token
-      });
+            this.state = State.IN_CONTENT;
+            this.deliverToken(pToken);
+            nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
+            handled(); // and mark the end of processing of the DOCTYPE end token
+         },
+      );
    }
 
    /*
@@ -391,7 +395,7 @@ class EntityExpander {
 
       this.entityNameStack.pushName(pToken);
 
-      streamEntityReference(pToken, this.expandParams, (result, done) => {
+      streamParsedReplacementText(pToken, this.expandParams, (result, done) => {
          if (!result) {
             // BUG 1
             if (countSeen === 0) {

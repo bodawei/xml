@@ -23,9 +23,13 @@ import {
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
-import { streamEntityReference } from '../streamEntityReference';
+import { streamParsedReplacementText } from '../streamParsedReplacementText';
 
-describe('streamEntityReference() (unit)', () => {
+function noopFunction(): void {
+   // do nothing
+}
+
+describe('streamParsedReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
    let params: ExpandParams;
    let textPToken: TextPToken;
@@ -53,7 +57,7 @@ describe('streamEntityReference() (unit)', () => {
                   getErrors: (): Array<XmlError> => [],
                };
             },
-            parseAttributeValue: (): void => {},
+            parseAttributeValue: noopFunction,
          },
          emd: new EntityMetaData(),
       };
@@ -68,7 +72,7 @@ describe('streamEntityReference() (unit)', () => {
    ): void {
       const allResults: Array<PToken> = [];
 
-      streamEntityReference(token, params, (result, handled) => {
+      streamParsedReplacementText(token, params, (result, handled) => {
          if (!result) {
             deliverResults(allResults);
          } else {
@@ -81,7 +85,7 @@ describe('streamEntityReference() (unit)', () => {
    it('delivers the external DTD tokens', (done) => {
       params.utils.parseBody = (source, inContent, cb) => {
          cb(textPToken, () => {
-            cb(undefined, () => {});
+            cb(undefined, noopFunction);
          });
       };
 
@@ -122,7 +126,7 @@ describe('streamEntityReference() (unit)', () => {
       const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE, ['x']);
       params.utils.parseBody = (source, inContent, cb) => {
          cb(textPToken, () => {
-            cb(undefined, () => {});
+            cb(undefined, noopFunction);
          });
       };
       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
@@ -156,7 +160,7 @@ describe('streamEntityReference() (unit)', () => {
          name: toSToken('ge'),
       });
 
-      streamEntityReference(geRef, params, (value, cb) => {
+      streamParsedReplacementText(geRef, params, (value, cb) => {
          cb();
       });
 
@@ -170,7 +174,7 @@ describe('streamEntityReference() (unit)', () => {
    it('delivers the parsed content of an already prepared entity wrapped in a start and end general entity', (done) => {
       params.utils.parseBody = (source, inContent, cb) => {
          cb(textPToken, () => {
-            cb(undefined, () => {});
+            cb(undefined, noopFunction);
          });
       };
       const geDecl = new GeneralEntityDeclarationPToken({
@@ -227,7 +231,7 @@ describe('streamEntityReference() (unit)', () => {
          getErrors: (): Array<XmlError> => [],
       });
 
-      streamEntityReference(peRef, params, (value, cb) => {
+      streamParsedReplacementText(peRef, params, (value, cb) => {
          cb();
       });
 
@@ -241,7 +245,9 @@ describe('streamEntityReference() (unit)', () => {
    it('delivers the parsed content of an already prepared entity wrapped in a start and end parameter entity', (done) => {
       params.utils.parseBody = (source, inContent, cb) => {
          cb(textPToken, () => {
-            cb(undefined, () => {});
+            cb(undefined, () => {
+               // do nothing
+            });
          });
       };
       const peDecl = new ParameterEntityDeclarationPToken({

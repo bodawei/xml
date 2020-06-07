@@ -51,7 +51,7 @@ function deliverMultipleTokens(
  * PTokens are found, pass undefined to the caller.
  * The caller must acknowledge each token before the next is sent
  */
-function streamEntityReference(
+function streamParsedReplacementText(
    reference:
       | ParameterEntityReferencePToken
       | GeneralEntityReferencePToken
@@ -121,4 +121,4 @@ function streamEntityReference(
    });
 }
 
-export { streamEntityReference };
+export { streamParsedReplacementText };

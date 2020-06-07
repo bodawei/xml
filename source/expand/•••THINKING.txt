@@ -229,6 +229,8 @@ x      - expandEntityValue
 x      - NOTE: we are storing the preparsed values in the start and end tokens.
 x      - need this in addProtoReplacementText
 x      - Unsurprisingly, also expandEntityValue
+x Don't load external entities
+
 GOALS
    - Get the expansion system finished and working
       - Why: This has been a huge sinkhole of effort and thinking. Getitng it done will
@@ -256,8 +258,6 @@ IMPLEMENTATION
       √ need to handle in entity decl
          - This is a serious problem. we don't have the expanded, and the expanded is invisible.
             - We need this also for external.
-   - Don't load external entities
-      - Need to do validation
    - Bug one: EntityExpander when streaming, if can't find the entity, it will barf
    - Bug2 EMD's from sub entits clobber the one for the doc in the entity expander
    - Bug 3: Add geRef to PTokenFromLiteralStream

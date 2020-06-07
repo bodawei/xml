@@ -32,7 +32,7 @@ import {
 
 import * as expandAttributes from '../utils/expandAttributes';
 import * as expandEntityValueModule from '../utils/expandEntityValue';
-import * as streamEntityReference from '../utils/streamEntityReference';
+import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
 import * as expandUnassigned from '../utils/expandUnassigned';
 import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
 import { EntityExpander } from '../EntityExpander';
@@ -214,7 +214,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('calls the streamEntityReference() function with the subset token, prams and a callback', (done) => {
+      it('calls the streamParsedReplacementText() function with the subset token, prams and a callback', (done) => {
          docTypeStart = new DocTypeStartPToken({
             open: toSToken('<!'),
             name: toSToken('root'),
@@ -224,16 +224,16 @@ describe('EntityExpander (unit)', () => {
                },
             },
          });
-         const streamEntityReferenceSpy: jasmine.Spy = spyOn(
-            streamEntityReference,
-            'streamEntityReference',
+         const streamParsedReplacementTextSpy: jasmine.Spy = spyOn(
+            streamParsedReplacementText,
+            'streamParsedReplacementText',
          );
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(undefined, () => {});
          });
 
          doExpand([docTypeStart, docTypeEnd], true, (results) => {
-            const args = streamEntityReferenceSpy.calls.argsFor(0);
+            const args = streamParsedReplacementTextSpy.calls.argsFor(0);
 
             expect(args[0].type).toEqual(EXTERNAL_DTD_PSEUDO_TOKEN);
             expect(args[1].entityDetails).not.toBeUndefined();
@@ -252,12 +252,12 @@ describe('EntityExpander (unit)', () => {
                },
             },
          });
-         const streamEntityReferenceSpy: jasmine.Spy = spyOn(
-            streamEntityReference,
-            'streamEntityReference',
+         const streamParsedReplacementTextSpy: jasmine.Spy = spyOn(
+            streamParsedReplacementText,
+            'streamParsedReplacementText',
          );
          const notation = new NotationDeclarationPToken({ open: toSToken('<!') });
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(notation, () => {
                callback(undefined, () => {});
             });
@@ -285,12 +285,12 @@ describe('EntityExpander (unit)', () => {
                },
             },
          });
-         const streamEntityReferenceSpy: jasmine.Spy = spyOn(
-            streamEntityReference,
-            'streamEntityReference',
+         const streamParsedReplacementTextSpy: jasmine.Spy = spyOn(
+            streamParsedReplacementText,
+            'streamParsedReplacementText',
          );
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(error, () => {
                callback(undefined, () => {});
             });
@@ -879,10 +879,13 @@ describe('EntityExpander (unit)', () => {
 
    describe('entity references', () => {
       let geRef: GeneralEntityReferencePToken;
-      let streamEntityReferenceSpy: jasmine.Spy;
+      let streamParsedReplacementTextSpy: jasmine.Spy;
 
       beforeEach(() => {
-         streamEntityReferenceSpy = spyOn(streamEntityReference, 'streamEntityReference');
+         streamParsedReplacementTextSpy = spyOn(
+            streamParsedReplacementText,
+            'streamParsedReplacementText',
+         );
 
          geRef = new GeneralEntityReferencePToken({
             open: toSToken('&'),
@@ -890,13 +893,13 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('calls the streamEntityReference() function with the ref token, prams and a callback', (done) => {
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+      it('calls the streamParsedReplacementText() function with the ref token, prams and a callback', (done) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(undefined, () => {});
          });
 
          doExpand([geRef], true, () => {
-            const args = streamEntityReferenceSpy.calls.argsFor(0);
+            const args = streamParsedReplacementTextSpy.calls.argsFor(0);
 
             expect(args[0]).toEqual(geRef);
             expect(args[1].entityDetails).not.toBeUndefined();
@@ -906,7 +909,7 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('returns the geRef if it is not expanded', (done) => {
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(undefined, () => {});
          });
 
@@ -918,7 +921,7 @@ describe('EntityExpander (unit)', () => {
 
       it('returns any intermediate tokens rather than the GE Ref if there are any', (done) => {
          const text = new TextPToken({ text: toSToken('foo') });
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(text, () => {
                callback(undefined, () => {});
             });
@@ -935,14 +938,14 @@ describe('EntityExpander (unit)', () => {
             open: toSToken('&'),
             name: toSToken('root'),
          });
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(geRef2, () => {
                callback(undefined, () => {});
             });
          });
 
          doExpand([geRef], true, (results) => {
-            expect(streamEntityReferenceSpy).toHaveBeenCalledTimes(1);
+            expect(streamParsedReplacementTextSpy).toHaveBeenCalledTimes(1);
             expect(harvestTypes(results)).toEqual([geRef2.type]);
             done();
          });
@@ -957,14 +960,14 @@ describe('EntityExpander (unit)', () => {
             open: toSToken('%'),
             name: toSToken('root'),
          });
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             callback(peRef2, () => {
                callback(undefined, () => {});
             });
          });
 
          doExpand([peRef1], true, (results) => {
-            expect(streamEntityReferenceSpy).toHaveBeenCalledTimes(1);
+            expect(streamParsedReplacementTextSpy).toHaveBeenCalledTimes(1);
             expect(harvestTypes(results)).toEqual([peRef2.type]);
             done();
          });
@@ -977,7 +980,7 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('root'),
          });
          const text = new TextPToken({ text: toSToken('foo') });
-         streamEntityReferenceSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
             if (token === peRef1) {
                callback(geRef, () => {
                   callback(undefined, () => {});
@@ -990,7 +993,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          doExpand([peRef1], true, (results) => {
-            expect(streamEntityReferenceSpy).toHaveBeenCalledTimes(2);
+            expect(streamParsedReplacementTextSpy).toHaveBeenCalledTimes(2);
             expect(harvestTypes(results)).toEqual([text.type]);
             done();
          });
