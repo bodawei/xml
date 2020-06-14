@@ -117,7 +117,7 @@ describe('EntityExpander (unit)', () => {
             cb([
                {
                   newValue: [],
-                  errors: [],
+                  byproducts: [],
                },
             ]);
          });
@@ -354,7 +354,7 @@ describe('EntityExpander (unit)', () => {
          (notation.assignUnassigned as any) = () => {};
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [2], errors: [] });
+            callback({ newValue: [2], byproducts: [] });
          });
 
          doExpand([notation], true, (results) => {
@@ -368,7 +368,7 @@ describe('EntityExpander (unit)', () => {
          (notation.assignUnassigned as any) = () => {};
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [], errors: [] });
+            callback({ newValue: [], byproducts: [] });
          });
 
          doExpand([notation], true, () => {
@@ -389,7 +389,7 @@ describe('EntityExpander (unit)', () => {
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [2], errors: [error] });
+            callback({ newValue: [2], byproducts: [error] });
          });
 
          doExpand([notation], true, (results) => {
@@ -425,7 +425,7 @@ describe('EntityExpander (unit)', () => {
          (notation.assignUnassigned as any) = jasmine.createSpy();
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [2], errors: [] });
+            callback({ newValue: [2], byproducts: [] });
          });
 
          doExpand([notation], true, () => {
@@ -460,7 +460,7 @@ describe('EntityExpander (unit)', () => {
          (elementDecl.assignUnassigned as any) = jasmine.createSpy();
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [2], errors: [] });
+            callback({ newValue: [2], byproducts: [] });
          });
 
          doExpand([elementDecl], true, () => {
@@ -475,7 +475,7 @@ describe('EntityExpander (unit)', () => {
          (elementDecl.assignUnassigned as any) = jasmine.createSpy();
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [], errors: [] });
+            callback({ newValue: [], byproducts: [] });
          });
 
          doExpand([elementDecl], true, () => {
@@ -502,7 +502,7 @@ describe('EntityExpander (unit)', () => {
 
                   return {
                      newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
-                     errors: [new WellFormedError(code, [`${index}`])],
+                     byproducts: [new WellFormedError(code, [`${index}`])],
                   };
                });
 
@@ -582,7 +582,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [2], errors: [] });
+            callback({ newValue: [2], byproducts: [] });
          });
 
          doExpand([attList], true, () => {
@@ -610,7 +610,7 @@ describe('EntityExpander (unit)', () => {
                index++;
                cb({
                   newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
-                  errors: [error],
+                  byproducts: [error],
                });
             },
          );
@@ -718,7 +718,7 @@ describe('EntityExpander (unit)', () => {
             (pToken: any, params: ExpandParams, chain: any, cb: any) => {
                hasGeDecl = params.entityDetails.hasEntity(geDecl);
                afterCallParams = params;
-               cb({ newValue: [new TextPToken({ text: toSToken(`testValue`) })], errors: [] });
+               cb({ newValue: [new TextPToken({ text: toSToken(`testValue`) })], byproducts: [] });
             },
          );
 
@@ -739,7 +739,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [2], errors: [] });
+            callback({ newValue: [2], byproducts: [] });
          });
 
          doExpand([geDecl], true, () => {
@@ -771,7 +771,7 @@ describe('EntityExpander (unit)', () => {
 
                   return {
                      newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
-                     errors: [new WellFormedError(code, [`${index}`])],
+                     byproducts: [new WellFormedError(code, [`${index}`])],
                   };
                });
 

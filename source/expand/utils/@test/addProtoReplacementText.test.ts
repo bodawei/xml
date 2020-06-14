@@ -4,6 +4,7 @@ import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
+   ElidedEntityDeclarationPToken,
    EntityValuePToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -76,7 +77,7 @@ describe('addProtoReplacementText() (unit)', () => {
 
       expandEntitValueSpy = spyOn(expandEntityValue, 'expandEntityValue').and.callFake(
          (pToken: any, expandParams: any, chain: any, cb: Function) => {
-            cb({ newValue: [textPToken], errors: [] });
+            cb({ newValue: [textPToken], byproducts: [] });
          },
       );
    });
@@ -85,7 +86,7 @@ describe('addProtoReplacementText() (unit)', () => {
       entityDetails.updateDeclaredValue(peDecl, [], []);
 
       addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (result) => {
-         expect(result).toEqual([]);
+         expect(result).toEqual({ byproducts: [] });
          done();
       });
    });
@@ -221,13 +222,22 @@ describe('addProtoReplacementText() (unit)', () => {
       callCount++;
       // Make a first call.  This will start to "retrieve" the sToken and the errors at this time
       addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (results) => {
-         expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
+         expect(results).toEqual({
+            byproducts: [
+               new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
+               new ElidedEntityDeclarationPToken(peDecl, [
+                  new TextPToken({ text: toSToken('foo') }),
+               ]),
+            ],
+         });
       });
 
       // make the second call. This will short circuit and not retrieve.
       callCount++;
       addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (results) => {
-         expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
+         expect(results).toEqual({
+            byproducts: [],
+         });
          done();
       });
 
@@ -249,7 +259,9 @@ describe('addProtoReplacementText() (unit)', () => {
       };
 
       addProtoReplacementText(peRefPToken, params, new EntityNameStack(), (results) => {
-         expect(results).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
+         expect(results).toEqual({
+            byproducts: [new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)],
+         });
          done();
       });
    });

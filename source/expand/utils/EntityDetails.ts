@@ -10,13 +10,14 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    XmlError,
+   ElidedEntityDeclarationPToken,
 } from 'token';
 
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 
 type LoadingResult = {
    details: InternalGEDetails | InternalPEDetails | void;
-   errors: Array<XmlError>;
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
 };
 type LoadingCallback = (result: LoadingResult) => void;
 
@@ -168,7 +169,7 @@ class EntityDetails {
       const details = this.getDeclarationDetails(declaration);
 
       if (!details || !details.isLoading) {
-         setTimeout(() => callback({ details, errors: [] }), 0);
+         setTimeout(() => callback({ details, byproducts: [] }), 0);
          return;
       }
 
@@ -178,7 +179,7 @@ class EntityDetails {
    public updateDeclaredValue(
       declaration: ParameterEntityDeclarationPToken | GeneralEntityDeclarationPToken,
       newValue: EntityValuePToken | void,
-      errors: Array<XmlError>,
+      byproducts: Array<XmlError | ElidedEntityDeclarationPToken>,
    ): void {
       const details = this.getDeclarationDetails(declaration);
 
@@ -197,7 +198,7 @@ class EntityDetails {
          details.waiters = [];
 
          for (const waiter of waiters) {
-            waiter({ details, errors });
+            waiter({ details, byproducts });
          }
       }
    }

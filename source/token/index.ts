@@ -22,6 +22,7 @@ import { ConditionalPToken } from './conditional';
 import { ConditionalClosePToken } from './conditionalClose';
 import { ProcessingInstructionPToken } from './processingInstruction';
 import { CharRefPToken } from './charRef';
+import { ElidedEntityDeclarationPToken } from './ElidedEntityDeclarationPToken';
 import { TextPToken } from './text';
 import { GeneralEntityReferencePToken } from './generalEntityReference';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
@@ -52,6 +53,7 @@ export * from './marker/internalSubsetEnd';
 export * from './marker/internalSubsetStart';
 export * from './marker/parameterEntityEnd';
 export * from './marker/parameterEntityStart';
+export * from './ElidedEntityDeclarationPToken';
 
 export * from './cdata';
 export * from './charData';
@@ -98,6 +100,7 @@ type PToken =
    | ElementEmptyPToken
    | ElementEndPToken
    | ElementStartPToken
+   | ElidedEntityDeclarationPToken
    | ExternalSubsetStartToken
    | ExternalSubsetEndToken
    | GeneralEntityDeclarationPToken

@@ -356,7 +356,7 @@ describe('EntityDetails (unit)', () => {
          entityDetails.waitForLoading(geDecl1, (result) => {
             expect(result).toEqual({
                details: undefined,
-               errors: [],
+               byproducts: [],
             });
             done();
          });
@@ -382,7 +382,7 @@ describe('EntityDetails (unit)', () => {
             expect((result.details as any).protoReplacementText).toEqual([
                new TextPToken({ text: toSToken('wow') }),
             ]);
-            expect(result.errors).toEqual([{} as any]);
+            expect(result.byproducts).toEqual([{} as any]);
 
             done();
          });

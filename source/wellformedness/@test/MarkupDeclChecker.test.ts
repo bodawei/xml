@@ -20,6 +20,7 @@ import {
    ParameterEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
+   ElidedEntityDeclarationPToken,
 } from 'token';
 import { AttListPToken } from 'source/token/attListDeclaration';
 
@@ -592,6 +593,17 @@ describe('MarkupDeclChecker (unit)', () => {
 
          expect(checkState.generalDecls.geDecl).toEqual(generalEntityDeclaration);
       });
+   });
+
+   describe('parameter entity reference', () => {
+      it('marks that we do not have all declarations after encountering a PE ref in an internal subset', () => {
+         checker = new MarkupDeclChecker(checkState, [], true);
+
+         checker.check(internalSubsetStart, ec);
+         checker.check(paramEntityRef, ec);
+
+         expect(checkState.peRefCount).toEqual(1);
+      });
 
       it('reports an error if there is self-recursive recursive reference in a parameter entity value', () => {
          const peRefToTwo = new ParameterEntityReferencePToken({
@@ -672,14 +684,31 @@ describe('MarkupDeclChecker (unit)', () => {
       });
    });
 
-   describe('parameter entity reference', () => {
-      it('marks that we do not have all declarations after encountering a PE ref in an internal subset', () => {
-         checker = new MarkupDeclChecker(checkState, [], true);
+   describe('elided parameter entity', () => {
+      it('reports an error if a parameter entity reference in an elided declaration value is also in the contxt', () => {
+         const refToTestEnity = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('testEntity'),
+         });
+         const peDecl = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('two'),
+            value: [],
+         });
+         const elided = new ElidedEntityDeclarationPToken(peDecl, [
+            new ParameterEntityStartPToken(refToTestEnity),
+            new ParameterEntityEndPToken(refToTestEnity),
+         ]);
+         checker = new MarkupDeclChecker(checkState, ['testEntity'], true);
 
-         checker.check(internalSubsetStart, ec);
-         checker.check(paramEntityRef, ec);
+         checker.check(peDecl, ec);
+         checker.check(elided, ec);
 
-         expect(checkState.peRefCount).toEqual(1);
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['testEntity'],
+            position: refToTestEnity.open,
+         });
       });
    });
 

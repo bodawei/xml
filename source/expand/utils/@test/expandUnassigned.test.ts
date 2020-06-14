@@ -3,11 +3,7 @@
 import { EntityMetaData } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
-   AttributeValuePToken,
-   GeneralEntityDeclarationPToken,
-   GeneralEntityEndPToken,
    ParameterEntityReferencePToken,
-   GeneralEntityStartPToken,
    TextPToken,
    XmlError,
    ParameterEntityDeclarationPToken,
@@ -166,11 +162,11 @@ describe('expandUnassigned() (unit)', () => {
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: peRef }];
       entityDetails.addEntity(peDecl, [textPToken]);
       addSpy.and.callFake((ref: any, expand: any, chain: any, cb: any) => {
-         cb([attrError]);
+         cb({ byproducts: [attrError] });
       });
 
       expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
-         expect(result.errors).toEqual([attrError]);
+         expect(result.byproducts).toEqual([attrError]);
          done();
       });
    });
@@ -188,13 +184,13 @@ describe('expandUnassigned() (unit)', () => {
       entityDetails.addEntity(peDecl2);
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: peRef2 }];
       addSpy.and.callFake((ref: any, expand: any, chain: any, cb: any) => {
-         cb([attrError]);
+         cb({ byproducts: [attrError] });
       });
 
       expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
          expect(result).toEqual({
             newValue: [{ type: UnassignedType.REFERENCE, token: peRef2 }],
-            errors: [attrError],
+            byproducts: [attrError],
          });
          done();
       });

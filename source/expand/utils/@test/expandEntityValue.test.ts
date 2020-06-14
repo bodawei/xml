@@ -4,6 +4,7 @@ import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
+   ElidedEntityDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
@@ -75,7 +76,7 @@ describe('expandEntityValue() (unit)', () => {
 
    it('calls back with no errors when given an entity value with no references', (done) => {
       expandEntityValue([textPToken], params, new EntityNameStack(), (result) => {
-         expect(result.errors).toEqual([]);
+         expect(result.byproducts).toEqual([]);
          done();
       });
    });
@@ -85,7 +86,7 @@ describe('expandEntityValue() (unit)', () => {
 
       expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
          expect(result).toEqual({
-            errors: [],
+            byproducts: [],
             newValue: [
                textPToken,
                new ParameterEntityStartPToken(peRefPToken),
@@ -104,7 +105,7 @@ describe('expandEntityValue() (unit)', () => {
          new EntityNameStack(),
          (result) => {
             expect(result).toEqual({
-               errors: [],
+               byproducts: [new ElidedEntityDeclarationPToken(peDecl, [textPToken])],
                newValue: [
                   new ParameterEntityStartPToken(peRefPToken),
                   textPToken,
@@ -133,7 +134,7 @@ describe('expandEntityValue() (unit)', () => {
 
       expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
          expect(result).toEqual({
-            errors: [],
+            byproducts: [new ElidedEntityDeclarationPToken(peDecl, [])],
             newValue: [
                textPToken,
                new ParameterEntityStartPToken(peRefPToken),
@@ -158,7 +159,10 @@ describe('expandEntityValue() (unit)', () => {
       };
 
       expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
-         expect(result.errors).toEqual([new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)]);
+         expect(result.byproducts).toEqual([
+            new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
+            new ElidedEntityDeclarationPToken(peDecl, []),
+         ]);
          done();
       });
    });
@@ -171,7 +175,7 @@ describe('expandEntityValue() (unit)', () => {
 
       expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
          expect(result).toEqual({
-            errors: [],
+            byproducts: [],
             newValue: [peRefPToken, textPToken],
          });
          done();
@@ -186,7 +190,7 @@ describe('expandEntityValue() (unit)', () => {
 
       expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
          expect(result).toEqual({
-            errors: [],
+            byproducts: [],
             newValue: [peRefPToken, textPToken],
          });
          done();
@@ -205,7 +209,7 @@ describe('expandEntityValue() (unit)', () => {
          new EntityNameStack().cloneWithPEName('already'),
          (result) => {
             expect(result).toEqual({
-               errors: [],
+               byproducts: [],
                newValue: [peRefPToken, textPToken],
             });
             done();
@@ -241,7 +245,7 @@ describe('expandEntityValue() (unit)', () => {
 
       expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
          expect(result).toEqual({
-            errors: [],
+            byproducts: [],
             newValue: [
                new ParameterEntityStartPToken(peRefPToken),
                second,

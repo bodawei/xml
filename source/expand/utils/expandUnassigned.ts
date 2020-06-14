@@ -2,7 +2,12 @@
 
 import { doAsyncLoop } from 'basic';
 import { strOrBlank } from 'sToken';
-import { EntityValuePToken, ParameterEntityReferencePToken, XmlError, unassigned } from 'token';
+import {
+   ElidedEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
+   XmlError,
+   unassigned,
+} from 'token';
 
 import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
 
@@ -11,16 +16,15 @@ import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityNameStack } from './EntityNameStack';
 
-type ExpandAttrResult = {
+type ExpandUnassignedResult = {
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
    newValue: UnassignedArray;
-   errors: Array<XmlError>;
 };
-type UnassignedExpanded = (result: ExpandAttrResult) => void;
+type UnassignedExpanded = (result: ExpandUnassignedResult) => void;
 
 type ParseResults = {
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
    unassignedFragment: UnassignedArray | void;
-   preparseValue: EntityValuePToken | void;
-   errors: Array<XmlError>;
 };
 
 function expandPeRef(
@@ -34,8 +38,7 @@ function expandPeRef(
    const details = expandParams.entityDetails.getPEDetails(entityName);
    const result: ParseResults = {
       unassignedFragment: undefined,
-      preparseValue: undefined,
-      errors: [],
+      byproducts: [],
    };
 
    // §4.1.0: Well-formedness constraint: No Recursion
@@ -46,9 +49,9 @@ function expandPeRef(
       return;
    }
 
-   addProtoReplacementText(peRef, expandParams, nameStack, (newErrors) => {
+   addProtoReplacementText(peRef, expandParams, nameStack, (addResult) => {
       if (!details.protoReplacementText) {
-         result.errors = newErrors;
+         result.byproducts = addResult.byproducts;
          callback(result);
          return;
       }
@@ -61,8 +64,7 @@ function expandPeRef(
       unassigned.parseAllValues(sTokenSource, isElementDecl, (results?: UnassignedArray) => {
          callback({
             unassignedFragment: results,
-            preparseValue: undefined,
-            errors: newErrors,
+            byproducts: addResult.byproducts,
          });
       });
    });
@@ -88,7 +90,7 @@ function expandUnassigned(
    }
 
    if (peRefs.length === 0) {
-      expanded({ newValue: [...value], errors: [] });
+      expanded({ newValue: [...value], byproducts: [] });
       return;
    }
 
@@ -96,7 +98,7 @@ function expandUnassigned(
 
    // Process expand all the peRefs potentially very asynchronously.
    doAsyncLoop(peRefs, expandRef, (results) => {
-      const allErrors: Array<XmlError> = [];
+      const allByproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
       const newValue: UnassignedArray = [];
       let peRefIndex = 0;
 
@@ -107,10 +109,10 @@ function expandUnassigned(
             continue;
          }
 
-         const { unassignedFragment, errors } = results[peRefIndex];
+         const { unassignedFragment, byproducts } = results[peRefIndex];
 
          peRefIndex++;
-         allErrors.push(...errors);
+         allByproducts.push(...byproducts);
 
          if (!unassignedFragment) {
             // For some reason couldn't expand. Just put it in the array
@@ -130,8 +132,8 @@ function expandUnassigned(
          }
       }
 
-      expanded({ newValue, errors: allErrors });
+      expanded({ newValue, byproducts: allByproducts });
    });
 }
 
-export { expandUnassigned, UnassignedExpanded, ExpandAttrResult };
+export { expandUnassigned, UnassignedExpanded };

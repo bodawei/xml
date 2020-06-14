@@ -29,6 +29,7 @@ import {
    ParameterEntityReferencePToken,
    PToken,
    XmlError,
+   ElidedEntityDeclarationPToken,
 } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
@@ -236,7 +237,7 @@ class EntityExpander {
 
             declarationPToken.assignUnassigned();
 
-            this.deliverErrors(results.errors);
+            this.deliverByproducts(results.byproducts);
             this.processExpandedDeclaration(declarationPToken, handled);
          },
       );
@@ -286,7 +287,7 @@ class EntityExpander {
          (results) => {
             for (let index = 0; index < results.length; index++) {
                pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
-               this.deliverErrors(results[index].errors);
+               this.deliverByproducts(results[index].byproducts);
             }
 
             this.deliverToken(pToken);
@@ -340,7 +341,7 @@ class EntityExpander {
       expandEntityValue(pToken.value as any, this.expandParams, chain, (result): void => {
          this.expandParams.entityDetails.addEntity(pToken, result.newValue);
 
-         this.deliverErrors(result.errors);
+         this.deliverByproducts(result.byproducts);
          this.deliverToken(pToken);
          handled();
       });
@@ -369,7 +370,7 @@ class EntityExpander {
          (results) => {
             for (let index = 0; index < results.length; index++) {
                pToken.attributes[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
-               this.deliverErrors(results[index].errors);
+               this.deliverByproducts(results[index].byproducts);
             }
 
             this.deliverToken(pToken);
@@ -411,8 +412,8 @@ class EntityExpander {
       });
    }
 
-   private deliverErrors(errors: Array<XmlError>): void {
-      for (const err of errors) {
+   private deliverByproducts(byproducts: Array<XmlError | ElidedEntityDeclarationPToken>): void {
+      for (const err of byproducts) {
          this.deliverToken(err);
       }
    }

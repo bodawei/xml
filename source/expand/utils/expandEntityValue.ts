@@ -1,6 +1,7 @@
 import { strOrBlank } from 'sToken';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   ElidedEntityDeclarationPToken,
    EntityValuePToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
@@ -16,7 +17,7 @@ import { EntityNameStack } from './EntityNameStack';
 
 type ExpandedResult = {
    newValue: EntityValuePToken;
-   errors: Array<XmlError>;
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
 };
 
 /*
@@ -55,7 +56,7 @@ function expandValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
    nameStack: EntityNameStack,
-   errors: Array<XmlError>,
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>,
    expanded: (result: ExpandedResult) => void,
 ): void {
    const newValue: EntityValuePToken = [];
@@ -85,7 +86,7 @@ function expandValue(
       newValue.push(element);
    }
 
-   expanded({ newValue, errors });
+   expanded({ newValue, byproducts });
 }
 
 /*
@@ -104,7 +105,7 @@ function expandEntityValue(
    nameStack: EntityNameStack,
    expanded: (result: ExpandedResult) => void,
 ): void {
-   const allErrors: Array<XmlError> = [];
+   const byproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
    const entitiesWithoutRT = entitiesWithoutReplacementText(value, expandParams.entityDetails);
    let remainingEntities = entitiesWithoutRT.length;
 
@@ -115,12 +116,12 @@ function expandEntityValue(
 
    for (const reference of entitiesWithoutRT) {
       // eslint-disable-next-line no-loop-func
-      addProtoReplacementText(reference, expandParams, nameStack, (errors) => {
-         allErrors.push(...errors);
+      addProtoReplacementText(reference, expandParams, nameStack, (addResult) => {
+         byproducts.push(...addResult.byproducts);
          remainingEntities--;
 
          if (remainingEntities === 0) {
-            expandValue(value, expandParams, nameStack, allErrors, expanded);
+            expandValue(value, expandParams, nameStack, byproducts, expanded);
          }
       });
    }

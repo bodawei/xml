@@ -5,7 +5,7 @@ import { strOrBlank, STokenSource } from 'sToken';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    AttributeValuePToken,
-   EntityValuePToken,
+   ElidedEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    GeneralEntityReferencePToken,
@@ -22,15 +22,14 @@ import { EntityNameStack } from './EntityNameStack';
 type AttrValueObj = { value: AttributeValuePToken };
 
 type ExpandAttrResult = {
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
    newValue: AttributeValuePToken;
-   errors: Array<XmlError>;
 };
 type AttrExpanded = (result: ExpandAttrResult) => void;
 
 type ParseResults = {
    expandedFragment: AttributeValuePToken | void;
-   preparseValue: EntityValuePToken | void;
-   errors: Array<XmlError>;
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
 };
 
 /*
@@ -42,7 +41,7 @@ function parseEntityValueAsAttributeValue(
    geDetails: GEDetails,
    expandParams: ExpandParams,
    nameStack: EntityNameStack,
-   errors: Array<XmlError>,
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>,
    callback: (result: ParseResults) => void,
 ): void {
    const entityValue = geDetails.protoReplacementText;
@@ -54,8 +53,7 @@ function parseEntityValueAsAttributeValue(
       if (!result.newValue) {
          callback({
             expandedFragment: undefined,
-            preparseValue: undefined,
-            errors: [...errors, ...result.errors],
+            byproducts: [...byproducts, ...result.errors],
          });
          return;
       }
@@ -70,8 +68,7 @@ function parseEntityValueAsAttributeValue(
       expandOneAttribute(result.newValue, expandParams, nameStack, (recurResults) => {
          callback({
             expandedFragment: recurResults.newValue,
-            preparseValue: entityValue,
-            errors: [...errors, ...result.errors, ...recurResults.errors],
+            byproducts: [...byproducts, ...result.errors, ...recurResults.byproducts],
          });
       });
    });
@@ -91,15 +88,14 @@ function expandGeRef(
    const geDetails = expandParams.entityDetails.getGEDetails(entityName);
    const result: ParseResults = {
       expandedFragment: undefined,
-      preparseValue: undefined,
-      errors: [],
+      byproducts: [],
    };
 
    // If there is no declaration, check if it is one of the predefined entities.
    if (!geDetails) {
-      result.preparseValue = lookupPredefinedEntityValue(entityName);
+      const replacementText = lookupPredefinedEntityValue(entityName);
       // In this case, we know that the EntityValuePToken and AttributeValuePToken are the same
-      result.expandedFragment = result.preparseValue as AttributeValuePToken | void;
+      result.expandedFragment = replacementText as AttributeValuePToken | void;
 
       geRefExpanded(result);
       return;
@@ -123,9 +119,9 @@ function expandGeRef(
       return;
    }
 
-   addProtoReplacementText(geRef, expandParams, nameStack, (newErrors) => {
+   addProtoReplacementText(geRef, expandParams, nameStack, (addResult) => {
       if (!geDetails.protoReplacementText) {
-         result.errors = newErrors;
+         result.byproducts = addResult.byproducts;
          geRefExpanded(result);
          return;
       }
@@ -134,7 +130,7 @@ function expandGeRef(
          geDetails,
          expandParams,
          newRefChain,
-         newErrors,
+         addResult.byproducts,
          geRefExpanded,
       );
    });
@@ -163,12 +159,12 @@ function expandOneAttribute(
    }
 
    if (geRefs.length === 0) {
-      expanded({ newValue: attValue, errors: [] });
+      expanded({ newValue: attValue, byproducts: [] });
       return;
    }
 
    doAsyncLoop(geRefs, expandGeRef.bind(undefined, expandParams, nameStack), (expandedDetails) => {
-      const allErrors: Array<XmlError> = [];
+      const allByproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
       const newValue: AttributeValuePToken = [];
       let geRefIndex = 0;
 
@@ -179,10 +175,10 @@ function expandOneAttribute(
             continue;
          }
 
-         const { expandedFragment, preparseValue, errors } = expandedDetails[geRefIndex];
+         const { expandedFragment, byproducts } = expandedDetails[geRefIndex];
 
          geRefIndex++;
-         allErrors.push(...errors);
+         allByproducts.push(...byproducts);
 
          if (!expandedFragment) {
             // For some reason couldn't expand. Just put it in the array
@@ -190,14 +186,14 @@ function expandOneAttribute(
          } else {
             // expanded! wrap the expanded contents with a start and end
             newValue.push(
-               new GeneralEntityStartPToken(element, preparseValue),
+               new GeneralEntityStartPToken(element),
                ...expandedFragment,
-               new GeneralEntityEndPToken(element, preparseValue),
+               new GeneralEntityEndPToken(element),
             );
          }
       }
 
-      expanded({ newValue, errors: allErrors });
+      expanded({ newValue, byproducts: allByproducts });
    });
 }
 

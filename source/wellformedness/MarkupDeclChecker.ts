@@ -20,6 +20,7 @@ import {
    SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
    PToken,
+   ElidedEntityDeclarationPToken,
    InternalSubsetStartToken,
    ParameterEntityStartPToken,
    GeneralEntityDeclarationPToken,
@@ -27,8 +28,8 @@ import {
    attListDeclaration,
    ParameterEntityDeclarationPToken,
    getFirstSToken,
-   EntityValuePToken,
    ParameterEntityReferencePToken,
+   ELIDED_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import { ELEMENT_DECLARATION_PTOKEN } from 'source/token/elementDeclaration';
@@ -157,13 +158,16 @@ type DeclarationInfo = {
  * checks.
  */
 function processDeclaration(
-   pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+   pToken:
+      | GeneralEntityDeclarationPToken
+      | ParameterEntityDeclarationPToken
+      | ElidedEntityDeclarationPToken,
    declsSeen: DeclarationInfo,
 ): void {
    const name = strOrBlank(pToken.name);
    const tokens: Array<ParameterEntityReferencePToken> = [];
 
-   if (declsSeen[name]) {
+   if (declsSeen[name] && pToken.type !== ELIDED_ENTITY_DECLARATION_PTOKEN) {
       return;
    }
 
@@ -182,7 +186,10 @@ function processDeclaration(
 }
 
 function checkForRecursionInValue(
-   pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+   pToken:
+      | GeneralEntityDeclarationPToken
+      | ParameterEntityDeclarationPToken
+      | ElidedEntityDeclarationPToken,
    declContext: Array<string>,
    declsSeen: DeclarationInfo,
    errorCollector: ErrorCollector,
@@ -356,6 +363,9 @@ class MarkupDeclChecker implements Checker {
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
             this.checkState.paramDecls[strOrBlank(pToken.name)] = pToken;
+            break;
+         case ELIDED_ENTITY_DECLARATION_PTOKEN:
+            checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
             break;
       }
 

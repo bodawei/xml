@@ -10,6 +10,7 @@ import {
    GeneralEntityStartPToken,
    TextPToken,
    XmlError,
+   ElidedEntityDeclarationPToken,
 } from 'token';
 
 import { expandAttributes } from '../expandAttributes';
@@ -67,7 +68,7 @@ describe('expandAttributes() (unit)', () => {
 
    it('calls back with a copy of the set of attribute values when it contains no general entity references', (done) => {
       expandAttributes([{ value: [textPToken] }], params, new EntityNameStack(), (result) => {
-         expect(result).toEqualShallowDifferent([{ newValue: [textPToken], errors: [] }]);
+         expect(result).toEqualShallowDifferent([{ newValue: [textPToken], byproducts: [] }]);
          done();
       });
    });
@@ -293,10 +294,17 @@ describe('expandAttributes() (unit)', () => {
             name: toSToken('unloadable'),
          }),
       );
-      const setupReferncedEntitySpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
-      setupReferncedEntitySpy.and.callFake(
-         (a: any, b: any, chain: any, callback: (result: Array<XmlError>) => void) => {
-            callback([attrError]);
+      const addProtoReplacementTextSpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
+      addProtoReplacementTextSpy.and.callFake(
+         (
+            a: any,
+            b: any,
+            chain: any,
+            callback: (result: {
+               byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+            }) => void,
+         ) => {
+            callback({ byproducts: [attrError] });
          },
       );
 
@@ -308,7 +316,7 @@ describe('expandAttributes() (unit)', () => {
             expect(result).toEqual([
                {
                   newValue: [textPToken, unloadable],
-                  errors: [attrError],
+                  byproducts: [attrError],
                },
             ]);
             done();
@@ -353,7 +361,7 @@ describe('expandAttributes() (unit)', () => {
             params,
             new EntityNameStack(),
             (results) => {
-               expect(results[0].errors).toEqual([]);
+               expect(results[0].byproducts).toEqual([]);
                done();
             },
          );
@@ -373,7 +381,7 @@ describe('expandAttributes() (unit)', () => {
             params,
             new EntityNameStack(),
             (result) => {
-               expect(result[0].errors).toEqual([attrError]);
+               expect(result[0].byproducts).toEqual([attrError]);
                done();
             },
          );
@@ -392,10 +400,20 @@ describe('expandAttributes() (unit)', () => {
             }),
          );
          const loadingError = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
-         const setupReferncedEntitySpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
-         setupReferncedEntitySpy.and.callFake(
-            (a: any, b: any, chain: any, callback: (result: Array<XmlError>) => void) => {
-               callback([loadingError]);
+         const addProtoReplacementTextSpy = spyOn(
+            addProtoReplacementText,
+            'addProtoReplacementText',
+         );
+         addProtoReplacementTextSpy.and.callFake(
+            (
+               a: any,
+               b: any,
+               chain: any,
+               callback: (result: {
+                  byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+               }) => void,
+            ) => {
+               callback({ byproducts: [loadingError] });
             },
          );
          params.utils.parseAttributeValue = (
@@ -410,7 +428,7 @@ describe('expandAttributes() (unit)', () => {
             params,
             new EntityNameStack(),
             (results) => {
-               expect(results[0].errors).toEqual([loadingError]);
+               expect(results[0].byproducts).toEqual([loadingError]);
                done();
             },
          );
@@ -432,11 +450,18 @@ describe('expandAttributes() (unit)', () => {
       });
       let ctr = 0;
       entityDetails.addEntity(get2Decl);
-      const setupReferncedEntitySpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
-      setupReferncedEntitySpy.and.callFake(
-         (a: any, b: any, chain: any, callback: (result: Array<XmlError>) => void) => {
+      const addProtoReplacementTextSpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
+      addProtoReplacementTextSpy.and.callFake(
+         (
+            a: any,
+            b: any,
+            chain: any,
+            callback: (result: {
+               byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+            }) => void,
+         ) => {
             entityDetails.updateDeclaredValue(get2Decl, [ge2Value], []);
-            callback([loadingError]);
+            callback({ byproducts: [loadingError] });
          },
       );
       params.utils.parseAttributeValue = (
@@ -456,7 +481,7 @@ describe('expandAttributes() (unit)', () => {
          params,
          new EntityNameStack(),
          (results) => {
-            expect(results[0].errors).toEqual([attrError1, loadingError, attrError2]);
+            expect(results[0].byproducts).toEqual([attrError1, loadingError, attrError2]);
             done();
          },
       );

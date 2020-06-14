@@ -1,11 +1,13 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import {
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   ElidedEntityDeclarationPToken,
    EntityValuePToken,
    ParameterEntityReferencePToken,
    GeneralEntityReferencePToken,
    XmlError,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
 
 import { expandEntityValue } from './expandEntityValue';
@@ -13,7 +15,11 @@ import { ExpandParams } from '../types';
 import { strOrBlank } from 'sToken';
 import { EntityNameStack } from './EntityNameStack';
 
-type Done = (result: Array<XmlError>) => void;
+type AddProtoReplacementTextResult = {
+   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+};
+
+type Done = (result: AddProtoReplacementTextResult) => void;
 
 /*
  * Given an entity reference, make sure there is a protoReplacementText
@@ -47,19 +53,23 @@ function addProtoReplacementText(
       !details.token.externalId ||
       !expandParams.loadExternalEntities
    ) {
-      done([]);
+      done({ byproducts: [] });
       return;
    }
 
    if (details.isLoading) {
-      entityDetails.waitForLoading(details.token, (info) => done(info.errors));
+      entityDetails.waitForLoading(details.token, () => done({ byproducts: [] }));
       return;
    }
 
    const { sTokenSource, getErrors } = utils.retrieveExternalEntity(details.token.externalId, emd);
 
    entityDetails.loadingEntity(details.token);
-   entityDetails.waitForLoading(details.token, (info) => done(info.errors));
+   entityDetails.waitForLoading(details.token, (info) =>
+      done({
+         byproducts: info.byproducts,
+      }),
+   );
 
    utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken | void) => {
       const newStack =
@@ -77,10 +87,13 @@ function addProtoReplacementText(
       }
 
       expandEntityValue(entityValuePToken, expandParams, newStack, (results) => {
-         entityDetails.updateDeclaredValue(details.token, results.newValue, [
-            ...getErrors(),
-            ...results.errors,
-         ]);
+         const byproducts = [...getErrors(), ...results.byproducts];
+
+         if (details.token.type === PARAMETER_ENTITY_DECLARATION_PTOKEN) {
+            byproducts.push(new ElidedEntityDeclarationPToken(details.token, entityValuePToken));
+         }
+
+         entityDetails.updateDeclaredValue(details.token, results.newValue, byproducts);
       });
    });
 }
