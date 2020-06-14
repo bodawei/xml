@@ -22,9 +22,13 @@ import {
    PToken,
    InternalSubsetStartToken,
    ParameterEntityStartPToken,
+   GeneralEntityDeclarationPToken,
    ExternalSubsetStartToken,
    attListDeclaration,
+   ParameterEntityDeclarationPToken,
    getFirstSToken,
+   EntityValuePToken,
+   ParameterEntityReferencePToken,
 } from 'token';
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import { ELEMENT_DECLARATION_PTOKEN } from 'source/token/elementDeclaration';
@@ -142,6 +146,86 @@ const transitionsByState: StateTable = {
    [States.DONE]: {},
 };
 
+type DeclarationInfo = {
+   [declName: string]: {
+      referenceTokens: Array<ParameterEntityReferencePToken>;
+   };
+};
+
+/*
+ * Extract information out of a declaration that we will need to do other
+ * checks.
+ */
+function processDeclaration(
+   pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+   declsSeen: DeclarationInfo,
+): void {
+   const name = strOrBlank(pToken.name);
+   const tokens: Array<ParameterEntityReferencePToken> = [];
+
+   if (declsSeen[name]) {
+      return;
+   }
+
+   declsSeen[name] = {
+      referenceTokens: tokens,
+   };
+
+   // Refactor/cleanup: we should be allowing starts in these values
+   for (const value of pToken.value as any) {
+      if (value.type === PARAMETER_ENTITY_START_PTOKEN) {
+         tokens.push(value.referencePToken);
+      } else if (value.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+         tokens.push(value);
+      }
+   }
+}
+
+function checkForRecursionInValue(
+   pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+   declContext: Array<string>,
+   declsSeen: DeclarationInfo,
+   errorCollector: ErrorCollector,
+): void {
+   const declName = strOrBlank(pToken.name);
+
+   processDeclaration(pToken, declsSeen);
+
+   // §4.1.0: Well-formedness constraint: No Recursion
+   //    A parsed entity must not contain a recursive reference to itself,
+   //    either directly or indirectly.
+   //
+   // Situations we need to be concerned with:
+   //  - An entity declaration has a reference to itself in its declared value
+   //  - If any of the references in its value are also in it are in the declContext.
+   // You might ask: What about one of the references in the value referencing another
+   // which then references this declaration. That IS a recursive call. However, given
+   // the nature of parameter entitity values, those will already have tried to reference
+   // this and failed because this declaration wasn't found yet. So, they'll get
+   // errord for other reasons. It isn't clear to me that there is value in reporting
+   // that here.
+
+   const descendentRefs = declsSeen[declName].referenceTokens;
+
+   for (const refToken of descendentRefs) {
+      const refName = strOrBlank(refToken.name);
+
+      errorCollector.check(
+         pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN && refName === declName,
+         WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         [declName],
+         refToken.open,
+      );
+
+      errorCollector.check(
+         declContext.includes(refName),
+         WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         [refName],
+         refToken.open,
+      );
+   }
+}
+
 /*
  * This class checks well-formedness constraints on PTokens within a DTD portion of an
  * XML document (See §2.8.0 [28b, 29, 30, 31]).
@@ -162,10 +246,14 @@ class MarkupDeclChecker implements Checker {
    private inExternalSubset = false;
    private checkState: CheckState;
    private embeddedChecker?: MarkupDeclChecker;
+   private peContext: Array<string>;
+   private declsSeen: DeclarationInfo;
 
    constructor(checkState: CheckState, peContext: Array<string>, inExternalSubset = false) {
       this.checkState = checkState;
       this.inExternalSubset = inExternalSubset;
+      this.peContext = peContext;
+      this.declsSeen = {};
    }
 
    check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
@@ -183,34 +271,6 @@ class MarkupDeclChecker implements Checker {
          throw new Error(
             'Internal error: Passed a token to MarkupDeclChecker when it was already done.',
          );
-      }
-
-      // §4.1.0: Well-formedness constraint: No Recursion
-      //    A parsed entity must not contain a recursive reference to itself,
-      //    either directly or indirectly.
-      if (this.state !== States.PRE && this.start.type === PARAMETER_ENTITY_START_PTOKEN) {
-         const startName = strOrBlank(this.start.referencePToken.name);
-         let entityName: string | void;
-         let open: SToken | void;
-
-         if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
-            entityName = strOrBlank(pToken.referencePToken.name);
-            open = pToken.referencePToken.open;
-         }
-
-         if (pToken.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-            entityName = strOrBlank(pToken.name);
-            open = pToken.open;
-         }
-
-         if (entityName !== undefined) {
-            errorCollector.check(
-               startName === entityName,
-               WellFormedError.ID.REFERENCE_INVALID_RECURSION,
-               [entityName],
-               open,
-            );
-         }
       }
 
       if (this.embeddedChecker) {
@@ -233,6 +293,18 @@ class MarkupDeclChecker implements Checker {
             );
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+            const refName = strOrBlank(pToken.name);
+
+            // §4.1.0: Well-formedness constraint: No Recursion
+            //    A parsed entity must not contain a recursive reference to itself,
+            //    either directly or indirectly.
+            errorCollector.check(
+               this.peContext.includes(refName),
+               WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+               [refName],
+               pToken.open,
+            );
+
             // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
             checkParameterEntity(
                pToken,
@@ -245,6 +317,20 @@ class MarkupDeclChecker implements Checker {
             break;
          case PARAMETER_ENTITY_START_PTOKEN:
             if (this.state === States.PRE) {
+               const entityName = strOrBlank(pToken.referencePToken.name);
+
+               // §4.1.0: Well-formedness constraint: No Recursion
+               //    A parsed entity must not contain a recursive reference to itself,
+               //    either directly or indirectly.
+               errorCollector.check(
+                  this.peContext.includes(entityName),
+                  WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+                  [entityName],
+                  pToken.referencePToken.open,
+               );
+
+               this.peContext.push(entityName);
+
                // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
                checkParameterEntity(
                   pToken.referencePToken,
@@ -257,7 +343,7 @@ class MarkupDeclChecker implements Checker {
             } else {
                this.embeddedChecker = new MarkupDeclChecker(
                   this.checkState,
-                  [],
+                  this.peContext,
                   this.inExternalSubset,
                );
                this.embeddedChecker.check(pToken, errorCollector);
@@ -268,6 +354,7 @@ class MarkupDeclChecker implements Checker {
             this.checkState.generalDecls[strOrBlank(pToken.name)] = pToken;
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
             this.checkState.paramDecls[strOrBlank(pToken.name)] = pToken;
             break;
       }

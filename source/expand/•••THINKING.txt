@@ -231,6 +231,9 @@ x      - need this in addProtoReplacementText
 x      - Unsurprisingly, also expandEntityValue
 x Don't load external entities
 x in body, we don't have recursion checking, but we could be passing in the context.
+x  Need to do WF checks for entity values and attribute values.
+x         √ in scanAttributeValues we easily have the ability to check for recursive GE refs
+x         √ Best to also pass in context
 
 GOALS
    - Get the expansion system finished and working
@@ -248,21 +251,31 @@ DOCUMENT
 
 IMPLEMENTATION
    - Recursion problem
-      - Need to do WF checks for entity values and attribute values.
-         √ in scanAttributeValues we easily have the ability to check for recursive GE refs
-         - Best to also pass in context
+      x test failures
+      x We have top-level in markup decl checker
+      x WE ahve checks in scanAttributeValues()
+      - We do NOT have checks in pe or ge declarations 
+      - Unsure what's going on in contentchecker
+      - Do not have handling of external decls
+
+      - Each entity decl will have start and ends, with inbetween having been parsed in a way that make earlier disapper
+      - But, we'll have those declarations. so, when we encounter one we can then
+         - follow up with earlier declarations to determine recursion
       √ need to handle in entity decl
          - This is a serious problem. we don't have the expanded, and the expanded is invisible.
             - We need this also for external.
          - We have no way to check pe refs that contributed to id
             - Envision getting a meta data thing for any entity.  the checker should track these and then scan them too
          - what about pe refs in an attlist attribute and also owning the attlist
+         -- Oh, this is harder.  external ones will have not been stored
+   - REport on external entities in attributes
    - Bug one: EntityExpander when streaming, if can't find the entity, it will barf
    - Bug2 EMD's from sub entits clobber the one for the doc in the entity expander
    - Bug 3: Add geRef to PTokenFromLiteralStream
    - Seriously need to think about retrieveExternalEntity error conditions
    - unassgined.  PArsing can return no results?
    - Later cleanup
+      - Logic in ContentChecker would be a lot easier if the first Token as passed to the constructor
       - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.
       - Have in mind an algorithm to notice when we're getting too deep in entity expander and introduce a tick to empty the stack.
       - Who should be purging the emd's and textdecl's

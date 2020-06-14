@@ -90,7 +90,7 @@ describe('MarkupDeclChecker (unit)', () => {
       textDecl = makeTextDecl();
    });
 
-   function addAllTokens(checker: MarkupDeclChecker, ec: MockErrorCollector) {
+   function addAllTokens(checker: MarkupDeclChecker, ec: MockErrorCollector): void {
       checker.check(comment, ec);
       checker.check(makeSpace(), ec);
       checker.check(makeProcessingInstruction(), ec);
@@ -590,7 +590,85 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(internalSubsetStart, ec);
          checker.check(generalEntityDeclaration, ec);
 
-         expect(checkState.generalDecls.genDecl).toEqual(generalEntityDeclaration);
+         expect(checkState.generalDecls.geDecl).toEqual(generalEntityDeclaration);
+      });
+
+      it('reports an error if there is self-recursive recursive reference in a parameter entity value', () => {
+         const peRefToTwo = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('two'),
+         });
+         const peDecl2 = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('two'),
+            value: [
+               new ParameterEntityStartPToken(peRefToTwo),
+               new ParameterEntityEndPToken(peRefToTwo),
+            ],
+         });
+         checker = new MarkupDeclChecker(checkState, [], true);
+
+         checker.check(peDecl2, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['two'],
+            position: peRefToTwo.open,
+         });
+      });
+
+      it('does not report an error if there is reference in a general entity value to a parameter entity with the same name as the general entity', () => {
+         const peDecl = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('two'),
+            value: [],
+         });
+         const peRefToTwo = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('two'),
+         });
+         const geDecl = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('two'),
+            value: [
+               new ParameterEntityStartPToken(peRefToTwo),
+               new ParameterEntityEndPToken(peRefToTwo),
+            ],
+         });
+         checker = new MarkupDeclChecker(checkState, [], true);
+
+         checker.check(peDecl, ec);
+         checker.check(geDecl, ec);
+
+         expect(ec).not.toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['two'],
+            position: peRefToTwo.open,
+         });
+      });
+
+      it('reports an error if a parameter entity reference in a declaration value is also in the contxt', () => {
+         const refToTestEnity = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            name: toSToken('testEntity'),
+         });
+         const peDecl = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('two'),
+            value: [
+               new ParameterEntityStartPToken(refToTestEnity),
+               new ParameterEntityEndPToken(refToTestEnity),
+            ],
+         });
+         checker = new MarkupDeclChecker(checkState, ['testEntity'], true);
+
+         checker.check(peDecl, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            params: ['testEntity'],
+            position: refToTestEnity.open,
+         });
       });
    });
 
@@ -653,15 +731,15 @@ describe('MarkupDeclChecker (unit)', () => {
          });
       });
 
-      it('does not report a recursive error if a parameter entity start matches the name of this checker start (§4.1.0)', () => {
+      it('does not report a recursive error if a parameter entity start does not match the name of this checker start (§4.1.0)', () => {
          const peRef2 = new ParameterEntityReferencePToken({
-            open: toSToken('&'),
+            open: toSToken('%'),
             name: toSToken('entityName2'),
          });
          const peStart2 = new ParameterEntityStartPToken(peRef2);
          checker = new MarkupDeclChecker(checkState, []);
 
-         checker.check(generalEntityStart, ec);
+         checker.check(parameterEntityStart, ec);
          checker.check(peStart2, ec);
 
          expect(ec).not.toReportError({
@@ -673,7 +751,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
       it('reports a recursive error if a parameter entity reference matches the name of this checker start (§4.1.0)', () => {
          const peRef2 = new ParameterEntityReferencePToken({
-            open: toSToken('&'),
+            open: toSToken('%'),
             name: toSToken('entityName'),
          });
          checker = new MarkupDeclChecker(checkState, []);

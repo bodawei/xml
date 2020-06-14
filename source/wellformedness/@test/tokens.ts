@@ -148,19 +148,21 @@ const makeElementDeclaration = () =>
 const makeExternalSubsetEnd = () => new ExternalSubsetEndToken();
 const makeExternalSubsetStart = () => new ExternalSubsetStartToken();
 
-const makeGeneralEntityDeclaration = () =>
-   new GeneralEntityDeclarationPToken({
+function makeGeneralEntityDeclaration(name = 'geDecl'): GeneralEntityDeclarationPToken {
+   return new GeneralEntityDeclarationPToken({
       open: toSToken('<!'),
-      name: toSToken('genDecl'),
+      name: toSToken(name),
       close: toSToken('>'),
    });
+}
 
-const makeGeneralEntityReference = () =>
-   new GeneralEntityReferencePToken({
+function makeGeneralEntityReference(): GeneralEntityReferencePToken {
+   return new GeneralEntityReferencePToken({
       open: toSToken('&'),
       name: toSToken('testRef'),
       close: toSToken(';'),
    });
+}
 
 const makeGeneralEntityStart = () => new GeneralEntityStartPToken(makeGeneralEntityReference());
 const makeGeneralEntityEnd = () => new GeneralEntityEndPToken(makeGeneralEntityReference());

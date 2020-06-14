@@ -108,8 +108,6 @@ class DocumentChecker {
    private checkers: CheckerMap;
    private internalSubsetSeen = false;
    private externalSubsetSeen = false;
-   private inEntity: EntityType = EntityType.DOCUMENT;
-   private entityNameStack: Array<string> = [];
 
    constructor(checkerMap: CheckerMap) {
       this.checkers = checkerMap;
