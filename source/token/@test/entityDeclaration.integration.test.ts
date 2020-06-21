@@ -107,7 +107,7 @@ describe('entityDeclaration (integration)', () => {
 
          parseEntityDeclaration(source, {} as DeclarationPToken, (pToken) => {
             // "expand" what should be there.
-            (pToken as any).unassigned = [{
+            const unassignedValue = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, unassigned.wordFromSToken(SToken.fromString('entityName')),
@@ -123,6 +123,8 @@ describe('entityDeclaration (integration)', () => {
                   token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }
             ] as any;
+            (pToken as any).unassigned = unassignedValue;
+            (pToken as any).peRefPlus = unassignedValue;
 
             (pToken as any).assignUnassigned(); // typeHack
 

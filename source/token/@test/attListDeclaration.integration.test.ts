@@ -201,7 +201,7 @@ describe('attListDeclaration (integration)', () => {
          attListDeclaration.parse(source, { open: SToken.fromString('<!') }, (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
-            expect(result).toEqual(new attListDeclaration.PToken({
+            const expected = new attListDeclaration.PToken({
                open: SToken.fromString('<!'),
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
@@ -215,7 +215,11 @@ describe('attListDeclaration (integration)', () => {
                } ],
                nextPropName: 'elementName',
                close: makeSToken1('>'),
-            }));
+               peRefPlus: [],
+            });
+            (expected as any).peRefPlus = expected.unassigned;
+
+            expect(result).toEqual(expected);
             done();
          });
       });
@@ -228,7 +232,7 @@ describe('attListDeclaration (integration)', () => {
          attListDeclaration.parse(source, { open: SToken.fromString('<!') }, (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 32, 0, 32);
-            expect(result).toEqual(new attListDeclaration.PToken({
+            const expected = new attListDeclaration.PToken({
                open: SToken.fromString('<!'),
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
@@ -241,6 +245,7 @@ describe('attListDeclaration (integration)', () => {
                   postDefaultTypeSpace: makeSToken(' '),
                   value: [],
                }],
+               peRefPlus: [],
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
                   token: new ParameterEntityReferencePToken({
@@ -253,7 +258,10 @@ describe('attListDeclaration (integration)', () => {
                } ],
                nextPropName: 'name',
                close: makeSToken1('>'),
-            }));
+            });
+            (expected as any).peRefPlus = expected.unassigned;
+
+            expect(result).toEqual(expected);
             done();
          });
       });
@@ -266,7 +274,7 @@ describe('attListDeclaration (integration)', () => {
          attListDeclaration.parse(source, { open: SToken.fromString('<!') }, (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 35, 0, 35);
-            expect(result).toEqual(new attListDeclaration.PToken({
+            const expected = new attListDeclaration.PToken({
                open: SToken.fromString('<!'),
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
@@ -283,6 +291,7 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: undefined,
                   value: [],
                }],
+               peRefPlus: [],
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
                   token: new ParameterEntityReferencePToken({
@@ -295,7 +304,10 @@ describe('attListDeclaration (integration)', () => {
                } ],
                nextPropName: 'type',
                close: makeSToken1('>'),
-            }));
+            });
+            (expected as any).peRefPlus = expected.unassigned;
+
+            expect(result).toEqual(expected);
             done();
          });
       });
@@ -308,7 +320,7 @@ describe('attListDeclaration (integration)', () => {
          attListDeclaration.parse(source, { open: SToken.fromString('<!') }, (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 39, 0, 39);
-            expect(result).toEqual(new attListDeclaration.PToken({
+            const expected = new attListDeclaration.PToken({
                open: SToken.fromString('<!'),
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
@@ -327,6 +339,7 @@ describe('attListDeclaration (integration)', () => {
                   postTypeSpace: makeSToken(' '),
                   value: [],
                }],
+               peRefPlus: [],
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
                   token: new ParameterEntityReferencePToken({
@@ -339,7 +352,10 @@ describe('attListDeclaration (integration)', () => {
                } ],
                nextPropName: 'defaultType',
                close: makeSToken1('>'),
-            }));
+            });
+            (expected as any).peRefPlus = expected.unassigned;
+
+            expect(result).toEqual(expected);
             done();
          });
       });
@@ -359,7 +375,7 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [{
+            const unassignedValue = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
@@ -369,17 +385,21 @@ describe('attListDeclaration (integration)', () => {
                   token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }
             ];
+            pToken.unassigned = unassignedValue;
+            (pToken as any).peRefPlus = pToken.unassigned;
 
             attListDeclaration.assignUnassigned(pToken);
 
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
+
             expect(pToken).toEqual(new attListDeclaration.PToken({
                open: SToken.fromString('<!'),
                declTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                elementName: SToken.fromString('entityName'),
                postElementNameSpace: new SToken('  ', '  ', [ new Range(new EntityLocation()), helper.makeInsertedRange() ]),
                close: makeSToken2('>'),
+               peRefPlus: unassignedValue,
             }));
             done();
          });
@@ -396,7 +416,7 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [{
+            const unassignedValue = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, unassigned.wordFromSToken(SToken.fromString('at2')),
@@ -407,6 +427,8 @@ describe('attListDeclaration (integration)', () => {
                   token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ];
+            pToken.unassigned = unassignedValue;
+            (pToken as any).peRefPlus = unassignedValue;
 
             attListDeclaration.assignUnassigned(pToken);
 
@@ -430,6 +452,7 @@ describe('attListDeclaration (integration)', () => {
                   // value: [],
                }] as any,
                close: makeSToken2('>'),
+               peRefPlus: unassignedValue,
             });
             (expected as any).attDefs[0].postTypeSpace.str += ' ';
             (expected as any).attDefs[0].postTypeSpace.originalStr += ' ';
@@ -453,7 +476,7 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [{
+            const unassignedValue = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
@@ -468,6 +491,9 @@ describe('attListDeclaration (integration)', () => {
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }
             ];
+            (pToken as any).unassigned = unassignedValue;
+            (pToken as any).peRefPlus = unassignedValue;
+
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 22, 0, 22);
             const rawExpected = new attListDeclaration.PToken({
@@ -498,6 +524,7 @@ describe('attListDeclaration (integration)', () => {
                   // value: [],
                }] as any,
                close: makeSToken2('>'),
+               peRefPlus: unassignedValue,
             });
             // work around some kind of ts issue
             const expected = new attListDeclaration.PToken(rawExpected);
@@ -526,7 +553,7 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [{
+            const unassignedValue = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, unassigned.wordFromSToken(SToken.fromString('two')),
@@ -536,6 +563,9 @@ describe('attListDeclaration (integration)', () => {
                   token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ];
+            (pToken as any).unassigned = unassignedValue;
+            (pToken as any).peRefPlus = unassignedValue;
+
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 21, 0, 21);
             const rawExpected = new attListDeclaration.PToken({
@@ -566,6 +596,7 @@ describe('attListDeclaration (integration)', () => {
                   value: [],
                }],
                close: makeSToken2('>'),
+               peRefPlus: unassignedValue,
             });
             // work around some kind of ts issue
             const expected = new attListDeclaration.PToken(rawExpected);

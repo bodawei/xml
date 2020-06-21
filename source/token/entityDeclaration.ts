@@ -97,6 +97,7 @@ function parseWordOrPERef(source: STokenSource, pToken: GeneralEntityDeclaration
                   type: 'reference',
                   token: entityRef,
                });
+               (pToken as any).peRefPlus = (pToken as any).unassigned;
                delete (pToken as any).parameter;
                delete (pToken as any).parameterSpace;
                delete (pToken as any).name;
@@ -140,6 +141,7 @@ function parseExternalId(source: STokenSource, pToken: GeneralEntityDeclarationP
       externalId.parse(source, [ '>' ], (externalId) => {
          (pToken as any).externalId = externalId;
          (pToken as any).unassigned = externalId && externalId.unassigned;
+         (pToken as any).peRefPlus = (externalId && externalId.unassigned) || [];
 
          if (!externalId || externalId.unassigned) {
             done();

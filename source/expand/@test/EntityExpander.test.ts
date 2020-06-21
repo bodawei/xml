@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, EntityKind } from 'basic';
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource } from 'sToken';
@@ -106,6 +106,15 @@ describe('EntityExpander (unit)', () => {
 
       it('passes the EntityMetaData instance through', (done) => {
          doExpand([emd], true, (results) => {
+            expect(results).toEqual([emd]);
+            done();
+         });
+      });
+
+      it('swallows subsequent entity meta data tokens', (done) => {
+         const emd2 = new EntityMetaData(EntityKind.EXTERNAL);
+
+         doExpand([emd, emd2], true, (results) => {
             expect(results).toEqual([emd]);
             done();
          });
@@ -345,6 +354,7 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('test'),
             externalId: {
                type: 'EXTERNAL_ID',
+               peRefPlus: [],
             },
          });
       });
@@ -409,6 +419,7 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('test'),
             externalId: {
                type: 'EXTERNAL_ID',
+               peRefPlus: [],
             },
          });
       });

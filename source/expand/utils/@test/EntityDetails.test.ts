@@ -291,6 +291,7 @@ describe('EntityDetails (unit)', () => {
       it('adds an external subset token to this', () => {
          entityDetails.addExternalSubset({
             type: EXTERNAL_ID,
+            peRefPlus: [],
          });
 
          const result = entityDetails.getExternalSubsetReference();
@@ -302,6 +303,7 @@ describe('EntityDetails (unit)', () => {
       it('adds an external subset token to this', () => {
          entityDetails.addExternalSubset({
             type: EXTERNAL_ID,
+            peRefPlus: [],
          });
 
          const result = entityDetails.getExternalSubsetReference();

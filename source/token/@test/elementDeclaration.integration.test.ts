@@ -35,7 +35,7 @@ describe('elementDeclaration (integration)', () => {
          elementDeclaration.parse(source, new declaration.PToken(), (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
-            expect(result).toEqual(new elementDeclaration.PToken({
+            const expected = new elementDeclaration.PToken({
                unassigned: [ {
                   type: 'reference',
                   token: new ParameterEntityReferencePToken({
@@ -48,7 +48,10 @@ describe('elementDeclaration (integration)', () => {
                } ],
                nextPropName: 'name',
                close: makeSToken1('>'),
-            }));
+            });
+            (expected as any).peRefPlus = expected.unassigned;
+
+            expect(result).toEqual(expected);
             done();
          });
       });
@@ -149,6 +152,7 @@ describe('elementDeclaration (integration)', () => {
 
 const PARSE_TEST_EXPECTED = {
    type: 'ELEMENTDECL',
+   peRefPlus: [],
    open: {
       str: '',
       originalStr: '',

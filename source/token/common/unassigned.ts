@@ -63,6 +63,7 @@ interface UnassignedPToken {
    nextPropName?: string;
    extra?: UnassignedArray;
    unassigned?: UnassignedArray;
+   peRefPlus: UnassignedArray;
 }
 
 interface Descriptor {
@@ -439,6 +440,7 @@ function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnas
       if (unassignedValues) {
          pToken.nextPropName = propName;
          pToken.unassigned = unassignedValues;
+         pToken.peRefPlus = unassignedValues;
          foundUnassigned(pToken);
          return;
       }

@@ -234,11 +234,36 @@ x in body, we don't have recursion checking, but we could be passing in the cont
 x  Need to do WF checks for entity values and attribute values.
 x         √ in scanAttributeValues we easily have the ability to check for recursive GE refs
 x         √ Best to also pass in context
+x Recursion problem
+      x test failures
+      x We have top-level in markup decl checker
+      x WE ahve checks in scanAttributeValues()
+      x We do NOT have checks in pe or ge declarations 
+      x Unsure what's going on in contentchecker
+      - Do not have handling of external decls
+      x- Each entity decl will have start and ends, with inbetween having been parsed in a way that make earlier disapper
+      x- But, we'll have those declarations. so, when we encounter one we can then
+         - follow up with earlier declarations to determine recursion
+      √ need to handle in entity decl
+         - This is a serious problem. we don't have the expanded, and the expanded is invisible.
+            - We need this also for external.
+         - We have no way to check pe refs that contributed to id
+            - Envision getting a meta data thing for any entity.  the checker should track these and then scan them too
+         - what about pe refs in an attlist attribute and also owning the attlist
+         -- Oh, this is harder.  external ones will have not been stored
+x Seriously need to think about retrieveExternalEntity error conditions
+   - unassgined.  PArsing can return no results?
+x Bug 3: Add geRef to PTokenFromLiteralStream
+x Bug2 EMD's from sub entits clobber the one for the doc in the entity expander
+x Bug one: EntityExpander when streaming, if can't find the entity, it will barf
+x Get the expansion system finished and working
+   - Why: This has been a huge sinkhole of effort and thinking. Getitng it done will
+      free up alot of energy to finish the overall project
 
 GOALS
-   - Get the expansion system finished and working
-      - Why: This has been a huge sinkhole of effort and thinking. Getitng it done will
-         free up alot of energy to finish the overall project
+- get ibm tests all working
+   - That provides a new milestone. At that point we should start to go back and clean everything up
+   - Also, of course, pull in the whole xml suite
 
 DOCUMENT
 - Put a whole readme describing the whole thinking around expansion,
@@ -250,30 +275,18 @@ DOCUMENT
   - Also document what comes out, especially for all the expansion cases.
 
 IMPLEMENTATION
-   - Recursion problem
-      x test failures
-      x We have top-level in markup decl checker
-      x WE ahve checks in scanAttributeValues()
-      - We do NOT have checks in pe or ge declarations 
-      - Unsure what's going on in contentchecker
-      - Do not have handling of external decls
+   - Bug: gerefs should do: checkForRecursionInValue [1h]
+   - Need to modify expansion:
+      - should preserve the unassigned tokens but set some flag saying it had been ExpandedPToken
+         - ibm29n03.xml
+   - ibm41n11.xml: REport on external entities in Attributes
+      - checkUtils.CheckState has a map of pedecls [1hr]
+         - Modify so it is a map with both the decl token and the referenced tokens
+         - Collapse the DeclarationInfo in MarkupDeclChecker into it
+      - checkForRecursionInValue() should move into checkUtils, or threabouts. [1hr]
+         - We could precache isParamEntityExternal as well.
+      - Add code in checkUtils [1-2 hr]
 
-      - Each entity decl will have start and ends, with inbetween having been parsed in a way that make earlier disapper
-      - But, we'll have those declarations. so, when we encounter one we can then
-         - follow up with earlier declarations to determine recursion
-      √ need to handle in entity decl
-         - This is a serious problem. we don't have the expanded, and the expanded is invisible.
-            - We need this also for external.
-         - We have no way to check pe refs that contributed to id
-            - Envision getting a meta data thing for any entity.  the checker should track these and then scan them too
-         - what about pe refs in an attlist attribute and also owning the attlist
-         -- Oh, this is harder.  external ones will have not been stored
-   - REport on external entities in attributes
-   - Bug one: EntityExpander when streaming, if can't find the entity, it will barf
-   - Bug2 EMD's from sub entits clobber the one for the doc in the entity expander
-   - Bug 3: Add geRef to PTokenFromLiteralStream
-   - Seriously need to think about retrieveExternalEntity error conditions
-   - unassgined.  PArsing can return no results?
    - Later cleanup
       - Logic in ContentChecker would be a lot easier if the first Token as passed to the constructor
       - We could optimize attribute expansion. If there are no & or charrefs that would become & in the input, we can do this without parsing or modifying the original tokens at all.

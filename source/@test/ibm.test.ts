@@ -209,31 +209,25 @@ describe('ibm tests22', () => {
    Object.keys(notWfTests).forEach(productionName => {
       Object.keys(notWfTests[productionName]).forEach(testName => {
          const skipTests: Array<string> = [
-            'ibm14n01.xml',
-            'ibm18n01.xml',
-            'ibm20n01.xml',
-            'ibm29n03.xml', // They think these uses of perefs are bad.  Not allowed to have these perefs in internal subset
-            'ibm29n04.xml', // They think these uses of perefs are bad.  Not allowed to have these perefs in internal subset
-            'ibm29n07.xml', // They think these uses of perefs are bad.  Not allowed to have these perefs in internal subset
             'ibm32n09.xml', // I think this is a validity validation.
             'ibm68n06.xml', // Also I think this is validity (standalone violation)
             'ibm41n11.xml', // attribute refering to an external entity. Need validity checks.
                // When we expand an attribute, we are doing a full body parsing, which includes element starts!
-            'ibm41n13.xml', // Need to check for < in attribute values that have been expanded. Also it seems &lt; with no declaration should not be a well formed error?
+            'ibm41n13.xml', //10 Need to check for < in attribute values that have been expanded. Also it seems &lt; with no declaration should not be a well formed error?
             'ibm41n14.xml', // Need to check for < in attribute values that have been expanded
             'ibm60n07.xml', // "
             'ltinentval.xml', // "
             'simpleltinentval.xml', // "
-            'ibm62n07.xml', // Need to handle include conditional sections (nesting!) in external subset
+            'ibm62n07.xml', //15 Need to handle include conditional sections (nesting!) in external subset
             'ibm66n03.xml', // This is a violation of intent, but is actually OK.
 
             'ibm69n02.xml', // not checking parameter entity start's parameter entity references in checker
             'ibm69n03.xml', // not checking parameter entity start's parameter entity references in checker
             'ibm69n04.xml', // not checking parameter entity start's parameter entity references in checker
 
-            'ibm69n06.xml', // Certainly is not right, but given that it is unreferenced is it actually a problem
-            'ibm69n07.xml', // Certainly is not right, but given that it is unreferenced is it actually a problem
-            '432gewf.xml', // "  See 4.3.2
+            'ibm69n06.xml', //20 Certainly is not right, but given that it is unreferenced is it actually a problem
+            'ibm69n07.xml', //21 Certainly is not right, but given that it is unreferenced is it actually a problem
+            '432gewf.xml',  //22 "  See 4.3.2
          ];
          const includeTests: Array<string> = [];
 
@@ -250,12 +244,7 @@ describe('ibm tests22', () => {
             gatherStream(stream, (results) => {
                let error = results.filter(token => (token as any).type === 'ERROR_TYPE' && (token as any).subtype === 'WELL_FORMED_ERROR');
 
-               // console.log('results', JSON.stringify(results, undefined, 5) );
-               // for (let token of results) {
-               //    if ((token as any).type === 'ERROR_TYPE' && (token as any).subtype === 'WELL_FORMED_ERROR') {
-               //       error.push(token);
-               //    }
-               // }
+               // console.log('results', JSON.stringify(error, undefined, 5) );
 
                const match = (results as any).reduce((acc: boolean, err: any) => {
                   const entry = (notWellFormedCodes as any)[testName];

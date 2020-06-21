@@ -109,6 +109,7 @@ function streamParsedReplacementText(
          ));
       }
    }
+
    deliverToken(start, () => {
       utils.parseBody(sTokenSource, inContent, (result, handled) => {
          if (!result) {

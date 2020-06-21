@@ -59,6 +59,7 @@ class ParameterEntityDeclarationPToken {
    public readonly entityValueSpace?: SToken;
    public readonly externalIdSpace?: SToken;
    public readonly close?: SToken;
+   public readonly peRefPlus: UnassignedArray;
    public readonly unassigned?: UnassignedArray;
    public readonly extra?: UnassignedArray;
    public readonly nextPropName?: string;
@@ -69,6 +70,12 @@ class ParameterEntityDeclarationPToken {
       this.open = (props as any).open;
       this.value = (props as any).value || [];
       this.type = PARAMETER_ENTITY_DECLARATION_PTOKEN;
+
+      if (props) {
+         this.peRefPlus = (props as any).peRefPlus || []
+      } else {
+         this.peRefPlus = [];
+      }
    }
 
    assignUnassigned() {

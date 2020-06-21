@@ -29,6 +29,7 @@ type ExternalId = {
    type: string,
    public?: LiteralPToken,
    system?: LiteralPToken,
+   peRefPlus: UnassignedArray,
    unassigned?: UnassignedArray,
    extra?: UnassignedArray,
    nextPropName?: string,
@@ -62,6 +63,7 @@ function parse(source: STokenSource, terminators: Array<string>, deliverExtId: (
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
    const extIdPToken = {
       type: EXTERNAL_ID,
+      peRefPlus: [],
    };
 
    const callback = unassigned.makeCheckCallback(extIdPToken, 'idType', deliverExtId, (result?: ExternalId) => {

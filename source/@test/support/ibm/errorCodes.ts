@@ -108,7 +108,7 @@ const notWellFormedCodes = {
    'ibm13n03.xml': 'EXTERNALID_PUBLIC_INVALID_CHARS',
 
    // §2.4 Bad characters in chardata
-   // 'ibm14n01.xml'  <-- We arenot detecting ]]> in the content
+   'ibm14n01.xml': 'CHARDATA_INVALID_SECTION_END',
    'ibm14n02.xml': 'ATTRIBUTE_INVALID_NAME',
    'ibm14n03.xml': 'REFERENCE_XTRA_TRAILING_SPACE',
 
@@ -146,7 +146,7 @@ const notWellFormedCodes = {
    },
 
    // §2.7 CData sections
-   // 'ibm18n01.xml'  <-- We arenot detecting ]]> in the content
+   'ibm18n01.xml': 'CHARDATA_INVALID_SECTION_END',
    'ibm18n02.xml': 'CDATA_NO_CLOSE',
 
    // §2.7 CData sections
@@ -155,7 +155,10 @@ const notWellFormedCodes = {
    'ibm19n03.xml': 'PI_NO_CLOSE',
 
    // §2.7 CData sections
-   // 'ibm20n01.xml': 'CDATA_INVALID_CASE',
+   'ibm20n01.xml': {
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: /CHARDATA_PTOKEN/,
+   },
 
    // §2.7 CData sections
    'ibm21n01.xml': 'CONDITIONAL_UNKNOWN',
@@ -239,9 +242,11 @@ const notWellFormedCodes = {
       message: /DOCTYPE_START_PTOKEN/,
    },
    'ibm29n02.xml': 'ELEMENTDECL_EXTRA_TEXT',
+   'ibm29n03.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
+   'ibm29n04.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
    'ibm29n05.xml': 'PI_NO_CLOSE',
    'ibm29n06.xml': 'COMMENT_NO_CLOSE',
-   'ibm29n07.xml': 'COMMENT_NO_CLOSE',
+   'ibm29n07.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
 
    // §2.8 External Subset
    'ibm30n01.xml': {

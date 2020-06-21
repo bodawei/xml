@@ -65,6 +65,7 @@ class GeneralEntityDeclarationPToken {
    public readonly nDataName?: SToken;
    public readonly nDataNameSpace?: SToken;
    public readonly close?: SToken;
+   public readonly peRefPlus: UnassignedArray;
    public readonly unassigned?: UnassignedArray;
    public readonly extra?: UnassignedArray;
    public readonly nextPropName?: string;
@@ -75,6 +76,12 @@ class GeneralEntityDeclarationPToken {
       this.open = (props as any).open;
       this.value = (props as any).value || [];
       this.type = GENERAL_ENTITY_DECLARATION_PTOKEN;
+
+      if (props) {
+         this.peRefPlus = (props as any).peRefPlus || []
+      } else {
+         this.peRefPlus = [];
+      }
    }
 
    assignUnassigned() {

@@ -970,6 +970,7 @@ describe('unassigned (unit)', () => {
 
          expect(foundSpy).toHaveBeenCalledWith({
             unassigned: 'unassigned array',
+            peRefPlus: 'unassigned array',
             nextPropName: 'foo',
          });
       });

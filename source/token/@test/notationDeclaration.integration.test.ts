@@ -48,7 +48,7 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (result) => {
-            expect(result).toEqualRangeless(new NotationDeclarationPToken({
+            const expected = new NotationDeclarationPToken({
                open: SToken.fromString('<!'),
                unassigned: [{
                   type: UnassignedType.REFERENCE,
@@ -62,7 +62,10 @@ describe('notationDeclaration (integration)', () => {
                }],
                nextPropName: 'name',
                close: SToken.fromString('>'),
-            }));
+            });
+            (expected as any).peRefPlus = expected.unassigned;
+
+            expect(result).toEqualRangeless(expected);
             done();
          });
       });
@@ -89,9 +92,11 @@ describe('notationDeclaration (integration)', () => {
                name: SToken.fromString('notationName'),
                nameSpace: SToken.fromString(' '),
                unassigned: unassignedValue as any,
+               peRefPlus: unassignedValue as any,
                nextPropName: 'idType',
                externalId: {
                   type: 'EXTERNAL_ID',
+                  peRefPlus: unassignedValue as any,
                },
                close: SToken.fromString('>'),
             }));
@@ -128,6 +133,7 @@ describe('notationDeclaration (integration)', () => {
                token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             }
             ];
+            (pToken as any).peRefPlus = (pToken as any).unassigned;
 
             pToken.assignUnassigned();
 
@@ -138,6 +144,7 @@ describe('notationDeclaration (integration)', () => {
                name: SToken.fromString('notationName'),
                nameSpace: SToken.fromString(' '),
                unassigned: (pToken as any).unassigned as any,
+               peRefPlus: (pToken as any).unassigned as any,
                extra: [],
                externalId: {
                   idType: SToken.fromString('PUBLIC'),

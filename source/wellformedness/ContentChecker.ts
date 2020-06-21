@@ -1,4 +1,4 @@
-/* Copyright ® 2019 by 柏大衛. All rights reserved. */
+/* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
@@ -160,6 +160,18 @@ class ContentChecker implements Checker {
                this.checkState,
                this.geContext,
                errorCollector,
+            );
+            break;
+         case CHARDATA_PTOKEN:
+            // §2.4.0: By dyntactic definition, ]]> may not appear in content:
+            //    In the content of elements, character data is any string of characters which
+            //    does not contain the start-delimiter of any markup and does not include the
+            //    CDATA-section-close delimiter, "]]>".
+            errorCollector.check(
+               strOrBlank(pToken.text) === ']]>',
+               WFID.CHARDATA_INVALID_SECTION_END,
+               [],
+               pToken.text,
             );
             break;
          case ELEMENT_END_PTOKEN:

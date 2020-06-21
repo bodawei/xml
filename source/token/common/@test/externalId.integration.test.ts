@@ -34,6 +34,7 @@ describe('externalId (integration)', () => {
             const makeSToken = makeSTokenMaker();
             expect(result).toEqual({
                type: 'EXTERNAL_ID',
+               peRefPlus: [],
                idType: makeSToken('PUBLIC'),
                postIdTypeSpace: makeSToken(' '),
                public: {
@@ -57,8 +58,9 @@ describe('externalId (integration)', () => {
 
          externalId.parse(source, [], (result) => {
             const makeSToken = makeSTokenMaker();
-            expect(result).toEqual({
+            const expected = {
                type: 'EXTERNAL_ID',
+               peRefPlus: [],
                idType: makeSToken('PUBLIC'),
                postIdTypeSpace: makeSToken(' '),
                public: {
@@ -78,7 +80,10 @@ describe('externalId (integration)', () => {
                   })
                } ],
                nextPropName: 'system',
-            });
+            };
+            (expected as any).peRefPlus = expected.unassigned;
+
+            expect(result).toEqual(expected as any);
             done();
          });
       });
@@ -149,6 +154,7 @@ describe('externalId (integration)', () => {
                   value: [ new TextPToken({ text: makeSToken2('sys.xml') }) ],
                   closeQuote: makeSToken2('"'),
                },
+               peRefPlus: [],
             });
             done();
          });

@@ -127,6 +127,10 @@ function checkGeneralEntity(
             [name],
             pToken.open,
          );
+         // @@@ Check parameter entities
+         // Now go over each peref in the value, check it and recurse.
+         // if any violation is external, return it, and the
+         // ATTRIBUTE_INVALID_REFERENCE should reference both this and and the attribute I think
       }
 
       // §4.1.0: Well-Formedness Constraint: Parsed Entity
@@ -155,6 +159,9 @@ function scanAttributeValues(
    const refNameStack: Array<string> = [];
 
    for (const att of attributes) {
+      if (!att.value) {
+         continue;
+      }
       for (const val of att.value) {
          switch (val.type) {
             case GENERAL_ENTITY_REFERENCE_PTOKEN:

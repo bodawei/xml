@@ -29,6 +29,7 @@ describe('docTypeStart (integration)', () => {
                value: [ new TextPToken({ text: makeSToken('sys.dtd') }) ],
                closeQuote: makeSToken('"'),
             },
+            peRefPlus: [],
          },
          externalIdSpace: makeSToken(' '),
          openSubset: makeSToken('['),

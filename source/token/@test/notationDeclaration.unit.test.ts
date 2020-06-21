@@ -29,6 +29,7 @@ describe('notationdeDeclaration (unit)', () => {
          nameSpace: SToken.fromString(' '),
          externalId: {
             type: 'EXTERNAL_ID',
+             peRefPlus: [],
          },
          externalIdSpace: SToken.fromString(' '),
          close: SToken.fromString('>'),
@@ -177,7 +178,8 @@ describe('notationdeDeclaration (unit)', () => {
             name: SToken.fromString('notationName'),
             nameSpace: SToken.fromString(' '),
             externalId: {
-               type: 'EXTERNAL_ID',
+               type: 'EXTERNAL_ID',             peRefPlus: [],
+
             },
             externalIdSpace: SToken.fromString(' '),
             close: SToken.fromString('>'),
@@ -196,7 +198,8 @@ describe('notationdeDeclaration (unit)', () => {
             name: SToken.fromString('notationName'),
             nameSpace: SToken.fromString(' '),
             externalId: {
-               type: 'EXTERNAL_ID',
+               type: 'EXTERNAL_ID',             peRefPlus: [],
+
             },
             externalIdSpace: SToken.fromString(' '),
             close: SToken.fromString('>'),
@@ -267,7 +270,8 @@ describe('notationdeDeclaration (unit)', () => {
             unassigned: ['foo'] as any,
             nextPropName: 'name',
             externalId: {
-               type: 'EXTERNAL_ID',
+               type: 'EXTERNAL_ID',             peRefPlus: [],
+
             },
          });
 
@@ -279,7 +283,8 @@ describe('notationdeDeclaration (unit)', () => {
             unassigned: ['foo'] as any,
             nextPropName: 'name',
             externalId: {
-               type: 'EXTERNAL_ID',
+               type: 'EXTERNAL_ID',             peRefPlus: [],
+
             },
             extra: ['foo'] as any,
          }));
@@ -346,7 +351,8 @@ describe('notationdeDeclaration (unit)', () => {
             name: SToken.fromString('notationName'),
             nameSpace: SToken.fromString(' '),
             externalId: {
-               type: 'EXTERNAL_ID',
+               type: 'EXTERNAL_ID',             peRefPlus: [],
+
             },
             externalIdSpace: SToken.fromString(' '),
             close: SToken.fromString('>'),
@@ -484,7 +490,8 @@ describe('notationdeDeclaration (unit)', () => {
             name: SToken.fromString('notationName'),
             nameSpace: SToken.fromString(' '),
             externalId: {
-               type: 'EXTERNAL_ID',
+               type: 'EXTERNAL_ID',             peRefPlus: [],
+
             },
             externalIdSpace: SToken.fromString(' '),
             close: SToken.fromString('>'),

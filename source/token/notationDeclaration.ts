@@ -50,6 +50,7 @@ class NotationDeclarationPToken {
    public readonly externalId?: ExternalId;
    public readonly externalIdSpace?: SToken;
    public readonly close?: SToken;
+   public readonly peRefPlus: UnassignedArray;
    public readonly unassigned: UnassignedArray;
    public readonly nextPropName?: string;
    public extra?: UnassignedArray;
@@ -61,6 +62,7 @@ class NotationDeclarationPToken {
 
       this.type = NOTATION_DECLARATION_PTOKEN;
       this.open = props.open;
+      this.peRefPlus = (props as any).peRefPlus || [];
    }
 
    assignUnassigned() {
@@ -103,7 +105,7 @@ class NotationDeclarationPToken {
 function parseNotationDeclaration(source: STokenSource, declarationStart: DeclarationStart, deliverPToken: DeliverPToken): void {
    const protoToken: ProtoToken = Object.assign({}, declarationStart) as ProtoToken;
 
-   unassigned.parsePERefOrOrdinary(source, protoToken, 'name', () => {
+   unassigned.parsePERefOrOrdinary(source, (protoToken as any), 'name', () => {
       getClose(source, protoToken, deliverPToken);
    }, () => {
       source.extractToObject('word', [ '>' ], protoToken, 'name');
@@ -115,6 +117,7 @@ function parseNotationDeclaration(source: STokenSource, declarationStart: Declar
             if (externalId.unassigned) {
                protoToken.unassigned = externalId.unassigned;
                protoToken.nextPropName = externalId.nextPropName;
+               (protoToken as any).peRefPlus = (externalId && externalId.unassigned) || [];
                delete externalId.unassigned;
                delete externalId.nextPropName;
             } else {

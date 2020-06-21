@@ -49,6 +49,7 @@ describe('externalId (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             public: {
@@ -75,6 +76,7 @@ describe('externalId (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('SYSTEM'),
             postIdTypeSpace: expectedSToken(' '),
          } ] ]);
@@ -118,6 +120,7 @@ describe('externalId (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             public: {
                value: [],
@@ -143,6 +146,7 @@ describe('externalId (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('pUbLiC'),
             postIdTypeSpace: expectedSToken(' '),
             public: {
@@ -166,6 +170,7 @@ describe('externalId (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
          } ] ]);
@@ -196,6 +201,7 @@ describe('externalId (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: undefined,
             public: {
@@ -222,6 +228,7 @@ describe('externalId (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             public: {
@@ -248,6 +255,7 @@ describe('externalId (unit)', () => {
 
             expect(unCheck.calls.argsFor(0)[0]).toEqual({
                type: externalId.PTYPE,
+               peRefPlus: [],
             });
             expect(unCheck.calls.argsFor(0)[1]).toEqual('idType');
             expect(unCheck.calls.argsFor(0)[2]).toEqual(callback);
@@ -275,6 +283,7 @@ describe('externalId (unit)', () => {
 
             expect(unCheck.calls.argsFor(1)[0]).toEqual({
                type: 'EXTERNAL_ID',
+               peRefPlus: [],
                idType: expectedSToken('PUBLIC'),
                postIdTypeSpace: undefined,
             });
@@ -306,6 +315,7 @@ describe('externalId (unit)', () => {
 
             expect(unCheck.calls.argsFor(2)[0]).toEqual({
                type: 'EXTERNAL_ID',
+               peRefPlus: [],
                idType: expectedSToken('PUBLIC'),
                postIdTypeSpace: undefined,
                public: {
@@ -618,6 +628,7 @@ describe('externalId (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          pTokenPart = {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             public: {
@@ -812,6 +823,7 @@ describe('externalId (unit)', () => {
          const pTokenPart = {
             unassigned: [],
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             system: {
@@ -830,6 +842,7 @@ describe('externalId (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             public: {
@@ -854,6 +867,7 @@ describe('externalId (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             system: {
@@ -872,6 +886,7 @@ describe('externalId (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             public: {
@@ -890,6 +905,7 @@ describe('externalId (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             system: {
@@ -913,6 +929,7 @@ describe('externalId (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             system: {
@@ -966,6 +983,7 @@ describe('externalId (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
             type: 'EXTERNAL_ID',
+            peRefPlus: [],
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
             postPublicSpace: expectedSToken(' '),

@@ -218,7 +218,9 @@ function expandAttributes(
    const attributeValues: Array<AttributeValuePToken> = [];
 
    for (const valueObj of valueObjects) {
-      attributeValues.push(valueObj.value);
+      if (valueObj.value) {
+         attributeValues.push(valueObj.value);
+      }
    }
 
    function process(attributeValue: AttributeValuePToken, callback: AttrExpanded): void {

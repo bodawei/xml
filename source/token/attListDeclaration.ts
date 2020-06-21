@@ -51,6 +51,7 @@ class AttListPToken {
    public postElementNameSpace?: SToken;
    public attDefs: Array<AttDefPToken>;
    public close?: SToken;
+   public peRefPlus: UnassignedArray;
    public unassigned?: UnassignedArray;
    public extra?: UnassignedArray;
    public nextPropName?: string;
@@ -65,6 +66,7 @@ class AttListPToken {
       }
 
       this.open = basePToken.open
+      this.peRefPlus = basePToken.peRefPlus || [];
    }
 
    assignUnassigned() {

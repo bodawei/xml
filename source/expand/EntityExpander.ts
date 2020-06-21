@@ -80,7 +80,7 @@ class EntityExpander {
    private deliverToken: DeliverPToken;
    private expandParams: ExpandParams;
    private state = State.AT_START;
-   private bug2 = false;
+   private seenEmd = false;
    private entityNameStack: EntityNameStack = new EntityNameStack();
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
@@ -101,8 +101,8 @@ class EntityExpander {
    public expandPToken(pToken: PToken, expanded: PTokenExpanded): void {
       switch (pToken.type) {
          case ENTITY_META_DATA:
-            if (!this.bug2) {
-               this.bug2 = true;
+            if (!this.seenEmd) {
+               this.seenEmd = true;
                this.expandParams.emd = pToken;
                this.deliverToken(pToken);
             }

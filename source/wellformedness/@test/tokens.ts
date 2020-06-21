@@ -98,32 +98,35 @@ const makeDocTypeEnd = () =>
       close: toSToken('>'),
    });
 
-const makeNotationDeclaration = (): NotationDeclarationPToken =>
-   new NotationDeclarationPToken({
+function makeNotationDeclaration(): NotationDeclarationPToken {
+   return new NotationDeclarationPToken({
       open: toSToken('<!'),
       openSpace: undefined,
       declType: toSToken('NOTATION'),
       declTypeSpace: toSToken(' '),
       name: toSToken('notationName'),
       nameSpace: toSToken(' '),
-      externalId: { type: 'EXTERNAL_ID' },
+      externalId: { type: 'EXTERNAL_ID', peRefPlus: [] },
       externalIdSpace: toSToken(' '),
       close: toSToken('>'),
    });
+}
 
-const makeElementEmpty = () =>
-   new ElementEmptyPToken({
+function makeElementEmpty(): ElementEmptyPToken {
+   return new ElementEmptyPToken({
       open: toSToken('<'),
       name: toSToken('elStart'),
       close: toSToken('/>'),
    });
+}
 
-const makeElementEnd = () =>
-   new ElementEndPToken({
+function makeElementEnd(): ElementEndPToken {
+   return new ElementEndPToken({
       open: toSToken('</'),
       name: toSToken('elStart'),
       close: toSToken('>'),
    });
+}
 
 const makeElementStart = () =>
    new ElementStartPToken({
@@ -190,6 +193,7 @@ const makeParameterExternalEntityDeclaration = () =>
       nameSpace: toSToken(' '),
       externalId: {
          type: 'EXTERNAL_ID',
+         peRefPlus: [],
          idType: toSToken('PUBLIC'),
          postIdTypeSpace: toSToken(' '),
          public: {

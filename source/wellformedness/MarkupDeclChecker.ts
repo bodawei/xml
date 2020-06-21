@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import { strOrBlank, SToken } from 'sToken';
+import { strOrBlank } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
@@ -30,9 +30,13 @@ import {
    getFirstSToken,
    ParameterEntityReferencePToken,
    ELIDED_ENTITY_DECLARATION_PTOKEN,
+   NotationDeclarationPToken,
 } from 'token';
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
-import { ELEMENT_DECLARATION_PTOKEN } from 'source/token/elementDeclaration';
+import {
+   ELEMENT_DECLARATION_PTOKEN,
+   ElementDeclarationPToken,
+} from 'source/token/elementDeclaration';
 import {
    CHECKER_DONE,
    CheckState,
@@ -233,6 +237,50 @@ function checkForRecursionInValue(
    }
 }
 
+function checkDeclaration(
+   pToken:
+      | AttListPToken
+      | ElementDeclarationPToken
+      | NotationDeclarationPToken
+      | GeneralEntityDeclarationPToken
+      | ParameterEntityDeclarationPToken,
+   state: States,
+   ec: ErrorCollector,
+): void {
+   // §2.8.0: Well-formedness constraint: PEs in Internal Subset
+   //     In the internal DTD subset, parameter-entity references must not
+   //     occur within markup declarations; they may occur where markup
+   //     declarations can occur. (This does not apply to references that
+   //     occur in external parameter entities or to the external subset.)
+   if (state === States.INTERNAL_SUBSET) {
+      ec.check(
+         pToken.peRefPlus.length > 0,
+         WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+         [],
+         pToken.open,
+      );
+
+      if (
+         pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN ||
+         pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN
+      ) {
+         let hasPERef = false;
+
+         for (const item of pToken.value) {
+            // Refactor/cleanup again getting bitten by the types in entity values
+            if (
+               item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN ||
+               (item.type as any) === PARAMETER_ENTITY_START_PTOKEN
+            ) {
+               hasPERef = true;
+            }
+         }
+
+         ec.check(hasPERef, WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT, [], pToken.open);
+      }
+   }
+}
+
 /*
  * This class checks well-formedness constraints on PTokens within a DTD portion of an
  * XML document (See §2.8.0 [28b, 29, 30, 31]).
@@ -298,6 +346,11 @@ class MarkupDeclChecker implements Checker {
                [], // not possible to have general entity context here
                errorCollector,
             );
+            checkDeclaration(pToken as any, this.state, errorCollector);
+            break;
+         case ELEMENT_DECLARATION_PTOKEN:
+         case NOTATION_DECLARATION_PTOKEN:
+            checkDeclaration(pToken, this.state, errorCollector);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             const refName = strOrBlank(pToken.name);
@@ -359,10 +412,12 @@ class MarkupDeclChecker implements Checker {
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
             this.checkState.generalDecls[strOrBlank(pToken.name)] = pToken;
+            checkDeclaration(pToken, this.state, errorCollector);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
             this.checkState.paramDecls[strOrBlank(pToken.name)] = pToken;
+            checkDeclaration(pToken, this.state, errorCollector);
             break;
          case ELIDED_ENTITY_DECLARATION_PTOKEN:
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);

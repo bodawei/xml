@@ -21,6 +21,7 @@ import {
    GeneralEntityReferencePToken,
    NotationDeclarationPToken,
    TextDeclarationPToken,
+   CharDataPToken,
 } from 'token';
 
 import { ContentChecker } from '../ContentChecker';
@@ -321,6 +322,20 @@ describe('ContentChecker (unit)', () => {
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [NOTATION_DECLARATION_PTOKEN],
             position: notationDecl.open,
+         });
+      });
+
+      it('reports an error if a chardata token with "]]>" is found', () => {
+         const charData = new CharDataPToken({ text: toSToken(']]>') });
+         const checker = makeChecker();
+
+         checker.check(elementStart, ec);
+         checker.check(charData, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.CHARDATA_INVALID_SECTION_END,
+            params: [],
+            position: charData.text,
          });
       });
    });

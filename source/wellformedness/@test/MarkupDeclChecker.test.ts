@@ -21,6 +21,7 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    ElidedEntityDeclarationPToken,
+   NotationDeclarationPToken,
 } from 'token';
 import { AttListPToken } from 'source/token/attListDeclaration';
 
@@ -46,6 +47,7 @@ import {
    makeNotationDeclaration,
    makeElementDeclaration,
 } from './tokens';
+import { UnassignedType } from 'source/token/common/unassigned';
 
 describe('MarkupDeclChecker (unit)', () => {
    let ec: MockErrorCollector;
@@ -250,6 +252,87 @@ describe('MarkupDeclChecker (unit)', () => {
             expect(ec.errors).toEqual([]);
          });
       });
+
+      it('reports an error if there is a parameter entity reference in a token in the internal subset', () => {
+         const notationDeclaration = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            peRefPlus: [
+               {
+                  type: UnassignedType.REFERENCE,
+                  token: new ParameterEntityReferencePToken({
+                     open: toSToken('%'),
+                  }),
+               },
+            ],
+         });
+
+         checker.check(notationDeclaration, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+            params: [],
+            position: notationDeclaration.open,
+         });
+      });
+
+      it('reports an error if there is a parameter entity reference in a parameter entity declaration in the internal subset', () => {
+         const paramEntityDecl = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            value: [
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+               }),
+            ],
+         });
+
+         checker.check(paramEntityDecl, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+            params: [],
+            position: paramEntityDecl.open,
+         });
+      });
+
+      it('reports an error if there is a parameter entity start in a parameter entity declaration in the internal subset', () => {
+         const paramEntityDecl = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            value: [
+               new ParameterEntityStartPToken(
+                  new ParameterEntityReferencePToken({
+                     open: toSToken('%'),
+                  }),
+               ),
+            ],
+         });
+
+         checker.check(paramEntityDecl, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+            params: [],
+            position: paramEntityDecl.open,
+         });
+      });
+
+      it('reports an error if there is a parameter entity reference in a general entity declaration in the internal subset', () => {
+         const generalEntityDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            value: [
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+               }),
+            ],
+         });
+
+         checker.check(generalEntityDecl, ec);
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+            params: [],
+            position: generalEntityDecl.open,
+         });
+      });
    });
 
    describe('external subset', () => {
@@ -373,6 +456,28 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(externalSubsetEnd, ec);
 
             expect(ec.errors).toEqual([]);
+         });
+      });
+
+      it('does not report an error if there is a parameter entity reference in a token in the external subset', () => {
+         const notationDeclaration = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            peRefPlus: [
+               {
+                  type: UnassignedType.REFERENCE,
+                  token: new ParameterEntityReferencePToken({
+                     open: toSToken('%'),
+                  }),
+               },
+            ],
+         });
+
+         checker.check(notationDeclaration, ec);
+
+         expect(ec).not.toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+            params: [],
+            position: notationDeclaration.open,
          });
       });
    });

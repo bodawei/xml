@@ -46,6 +46,7 @@ class ElementDeclarationPToken extends declaration.PToken {
    public postContentSpecSpace?: SToken;
    public children?: NameListPToken;
    public close?: SToken;
+   public peRefPlus: UnassignedArray;
    public unassigned?: UnassignedArray;
    public extra?: UnassignedArray;
    public nextPropName?: string;
@@ -54,6 +55,12 @@ class ElementDeclarationPToken extends declaration.PToken {
    constructor(props?: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ELEMENTDECL, props);
+
+      if (props) {
+         this.peRefPlus = (props as any).peRefPlus || []
+      } else {
+         this.peRefPlus = [];
+      }
    }
 
    getSTokenArray() {
