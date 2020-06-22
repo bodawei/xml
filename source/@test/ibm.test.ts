@@ -209,33 +209,24 @@ describe('ibm tests22', () => {
    Object.keys(notWfTests).forEach(productionName => {
       Object.keys(notWfTests[productionName]).forEach(testName => {
          const skipTests: Array<string> = [
+            'ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
+            // --- 
+            'ibm62n07.xml', //Need to handle include conditional sections (nesting!) in external subset
+            // --- 
             'ibm32n09.xml', // I think this is a validity validation.
             'ibm68n06.xml', // Also I think this is validity (standalone violation)
             'ibm41n11.xml', // attribute refering to an external entity. Need validity checks.
                // When we expand an attribute, we are doing a full body parsing, which includes element starts!
-            'ibm41n13.xml', //10 Need to check for < in attribute values that have been expanded. Also it seems &lt; with no declaration should not be a well formed error?
-            'ibm41n14.xml', // Need to check for < in attribute values that have been expanded
-            'ibm60n07.xml', // "
-            'ltinentval.xml', // "
-            'simpleltinentval.xml', // "
-            'ibm62n07.xml', //15 Need to handle include conditional sections (nesting!) in external subset
-            'ibm66n03.xml', // This is a violation of intent, but is actually OK.
-
-            'ibm69n02.xml', // not checking parameter entity start's parameter entity references in checker
-            'ibm69n03.xml', // not checking parameter entity start's parameter entity references in checker
-            'ibm69n04.xml', // not checking parameter entity start's parameter entity references in checker
-
-            'ibm69n06.xml', //20 Certainly is not right, but given that it is unreferenced is it actually a problem
-            'ibm69n07.xml', //21 Certainly is not right, but given that it is unreferenced is it actually a problem
-            '432gewf.xml',  //22 "  See 4.3.2
+            // 'ibm41n13.xml', //10 Need to check for < in attribute values that have been expanded. Also it seems &lt; with no declaration should not be a well formed error?
+            // 'ibm41n14.xml', // Need to check for < in attribute values that have been expanded
          ];
-         const includeTests: Array<string> = [];
+         const includeTests: Array<string> = [ 'ltinentval.xml' ];
 
          if (skipTest(testName, skipTests, includeTests) || skipProduction(productionName)) {
             return;
          }
 
-         it(`not-wf/${productionName}/${testName}`, (done) => {
+         fit(`not-wf/${productionName}/${testName}`, (done) => {
             const stream = setupNotWF(`${__dirname}/xmlconf/ibm/not-wf/${productionName}/${testName}`, notWfResources);
             const testData = notWfTests[productionName][testName];
             pTokenStream.addText(testData.input);

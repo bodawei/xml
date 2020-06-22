@@ -8,7 +8,7 @@ import { TextPToken, TextXToken, isTextPToken } from '../text';
 import misc from './misc';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGeneralEntityReference } from '../generalEntityReference';
 import { parseParameterEntityReference, ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
-import { CharRefPToken, CharRefXToken, parseCharRef } from '../charRef';
+import { CharRefPToken, CharRefXToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
@@ -114,6 +114,8 @@ function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityM
       if (isTextPToken(item)) {
          ec.setPos(item.text);
          misc.checkCharWellFormed(item.text, ec, entityMetaData);
+      } else if (item.type === CHARREF_PTOKEN) {
+         item.checkWellFormed(ec, entityMetaData);
       } else if (!(item instanceof GeneralEntityStartPToken || item instanceof GeneralEntityEndPToken ||
          item instanceof ParameterEntityStartPToken || item instanceof ParameterEntityEndPToken)) {
          item.checkWellFormed(ec, entityMetaData);

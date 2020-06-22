@@ -3,6 +3,8 @@
 import { strOrBlank } from 'sToken';
 
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
+import { ErrorCollector } from 'error';
+import { EntityMetaData } from 'basic';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.
@@ -17,6 +19,10 @@ class ParameterEntityStartPToken {
 
    constructor(peReferencePToken: ParameterEntityReferencePToken) {
       this.referencePToken = peReferencePToken;
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
+      this.referencePToken.checkWellFormed(ec, entityMetaData);
    }
 
    toXToken() {

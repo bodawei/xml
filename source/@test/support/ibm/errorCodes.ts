@@ -313,6 +313,8 @@ const notWellFormedCodes = {
    'ibm41n10.xml': 'ATTRIBUTE_INVALID_REFERENCE',
    'ibm41n11.xml': 'ATTRIBUTE_INVALID_REFERENCE',
    'ibm41n12.xml': 'REFERENCE_UNPARSED_NO_USE',
+   'ibm41n13.xml': 'ATTRIBUTE_INVALID_VALUE',
+   'ibm41n14.xml': 'ATTRIBUTE_INVALID_VALUE',
 
    // §3.1 Attributes of start tags
    'ibm42n01.xml': 'ELEMENT_NO_NAME',
@@ -482,8 +484,10 @@ const notWellFormedCodes = {
    'ibm60n04.xml': 'ATTLISTDECL_ATTR_FIXED_NO_VALUE', // great
    'ibm60n05.xml': 'ATTLISTDECL_ATTR_FIXED_NO_SPACE', // great
    'ibm60n06.xml': 'ATTLISTDECL_ATTR_NAME_INVALID',
-   // 'ibm60n07.xml': 'WORDLIST_NO_WORDS',
+   'ibm60n07.xml': 'ATTRIBUTE_INVALID_VALUE',
    'ibm60n08.xml': 'ATTLISTDECL_ATTR_NAME_INVALID',
+   'simpleltinentval.xml': 'ATTRIBUTE_INVALID_VALUE',
+   'ltinentval.xml': 'ATTRIBUTE_INVALID_VALUE',
 
    // §3.4.0 conditionalSect
    'ibm61n01.xml': 'CONDITIONAL_UNKNOWN',
@@ -531,7 +535,7 @@ const notWellFormedCodes = {
    // §4.1.0 CharRef
    'ibm66n01.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm66n02.xml': 'CHARREF_NO_CLOSE', // great
-   'ibm66n03.xml': 'OK', // EEEK  this looks ok
+   'ibm66n03.xml': 'OK',
    'ibm66n04.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm66n05.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm66n06.xml': 'CHARREF_INVALID_CHAR', // great
@@ -562,7 +566,12 @@ const notWellFormedCodes = {
 
    // §4.1.0 PEReference
    'ibm69n01.xml': 'PEREF_NO_NAME', // great
+   'ibm69n02.xml': 'PEREF_XTRA_TRAILING_SPACE',
+   'ibm69n03.xml': 'PEREF_XTRA_TRAILING_SPACE',
+   'ibm69n04.xml': 'PEREF_XTRA_SPACE',
    'ibm69n05.xml': 'REFERENCE_NO_DECLARATION', // ok - forward declaration
+   'ibm69n06.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
+   'ibm69n07.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
 
    // §4.2.0 EntityDecl
    'ibm70n01.xml': {

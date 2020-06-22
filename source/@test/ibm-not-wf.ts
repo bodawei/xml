@@ -2352,9 +2352,10 @@ const testData = {
                 }
             },
             "misc": {
-                "432gewf.xml": {
-                    "input": "<!DOCTYPE student [\r\n\t<!ELEMENT student (#PCDATA)>\r\n\t<!ENTITY gewithElemnetDecl \"<!ELEMENT bogus ANY>\"> \r\n        <!ATTLIST student att1 CDATA #REQUIRED>\r\n]>\r\n<!--* This test is to test the GE well-formedness \r\n      constraints in Section 4.3.2:\r\n      An internal general parsed encith is well-formed if \r\n      its replacement text matches the production labeled\r\n      \"content\" *--> \r\n<?MyInstruct This is a test ?>\r\n<student att1=\"ibm\">My Name is SnowMan. </student>"
-                },
+               // This is actually fine as stated. this looks both incomplete and not mentioned in: https://www.w3.org/XML/Test/xmlconf-20080827.html
+               //  "432gewf.xml": {
+               //      "input": "<!DOCTYPE student [\r\n\t<!ELEMENT student (#PCDATA)>\r\n\t<!ENTITY gewithElemnetDecl \"<!ELEMENT bogus ANY>\"> \r\n        <!ATTLIST student att1 CDATA #REQUIRED>\r\n]>\r\n<!--* This test is to test the GE well-formedness \r\n      constraints in Section 4.3.2:\r\n      An internal general parsed encith is well-formed if \r\n      its replacement text matches the production labeled\r\n      \"content\" *--> \r\n<?MyInstruct This is a test ?>\r\n<student att1=\"ibm\">My Name is SnowMan. </student>"
+               //  },
                 "ltinentval.xml": {
                     "input": "<!DOCTYPE student [\r\n\t<!ELEMENT student (#PCDATA)>\r\n\t<!ENTITY gewithlt \"abcd&#x26;&#x23;x3c;\"> \r\n        <!ATTLIST student att1 CDATA #REQUIRED>\r\n]>\r\n<--* this is to test \"<\" can not be included in an entity \r\n     that is referenced in AttValue, even indirectly *-->\r\n     \r\n\r\n<?MyInstruct This is a test ?>\r\n<student att1=\"&gewithlt;\">My Name is SnowMan. </student>\r\n"
                 },

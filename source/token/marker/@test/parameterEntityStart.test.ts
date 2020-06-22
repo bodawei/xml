@@ -6,13 +6,32 @@ import { SToken } from 'sToken';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../parameterEntityStart';
+import { EntityMetaData } from 'basic';
+import { MockErrorCollector } from 'error-test';
 
 describe('ParameterEntityStartPToken (unit)', () => {
+   let emd: EntityMetaData;
+   let mockErrorCollector: MockErrorCollector;
+
+   beforeEach(() => {
+      emd = new EntityMetaData();
+      mockErrorCollector = new MockErrorCollector();
+   });
 
    it('is constructed with the specified name', () => {
       const token = new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%') }));
 
       expect(token.referencePToken).toEqual(new ParameterEntityReferencePToken({ open: SToken.fromString('%') }));
+   });
+
+   it('calls checkWellFormed() in the related parameterEntityReferencePToken', () => {
+      const reference = new ParameterEntityReferencePToken({ open: SToken.fromString('%') });
+      const token = new ParameterEntityStartPToken(reference);
+      const spy = spyOn(reference, 'checkWellFormed');
+
+      token.checkWellFormed(mockErrorCollector, emd);
+
+      expect(spy).toHaveBeenCalledWith(mockErrorCollector, emd);
    });
 
    it('will create an xToken', () => {
