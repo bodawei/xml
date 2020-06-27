@@ -61,8 +61,8 @@ function fixTests() {
       .replace('i-BS-ABCD', 'i-klingon');
    ibmValidTests.P36['ibm36v01.xml'].output = ibmValidTests.P36['ibm36v01.xml'].output
       .replace('i-BS-ABCD', 'i-klingon');
-   notWfTests.misc['ltinentval.xml'].input = notWfTests.misc['ltinentval.xml'].input
-      .replace('<--*', '<!--*');
+   // notWfTests.misc['ltinentval.xml'].input = notWfTests.misc['ltinentval.xml'].input
+   //    .replace('<--*', '<!--*');
    notWfTests.misc['simpleltinentval.xml'].input = notWfTests.misc['simpleltinentval.xml'].input
       .replace('<--*', '<!--*');
 
@@ -140,7 +140,7 @@ function skipProduction(productionName: string, minProduction: number | void, ma
 }
 
 // XML Conformance tests cover: Rev 2 and 3
-describe('ibm tests22', () => {
+describe('ibm tests', () => {
    let pTokenStream: PTokenStream;
    let checkWF: CheckWellFormed;
    let entityExpander: IbmEntityExpanderStream;
@@ -212,13 +212,6 @@ describe('ibm tests22', () => {
             'ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
             // --- 
             'ibm62n07.xml', //Need to handle include conditional sections (nesting!) in external subset
-            // --- 
-            'ibm32n09.xml', // I think this is a validity validation.
-            'ibm68n06.xml', // Also I think this is validity (standalone violation)
-            'ibm41n11.xml', // attribute refering to an external entity. Need validity checks.
-               // When we expand an attribute, we are doing a full body parsing, which includes element starts!
-            // 'ibm41n13.xml', //10 Need to check for < in attribute values that have been expanded. Also it seems &lt; with no declaration should not be a well formed error?
-            // 'ibm41n14.xml', // Need to check for < in attribute values that have been expanded
          ];
          const includeTests: Array<string> = [ 'ltinentval.xml' ];
 
@@ -235,6 +228,7 @@ describe('ibm tests22', () => {
             gatherStream(stream, (results) => {
                let error = results.filter(token => (token as any).type === 'ERROR_TYPE' && (token as any).subtype === 'WELL_FORMED_ERROR');
 
+               // console.log('results', JSON.stringify(results, undefined, 5) );
                // console.log('results', JSON.stringify(error, undefined, 5) );
 
                const match = (results as any).reduce((acc: boolean, err: any) => {

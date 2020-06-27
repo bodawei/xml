@@ -39,6 +39,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       entityDetails = new EntityDetails();
       entityDetails.addExternalSubset({
          type: EXTERNAL_ID,
+         peRefPlus: [],
       });
 
       params = {
@@ -235,7 +236,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          cb();
       });
 
-      expect(retrieveSpy).toHaveBeenCalledWith({ type: EXTERNAL_ID }, params.emd);
+      expect(retrieveSpy).toHaveBeenCalledWith({ type: EXTERNAL_ID, peRefPlus: [] }, params.emd);
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);
       expect(args[1]).toEqual(false);

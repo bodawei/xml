@@ -411,7 +411,13 @@ class MarkupDeclChecker implements Checker {
             }
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
-            this.checkState.generalDecls[strOrBlank(pToken.name)] = pToken;
+            const inInternalSubset =
+               this.state === States.PARAM_START_INTERNAL_SUBSET ||
+               this.state === States.INTERNAL_SUBSET;
+            this.checkState.generalDecls[strOrBlank(pToken.name)] = {
+               token: pToken,
+               declaredInInternalSubset: inInternalSubset,
+            };
             checkDeclaration(pToken, this.state, errorCollector);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
@@ -436,7 +442,7 @@ class MarkupDeclChecker implements Checker {
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: PToken, ec: ErrorCollector) {
+   private transition(pToken: PToken, ec: ErrorCollector): boolean {
       let newState: States | typeof NO_CHANGE | void;
 
       if (pToken.type === PARAMETER_ENTITY_START_PTOKEN && this.state === States.PRE) {

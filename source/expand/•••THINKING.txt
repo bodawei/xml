@@ -265,6 +265,15 @@ x Need to modify expansion:
 x get ibm tests all working
    - That provides a new milestone. At that point we should start to go back and clean everything up
    - Also, of course, pull in the whole xml suite
+x ibm41n11.xml: REport on value-external GE entities in Attributes.
+x ibm68n06.xml: standalone yes, but has a value-internal externally declared GE entity
+x ibm32n09.xml: standalone yes, but has an externally declared GE entity
+   - checkUtils.CheckState has a map of pedecls [1hr]
+      - Modify so it is a map with both the decl token and the referenced tokens
+      - Collapse the DeclarationInfo in MarkupDeclChecker into it
+   - checkForRecursionInValue() should move into checkUtils, or threabouts. [1hr]
+      - We could precache isParamEntityExternal as well.
+   - Add code in checkUtils [1-2 hr]
 
 DOCUMENT
 - Put a whole readme describing the whole thinking around expansion,
@@ -277,17 +286,13 @@ DOCUMENT
 
 IMPLEMENTATION
    IBM tests
-      - ibm41n11.xml: REport on external entities in Attributes
-         - checkUtils.CheckState has a map of pedecls [1hr]
-            - Modify so it is a map with both the decl token and the referenced tokens
-            - Collapse the DeclarationInfo in MarkupDeclChecker into it
-         - checkForRecursionInValue() should move into checkUtils, or threabouts. [1hr]
-            - We could precache isParamEntityExternal as well.
-         - Add code in checkUtils [1-2 hr]
    - Bug: gerefs should do: checkForRecursionInValue [1h]
+   - Bug: check geRef in checkUtils needs to check references recursively.
+   - should handle standalone for gerefs and perefs in body.
    - deal with peRefPlus/unassigned/extra
    - SHould check for extra in wellformed
    - conditional sections
+   - ltinentval.xml is flawed, but it does end up putting a literal < in an attribute value maybe?
 
    - Later cleanup
       - Logic in ContentChecker would be a lot easier if the first Token as passed to the constructor

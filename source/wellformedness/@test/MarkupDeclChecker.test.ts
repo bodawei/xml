@@ -559,9 +559,12 @@ describe('MarkupDeclChecker (unit)', () => {
                ],
             });
             const state = new CheckState();
-            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
-               open: toSToken('<!'),
-            });
+            state.generalDecls.testRef = {
+               token: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+               }),
+               declaredInInternalSubset: true,
+            };
             const checker = new MarkupDeclChecker(state, []);
 
             checker.check(internalSubsetStart, ec);
@@ -644,10 +647,13 @@ describe('MarkupDeclChecker (unit)', () => {
                ],
             });
             const state = new CheckState();
-            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
-               open: toSToken('<!'),
-               externalId: {},
-            });
+            state.generalDecls.testRef = {
+               token: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  externalId: {},
+               }),
+               declaredInInternalSubset: false,
+            };
             const checker = new MarkupDeclChecker(state, []);
 
             checker.check(internalSubsetStart, ec);
@@ -671,10 +677,13 @@ describe('MarkupDeclChecker (unit)', () => {
                ],
             });
             const state = new CheckState();
-            state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
-               open: toSToken('<!'),
-               nDataName: toSToken('foo'),
-            });
+            state.generalDecls.testRef = {
+               token: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  nDataName: toSToken('foo'),
+               }),
+               declaredInInternalSubset: false,
+            };
             const checker = new MarkupDeclChecker(state, []);
 
             checker.check(internalSubsetStart, ec);
@@ -696,7 +705,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(internalSubsetStart, ec);
          checker.check(generalEntityDeclaration, ec);
 
-         expect(checkState.generalDecls.geDecl).toEqual(generalEntityDeclaration);
+         expect(checkState.generalDecls.geDecl.token).toEqual(generalEntityDeclaration);
       });
    });
 

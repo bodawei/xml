@@ -269,6 +269,7 @@ const notWellFormedCodes = {
    'ibm32n06.xml': 'XMLDECL_STANDALONE_INVALID_CASE',
    'ibm32n07.xml': 'XMLDECL_STANDALONE_INVALID_CASE',
    'ibm32n08.xml': 'XMLDECL_NO_CLOSE',
+   'ibm32n09.xml': 'REFERENCE_INVALID_STANDALONE',
 
    // §3.0 Element
    'ibm39n01.xml': 'DOC_END_EARLY',
@@ -487,7 +488,6 @@ const notWellFormedCodes = {
    'ibm60n07.xml': 'ATTRIBUTE_INVALID_VALUE',
    'ibm60n08.xml': 'ATTLISTDECL_ATTR_NAME_INVALID',
    'simpleltinentval.xml': 'ATTRIBUTE_INVALID_VALUE',
-   'ltinentval.xml': 'ATTRIBUTE_INVALID_VALUE',
 
    // §3.4.0 conditionalSect
    'ibm61n01.xml': 'CONDITIONAL_UNKNOWN',
@@ -559,6 +559,7 @@ const notWellFormedCodes = {
    'ibm68n03.xml': 'REFERENCE_XTRA_SPACE', // great
    'ibm68n04.xml': 'REFERENCE_NO_DECLARATION', // ok  (case difference)
    'ibm68n05.xml': 'REFERENCE_NO_DECLARATION', // great
+   'ibm68n06.xml': 'REFERENCE_INVALID_STANDALONE',
    'ibm68n07.xml': 'REFERENCE_NO_DECLARATION', // ok - no declaration doesn't say before declared
    'ibm68n08.xml': 'REFERENCE_UNPARSED_NO_USE', // great
    'ibm68n09.xml': 'REFERENCE_INVALID_RECURSION', // great

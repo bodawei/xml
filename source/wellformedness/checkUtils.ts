@@ -14,7 +14,10 @@ import {
 import { AttributePToken } from 'source/token/common/attribute';
 
 type GeneralEntitiesInfo = {
-   [name: string]: GeneralEntityDeclarationPToken;
+   [name: string]: {
+      token: GeneralEntityDeclarationPToken;
+      declaredInInternalSubset: boolean;
+   };
 };
 
 type ParameterEntitiesInfo = {
@@ -122,7 +125,7 @@ function checkGeneralEntity(
          //    Attribute values must not contain direct or indirect entity
          //    references to external entities.
          ec.check(
-            genEntityDecl && genEntityDecl.externalId,
+            genEntityDecl && genEntityDecl.token.externalId,
             WFID.ATTRIBUTE_INVALID_REFERENCE,
             [name],
             pToken.open,
@@ -137,7 +140,20 @@ function checkGeneralEntity(
       //     An entity reference must not contain the name of an unparsed entity.
       //     Unparsed entities may be referred to only in attribute values
       //     declared to be of type ENTITY or ENTITIES.
-      ec.check(genEntityDecl.nDataName, WFID.REFERENCE_UNPARSED_NO_USE, [name], pToken.open);
+      ec.check(genEntityDecl.token.nDataName, WFID.REFERENCE_UNPARSED_NO_USE, [name], pToken.open);
+
+      // §4.1.0 Well-formedness constraint: Entity Declared
+      //     In a ... document wit "standalone='yes'", for an entity reference that
+      //     does not occur within the external subset or a parameter entity, the
+      //     Name given in the entity reference must match that in an entity
+      //     declaration that does not occur within the external subset...
+      // @@@ need to do this recursively.  IBM tests work fine with one level
+      ec.check(
+         state.isStandalone && !genEntityDecl.declaredInInternalSubset,
+         WFID.REFERENCE_INVALID_STANDALONE,
+         [name],
+         pToken.open,
+      );
    }
 
    // §4.1.0 See long comment above.
@@ -245,7 +261,7 @@ function checkParameterEntity(
 function isParamEntityExternal(
    pToken: ParameterEntityReferencePToken,
    entityDecls: ParameterEntitiesInfo,
-) {
+): boolean {
    const name = strOrBlank(pToken.name);
    const paramEntityDecl = entityDecls[name];
    const declarationExists = !!paramEntityDecl;

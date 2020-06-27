@@ -248,10 +248,13 @@ describe('ContentChecker (unit)', () => {
    describe('token context', () => {
       it('reports no errors if a TextDecl is found after a general entity start, and it is an external entity', () => {
          const state = new CheckState();
-         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            externalId: {},
-         });
+         state.generalDecls.testRef = {
+            token: new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               externalId: {},
+            }),
+            declaredInInternalSubset: true,
+         };
          const checker = makeChecker(state);
 
          checker.check(generalEntityStart, ec);
@@ -262,7 +265,13 @@ describe('ContentChecker (unit)', () => {
 
       it('reports an error if a TextDecl is found after a general entity start, and it is an internal entity', () => {
          const state = new CheckState();
-         state.generalDecls.test = new GeneralEntityDeclarationPToken({ open: toSToken('<!') });
+         state.generalDecls.test = {
+            token: new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               externalId: {},
+            }),
+            declaredInInternalSubset: true,
+         };
          const checker = makeChecker(state);
 
          checker.check(generalEntityStart, ec);
@@ -351,7 +360,10 @@ describe('ContentChecker (unit)', () => {
             name: toSToken('test'),
          });
          const state = new CheckState();
-         state.generalDecls.test = entityDecl;
+         state.generalDecls.test = {
+            token: entityDecl,
+            declaredInInternalSubset: true,
+         };
          const checker = makeChecker(state);
 
          checker.check(elementStart, ec);
@@ -370,7 +382,10 @@ describe('ContentChecker (unit)', () => {
             name: toSToken('unparsed'),
          });
          const state = new CheckState();
-         state.generalDecls.unparsed = entityDecl;
+         state.generalDecls.unparsed = {
+            token: entityDecl,
+            declaredInInternalSubset: true,
+         };
          const checker = makeChecker(state);
 
          checker.check(elementStart, ec);
@@ -657,7 +672,10 @@ describe('ContentChecker (unit)', () => {
             ],
          });
          const state = new CheckState();
-         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({ open: toSToken('<!') });
+         state.generalDecls.testRef = {
+            token: new GeneralEntityDeclarationPToken({ open: toSToken('<!') }),
+            declaredInInternalSubset: true,
+         };
          const checker = makeChecker(state);
 
          checker.check(undeclaredRef, ec);
@@ -716,10 +734,13 @@ describe('ContentChecker (unit)', () => {
             ],
          });
          const state = new CheckState();
-         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            externalId: {},
-         });
+         state.generalDecls.testRef = {
+            token: new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               externalId: {},
+            }),
+            declaredInInternalSubset: true,
+         };
          const checker = makeChecker(state);
 
          checker.check(withExternalRef, ec);
@@ -742,10 +763,13 @@ describe('ContentChecker (unit)', () => {
             ],
          });
          const state = new CheckState();
-         state.generalDecls.testRef = new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            nDataName: toSToken('foo'),
-         });
+         state.generalDecls.testRef = {
+            token: new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               nDataName: toSToken('foo'),
+            }),
+            declaredInInternalSubset: true,
+         };
          const checker = makeChecker(state);
 
          checker.check(withUnparsedRef, ec);

@@ -13,6 +13,7 @@ import {
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
    ParameterEntityDeclarationPToken,
+   EXTERNAL_ID,
 } from 'token';
 
 import {
@@ -156,10 +157,13 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(
             withExternalRef.attributes,
             {
-               testRef: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-                  externalId: {},
-               }),
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     externalId: {},
+                  }),
+                  declaredInInternalSubset: true,
+               },
             },
             state,
             [],
@@ -187,10 +191,13 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(
             withUnparsedRef.attributes,
             {
-               testRef: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-                  nDataName: toSToken('foo'),
-               }),
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     nDataName: toSToken('foo'),
+                  }),
+                  declaredInInternalSubset: true,
+               },
             },
             state,
             [],
@@ -234,12 +241,18 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(
             emptyElement.attributes,
             {
-               one: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-               }),
-               two: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-               }),
+               one: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                  }),
+                  declaredInInternalSubset: true,
+               },
+               two: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                  }),
+                  declaredInInternalSubset: true,
+               },
             },
             state,
             [],
@@ -282,12 +295,18 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(
             emptyElement.attributes,
             {
-               one: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-               }),
-               two: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-               }),
+               one: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                  }),
+                  declaredInInternalSubset: true,
+               },
+               two: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                  }),
+                  declaredInInternalSubset: true,
+               },
             },
             state,
             [],
@@ -315,9 +334,12 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(
             emptyElement.attributes,
             {
-               one: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-               }),
+               one: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                  }),
+                  declaredInInternalSubset: true,
+               },
             },
             state,
             ['testRef'],
@@ -346,9 +368,12 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(
             emptyElement.attributes,
             {
-               one: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-               }),
+               one: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                  }),
+                  declaredInInternalSubset: true,
+               },
             },
             state,
             ['testRef'],
@@ -394,10 +419,13 @@ describe('checkUtils (unit)', () => {
             generalEntityReference,
             false,
             {
-               testRef: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-                  nDataName: toSToken('foo'),
-               }),
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     nDataName: toSToken('foo'),
+                  }),
+                  declaredInInternalSubset: false,
+               },
             },
             state,
             ec,
@@ -415,10 +443,13 @@ describe('checkUtils (unit)', () => {
             generalEntityReference,
             true,
             {
-               testRef: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-                  externalId: {},
-               }),
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     externalId: {},
+                  }),
+                  declaredInInternalSubset: true,
+               },
             },
             state,
             ec,
@@ -426,6 +457,31 @@ describe('checkUtils (unit)', () => {
 
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+            params: ['testRef'],
+            position: generalEntityReference.open,
+         });
+      });
+
+      it('reports an error if the general entity is external but document is standalone (§4.1.0)', () => {
+         state.isStandalone = true;
+         checkGeneralEntity(
+            generalEntityReference,
+            true,
+            {
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     externalId: {},
+                  }),
+                  declaredInInternalSubset: false,
+               },
+            },
+            state,
+            ec,
+         );
+
+         expect(ec).toReportError({
+            id: WellFormedError.ID.REFERENCE_INVALID_STANDALONE,
             params: ['testRef'],
             position: generalEntityReference.open,
          });

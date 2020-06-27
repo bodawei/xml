@@ -280,14 +280,14 @@ class ContentChecker implements Checker {
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: PToken, ec: ErrorCollector) {
+   private transition(pToken: PToken, ec: ErrorCollector): boolean {
       let newState: State | typeof NO_CHANGE = NO_CHANGE;
 
       if (pToken.type === GENERAL_ENTITY_START_PTOKEN && this.state === State.PRE) {
          const genEntityName = strOrBlank(pToken.referencePToken.name);
          const genEntityDecl = this.checkState.generalDecls[genEntityName];
 
-         if (genEntityDecl && genEntityDecl.externalId) {
+         if (genEntityDecl && genEntityDecl.token.externalId) {
             newState = State.ENTITY_START;
          } else {
             newState = State.CONTENT;
