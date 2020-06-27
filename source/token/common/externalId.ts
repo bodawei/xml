@@ -40,6 +40,12 @@ type ProtoExternalId = {
 
 type ExternalId = ProtoExternalId;
 
+type ParsedExternalId = {
+   externalId?: ExternalId;
+   peRefPlus: UnassignedArray;
+   nextPropName?: string;
+};
+
 /**********************************************************************\
  parse() tries to extract an ExternalID or a PublicID from
  the current position in the STokenSource.
@@ -64,7 +70,7 @@ function parseSystem(
    source: STokenSource,
    allTerminators: Array<string>,
    extIdPToken: ProtoExternalId,
-   deliverExtId: (result?: ProtoExternalId) => void,
+   deliverExtId: (result?: ExternalId) => void,
 ): void {
    const callback = unassigned.makeCheckCallback(extIdPToken, 'system', deliverExtId, () => {
       source.extract('peekWord', allTerminators, (nData) => {
@@ -131,7 +137,8 @@ function parsePublic(
 function parse(
    source: STokenSource,
    terminators: Array<string>,
-   deliverExtId: (result?: ExternalId) => void,
+   allowPERefs: boolean,
+   deliverExtId: (result: ParsedExternalId) => void,
 ): void {
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
    const extIdPToken: ExternalId = {
@@ -139,30 +146,42 @@ function parse(
       peRefPlus: [],
    };
 
-   const callback = unassigned.makeCheckCallback(
-      extIdPToken,
-      'externalType',
-      deliverExtId,
-      (result?: ExternalId) => {
-         source.extract('peekWord', allTerminators, (sToken) => {
-            const capitalType = sToken && sToken.str.toLocaleUpperCase();
+   function convertReturn(externalId?: ExternalId): void {
+      if (!externalId) {
+         return deliverExtId({ peRefPlus: [] });
+      }
 
-            if (!capitalType || ALLOWED_TYPES.indexOf(capitalType) === -1) {
-               deliverExtId();
-               return;
-            }
+      const result: ParsedExternalId = {
+         externalId: externalId,
+         peRefPlus: externalId.peRefPlus,
+      };
 
-            source.extractToObject('word', allTerminators, extIdPToken, 'externalType');
-            source.extractToObjectNoParams('space', extIdPToken, 'externalTypeSpace');
+      if (externalId.nextPropName) {
+         result.nextPropName = externalId.nextPropName;
+      }
 
-            if (capitalType === 'PUBLIC') {
-               parsePublic(source, extIdPToken, allTerminators, deliverExtId);
-            } else {
-               parseSystem(source, allTerminators, extIdPToken, deliverExtId);
-            }
-         });
-      },
-   );
+      deliverExtId(result);
+   }
+
+   const callback = unassigned.makeCheckCallback(extIdPToken, 'externalType', convertReturn, () => {
+      source.extract('peekWord', allTerminators, (sToken) => {
+         const capitalType = sToken && sToken.str.toLocaleUpperCase();
+
+         if (!capitalType || ALLOWED_TYPES.indexOf(capitalType) === -1) {
+            deliverExtId({ peRefPlus: [] });
+            return;
+         }
+
+         source.extractToObject('word', allTerminators, extIdPToken, 'externalType');
+         source.extractToObjectNoParams('space', extIdPToken, 'externalTypeSpace');
+
+         if (capitalType === 'PUBLIC') {
+            parsePublic(source, extIdPToken, allTerminators, convertReturn);
+         } else {
+            parseSystem(source, allTerminators, extIdPToken, convertReturn);
+         }
+      });
+   });
 
    unassigned.checkForPERef(source, callback);
 }
@@ -264,7 +283,7 @@ function checkWellFormed(
    ec: ErrorCollector,
    entityMetaData: EntityMetaData,
 ): void {
-   if (!pTokenPart || pTokenPart.unassigned) {
+   if (!pTokenPart || (pTokenPart.unassigned && pTokenPart.unassigned.length > 0)) {
       return;
    }
 
@@ -370,4 +389,4 @@ const externalId = {
 
 export default externalId;
 
-export { EXTERNAL_ID, ExternalId };
+export { EXTERNAL_ID, ExternalId, ParsedExternalId };

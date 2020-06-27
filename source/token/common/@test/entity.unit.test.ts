@@ -416,7 +416,7 @@ describe('entity (unit)', () => {
 
       it('reports no errors if there are unassigned values', () => {
          delete pToken.name;
-         pToken.unassigned = [];
+         pToken.unassigned = [{ something: true }];
 
          checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
 

@@ -4,17 +4,18 @@
 import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { XmlWarning, WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import externalId from '../common/externalId';
+import externalId, { EXTERNAL_ID } from '../common/externalId';
 import misc from '../common/misc';
-import unassigned, { UnassignedArray } from '../common/unassigned';
+import unassigned, { UnassignedArray, UnassignedType } from '../common/unassigned';
 import {
    NotationDeclarationPToken,
    NotationDeclarationXToken,
    parseNotationDeclaration,
 } from '../notationDeclaration';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('notationdeDeclaration (unit)', () => {
    let notationPToken: NotationDeclarationPToken;
@@ -47,8 +48,8 @@ describe('notationdeDeclaration (unit)', () => {
          nonPeRefCallback = () => { };
          callback = jasmine.createSpy('callbackSpy');
          externalIDParseSpy = spyOn(externalId, 'parse');
-         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
-            cb({ externalId: true });
+         externalIDParseSpy.and.callFake((_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
+            cb({ externalId: { type: EXTERNAL_ID }, peRefPlus: [], });
          });
          unassignedParsePERefSpy = spyOn(unassigned as any, 'parsePERefOrOrdinary').and.callFake((_1: any, _2: any, _3: any, cb1: () => void, cb2: () => void) => { // typeHack
             peRefCallback = cb1;
@@ -70,7 +71,8 @@ describe('notationdeDeclaration (unit)', () => {
 
          expect(externalIDParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
          expect(externalIDParseSpy.calls.argsFor(0)[1]).toEqual(['>']);
-         expect(externalIDParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(externalIDParseSpy.calls.argsFor(0)[2]).toEqual(true);
+         expect(externalIDParseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
       });
 
       it('does a simple parse', () => {
@@ -79,7 +81,7 @@ describe('notationdeDeclaration (unit)', () => {
             name: SToken.fromString('notationName'),
             nameSpace: SToken.fromString(' '),
             externalId: {
-               'externalId': true,
+               'type': EXTERNAL_ID
             } as any,
             externalIdSpace: SToken.fromString(' '),
             close: SToken.fromString('>'),
@@ -128,8 +130,8 @@ describe('notationdeDeclaration (unit)', () => {
             ' ',
             '>',
          ]);
-         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-            cb({ unassigned: [7734] });
+         externalIDParseSpy.and.callFake((_1: any, _2: any, allowPeRefs: boolean, cb: (x: any) => void) => {
+            cb({ peRefPlus: [7734] });
          });
 
          parseNotationDeclaration(mockSource, {
@@ -330,7 +332,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('reports an error if there is an unassigned parameter entity', () => {
          notationPToken = new NotationDeclarationPToken({
             open: SToken.fromString('<!'),
-            unassigned: [],
+            unassigned: [ { type: UnassignedType.REFERENCE, token: new ParameterEntityReferencePToken({ open: toSToken('<!') })  }],
          });
 
          notationPToken.checkWellFormed(mockErrorCollector, emd);

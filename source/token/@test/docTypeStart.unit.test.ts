@@ -4,13 +4,13 @@
 
 import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from'error-test';
-import { SToken } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError } from 'error';
 
 import declaration from '../bridge/baseDeclaration';
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
-import externalId from '../common/externalId';
+import externalId, { EXTERNAL_ID } from '../common/externalId';
 import misc from '../common/misc';
 
 describe('docTypeStart (unit)', () => {
@@ -22,7 +22,7 @@ describe('docTypeStart (unit)', () => {
          open: SToken.fromString('<!'),
          name: makeSToken('rootElement'),
          nameSpace: makeSToken(' '),
-         externalId: { externalId: true },
+         externalId: { type: EXTERNAL_ID },
          externalIdSpace: makeSToken(' '),
          openSubset: makeSToken('['),
       });
@@ -33,8 +33,8 @@ describe('docTypeStart (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(externalId, 'parse').and.callFake((ignored1: any, ignored2: any, cb: any) => {
-            cb({ externalId: true });
+         spyOn(externalId, 'parse').and.callFake((sTokenSource: STokenSource, tokens: any, allowPERefs: boolean, cb: any) => {
+            cb({ externalId: { type: EXTERNAL_ID } });
          });
       });
 
@@ -67,7 +67,7 @@ describe('docTypeStart (unit)', () => {
             name: undefined,
             nameSpace: undefined,
             externalIdSpace: undefined,
-            externalId: { externalId: true },
+            externalId: { type: EXTERNAL_ID },
             openSubset: undefined,
          });
       });

@@ -6,14 +6,13 @@ import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
+import { ParameterEntityReferencePToken, TextPToken } from 'token';
 
 import unassigned from '../unassigned';
 import { UnassignedArray, UnassignedValue, UnassignedType } from '../unassigned';
 
-import externalId from '../externalId';
 import literal from '../literal';
-import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
-import { TextPToken } from 'source/token/text';
+import externalId from '../externalId';
 
 describe('externalId (unit)', () => {
    describe('parse()', () => {
@@ -25,7 +24,7 @@ describe('externalId (unit)', () => {
 
       beforeEach(() => {
          expectedSToken = makeSTokenMaker();
-         callback = jasmine.createSpy('callbackSpy');
+         callback = jasmine.createSpy('literalParseSpy');
          literalParseSpy = spyOn(literal, 'parse').and.callFake(
             (_1: any, options: any, callback: Function) => {
                callback();
@@ -51,23 +50,26 @@ describe('externalId (unit)', () => {
             [' ', 'space'],
             [undefined, 'peekWord'],
          ]);
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([
             [
                {
-                  type: 'EXTERNAL_ID',
+                  externalId: {
+                     type: 'EXTERNAL_ID',
+                     peRefPlus: [],
+                     externalType: expectedSToken('PUBLIC'),
+                     externalTypeSpace: expectedSToken(' '),
+                     public: {
+                        value: [],
+                     },
+                     publicSpace: expectedSToken(' '),
+                     system: {
+                        value: [],
+                     },
+                  },
                   peRefPlus: [],
-                  externalType: expectedSToken('PUBLIC'),
-                  externalTypeSpace: expectedSToken(' '),
-                  public: {
-                     value: [],
-                  },
-                  publicSpace: expectedSToken(' '),
-                  system: {
-                     value: [],
-                  },
                },
             ],
          ]);
@@ -82,16 +84,19 @@ describe('externalId (unit)', () => {
             [undefined, 'peekWord'],
          ]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([
             [
                {
-                  type: 'EXTERNAL_ID',
+                  externalId: {
+                     type: 'EXTERNAL_ID',
+                     peRefPlus: [],
+                     externalType: expectedSToken('SYSTEM'),
+                     externalTypeSpace: expectedSToken(' '),
+                  },
                   peRefPlus: [],
-                  externalType: expectedSToken('SYSTEM'),
-                  externalTypeSpace: expectedSToken(' '),
                },
             ],
          ]);
@@ -100,10 +105,10 @@ describe('externalId (unit)', () => {
       it('returns nothing if it gets nothing back on first call', () => {
          mockSource = new MockSTokenSource([[undefined, 'peekWord']]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith();
+         expect(callback).toHaveBeenCalledWith({ peRefPlus: [] });
       });
 
       it('returns nothing if the first word is not SYSTEM or PUBLIC', () => {
@@ -111,10 +116,10 @@ describe('externalId (unit)', () => {
             [MockSTokenSource.PEEK('BOGUS!'), 'peekWord', ['"', "'"]],
          ]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith();
+         expect(callback).toHaveBeenCalledWith({ peRefPlus: [] });
       });
 
       it('stops if it finds an NDATA after finding the PublicId', () => {
@@ -130,20 +135,23 @@ describe('externalId (unit)', () => {
             ['NDATA', 'peekWord', ['"', "'"]],
          ]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([
             [
                {
-                  type: 'EXTERNAL_ID',
-                  peRefPlus: [],
-                  externalType: expectedSToken('PUBLIC'),
-                  public: {
-                     value: [],
+                  externalId: {
+                     type: 'EXTERNAL_ID',
+                     peRefPlus: [],
+                     externalType: expectedSToken('PUBLIC'),
+                     public: {
+                        value: [],
+                     },
+                     externalTypeSpace: expectedSToken(' '),
+                     publicSpace: expectedSToken(' '),
                   },
-                  externalTypeSpace: expectedSToken(' '),
-                  publicSpace: expectedSToken(' '),
+                  peRefPlus: [],
                },
             ],
          ]);
@@ -162,20 +170,23 @@ describe('externalId (unit)', () => {
             ['nData', 'peekWord', ['"', "'"]],
          ]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([
             [
                {
-                  type: 'EXTERNAL_ID',
-                  peRefPlus: [],
-                  externalType: expectedSToken('pUbLiC'),
-                  externalTypeSpace: expectedSToken(' '),
-                  public: {
-                     value: [],
+                  externalId: {
+                     type: 'EXTERNAL_ID',
+                     peRefPlus: [],
+                     externalType: expectedSToken('pUbLiC'),
+                     externalTypeSpace: expectedSToken(' '),
+                     public: {
+                        value: [],
+                     },
+                     publicSpace: expectedSToken(' '),
                   },
-                  publicSpace: expectedSToken(' '),
+                  peRefPlus: [],
                },
             ],
          ]);
@@ -192,16 +203,19 @@ describe('externalId (unit)', () => {
             // literal
          ]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([
             [
                {
-                  type: 'EXTERNAL_ID',
+                  externalId: {
+                     type: 'EXTERNAL_ID',
+                     peRefPlus: [],
+                     externalType: expectedSToken('PUBLIC'),
+                     externalTypeSpace: expectedSToken(' '),
+                  },
                   peRefPlus: [],
-                  externalType: expectedSToken('PUBLIC'),
-                  externalTypeSpace: expectedSToken(' '),
                },
             ],
          ]);
@@ -227,20 +241,23 @@ describe('externalId (unit)', () => {
             // literal
          ]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([
             [
                {
-                  type: 'EXTERNAL_ID',
-                  peRefPlus: [],
-                  externalType: expectedSToken('PUBLIC'),
-                  externalTypeSpace: undefined,
-                  public: {
-                     value: [],
+                  externalId: {
+                     type: 'EXTERNAL_ID',
+                     peRefPlus: [],
+                     externalType: expectedSToken('PUBLIC'),
+                     externalTypeSpace: undefined,
+                     public: {
+                        value: [],
+                     },
+                     publicSpace: expectedSToken(' '),
                   },
-                  publicSpace: expectedSToken(' '),
+                  peRefPlus: [],
                },
             ],
          ]);
@@ -260,23 +277,26 @@ describe('externalId (unit)', () => {
             // literal
          ]);
 
-         externalId.parse(mockSource, [], callback);
+         externalId.parse(mockSource, [], true, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([
             [
                {
-                  type: 'EXTERNAL_ID',
+                  externalId: {
+                     type: 'EXTERNAL_ID',
+                     peRefPlus: [],
+                     externalType: expectedSToken('PUBLIC'),
+                     externalTypeSpace: expectedSToken(' '),
+                     public: {
+                        value: [],
+                     },
+                     publicSpace: undefined,
+                     system: {
+                        value: [],
+                     },
+                  },
                   peRefPlus: [],
-                  externalType: expectedSToken('PUBLIC'),
-                  externalTypeSpace: expectedSToken(' '),
-                  public: {
-                     value: [],
-                  },
-                  publicSpace: undefined,
-                  system: {
-                     value: [],
-                  },
                },
             ],
          ]);
@@ -290,7 +310,7 @@ describe('externalId (unit)', () => {
             unCheck.and.returnValue(checkCallbackSpy);
             mockSource = new MockSTokenSource([]);
 
-            externalId.parse(mockSource, [], callback);
+            externalId.parse(mockSource, [], true, callback);
             mockSource.respondInAsyncTime();
 
             expect(unCheck.calls.argsFor(0)[0]).toEqual({
@@ -298,7 +318,7 @@ describe('externalId (unit)', () => {
                peRefPlus: [],
             });
             expect(unCheck.calls.argsFor(0)[1]).toEqual('externalType');
-            expect(unCheck.calls.argsFor(0)[2]).toEqual(callback);
+            expect(unCheck.calls.argsFor(0)[2]).toBeInstanceOf(Function);
             expect(unCheck.calls.argsFor(0)[3]).toBeInstanceOf(Function);
             expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
@@ -320,7 +340,7 @@ describe('externalId (unit)', () => {
                [undefined, 'space'],
             ]);
 
-            externalId.parse(mockSource, [], callback);
+            externalId.parse(mockSource, [], true, callback);
             mockSource.respondInAsyncTime();
 
             expect(unCheck.calls.argsFor(1)[0]).toEqual({
@@ -330,7 +350,7 @@ describe('externalId (unit)', () => {
                externalTypeSpace: undefined,
             });
             expect(unCheck.calls.argsFor(1)[1]).toEqual('public');
-            expect(unCheck.calls.argsFor(1)[2]).toEqual(callback);
+            expect(unCheck.calls.argsFor(0)[2]).toBeInstanceOf(Function);
             expect(unCheck.calls.argsFor(1)[3]).toBeInstanceOf(Function);
             expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
@@ -356,7 +376,7 @@ describe('externalId (unit)', () => {
                [' ', 'space'],
             ]);
 
-            externalId.parse(mockSource, [], callback);
+            externalId.parse(mockSource, [], true, callback);
             mockSource.respondInAsyncTime();
 
             expect(unCheck.calls.argsFor(2)[0]).toEqual({
@@ -370,7 +390,7 @@ describe('externalId (unit)', () => {
                publicSpace: expectedSToken(' '),
             });
             expect(unCheck.calls.argsFor(2)[1]).toEqual('system');
-            expect(unCheck.calls.argsFor(2)[2]).toEqual(callback);
+            expect(unCheck.calls.argsFor(0)[2]).toBeInstanceOf(Function);
             expect(unCheck.calls.argsFor(2)[3]).toBeInstanceOf(Function);
             expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
@@ -737,7 +757,7 @@ describe('externalId (unit)', () => {
 
       it('reports no errors the pToken is passed in with unassigned values', () => {
          pTokenPart.externalType = SToken.fromString('bad');
-         pTokenPart.unassigned = [];
+         pTokenPart.unassigned = [{}];
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();

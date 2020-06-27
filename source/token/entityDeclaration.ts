@@ -1,22 +1,18 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from 'basic';
-import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
-import { strOrBlank, SToken, STokenSource } from 'sToken';
+import { STokenSource } from 'sToken';
 
 import { DeclarationStart } from './bridge/declaration';
-import unassigned, { UnassignedType, UnassignedArray } from './common/unassigned';
-import misc from './common/misc';
-import externalId, { ExternalId } from './common/externalId';
-import literal, { LiteralValuePToken } from './common/literal';
-import { UnassignedValue } from './common/unassigned';
+import unassigned from './common/unassigned';
+import externalId from './common/externalId';
+import literal from './common/literal';
 import { CharRefPToken } from './charRef';
 import { TextPToken } from './text';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
-import { GeneralEntityDeclarationPToken, GeneralEntityDeclarationXToken } from './generalEntityDeclaration';
-import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from './parameterEntityDeclaration';
+import { GeneralEntityDeclarationPToken } from './generalEntityDeclaration';
+import { ParameterEntityDeclarationPToken } from './parameterEntityDeclaration';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -138,12 +134,13 @@ function parseEntityValue(source: STokenSource, pToken: GeneralEntityDeclaration
 
 function parseExternalId(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'entityValueOrId', done, () => {
-      externalId.parse(source, [ '>' ], (externalId) => {
-         (pToken as any).externalId = externalId;
-         (pToken as any).unassigned = externalId && externalId.unassigned;
-         (pToken as any).peRefPlus = (externalId && externalId.unassigned) || [];
+      externalId.parse(source, [ '>' ], true, (parsedResult) => {
+         (pToken as any).externalId = parsedResult.externalId;
+         (pToken as any).unassigned = parsedResult.peRefPlus;
+         (pToken as any).peRefPlus = parsedResult.peRefPlus;
+         (pToken as any).nextPropName = parsedResult.nextPropName;
 
-         if (!externalId || externalId.unassigned) {
+         if (!parsedResult.externalId || parsedResult.peRefPlus.length > 0) {
             done();
             return;
          }

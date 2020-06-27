@@ -102,8 +102,8 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
    source.extractToObject('word', [ '[', '>' ], pToken, 'name'); // look for quotes?
    source.extractToObject('space', undefined, pToken, 'nameSpace');
 
-   externalId.parse(source, [ '[', '>' ], (externalId: any) => { // typeHack
-      pToken.externalId = externalId;
+   externalId.parse(source, [ '[', '>' ], false, (parseResult) => {
+      pToken.externalId = parseResult.externalId;
 
       source.extractToObject('space', undefined, pToken, 'externalIdSpace');
 

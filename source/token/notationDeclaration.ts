@@ -111,18 +111,14 @@ function parseNotationDeclaration(source: STokenSource, declarationStart: Declar
       source.extractToObject('word', [ '>' ], protoToken, 'name');
       source.extractToObjectNoParams('space', protoToken, 'nameSpace');
 
-      externalId.parse(source, [ '>' ], (externalId?: ExternalId) => {
-         if (externalId) {
-            protoToken.externalId = externalId;
-            if (externalId.unassigned) {
-               protoToken.unassigned = externalId.unassigned;
-               protoToken.nextPropName = externalId.nextPropName;
-               (protoToken as any).peRefPlus = (externalId && externalId.unassigned) || [];
-               delete externalId.unassigned;
-               delete externalId.nextPropName;
-            } else {
-               source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
-            }
+      externalId.parse(source, [ '>' ], true, (parsedResult) => {
+         protoToken.externalId = parsedResult.externalId;
+         protoToken.unassigned = parsedResult.peRefPlus;
+         protoToken.nextPropName = parsedResult.nextPropName;
+         protoToken.peRefPlus = parsedResult.peRefPlus;
+
+         if (protoToken.externalId && parsedResult.peRefPlus.length === 0) {
+            source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
          }
 
          getClose(source, protoToken, deliverPToken);
@@ -179,7 +175,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, 
 
    ec.setPos(pToken.open);
 
-   ec.check(pToken.unassigned && !pToken.extra, WFEID.NOTATIONDECL_UNASSIGNED);
+   ec.check((pToken.unassigned && pToken.unassigned.length > 0) && !pToken.extra, WFEID.NOTATIONDECL_UNASSIGNED);
 
    ec.setPos(pToken.openSpace);
    ec.check(pToken.openSpace, WFEID.NOTATIONDECL_OPEN_XTRA_SPACE_AFTER);

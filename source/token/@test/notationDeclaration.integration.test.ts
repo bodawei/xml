@@ -97,6 +97,8 @@ describe('notationDeclaration (integration)', () => {
                externalId: {
                   type: 'EXTERNAL_ID',
                   peRefPlus: unassignedValue as any,
+                  unassigned: unassignedValue as any,
+                  nextPropName: 'externalType',
                },
                close: SToken.fromString('>'),
             }));

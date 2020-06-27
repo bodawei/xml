@@ -126,7 +126,7 @@ function assignUnassigned(pToken: GeneralEntityDeclarationPToken | ParameterEnti
 \**********************************************************************/
 
 function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   if (!pToken || pToken.unassigned) {
+   if (!pToken || (pToken.unassigned && pToken.unassigned.length > 0)) {
       return;
    }
 

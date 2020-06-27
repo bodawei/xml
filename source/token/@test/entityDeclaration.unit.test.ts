@@ -1,14 +1,14 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import { parseEntityDeclaration } from '../entityDeclaration';
 import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
 import unassigned from '../common/unassigned';
-import externalId from '../common/externalId';
+import externalId, { EXTERNAL_ID } from '../common/externalId';
 import literal from '../common/literal';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
@@ -45,8 +45,8 @@ describe('entityDeclaration (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
 
-         externalIdSpy = spyOn(externalId, 'parse').and.callFake((_1: any, _2: any, cb: Function) => {
-            cb({ externalId: true });
+         externalIdSpy = spyOn(externalId, 'parse').and.callFake((sTokenSource: STokenSource, terminators: any, allowPERefs: boolean, cb: Function) => {
+            cb({ externalId: { type: EXTERNAL_ID }, peRefPlus: [], });
          });
 
          literalSpy = spyOn(literal, 'parse');
@@ -97,7 +97,8 @@ describe('entityDeclaration (unit)', () => {
 
          expect(externalIdSpy.calls.argsFor(0)[0]).toEqual(mockSource);
          expect(externalIdSpy.calls.argsFor(0)[1]).toEqual([ '>' ]);
-         expect(externalIdSpy.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+         expect(externalIdSpy.calls.argsFor(0)[2]).toEqual(true);
+         expect(externalIdSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
       });
 
       it('does a parse of a general entity with a literal value', () => {
@@ -178,7 +179,7 @@ describe('entityDeclaration (unit)', () => {
       it('returns nothing if there is no name, space, or start of value: <!ENTITY %', () => {
          const expectedSToken = makeSTokenMaker();
          literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
-         externalIdSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(undefined); });
+         externalIdSpy.and.callFake((_1: any, _2: any, allowPERefs: boolean, callback: Function) => { callback({ }); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('%'),
             [ '%', 'char' ],
@@ -253,8 +254,8 @@ describe('entityDeclaration (unit)', () => {
             '>',
             '>',
          ]);
-         externalIdSpy.and.callFake((_1: any, _2: any, cb: Function) => {
-            cb(undefined);
+         externalIdSpy.and.callFake((_1: any, _2: any, allowPERef: boolean, cb: Function) => {
+            cb({});
          });
 
          parseEntityDeclaration(mockSource, {} as any, callback);
@@ -284,9 +285,7 @@ describe('entityDeclaration (unit)', () => {
 
          const expectedSToken = makeSTokenMaker(undefined, 11, 0, 11);
          expect(callback).toContainPTokenProps({
-            externalId: {
-               externalId: true,
-            },
+            externalId: { type: EXTERNAL_ID },
             externalIdSpace: expectedSToken(' '),
             close: expectedSToken('>'),
          });
@@ -482,10 +481,10 @@ describe('entityDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref in external ID', () => {
             literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
-            externalIdSpy.and.callFake((_1: any, _2: any, cb: Function) => {
+            externalIdSpy.and.callFake((_1: any, _2: any, allowPEref: boolean, cb: Function) => {
                cb({
-                  externalId: true,
-                  unassigned: [ { type: 'literal' } ],
+                  externalId: { type: EXTERNAL_ID, },
+                  peRefPlus: [ { type: 'literal' } ],
                   nextPropName: 'system',
                });
             });
@@ -505,8 +504,7 @@ describe('entityDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             const pToken = callback.calls.argsFor(0)[0];
-            expect(pToken.externalId.unassigned).toEqual([ { type: 'literal' } ])
-            expect(pToken.unassigned).toBe(pToken.externalId.unassigned)
+            expect(pToken.unassigned).toEqual([ { type: 'literal' } ])
          });
 
          it('returns an unassigned value with a PE Ref in the NDATA name position', () => {

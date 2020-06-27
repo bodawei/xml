@@ -128,12 +128,13 @@ function makeElementEnd(): ElementEndPToken {
    });
 }
 
-const makeElementStart = () =>
-   new ElementStartPToken({
+function makeElementStart(): ElementStartPToken {
+   return new ElementStartPToken({
       open: toSToken('<'),
       name: toSToken('elStart'),
       close: toSToken('>'),
    });
+}
 
 const makeElementDeclaration = () =>
    new elementDeclaration.PToken({
