@@ -93,7 +93,7 @@ describe('notationDeclaration (integration)', () => {
                nameSpace: SToken.fromString(' '),
                unassigned: unassignedValue as any,
                peRefPlus: unassignedValue as any,
-               nextPropName: 'idType',
+               nextPropName: 'externalType',
                externalId: {
                   type: 'EXTERNAL_ID',
                   peRefPlus: unassignedValue as any,
@@ -147,13 +147,13 @@ describe('notationDeclaration (integration)', () => {
                peRefPlus: (pToken as any).unassigned as any,
                extra: [],
                externalId: {
-                  idType: SToken.fromString('PUBLIC'),
+                  externalType: SToken.fromString('PUBLIC'),
                   public: {
                      openQuote: SToken.fromString('"'),
                      value: [SToken.fromString('foo')], // ICK
                      closeQuote: SToken.fromString('"'),
                   } as any,
-                  postPublicSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+                  publicSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
                } as any,
                close: SToken.fromString('>'),
             }));

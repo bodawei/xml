@@ -148,8 +148,12 @@ const makeElementDeclaration = () =>
       close: toSToken('>'),
    });
 
-const makeExternalSubsetEnd = () => new ExternalSubsetEndToken();
-const makeExternalSubsetStart = () => new ExternalSubsetStartToken();
+function makeExternalSubsetEnd() {
+   return new ExternalSubsetEndToken();
+}
+function makeExternalSubsetStart() {
+   return new ExternalSubsetStartToken();
+}
 
 function makeGeneralEntityDeclaration(name = 'geDecl'): GeneralEntityDeclarationPToken {
    return new GeneralEntityDeclarationPToken({
@@ -167,14 +171,22 @@ function makeGeneralEntityReference(): GeneralEntityReferencePToken {
    });
 }
 
-const makeGeneralEntityStart = () => new GeneralEntityStartPToken(makeGeneralEntityReference());
-const makeGeneralEntityEnd = () => new GeneralEntityEndPToken(makeGeneralEntityReference());
+function makeGeneralEntityStart(): GeneralEntityStartPToken {
+   return new GeneralEntityStartPToken(makeGeneralEntityReference());
+}
+function makeGeneralEntityEnd(): GeneralEntityEndPToken {
+   return new GeneralEntityEndPToken(makeGeneralEntityReference());
+}
 
-const makeInternalSubsetEnd = () => new InternalSubsetEndToken();
-const makeInternalSubsetStart = () => new InternalSubsetStartToken();
+function makeInternalSubsetEnd(): InternalSubsetEndToken {
+   return new InternalSubsetEndToken();
+}
+function makeInternalSubsetStart(): InternalSubsetStartToken {
+   return new InternalSubsetStartToken();
+}
 
-const makeParameterEntityDeclaration = () =>
-   new ParameterEntityDeclarationPToken({
+function makeParameterEntityDeclaration(): ParameterEntityDeclarationPToken {
+   return new ParameterEntityDeclarationPToken({
       parameter: toSToken('%'),
       parameterSpace: toSToken(' '),
       name: toSToken('entityName'),
@@ -184,9 +196,10 @@ const makeParameterEntityDeclaration = () =>
       closeQuote: toSToken('"'),
       close: toSToken('>'),
    });
+}
 
-const makeParameterExternalEntityDeclaration = () =>
-   new ParameterEntityDeclarationPToken({
+function makeParameterExternalEntityDeclaration(): ParameterEntityDeclarationPToken {
+   return new ParameterEntityDeclarationPToken({
       parameter: toSToken('%'),
       parameterSpace: toSToken(' '),
       name: toSToken('entityName'),
@@ -194,8 +207,8 @@ const makeParameterExternalEntityDeclaration = () =>
       externalId: {
          type: 'EXTERNAL_ID',
          peRefPlus: [],
-         idType: toSToken('PUBLIC'),
-         postIdTypeSpace: toSToken(' '),
+         externalType: toSToken('PUBLIC'),
+         externalTypeSpace: toSToken(' '),
          public: {
             openQuote: toSToken('"'),
             value: [new TextPToken({ text: toSToken('pub.xml') })],
@@ -204,6 +217,7 @@ const makeParameterExternalEntityDeclaration = () =>
       },
       close: toSToken('>'),
    });
+}
 
 const makeParameterEntityReference = () =>
    new ParameterEntityReferencePToken({
@@ -214,7 +228,9 @@ const makeParameterEntityReference = () =>
 
 const makeParameterEntityStart = () =>
    new ParameterEntityStartPToken(makeParameterEntityReference());
-const makeParameterEntityEnd = () => new ParameterEntityEndPToken(makeParameterEntityReference());
+function makeParameterEntityEnd() {
+   return new ParameterEntityEndPToken(makeParameterEntityReference());
+}
 
 const makeProcessingInstruction = () =>
    new ProcessingInstructionPToken({

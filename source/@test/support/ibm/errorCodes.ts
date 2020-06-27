@@ -625,11 +625,11 @@ const notWellFormedCodes = {
    'ibm75n02.xml': 'EXTERNALID_INVALID_CASE', // great
    'ibm75n03.xml': 'EXTERNALID_INVALID_CASE', // great
    'ibm75n04.xml': 'DOCTYPE_NO_CLOSE', // ok.
-   'ibm75n05.xml': 'EXTERNALID_IDTYPE_NO_SPACE', // great
+   'ibm75n05.xml': 'EXTERNALID_EXTERNALTYPE_NO_SPACE', // great
    'ibm75n06.xml': 'LITERAL_NO_OPEN_QUOTE', // ok. All these "no opn quotes" would be better as saying "no literal"
    'ibm75n07.xml': 'EXTERNALID_SYSTEM_NO_LEADING_SPACE', // great
    'ibm75n08.xml': 'DOCTYPE_NO_CLOSE', // ok a lack of PUBLIC would be better
-   'ibm75n09.xml': 'EXTERNALID_IDTYPE_NO_SPACE', // great
+   'ibm75n09.xml': 'EXTERNALID_EXTERNALTYPE_NO_SPACE', // great
    'ibm75n10.xml': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great
    'ibm75n11.xml': 'EXTERNALID_INVALID_CASE', // great (though, test would like to complain about no system value
    'ibm75n12.xml': 'ENTITYDECL_NO_CLOSE', // ok. more than SYSTEM is misplace
@@ -709,7 +709,7 @@ const notWellFormedCodes = {
    'ibm83n01.xml': 'EXTERNALID_INVALID_CASE', // great
    'ibm83n02.xml': 'EXTERNALID_INVALID_CASE', // great
    'ibm83n03.xml': 'NOTATIONDECL_NO_EXTERNALID', // ok
-   'ibm83n04.xml': 'EXTERNALID_IDTYPE_NO_SPACE', // great
+   'ibm83n04.xml': 'EXTERNALID_EXTERNALTYPE_NO_SPACE', // great
    'ibm83n05.xml': 'LITERAL_NO_OPEN_QUOTE', // great
    'ibm83n06.xml': 'NOTATIONDECL_NO_EXTERNALID', // great
 

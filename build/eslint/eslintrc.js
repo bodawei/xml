@@ -129,7 +129,9 @@ module.exports = {
       node: true,
    },
    overrides: [ {
-      files: [ './source/expand/**/*.ts', './source/wellformedness/**/*.ts' ],
+      files: [
+         './source/token/common/externalId.ts',
+         './source/expand/**/*.ts', './source/wellformedness/**/*.ts' ],
       parser: '@typescript-eslint/parser',
       plugins: [
          '@typescript-eslint',
@@ -146,6 +148,7 @@ module.exports = {
       },
    }, {
       files: [
+         './source/token/common/**/externalId*test.ts',
          './source/basic/**/*.test.ts',
          './source/expand/**/*.test.ts',
       ],

@@ -1,14 +1,12 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { EntityLocation, EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
-
-import unassigned from './unassigned';
+import { strOrBlank, STokenSource, SToken } from 'sToken';
 
 import literal, { LiteralPToken } from './literal';
-import { strOrBlank, STokenSource, SToken } from 'sToken';
+import unassigned from './unassigned';
 import { UnassignedArray } from './unassigned';
-import { EIDRM } from 'constants';
 import { TEXT_PTOKEN } from '../text';
 
 /**********************************************************************\
@@ -21,23 +19,26 @@ import { TEXT_PTOKEN } from '../text';
 
 const WFEID = WellFormedError.ID;
 const EXTERNAL_ID = 'EXTERNAL_ID';
-const ALLOWED_TYPES = [ 'PUBLIC', 'SYSTEM' ];
-const TYPE_TERMINATORS = [ '"', '\'' ];
-const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
+const ALLOWED_TYPES = ['PUBLIC', 'SYSTEM'];
+const TYPE_TERMINATORS = ['"', "'"];
+const PUBID_CHARS = /^[- \n'()+,./:=?;!*#@$_%a-zA-Z0-9]*/;
 
-type ExternalId = {
-   type: string,
-   public?: LiteralPToken,
-   system?: LiteralPToken,
-   peRefPlus: UnassignedArray,
-   unassigned?: UnassignedArray,
-   extra?: UnassignedArray,
-   nextPropName?: string,
-   idType?: SToken,
-   __bogusWorkaround?: SToken,
-   postIdTypeSpace?: SToken,
-   postPublicSpace?: SToken,
+type ProtoExternalId = {
+   type: string;
+   externalType?: SToken;
+   externalTypeSpace?: SToken;
+   public?: LiteralPToken;
+   publicSpace?: SToken;
+   system?: LiteralPToken;
+
+   peRefPlus: UnassignedArray;
+   unassigned?: UnassignedArray;
+   extra?: UnassignedArray;
+   nextPropName?: string;
+   __bogusWorkaround?: SToken;
 };
+
+type ExternalId = ProtoExternalId;
 
 /**********************************************************************\
  parse() tries to extract an ExternalID or a PublicID from
@@ -59,61 +60,12 @@ type ExternalId = {
    deliverPTokenPart: Callback to deliver the PToken compatible version
 \**********************************************************************/
 
-function parse(source: STokenSource, terminators: Array<string>, deliverExtId: (result?: ExternalId) => void) {
-   const allTerminators = TYPE_TERMINATORS.concat(terminators);
-   const extIdPToken = {
-      type: EXTERNAL_ID,
-      peRefPlus: [],
-   };
-
-   const callback = unassigned.makeCheckCallback(extIdPToken, 'idType', deliverExtId, (result?: ExternalId) => {
-      source.extract('peekWord', allTerminators, (sToken) => {
-         const capitalType = sToken && sToken.str.toLocaleUpperCase();
-
-         if (!capitalType || ALLOWED_TYPES.indexOf(capitalType) === -1) {
-            deliverExtId();
-            return;
-         }
-
-         source.extractToObject('word', allTerminators, extIdPToken, 'idType');
-         source.extractToObjectNoParams('space', extIdPToken, 'postIdTypeSpace');
-
-         if (capitalType === 'PUBLIC') {
-            parsePublic(source, extIdPToken, allTerminators, deliverExtId);
-         } else {
-            parseSystem(source, allTerminators, extIdPToken, deliverExtId);
-         }
-      });
-   });
-
-   unassigned.checkForPERef(source, callback);
-}
-
-function parsePublic(source: STokenSource, extIdPToken: ExternalId, allTerminators: Array<string>, deliverExtId: (result?: ExternalId) => void) {
-   const callback = unassigned.makeCheckCallback(extIdPToken, 'public', deliverExtId, () => {
-      const temp: LiteralPToken = {
-         value: [],
-      };
-
-      literal.parse(source, {
-         pToken: temp,
-      }, (alternatePToken) => {
-         if (!alternatePToken) {
-            deliverExtId(extIdPToken);
-            return;
-         }
-
-         extIdPToken.public = temp;
-         source.extractToObjectNoParams('space', extIdPToken, 'postPublicSpace');
-
-         parseSystem(source, allTerminators, extIdPToken, deliverExtId);
-      });
-   });
-
-   unassigned.checkForPERef(source, callback);
-}
-
-function parseSystem(source: STokenSource, allTerminators: Array<string>, extIdPToken: ExternalId, deliverExtId: (result?: ExternalId) => void) {
+function parseSystem(
+   source: STokenSource,
+   allTerminators: Array<string>,
+   extIdPToken: ProtoExternalId,
+   deliverExtId: (result?: ProtoExternalId) => void,
+): void {
    const callback = unassigned.makeCheckCallback(extIdPToken, 'system', deliverExtId, () => {
       source.extract('peekWord', allTerminators, (nData) => {
          if (nData && nData.str.toLocaleUpperCase() === 'NDATA') {
@@ -124,40 +76,105 @@ function parseSystem(source: STokenSource, allTerminators: Array<string>, extIdP
          const temp: LiteralPToken = {
             value: [],
          };
-         literal.parse(source, {
-            pToken: temp,
-         }, (modifiedPToken) => {
-            if (modifiedPToken) {
-               extIdPToken.system = temp;
-            }
+         literal.parse(
+            source,
+            {
+               pToken: temp,
+            },
+            (modifiedPToken) => {
+               if (modifiedPToken) {
+                  extIdPToken.system = temp;
+               }
 
-            deliverExtId(extIdPToken);
-         });
+               deliverExtId(extIdPToken);
+            },
+         );
       });
    });
 
    unassigned.checkForPERef(source, callback);
 }
 
-function assignUnassignedNew(unassigned: UnassignedArray, prevContainer: { [key: string]: any }, prevSpacePropName?: string) {
-   const eId: ExternalId = (prevContainer && prevContainer.externalId) ||  { type: EXTERNAL_ID };
+function parsePublic(
+   source: STokenSource,
+   extIdPToken: ExternalId,
+   allTerminators: Array<string>,
+   deliverExtId: (result?: ExternalId) => void,
+): void {
+   const callback = unassigned.makeCheckCallback(extIdPToken, 'public', deliverExtId, () => {
+      const temp: LiteralPToken = {
+         value: [],
+      };
 
-   eId.unassigned = unassigned;
-   assignUnassigned(eId, prevContainer, prevSpacePropName);
-   delete eId.unassigned;
-   delete eId.extra;
-   delete eId.type;
+      literal.parse(
+         source,
+         {
+            pToken: temp,
+         },
+         (alternatePToken) => {
+            if (!alternatePToken) {
+               deliverExtId(extIdPToken);
+               return;
+            }
 
-   if (Object.keys(eId).length > 1) {
-      prevContainer.externalId = eId;
-   }
+            extIdPToken.public = temp;
+            source.extractToObjectNoParams('space', extIdPToken, 'publicSpace');
+
+            parseSystem(source, allTerminators, extIdPToken, deliverExtId);
+         },
+      );
+   });
+
+   unassigned.checkForPERef(source, callback);
 }
 
-function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string]: any }, prevSpacePropName?: string) {
+function parse(
+   source: STokenSource,
+   terminators: Array<string>,
+   deliverExtId: (result?: ExternalId) => void,
+): void {
+   const allTerminators = TYPE_TERMINATORS.concat(terminators);
+   const extIdPToken: ExternalId = {
+      type: EXTERNAL_ID,
+      peRefPlus: [],
+   };
+
+   const callback = unassigned.makeCheckCallback(
+      extIdPToken,
+      'externalType',
+      deliverExtId,
+      (result?: ExternalId) => {
+         source.extract('peekWord', allTerminators, (sToken) => {
+            const capitalType = sToken && sToken.str.toLocaleUpperCase();
+
+            if (!capitalType || ALLOWED_TYPES.indexOf(capitalType) === -1) {
+               deliverExtId();
+               return;
+            }
+
+            source.extractToObject('word', allTerminators, extIdPToken, 'externalType');
+            source.extractToObjectNoParams('space', extIdPToken, 'externalTypeSpace');
+
+            if (capitalType === 'PUBLIC') {
+               parsePublic(source, extIdPToken, allTerminators, deliverExtId);
+            } else {
+               parseSystem(source, allTerminators, extIdPToken, deliverExtId);
+            }
+         });
+      },
+   );
+
+   unassigned.checkForPERef(source, callback);
+}
+function assignUnassigned(
+   externalId: ExternalId,
+   prevContainer?: { [key: string]: any },
+   prevSpacePropName?: string,
+): void {
    const unValues = externalId.unassigned || [];
    const descriptors = [
-      { name: 'idType', type: 'word', allowed: /public|system/i },
-      { name: 'postIdTypeSpace', type: 'space' },
+      { name: 'externalType', type: 'word', allowed: /public|system/i },
+      { name: 'externalTypeSpace', type: 'space' },
    ];
 
    if (!externalId.unassigned || unValues.length === 0) {
@@ -166,7 +183,7 @@ function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string
       return;
    }
 
-   const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
+   const unexpandedRef = unValues.filter((item) => item.type === 'reference');
 
    if (unexpandedRef.length !== 0) {
       return;
@@ -176,7 +193,7 @@ function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string
       descriptors.unshift({ name: '__bogusWorkaround', type: 'space' });
    }
 
-   const nextPropName = externalId.nextPropName || 'idType';
+   const nextPropName = externalId.nextPropName || 'externalType';
    unassigned.assignToProps(externalId.unassigned, externalId, nextPropName, descriptors);
 
    if (externalId.__bogusWorkaround) {
@@ -187,20 +204,20 @@ function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string
       }
    }
 
-   const idType = externalId.idType && externalId.idType.str.toLocaleUpperCase();
+   const externalType = externalId.externalType && externalId.externalType.str.toLocaleUpperCase();
 
-   switch (idType) {
+   switch (externalType) {
       case 'SYSTEM':
          unassigned.assignToProps(externalId.unassigned, externalId, 'system', [
-            { name: 'postIdTypeSpace', type: 'space' },
+            { name: 'externalTypeSpace', type: 'space' },
             { name: 'system', type: 'literal' },
          ]);
          break;
       case 'PUBLIC':
          unassigned.assignToProps(externalId.unassigned, externalId, 'public', [
-            { name: 'postIdTypeSpace', type: 'space' },
+            { name: 'externalTypeSpace', type: 'space' },
             { name: 'public', type: 'literal' },
-            { name: 'postPublicSpace', type: 'space' },
+            { name: 'publicSpace', type: 'space' },
             { name: 'system', type: 'literal' },
          ]);
          break;
@@ -215,6 +232,24 @@ function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string
    delete externalId.unassigned;
 }
 
+function assignUnassignedNew(
+   unassigned: UnassignedArray,
+   prevContainer: { [key: string]: any },
+   prevSpacePropName?: string,
+): void {
+   const eId: ExternalId = (prevContainer && prevContainer.externalId) || { type: EXTERNAL_ID };
+
+   eId.unassigned = unassigned;
+   assignUnassigned(eId, prevContainer, prevSpacePropName);
+   delete eId.unassigned;
+   delete eId.extra;
+   delete eId.type;
+
+   if (Object.keys(eId).length > 1) {
+      prevContainer.externalId = eId;
+   }
+}
+
 /**********************************************************************\
  checkWellFormed() does a well formed check on the pTokenPart value, and
  reports any error through the error collector.
@@ -224,48 +259,59 @@ function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string
    ec: An ErrorCollector instance.
 \**********************************************************************/
 
-function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(
+   pTokenPart: ExternalId | void,
+   ec: ErrorCollector,
+   entityMetaData: EntityMetaData,
+): void {
    if (!pTokenPart || pTokenPart.unassigned) {
       return;
    }
 
-   ec.setPos(pTokenPart.idType);
-   const typeText = strOrBlank(pTokenPart.idType);
+   ec.setPos(pTokenPart.externalType);
+   const typeText = strOrBlank(pTokenPart.externalType);
    const capitalType = typeText.toLocaleUpperCase();
-   ec.check(ALLOWED_TYPES.indexOf(capitalType) === -1, WFEID.EXTERNALID_UNKNOWN, [ typeText ]);
-   ec.check(typeText !== capitalType, WFEID.EXTERNALID_INVALID_CASE, [ capitalType, typeText ]);
+   ec.check(ALLOWED_TYPES.indexOf(capitalType) === -1, WFEID.EXTERNALID_UNKNOWN, [typeText]);
+   ec.check(typeText !== capitalType, WFEID.EXTERNALID_INVALID_CASE, [capitalType, typeText]);
 
-   ec.setPos(pTokenPart.postIdTypeSpace);
-   ec.check(!pTokenPart.postIdTypeSpace, WFEID.EXTERNALID_IDTYPE_NO_SPACE);
+   ec.setPos(pTokenPart.externalTypeSpace);
+   ec.check(!pTokenPart.externalTypeSpace, WFEID.EXTERNALID_EXTERNALTYPE_NO_SPACE);
 
    if (capitalType === 'PUBLIC') {
       // This is very fragile if there is no value.
-      literal.checkWellFormed(pTokenPart.public, ec, entityMetaData, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
-         if (!pTokenPart.public || !pTokenPart.public.value) {
-            return;
-         }
-         let sToken
-
-         // we are so confused
-         if (pTokenPart.public.value.length > 0) {
-            if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
-               sToken = (pTokenPart.public.value[0] as any).text; //typeHack
-            } else {
-               sToken = (pTokenPart.public.value[0] as any).str;
+      literal.checkWellFormed(
+         pTokenPart.public,
+         ec,
+         entityMetaData,
+         WFEID.NOUN_EXTERNALID_PUBLIC,
+         () => {
+            if (!pTokenPart.public || !pTokenPart.public.value) {
+               return;
             }
+            let sToken;
 
-            const match = PUBID_CHARS.exec(sToken.str);
+            // we are so confused
+            if (pTokenPart.public.value.length > 0) {
+               if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
+                  sToken = (pTokenPart.public.value[0] as any).text; //typeHack
+               } else {
+                  sToken = (pTokenPart.public.value[0] as any).str;
+               }
 
-            ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-               [ sToken.str[match![0].length] ]);
+               const match = PUBID_CHARS.exec(sToken.str);
+
+               ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS, [
+                  sToken.str[match![0].length],
+               ]);
             }
-      });
+         },
+      );
    }
 
    if (capitalType === 'SYSTEM' || pTokenPart.system) {
       if (pTokenPart.public && pTokenPart.public.value) {
-         ec.setPos(pTokenPart.postPublicSpace);
-         ec.check(!pTokenPart.postPublicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+         ec.setPos(pTokenPart.publicSpace);
+         ec.check(!pTokenPart.publicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
       literal.checkWellFormed(pTokenPart.system, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
@@ -279,33 +325,37 @@ function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, enti
  can be inserted into a token.
 \**********************************************************************/
 
-function makeEntityLocation(pTokenPart: ExternalId | void) {
+function makeEntityLocation(pTokenPart: ExternalId | void): EntityLocation | undefined {
    if (!pTokenPart || pTokenPart.unassigned) {
       return;
    }
 
-   const value = (pTokenPart.system && pTokenPart.system.value && pTokenPart.system.value.length > 0) ?
-      (pTokenPart.system.value[0] as any).text.str : undefined; // typeHack
-   const publicValue = (pTokenPart.public && pTokenPart.public.value && pTokenPart.public.value.length > 0) ?
-      (pTokenPart.public.value[0] as any).text.str : undefined; // typeHack
+   const value =
+      pTokenPart.system && pTokenPart.system.value && pTokenPart.system.value.length > 0
+         ? (pTokenPart.system.value[0] as any).text.str
+         : undefined; // typeHack
+   const publicValue =
+      pTokenPart.public && pTokenPart.public.value && pTokenPart.public.value.length > 0
+         ? (pTokenPart.public.value[0] as any).text.str
+         : undefined; // typeHack
 
    return new EntityLocation(value, publicValue);
 }
 
-function getSTokens(pTokenPart?: ExternalId) {
-   let results = [];
+function getSTokens(pTokenPart?: ExternalId): Array<SToken> {
+   let results: Array<SToken | undefined> = [];
    if (!pTokenPart) {
       return [];
    }
 
-   results.push(pTokenPart.idType);
-   results.push(pTokenPart.postIdTypeSpace);
+   results.push(pTokenPart.externalType);
+   results.push(pTokenPart.externalTypeSpace);
 
    results = results.concat(literal.getSTokens(pTokenPart.public));
-   results.push(pTokenPart.postPublicSpace);
+   results.push(pTokenPart.publicSpace);
    results = results.concat(literal.getSTokens(pTokenPart.system));
 
-   return results.filter(item => item);
+   return results.filter((item) => item) as any;
 }
 
 const externalId = {
@@ -320,7 +370,4 @@ const externalId = {
 
 export default externalId;
 
-export {
-   EXTERNAL_ID,
-   ExternalId,
-};
+export { EXTERNAL_ID, ExternalId };

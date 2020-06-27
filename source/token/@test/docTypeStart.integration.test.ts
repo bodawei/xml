@@ -22,8 +22,8 @@ describe('docTypeStart (integration)', () => {
          nameSpace: makeSToken(' '),
          externalId: {
             type: 'EXTERNAL_ID',
-            idType: makeSToken('SYSTEM'),
-            postIdTypeSpace: makeSToken(' '),
+            externalType: makeSToken('SYSTEM'),
+            externalTypeSpace: makeSToken(' '),
             system: {
                openQuote: makeSToken('"'),
                value: [ new TextPToken({ text: makeSToken('sys.dtd') }) ],
