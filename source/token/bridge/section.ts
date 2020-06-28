@@ -4,14 +4,30 @@ import { STokenSource, SToken } from 'sToken';
 
 import { parseCdata, CdataPToken } from '../cdata';
 import { parseConditional, ConditionalPToken } from '../conditional';
+import { parseParameterEntityReference, ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 type SectionStart = {
    open: SToken,
    openSpace?: SToken,
    sectionType?: SToken,
+   peRef?: ParameterEntityReferencePToken,
+   peRefPlus?: Array<ParameterEntityReferencePToken>,
    sectionTypeSpace?: SToken,
 };
 type DeliverSection = (section: CdataPToken | ConditionalPToken) => void;
+
+
+function continueToContent(source: STokenSource, sectionData: SectionStart, deliverSection: DeliverSection) {
+   source.extractNoParams('space', (typeSpace) => {
+      sectionData.sectionTypeSpace = typeSpace;
+
+      if (sectionData.sectionType && sectionData.sectionType.str.toLowerCase() === 'cdata') {
+         parseCdata(source, sectionData, deliverSection);
+      } else {
+         parseConditional(source, sectionData, deliverSection);
+      }
+   });
+}
 
 /**********************************************************************\
  parseSection() parses a "section", which is either a CDATA section or
@@ -27,8 +43,10 @@ type DeliverSection = (section: CdataPToken | ConditionalPToken) => void;
       [19] CDStart     ::= '<![CDATA' ...
       [62] includeSect ::= '<![' S? 'INCLUDE' S? ...
       [63] ignoreSect  ::= '<![' S? 'IGNORE' S? ...
+      (implicitly)  ::= '<![' S? parameterEntityReference S? ...
    Lax:
       section ::= '<![' S name S
+      section ::= '<![' S % S name S ; S
 \**********************************************************************/
 
 function parseSection(source: STokenSource, openSToken: SToken, deliverSection: DeliverSection) {
@@ -36,14 +54,20 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
       open: openSToken,
    };
    source.extractToObjectNoParams('space', sectionData, 'openSpace');
-   source.extractToObject('word', [ '[', '>' ], sectionData, 'sectionType');
-   source.extractNoParams('space', (typeSpace) => {
-      sectionData.sectionTypeSpace = typeSpace;
-      // revisit the checkWellFormed() cases when we add conditional sections
-      if (sectionData.sectionType && sectionData.sectionType.str.toLowerCase() === 'cdata') {
-         parseCdata(source, sectionData, deliverSection);
+   source.extractNoParams('peekChar', (charSToken) => {
+      if (charSToken && charSToken.str === '%') {
+         parseParameterEntityReference(source, (result) => {
+            sectionData.peRef = result;
+
+            if (result) {
+               sectionData.peRefPlus = [result];
+            }
+
+            continueToContent(source, sectionData, deliverSection);
+         });
       } else {
-         parseConditional(source, sectionData, deliverSection);
+         source.extractToObject('word', [ '[', '>' ], sectionData, 'sectionType');
+         continueToContent(source, sectionData, deliverSection);
       }
    });
 }

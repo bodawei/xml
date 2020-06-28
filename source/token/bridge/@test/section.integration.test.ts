@@ -2,35 +2,79 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { defaultExtractors } from '../../../extractor';
-import { SToken, STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { defaultExtractors } from 'extractor';
+import { SToken, STokenSource, toSToken } from 'sToken';
+import { CdataPToken, ConditionalPToken, ParameterEntityReferencePToken } from 'token';
 
-import { CdataPToken } from '../../cdata';
 import { parseSection } from '../section';
 
 describe('section (integration)', () => {
 
    describe('parse()', () => {
 
-      it('produces a full PToken', (done) => {
+      it('produces a full CDATA PToken', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         const makeSToken = makeSTokenMaker()
          source.addText(' CDATA [ FOO ]]>');
          source.endText();
 
-         parseSection(source, SToken.fromString('<!['), (parsing) => {
+         parseSection(source, toSToken('<!['), (parsing) => {
             const expected = new CdataPToken({
-               open: SToken.fromString('<!['),
-               openSpace: makeSToken(' '),
-               sectionType: makeSToken('CDATA'),
-               sectionTypeSpace: makeSToken(' '),
-               bracket: makeSToken('['),
-               text: makeSToken(' FOO '),
-               close: makeSToken(']]>'),
+               open: toSToken('<!['),
+               openSpace: toSToken(' '),
+               sectionType: toSToken('CDATA'),
+               sectionTypeSpace: toSToken(' '),
+               bracket: toSToken('['),
+               text: toSToken(' FOO '),
+               close: toSToken(']]>')
             });
 
-            expect(parsing).toEqual(expected);
+            expect(parsing).toEqualRangeless(expected);
+            done();
+         });
+      });
+
+      it('produces a full other valued PToken', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText(' INCLUDE [ FOO ]]>');
+         source.endText();
+
+         parseSection(source, SToken.fromString('<!['), (parsing) => {
+            const expected = new ConditionalPToken({
+               open: SToken.fromString('<!['),
+               openSpace: toSToken(' '),
+               sectionType: toSToken('INCLUDE'),
+               sectionTypeSpace: toSToken(' '),
+               bracket: toSToken('['),
+            });
+
+            expect(parsing).toEqualRangeless(expected);
+            done();
+         });
+      });
+
+      it('produces a full token with a parameter entity reference', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const peRef = new ParameterEntityReferencePToken({
+            open: toSToken('%'),
+            openSpace: toSToken(' '),
+            name: toSToken('foo'),
+            nameSpace: toSToken(' '),
+            close: toSToken(';'),
+         });
+         source.addText(' % foo ; [ FOO ]]>');
+         source.endText();
+
+         parseSection(source, SToken.fromString('<!['), (parsing) => {
+            const expected = new ConditionalPToken({
+               open: SToken.fromString('<!['),
+               openSpace: toSToken(' '),
+               peRef,
+               peRefPlus: [peRef],
+               sectionTypeSpace: toSToken(' '),
+               bracket: toSToken('['),
+            });
+
+            expect(parsing).toEqualRangeless(expected);
             done();
          });
       });

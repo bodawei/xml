@@ -1,0 +1,4 @@
+<!ENTITY % condSect1 "<![INCLUDE[<!ELEMENT " >
+<!ENTITY % condSect2 "root ANY>]]>" >
+
+%condSect1;%condSect2;

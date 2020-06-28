@@ -9,7 +9,7 @@ const PARAMETER_ENTITY_REFERENCE_PTOKEN = 'PARAMETER_ENTITY_REFERENCE_PTOKEN';
 const PARAMETER_ENTITY_REFERENCE_XTOKEN = 'PARAMETER_ENTITY_REFERENCE_XTOKEN';
 const WFEID = WellFormedError.ID;
 
-type DeliverPToken = (pToken: ParameterEntityReferencePToken | void) => void;
+type DeliverPToken = (pToken: ParameterEntityReferencePToken | undefined) => void;
 
 type ParamReference = {
    open: SToken;

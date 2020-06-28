@@ -130,8 +130,11 @@ module.exports = {
    },
    overrides: [ {
       files: [
+         './source/token/bridge/section.ts',
+         './source/token/conditional.ts',
          './source/token/common/externalId.ts',
-         './source/expand/**/*.ts', './source/wellformedness/**/*.ts' ],
+         './source/expand/**/*.ts',
+         './source/wellformedness/**/*.ts' ],
       parser: '@typescript-eslint/parser',
       plugins: [
          '@typescript-eslint',
@@ -148,6 +151,8 @@ module.exports = {
       },
    }, {
       files: [
+         './source/token/**/@test/**/section.ts',
+         './source/token/**/@test/**/conditional.ts',
          './source/token/common/**/externalId*test.ts',
          './source/basic/**/*.test.ts',
          './source/expand/**/*.test.ts',

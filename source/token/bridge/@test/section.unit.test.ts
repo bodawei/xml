@@ -1,11 +1,14 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
+import { ParameterEntityReferencePToken } from 'token';
 
 import * as cdata from '../../cdata';
 import * as conditional from '../../conditional';
+import * as peReference from '../../parameterEntityReference';
+
 import { SectionStart, parseSection } from '../section';
 
 describe('section (unit)', () => {
@@ -23,8 +26,12 @@ describe('section (unit)', () => {
    describe('parseSection()', () => {
       let mockSource: MockSTokenSource;
       let callback: jasmine.Spy;
+      let peRef: ParameterEntityReferencePToken;
 
       beforeEach(() => {
+         peRef = new ParameterEntityReferencePToken({
+            open: toSToken('%')
+         });
          callback = jasmine.createSpy('callbackSpy');
          spyOn(cdata, 'parseCdata').and.callFake((_1: any, start: any, cb: (x: any) => void) => {
             cb(start);
@@ -32,11 +39,16 @@ describe('section (unit)', () => {
          spyOn(conditional, 'parseConditional').and.callFake((_1: any, start: any, cb: (x: any) => void) => {
             cb(start);
          });
+         spyOn(peReference, 'parseParameterEntityReference').and.callFake((_1: any, cb: (x: any) => void) => {
+            cb(peRef);
+         });
+
       });
 
-      it('does an ordinary full parsing', () => {
+      it('delivers a section start for CDATA', () => {
          mockSource = new MockSTokenSource([
             [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK('C'), 'peekChar' ],
             [ 'CDATA', 'word', [ '[', '>' ] ],
             [ ' ', 'space' ],
          ]);
@@ -45,6 +57,45 @@ describe('section (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless(sectionStart);
+      });
+
+      it('delivers a section start for non-CDATA value', () => {
+         mockSource = new MockSTokenSource([
+            [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK('S'), 'peekChar' ],
+            [ 'SUPER', 'word', [ '[', '>' ] ],
+            [ ' ', 'space' ],
+         ]);
+
+         parseSection(mockSource, sectionStart.open, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toEqualRangeless({
+            open: SToken.fromString('<!['),
+            openSpace: SToken.fromString(' '),
+            sectionType: SToken.fromString('SUPER'),
+            sectionTypeSpace: SToken.fromString(' '),
+         });
+      });
+
+      it('delivers a section start with a parameter entity reference', () => {
+         mockSource = new MockSTokenSource([
+            [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK('%'), 'peekChar' ],
+            // parameter entity reference would 
+            [ ' ', 'space' ],
+         ]);
+
+         parseSection(mockSource, sectionStart.open, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toEqualRangeless({
+            open: SToken.fromString('<!['),
+            openSpace: SToken.fromString(' '),
+            peRef,
+            peRefPlus: [peRef],
+            sectionTypeSpace: SToken.fromString(' '),
+         });
       });
 
       it('copes with EOF', () => {

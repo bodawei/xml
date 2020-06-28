@@ -41,6 +41,9 @@ import {
    XMLDECL_PTOKEN,
 } from 'token';
 
+import { conditionalSectionPTokenToXToken } from './tokens/conditionalSection';
+import { conditionalClosePTokenToXToken } from './tokens/conditionalClose';
+
 class PToXTokenStream extends Transform {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
@@ -61,12 +64,16 @@ class PToXTokenStream extends Transform {
          case elementDeclaration.PTYPE:
             this.push(elementDeclaration.pTokenToXToken(pToken));
             break;
+         case CONDITIONAL_PTOKEN:
+            this.push(conditionalSectionPTokenToXToken(pToken));
+            break;
+         case CONDITIONAL_CLOSE_PTOKEN:
+            this.push(conditionalClosePTokenToXToken(pToken));
+            break;
          case CDATA_PTOKEN:
          case CHARDATA_PTOKEN:
          case CHARREF_PTOKEN:
          case COMMENT_PTOKEN:
-         case CONDITIONAL_PTOKEN:
-         case CONDITIONAL_CLOSE_PTOKEN:
          case DOCTYPE_END_PTOKEN:
          case DOCTYPE_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:

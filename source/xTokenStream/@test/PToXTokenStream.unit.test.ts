@@ -39,6 +39,9 @@ import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { SpacePToken } from 'source/token/space';
 
+import * as conditionalSection from '../tokens/conditionalSection';
+import * as conditionalClose from '../tokens/conditionalClose';
+
 describe('PToXTokenStream (unit)', () => {
    let tokenStream: PToXTokenStream;
 
@@ -108,22 +111,22 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls conditional.toXToken()', () => {
       const pToken = new ConditionalPToken({ open: SToken.fromString('<[') });
-      spyOn(pToken, 'toXToken');
+      const convertSpy = spyOn(conditionalSection, 'conditionalSectionPTokenToXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
+      expect(convertSpy).toHaveBeenCalledWith(pToken);
    });
 
    it('calls conditionalClose.toXToken()', () => {
       const pToken = new ConditionalClosePToken({ open: SToken.fromString(']]>') });
-      spyOn(pToken, 'toXToken');
+      spyOn(conditionalClose, 'conditionalClosePTokenToXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
+      expect(conditionalClose.conditionalClosePTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls ElementStartPToken.toXToken()', () => {

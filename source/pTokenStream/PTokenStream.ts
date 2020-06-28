@@ -227,7 +227,7 @@ class PTokenStream extends Readable {
                break;
             case '<![':
                parseSection(this._sTokenSource, markupStartSToken, (section) => {
-                  if (section instanceof ConditionalPToken && section.incomplete) {
+                  if (section instanceof ConditionalPToken) {
                      this.conditionalIncludeDepth++;
                   }
                   deliverParse(section);

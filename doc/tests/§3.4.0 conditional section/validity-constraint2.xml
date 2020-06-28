@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE root SYSTEM './validity-constraint2.dtd'>
+
+<root>
+<![CDATA[
+Demonstrates That, of course, a conditional section can not span parameter entity values
+
+   xmllint --loaddtd  --noent  --valid validity-constraint2.xml
+]]>
+</root>
+

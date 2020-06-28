@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE root SYSTEM './validity-constraint1.dtd'>
+
+<root>
+<![CDATA[
+Demonstrates a simple use of a conditional section in a PE Ref that deines the root element.
+
+   xmllint --loaddtd  --noent  --valid validity-constraint1.xml
+]]>
+</root>
+

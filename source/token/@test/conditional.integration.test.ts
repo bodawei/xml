@@ -32,17 +32,6 @@ describe('conditional (integration)', () => {
             open: fromString('<!['),
             sectionType: fromString('IGNORE'),
             bracket: fromString('['),
-            ignored: [
-               fromString('blah'),
-               fromString('<!['),
-               fromString('two'),
-               fromString('<!['),
-               fromString('three'),
-               fromString(']]>'),
-               fromString('four'),
-               fromString(']]>'),
-            ],
-            close: fromString(']]>'),
          });
          source.addText('[blah<![two<![three]]>four]]>]]>');
 

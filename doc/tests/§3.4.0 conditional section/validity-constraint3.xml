@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE root SYSTEM './validity-constraint3.dtd'>
+
+<root>
+<![CDATA[
+Demonstrates that we can break a conditional section up across PE declarations as long
+as the final declaration is unified.
+
+   xmllint --loaddtd  --noent  --valid validity-constraint3.xml
+]]>
+</root>
+

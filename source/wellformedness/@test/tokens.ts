@@ -32,6 +32,7 @@ import {
    elementDeclaration,
    CharDataPToken,
    CharRefPToken,
+   ElementDeclarationPToken,
 } from 'token';
 
 function makeAttListDeclaration(): any {
@@ -54,42 +55,47 @@ function makeAttListDeclaration(): any {
    });
 }
 
-const makeCharData = () =>
-   new CharDataPToken({
+function makeCharData(): CharDataPToken {
+   return new CharDataPToken({
       text: toSToken('test text'),
    });
+}
 
-const makeCdata = () =>
-   new CdataPToken({
+function makeCdata(): CdataPToken {
+   return new CdataPToken({
       open: toSToken('<!['),
       sectionType: toSToken('CDATA'),
       bracket: toSToken('['),
       text: toSToken('test text'),
       close: toSToken(']]>'),
    });
+}
 
-const makeCharRef = () =>
-   new CharRefPToken({
+function makeCharRef(): CharRefPToken {
+   return new CharRefPToken({
       open: toSToken('&#'),
       digits: toSToken('68'),
       close: toSToken(';'),
       charCode: 68,
    });
+}
 
-const makeComment = () =>
-   new CommentPToken({
+function makeComment(): CommentPToken {
+   return new CommentPToken({
       open: toSToken('<!--'),
       text: [toSToken('commentText')],
       close: toSToken('-->'),
    });
+}
 
-const makeDocTypeStart = () =>
-   new DocTypeStartPToken({
+function makeDocTypeStart(): DocTypeStartPToken {
+   return new DocTypeStartPToken({
       open: toSToken('<!'),
       declType: toSToken('DOCTYPE'),
       name: toSToken('root'),
       openSubset: toSToken('['),
    });
+}
 
 function makeDocTypeEnd(): DocTypeEndPToken {
    return new DocTypeEndPToken({
@@ -137,8 +143,8 @@ function makeElementStart(): ElementStartPToken {
    });
 }
 
-const makeElementDeclaration = () =>
-   new elementDeclaration.PToken({
+function makeElementDeclaration(): ElementDeclarationPToken {
+   return new elementDeclaration.PToken({
       open: toSToken('<!'),
       postOpenSpace: undefined,
       declType: toSToken('ELEMENT'),
@@ -149,11 +155,12 @@ const makeElementDeclaration = () =>
       postContentSpecSpace: toSToken(' '),
       close: toSToken('>'),
    });
+}
 
-function makeExternalSubsetEnd() {
+function makeExternalSubsetEnd(): ExternalSubsetEndToken {
    return new ExternalSubsetEndToken();
 }
-function makeExternalSubsetStart() {
+function makeExternalSubsetStart(): ExternalSubsetStartToken {
    return new ExternalSubsetStartToken();
 }
 
@@ -221,35 +228,40 @@ function makeParameterExternalEntityDeclaration(): ParameterEntityDeclarationPTo
    });
 }
 
-const makeParameterEntityReference = () =>
-   new ParameterEntityReferencePToken({
+function makeParameterEntityReference(): ParameterEntityReferencePToken {
+   return new ParameterEntityReferencePToken({
       open: toSToken('&'),
       name: toSToken('entityName'),
       close: toSToken(';'),
    });
+}
 
-const makeParameterEntityStart = () =>
-   new ParameterEntityStartPToken(makeParameterEntityReference());
-function makeParameterEntityEnd() {
+function makeParameterEntityStart(): ParameterEntityStartPToken {
+   return new ParameterEntityStartPToken(makeParameterEntityReference());
+}
+
+function makeParameterEntityEnd(): ParameterEntityEndPToken {
    return new ParameterEntityEndPToken(makeParameterEntityReference());
 }
 
-const makeProcessingInstruction = () =>
-   new ProcessingInstructionPToken({
+function makeProcessingInstruction(): ProcessingInstructionPToken {
+   return new ProcessingInstructionPToken({
       open: toSToken('<?'),
       target: toSToken('foo'),
       targetSpace: toSToken(' '),
       instruction: toSToken('blah'),
       close: toSToken('?>'),
    });
+}
 
-const makeSpace = () =>
-   new SpacePToken({
+function makeSpace(): SpacePToken {
+   return new SpacePToken({
       text: toSToken(' '),
    });
+}
 
-const makeTextDecl = () =>
-   new TextDeclarationPToken({
+function makeTextDecl(): TextDeclarationPToken {
+   return new TextDeclarationPToken({
       open: toSToken('<?'),
       openSpace: undefined,
       target: toSToken('xml'),
@@ -265,9 +277,10 @@ const makeTextDecl = () =>
       ],
       close: toSToken('?>'),
    });
+}
 
-const makeXmlDecl = () =>
-   new XmlDeclarationPToken({
+function makeXmlDecl(): XmlDeclarationPToken {
+   return new XmlDeclarationPToken({
       open: toSToken('<?'),
       openSpace: undefined,
       target: toSToken('xml'),
@@ -283,6 +296,7 @@ const makeXmlDecl = () =>
       ],
       close: toSToken('?>'),
    });
+}
 
 export {
    makeAttListDeclaration,
