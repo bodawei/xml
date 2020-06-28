@@ -4,7 +4,7 @@ import { EntityLocation, EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
 
-import externalId, { ExternalId } from './common/externalId';
+import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens, makeEntityLocation } from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import misc from './common/misc';
 
@@ -102,7 +102,7 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
    source.extractToObject('word', [ '[', '>' ], pToken, 'name'); // look for quotes?
    source.extractToObject('space', undefined, pToken, 'nameSpace');
 
-   externalId.parse(source, [ '[', '>' ], false, (parseResult) => {
+   parseExternalId(source, [ '[', '>' ], false, (parseResult) => {
       pToken.externalId = parseResult.externalId;
 
       source.extractToObject('space', undefined, pToken, 'externalIdSpace');
@@ -125,7 +125,7 @@ function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityM
    ec.check(!pToken.name, WFEID.DOCTYPE_NO_NAME);
    misc.checkName(pToken.name, ec, entityMetaData, WFEID.DOCTYPE_NAME_INVALID);
 
-   externalId.checkWellFormed(pToken.externalId, ec, entityMetaData);
+   checkExternalIdWellFormed(pToken.externalId, ec, entityMetaData);
 
    ec.setPos(pToken.openSubset);
 }
@@ -136,7 +136,7 @@ function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityM
 
 function pTokenToXToken(pToken: DocTypeStartPToken) {
    return new DocTypeStartXToken(strOrBlank(pToken.name),
-      externalId.makeEntityLocation(pToken.externalId) as EntityLocation, // typeHack
+   makeEntityLocation(pToken.externalId) as EntityLocation, // typeHack
       !!pToken.openSubset,
       pToken);
 }
@@ -147,7 +147,7 @@ function pTokenToXToken(pToken: DocTypeStartPToken) {
 
 function sTokensFromPToken(pToken: DocTypeStartPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
-   const externalTokens = externalId.getSTokens(pToken.externalId);
+   const externalTokens = getSTokens(pToken.externalId);
 
    builder.add(
       pToken.open,

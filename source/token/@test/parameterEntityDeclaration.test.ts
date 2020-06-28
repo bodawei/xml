@@ -4,7 +4,7 @@
 import { SToken } from 'sToken';
 
 import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from '../parameterEntityDeclaration';
-import externalId from '../common/externalId';
+import * as externalId from '../common/externalId';
 import literal from '../common/literal';
 
 describe('ParameterEntityDeclaration (unit)', () => {

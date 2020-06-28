@@ -1,15 +1,13 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { EntityLocation, EntityMetaData } from 'basic';
-import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
-import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { ErrorCollector } from 'error';
+import { strOrBlank, SToken, STokenArrayBuilder } from 'sToken';
 
 import { DeclarationStart } from './bridge/declaration';
-import unassigned, { UnassignedType, UnassignedArray } from './common/unassigned';
-import misc from './common/misc';
-import externalId, { ExternalId } from './common/externalId';
+import { UnassignedArray } from './common/unassigned';
+import { ExternalId, makeEntityLocation, getSTokens } from './common/externalId';
 import literal, { LiteralValuePToken } from './common/literal';
-import { UnassignedValue } from './common/unassigned';
 import { TextPToken } from './text';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
@@ -106,7 +104,7 @@ class ParameterEntityDeclarationPToken {
 function pTokenToXToken(pToken: ParameterEntityDeclarationPToken) {
    return new ParameterEntityDeclarationXToken(strOrBlank(pToken.name),
    pToken.value as any,
-   externalId.makeEntityLocation(pToken.externalId),
+   makeEntityLocation(pToken.externalId),
    pToken as any);
 }
 
@@ -117,7 +115,7 @@ function pTokenToXToken(pToken: ParameterEntityDeclarationPToken) {
 function sTokensFromPToken(pToken: ParameterEntityDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
    const literalSTokens = literal.getSTokens(pToken);
-   const externalIdSTokens = externalId.getSTokens(pToken.externalId);
+   const externalIdSTokens = getSTokens(pToken.externalId);
 
    builder.add(pToken.open,
       pToken.openSpace,

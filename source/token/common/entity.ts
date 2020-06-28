@@ -1,20 +1,20 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import {  EntityMetaData } from 'basic';
 import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
-import { strOrBlank, SToken, STokenSource } from 'sToken';
+import { strOrBlank } from 'sToken';
 
-import unassigned, { UnassignedType, UnassignedArray } from '../common/unassigned';
+import unassigned, { UnassignedType } from '../common/unassigned';
 import misc from '../common/misc';
-import externalId, { ExternalId } from '../common/externalId';
+import { ExternalId, assignExternalIdUnssigned, checkExternalIdWellFormed } from '../common/externalId';
 import literal from '../common/literal';
 import { UnassignedValue } from '../common/unassigned';
 import { TextPToken } from '../text';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
-import { GeneralEntityDeclarationPToken, GeneralEntityDeclarationXToken } from '../generalEntityDeclaration';
-import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from '../parameterEntityDeclaration';
+import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
+import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -63,13 +63,27 @@ function assignUnassigned(pToken: GeneralEntityDeclarationPToken | ParameterEnti
 
    // Help guide where to fill in the unassigned values
    const inProlog = prolog.filter((item) => item.name === pToken.nextPropName).length > 0;
-   const inExternalId = !!(pToken.externalId && pToken.externalId.unassigned);
+   const inExternalId = !!pToken.externalId;
    const isEntityValueOrExternalId = pToken.nextPropName === 'entityValueOrId';
    const inEpilog = epilog.filter((item) => item.name === pToken.nextPropName);
    let doEpilog = inEpilog.length > 0;
 
    if (inExternalId) {
-      externalId.assignUnassigned(pToken.externalId as ExternalId, pToken, 'nameSpace'); // typeHack
+      const results = assignExternalIdUnssigned(pToken.externalId, unValues, pToken.nextPropName);
+      if (results.preSpace) {
+         if (pToken.nameSpace) {
+            pToken.nameSpace.merge(results.preSpace);
+         } else {
+            (pToken as any).nameSpace = results.preSpace;
+         }
+      }
+   
+      if (results.externalId) {
+         (pToken as any).externalId = results.externalId;
+      }
+
+      (pToken as any).unassigned = results.unassigned;
+   
       doEpilog = true;
    } else {
       if (inProlog) {
@@ -94,10 +108,21 @@ function assignUnassigned(pToken: GeneralEntityDeclarationPToken | ParameterEnti
                { name: 'entityValueSpace', type: 'space' },
             ]);
          } else {
-            (pToken as any).externalId = {
-               unassigned: pToken.unassigned,
-            } as ExternalId; // typeHack
-            externalId.assignUnassigned((pToken as any).externalId, pToken, 'nameSpace');
+            const results = assignExternalIdUnssigned(pToken.externalId, pToken.unassigned!);
+            if (results.preSpace) {
+               if (pToken.nameSpace) {
+                  pToken.nameSpace.merge(results.preSpace);
+               } else {
+                  (pToken as any).nameSpace = results.preSpace;
+               }
+            }
+         
+            if (results.externalId) {
+               (pToken as any).externalId = results.externalId;
+            }
+      
+            (pToken as any).unassigned = results.unassigned;
+      
             doEpilog = true;
          }
       }
@@ -153,7 +178,7 @@ function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntit
    ec.check(!pToken.nameSpace, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
    if (pToken.externalId) {
-      externalId.checkWellFormed(pToken.externalId, ec, entityMetaData);
+      checkExternalIdWellFormed(pToken.externalId, ec, entityMetaData);
 
       if (pToken instanceof GeneralEntityDeclarationPToken && pToken.nData) {
          ec.setPos(pToken.externalIdSpace);

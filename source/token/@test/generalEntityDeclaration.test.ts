@@ -4,7 +4,7 @@
 import { SToken } from 'sToken';
 
 import { GeneralEntityDeclarationPToken, GeneralEntityDeclarationXToken } from '../generalEntityDeclaration';
-import externalId from '../common/externalId';
+import * as externalId from '../common/externalId';
 import literal from '../common/literal';
 
 describe('generalEntityDeclaration (unit)', () => {

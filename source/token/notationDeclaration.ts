@@ -4,7 +4,7 @@ import { EntityLocation, EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
-import externalId, { ExternalId } from './common/externalId';
+import { ExternalId, parseExternalId, assignExternalIdUnssigned, checkExternalIdWellFormed, getSTokens, makeEntityLocation } from './common/externalId';
 import misc from './common/misc';
 import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';
 import { DeclarationStart } from './bridge/declaration';
@@ -111,7 +111,7 @@ function parseNotationDeclaration(source: STokenSource, declarationStart: Declar
       source.extractToObject('word', [ '>' ], protoToken, 'name');
       source.extractToObjectNoParams('space', protoToken, 'nameSpace');
 
-      externalId.parse(source, [ '>' ], true, (parsedResult) => {
+      parseExternalId(source, [ '>' ], true, (parsedResult) => {
          protoToken.externalId = parsedResult.externalId;
          protoToken.unassigned = parsedResult.peRefPlus;
          protoToken.nextPropName = parsedResult.nextPropName;
@@ -160,7 +160,20 @@ function assignUnassigned(notationPToken: NotationDeclarationPToken): void {
       ]);
    }
 
-   externalId.assignUnassignedNew(unValues, notationPToken, 'nameSpace');
+   const nextName = notationPToken.nextPropName === 'name' ? undefined : notationPToken.nextPropName;
+   const results = assignExternalIdUnssigned(notationPToken.externalId, unValues, nextName);
+
+   if (results.preSpace) {
+      if (notationPToken.nameSpace) {
+         notationPToken.nameSpace.merge(results.preSpace);
+      } else {
+         (notationPToken as any).nameSpace = results.preSpace;
+      }
+   }
+
+   if (results.externalId) {
+      (notationPToken as any).externalId = results.externalId;
+   }
 
    notationPToken.extra = unValues;
 }
@@ -194,7 +207,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, 
    ec.check(!pToken.nameSpace, WFEID.NOTATIONDECL_NAME_NO_SPACE, [ nameText ]);
 
    ec.check(!pToken.externalId, WFEID.NOTATIONDECL_NO_EXTERNALID);
-   externalId.checkWellFormed(pToken.externalId, ec, entityMetaData);
+   checkExternalIdWellFormed(pToken.externalId, ec, entityMetaData);
 
    ec.setPos(pToken.externalIdSpace);
    ec.setPos(pToken.close);
@@ -209,7 +222,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, 
 
 function pTokenToXToken(pToken: NotationDeclarationPToken): NotationDeclarationXToken {
    return new NotationDeclarationXToken(strOrBlank(pToken.name),
-      externalId.makeEntityLocation(pToken.externalId), pToken);
+      makeEntityLocation(pToken.externalId), pToken);
 }
 
 /**********************************************************************\
@@ -225,7 +238,7 @@ function sTokensFromPToken(pToken: NotationDeclarationPToken): Array<SToken> {
       pToken.declTypeSpace,
       pToken.name,
       pToken.nameSpace,
-      externalId.getSTokens(pToken.externalId),
+      getSTokens(pToken.externalId),
       pToken.externalIdSpace,
       unassigned.getSTokens(pToken.extra || []),
       pToken.close);

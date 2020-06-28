@@ -4,7 +4,7 @@ import { STokenSource } from 'sToken';
 
 import { DeclarationStart } from './bridge/declaration';
 import unassigned from './common/unassigned';
-import externalId from './common/externalId';
+import { parseExternalId } from './common/externalId';
 import literal from './common/literal';
 import { CharRefPToken } from './charRef';
 import { TextPToken } from './text';
@@ -125,16 +125,16 @@ function parseEntityValue(source: STokenSource, pToken: GeneralEntityDeclaration
             return;
          }
 
-         parseExternalId(source, pToken, done);
+         parseExternalIdOfEntity(source, pToken, done);
       });
    });
 
    unassigned.checkForPERef(source, callback);
 }
 
-function parseExternalId(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
+function parseExternalIdOfEntity(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'entityValueOrId', done, () => {
-      externalId.parse(source, [ '>' ], true, (parsedResult) => {
+      parseExternalId(source, [ '>' ], true, (parsedResult) => {
          (pToken as any).externalId = parsedResult.externalId;
          (pToken as any).unassigned = parsedResult.peRefPlus;
          (pToken as any).peRefPlus = parsedResult.peRefPlus;

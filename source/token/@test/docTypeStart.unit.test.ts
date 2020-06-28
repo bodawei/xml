@@ -10,7 +10,8 @@ import { WellFormedError } from 'error';
 
 import declaration from '../bridge/baseDeclaration';
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
-import externalId, { EXTERNAL_ID } from '../common/externalId';
+import { EXTERNAL_ID } from '../common/externalId';
+import * as externalId from '../common/externalId';
 import misc from '../common/misc';
 
 describe('docTypeStart (unit)', () => {
@@ -33,7 +34,7 @@ describe('docTypeStart (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(externalId, 'parse').and.callFake((sTokenSource: STokenSource, tokens: any, allowPERefs: boolean, cb: any) => {
+         spyOn(externalId, 'parseExternalId').and.callFake((sTokenSource: STokenSource, tokens: any, allowPERefs: boolean, cb: any) => {
             cb({ externalId: { type: EXTERNAL_ID } });
          });
       });
@@ -85,7 +86,7 @@ describe('docTypeStart (unit)', () => {
 
          declCheckWellFormedSpy = spyOn(declaration, 'checkWellFormed');
          spyOn(misc, 'checkName');
-         spyOn(externalId, 'checkWellFormed');
+         spyOn(externalId, 'checkExternalIdWellFormed');
       });
 
       it('asks the declaration module to look for problems in the declaration part', () => {
@@ -104,7 +105,7 @@ describe('docTypeStart (unit)', () => {
       it('checks whether externalId is valid', () => {
          docTypeStartPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(externalId.checkWellFormed)
+         expect(externalId.checkExternalIdWellFormed)
             .toHaveBeenCalledWith(docTypeStartPToken.externalId, mockErrorCollector, emd);
       });
 

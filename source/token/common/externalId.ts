@@ -5,7 +5,7 @@ import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, STokenSource, SToken } from 'sToken';
 
 import literal, { LiteralPToken } from './literal';
-import unassigned from './unassigned';
+import unassigned, { UnassignedType } from './unassigned';
 import { UnassignedArray } from './unassigned';
 import { TEXT_PTOKEN } from '../text';
 
@@ -44,6 +44,12 @@ type ParsedExternalId = {
    externalId?: ExternalId;
    peRefPlus: UnassignedArray;
    nextPropName?: string;
+};
+
+type AssignResult = {
+   preSpace?: SToken;
+   externalId?: ExternalId;
+   unassigned: UnassignedArray;
 };
 
 /**********************************************************************\
@@ -134,7 +140,7 @@ function parsePublic(
    unassigned.checkForPERef(source, callback);
 }
 
-function parse(
+function parseExternalId(
    source: STokenSource,
    terminators: Array<string>,
    allowPERefs: boolean,
@@ -185,55 +191,46 @@ function parse(
 
    unassigned.checkForPERef(source, callback);
 }
-function assignUnassigned(
-   externalId: ExternalId,
-   prevContainer?: { [key: string]: any },
-   prevSpacePropName?: string,
-): void {
-   const unValues = externalId.unassigned || [];
+
+function assignExternalIdUnssigned(
+   externalId: ExternalId | undefined,
+   unassignedValues: UnassignedArray,
+   nextPropName: string | undefined = 'externalType',
+): AssignResult {
+   const newExternalId: ProtoExternalId = { type: EXTERNAL_ID, peRefPlus: [], ...externalId };
    const descriptors = [
       { name: 'externalType', type: 'word', allowed: /public|system/i },
       { name: 'externalTypeSpace', type: 'space' },
    ];
 
-   if (!externalId.unassigned || unValues.length === 0) {
-      delete externalId.unassigned;
-      delete externalId.nextPropName;
-      return;
+   // Do not continue processing if we have no values, or there are unexpanded references.
+   if (unassignedValues.length === 0) {
+      return { unassigned: unassignedValues };
    }
 
-   const unexpandedRef = unValues.filter((item) => item.type === 'reference');
-
-   if (unexpandedRef.length !== 0) {
-      return;
-   }
-
-   if (prevContainer && prevSpacePropName) {
-      descriptors.unshift({ name: '__bogusWorkaround', type: 'space' });
-   }
-
-   const nextPropName = externalId.nextPropName || 'externalType';
-   unassigned.assignToProps(externalId.unassigned, externalId, nextPropName, descriptors);
-
-   if (externalId.__bogusWorkaround) {
-      if (prevContainer![prevSpacePropName!]) {
-         prevContainer![prevSpacePropName!].merge(externalId.__bogusWorkaround);
-      } else {
-         prevContainer![prevSpacePropName!] = externalId.__bogusWorkaround;
+   for (const value of unassignedValues) {
+      if (value.type === UnassignedType.REFERENCE) {
+         return { unassigned: unassignedValues };
       }
    }
 
-   const externalType = externalId.externalType && externalId.externalType.str.toLocaleUpperCase();
+   if (nextPropName === 'externalType') {
+      descriptors.unshift({ name: 'preSpace', type: 'space' });
+   }
+
+   unassigned.assignToProps(unassignedValues, newExternalId, nextPropName, descriptors);
+
+   const externalType = strOrBlank(newExternalId.externalType).toLocaleUpperCase();
 
    switch (externalType) {
       case 'SYSTEM':
-         unassigned.assignToProps(externalId.unassigned, externalId, 'system', [
+         unassigned.assignToProps(unassignedValues, newExternalId, 'system', [
             { name: 'externalTypeSpace', type: 'space' },
             { name: 'system', type: 'literal' },
          ]);
          break;
       case 'PUBLIC':
-         unassigned.assignToProps(externalId.unassigned, externalId, 'public', [
+         unassigned.assignToProps(unassignedValues, newExternalId, 'public', [
             { name: 'externalTypeSpace', type: 'space' },
             { name: 'public', type: 'literal' },
             { name: 'publicSpace', type: 'space' },
@@ -242,31 +239,18 @@ function assignUnassigned(
          break;
    }
 
-   if (unValues.length !== 0) {
-      externalId.extra = externalId.unassigned;
+   const result = {
+      externalId: newExternalId,
+      unassigned: unassignedValues,
+   };
+
+   if ((newExternalId as any).preSpace) {
+      (result as any).preSpace = (newExternalId as any).preSpace;
    }
 
-   delete externalId.__bogusWorkaround;
-   delete externalId.nextPropName;
-   delete externalId.unassigned;
-}
+   delete (newExternalId as any).preSpace;
 
-function assignUnassignedNew(
-   unassigned: UnassignedArray,
-   prevContainer: { [key: string]: any },
-   prevSpacePropName?: string,
-): void {
-   const eId: ExternalId = (prevContainer && prevContainer.externalId) || { type: EXTERNAL_ID };
-
-   eId.unassigned = unassigned;
-   assignUnassigned(eId, prevContainer, prevSpacePropName);
-   delete eId.unassigned;
-   delete eId.extra;
-   delete eId.type;
-
-   if (Object.keys(eId).length > 1) {
-      prevContainer.externalId = eId;
-   }
+   return result;
 }
 
 /**********************************************************************\
@@ -283,7 +267,7 @@ function checkWellFormed(
    ec: ErrorCollector,
    entityMetaData: EntityMetaData,
 ): void {
-   if (!pTokenPart || (pTokenPart.unassigned && pTokenPart.unassigned.length > 0)) {
+   if (!pTokenPart) {
       return;
    }
 
@@ -335,8 +319,6 @@ function checkWellFormed(
 
       literal.checkWellFormed(pTokenPart.system, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
    }
-
-   unassigned.checkExtra(pTokenPart.extra, ec, WFEID.EXTERNALID_EXTRA_TEXT);
 }
 
 /**********************************************************************\
@@ -377,16 +359,14 @@ function getSTokens(pTokenPart?: ExternalId): Array<SToken> {
    return results.filter((item) => item) as any;
 }
 
-const externalId = {
-   PTYPE: EXTERNAL_ID,
-   parse,
-   assignUnassigned,
-   assignUnassignedNew,
+const checkExternalIdWellFormed = checkWellFormed;
+
+export {
+   EXTERNAL_ID,
+   ExternalId,
+   parseExternalId,
+   assignExternalIdUnssigned,
    getSTokens,
-   checkWellFormed,
+   checkExternalIdWellFormed,
    makeEntityLocation,
 };
-
-export default externalId;
-
-export { EXTERNAL_ID, ExternalId, ParsedExternalId };

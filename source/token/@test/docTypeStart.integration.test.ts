@@ -10,6 +10,7 @@ import { makeSTokenMaker } from 'sToken-test';
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
 import { TextPToken } from '../text';
+import { EXTERNAL_ID } from '../common/externalId';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken: DocTypeStartPToken;
@@ -21,7 +22,7 @@ describe('docTypeStart (integration)', () => {
          name: makeSToken('rootElement'),
          nameSpace: makeSToken(' '),
          externalId: {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             externalType: makeSToken('SYSTEM'),
             externalTypeSpace: makeSToken(' '),
             system: {

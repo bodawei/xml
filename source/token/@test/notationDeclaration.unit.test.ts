@@ -7,7 +7,8 @@ import { MockErrorCollector } from 'error-test';
 import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import externalId, { EXTERNAL_ID } from '../common/externalId';
+import { EXTERNAL_ID } from '../common/externalId';
+import * as externalId from '../common/externalId';
 import misc from '../common/misc';
 import unassigned, { UnassignedArray, UnassignedType } from '../common/unassigned';
 import {
@@ -22,18 +23,18 @@ describe('notationdeDeclaration (unit)', () => {
 
    beforeEach(() => {
       notationPToken = new NotationDeclarationPToken({
-         open: SToken.fromString('<!'),
+         open: toSToken('<!'),
          openSpace: undefined,
-         declType: SToken.fromString('NOTATION'),
-         declTypeSpace: SToken.fromString(' '),
-         name: SToken.fromString('notationName'),
-         nameSpace: SToken.fromString(' '),
+         declType: toSToken('NOTATION'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('notationName'),
+         nameSpace: toSToken(' '),
          externalId: {
             type: 'EXTERNAL_ID',
              peRefPlus: [],
          },
-         externalIdSpace: SToken.fromString(' '),
-         close: SToken.fromString('>'),
+         externalIdSpace: toSToken(' '),
+         close: toSToken('>'),
       });
    });
 
@@ -47,7 +48,7 @@ describe('notationdeDeclaration (unit)', () => {
       beforeEach(() => {
          nonPeRefCallback = () => { };
          callback = jasmine.createSpy('callbackSpy');
-         externalIDParseSpy = spyOn(externalId, 'parse');
+         externalIDParseSpy = spyOn(externalId, 'parseExternalId');
          externalIDParseSpy.and.callFake((_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
             cb({ externalId: { type: EXTERNAL_ID }, peRefPlus: [], });
          });
@@ -77,14 +78,14 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('does a simple parse', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            name: SToken.fromString('notationName'),
-            nameSpace: SToken.fromString(' '),
+            open: toSToken('<!'),
+            name: toSToken('notationName'),
+            nameSpace: toSToken(' '),
             externalId: {
                'type': EXTERNAL_ID
             } as any,
-            externalIdSpace: SToken.fromString(' '),
-            close: SToken.fromString('>'),
+            externalIdSpace: toSToken(' '),
+            close: toSToken('>'),
          });
          const mockSource = new MockSTokenSource([
             'notationName',
@@ -95,7 +96,7 @@ describe('notationdeDeclaration (unit)', () => {
          ]);
 
          parseNotationDeclaration(mockSource, {
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
          }, callback);
          nonPeRefCallback();
          mockSource.respondInAsyncTime();
@@ -105,15 +106,15 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('parses a parameter entity reference instead of the name', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            close: SToken.fromString('>'),
+            open: toSToken('<!'),
+            close: toSToken('>'),
          });
          const mockSource = new MockSTokenSource([
             '>',
          ]);
 
          parseNotationDeclaration(mockSource, {
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
          }, callback);
          peRefCallback();
          mockSource.respondInAsyncTime();
@@ -135,7 +136,7 @@ describe('notationdeDeclaration (unit)', () => {
          });
 
          parseNotationDeclaration(mockSource, {
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
          }, callback);
          nonPeRefCallback();
          mockSource.respondInAsyncTime();
@@ -147,12 +148,12 @@ describe('notationdeDeclaration (unit)', () => {
          const mockSource = new MockSTokenSource([]);
 
          parseNotationDeclaration(mockSource, {
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
          }, callback);
          mockSource.respondInAsyncTime();
 
          expect(unassignedParsePERefSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(unassignedParsePERefSpy.calls.argsFor(0)[1].open).toEqual(SToken.fromString('<!'));
+         expect(unassignedParsePERefSpy.calls.argsFor(0)[1].open).toEqual(toSToken('<!'));
          expect(unassignedParsePERefSpy.calls.argsFor(0)[2]).toEqual('name');
          expect(unassignedParsePERefSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          expect(unassignedParsePERefSpy.calls.argsFor(0)[4]).toBeInstanceOf(Function);
@@ -165,7 +166,8 @@ describe('notationdeDeclaration (unit)', () => {
 
       beforeEach(() => {
          spyOn(unassigned, 'assignToProps');
-         externalIDAssignSpy = spyOn(externalId, 'assignUnassignedNew');
+         externalIDAssignSpy = spyOn(externalId, 'assignExternalIdUnssigned');
+         externalIDAssignSpy.and.returnValue({});
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
@@ -176,15 +178,15 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('sets the extra property to be empty if unassigned is empty', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            name: SToken.fromString('notationName'),
-            nameSpace: SToken.fromString(' '),
+            open: toSToken('<!'),
+            name: toSToken('notationName'),
+            nameSpace: toSToken(' '),
             externalId: {
-               type: 'EXTERNAL_ID',             peRefPlus: [],
-
+               type: 'EXTERNAL_ID',
+                peRefPlus: [],
             },
-            externalIdSpace: SToken.fromString(' '),
-            close: SToken.fromString('>'),
+            externalIdSpace: toSToken(' '),
+            close: toSToken('>'),
             unassigned: [],
             nextPropName: 'name',
          });
@@ -196,15 +198,15 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            name: SToken.fromString('notationName'),
-            nameSpace: SToken.fromString(' '),
+            open: toSToken('<!'),
+            name: toSToken('notationName'),
+            nameSpace: toSToken(' '),
             externalId: {
                type: 'EXTERNAL_ID',             peRefPlus: [],
 
             },
-            externalIdSpace: SToken.fromString(' '),
-            close: SToken.fromString('>'),
+            externalIdSpace: toSToken(' '),
+            close: toSToken('>'),
             unassigned: [{
                type: 'reference',
             }] as any,
@@ -218,7 +220,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('calls unassigned.assignToProps() if the nextPropName is "name"', () => {
          notationPToken = new NotationDeclarationPToken({
             type: 'NOTATION_DECLARATION_PTOKEN',
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
             unassigned: ['foo'] as any as any,
             nextPropName: 'name',
          });
@@ -235,28 +237,104 @@ describe('notationdeDeclaration (unit)', () => {
             ]);
       });
 
-      it('calls externalId.assignUnassigned() with the toplevel unassigned value', () => {
+      it('calls the externalId assignUnassigned() with undefined when the next prop is name', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            unassigned: [unassigned.wordFromSToken(SToken.fromString('foo'))],
+            open: toSToken('<!'),
+            unassigned: [unassigned.wordFromSToken(toSToken('foo'))],
             nextPropName: 'name',
-         });
-         let testName: string = '';
-         externalIDAssignSpy.and.callFake((un: UnassignedArray, container: NotationDeclarationPToken, propName: string) => {
-            expect(un).toEqual([unassigned.wordFromSToken(SToken.fromString('foo'))]);
-            expect(container).toEqual(notationPToken);
-            testName = propName;
          });
 
          notationPToken.assignUnassigned();
 
-         expect(testName).toEqual('nameSpace');
+         expect(externalIDAssignSpy).toHaveBeenCalledWith(undefined, notationPToken.unassigned, undefined);
+      });
+
+      it('calls the externalId assignUnassigned() with the nextPropName when it is anything but name', () => {
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            unassigned: [unassigned.wordFromSToken(toSToken('foo'))],
+            nextPropName: 'foo',
+            externalId: { type: EXTERNAL_ID, peRefPlus: [] }
+         });
+
+         notationPToken.assignUnassigned();
+
+         expect(externalIDAssignSpy).toHaveBeenCalledWith({ type: EXTERNAL_ID, peRefPlus: [] }, notationPToken.unassigned, 'foo');
+      });
+
+      it('fills in the pre-space if this was found by the externalId assignUnassigned()', () => {
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            unassigned: [unassigned.wordFromSToken(toSToken('foo'))],
+            nextPropName: 'name',
+         });
+         externalIDAssignSpy.and.returnValue({
+            preSpace: toSToken('xxx'),
+         });
+
+         notationPToken.assignUnassigned();
+
+         expect(notationPToken.nameSpace).toEqual(toSToken('xxx'));
+      });
+
+      it('merges an existing space with the pre-space if this was found by the externalId assignUnassigned()', () => {
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            nameSpace: toSToken('---'),
+            unassigned: [unassigned.wordFromSToken(toSToken('foo'))],
+            nextPropName: 'name',
+         });
+         externalIDAssignSpy.and.returnValue({
+            preSpace: toSToken('xxx'),
+         });
+
+         notationPToken.assignUnassigned();
+
+         expect(notationPToken.nameSpace).toEqual(toSToken('---xxx'));
+      });
+
+      it('fills in the externalId if this was found by the externalId assignUnassigned()', () => {
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            unassigned: [unassigned.wordFromSToken(toSToken('foo'))],
+            nextPropName: 'name',
+         });
+         externalIDAssignSpy.and.returnValue({
+            externalId: { type: EXTERNAL_ID, peRefPlus: [] }
+         });
+
+         notationPToken.assignUnassigned();
+
+         expect(notationPToken.externalId).toEqual({ type: EXTERNAL_ID, peRefPlus: [] });
+      });
+
+
+      it('does not affect the externalId if none was returned by assignUnassigned()', () => {
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            unassigned: [unassigned.wordFromSToken(toSToken('foo'))],
+            nextPropName: 'other',
+            externalId: {
+               type: EXTERNAL_ID,
+               peRefPlus: [],
+               externalType: toSToken('SYSTEM'), 
+            }
+         });
+         externalIDAssignSpy.and.returnValue({});
+
+         notationPToken.assignUnassigned();
+
+         expect(notationPToken.externalId).toEqual({
+            type: EXTERNAL_ID,
+            peRefPlus: [],
+            externalType: toSToken('SYSTEM'), 
+         });
       });
 
       it('adds an "extra" property if the unassigned values are not consumed', () => {
          notationPToken = new NotationDeclarationPToken({
             type: 'NOTATION_DECLARATION_PTOKEN',
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
             unassigned: ['foo'] as any,
          });
 
@@ -268,7 +346,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('removes all unassigned and nextPropName values', () => {
          notationPToken = new NotationDeclarationPToken({
             type: 'NOTATION_DECLARATION_PTOKEN',
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
             unassigned: ['foo'] as any,
             nextPropName: 'name',
             externalId: {
@@ -281,7 +359,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          expect(notationPToken).toEqualRangeless(new NotationDeclarationPToken({
             type: 'NOTATION_DECLARATION_PTOKEN',
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
             unassigned: ['foo'] as any,
             nextPropName: 'name',
             externalId: {
@@ -302,7 +380,7 @@ describe('notationdeDeclaration (unit)', () => {
       beforeEach(() => {
          emd = new EntityMetaData();
          mockErrorCollector = new MockErrorCollector();
-         spyOn(externalId, 'checkWellFormed');
+         spyOn(externalId, 'checkExternalIdWellFormed');
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
@@ -310,7 +388,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('asks the externalId module to look for well formed problems', () => {
          notationPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(externalId.checkWellFormed)
+         expect(externalId.checkExternalIdWellFormed)
             .toHaveBeenCalledWith(notationPToken.externalId, mockErrorCollector, emd);
       });
 
@@ -331,7 +409,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('reports an error if there is an unassigned parameter entity', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
+            open: toSToken('<!'),
             unassigned: [ { type: UnassignedType.REFERENCE, token: new ParameterEntityReferencePToken({ open: toSToken('<!') })  }],
          });
 
@@ -346,18 +424,18 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('reports an error if there is an extra opening space', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            openSpace: SToken.fromString(' '),
-            declType: SToken.fromString('NOTATION'),
-            declTypeSpace: SToken.fromString(' '),
-            name: SToken.fromString('notationName'),
-            nameSpace: SToken.fromString(' '),
+            open: toSToken('<!'),
+            openSpace: toSToken(' '),
+            declType: toSToken('NOTATION'),
+            declTypeSpace: toSToken(' '),
+            name: toSToken('notationName'),
+            nameSpace: toSToken(' '),
             externalId: {
                type: 'EXTERNAL_ID',             peRefPlus: [],
 
             },
-            externalIdSpace: SToken.fromString(' '),
-            close: SToken.fromString('>'),
+            externalIdSpace: toSToken(' '),
+            close: toSToken('>'),
          });
 
          notationPToken.checkWellFormed(mockErrorCollector, emd);
@@ -371,9 +449,9 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('reports an error if notation is not capitalized', () => {
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            openSpace: SToken.fromString(' '),
-            declType: SToken.fromString('notation'),
+            open: toSToken('<!'),
+            openSpace: toSToken(' '),
+            declType: toSToken('notation'),
          });
 
          notationPToken.checkWellFormed(mockErrorCollector, emd);
@@ -485,18 +563,18 @@ describe('notationdeDeclaration (unit)', () => {
          spyOn(externalId, 'getSTokens').and.returnValue([]);
          spyOn(unassigned, 'getSTokens').and.returnValue([]);
          notationPToken = new NotationDeclarationPToken({
-            open: SToken.fromString('<!'),
-            openSpace: SToken.fromString(' '),
-            declType: SToken.fromString('NOTATION'),
-            declTypeSpace: SToken.fromString(' '),
-            name: SToken.fromString('notationName'),
-            nameSpace: SToken.fromString(' '),
+            open: toSToken('<!'),
+            openSpace: toSToken(' '),
+            declType: toSToken('NOTATION'),
+            declTypeSpace: toSToken(' '),
+            name: toSToken('notationName'),
+            nameSpace: toSToken(' '),
             externalId: {
                type: 'EXTERNAL_ID',             peRefPlus: [],
 
             },
-            externalIdSpace: SToken.fromString(' '),
-            close: SToken.fromString('>'),
+            externalIdSpace: toSToken(' '),
+            close: toSToken('>'),
          });
 
          const result = notationPToken.toSTokenArray();

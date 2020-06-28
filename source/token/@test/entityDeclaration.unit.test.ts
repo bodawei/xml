@@ -8,7 +8,8 @@ import { parseEntityDeclaration } from '../entityDeclaration';
 import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
 import unassigned from '../common/unassigned';
-import externalId, { EXTERNAL_ID } from '../common/externalId';
+import { EXTERNAL_ID } from '../common/externalId';
+import * as externalId from '../common/externalId';
 import literal from '../common/literal';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
@@ -45,7 +46,7 @@ describe('entityDeclaration (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
 
-         externalIdSpy = spyOn(externalId, 'parse').and.callFake((sTokenSource: STokenSource, terminators: any, allowPERefs: boolean, cb: Function) => {
+         externalIdSpy = spyOn(externalId, 'parseExternalId').and.callFake((sTokenSource: STokenSource, terminators: any, allowPERefs: boolean, cb: Function) => {
             cb({ externalId: { type: EXTERNAL_ID }, peRefPlus: [], });
          });
 

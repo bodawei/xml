@@ -7,7 +7,7 @@ import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 
 import { DeclarationStart } from '../bridge/declaration';
-import externalId from '../common/externalId';
+import { EXTERNAL_ID } from '../common/externalId';
 import unassigned, { UnassignedType } from '../common/unassigned';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
@@ -37,7 +37,7 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          parseNotationDeclaration(source, declarationStart, (parsing) => {
-            expect(parsing.externalId!.type).toEqual(externalId.PTYPE);
+            expect(parsing.externalId!.type).toEqual(EXTERNAL_ID);
             done();
          });
       });
@@ -149,13 +149,16 @@ describe('notationDeclaration (integration)', () => {
                peRefPlus: (pToken as any).unassigned as any,
                extra: [],
                externalId: {
+                  type: EXTERNAL_ID,
+                  peRefPlus: [],
                   externalType: SToken.fromString('PUBLIC'),
                   public: {
                      openQuote: SToken.fromString('"'),
                      value: [SToken.fromString('foo')], // ICK
                      closeQuote: SToken.fromString('"'),
-                  } as any,
+                  },
                   publicSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+                  
                } as any,
                close: SToken.fromString('>'),
             }));

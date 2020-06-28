@@ -1,17 +1,23 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { ParameterEntityReferencePToken, ParameterEntityStartPToken, TextPToken } from 'token';
 
 import helper from '../../@test/helper';
 import { ParameterEntityEndPToken } from '../../marker/parameterEntityEnd';
 import unassigned, { UnassignedType } from '../unassigned';
-import externalId, { ExternalId } from '../externalId';
+import {
+   ExternalId,
+   parseExternalId,
+   assignExternalIdUnssigned,
+   checkExternalIdWellFormed,
+   getSTokens,
+} from '../externalId';
 
 describe('externalId (integration)', () => {
    describe('parse()', () => {
@@ -26,7 +32,7 @@ describe('externalId (integration)', () => {
       it('parses the public and system value (check literal.parse())', (done) => {
          source.addText('PUBLIC "pub.xml"\t"sys.xml">');
 
-         externalId.parse(source, [], false, (result) => {
+         parseExternalId(source, [], false, (result) => {
             const makeSToken = makeSTokenMaker();
             expect(result.externalId).toEqual({
                type: 'EXTERNAL_ID',
@@ -52,7 +58,7 @@ describe('externalId (integration)', () => {
       it('parses a PERef (check unsasigned calls)', (done) => {
          source.addText('PUBLIC "pub.xml"%foo;>');
 
-         externalId.parse(source, [], true, (result) => {
+         parseExternalId(source, [], true, (result) => {
             const makeSToken = makeSTokenMaker();
             const expected: ExternalId = {
                type: 'EXTERNAL_ID',
@@ -95,150 +101,89 @@ describe('externalId (integration)', () => {
          emd = new EntityMetaData();
          source = new STokenSource(defaultExtractors, emd);
       });
-
       it('assigns the public and system value (check unassigned.assignToProps())', (done) => {
          source.addText('PUBLIC\t%publicVal;\t"sys.xml">');
          source.endText();
 
-         externalId.parse(source, [], true, (result) => {
+         parseExternalId(source, [], true, (result) => {
             // expand/replace the publicVal reference
-            expect(result.peRefPlus[0].type).toEqual('reference');
             result.peRefPlus.shift();
             result.peRefPlus.unshift({
                type: UnassignedType.ENTITY_END,
                token: new ParameterEntityEndPToken(
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
                ) as any,
             });
             result.peRefPlus.unshift({
                type: UnassignedType.LITERAL,
                token: {
-                  openQuote: SToken.fromString('"'),
-                  value: [new TextPToken({ text: SToken.fromString('pub.xml') })],
-                  closeQuote: SToken.fromString('"'),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken({ text: toSToken('pub.xml') })],
+                  closeQuote: toSToken('"'),
                },
             });
             result.peRefPlus.unshift({
                type: UnassignedType.ENTITY_START,
                token: new ParameterEntityStartPToken(
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
                ) as any,
             });
 
-            externalId.assignUnassigned(result.externalId!);
+            const assignResult = assignExternalIdUnssigned(
+               result.externalId!,
+               result.peRefPlus,
+               result.nextPropName,
+            );
 
-            // Set up all the special ranges we need for the merging
-            const makeSToken = makeSTokenMaker();
-            const makeSToken2 = makeSTokenMaker(undefined, 18, 0, 18);
-            const externalType = makeSToken('PUBLIC');
-            const externalTypeSpace = makeSToken('\t');
-            const publicSpace = makeSToken2('\t');
-            externalTypeSpace.str += ' ';
-            externalTypeSpace.originalStr += ' ';
-            externalTypeSpace.ranges.push(helper.makeInsertedRange());
-            publicSpace.str = ' ' + publicSpace.str;
-            publicSpace.originalStr = ' ' + publicSpace.originalStr;
-            publicSpace.ranges.unshift(helper.makeInsertedRange());
-
-            expect(result.externalId).toEqual({
+            expect(assignResult.externalId).toEqualRangeless({
                type: 'EXTERNAL_ID',
-               externalType,
-               externalTypeSpace,
+               externalType: toSToken('PUBLIC'),
+               externalTypeSpace: toSToken('\t '),
                public: {
-                  openQuote: SToken.fromString('"'),
-                  value: [new TextPToken({ text: SToken.fromString('pub.xml') })],
-                  closeQuote: SToken.fromString('"'),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken({ text: toSToken('pub.xml') })],
+                  closeQuote: toSToken('"'),
                },
-               publicSpace,
+               publicSpace: toSToken(' \t'),
                system: {
-                  openQuote: makeSToken2('"'),
-                  value: [new TextPToken({ text: makeSToken2('sys.xml') })],
-                  closeQuote: makeSToken2('"'),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken({ text: toSToken('sys.xml') })],
+                  closeQuote: toSToken('"'),
                },
                peRefPlus: [],
+               nextPropName: 'public',
+               unassigned: [],
             });
-            done();
-         });
-      });
-
-      it('adds a space to the previous prop name (check unsasigned calls)', (done) => {
-         const container = {
-            prevProp: new SToken('\t', '\t', [
-               new Range(new EntityLocation(), 10, 0, 10, 11, 0, 11),
-            ]),
-         };
-         const expectedString = new SToken('\t ', '\t ', [
-            new Range(new EntityLocation(), 10, 0, 10, 11, 0, 11),
-            helper.makeInsertedRange(),
-         ]);
-         source.addText('%foo;>');
-         source.endText();
-
-         externalId.parse(source, [], true, (result) => {
-            // expand/replace the publicVal reference
-            expect(result.peRefPlus[0].type).toEqual('reference');
-            result.peRefPlus.shift();
-            result.peRefPlus.unshift({
-               type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
-               ) as any,
-            });
-            result.peRefPlus.unshift({
-               type: UnassignedType.WORD,
-               token: {
-                  text: SToken.fromString('public'),
-               } as any,
-            });
-            result.peRefPlus.unshift({
-               type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
-               ) as any,
-            });
-
-            externalId.assignUnassigned(result.externalId!, container, 'prevProp');
-
-            expect(container.prevProp).toEqual(expectedString);
-            expect(result.externalId!.externalType!.str).toEqual('public');
             done();
          });
       });
 
       it('adds a space to an otherwise missing previous prop name (check unsasigned calls)', (done) => {
-         const container: any = {};
          const expectedString = new SToken(' ', ' ', [helper.makeInsertedRange()]);
          source.addText('%foo;>');
          source.endText();
 
-         externalId.parse(source, [], true, (result) => {
+         parseExternalId(source, [], true, (result) => {
             // expand/replace the publicVal reference
-            expect(result.peRefPlus[0].type).toEqual('reference');
             result.peRefPlus.shift();
-            result.peRefPlus.unshift({
+
+            result.peRefPlus.unshift(unassigned.wordFromSToken(toSToken('public')), {
                type: UnassignedType.ENTITY_END,
                token: new ParameterEntityEndPToken(
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
                ) as any,
             });
-            result.peRefPlus.unshift({
-               type: UnassignedType.WORD,
-               token: {
-                  text: SToken.fromString('public'),
-               } as any,
-            });
+            result.peRefPlus.unshift();
             result.peRefPlus.unshift({
                type: UnassignedType.ENTITY_START,
                token: new ParameterEntityStartPToken(
-                  new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
+                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
                ) as any,
             });
 
-            externalId.assignUnassigned(result.externalId!, container, 'prevProp');
+            const assignResult = assignExternalIdUnssigned(result.externalId!, result.peRefPlus);
 
-            expect(container.prevProp).toEqual(expectedString);
-            expect(result.externalId!.__bogusWorkaround).toBeUndefined();
-            expect(result.externalId!.externalType!.str).toEqual('public');
+            expect(assignResult.preSpace).toEqual(expectedString);
             done();
          });
       });
@@ -256,66 +201,12 @@ describe('externalId (integration)', () => {
       it('reports an error when the SYSTEM is missing a quote (check literal.checkCharWellFormed())', (done) => {
          source.addText('SYSTEM "bad');
          source.endText();
-         externalId.parse(source, [], true, (result) => {
-            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
+         parseExternalId(source, [], true, (result) => {
+            const ec = new ErrorCollector(toSToken('x'), WellFormedError);
 
-            externalId.checkWellFormed(result.externalId, ec, emd);
+            checkExternalIdWellFormed(result.externalId, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
-            done();
-         });
-      });
-
-      it('calls unassigned.checkExtra() to report on extra values', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('%wtf; "other">');
-         source.endText();
-
-         externalId.parse(source, [], true, (result) => {
-            // "expand" what should be there.
-            result.peRefPlus.shift(); // get rid of the peref
-            const temp = result.peRefPlus;
-            result.peRefPlus = [
-               {
-                  type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(
-                     new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
-                  ),
-               },
-               unassigned.wordFromSToken(
-                  new SToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation())),
-               ),
-               unassigned.spaceFromSToken(new SToken(' ', ' ', new Range(new EntityLocation()))),
-               {
-                  type: UnassignedType.LITERAL,
-                  token: {
-                     openQuote: new SToken('"', '"', new Range(new EntityLocation())),
-                     value: [
-                        new TextPToken({
-                           text: new SToken(
-                              'entityValue',
-                              'entityValue',
-                              new Range(new EntityLocation()),
-                           ),
-                        }),
-                     ],
-                     closeQuote: new SToken('"', '"', new Range(new EntityLocation())),
-                  },
-               },
-               {
-                  type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(
-                     new ParameterEntityReferencePToken({ open: SToken.fromString('%') }),
-                  ),
-               },
-            ].concat(temp as any) as any;
-            result.externalId!.unassigned = result.peRefPlus;
-            externalId.assignUnassigned(result.externalId!, {}, 'prevSpace');
-            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
-
-            externalId.checkWellFormed(result.externalId, ec, new EntityMetaData());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_EXTRA_TEXT);
             done();
          });
       });
@@ -332,8 +223,8 @@ describe('externalId (integration)', () => {
 
       it('adds all tokens (check literal.getSTokens())', (done) => {
          source.addText('PUBLIC "pub.xml"\t"sys.xml">');
-         externalId.parse(source, [], false, (result) => {
-            const results = externalId.getSTokens(result.externalId);
+         parseExternalId(source, [], false, (result) => {
+            const results = getSTokens(result.externalId);
 
             const makeSToken = makeSTokenMaker();
             expect(results).toEqual([

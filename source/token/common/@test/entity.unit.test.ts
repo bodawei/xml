@@ -3,7 +3,7 @@
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { MockErrorCollector } from'error-test';
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 import { makeSTokenMaker, STokenMaker } from 'sToken-test';
 import { WellFormedError, XmlWarning } from 'error';
 
@@ -11,7 +11,8 @@ import declaration from '../../bridge/baseDeclaration';
 import { GeneralEntityDeclarationPToken } from '../../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../parameterEntityDeclaration';
 import unassigned from '../unassigned';
-import externalId from '../externalId';
+import { EXTERNAL_ID } from '../externalId';
+import * as externalId from '../externalId';
 import misc from '../misc';
 import literal from '../literal';
 import { assignUnassigned, checkWellFormed } from '../entity';
@@ -45,7 +46,11 @@ describe('entity (unit)', () => {
 
       beforeEach(() => {
          unAssign = spyOn(unassigned, 'assignToProps');
-         extUnass = spyOn(externalId, 'assignUnassigned');
+         extUnass = spyOn(externalId, 'assignExternalIdUnssigned');
+
+         extUnass.and.returnValue({
+            unassigned: [],
+         });
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
@@ -105,19 +110,10 @@ describe('entity (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
-            let propName: string;
-            extUnass.and.callFake((externalId: any, pToken: any, name: string) => {
-               // check externalId now, before it is modified
-               expect(externalId).toEqual({
-                  unassigned: unassignedValue
-               });
-               expect(pToken).toEqual(declPToken);
-               propName = name;
-            });
 
             assignUnassigned(declPToken);
 
-            expect(propName!).toEqual('nameSpace'); // make sure we've evaluated above
+            expect(extUnass).toHaveBeenCalledWith(undefined, unassignedValue);
          });
 
          it('calls unassigned.assignToProps() with the epilog', () => {
@@ -129,7 +125,7 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+            expect(unassigned.assignToProps).toHaveBeenCalledWith([],
                declPToken, 'externalIdSpace', [
                   { name: 'externalIdSpace', type: 'space' },
                   { name: 'nData', type: 'word' },
@@ -145,10 +141,14 @@ describe('entity (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
+            const unassignedThing = [unassigned.wordFromSToken(toSToken('bar'))];
+            extUnass.and.returnValue({
+               unassigned: unassignedThing,
+            });
 
             assignUnassigned(declPToken);
 
-            expect(declPToken.extra).toEqual(unassignedValue as any);
+            expect(declPToken.extra).toEqual(unassignedThing);
          });
 
       });
@@ -180,19 +180,10 @@ describe('entity (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
-            let propName: string;
-            extUnass.and.callFake((externalId: any, pToken: any, name: string) => {
-               // check externalId now, before it is modified
-               expect(externalId).toEqual({
-                  unassigned: unassignedValue
-               });
-               expect(pToken).toEqual(declPToken);
-               propName = name;
-            });
 
             assignUnassigned(declPToken);
 
-            expect(propName!).toEqual('nameSpace'); // make sure we've evaluated above
+            expect(extUnass).toHaveBeenCalledWith(undefined, unassignedValue);
          });
 
          it('calls unassigned.assignToProps() with the epilog if we found an externalId', () => {
@@ -201,10 +192,14 @@ describe('entity (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
+            const unassignedThing = [unassigned.wordFromSToken(toSToken('bar'))];
+            extUnass.and.returnValue({
+               unassigned: unassignedThing,
+            });
 
             assignUnassigned(declPToken);
 
-            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedThing,
                declPToken, 'externalIdSpace', [
                   { name: 'externalIdSpace', type: 'space' },
                   { name: 'nData', type: 'word' },
@@ -292,8 +287,8 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(externalId.assignUnassigned).toHaveBeenCalledWith(
-               declPToken.externalId!, declPToken, 'nameSpace');
+            expect(externalId.assignExternalIdUnssigned).toHaveBeenCalledWith(
+               declPToken.externalId!, unassignedValue, undefined);
          });
 
          it('calls unassigned.assignToProps() if externalId has an unassigned value', () => {
@@ -308,7 +303,7 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+            expect(unassigned.assignToProps).toHaveBeenCalledWith([],
                declPToken, 'externalIdSpace', [
                   { name: 'externalIdSpace', type: 'space' },
                   { name: 'nData', type: 'word' },
@@ -348,7 +343,7 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(externalId.assignUnassigned).not.toHaveBeenCalled();
+            expect(externalId.assignExternalIdUnssigned).not.toHaveBeenCalled();
          });
 
          it('calls unassigned.assignToProps() only with the epilog values', () => {
@@ -360,11 +355,15 @@ describe('entity (unit)', () => {
                   nextPropName: 'nData',
                },
             });
+            const unassignedThing = [unassigned.wordFromSToken(toSToken('bar'))];
+            extUnass.and.returnValue({
+               unassigned: unassignedThing,
+            });
 
             assignUnassigned(declPToken);
 
             expect(unAssign.calls.count()).toEqual(1);
-            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedThing,
                declPToken, 'externalIdSpace', [
                   { name: 'externalIdSpace', type: 'space' },
                   { name: 'nData', type: 'word' },
@@ -404,7 +403,7 @@ describe('entity (unit)', () => {
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
          spyOn(misc, 'checkCharWellFormed');
-         spyOn(externalId, 'checkWellFormed');
+         spyOn(externalId, 'checkExternalIdWellFormed');
          spyOn(literal, 'checkWellFormed');
       });
 
@@ -499,7 +498,7 @@ describe('entity (unit)', () => {
 
          checkWellFormed(pToken, mockErrorCollector, emd);
 
-         expect(externalId.checkWellFormed).toHaveBeenCalledWith(pToken.externalId,
+         expect(externalId.checkExternalIdWellFormed).toHaveBeenCalledWith(pToken.externalId,
             mockErrorCollector, emd);
       });
 
