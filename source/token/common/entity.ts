@@ -136,12 +136,6 @@ function assignUnassigned(pToken: GeneralEntityDeclarationPToken | ParameterEnti
       (pToken as any).extra = pToken.unassigned;
    }
 
-   if (pToken.externalId) {
-      delete pToken.externalId.nextPropName;
-      delete pToken.externalId.unassigned;
-      delete pToken.externalId.extra;
-   }
-
    delete (pToken as any).nextPropName;
    delete (pToken as any).unassigned;
 }

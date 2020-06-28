@@ -33,12 +33,17 @@ type ProtoExternalId = {
 
    peRefPlus: UnassignedArray;
    unassigned?: UnassignedArray;
-   extra?: UnassignedArray;
    nextPropName?: string;
-   __bogusWorkaround?: SToken;
 };
 
-type ExternalId = ProtoExternalId;
+type ExternalId = {
+   type: string;
+   externalType?: SToken;
+   externalTypeSpace?: SToken;
+   public?: LiteralPToken;
+   publicSpace?: SToken;
+   system?: LiteralPToken;
+};
 
 type ParsedExternalId = {
    externalId?: ExternalId;
@@ -51,6 +56,17 @@ type AssignResult = {
    externalId?: ExternalId;
    unassigned: UnassignedArray;
 };
+
+function protoToExternalId(peid: ProtoExternalId): ExternalId {
+   return {
+      type: EXTERNAL_ID,
+      externalType: peid.externalType,
+      externalTypeSpace: peid.externalTypeSpace,
+      public: peid.public,
+      publicSpace: peid.publicSpace,
+      system: peid.system,
+   };
+}
 
 /**********************************************************************\
  parse() tries to extract an ExternalID or a PublicID from
@@ -76,7 +92,7 @@ function parseSystem(
    source: STokenSource,
    allTerminators: Array<string>,
    extIdPToken: ProtoExternalId,
-   deliverExtId: (result?: ExternalId) => void,
+   deliverExtId: (result?: ProtoExternalId) => void,
 ): void {
    const callback = unassigned.makeCheckCallback(extIdPToken, 'system', deliverExtId, () => {
       source.extract('peekWord', allTerminators, (nData) => {
@@ -109,9 +125,9 @@ function parseSystem(
 
 function parsePublic(
    source: STokenSource,
-   extIdPToken: ExternalId,
+   extIdPToken: ProtoExternalId,
    allTerminators: Array<string>,
-   deliverExtId: (result?: ExternalId) => void,
+   deliverExtId: (result?: ProtoExternalId) => void,
 ): void {
    const callback = unassigned.makeCheckCallback(extIdPToken, 'public', deliverExtId, () => {
       const temp: LiteralPToken = {
@@ -147,18 +163,18 @@ function parseExternalId(
    deliverExtId: (result: ParsedExternalId) => void,
 ): void {
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
-   const extIdPToken: ExternalId = {
+   const extIdPToken: ProtoExternalId = {
       type: EXTERNAL_ID,
       peRefPlus: [],
    };
 
-   function convertReturn(externalId?: ExternalId): void {
+   function convertReturn(externalId?: ProtoExternalId): void {
       if (!externalId) {
          return deliverExtId({ peRefPlus: [] });
       }
 
       const result: ParsedExternalId = {
-         externalId: externalId,
+         externalId: protoToExternalId(externalId),
          peRefPlus: externalId.peRefPlus,
       };
 
@@ -240,7 +256,7 @@ function assignExternalIdUnssigned(
    }
 
    const result = {
-      externalId: newExternalId,
+      externalId: protoToExternalId(newExternalId),
       unassigned: unassignedValues,
    };
 
@@ -327,7 +343,7 @@ function checkWellFormed(
 \**********************************************************************/
 
 function makeEntityLocation(pTokenPart: ExternalId | void): EntityLocation | undefined {
-   if (!pTokenPart || pTokenPart.unassigned) {
+   if (!pTokenPart) {
       return;
    }
 
@@ -356,7 +372,7 @@ function getSTokens(pTokenPart?: ExternalId): Array<SToken> {
    results.push(pTokenPart.publicSpace);
    results = results.concat(literal.getSTokens(pTokenPart.system));
 
-   return results.filter((item) => item) as any;
+   return results.filter((item) => item) as Array<SToken>;
 }
 
 const checkExternalIdWellFormed = checkWellFormed;

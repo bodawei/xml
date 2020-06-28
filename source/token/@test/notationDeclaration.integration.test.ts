@@ -8,7 +8,7 @@ import { SToken, STokenSource } from 'sToken';
 
 import { DeclarationStart } from '../bridge/declaration';
 import { EXTERNAL_ID } from '../common/externalId';
-import unassigned, { UnassignedType } from '../common/unassigned';
+import unassigned, { UnassignedType, UnassignedArray } from '../common/unassigned';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { NotationDeclarationPToken, parseNotationDeclaration, NotationDeclarationXToken } from '../notationDeclaration';
@@ -74,7 +74,7 @@ describe('notationDeclaration (integration)', () => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('notationName %foo;>');
          source.endText();
-         const unassignedValue = [{
+         const unassignedValue: UnassignedArray = [{
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
                open: SToken.fromString('%'),
@@ -91,14 +91,16 @@ describe('notationDeclaration (integration)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('notationName'),
                nameSpace: SToken.fromString(' '),
-               unassigned: unassignedValue as any,
-               peRefPlus: unassignedValue as any,
+               unassigned: unassignedValue,
+               peRefPlus: unassignedValue,
                nextPropName: 'externalType',
                externalId: {
                   type: 'EXTERNAL_ID',
-                  peRefPlus: unassignedValue as any,
-                  unassigned: unassignedValue as any,
-                  nextPropName: 'externalType',
+                  externalType: undefined,
+                  externalTypeSpace: undefined,
+                  public: undefined,
+                  publicSpace: undefined,
+                  system: undefined,
                },
                close: SToken.fromString('>'),
             }));
@@ -150,14 +152,15 @@ describe('notationDeclaration (integration)', () => {
                extra: [],
                externalId: {
                   type: EXTERNAL_ID,
-                  peRefPlus: [],
                   externalType: SToken.fromString('PUBLIC'),
+                  externalTypeSpace: undefined,
                   public: {
                      openQuote: SToken.fromString('"'),
                      value: [SToken.fromString('foo')], // ICK
                      closeQuote: SToken.fromString('"'),
                   },
                   publicSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+                  system: undefined,
                   
                } as any,
                close: SToken.fromString('>'),

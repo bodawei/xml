@@ -313,23 +313,6 @@ describe('entity (unit)', () => {
                ]);
          });
 
-         it('removes any unassigned values in the externalId', () => {
-            const unassignedValue: any = [ 'foo' ];
-            const declPToken = new GeneralEntityDeclarationPToken({
-               unassigned: unassignedValue,
-               externalId: {
-                  unassigned: unassignedValue,
-                  nextPropName: 'name',
-               },
-            });
-
-            assignUnassigned(declPToken);
-
-            expect(declPToken!.externalId!.unassigned).toBeUndefined();
-            expect(declPToken!.externalId!.extra).toBeUndefined();
-            expect(declPToken!.externalId!.nextPropName).toBeUndefined();
-         });
-
       });
 
       describe('unassigned inside epilog', () => {

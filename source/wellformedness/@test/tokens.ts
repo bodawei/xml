@@ -91,12 +91,13 @@ const makeDocTypeStart = () =>
       openSubset: toSToken('['),
    });
 
-const makeDocTypeEnd = () =>
-   new DocTypeEndPToken({
+function makeDocTypeEnd(): DocTypeEndPToken {
+   return new DocTypeEndPToken({
       docTypeStartPToken: makeDocTypeStart(),
       closeSubset: toSToken(']'),
       close: toSToken('>'),
    });
+}
 
 function makeNotationDeclaration(): NotationDeclarationPToken {
    return new NotationDeclarationPToken({
@@ -106,7 +107,7 @@ function makeNotationDeclaration(): NotationDeclarationPToken {
       declTypeSpace: toSToken(' '),
       name: toSToken('notationName'),
       nameSpace: toSToken(' '),
-      externalId: { type: 'EXTERNAL_ID', peRefPlus: [] },
+      externalId: { type: 'EXTERNAL_ID' },
       externalIdSpace: toSToken(' '),
       close: toSToken('>'),
    });

@@ -1,10 +1,10 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { EntityLocation, EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { SToken, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 import { ParameterEntityReferencePToken, TextPToken } from 'token';
 
@@ -34,20 +34,20 @@ describe('externalId (unit)', () => {
          expectedSToken = makeSTokenMaker();
          callback = jasmine.createSpy('literalParseSpy');
          literalParseSpy = spyOn(literal, 'parse').and.callFake(
-            (_1: any, options: any, callback: Function) => {
+            (_1, options, callback: Function) => {
                callback();
             },
          );
          unCheck = spyOn(unassigned, 'makeCheckCallback').and.callFake(
-            (_1: any, _2: any, _3: any, cb: (values?: UnassignedArray) => void) => cb,
+            (_1, _2, _3, cb: (values?: UnassignedArray) => void) => cb,
          );
-         spyOn(unassigned, 'checkForPERef').and.callFake((_1: any, cb: Function) => {
+         spyOn(unassigned, 'checkForPERef').and.callFake((_1, cb: Function) => {
             cb();
          });
       });
 
       it('returns simple values', () => {
-         literalParseSpy.and.callFake((_1: any, options: any, callback: Function) => {
+         literalParseSpy.and.callFake((_1, options, callback: Function) => {
             callback(options.pToken);
          });
          mockSource = new MockSTokenSource([
@@ -65,8 +65,7 @@ describe('externalId (unit)', () => {
             [
                {
                   externalId: {
-                     type: 'EXTERNAL_ID',
-                     peRefPlus: [],
+                     type: EXTERNAL_ID,
                      externalType: expectedSToken('PUBLIC'),
                      externalTypeSpace: expectedSToken(' '),
                      public: {
@@ -99,10 +98,12 @@ describe('externalId (unit)', () => {
             [
                {
                   externalId: {
-                     type: 'EXTERNAL_ID',
-                     peRefPlus: [],
+                     type: EXTERNAL_ID,
                      externalType: expectedSToken('SYSTEM'),
                      externalTypeSpace: expectedSToken(' '),
+                     public: undefined,
+                     publicSpace: undefined,
+                     system: undefined,
                   },
                   peRefPlus: [],
                },
@@ -131,7 +132,7 @@ describe('externalId (unit)', () => {
       });
 
       it('stops if it finds an NDATA after finding the PublicId', () => {
-         literalParseSpy.and.callFake((_1: any, options: any, callback: Function) => {
+         literalParseSpy.and.callFake((_1, options, callback: Function) => {
             callback(options.pToken);
          });
          mockSource = new MockSTokenSource([
@@ -150,14 +151,14 @@ describe('externalId (unit)', () => {
             [
                {
                   externalId: {
-                     type: 'EXTERNAL_ID',
-                     peRefPlus: [],
+                     type: EXTERNAL_ID,
                      externalType: expectedSToken('PUBLIC'),
+                     externalTypeSpace: expectedSToken(' '),
                      public: {
                         value: [],
                      },
-                     externalTypeSpace: expectedSToken(' '),
                      publicSpace: expectedSToken(' '),
+                     system: undefined,
                   },
                   peRefPlus: [],
                },
@@ -166,7 +167,7 @@ describe('externalId (unit)', () => {
       });
 
       it('does not mind if public or ndata are the wrong case', () => {
-         literalParseSpy.and.callFake((_1: any, options: any, callback: Function) => {
+         literalParseSpy.and.callFake((_1, options, callback: Function) => {
             callback(options.pToken);
          });
          mockSource = new MockSTokenSource([
@@ -185,14 +186,14 @@ describe('externalId (unit)', () => {
             [
                {
                   externalId: {
-                     type: 'EXTERNAL_ID',
-                     peRefPlus: [],
+                     type: EXTERNAL_ID,
                      externalType: expectedSToken('pUbLiC'),
                      externalTypeSpace: expectedSToken(' '),
                      public: {
                         value: [],
                      },
                      publicSpace: expectedSToken(' '),
+                     system: undefined,
                   },
                   peRefPlus: [],
                },
@@ -201,7 +202,8 @@ describe('externalId (unit)', () => {
       });
 
       it('stops if it does not find an open quote', () => {
-         literalParseSpy.and.callFake((_1: any, _2: any, callback: Function) => {
+         literalParseSpy.and.callFake((_1, _2, callback: Function) => {
+            mockSource.respondInAsyncTime();
             callback();
          });
          mockSource = new MockSTokenSource([
@@ -218,10 +220,12 @@ describe('externalId (unit)', () => {
             [
                {
                   externalId: {
-                     type: 'EXTERNAL_ID',
-                     peRefPlus: [],
+                     type: EXTERNAL_ID,
                      externalType: expectedSToken('PUBLIC'),
                      externalTypeSpace: expectedSToken(' '),
+                     public: undefined,
+                     publicSpace: undefined,
+                     system: undefined,
                   },
                   peRefPlus: [],
                },
@@ -231,7 +235,7 @@ describe('externalId (unit)', () => {
 
       it('does not mind if, illegally, no space between PUBLIC and PublicLiteral', () => {
          let didPublic = false;
-         literalParseSpy.and.callFake((_1: any, options: any, callback: Function) => {
+         literalParseSpy.and.callFake((_1, options, callback: Function) => {
             if (!didPublic) {
                didPublic = true;
                callback(options.pToken);
@@ -256,14 +260,14 @@ describe('externalId (unit)', () => {
             [
                {
                   externalId: {
-                     type: 'EXTERNAL_ID',
-                     peRefPlus: [],
+                     type: EXTERNAL_ID,
                      externalType: expectedSToken('PUBLIC'),
                      externalTypeSpace: undefined,
                      public: {
                         value: [],
                      },
                      publicSpace: expectedSToken(' '),
+                     system: undefined,
                   },
                   peRefPlus: [],
                },
@@ -272,7 +276,7 @@ describe('externalId (unit)', () => {
       });
 
       it('does not mind if, illegally, no space between public and system literals', () => {
-         literalParseSpy.and.callFake((_1: any, options: any, callback: Function) => {
+         literalParseSpy.and.callFake((_1, options, callback: Function) => {
             callback(options.pToken);
          });
          mockSource = new MockSTokenSource([
@@ -292,8 +296,7 @@ describe('externalId (unit)', () => {
             [
                {
                   externalId: {
-                     type: 'EXTERNAL_ID',
-                     peRefPlus: [],
+                     type: EXTERNAL_ID,
                      externalType: expectedSToken('PUBLIC'),
                      externalTypeSpace: expectedSToken(' '),
                      public: {
@@ -352,7 +355,7 @@ describe('externalId (unit)', () => {
             mockSource.respondInAsyncTime();
 
             expect(unCheck.calls.argsFor(1)[0]).toEqual({
-               type: 'EXTERNAL_ID',
+               type: EXTERNAL_ID,
                peRefPlus: [],
                externalType: expectedSToken('PUBLIC'),
                externalTypeSpace: undefined,
@@ -388,7 +391,7 @@ describe('externalId (unit)', () => {
             mockSource.respondInAsyncTime();
 
             expect(unCheck.calls.argsFor(2)[0]).toEqual({
-               type: 'EXTERNAL_ID',
+               type: EXTERNAL_ID,
                peRefPlus: [],
                externalType: expectedSToken('PUBLIC'),
                externalTypeSpace: undefined,
@@ -416,7 +419,6 @@ describe('externalId (unit)', () => {
          unData = [unassigned.wordFromSToken(toSToken('SYSTEM'))];
          externalId = {
             type: EXTERNAL_ID,
-            peRefPlus: [],
          };
       });
 
@@ -438,9 +440,13 @@ describe('externalId (unit)', () => {
       });
 
       it('calls assignToProps() with the preSpace if no nextPropName provided', () => {
+         const expected = {
+            type: EXTERNAL_ID,
+            peRefPlus: [],
+         };
          assignExternalIdUnssigned(externalId, unData);
 
-         expect(unassigned.assignToProps).toHaveBeenCalledWith(unData, externalId, 'externalType', [
+         expect(unassigned.assignToProps).toHaveBeenCalledWith(unData, expected, 'externalType', [
             { name: 'preSpace', type: 'space' },
             { name: 'externalType', type: 'word', allowed: /public|system/i },
             { name: 'externalTypeSpace', type: 'space' },
@@ -448,16 +454,21 @@ describe('externalId (unit)', () => {
       });
 
       it('calls assignToProps() with no previous space property name, if a name is provided', () => {
+         const expected = {
+            ...externalId,
+            peRefPlus: [],
+         };
+
          assignExternalIdUnssigned(externalId, unData, 'testPropName');
 
-         expect(unassigned.assignToProps).toHaveBeenCalledWith(unData, externalId, 'testPropName', [
+         expect(unassigned.assignToProps).toHaveBeenCalledWith(unData, expected, 'testPropName', [
             { name: 'externalType', type: 'word', allowed: /public|system/i },
             { name: 'externalTypeSpace', type: 'space' },
          ]);
       });
 
       it('returns the previous space if that is found by the assigner', () => {
-         unProps.and.callFake((_1: any, pToken: any) => {
+         unProps.and.callFake((_1, pToken) => {
             pToken.preSpace = toSToken('bogus');
          });
 
@@ -478,7 +489,7 @@ describe('externalId (unit)', () => {
       });
 
       it('passes the system descriptors to unassigned.assignToProps() when externalType is SYSTEM', () => {
-         unProps.and.callFake((values: any, pToken: any, name: any) => {
+         unProps.and.callFake((values: UnassignedArray, pToken: ExternalId, name: string) => {
             if (name === 'externalType') {
                pToken.externalType = toSToken('SysTem');
                values.shift();
@@ -487,6 +498,7 @@ describe('externalId (unit)', () => {
          const newExternalId = {
             ...externalId,
             externalType: toSToken('SysTem'),
+            peRefPlus: [],
          };
 
          assignExternalIdUnssigned(externalId, unData, 'externalType');
@@ -503,7 +515,7 @@ describe('externalId (unit)', () => {
       });
 
       it('passes the public descriptors to unassigned.assignToProps() when externalType is PUBLIC', () => {
-         unProps.and.callFake((values: any, pToken: any, name: any) => {
+         unProps.and.callFake((values: UnassignedArray, pToken: ExternalId, name: string) => {
             if (name === 'externalType') {
                pToken.externalType = toSToken('puBlic');
                values.shift();
@@ -512,6 +524,7 @@ describe('externalId (unit)', () => {
          const newExternalId = {
             ...externalId,
             externalType: toSToken('puBlic'),
+            peRefPlus: [],
          };
 
          assignExternalIdUnssigned(externalId, unData, 'externalType');
@@ -540,7 +553,7 @@ describe('externalId (unit)', () => {
 
          const expectedSToken = makeSTokenMaker();
          pTokenPart = {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             peRefPlus: [],
             externalType: expectedSToken('PUBLIC'),
             externalTypeSpace: expectedSToken(' '),
@@ -683,13 +696,11 @@ describe('externalId (unit)', () => {
       });
 
       it('throws no errors if there is no public part', () => {
-         litWell.and.callFake(
-            (publicOrSystem: any, _2: any, _3: any, _4: any, callback: Function) => {
-               if (!publicOrSystem) {
-                  callback();
-               }
-            },
-         );
+         litWell.and.callFake((publicOrSystem, _2, _3, _4, callback: Function) => {
+            if (!publicOrSystem) {
+               callback();
+            }
+         });
          delete pTokenPart.public;
 
          expect(() => {
@@ -699,30 +710,10 @@ describe('externalId (unit)', () => {
    });
 
    describe('makeEntityLocation()', () => {
-      it('returns nothing if the pToken part has an unassigned', () => {
-         const expectedSToken = makeSTokenMaker();
-         const pTokenPart = {
-            unassigned: [],
-            type: 'EXTERNAL_ID',
-            peRefPlus: [],
-            externalType: expectedSToken('PUBLIC'),
-            externalTypeSpace: expectedSToken(' '),
-            system: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('sys.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-         };
-
-         const externalLoc = makeEntityLocation(pTokenPart);
-
-         expect(externalLoc).toBeUndefined();
-      });
-
       it('returns an EntityLocation with the public and system ids', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             peRefPlus: [],
             externalType: expectedSToken('PUBLIC'),
             externalTypeSpace: expectedSToken(' '),
@@ -747,7 +738,7 @@ describe('externalId (unit)', () => {
       it('returns an EntityLocation with the system id only if there is no public', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             peRefPlus: [],
             externalType: expectedSToken('PUBLIC'),
             externalTypeSpace: expectedSToken(' '),
@@ -766,7 +757,7 @@ describe('externalId (unit)', () => {
       it('returns an EntityLocation with the public only if there is no system', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             peRefPlus: [],
             externalType: expectedSToken('PUBLIC'),
             externalTypeSpace: expectedSToken(' '),
@@ -785,7 +776,7 @@ describe('externalId (unit)', () => {
       it('returns an EntityLocation with the public only if system has no value in its array', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             peRefPlus: [],
             externalType: expectedSToken('PUBLIC'),
             externalTypeSpace: expectedSToken(' '),
@@ -809,7 +800,7 @@ describe('externalId (unit)', () => {
       it('returns an EntityLocation with no public or system if both have empty arrays', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             peRefPlus: [],
             externalType: expectedSToken('PUBLIC'),
             externalTypeSpace: expectedSToken(' '),
@@ -861,7 +852,7 @@ describe('externalId (unit)', () => {
       it('returns the STokens that made up the external ID', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
-            type: 'EXTERNAL_ID',
+            type: EXTERNAL_ID,
             peRefPlus: [],
             externalType: expectedSToken('PUBLIC'),
             externalTypeSpace: expectedSToken(' '),

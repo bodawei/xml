@@ -30,8 +30,7 @@ describe('notationdeDeclaration (unit)', () => {
          name: toSToken('notationName'),
          nameSpace: toSToken(' '),
          externalId: {
-            type: 'EXTERNAL_ID',
-             peRefPlus: [],
+            type: EXTERNAL_ID,
          },
          externalIdSpace: toSToken(' '),
          close: toSToken('>'),
@@ -182,8 +181,7 @@ describe('notationdeDeclaration (unit)', () => {
             name: toSToken('notationName'),
             nameSpace: toSToken(' '),
             externalId: {
-               type: 'EXTERNAL_ID',
-                peRefPlus: [],
+               type: EXTERNAL_ID,
             },
             externalIdSpace: toSToken(' '),
             close: toSToken('>'),
@@ -202,7 +200,7 @@ describe('notationdeDeclaration (unit)', () => {
             name: toSToken('notationName'),
             nameSpace: toSToken(' '),
             externalId: {
-               type: 'EXTERNAL_ID',             peRefPlus: [],
+               type: EXTERNAL_ID
 
             },
             externalIdSpace: toSToken(' '),
@@ -254,12 +252,12 @@ describe('notationdeDeclaration (unit)', () => {
             open: toSToken('<!'),
             unassigned: [unassigned.wordFromSToken(toSToken('foo'))],
             nextPropName: 'foo',
-            externalId: { type: EXTERNAL_ID, peRefPlus: [] }
+            externalId: { type: EXTERNAL_ID }
          });
 
          notationPToken.assignUnassigned();
 
-         expect(externalIDAssignSpy).toHaveBeenCalledWith({ type: EXTERNAL_ID, peRefPlus: [] }, notationPToken.unassigned, 'foo');
+         expect(externalIDAssignSpy).toHaveBeenCalledWith({ type: EXTERNAL_ID}, notationPToken.unassigned, 'foo');
       });
 
       it('fills in the pre-space if this was found by the externalId assignUnassigned()', () => {
@@ -300,12 +298,12 @@ describe('notationdeDeclaration (unit)', () => {
             nextPropName: 'name',
          });
          externalIDAssignSpy.and.returnValue({
-            externalId: { type: EXTERNAL_ID, peRefPlus: [] }
+            externalId: { type: EXTERNAL_ID }
          });
 
          notationPToken.assignUnassigned();
 
-         expect(notationPToken.externalId).toEqual({ type: EXTERNAL_ID, peRefPlus: [] });
+         expect(notationPToken.externalId).toEqual({ type: EXTERNAL_ID });
       });
 
 
@@ -316,7 +314,6 @@ describe('notationdeDeclaration (unit)', () => {
             nextPropName: 'other',
             externalId: {
                type: EXTERNAL_ID,
-               peRefPlus: [],
                externalType: toSToken('SYSTEM'), 
             }
          });
@@ -326,7 +323,6 @@ describe('notationdeDeclaration (unit)', () => {
 
          expect(notationPToken.externalId).toEqual({
             type: EXTERNAL_ID,
-            peRefPlus: [],
             externalType: toSToken('SYSTEM'), 
          });
       });
@@ -350,7 +346,7 @@ describe('notationdeDeclaration (unit)', () => {
             unassigned: ['foo'] as any,
             nextPropName: 'name',
             externalId: {
-               type: 'EXTERNAL_ID',             peRefPlus: [],
+               type: EXTERNAL_ID
 
             },
          });
@@ -363,7 +359,7 @@ describe('notationdeDeclaration (unit)', () => {
             unassigned: ['foo'] as any,
             nextPropName: 'name',
             externalId: {
-               type: 'EXTERNAL_ID',             peRefPlus: [],
+               type: EXTERNAL_ID
 
             },
             extra: ['foo'] as any,
@@ -431,7 +427,7 @@ describe('notationdeDeclaration (unit)', () => {
             name: toSToken('notationName'),
             nameSpace: toSToken(' '),
             externalId: {
-               type: 'EXTERNAL_ID',             peRefPlus: [],
+               type: EXTERNAL_ID,
 
             },
             externalIdSpace: toSToken(' '),
@@ -570,7 +566,7 @@ describe('notationdeDeclaration (unit)', () => {
             name: toSToken('notationName'),
             nameSpace: toSToken(' '),
             externalId: {
-               type: 'EXTERNAL_ID',             peRefPlus: [],
+               type: EXTERNAL_ID
 
             },
             externalIdSpace: toSToken(' '),

@@ -51,7 +51,7 @@ class NotationDeclarationPToken {
    public readonly externalIdSpace?: SToken;
    public readonly close?: SToken;
    public readonly peRefPlus: UnassignedArray;
-   public readonly unassigned: UnassignedArray;
+   public unassigned: UnassignedArray;
    public readonly nextPropName?: string;
    public extra?: UnassignedArray;
 

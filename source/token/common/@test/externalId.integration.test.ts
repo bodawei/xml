@@ -36,7 +36,6 @@ describe('externalId (integration)', () => {
             const makeSToken = makeSTokenMaker();
             expect(result.externalId).toEqual({
                type: 'EXTERNAL_ID',
-               peRefPlus: [],
                externalType: makeSToken('PUBLIC'),
                externalTypeSpace: makeSToken(' '),
                public: {
@@ -62,7 +61,6 @@ describe('externalId (integration)', () => {
             const makeSToken = makeSTokenMaker();
             const expected: ExternalId = {
                type: 'EXTERNAL_ID',
-               peRefPlus: [],
                externalType: makeSToken('PUBLIC'),
                externalTypeSpace: makeSToken(' '),
                public: {
@@ -71,7 +69,12 @@ describe('externalId (integration)', () => {
                   closeQuote: makeSToken('"'),
                },
                publicSpace: undefined,
-               unassigned: [
+               system: undefined,
+            };
+
+            expect(result).toEqual({
+               externalId: expected,
+               peRefPlus: [
                   {
                      type: UnassignedType.REFERENCE,
                      token: new ParameterEntityReferencePToken({
@@ -84,10 +87,7 @@ describe('externalId (integration)', () => {
                   },
                ],
                nextPropName: 'system',
-            };
-            (expected as any).peRefPlus = expected.unassigned;
-
-            expect(result.externalId).toEqual(expected);
+            });
             done();
          });
       });
@@ -135,23 +135,23 @@ describe('externalId (integration)', () => {
                result.nextPropName,
             );
 
-            expect(assignResult.externalId).toEqualRangeless({
-               type: 'EXTERNAL_ID',
-               externalType: toSToken('PUBLIC'),
-               externalTypeSpace: toSToken('\t '),
-               public: {
-                  openQuote: toSToken('"'),
-                  value: [new TextPToken({ text: toSToken('pub.xml') })],
-                  closeQuote: toSToken('"'),
+            expect(assignResult).toEqualRangeless({
+               externalId: {
+                  type: 'EXTERNAL_ID',
+                  externalType: toSToken('PUBLIC'),
+                  externalTypeSpace: toSToken('\t '),
+                  public: {
+                     openQuote: toSToken('"'),
+                     value: [new TextPToken({ text: toSToken('pub.xml') })],
+                     closeQuote: toSToken('"'),
+                  },
+                  publicSpace: toSToken(' \t'),
+                  system: {
+                     openQuote: toSToken('"'),
+                     value: [new TextPToken({ text: toSToken('sys.xml') })],
+                     closeQuote: toSToken('"'),
+                  },
                },
-               publicSpace: toSToken(' \t'),
-               system: {
-                  openQuote: toSToken('"'),
-                  value: [new TextPToken({ text: toSToken('sys.xml') })],
-                  closeQuote: toSToken('"'),
-               },
-               peRefPlus: [],
-               nextPropName: 'public',
                unassigned: [],
             });
             done();

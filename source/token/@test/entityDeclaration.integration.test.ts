@@ -90,7 +90,6 @@ describe('entityDeclaration (integration)', () => {
          parseEntityDeclaration(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.externalId!.externalType!.str).toEqual('SYSTEM');
             expect((pToken as any).unassigned[0].type).toEqual('reference');
-            expect(pToken.unassigned).toBe(pToken.externalId!.unassigned);
             expect(pToken.close!.str).toEqual('>');
             done();
          });
