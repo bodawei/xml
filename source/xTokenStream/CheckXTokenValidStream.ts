@@ -1167,7 +1167,7 @@ class CheckXTokenValidStream extends Transform {
 
       const pToken = edXToken.pToken;
       const elName = edXToken.name;
-      const unassignedArray = pToken.forValidation || [];
+      const unassignedArray = pToken.peRefPlus || [];
       let insideContentSpec = !!pToken.children;
       let entityDepth = 0;
       let parenDepth = 0;

@@ -50,7 +50,6 @@ class ElementDeclarationPToken extends declaration.PToken {
    public unassigned?: UnassignedArray;
    public extra?: UnassignedArray;
    public nextPropName?: string;
-   public forValidation?: UnassignedArray;
 
    constructor(props?: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
@@ -186,7 +185,7 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
       return;
    }
 
-   edPToken.forValidation = unValues.slice(0); // Copy for future
+   edPToken.peRefPlus = unValues.slice(0); // Copy for future
 
    const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
 

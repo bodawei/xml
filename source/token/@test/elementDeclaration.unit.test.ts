@@ -421,7 +421,7 @@ describe('elementDeclaration (unit)', () => {
          expect(elementPToken.extra).toBeUndefined();
       });
 
-      it('removes all unassigned and nextPropName values but adds the unassigned to the forValidation', () => {
+      it('removes all unassigned and nextPropName values but adds the unassigned to the peRefPlus', () => {
          elementPToken = new elementDeclaration.PToken({
             unassigned: [ 'foo' ],
             nextPropName: 'name',
@@ -431,7 +431,7 @@ describe('elementDeclaration (unit)', () => {
 
          expect(elementPToken).toEqual(new elementDeclaration.PToken({
             extra: [ 'foo' ],
-            forValidation: [ 'foo' ],
+            peRefPlus: [ 'foo' ],
          }));
       });
 
