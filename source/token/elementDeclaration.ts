@@ -2,13 +2,12 @@
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { strOrBlank } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
-import nameList, { NameListPToken, XNameList, isXName } from './contentspec/nameList';
 import misc from './common/misc';
-import unassigned, { UnassignedArray, UnassignedValue } from './common/unassigned';
-import { SToken, STokenSource } from 'sToken';
+import unassigned, { UnassignedArray } from './common/unassigned';
+import nameList, { NameListPToken, XNameList, isXName } from './contentspec/nameList';
 
 const ELEMENTDECL = 'ELEMENTDECL';
 const ELEMENTDECL_XTOKEN = 'ELEMENTDECL_XTOKEN';

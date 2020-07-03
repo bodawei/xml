@@ -4,20 +4,26 @@ import { STokenSource, SToken } from 'sToken';
 
 import { parseCdata, CdataPToken } from '../cdata';
 import { parseConditional, ConditionalPToken } from '../conditional';
-import { parseParameterEntityReference, ParameterEntityReferencePToken } from '../parameterEntityReference';
+import {
+   parseParameterEntityReference,
+   ParameterEntityReferencePToken,
+} from '../parameterEntityReference';
 
 type SectionStart = {
-   open: SToken,
-   openSpace?: SToken,
-   sectionType?: SToken,
-   peRef?: ParameterEntityReferencePToken,
-   peRefPlus?: Array<ParameterEntityReferencePToken>,
-   sectionTypeSpace?: SToken,
+   open: SToken;
+   openSpace?: SToken;
+   sectionType?: SToken;
+   peRef?: ParameterEntityReferencePToken;
+   peRefPlus?: Array<ParameterEntityReferencePToken>;
+   sectionTypeSpace?: SToken;
 };
 type DeliverSection = (section: CdataPToken | ConditionalPToken) => void;
 
-
-function continueToContent(source: STokenSource, sectionData: SectionStart, deliverSection: DeliverSection) {
+function continueToContent(
+   source: STokenSource,
+   sectionData: SectionStart,
+   deliverSection: DeliverSection,
+): void {
    source.extractNoParams('space', (typeSpace) => {
       sectionData.sectionTypeSpace = typeSpace;
 
@@ -66,14 +72,10 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
             continueToContent(source, sectionData, deliverSection);
          });
       } else {
-         source.extractToObject('word', [ '[', '>' ], sectionData, 'sectionType');
+         source.extractToObject('word', ['[', '>'], sectionData, 'sectionType');
          continueToContent(source, sectionData, deliverSection);
       }
    });
 }
 
-export {
-   SectionStart,
-
-   parseSection,
-};
+export { SectionStart, parseSection };

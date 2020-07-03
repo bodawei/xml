@@ -196,54 +196,68 @@ class EntityExpander {
     * Declaration: §2.8.0 [28]
     */
    private handleDocTypeEnd(pToken: DocTypeEndPToken, handled: PTokenExpanded): void {
-      if (this.state === State.IN_INTERNAL_SUBSET) {
-         this.emptyConditionalStack();
-         this.deliverToken(new InternalSubsetEndToken());
-      }
+      this.emptyConditionalStack(() => {
+         if (this.state === State.IN_INTERNAL_SUBSET) {
+            this.deliverToken(new InternalSubsetEndToken());
+         }
 
-      const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
+         const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
 
-      if (!externalSubsetToken || !this.expandParams.loadExternalEntities) {
-         this.state = State.IN_CONTENT;
-         this.deliverToken(pToken);
-         handled();
-         return;
-      }
-
-      this.state = State.IN_EXTERNAL_SUBSET;
-
-      streamParsedReplacementText(
-         externalSubsetToken,
-         this.expandParams,
-         (result, nextPTokenDone) => {
-            if (result) {
-               this.expandPToken(result, nextPTokenDone);
-               return;
-            }
-
-            this.emptyConditionalStack();
+         if (!externalSubsetToken || !this.expandParams.loadExternalEntities) {
             this.state = State.IN_CONTENT;
             this.deliverToken(pToken);
-            nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
-            handled(); // and mark the end of processing of the DOCTYPE end token
-         },
-      );
+            handled();
+            return;
+         }
+
+         this.state = State.IN_EXTERNAL_SUBSET;
+
+         streamParsedReplacementText(
+            externalSubsetToken,
+            this.expandParams,
+            (result, nextPTokenDone) => {
+               if (result) {
+                  this.expandPToken(result, nextPTokenDone);
+                  return;
+               }
+
+               this.emptyConditionalStack(() => {
+                  this.state = State.IN_CONTENT;
+                  this.deliverToken(pToken);
+                  nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
+                  handled(); // and mark the end of processing of the DOCTYPE end token
+               });
+            },
+         );
+      });
    }
 
-   private emptyConditionalStack(): void {
-      while (this.expandParams.conditionalStack.length > 0) {
-         // This needs to move to the start.  IF we're in the middle of this mode, we need to stop the first non-text thing we get.
-         const info = this.expandParams.conditionalStack.pop();
+   private emptyConditionalStack(done: () => void): void {
+      const stack = this.expandParams.conditionalStack;
 
-         if (info && info.source) {
-            info.callback = () => {
-               // eeek
-            };
-            info.source.endText();
-         }
+      let topCondition = stack[stack.length - 1];
+
+      while (topCondition && !topCondition.source) {
+         this.expandParams.conditionalStack.pop();
+         topCondition = stack[stack.length - 1];
+      }
+
+      if (topCondition && topCondition.source) {
+         topCondition.textIsFinished = (): void => {
+            this.emptyConditionalStack(done);
+         };
+         topCondition.source.endText();
+      } else {
+         done();
       }
    }
 
+   /*
+    * Conditional tokens (§3.4.0) need some special expansion help when they have a peRef
+    * in their use.  In those cases, call a subroutine which will set up the parsing and
+    * processing of any text which comes in afterwards. As that is processed, it will
+    * be passed back through the 5th parameter which will deliver those values back through this.
+    */
    private handleConditional(startToken: ConditionalPToken, handled: PTokenExpanded): void {
       if (!startToken.peRef) {
          this.deliverToken(startToken);
@@ -256,10 +270,15 @@ class EntityExpander {
          this.expandParams,
          this.entityNameStack,
          this.state === State.IN_CONTENT,
-         (token) =>
-            this.expandPToken(token, () => {
-               // this is scary
-            }), // handled is scry
+         (token, tokenHandled) => {
+            // Specially handle text, as we don't want these fed back into handleText()
+            if (token.type === TEXT_PTOKEN) {
+               this.deliverToken(token);
+               tokenHandled();
+            } else {
+               this.expandPToken(token, tokenHandled);
+            }
+         },
          (conditionalState) => {
             this.expandParams.conditionalStack.push(conditionalState);
             this.deliverToken(startToken);
@@ -268,24 +287,36 @@ class EntityExpander {
       );
    }
 
+   /*
+    * Ordinarily we pass text through unscathed. However, if we are in the middle
+    * of processing a conditional section which had a peRef, then the text token
+    * represents unprocessed text.  We need to add this text into the STokenSource
+    * that was set up by setupConditional().
+    */
    private handleText(textToken: TextPToken, handled: PTokenExpanded): void {
       const depth = this.expandParams.conditionalStack.length;
       const info = this.expandParams.conditionalStack[depth - 1];
 
       if (info && info.source) {
          info.source.addText(strOrBlank(textToken.text)); // need to add range
-         handled();
       } else {
          this.deliverToken(textToken);
-         handled();
       }
+
+      handled();
    }
 
+   /*
+    * When we reach the end of a conditional section (which may well be within another),
+    * if it was one with an expanded INCLUDE/IGNORE value, then we need to wrap up
+    * the consumption of the TextPToken values that came between the start and the
+    * end.
+    */
    private handleConditionalEnd(endToken: ConditionalClosePToken, handled: PTokenExpanded): void {
       const info = this.expandParams.conditionalStack.pop();
 
       if (info && info.source) {
-         info.callback = () => {
+         info.textIsFinished = (): void => {
             this.deliverToken(endToken);
             handled();
          };

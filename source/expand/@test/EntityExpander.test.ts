@@ -6,13 +6,18 @@ import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource } from 'sToken';
 import {
+   CONDITIONAL_PTOKEN,
+   CONDITIONAL_CLOSE_PTOKEN,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ERROR_TYPE,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
    NOTATION_DECLARATION_PTOKEN,
+   TEXT_PTOKEN,
    CharRefPToken,
+   ConditionalClosePToken,
+   ConditionalPToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementDeclarationPToken,
@@ -29,28 +34,26 @@ import {
    ParameterEntityReferencePToken,
    EXTERNAL_ID,
    unassigned,
-   ConditionalClosePToken,
-   ConditionalPToken,
-   CONDITIONAL_PTOKEN,
-   TEXT_PTOKEN,
-   CONDITIONAL_CLOSE_PTOKEN,
 } from 'token';
 
 import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
 import * as expandEntityValueModule from '../utils/expandEntityValue';
-import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
 import * as expandUnassigned from '../utils/expandUnassigned';
 import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
+import * as setupConditional from '../utils/setupConditional';
+import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
 import { EntityExpander } from '../EntityExpander';
 import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
 import { EntityNameStack } from '../utils/EntityNameStack';
 
 describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
+   let setupConditionalSpy: jasmine.Spy;
 
    beforeEach(() => {
       expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
+      setupConditionalSpy = spyOn(setupConditional, 'setupConditional');
    });
 
    function harvestTypes(results: Array<PToken>): Array<string> {
@@ -347,6 +350,111 @@ describe('EntityExpander (unit)', () => {
                DOCTYPE_END_PTOKEN,
             ]);
             done();
+         });
+      });
+
+      describe('with incomplete conditional sections', () => {
+         it('delivers doctype start, conditional section starts in the internal subset, and then doctype end', (done) => {
+            const condStart = new ConditionalPToken({ open: toSToken('<![') });
+            docTypeStart = new DocTypeStartPToken({
+               open: toSToken('<!'),
+               name: toSToken('root'),
+               openSubset: toSToken('['),
+            });
+
+            doExpand([docTypeStart, condStart, condStart, docTypeEnd], false, (results) => {
+               expect(harvestTypes(results)).toEqual([
+                  DOCTYPE_START_PTOKEN,
+                  INTERNAL_SUBSET_START_TOKEN,
+                  CONDITIONAL_PTOKEN,
+                  CONDITIONAL_PTOKEN,
+                  INTERNAL_SUBSET_END_TOKEN,
+                  DOCTYPE_END_PTOKEN,
+               ]);
+               done();
+            });
+         });
+
+         it('delivers doctype start, conditional section starts in the external subset, and then doctype end', (done) => {
+            const streamParsedReplacementTextSpy = spyOn(
+               streamParsedReplacementText,
+               'streamParsedReplacementText',
+            );
+            const condStart = new ConditionalPToken({ open: toSToken('<![') });
+            docTypeStart = new DocTypeStartPToken({
+               open: toSToken('<!'),
+               name: toSToken('root'),
+               externalId: {
+                  system: {
+                     value: [new TextPToken({ text: toSToken('systemFoo') })],
+                  },
+               },
+            });
+            streamParsedReplacementTextSpy.and.callFake((token, params, cb) => {
+               cb(condStart, () => {});
+               cb(condStart, () => {});
+               cb(undefined, () => {});
+            });
+
+            doExpand([docTypeStart, docTypeEnd], true, (results) => {
+               expect(harvestTypes(results)).toEqual([
+                  DOCTYPE_START_PTOKEN,
+                  CONDITIONAL_PTOKEN,
+                  CONDITIONAL_PTOKEN,
+                  DOCTYPE_END_PTOKEN,
+               ]);
+               done();
+            });
+         });
+
+         it('delivers doctype start, with conditional sections with perefs, and then doctype end', (done) => {
+            const condStart = new ConditionalPToken({ open: toSToken('<![') });
+            const condStartWithRf = new ConditionalPToken({
+               open: toSToken('<!['),
+               peRef: new ParameterEntityReferencePToken({ open: toSToken('%') }),
+            });
+            docTypeStart = new DocTypeStartPToken({
+               open: toSToken('<!'),
+               name: toSToken('root'),
+               openSubset: toSToken('['),
+            });
+            setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+               done({
+                  source: new STokenSource(defaultExtractors, new EntityMetaData()),
+               });
+            });
+            const results: Array<PToken> = [];
+            const entityExpander = new EntityExpander(false, results.push.bind(results), {
+               parseBody: (): void => {},
+               parseEntityValue: (): void => {},
+               retrieveExternalEntity,
+               parseAttributeValue,
+            });
+
+            entityExpander.expandPToken(docTypeStart, () => {});
+            entityExpander.expandPToken(condStart, () => {});
+            entityExpander.expandPToken(condStartWithRf, () => {});
+            entityExpander.expandPToken(condStart, () => {
+               const args = setupConditionalSpy.calls.argsFor(0);
+               const stack = args[1].conditionalStack;
+               console.log('args[1].conditionalStack', args[1].conditionalStack);
+               const topInfo = stack[stack.length - 1];
+
+               entityExpander.expandPToken(docTypeEnd, () => {});
+               delete topInfo.source;
+               topInfo.textIsFinished();
+
+               expect(harvestTypes(results)).toEqual([
+                  DOCTYPE_START_PTOKEN,
+                  INTERNAL_SUBSET_START_TOKEN,
+                  CONDITIONAL_PTOKEN,
+                  CONDITIONAL_PTOKEN,
+                  CONDITIONAL_PTOKEN,
+                  INTERNAL_SUBSET_END_TOKEN,
+                  DOCTYPE_END_PTOKEN,
+               ]);
+               done();
+            });
          });
       });
    });
@@ -779,15 +887,16 @@ describe('EntityExpander (unit)', () => {
       let condStart: ConditionalPToken;
       let condEnd: ConditionalClosePToken;
 
-      beforeEach(() => {});
+      beforeEach(() => {
+         condEnd = new ConditionalClosePToken({
+            open: toSToken(']]>'),
+         });
+      });
 
       it('passes all contents of an ignore conditional section through unchanged', (done) => {
          condStart = new ConditionalPToken({
             open: toSToken('<[!'),
             sectionType: toSToken('IGNORE'),
-         });
-         condEnd = new ConditionalClosePToken({
-            open: toSToken(']]>'),
          });
 
          doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
@@ -803,8 +912,19 @@ describe('EntityExpander (unit)', () => {
             open: toSToken('<[!'),
             sectionType: toSToken('OOPSIE'),
          });
-         condEnd = new ConditionalClosePToken({
-            open: toSToken(']]>'),
+
+         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+            const types = results.map((item) => item.type);
+
+            expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            done();
+         });
+      });
+
+      it('passes all contents of an include conditional section through unchanged', (done) => {
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            sectionType: toSToken('INCLUDE'),
          });
 
          doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
@@ -820,9 +940,6 @@ describe('EntityExpander (unit)', () => {
             open: toSToken('<[!'),
             sectionType: toSToken('INCLUDE'),
          });
-         condEnd = new ConditionalClosePToken({
-            open: toSToken(']]>'),
-         });
 
          doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
             const types = results.map((item) => item.type);
@@ -832,19 +949,181 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('passes all contents of an include conditional section through unchanged', (done) => {
+      it('passes a peRef and other parameters to setupConditional() when the peRef is present', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
          condStart = new ConditionalPToken({
             open: toSToken('<[!'),
-            sectionType: toSToken('INCLUDE'),
+            peRef,
          });
-         condEnd = new ConditionalClosePToken({
-            open: toSToken(']]>'),
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            done();
          });
 
-         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+         doExpand([condStart], true, () => {
+            const args = setupConditionalSpy.calls.argsFor(0);
+            expect(args[0]).toEqual(peRef);
+            expect(args[1].utils).not.toBeUndefined(); // inner awareness
+            expect(args[2]).toBeInstanceOf(EntityNameStack);
+            expect(args[3]).toEqual(false);
+            expect(args[4]).toBeInstanceOf(Function);
+            expect(args[5]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('adds to the conditional stack with the value from setupConditional()', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            peRef,
+         });
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            done({ source: true });
+         });
+
+         doExpand([condStart], true, () => {
+            const args = setupConditionalSpy.calls.argsFor(0);
+
+            expect(args[1].conditionalStack[0]).toEqual({ source: true });
+            done();
+         });
+      });
+
+      it('pases text tokens from the expanded conditional without modification', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            peRef,
+         });
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            done({ source: new STokenSource(defaultExtractors, new EntityMetaData()) });
+
+            deliver(new TextPToken({ text: toSToken('foo') }), () => {});
+         });
+
+         doExpand([condStart], true, (results) => {
+            // do the timeout to let the text token get passed through
+            setTimeout(() => {
+               const types = results.map((item) => item.type);
+
+               expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN]);
+               done();
+            }, 0);
+         });
+      });
+
+      it('nests multiple INCLUDE conditionals', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            peRef,
+         });
+         let count = 0;
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            done({ source: new STokenSource(defaultExtractors, new EntityMetaData()) });
+            count++;
+            if (count === 1) {
+               deliver(condStart, () => {});
+            }
+         });
+
+         doExpand([condStart], true, () => {
+            // do the timeout to let the text token get passed through
+            setTimeout(() => {
+               const args = setupConditionalSpy.calls.argsFor(0);
+
+               expect(args[1].conditionalStack.length).toEqual(2);
+               done();
+            }, 0);
+         });
+      });
+
+      it('pases text tokens to the STokenSource', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            peRef,
+         });
+         let sourceSpy: jasmine.Spy;
+
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            const source = new STokenSource(defaultExtractors, new EntityMetaData());
+            sourceSpy = spyOn(source, 'addText');
+            done({ source });
+         });
+
+         doExpand(
+            [condStart, new TextPToken({ text: toSToken('<!ELEMENT foo ANY>') })],
+            true,
+            () => {
+               expect(sourceSpy).toHaveBeenCalledWith('<!ELEMENT foo ANY>');
+               done();
+            },
+         );
+      });
+
+      it('a conditional end after a start with a peRef marks the source text as done', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            peRef,
+         });
+         let sourceSpy: jasmine.Spy;
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            const source = new STokenSource(defaultExtractors, new EntityMetaData());
+            sourceSpy = spyOn(source, 'endText');
+            done({ source });
+         });
+         const entityExpander = new EntityExpander(false, () => {}, {
+            parseBody: (): void => {},
+            parseEntityValue: (): void => {},
+            retrieveExternalEntity,
+            parseAttributeValue,
+         });
+
+         entityExpander.expandPToken(condStart, () => {
+            const args = setupConditionalSpy.calls.argsFor(0);
+            const stack = args[1].conditionalStack;
+            const topInfo = stack[stack.length - 1];
+
+            entityExpander.expandPToken(condEnd, () => {});
+            topInfo.textIsFinished();
+
+            expect(sourceSpy).toHaveBeenCalled();
+            done();
+         });
+      });
+
+      it('a conditional end after a start sets up a finished callback which delivers the end', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            peRef,
+         });
+
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            const source = new STokenSource(defaultExtractors, new EntityMetaData());
+            done({ source });
+         });
+         const results: Array<PToken> = [];
+         const entityExpander = new EntityExpander(false, results.push.bind(results), {
+            parseBody: (): void => {},
+            parseEntityValue: (): void => {},
+            retrieveExternalEntity,
+            parseAttributeValue,
+         });
+
+         entityExpander.expandPToken(condStart, () => {
+            const args = setupConditionalSpy.calls.argsFor(0);
+            const stack = args[1].conditionalStack;
+            const topInfo = stack[stack.length - 1];
+
+            entityExpander.expandPToken(condEnd, () => {});
+            topInfo.textIsFinished();
+
             const types = results.map((item) => item.type);
 
-            expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            expect(types).toEqual([CONDITIONAL_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
          });
       });

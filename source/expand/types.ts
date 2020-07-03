@@ -10,7 +10,7 @@ type TokenHandled = () => void;
 
 type ConditionalInfo = {
    source?: STokenSource | undefined;
-   callback?: () => void;
+   textIsFinished?: () => void;
 };
 
 type RetrieveResults = {
