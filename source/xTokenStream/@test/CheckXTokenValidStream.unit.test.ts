@@ -2718,11 +2718,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          describe('parameter entity validation', () => {
-
-            beforeEach(() => {
-               spyOn(elementDeclaration, 'assignUnassigned');
-            });
-
             it('reports no warnings with a syntactically ok expansion', (done) => {
                const pToken = new ElementDeclarationPToken({
                   open: SToken.fromString('<!'),

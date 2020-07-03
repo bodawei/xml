@@ -38,6 +38,7 @@ import {
    TextPToken,
 } from 'token';
 
+import { assignElementDeclaration } from './unassigned/assignElementDeclaration';
 import { EntityDetails } from './utils/EntityDetails';
 import { setupConditional } from './utils/setupConditional';
 import { expandAttributes } from './utils/expandAttributes';
@@ -320,7 +321,11 @@ class EntityExpander {
             // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
             (declarationPToken.unassigned as any) = results.newValue;
 
-            declarationPToken.assignUnassigned();
+            if (declarationPToken.type === ELEMENT_DECLARATION_PTOKEN) {
+               assignElementDeclaration(results.newValue, declarationPToken);
+            } else {
+               declarationPToken.assignUnassigned();
+            }
 
             this.deliverByproducts(results.byproducts);
             this.processExpandedDeclaration(declarationPToken, handled);

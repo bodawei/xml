@@ -83,10 +83,6 @@ class ElementDeclarationPToken extends declaration.PToken {
       return results;
    }
 
-   assignUnassigned() {
-      assignUnassigned(this);
-   }
-
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
       checkWellFormed(this, ec, entityMetaData);
    }
@@ -173,65 +169,6 @@ function parseClose(source: STokenSource, pToken: ElementDeclarationPToken, deli
 }
 
 /**********************************************************************\
- Recover from finding a parameter param entity ref in the declaration
-\**********************************************************************/
-
-function assignUnassigned(edPToken: ElementDeclarationPToken) {
-   const unValues: UnassignedArray | void = edPToken.unassigned;
-
-   if (!unValues || unValues.length === 0) {
-      delete edPToken.unassigned;
-      delete edPToken.nextPropName;
-      return;
-   }
-
-   edPToken.peRefPlus = unValues.slice(0); // Copy for future
-
-   const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
-
-   if (unexpandedRef.length !== 0) {
-      return;
-   }
-
-   if (edPToken.nextPropName === 'name') {
-      unassigned.assignToProps(unValues, edPToken, edPToken.nextPropName, [
-         { name: 'postDeclTypeSpace', type: 'space' },
-         { name: 'name', type: 'word' },
-         { name: 'postNameSpace', type: 'space' },
-      ]);
-
-      edPToken.nextPropName = 'contentSpec';
-   }
-
-   if (edPToken.nextPropName === 'contentSpec') {
-      unassigned.assignToProps(unValues, edPToken, 'postNameSpace', [  // must test
-         { name: 'postNameSpace', type: 'space' },
-      ]);
-
-      let nextValue: UnassignedValue | void = unValues.length > 0 ? unValues[0] : undefined;
-
-      if (nextValue && nextValue.type === 'word' && nextValue.token.text && nextValue.token.text.str === '(') {
-         edPToken.children = edPToken.children || new NameListPToken();
-         nameList.assignUnassigned(edPToken.children!, unValues);
-      } else {
-         unassigned.assignToProps(unValues, edPToken, edPToken.nextPropName, [
-            { name: 'contentSpec', type: 'word' },
-            { name: 'postContentSpecSpace', type: 'space' },
-         ]);
-      }
-   } else {
-      nameList.assignUnassigned(edPToken.children!, unValues);
-   }
-
-   if (unValues.length !== 0) {
-      edPToken.extra = edPToken.unassigned;
-   }
-
-   delete edPToken.nextPropName;
-   delete edPToken.unassigned;
-}
-
-/**********************************************************************\
  checkWellFormed() does check on validity
 \**********************************************************************/
 
@@ -301,18 +238,15 @@ const elementDeclaration = {
    XToken: ElementDeclaration,
    PToken: ElementDeclarationPToken,
    parse,
-   assignUnassigned,
    checkWellFormed,
    pTokenToXToken,
 };
 
-let isNamePToken = nameList.isNamePToken;
 export default elementDeclaration;
 export {
    ElementDeclarationPToken,
    ElementDeclaration,
    XNameList,
    isXName,
-   assignUnassigned,
    ELEMENTDECL as ELEMENT_DECLARATION_PTOKEN,
 };

@@ -36,6 +36,7 @@ import {
    CONDITIONAL_CLOSE_PTOKEN,
 } from 'token';
 
+import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
 import * as expandEntityValueModule from '../utils/expandEntityValue';
 import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
@@ -481,15 +482,14 @@ describe('EntityExpander (unit)', () => {
          const one = unassigned.wordFromSToken(toSToken('1'));
          const two = unassigned.wordFromSToken(toSToken('2'));
          elementDecl.unassigned = [one];
-         spyOn(elementDecl, 'assignUnassigned');
+         spyOn(assignElementDeclaration, 'assignElementDeclaration');
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [two], byproducts: [] });
          });
 
          doExpand([elementDecl], true, () => {
-            expect(elementDecl.assignUnassigned).toHaveBeenCalled();
-            expect(elementDecl.unassigned).toEqual([two]);
+            expect(assignElementDeclaration.assignElementDeclaration).toHaveBeenCalled();
             done();
          });
       });
@@ -497,7 +497,7 @@ describe('EntityExpander (unit)', () => {
       it('passes tells expandUnassigned to treat this as an element for parsing purposes', (done) => {
          const one = unassigned.wordFromSToken(toSToken('1'));
          elementDecl.unassigned = [one];
-         spyOn(elementDecl, 'assignUnassigned');
+         spyOn(assignElementDeclaration, 'assignElementDeclaration');
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [], byproducts: [] });
