@@ -49,6 +49,7 @@ describe('expandAttributes() (unit)', () => {
       params = {
          emd: new EntityMetaData(),
          entityDetails,
+         conditionalStack: [],
          loadExternalEntities: true,
          utils: {
             parseBody: (): void => undefined,

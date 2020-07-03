@@ -29,6 +29,11 @@ import {
    ParameterEntityReferencePToken,
    EXTERNAL_ID,
    unassigned,
+   ConditionalClosePToken,
+   ConditionalPToken,
+   CONDITIONAL_PTOKEN,
+   TEXT_PTOKEN,
+   CONDITIONAL_CLOSE_PTOKEN,
 } from 'token';
 
 import * as expandAttributes from '../utils/expandAttributes';
@@ -765,6 +770,81 @@ describe('EntityExpander (unit)', () => {
          doExpand([geDecl], true, () => {
             expect(geDecl.assignUnassigned).toHaveBeenCalled();
             expect(geDecl.unassigned).toEqual([two]);
+            done();
+         });
+      });
+   });
+
+   describe('conditional sections', () => {
+      let condStart: ConditionalPToken;
+      let condEnd: ConditionalClosePToken;
+
+      beforeEach(() => {});
+
+      it('passes all contents of an ignore conditional section through unchanged', (done) => {
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            sectionType: toSToken('IGNORE'),
+         });
+         condEnd = new ConditionalClosePToken({
+            open: toSToken(']]>'),
+         });
+
+         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+            const types = results.map((item) => item.type);
+
+            expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            done();
+         });
+      });
+
+      it('passes all contents of an unknown conditional section through unchanged', (done) => {
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            sectionType: toSToken('OOPSIE'),
+         });
+         condEnd = new ConditionalClosePToken({
+            open: toSToken(']]>'),
+         });
+
+         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+            const types = results.map((item) => item.type);
+
+            expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            done();
+         });
+      });
+
+      it('passes all contents of an include conditional section through unchanged', (done) => {
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            sectionType: toSToken('INCLUDE'),
+         });
+         condEnd = new ConditionalClosePToken({
+            open: toSToken(']]>'),
+         });
+
+         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+            const types = results.map((item) => item.type);
+
+            expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            done();
+         });
+      });
+
+      it('passes all contents of an include conditional section through unchanged', (done) => {
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            sectionType: toSToken('INCLUDE'),
+         });
+         condEnd = new ConditionalClosePToken({
+            open: toSToken(']]>'),
+         });
+
+         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+            const types = results.map((item) => item.type);
+
+            expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
          });
       });

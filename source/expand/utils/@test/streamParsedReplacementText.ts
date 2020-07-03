@@ -44,6 +44,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       params = {
          entityDetails,
          loadExternalEntities: true,
+         conditionalStack: [],
          utils: {
             parseBody: (): void => {
                return undefined;

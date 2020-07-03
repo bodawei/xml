@@ -3,7 +3,10 @@
 import { SToken, STokenSource } from 'sToken';
 
 import { SectionStart } from './bridge/section';
-import { ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from './parameterEntityReference';
+import {
+   ParameterEntityReferencePToken,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+} from './parameterEntityReference';
 
 const CONDITIONAL_PTOKEN = 'CONDITIONAL_PTOKEN';
 
@@ -18,24 +21,26 @@ type ConditionalProps = {
    open?: SToken;
    openSpace?: SToken;
    sectionType?: SToken;
-   peRef?: ParameterEntityReferencePToken,
-   peRefPlus?: Array<ParameterEntityReferencePToken>,
+   peRef?: ParameterEntityReferencePToken;
+   peRefPlus?: Array<ParameterEntityReferencePToken>;
    sectionTypeSpace?: SToken;
    bracket?: SToken;
-}
+};
 
-type ConditionalCore =  ConditionalProps & {
-    open: SToken;
-}
+type ConditionalCore = ConditionalProps & {
+   open: SToken;
+};
 
-function arrayOfPERefs(candidate: Array<any> | undefined): Array<ParameterEntityReferencePToken> | undefined {
+function arrayOfPERefs(
+   candidate: Array<any> | undefined,
+): Array<ParameterEntityReferencePToken> | undefined {
    let isGoodArray = true;
 
    if (!candidate || !Array.isArray(candidate)) {
       return undefined;
    }
 
-   for (let element of candidate) {
+   for (const element of candidate) {
       isGoodArray = isGoodArray && element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN;
    }
 
@@ -52,14 +57,22 @@ class ConditionalPToken {
    public readonly sectionTypeSpace: SToken | undefined;
    public readonly bracket: SToken | undefined;
 
-   constructor(param: ConditionalPToken | SectionStart | ConditionalCore, other: ConditionalProps | undefined = {}) {
+   constructor(
+      param: ConditionalPToken | SectionStart | ConditionalCore,
+      other: ConditionalProps | undefined = {},
+   ) {
       const start = other.open && other.open instanceof SToken ? other.open : undefined;
       this.open = start ? start : param.open;
       this.openSpace = other.openSpace instanceof SToken ? other.openSpace : param.openSpace;
-      this.sectionType = other.sectionType instanceof SToken ? other.sectionType : param.sectionType;
-      this.peRef = (other.peRef && other.peRef.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) ? other.peRef : param.peRef;
+      this.sectionType =
+         other.sectionType instanceof SToken ? other.sectionType : param.sectionType;
+      this.peRef =
+         other.peRef && other.peRef.type === PARAMETER_ENTITY_REFERENCE_PTOKEN
+            ? other.peRef
+            : param.peRef;
       this.peRefPlus = arrayOfPERefs(other.peRefPlus) || param.peRefPlus;
-      this.sectionTypeSpace = other.sectionTypeSpace instanceof SToken ? other.sectionTypeSpace : param.sectionTypeSpace;
+      this.sectionTypeSpace =
+         other.sectionTypeSpace instanceof SToken ? other.sectionTypeSpace : param.sectionTypeSpace;
 
       if ('bracket' in param && param.bracket instanceof SToken) {
          this.bracket = param.bracket;
@@ -83,7 +96,11 @@ class ConditionalPToken {
     [63]  ignoreSect         ::= '<![' S? PEReference S? '[' 
 \**********************************************************************/
 
-function parseConditional(source: STokenSource, sectionStart: SectionStart, deliverPToken: DeliverPToken) {
+function parseConditional(
+   source: STokenSource,
+   sectionStart: SectionStart,
+   deliverPToken: DeliverPToken,
+): void {
    const otherProps: ConditionalProps = {};
 
    source.extract('match', '[', (sToken) => {
@@ -92,9 +109,4 @@ function parseConditional(source: STokenSource, sectionStart: SectionStart, deli
    });
 }
 
-export {
-   CONDITIONAL_PTOKEN,
-   ConditionalPToken,
-
-   parseConditional,
-};
+export { CONDITIONAL_PTOKEN, ConditionalPToken, parseConditional };

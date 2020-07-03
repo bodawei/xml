@@ -25,11 +25,18 @@ import {
    CharDataPToken,
    ConditionalClosePToken,
    ConditionalPToken,
+   TextPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
+enum ConditionalState {
+   NONE,
+   INCLUDE,
+   IGNORE,
+   INSIDE_IGNORE,
+}
 
 class PTokenStream extends Readable {
    private _sTokenSource: STokenSource;
@@ -39,7 +46,7 @@ class PTokenStream extends Readable {
    private _parsing: boolean = false;
    private emd: EntityMetaData;
    private waitingForInternalClose: boolean = false;
-   private conditionalIncludeDepth: number = 0;
+   private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
    constructor(metaDataOrTokenSource: STokenSource | EntityMetaData) {
@@ -119,6 +126,43 @@ class PTokenStream extends Readable {
          this._parseContent(deliverParse);
 
       } else {
+         const conditionalState = this.conditionalStack.length === 0 ? ConditionalState.NONE : this.conditionalStack[this.conditionalStack.length -1];
+
+         if (conditionalState === ConditionalState.IGNORE || conditionalState === ConditionalState.INSIDE_IGNORE) {
+            this._sTokenSource.extract('multi', ['<![', ']]>'] , (sToken) => {
+               const valueFound = strOrBlank(sToken);
+
+               if (!sToken) {
+                  this._sTokenSource.extract('all', ['<![', ']]>'] , (sToken) => {
+                     if (!sToken) {
+                        deliverParse(null);
+                     } else {
+                        deliverParse(new TextPToken({ text: sToken }));
+                     }
+                  });
+                  return;
+               }
+
+               switch (valueFound) {
+                  case '<![':
+                     deliverParse(new TextPToken({ text: sToken }));
+                     this.conditionalStack.push(ConditionalState.INSIDE_IGNORE);
+                     break;
+                  case ']]>':
+                     this.conditionalStack.pop();
+
+                     if (conditionalState === ConditionalState.INSIDE_IGNORE) {
+                        deliverParse(new TextPToken({ text: sToken }));
+                     } else {
+                        const conditionalClose = new ConditionalClosePToken({ open: sToken });
+                        deliverParse(conditionalClose);
+                     }
+                     break;
+                  }
+            });
+            return;
+         }
+
          parseSpace(this._sTokenSource, (pToken: any) => {
             if (pToken) {
                deliverParse(pToken);
@@ -136,6 +180,7 @@ class PTokenStream extends Readable {
             deliverParse(null);
             return;
          }
+
          switch (sToken.str) {
             case '<':
             case '&':
@@ -145,12 +190,15 @@ class PTokenStream extends Readable {
                parseParameterEntityReference(this._sTokenSource, deliverParse);
                break;
             case ']':
-               if (this.conditionalIncludeDepth > 0) {
+               if (this.conditionalStack.length > 0) {
                   this._sTokenSource.extract('match', ']]>', (sToken) => {
                      if (sToken) {
-                        this.conditionalIncludeDepth--;
+                        this.conditionalStack.pop();
                         const conditionalClose = new ConditionalClosePToken({ open: sToken });
                         deliverParse(conditionalClose);
+                     } else if (this.waitingForInternalClose) {
+                        this.waitingForInternalClose = false;
+                        this._parseClose(deliverParse);
                      } else {
                         parseCharData(this._sTokenSource, [], deliverParse);
                      }
@@ -172,11 +220,6 @@ class PTokenStream extends Readable {
                         });
                      }
                   });
-                  // parseCharData(this._sTokenSource, [], (charPToken) => {
-                  //    // We were looking for ]]> But I don't understand why. Indeed this
-                  //    // whole section needs some documentation
-                  //    deliverParse(charPToken);
-                  // });
                }
                break;
             default:
@@ -228,7 +271,13 @@ class PTokenStream extends Readable {
             case '<![':
                parseSection(this._sTokenSource, markupStartSToken, (section) => {
                   if (section instanceof ConditionalPToken) {
-                     this.conditionalIncludeDepth++;
+                     const type = strOrBlank(section.sectionType);
+
+                     if (type.toLocaleLowerCase() === 'include') {
+                        this.conditionalStack.push(ConditionalState.INCLUDE);
+                     } else {
+                        this.conditionalStack.push(ConditionalState.IGNORE);
+                     }
                   }
                   deliverParse(section);
                });

@@ -8,6 +8,11 @@ import { EntityDetails } from './utils/EntityDetails';
 type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
 
+type ConditionalInfo = {
+   source?: STokenSource | undefined;
+   callback?: () => void;
+};
+
 type RetrieveResults = {
    sTokenSource: STokenSource;
    getErrors: () => Array<XmlError>;
@@ -37,7 +42,15 @@ type ExpandParams = {
    emd: EntityMetaData;
    entityDetails: EntityDetails;
    loadExternalEntities: boolean;
+   conditionalStack: Array<ConditionalInfo>;
    utils: EntityProcessors;
 };
 
-export { AttributeValueResults, ExpandParams, RetrieveResults, EntityProcessors, ExpandToken };
+export {
+   AttributeValueResults,
+   ConditionalInfo,
+   ExpandParams,
+   RetrieveResults,
+   EntityProcessors,
+   ExpandToken,
+};

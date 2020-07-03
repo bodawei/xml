@@ -37,6 +37,9 @@ import {
    GeneralEntityReferencePToken,
    GeneralEntityEndPToken,
    ParameterEntityDeclarationPToken,
+   CONDITIONAL_PTOKEN,
+   CONDITIONAL_CLOSE_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream, expectError } from './beforeEach';
@@ -334,6 +337,106 @@ describe('EntityExpanderStream (integration)', () => {
                   GENERAL_ENTITY_START_PTOKEN,
                   CHARDATA_PTOKEN,
                   GENERAL_ENTITY_END_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  ELEMENT_END_PTOKEN,
+               ]);
+            },
+            done,
+         );
+      });
+   });
+
+   describe('Case 9: Expand the parameter to a conditional section', () => {
+      it('includes the parsed content within the conditional section', (done) => {
+         pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one [
+            <!ENTITY % doit " INCLUDE">
+            <![%doit;[
+               <!ENTITY anEntity "the value">
+               <!ELEMENT one ANY>
+            ]]>
+         ]>
+         <one>
+            &anEntity;
+         </one>`);
+         pTokenStream.endText();
+
+         gatherStream(
+            entityExpander,
+            (results) => {
+               const types = results.map((result) => result.type);
+
+               expect(types).toEqual([
+                  ENTITY_META_DATA,
+                  XMLDECL_PTOKEN,
+                  SPACE_PTOKEN,
+                  DOCTYPE_START_PTOKEN,
+                  INTERNAL_SUBSET_START_TOKEN,
+                  SPACE_PTOKEN,
+                  PARAMETER_ENTITY_DECLARATION_PTOKEN,
+                  SPACE_PTOKEN,
+                  CONDITIONAL_PTOKEN,
+                  SPACE_PTOKEN,
+                  GENERAL_ENTITY_DECLARATION_PTOKEN,
+                  SPACE_PTOKEN,
+                  ELEMENT_DECLARATION_PTOKEN,
+                  SPACE_PTOKEN,
+                  CONDITIONAL_CLOSE_PTOKEN,
+                  SPACE_PTOKEN,
+                  INTERNAL_SUBSET_END_TOKEN,
+                  DOCTYPE_END_PTOKEN,
+                  SPACE_PTOKEN,
+                  ELEMENT_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  GENERAL_ENTITY_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  GENERAL_ENTITY_END_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  ELEMENT_END_PTOKEN,
+               ]);
+            },
+            done,
+         );
+      });
+
+      it('ignores content within an ignored conditional section', (done) => {
+         pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one [
+            <!ENTITY % doit " IGNORE ">
+            <![%doit;[
+               <!ENTITY anEntity "the value">
+               <!ELEMENT one ANY>
+            ]]>
+         ]>
+         <one>
+            &anEntity;
+         </one>`);
+         pTokenStream.endText();
+
+         gatherStream(
+            entityExpander,
+            (results) => {
+               const types = results.map((result) => result.type);
+
+               expect(types).toEqual([
+                  ENTITY_META_DATA,
+                  XMLDECL_PTOKEN,
+                  SPACE_PTOKEN,
+                  DOCTYPE_START_PTOKEN,
+                  INTERNAL_SUBSET_START_TOKEN,
+                  SPACE_PTOKEN,
+                  PARAMETER_ENTITY_DECLARATION_PTOKEN,
+                  SPACE_PTOKEN,
+                  CONDITIONAL_PTOKEN,
+                  TEXT_PTOKEN,
+                  CONDITIONAL_CLOSE_PTOKEN,
+                  SPACE_PTOKEN,
+                  INTERNAL_SUBSET_END_TOKEN,
+                  DOCTYPE_END_PTOKEN,
+                  SPACE_PTOKEN,
+                  ELEMENT_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  GENERAL_ENTITY_REFERENCE_PTOKEN,
                   CHARDATA_PTOKEN,
                   ELEMENT_END_PTOKEN,
                ]);

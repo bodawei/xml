@@ -1,14 +1,16 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
+import { EntityLocation, EntityMetaData, Range, EntityKind, ENTITY_META_DATA } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import * as tokenStuff from 'token';
+import { PToken, CHARDATA_PTOKEN, DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN } from 'token';
 
 import PTokenStream from '../PTokenStream';
+import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
 
 type Token = { type: string };
-type TokenArray = Array<Token>;
+type TokenArray = Array<PToken>;
 
 describe('PTokenStream (unit)', () => {
    let pTokenStream: PTokenStream;
@@ -20,7 +22,7 @@ describe('PTokenStream (unit)', () => {
    function gatherPTokens(pTokenStream: PTokenStream, deliverResults: (result: TokenArray) => void) {
       const pTokens: TokenArray = [];
 
-      pTokenStream.on('data', (pToken: Token) => pTokens.push(pToken));
+      pTokenStream.on('data', (pToken: PToken) => pTokens.push(pToken));
       pTokenStream.on('end', () => deliverResults(pTokens));
    }
 
@@ -351,6 +353,81 @@ describe('PTokenStream (unit)', () => {
          expect((pTokens[3] as any).text.str).toEqual(']'); // typeHack
          done();
       });
+   });
+
+   describe('conditional sections', () => {
+
+      it('parses an IGNORE conditional section as a start and end token with text between', (done) => {
+         pTokenStream.addText('<![IGNORE[foo bar]]>');
+         pTokenStream.endText();
+   
+         gatherPTokens(pTokenStream, (pTokens) => {
+            const tokenTypes = pTokens.map(token => token.type);
+            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            done();
+         });
+      });
+
+      it('parses an INCLUDE conditional section within an IGNORE as just as text', (done) => {
+         pTokenStream.addText('<![IGNORE[foo <![INCLUDE[bar]]>]]>');
+         pTokenStream.endText();
+   
+         gatherPTokens(pTokenStream, (pTokens) => {
+            const strings: Array<String> = [];
+            pTokens.forEach(token => {
+               if (token.type === TEXT_PTOKEN) {
+                  strings.push(token.text.str);
+               }
+            });
+
+            expect(strings).toEqual(['foo ', '<![', 'INCLUDE[bar', ']]>']);
+            done();
+         });
+      });
+
+      it('parses an IGNORE conditional section within an INCLUDE as just as text', (done) => {
+         pTokenStream.addText('<![INCLUDE[<!ELEMENT foo ANY><![IGNORE[bar]]>]]>');
+         pTokenStream.endText();
+   
+         gatherPTokens(pTokenStream, (pTokens) => {
+            const tokenTypes = pTokens.map(token => token.type);
+
+            expect(tokenTypes).toEqual([
+               ENTITY_META_DATA,
+               CONDITIONAL_PTOKEN,
+               ELEMENT_DECLARATION_PTOKEN,
+               CONDITIONAL_PTOKEN,
+               TEXT_PTOKEN,
+               CONDITIONAL_CLOSE_PTOKEN,
+               CONDITIONAL_CLOSE_PTOKEN,
+            ]);
+            done();
+         });
+      });
+
+      it('terminates an incomplete INCLUDE conditional section inside of the internal subset (this is an illegal use of conditional sections)', (done) => {
+         pTokenStream.addText('<!DOCTYPE one [<![INCLUDE[<!ELEMENT one ANY><![IGNORE[bar]]>]><one></one>');
+         pTokenStream.endText();
+   
+         gatherPTokens(pTokenStream, (pTokens) => {
+            const tokenTypes = pTokens.map(token => token.type);
+
+            expect(tokenTypes).toEqual([
+               ENTITY_META_DATA,
+               DOCTYPE_START_PTOKEN,
+               CONDITIONAL_PTOKEN,
+               ELEMENT_DECLARATION_PTOKEN,
+               CONDITIONAL_PTOKEN,
+               TEXT_PTOKEN,
+               CONDITIONAL_CLOSE_PTOKEN,
+               DOCTYPE_END_PTOKEN,
+               ELEMENT_START_PTOKEN,
+               ELEMENT_END_PTOKEN,
+            ]);
+            done();
+         });
+      });
+
    });
 
 });

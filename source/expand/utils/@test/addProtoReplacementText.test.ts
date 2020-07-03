@@ -57,6 +57,7 @@ describe('addProtoReplacementText() (unit)', () => {
       params = {
          emd: new EntityMetaData(),
          entityDetails,
+         conditionalStack: [],
          loadExternalEntities: true,
          utils: {
             parseBody: (): void => {

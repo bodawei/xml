@@ -31,6 +31,7 @@ import {
    ParameterEntityReferencePToken,
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    NotationDeclarationPToken,
+   TEXT_PTOKEN,
 } from 'token';
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import {
@@ -131,6 +132,7 @@ const transitionsByState: StateTable = {
       [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
       [COMMENT_PTOKEN]: NO_CHANGE,
+      [TEXT_PTOKEN]: NO_CHANGE, // @@@ this should be a different state.  IGNORE conditional sections allow this only
       [SPACE_PTOKEN]: NO_CHANGE,
       // conditional section will be here
       // EXTERNAL_SUBSET_END also needs special handling
