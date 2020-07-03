@@ -241,7 +241,7 @@ const notWellFormedCodes = {
       id: 'TOKEN_INVALID_CONTEXT',
       message: /DOCTYPE_START_PTOKEN/,
    },
-   'ibm29n02.xml': 'ELEMENTDECL_EXTRA_TEXT',
+   'ibm29n02.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
    'ibm29n03.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
    'ibm29n04.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
    'ibm29n05.xml': 'PI_NO_CLOSE',
@@ -499,7 +499,7 @@ const notWellFormedCodes = {
    'ibm62n04.xml': 'CONDITIONAL_UNKNOWN', // great
    'ibm62n05.xml': 'CONDITIONAL_NO_SECOND_BRACKET', // great
    'ibm62n06.xml': 'CONDITIONAL_UNKNOWN', // ok
-   'ibm62n07.xml': 'xxx', // no trailing ]]>
+   'ibm62n07.xml': 'CONDITIONAL_NO_CLOSE',
    'ibm62n08.xml': {
       id: 'MARKUPDECL_INVALID_TOKEN',
       message: /CHARDATA_PTOKEN/,

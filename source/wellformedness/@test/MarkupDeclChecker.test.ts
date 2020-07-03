@@ -22,6 +22,7 @@ import {
    GeneralEntityEndPToken,
    ElidedEntityDeclarationPToken,
    NotationDeclarationPToken,
+   ConditionalPToken,
 } from 'token';
 import { AttListPToken } from 'source/token/attListDeclaration';
 
@@ -388,6 +389,27 @@ describe('MarkupDeclChecker (unit)', () => {
          expect(() => checker.check(comment, ec)).toThrowError(
             /Passed a token to MarkupDeclChecker/,
          );
+      });
+
+      describe('with conditional section', () => {
+         let conditionalSection: ConditionalPToken;
+
+         beforeEach(() => {
+            conditionalSection = new ConditionalPToken({ open: toSToken('<!['), peRefPlus: [] });
+
+            checker.check(new ExternalSubsetStartToken(), ec);
+            checker.check(conditionalSection, ec);
+         });
+
+         it('an error if the end of the external subset happens', () => {
+            checker.check(new ExternalSubsetEndToken(), ec);
+
+            expect(ec).toReportError({
+               id: WellFormedError.ID.CONDITIONAL_NO_CLOSE,
+               params: [],
+               position: conditionalSection.open,
+            });
+         });
       });
 
       describe('with internal parameter entity', () => {

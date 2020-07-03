@@ -437,7 +437,6 @@ describe('EntityExpander (unit)', () => {
             entityExpander.expandPToken(condStart, () => {
                const args = setupConditionalSpy.calls.argsFor(0);
                const stack = args[1].conditionalStack;
-               console.log('args[1].conditionalStack', args[1].conditionalStack);
                const topInfo = stack[stack.length - 1];
 
                entityExpander.expandPToken(docTypeEnd, () => {});

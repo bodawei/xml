@@ -32,6 +32,7 @@ import {
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    NotationDeclarationPToken,
    TEXT_PTOKEN,
+   ConditionalPToken,
 } from 'token';
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import {
@@ -46,6 +47,7 @@ import {
    checkParameterEntity,
    isParamEntityExternal,
 } from './checkUtils';
+import { CONDITIONAL_CLOSE_XTOKEN } from 'source/xTokenStream/tokens/conditionalClose';
 
 enum States {
    PRE = 'PRE',
@@ -54,6 +56,7 @@ enum States {
    PARAM_START_INTERNAL_SUBSET = 'PARAM_START_INTERNAL_SUBSET',
    EXTERNAL_SUBSET_START = 'EXTERNAL_SUBSET_START',
    EXTERNAL_SUBSET = 'EXTERNAL_SUBSET',
+   INSIDE_CONDITIONAL = 'INSIDE_CONDITIONAL',
    DONE = 'DONE',
 }
 
@@ -103,7 +106,6 @@ const transitionsByState: StateTable = {
       [COMMENT_PTOKEN]: States.EXTERNAL_SUBSET,
       [SPACE_PTOKEN]: States.EXTERNAL_SUBSET,
       // PARAMETER_ENTITY_END_PTOKEN will need special handling
-      // conditional section will be here
    },
    [States.PARAM_START_INTERNAL_SUBSET]: {
       // §2.8.0 [30]
@@ -132,9 +134,23 @@ const transitionsByState: StateTable = {
       [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
       [COMMENT_PTOKEN]: NO_CHANGE,
-      [TEXT_PTOKEN]: NO_CHANGE, // @@@ this should be a different state.  IGNORE conditional sections allow this only
       [SPACE_PTOKEN]: NO_CHANGE,
-      // conditional section will be here
+      // EXTERNAL_SUBSET_END also needs special handling
+   },
+   [States.INSIDE_CONDITIONAL]: {
+      // §2.8.0 [30], [31]
+      [CONDITIONAL_PTOKEN]: NO_CHANGE,
+      [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
+      [attListDecl.PTYPE]: NO_CHANGE,
+      [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
+      [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
+      [PARAMETER_ENTITY_REFERENCE_PTOKEN]: NO_CHANGE, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
+      [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
+      [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
+      [COMMENT_PTOKEN]: NO_CHANGE,
+      [TEXT_PTOKEN]: NO_CHANGE, // This is where this differs from external subset
+      [SPACE_PTOKEN]: NO_CHANGE,
+      // CONDITIONAL_CLOSE_PTOKEN is handled specially
       // EXTERNAL_SUBSET_END also needs special handling
    },
    [States.INTERNAL_SUBSET]: {
@@ -299,7 +315,11 @@ function checkDeclaration(
  */
 class MarkupDeclChecker implements Checker {
    private state: States = States.PRE;
-   private start!: InternalSubsetStartToken | ExternalSubsetStartToken | ParameterEntityStartPToken;
+   private start!:
+      | InternalSubsetStartToken
+      | ExternalSubsetStartToken
+      | ParameterEntityStartPToken
+      | ConditionalPToken;
    private inExternalSubset = false;
    private checkState: CheckState;
    private embeddedChecker?: MarkupDeclChecker;
@@ -322,6 +342,8 @@ class MarkupDeclChecker implements Checker {
             this.inExternalSubset = true;
             this.start = pToken;
          } else if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
+            this.start = pToken;
+         } else if (pToken.type === CONDITIONAL_PTOKEN) {
             this.start = pToken;
          }
       } else if (this.state === States.DONE) {
@@ -376,6 +398,17 @@ class MarkupDeclChecker implements Checker {
             );
             this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
             // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
+            break;
+         case CONDITIONAL_PTOKEN:
+            if (this.state !== States.PRE) {
+               this.embeddedChecker = new MarkupDeclChecker(
+                  this.checkState,
+                  this.peContext,
+                  this.inExternalSubset,
+               );
+               this.embeddedChecker.check(pToken, errorCollector);
+               return;
+            }
             break;
          case PARAMETER_ENTITY_START_PTOKEN:
             if (this.state === States.PRE) {
@@ -455,6 +488,8 @@ class MarkupDeclChecker implements Checker {
          } else {
             newState = this.inExternalSubset ? States.EXTERNAL_SUBSET : States.INTERNAL_SUBSET;
          }
+      } else if (pToken.type === CONDITIONAL_PTOKEN && this.state === States.PRE) {
+         newState = this.inExternalSubset ? States.INSIDE_CONDITIONAL : undefined;
       } else if (
          (this.start &&
             pToken.type === PARAMETER_ENTITY_END_PTOKEN &&
@@ -462,9 +497,15 @@ class MarkupDeclChecker implements Checker {
          (pToken.type === INTERNAL_SUBSET_END_TOKEN &&
             this.start.type === INTERNAL_SUBSET_START_TOKEN) ||
          (pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
-            this.start.type === EXTERNAL_SUBSET_START_TOKEN)
+            (this.start.type === EXTERNAL_SUBSET_START_TOKEN ||
+               this.start.type === CONDITIONAL_PTOKEN)) ||
+         (pToken.type === CONDITIONAL_CLOSE_PTOKEN && this.start.type === CONDITIONAL_PTOKEN)
       ) {
          newState = States.DONE;
+      }
+
+      if (pToken.type === EXTERNAL_SUBSET_END_TOKEN && this.start.type === CONDITIONAL_PTOKEN) {
+         ec.report(WFID.CONDITIONAL_NO_CLOSE, [], getFirstSToken(this.start));
       }
 
       if (!newState) {

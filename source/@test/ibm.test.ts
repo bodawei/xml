@@ -210,16 +210,14 @@ describe('ibm tests', () => {
       Object.keys(notWfTests[productionName]).forEach(testName => {
          const skipTests: Array<string> = [
             'ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-            // --- 
-            'ibm62n07.xml', //Need to handle include conditional sections (nesting!) in external subset
          ];
-         const includeTests: Array<string> = [ 'ltinentval.xml' ];
+         const includeTests: Array<string> = [];
 
          if (skipTest(testName, skipTests, includeTests) || skipProduction(productionName)) {
             return;
          }
 
-         fit(`not-wf/${productionName}/${testName}`, (done) => {
+         it(`not-wf/${productionName}/${testName}`, (done) => {
             const stream = setupNotWF(`${__dirname}/xmlconf/ibm/not-wf/${productionName}/${testName}`, notWfResources);
             const testData = notWfTests[productionName][testName];
             pTokenStream.addText(testData.input);

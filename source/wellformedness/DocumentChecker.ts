@@ -11,18 +11,13 @@ import {
    INTERNAL_SUBSET_START_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
-   PARAMETER_ENTITY_START_PTOKEN,
-   PARAMETER_ENTITY_END_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   GENERAL_ENTITY_START_PTOKEN,
-   GENERAL_ENTITY_END_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
    SPACE_PTOKEN,
    XMLDECL_PTOKEN,
    PToken,
    getFirstSToken,
 } from 'token';
 
+import checkConditionalStartWellFormed from './tokens/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
 import { strOrBlank, SToken } from 'sToken';
 
@@ -129,6 +124,8 @@ class DocumentChecker {
          );
          pToken.checkWellFormed(specialErrorCollector, this.checkState.emd);
          errorCollector.appendFrom(specialErrorCollector);
+      } else if (pToken.type === 'CONDITIONAL_PTOKEN') {
+         checkConditionalStartWellFormed(pToken, errorCollector, this.checkState.emd);
       } else if ((pToken as any).checkWellFormed) {
          (pToken as any).checkWellFormed(errorCollector, this.checkState.emd);
       }
