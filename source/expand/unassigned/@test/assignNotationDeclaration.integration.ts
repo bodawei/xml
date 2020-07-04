@@ -14,11 +14,9 @@ import {
    ParameterEntityStartPToken,
    TextPToken,
 } from 'token';
+import { makeInsertedRange } from 'token-test';
 
 import { assignNotationDeclaration } from '../assignNotationDeclaration';
-
-// REFACTOR/CLEANUP bad import
-import helper from '../../../token/@test/helper';
 
 describe('assignUnassigned() (integration)', () => {
    it('fills in the missing properties, including the preceeding declaration space', (done) => {
@@ -59,7 +57,7 @@ describe('assignUnassigned() (integration)', () => {
             new NotationDeclarationPToken({
                type: 'NOTATION_DECLARATION_PTOKEN',
                open: toSToken('<!'),
-               declTypeSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+               declTypeSpace: new SToken(' ', ' ', [makeInsertedRange()]),
                name: toSToken('notationName'),
                nameSpace: toSToken(' '),
                peRefPlus,
@@ -73,7 +71,7 @@ describe('assignUnassigned() (integration)', () => {
                      value: [new TextPToken({ text: toSToken('foo') })],
                      closeQuote: toSToken('"'),
                   },
-                  publicSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+                  publicSpace: new SToken(' ', ' ', [makeInsertedRange()]),
                   system: undefined,
                },
                close: toSToken('>'),

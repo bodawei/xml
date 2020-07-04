@@ -1,3 +1,7 @@
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+
+import { EntityLocation, Range } from 'basic';
+import { toSToken, SToken } from 'sToken';
 import {
    ParameterEntityReferencePToken,
    UnassignedArray,
@@ -5,12 +9,9 @@ import {
    spaceFromSToken,
    wordFromSToken,
 } from 'token';
+import { makeInsertedRange } from 'token-test';
 
 import { assignToProps } from '../assignToProps';
-import { toSToken, SToken } from 'sToken';
-import { EntityLocation, Range } from 'basic';
-
-import helper from '../../../token/@test/helper';
 
 describe('assignToProps()', () => {
    it('does nothing if there is no unassigned items', () => {
@@ -331,7 +332,7 @@ describe('assignToProps()', () => {
 
          expect(pToken).toEqual({
             one: word1.token.text,
-            two: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+            two: new SToken(' ', ' ', [makeInsertedRange()]),
             three: word2.token.text,
          });
       });
@@ -399,7 +400,7 @@ describe('assignToProps()', () => {
 
          expect(pToken).toEqual({
             one: word1.token.text,
-            four: new SToken(' ', ' ', [helper.makeInsertedRange()]),
+            four: new SToken(' ', ' ', [makeInsertedRange()]),
          });
       });
 
@@ -496,10 +497,10 @@ describe('assignToProps()', () => {
          expect(pToken).toEqual({
             one: word.token.text,
             two: new SToken('     ', '     ', [
-               helper.makeInsertedRange(),
-               helper.makeInsertedRange(),
-               helper.makeInsertedRange(),
-               helper.makeInsertedRange(),
+               makeInsertedRange(),
+               makeInsertedRange(),
+               makeInsertedRange(),
+               makeInsertedRange(),
                new Range(new EntityLocation()),
             ]),
          });
@@ -593,10 +594,7 @@ describe('assignToProps()', () => {
          assignToProps(unVals, pToken, 'two', descriptors);
 
          expect(pToken).toEqual({
-            one: new SToken('\t ', '\t ', [
-               new Range(new EntityLocation()),
-               helper.makeInsertedRange(),
-            ]),
+            one: new SToken('\t ', '\t ', [new Range(new EntityLocation()), makeInsertedRange()]),
             two: word.token.text,
          });
       });

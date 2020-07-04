@@ -50,13 +50,7 @@ import {
    makeElementStart,
    makeElementEnd,
    makeElementEmpty,
-   makeGeneralEntityEnd,
-   makeGeneralEntityReference,
-   makeGeneralEntityStart,
-   makeParameterEntityStart,
-   makeParameterEntityReference,
-   makeParameterEntityEnd,
-} from './tokens';
+} from 'token-test';
 
 describe('DocumentChecker (unit)', () => {
    let checker: DocumentChecker;

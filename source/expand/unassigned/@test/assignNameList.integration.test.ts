@@ -3,9 +3,7 @@
 import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource } from 'sToken';
-import { ContentParticlePToken, NameListPToken } from 'token';
-
-import unassigned from '../../../token/common/unassigned';
+import { ContentParticlePToken, NameListPToken, parseAllUnassignedValues } from 'token';
 
 import { assignNameList } from '../assignNameList';
 
@@ -15,7 +13,7 @@ describe('assignNameList() (integration)', () => {
       source.addText('( one+ | ( ( two | three)+ , four)? | five)');
       source.endText();
 
-      unassigned.parseAllValues(source, true, (unassignedValues) => {
+      parseAllUnassignedValues(source, true, (unassignedValues) => {
          const listToken = new NameListPToken();
          const expected = new NameListPToken();
          expected.open = toSToken('(');

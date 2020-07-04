@@ -17,6 +17,8 @@ import misc from '../misc';
 import literal from '../literal';
 import { assignUnassigned, checkWellFormed } from '../entity';
 
+import * as assignExternalId from '../../../expand/unassigned/assignExternalId';
+
 describe('entity (unit)', () => {
    let genEntityDeclarationPToken: GeneralEntityDeclarationPToken;
    let paramGeneralEntityDeclarationPToken: ParameterEntityDeclarationPToken;
@@ -46,7 +48,7 @@ describe('entity (unit)', () => {
 
       beforeEach(() => {
          unAssign = spyOn(unassigned, 'assignToProps');
-         extUnass = spyOn(externalId, 'assignExternalIdUnssigned');
+         extUnass = spyOn(assignExternalId, 'assignExternalId');
 
          extUnass.and.returnValue({
             unassigned: [],
@@ -113,7 +115,7 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(extUnass).toHaveBeenCalledWith(undefined, unassignedValue);
+            expect(extUnass).toHaveBeenCalledWith(unassignedValue, undefined, undefined);
          });
 
          it('calls unassigned.assignToProps() with the epilog', () => {
@@ -183,7 +185,7 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(extUnass).toHaveBeenCalledWith(undefined, unassignedValue);
+            expect(extUnass).toHaveBeenCalledWith(unassignedValue, undefined, undefined);
          });
 
          it('calls unassigned.assignToProps() with the epilog if we found an externalId', () => {
@@ -287,8 +289,8 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(externalId.assignExternalIdUnssigned).toHaveBeenCalledWith(
-               declPToken.externalId!, unassignedValue, undefined);
+            expect(extUnass).toHaveBeenCalledWith(
+               unassignedValue, undefined, declPToken.externalId!, );
          });
 
          it('calls unassigned.assignToProps() if externalId has an unassigned value', () => {
@@ -326,7 +328,7 @@ describe('entity (unit)', () => {
 
             assignUnassigned(declPToken);
 
-            expect(externalId.assignExternalIdUnssigned).not.toHaveBeenCalled();
+            expect(extUnass).not.toHaveBeenCalled();
          });
 
          it('calls unassigned.assignToProps() only with the epilog values', () => {

@@ -38,6 +38,9 @@
          "token": [
             "./source/token"
          ],
+         "token-test": [
+            "./source/token/@test/helper"
+         ],
          "wellformedness": [
             "./source/wellformedness"
          ],

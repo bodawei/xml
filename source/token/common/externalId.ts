@@ -32,7 +32,6 @@ type ProtoExternalId = {
    system?: LiteralPToken;
 
    peRefPlus: UnassignedArray;
-   unassigned?: UnassignedArray;
    nextPropName?: string;
 };
 
@@ -49,12 +48,6 @@ type ParsedExternalId = {
    externalId?: ExternalId;
    peRefPlus: UnassignedArray;
    nextPropName?: string;
-};
-
-type AssignResult = {
-   preSpace?: SToken;
-   externalId?: ExternalId;
-   unassigned: UnassignedArray;
 };
 
 function protoToExternalId(peid: ProtoExternalId): ExternalId {
@@ -208,67 +201,6 @@ function parseExternalId(
    unassigned.checkForPERef(source, callback);
 }
 
-function assignExternalIdUnssigned(
-   externalId: ExternalId | undefined,
-   unassignedValues: UnassignedArray,
-   nextPropName: string | undefined = 'externalType',
-): AssignResult {
-   const newExternalId: ProtoExternalId = { type: EXTERNAL_ID, peRefPlus: [], ...externalId };
-   const descriptors = [
-      { name: 'externalType', type: 'word', allowed: /public|system/i },
-      { name: 'externalTypeSpace', type: 'space' },
-   ];
-
-   // Do not continue processing if we have no values, or there are unexpanded references.
-   if (unassignedValues.length === 0) {
-      return { unassigned: unassignedValues };
-   }
-
-   for (const value of unassignedValues) {
-      if (value.type === UnassignedType.REFERENCE) {
-         return { unassigned: unassignedValues };
-      }
-   }
-
-   if (nextPropName === 'externalType') {
-      descriptors.unshift({ name: 'preSpace', type: 'space' });
-   }
-
-   unassigned.assignToProps(unassignedValues, newExternalId, nextPropName, descriptors);
-
-   const externalType = strOrBlank(newExternalId.externalType).toLocaleUpperCase();
-
-   switch (externalType) {
-      case 'SYSTEM':
-         unassigned.assignToProps(unassignedValues, newExternalId, 'system', [
-            { name: 'externalTypeSpace', type: 'space' },
-            { name: 'system', type: 'literal' },
-         ]);
-         break;
-      case 'PUBLIC':
-         unassigned.assignToProps(unassignedValues, newExternalId, 'public', [
-            { name: 'externalTypeSpace', type: 'space' },
-            { name: 'public', type: 'literal' },
-            { name: 'publicSpace', type: 'space' },
-            { name: 'system', type: 'literal' },
-         ]);
-         break;
-   }
-
-   const result = {
-      externalId: protoToExternalId(newExternalId),
-      unassigned: unassignedValues,
-   };
-
-   if ((newExternalId as any).preSpace) {
-      (result as any).preSpace = (newExternalId as any).preSpace;
-   }
-
-   delete (newExternalId as any).preSpace;
-
-   return result;
-}
-
 /**********************************************************************\
  checkWellFormed() does a well formed check on the pTokenPart value, and
  reports any error through the error collector.
@@ -381,7 +313,6 @@ export {
    EXTERNAL_ID,
    ExternalId,
    parseExternalId,
-   assignExternalIdUnssigned,
    getSTokens,
    checkExternalIdWellFormed,
    makeEntityLocation,

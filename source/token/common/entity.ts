@@ -6,7 +6,7 @@ import { strOrBlank } from 'sToken';
 
 import unassigned, { UnassignedType } from '../common/unassigned';
 import misc from '../common/misc';
-import { ExternalId, assignExternalIdUnssigned, checkExternalIdWellFormed } from '../common/externalId';
+import {  checkExternalIdWellFormed } from '../common/externalId';
 import literal from '../common/literal';
 import { UnassignedValue } from '../common/unassigned';
 import { TextPToken } from '../text';
@@ -15,6 +15,7 @@ import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
+import { assignExternalId } from 'source/expand/unassigned/assignExternalId';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -69,7 +70,7 @@ function assignUnassigned(pToken: GeneralEntityDeclarationPToken | ParameterEnti
    let doEpilog = inEpilog.length > 0;
 
    if (inExternalId) {
-      const results = assignExternalIdUnssigned(pToken.externalId, unValues, pToken.nextPropName);
+      const results = assignExternalId(unValues, pToken.nextPropName, pToken.externalId);
       if (results.preSpace) {
          if (pToken.nameSpace) {
             pToken.nameSpace.merge(results.preSpace);
@@ -108,7 +109,7 @@ function assignUnassigned(pToken: GeneralEntityDeclarationPToken | ParameterEnti
                { name: 'entityValueSpace', type: 'space' },
             ]);
          } else {
-            const results = assignExternalIdUnssigned(pToken.externalId, pToken.unassigned!);
+            const results = assignExternalId(pToken.unassigned!, undefined, pToken.externalId);
             if (results.preSpace) {
                if (pToken.nameSpace) {
                   pToken.nameSpace.merge(results.preSpace);

@@ -11,13 +11,7 @@ import { ParameterEntityReferencePToken, ParameterEntityStartPToken, TextPToken 
 import helper from '../../@test/helper';
 import { ParameterEntityEndPToken } from '../../marker/parameterEntityEnd';
 import unassigned, { UnassignedType } from '../unassigned';
-import {
-   ExternalId,
-   parseExternalId,
-   assignExternalIdUnssigned,
-   checkExternalIdWellFormed,
-   getSTokens,
-} from '../externalId';
+import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from '../externalId';
 
 describe('externalId (integration)', () => {
    describe('parse()', () => {
@@ -88,102 +82,6 @@ describe('externalId (integration)', () => {
                ],
                nextPropName: 'system',
             });
-            done();
-         });
-      });
-   });
-
-   describe('assignUnassigned()', () => {
-      let emd: EntityMetaData;
-      let source: STokenSource;
-
-      beforeEach(() => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
-      });
-      it('assigns the public and system value (check unassigned.assignToProps())', (done) => {
-         source.addText('PUBLIC\t%publicVal;\t"sys.xml">');
-         source.endText();
-
-         parseExternalId(source, [], true, (result) => {
-            // expand/replace the publicVal reference
-            result.peRefPlus.shift();
-            result.peRefPlus.unshift({
-               type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(
-                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
-               ) as any,
-            });
-            result.peRefPlus.unshift({
-               type: UnassignedType.LITERAL,
-               token: {
-                  openQuote: toSToken('"'),
-                  value: [new TextPToken({ text: toSToken('pub.xml') })],
-                  closeQuote: toSToken('"'),
-               },
-            });
-            result.peRefPlus.unshift({
-               type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(
-                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
-               ) as any,
-            });
-
-            const assignResult = assignExternalIdUnssigned(
-               result.externalId!,
-               result.peRefPlus,
-               result.nextPropName,
-            );
-
-            expect(assignResult).toEqualRangeless({
-               externalId: {
-                  type: 'EXTERNAL_ID',
-                  externalType: toSToken('PUBLIC'),
-                  externalTypeSpace: toSToken('\t '),
-                  public: {
-                     openQuote: toSToken('"'),
-                     value: [new TextPToken({ text: toSToken('pub.xml') })],
-                     closeQuote: toSToken('"'),
-                  },
-                  publicSpace: toSToken(' \t'),
-                  system: {
-                     openQuote: toSToken('"'),
-                     value: [new TextPToken({ text: toSToken('sys.xml') })],
-                     closeQuote: toSToken('"'),
-                  },
-               },
-               unassigned: [],
-            });
-            done();
-         });
-      });
-
-      it('adds a space to an otherwise missing previous prop name (check unsasigned calls)', (done) => {
-         const expectedString = new SToken(' ', ' ', [helper.makeInsertedRange()]);
-         source.addText('%foo;>');
-         source.endText();
-
-         parseExternalId(source, [], true, (result) => {
-            // expand/replace the publicVal reference
-            result.peRefPlus.shift();
-
-            result.peRefPlus.unshift(unassigned.wordFromSToken(toSToken('public')), {
-               type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(
-                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
-               ) as any,
-            });
-            result.peRefPlus.unshift();
-            result.peRefPlus.unshift({
-               type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(
-                  new ParameterEntityReferencePToken({ open: toSToken('%') }),
-               ) as any,
-            });
-
-            const assignResult = assignExternalIdUnssigned(result.externalId!, result.peRefPlus);
-
-            expect(assignResult.preSpace).toEqual(expectedString);
             done();
          });
       });

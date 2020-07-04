@@ -47,7 +47,7 @@ import {
    makeProcessingInstruction,
    makeNotationDeclaration,
    makeElementDeclaration,
-} from './tokens';
+} from 'token-test';
 import { UnassignedType } from 'source/token/common/unassigned';
 
 describe('MarkupDeclChecker (unit)', () => {

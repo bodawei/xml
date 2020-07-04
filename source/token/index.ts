@@ -7,9 +7,10 @@ import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKE
 
 import { AttributeValuePToken } from './common/attribute';
 import unassigned from './common/unassigned';
+import { parseAllUnassignedValues } from './common/unassigned';
 import { UnassignedArray, UnassignedType, UnassignedValue, spaceFromSToken, wordFromSToken } from './common/unassigned';
 import literalValue from './common/literalValue';
-import { NameListPToken, ContentParticlePToken } from './contentspec/nameList';
+import { NamePToken, NameListPToken, ContentParticlePToken } from './contentspec/nameList';
 import { XmlDeclarationPToken } from './xmlDeclaration';
 import { DocTypeStartPToken } from './docTypeStart';
 import { InternalSubsetStartToken } from './marker/internalSubsetStart';
@@ -78,7 +79,7 @@ export * from './text';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
-import { EXTERNAL_ID, ExternalId } from './common/externalId';
+import { EXTERNAL_ID, ExternalId, parseExternalId } from './common/externalId';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
@@ -147,11 +148,14 @@ export {
    AttListPToken,
    ElementDeclarationPToken,
    ContentParticlePToken,
+   NamePToken,
    NameListPToken,
    UnassignedArray, UnassignedType,
    UnassignedValue,
    spaceFromSToken,
    wordFromSToken,
+   parseExternalId,
+   parseAllUnassignedValues,
    
    declaration,
 

@@ -1,9 +1,9 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { NotationDeclarationPToken, UnassignedArray, UnassignedType } from 'token';
-import { assignExternalIdUnssigned } from '../../token/common/externalId';
 
 import { assignToProps } from './assignToProps';
+import { assignExternalId } from './assignExternalId';
 
 const NAME_ASSIGNMENTS = [
    { name: 'declTypeSpace', type: 'space' },
@@ -29,7 +29,7 @@ function assignNotationDeclaration(
       nextPropName = undefined;
    }
 
-   const results = assignExternalIdUnssigned(notationPToken.externalId, unValues, nextPropName);
+   const results = assignExternalId(unValues, nextPropName, notationPToken.externalId);
 
    if (results.preSpace) {
       if (notationPToken.nameSpace) {

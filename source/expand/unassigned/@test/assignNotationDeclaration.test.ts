@@ -8,12 +8,10 @@ import {
    wordFromSToken,
    UnassignedArray,
 } from 'token';
-
-// REFACTOR/CLEANUP bad import
-import { makeParameterEntityReference } from 'source/wellformedness/@test/tokens';
-import * as externalId from '../../../token/common/externalId';
+import { makeParameterEntityReference } from 'token-test';
 
 import * as assignToProps from '../assignToProps';
+import * as assignExternalId from '../assignExternalId';
 
 import { assignNotationDeclaration } from '../assignNotationDeclaration';
 
@@ -25,7 +23,7 @@ describe('assignNotationDeclaration() (unit)', () => {
 
    beforeEach(() => {
       assignToPropsSpy = spyOn(assignToProps, 'assignToProps');
-      externalIDAssignSpy = spyOn(externalId, 'assignExternalIdUnssigned');
+      externalIDAssignSpy = spyOn(assignExternalId, 'assignExternalId');
       externalIDAssignSpy.and.returnValue({});
 
       simpleUnassigned = [wordFromSToken(toSToken('foo'))];
@@ -109,7 +107,7 @@ describe('assignNotationDeclaration() (unit)', () => {
 
       assignNotationDeclaration(simpleUnassigned, notationPToken);
 
-      expect(externalIDAssignSpy).toHaveBeenCalledWith(undefined, simpleUnassigned, undefined);
+      expect(externalIDAssignSpy).toHaveBeenCalledWith(simpleUnassigned, undefined, undefined);
    });
 
    it('calls the externalId assignUnassigned() with the nextPropName when it is anything but name', () => {
@@ -121,11 +119,9 @@ describe('assignNotationDeclaration() (unit)', () => {
 
       assignNotationDeclaration(simpleUnassigned, notationPToken);
 
-      expect(externalIDAssignSpy).toHaveBeenCalledWith(
-         { type: EXTERNAL_ID },
-         simpleUnassigned,
-         'foo',
-      );
+      expect(externalIDAssignSpy).toHaveBeenCalledWith(simpleUnassigned, 'foo', {
+         type: EXTERNAL_ID,
+      });
    });
 
    it('fills in the pre-space if this was found by the externalId assignUnassigned()', () => {

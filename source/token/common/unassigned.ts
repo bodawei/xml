@@ -505,6 +505,7 @@ const unassigned = {
 
 export default unassigned;
 
+const parseAllUnassignedValues = parseAllValues;
 export {
    UnassignedArray,
    UnassignedValue,
@@ -514,5 +515,6 @@ export {
    UnassignedType,
 
    spaceFromSToken,
-   wordFromSToken
+   wordFromSToken,
+   parseAllUnassignedValues,
 };

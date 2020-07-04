@@ -4,9 +4,9 @@ import { EntityLocation, EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
-import { ExternalId, parseExternalId, assignExternalIdUnssigned, checkExternalIdWellFormed, getSTokens, makeEntityLocation } from './common/externalId';
+import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens, makeEntityLocation } from './common/externalId';
 import misc from './common/misc';
-import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';
+import unassigned, { UnassignedArray } from './common/unassigned';
 import { DeclarationStart } from './bridge/declaration';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';

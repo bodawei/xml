@@ -1,14 +1,9 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-// REFACTOR/CLEANUP bad import
-import { UnassignedArray, DescriptorArray } from 'source/token/common/unassigned';
-import {
-   NameListPToken,
-   ContentParticlePToken,
-   NamePToken,
-} from 'source/token/contentspec/nameList';
+import { NamePToken, NameListPToken, ContentParticlePToken, UnassignedArray } from 'token';
 
 import { assignToProps } from './assignToProps';
+import { DescriptorArray } from './types';
 
 function assignListOpen(nameList: NameListPToken, unValues: UnassignedArray): void {
    let needOpen = nameList.names.length === 0;
