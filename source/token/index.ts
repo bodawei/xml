@@ -7,7 +7,9 @@ import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKE
 
 import { AttributeValuePToken } from './common/attribute';
 import unassigned from './common/unassigned';
+import { UnassignedArray, UnassignedType, UnassignedValue, spaceFromSToken, wordFromSToken } from './common/unassigned';
 import literalValue from './common/literalValue';
+import { NameListPToken, ContentParticlePToken } from './contentspec/nameList';
 import { XmlDeclarationPToken } from './xmlDeclaration';
 import { DocTypeStartPToken } from './docTypeStart';
 import { InternalSubsetStartToken } from './marker/internalSubsetStart';
@@ -144,6 +146,12 @@ export {
 
    AttListPToken,
    ElementDeclarationPToken,
+   ContentParticlePToken,
+   NameListPToken,
+   UnassignedArray, UnassignedType,
+   UnassignedValue,
+   spaceFromSToken,
+   wordFromSToken,
    
    declaration,
 

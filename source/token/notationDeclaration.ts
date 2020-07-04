@@ -65,10 +65,6 @@ class NotationDeclarationPToken {
       this.peRefPlus = (props as any).peRefPlus || [];
    }
 
-   assignUnassigned() {
-      return assignUnassigned(this);
-   }
-
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
       return checkWellFormed(this, ec, entityMetaData);
    }
@@ -139,44 +135,6 @@ function getClose(source: STokenSource, protoToken: ProtoToken, deliverPToken: D
    });
 }
 
-/**********************************************************************\
- Recover from finding a parameter param entity ref in the declaration
-\**********************************************************************/
-
-function assignUnassigned(notationPToken: NotationDeclarationPToken): void {
-   const unValues: UnassignedArray = notationPToken.unassigned.slice(0);
-   const unexpandedRef = unValues.filter((item: UnassignedValue) => (item.type === UnassignedType.REFERENCE));
-
-   if (unValues.length === 0 || unexpandedRef.length !== 0) {
-      notationPToken.extra = unValues;
-      return;
-   }
-
-   if (notationPToken.nextPropName === 'name') {
-      unassigned.assignToProps(unValues, notationPToken, notationPToken.nextPropName, [
-         { name: 'declTypeSpace', type: 'space' },
-         { name: 'name', type: 'word' },
-         { name: 'nameSpace', type: 'space' },
-      ]);
-   }
-
-   const nextName = notationPToken.nextPropName === 'name' ? undefined : notationPToken.nextPropName;
-   const results = assignExternalIdUnssigned(notationPToken.externalId, unValues, nextName);
-
-   if (results.preSpace) {
-      if (notationPToken.nameSpace) {
-         notationPToken.nameSpace.merge(results.preSpace);
-      } else {
-         (notationPToken as any).nameSpace = results.preSpace;
-      }
-   }
-
-   if (results.externalId) {
-      (notationPToken as any).externalId = results.externalId;
-   }
-
-   notationPToken.extra = unValues;
-}
 
 /**********************************************************************\
  checkWellFormed() does check on validity

@@ -512,4 +512,7 @@ export {
    DescriptorArray,
    Descriptor,
    UnassignedType,
+
+   spaceFromSToken,
+   wordFromSToken
 };

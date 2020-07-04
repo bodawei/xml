@@ -1,10 +1,10 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ElementDeclarationPToken } from 'token';
-import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
-import unassigned from '../../token/common/unassigned';
-import nameList, { NameListPToken } from 'source/token/contentspec/nameList';
 import { strOrBlank } from 'sToken';
+import { ElementDeclarationPToken, NameListPToken, UnassignedArray, UnassignedType } from 'token';
+
+import { assignNameList } from './assignNameList';
+import { assignToProps } from './assignToProps';
 
 const NAME_ASSIGNMENTS = [
    { name: 'postDeclTypeSpace', type: 'space' },
@@ -18,24 +18,25 @@ const SIMPLE_CONTENT_SPEC_ASSIGNENTS = [
 ];
 
 function assignElementDeclaration(
-   unassigedArray: UnassignedArray | undefined,
+   unassigedArray: UnassignedArray | undefined = [],
    edPToken: ElementDeclarationPToken,
 ): void {
-   const unValues = unassigedArray?.slice(0);
-   const hasRef = unValues && unValues.find((item) => item.type === UnassignedType.REFERENCE);
+   const unValues = unassigedArray.slice(0);
+   const hasRef = unValues.find((item) => item.type === UnassignedType.REFERENCE);
    let nextPropName = edPToken.nextPropName;
 
-   if (!unValues || unValues.length === 0 || hasRef) {
+   if (unValues.length === 0 || hasRef) {
+      edPToken.extra = unValues;
       return;
    }
 
    if (nextPropName === 'name') {
-      unassigned.assignToProps(unValues, edPToken, nextPropName, NAME_ASSIGNMENTS);
+      assignToProps(unValues, edPToken, nextPropName, NAME_ASSIGNMENTS);
       nextPropName = 'contentSpec';
    }
 
    if (nextPropName === 'contentSpec') {
-      unassigned.assignToProps(unValues, edPToken, 'postNameSpace', PRE_CONTENT_SPEC_ASSIGNMENT);
+      assignToProps(unValues, edPToken, 'postNameSpace', PRE_CONTENT_SPEC_ASSIGNMENT);
       const nextValue = unValues[0];
 
       if (
@@ -44,21 +45,19 @@ function assignElementDeclaration(
          strOrBlank(nextValue.token.text) === '('
       ) {
          edPToken.children = edPToken.children || new NameListPToken();
-         nameList.assignUnassigned(edPToken.children, unValues);
+         assignNameList(edPToken.children!, unValues);
       } else {
-         unassigned.assignToProps(unValues, edPToken, nextPropName, SIMPLE_CONTENT_SPEC_ASSIGNENTS);
+         assignToProps(unValues, edPToken, nextPropName, SIMPLE_CONTENT_SPEC_ASSIGNENTS);
       }
    } else {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      nameList.assignUnassigned(edPToken.children!, unValues);
+      assignNameList(edPToken.children!, unValues);
    }
 
    // REFACTOR/CLEANUP: this should not be happening. Validity requires the expanded value in unassignedArray, which is wrong.
    (edPToken as any).peRefPlus = unassigedArray;
 
-   if (unValues.length !== 0) {
-      edPToken.extra = unValues;
-   }
+   edPToken.extra = unValues;
 }
 
 export { assignElementDeclaration };

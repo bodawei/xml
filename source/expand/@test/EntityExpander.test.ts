@@ -37,6 +37,7 @@ import {
 } from 'token';
 
 import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
+import * as assignNotationDeclaration from '../unassigned/assignNotationDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
 import * as expandEntityValueModule from '../utils/expandEntityValue';
 import * as expandUnassigned from '../utils/expandUnassigned';
@@ -50,10 +51,12 @@ import { EntityNameStack } from '../utils/EntityNameStack';
 describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
+   let assignNotationDeclSpy: jasmine.Spy;
 
    beforeEach(() => {
       expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
       setupConditionalSpy = spyOn(setupConditional, 'setupConditional');
+      assignNotationDeclSpy = spyOn(assignNotationDeclaration, 'assignNotationDeclaration');
    });
 
    function harvestTypes(results: Array<PToken>): Array<string> {
@@ -476,7 +479,6 @@ describe('EntityExpander (unit)', () => {
          const one = unassigned.wordFromSToken(toSToken('1'));
          const two = unassigned.wordFromSToken(toSToken('2'));
          notation.unassigned = [one];
-         spyOn(notation, 'assignUnassigned');
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [two], byproducts: [] });
@@ -491,7 +493,6 @@ describe('EntityExpander (unit)', () => {
       it('passes a declaration with unassigned values to the expandUnassigned() utility', (done) => {
          const one = unassigned.wordFromSToken(toSToken('1'));
          notation.unassigned = [one];
-         spyOn(notation, 'assignUnassigned');
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [], byproducts: [] });
@@ -513,7 +514,6 @@ describe('EntityExpander (unit)', () => {
          const one = unassigned.wordFromSToken(toSToken('1'));
          const two = unassigned.wordFromSToken(toSToken('2'));
          notation.unassigned = [one];
-         spyOn(notation, 'assignUnassigned');
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
@@ -552,14 +552,13 @@ describe('EntityExpander (unit)', () => {
          const one = unassigned.wordFromSToken(toSToken('1'));
          const two = unassigned.wordFromSToken(toSToken('2'));
          notation.unassigned = [one];
-         spyOn(notation, 'assignUnassigned');
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
             callback({ newValue: [two], byproducts: [] });
          });
 
          doExpand([notation], true, () => {
-            expect(notation.assignUnassigned).toHaveBeenCalled();
+            expect(assignNotationDeclSpy).toHaveBeenCalled();
             expect(notation.unassigned).toEqual([two]);
             done();
          });

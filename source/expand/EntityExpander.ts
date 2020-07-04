@@ -47,6 +47,7 @@ import { expandUnassigned } from './utils/expandUnassigned';
 import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 import { EntityProcessors, ExpandParams } from './types';
 import { EntityNameStack } from './utils/EntityNameStack';
+import { assignNotationDeclaration } from './unassigned/assignNotationDeclaration';
 
 type DeclToken =
    | AttListPToken
@@ -354,6 +355,8 @@ class EntityExpander {
 
             if (declarationPToken.type === ELEMENT_DECLARATION_PTOKEN) {
                assignElementDeclaration(results.newValue, declarationPToken);
+            } else if (declarationPToken.type === NOTATION_DECLARATION_PTOKEN) {
+               assignNotationDeclaration(results.newValue, declarationPToken);
             } else {
                declarationPToken.assignUnassigned();
             }

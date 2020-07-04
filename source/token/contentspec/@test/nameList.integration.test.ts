@@ -6,9 +6,7 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import unassigned from '../../common/unassigned';
 import nameList, {
-   ContentParticlePToken,
    NameListPToken,
    NamePToken,
 } from '../nameList';
@@ -89,93 +87,6 @@ describe('nameList (integration)', () => {
             expect(listSubOne!.repeat!.str).toEqual('?');
             expect(listSubOneSubZero.repeat!.str).toEqual('+');
             expect(listSubOneSubZeroSubZero.name!.str).toEqual('two');
-            done();
-         });
-      });
-
-   });
-
-   describe('assignUnassigned()', () => {
-
-      it('fills in a simple list of names', (done) => {
-         const makeSToken = makeSTokenMaker();
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('( one+ | ( ( two | three)+ , four)? | five)');
-         source.endText();
-
-         unassigned.parseAllValues(source, true, (unassignedValues) => {
-            const listToken = new nameList.NameListPToken();
-            const expected = new nameList.NameListPToken();
-            expected.open = makeSToken('(');
-            expected.postOpenSpace = makeSToken(' ');
-            const first: ContentParticlePToken = {
-               particle: {
-                  name: makeSToken('one'),
-                  repeat: makeSToken('+'),
-                  postRepeatSpace: makeSToken(' '),
-               },
-               delimiter: makeSToken('|'),
-               postDelimiterSpace: makeSToken(' '),
-            };
-            expected.names.push(first);
-            const secondParticle: NameListPToken = new nameList.NameListPToken({
-               open: makeSToken('('),
-               postOpenSpace: makeSToken(' '),
-            });
-            const second: ContentParticlePToken = {
-               particle: secondParticle,
-            };
-            const secondAParticle: NameListPToken = new nameList.NameListPToken({
-               open: makeSToken('('),
-               postOpenSpace: makeSToken(' '),
-            });
-            const secondA: ContentParticlePToken = {
-               particle: secondAParticle,
-            };
-            const secondAOne: ContentParticlePToken = {
-               particle: {
-                  name: makeSToken('two'),
-                  postNameSpace: makeSToken(' '),
-               },
-               delimiter: makeSToken('|'),
-               postDelimiterSpace: makeSToken(' '),
-            };
-            const secondATwo: ContentParticlePToken = {
-               particle: {
-                  name: makeSToken('three'),
-               },
-            };
-            secondAParticle.names.push(secondAOne);
-            secondAParticle.names.push(secondATwo);
-            secondAParticle.close = makeSToken(')');
-            secondA.particle!.repeat = makeSToken('+');
-            secondA.particle!.postRepeatSpace = makeSToken(' ');
-            secondA.delimiter = makeSToken(',');
-            secondA.postDelimiterSpace = makeSToken(' ');
-            const secondB: ContentParticlePToken = {
-               particle: {
-                  name: makeSToken('four'),
-               },
-            };
-            secondParticle.names.push(secondA);
-            secondParticle.names.push(secondB);
-            secondParticle.close = makeSToken(')');
-            second.particle!.repeat = makeSToken('?');
-            second.particle!.postRepeatSpace = makeSToken(' ');
-            second.delimiter = makeSToken('|');
-            second.postDelimiterSpace = makeSToken(' ');
-            expected.names.push(second);
-            const third: ContentParticlePToken = {
-               particle: {
-                  name: makeSToken('five'),
-               },
-            };
-            expected.names.push(third);
-            expected.close = makeSToken(')');
-
-            nameList.assignUnassigned(listToken, unassignedValues!);
-
-            expect(listToken).toEqual(expected);
             done();
          });
       });

@@ -1,11 +1,19 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'sToken';
-import { ElementDeclarationPToken, ParameterEntityReferencePToken } from 'token';
+import {
+   ElementDeclarationPToken,
+   NameListPToken,
+   ParameterEntityReferencePToken,
+   UnassignedType,
+   UnassignedArray,
+   wordFromSToken,
+} from 'token';
+
+import * as assignToProps from '../assignToProps';
+import * as nameList from '../assignNameList';
 
 import { assignElementDeclaration } from '../assignElementDeclaration';
-import unassigned, { UnassignedType, UnassignedArray } from '../../../token/common/unassigned';
-import nameList from '../../../token/contentspec/nameList';
 
 describe('assignElementDeclaration()', () => {
    let elementPToken: ElementDeclarationPToken;
@@ -24,9 +32,9 @@ describe('assignElementDeclaration()', () => {
          postContentSpecSpace: toSToken(' '),
          close: toSToken('>'),
       });
-      testUnassigned = [unassigned.wordFromSToken(toSToken('foo'))];
+      testUnassigned = [wordFromSToken(toSToken('foo'))];
 
-      unassignedAssignSpy = spyOn(unassigned, 'assignToProps');
+      unassignedAssignSpy = spyOn(assignToProps, 'assignToProps');
    });
 
    it('does not call assignToProps() if there is no unassigned', () => {
@@ -122,9 +130,9 @@ describe('assignElementDeclaration()', () => {
    });
 
    it('calls nameList.assignToProps() if we are mid-contentSpec', () => {
-      const nlSpy = spyOn(nameList, 'assignUnassigned');
+      const nlSpy = spyOn(nameList, 'assignNameList');
       elementPToken = new ElementDeclarationPToken({
-         children: new nameList.PToken(),
+         children: new NameListPToken(),
          nextPropName: 'midContentSpec',
       });
 
@@ -134,8 +142,8 @@ describe('assignElementDeclaration()', () => {
    });
 
    it('calls nameList.assignToProps() if we left off with a contentSpec, and the first value is "("', () => {
-      spyOn(nameList, 'assignUnassigned');
-      const unassignedValues: UnassignedArray = [unassigned.wordFromSToken(toSToken('('))];
+      spyOn(nameList, 'assignNameList');
+      const unassignedValues: UnassignedArray = [wordFromSToken(toSToken('('))];
       elementPToken = new ElementDeclarationPToken({
          nextPropName: 'contentSpec',
       });
@@ -143,8 +151,8 @@ describe('assignElementDeclaration()', () => {
       assignElementDeclaration(unassignedValues, elementPToken);
 
       // Adds the missing children.
-      expect(elementPToken.children).toEqual(new nameList.PToken());
-      expect(nameList.assignUnassigned).toHaveBeenCalledWith(
+      expect(elementPToken.children).toEqual(new NameListPToken());
+      expect(nameList.assignNameList).toHaveBeenCalledWith(
          elementPToken.children!,
          unassignedValues,
       );
@@ -168,7 +176,7 @@ describe('assignElementDeclaration()', () => {
 
       assignElementDeclaration(testUnassigned, elementPToken);
 
-      expect(elementPToken.extra).toBeUndefined();
+      expect(elementPToken.extra).toEqual([]);
    });
 
    it('removes all unassigned and nextPropName values but adds the unassigned to the peRefPlus', () => {

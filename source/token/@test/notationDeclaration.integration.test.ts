@@ -110,67 +110,6 @@ describe('notationDeclaration (integration)', () => {
 
    });
 
-   describe('assignUnassigned()', () => {
-
-      it('fills in the missing properties, including the preceeding declaration space', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('%foo;>');
-         source.endText();
-
-         parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (pToken) => {
-            // "expand" what should be there.
-            (pToken as any).unassigned = [{
-               type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-            },
-            unassigned.wordFromSToken(SToken.fromString('notationName')),
-            unassigned.spaceFromSToken(SToken.fromString(' ')),
-            unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
-               type: UnassignedType.LITERAL,
-               token: {
-                  openQuote: SToken.fromString('"'),
-                  value: [SToken.fromString('foo')],
-                  closeQuote: SToken.fromString('"'),
-               }
-            }, {
-               type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-            }
-            ];
-            (pToken as any).peRefPlus = (pToken as any).unassigned;
-
-            pToken.assignUnassigned();
-
-            expect(pToken).toEqualRangeless(new NotationDeclarationPToken({
-               type: 'NOTATION_DECLARATION_PTOKEN',
-               open: SToken.fromString('<!'),
-               declTypeSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
-               name: SToken.fromString('notationName'),
-               nameSpace: SToken.fromString(' '),
-               unassigned: (pToken as any).unassigned as any,
-               peRefPlus: (pToken as any).unassigned as any,
-               extra: [],
-               externalId: {
-                  type: EXTERNAL_ID,
-                  externalType: SToken.fromString('PUBLIC'),
-                  externalTypeSpace: undefined,
-                  public: {
-                     openQuote: SToken.fromString('"'),
-                     value: [SToken.fromString('foo')], // ICK
-                     closeQuote: SToken.fromString('"'),
-                  },
-                  publicSpace: new SToken(' ', ' ', [helper.makeInsertedRange()]),
-                  system: undefined,
-                  
-               } as any,
-               close: SToken.fromString('>'),
-            }));
-            done();
-         });
-      });
-
-   });
-
    describe('checkWellFormed()', () => {
 
       it('asks the externalId module to look for well formed problems', (done) => {
@@ -223,29 +162,12 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          parseNotationDeclaration(source, declarationStart, (pToken) => {
-            // "expand" what should be there.
-            pToken.unassigned.shift(); // get rid of the peref
-            (pToken as any).unassigned = [{
-               type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-            }, {
-               type: UnassignedType.LITERAL,
-               token: {
-                  openQuote: SToken.fromString('"'),
-                  value: [new TextPToken({ text: SToken.fromString('sys.dtd') })],
-                  closeQuote: SToken.fromString('"'),
-               },
-            }, {
-               type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-            },
-            ].concat(pToken.unassigned as any);
-            pToken.assignUnassigned();
+            pToken.extra = pToken.unassigned;
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
             pToken.checkWellFormed(ec, new EntityMetaData());
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
+            expect(ec.getErrors()[2].id).toEqual(WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
             done();
          });
       });
