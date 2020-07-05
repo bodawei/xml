@@ -18,10 +18,10 @@ const SIMPLE_CONTENT_SPEC_ASSIGNENTS = [
 ];
 
 function assignElementDeclaration(
-   unassigedArray: UnassignedArray | undefined = [],
+   unassignedArray: UnassignedArray | undefined = [],
    edPToken: ElementDeclarationPToken,
 ): void {
-   const unValues = unassigedArray.slice(0);
+   const unValues = unassignedArray.slice(0);
    const hasRef = unValues.find((item) => item.type === UnassignedType.REFERENCE);
    let nextPropName = edPToken.nextPropName;
 
@@ -55,7 +55,7 @@ function assignElementDeclaration(
    }
 
    // REFACTOR/CLEANUP: this should not be happening. Validity requires the expanded value in unassignedArray, which is wrong.
-   (edPToken as any).peRefPlus = unassigedArray;
+   (edPToken as any).peRefPlus = unassignedArray;
 
    edPToken.extra = unValues;
 }

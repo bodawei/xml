@@ -7,7 +7,7 @@ import unassigned, { UnassignedArray } from './common/unassigned';
 
 import { DeclarationStart } from './bridge/declaration';
 import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';
-import { parseWordList, newWordListFromUndefined, WordListType, WordListPToken } from './common/wordList';
+import { parseWordList, WordListType, WordListPToken } from './common/wordList';
 import { AttributeValueXToken } from './common/attribute';
 import misc from './common/misc';
 
@@ -67,10 +67,6 @@ class AttListPToken {
 
       this.open = basePToken.open
       this.peRefPlus = basePToken.peRefPlus || [];
-   }
-
-   assignUnassigned() {
-      assignUnassigned(this);
    }
 
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
@@ -237,144 +233,6 @@ function parseClose(source: STokenSource, pToken: AttListPToken, deliverPToken: 
       pToken.close = sToken;
       deliverPToken(pToken);
    });
-}
-
-/**********************************************************************\
- Recover from finding a parameter param entity ref in the declaration
-\**********************************************************************/
-
-function assignUnassigned(attLiPToken: AttListPToken) {
-   if (!attLiPToken.unassigned || attLiPToken.unassigned.length === 0) {
-      delete attLiPToken.unassigned;
-      delete attLiPToken.nextPropName;
-      return;
-   }
-
-   const unValues = attLiPToken.unassigned;
-   const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
-
-   if (unexpandedRef.length !== 0) {
-      return;
-   }
-
-   if (attLiPToken.nextPropName === 'elementName') {
-      unassigned.assignToProps(attLiPToken.unassigned, attLiPToken, attLiPToken.nextPropName, [
-         { name: 'declTypeSpace', type: 'space' },
-         { name: 'elementName', type: 'word' },
-         { name: 'postElementNameSpace', type: 'space' },
-      ]);
-      attLiPToken.nextPropName = 'name';
-   }
-
-   let lastLength = 0;
-
-   while (lastLength !== unValues.length && unValues.length !== 0) {
-      const couldNeedList = attLiPToken.nextPropName === 'name' || attLiPToken.nextPropName === 'type' || attLiPToken.nextPropName === 'defaultType';
-
-      lastLength = unValues.length;
-      let descriptors = [
-         { name: 'name', type: 'word' },
-         { name: 'postNameSpace', type: 'space' },
-         { name: 'type', type: 'word', allowed: /^[^#(].*/i },
-         { name: 'postTypeSpace', type: 'space' },
-      ];
-
-      if (attLiPToken.nextPropName === 'name') {
-         // Working around TypeScript. this is wrong in some way.
-         attLiPToken.attDefs.push({} as AttDefPToken);
-         descriptors.unshift({ name: 'xtra', type: 'space' });
-      }
-
-      const nextDef = attLiPToken.attDefs[attLiPToken.attDefs.length -1];
-      unassigned.assignToProps(attLiPToken.unassigned, nextDef, attLiPToken.nextPropName, descriptors);
-
-      if (couldNeedList && (!nextDef.type || nextDef.type.str === '' || nextDef.type.str.toUpperCase() === 'NOTATION')) {
-         const enumeration = nextDef.enumeration;
-         const beforeLength = unValues.length;
-         const type = (!nextDef.type || nextDef.type.str === '') ? WordListType.ENUMERATION : WordListType.NOTATION;
-
-         if (enumeration) {
-            nextDef.enumeration = enumeration.newWithUnassigned(unValues);
-         } else {
-            const newEnum = newWordListFromUndefined(type, unValues);
-
-            // only add the namelist if we seem to have actually consumed any unassigned values.
-            if (beforeLength !== unValues.length) {
-               nextDef.enumeration = newEnum;
-            }
-         }
-      }
-
-      const remainingDescriptors = [
-         { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
-         { name: 'postDefaultTypeSpace', type: 'space' },
-         { name: 'value', type: 'literal' },
-         { name: 'postValueSpace', type: 'space' },
-      ];
-
-      if (attLiPToken.nextPropName === 'defaultType') {
-         remainingDescriptors.unshift({ name: 'postTypeSpace', type: 'space' });
-      }
-
-      if (attLiPToken.nextPropName === 'name' || attLiPToken.nextPropName === 'type') {
-         attLiPToken.nextPropName = 'defaultType';
-      }
-
-      unassigned.assignToProps(attLiPToken.unassigned, nextDef, attLiPToken.nextPropName, remainingDescriptors);
-
-      attLiPToken.nextPropName = 'name';
-   }
-
-   adjustSpaces(attLiPToken);
-
-   if (unValues.length !== 0) {
-      attLiPToken.extra = attLiPToken.unassigned;
-   }
-
-   delete attLiPToken.nextPropName;
-   delete attLiPToken.unassigned;
-}
-
-function adjustSpaces(attLiPToken: AttListPToken) {
-   let prevDef: AttDefPToken = attLiPToken.attDefs[0];
-
-   if (!prevDef) {
-      return;
-   }
-
-   if (prevDef.xtra) {
-      attLiPToken.postElementNameSpace = attLiPToken.postElementNameSpace ?
-         attLiPToken.postElementNameSpace.merge(prevDef.xtra) : prevDef.xtra;
-      delete prevDef.xtra;
-   }
-
-   for (let index = 1; index < attLiPToken.attDefs.length; index++) {
-      const current = attLiPToken.attDefs[index];
-
-      if (current.xtra) {
-         // need better definition here.
-         if (prevDef.value) {
-            prevDef.postValueSpace = prevDef.postValueSpace ?
-               prevDef.postValueSpace.merge(current.xtra) :
-               current.xtra;
-         } else if (prevDef.defaultType) {
-            prevDef.postDefaultTypeSpace = prevDef.postDefaultTypeSpace ?
-               prevDef.postDefaultTypeSpace.merge(current.xtra) :
-               current.xtra;
-         } else if (prevDef.type) {
-            prevDef.postTypeSpace = prevDef.postTypeSpace ?
-               prevDef.postTypeSpace.merge(current.xtra) :
-               current.xtra;
-         } else {
-            prevDef.postNameSpace = prevDef.postNameSpace ?
-               prevDef.postNameSpace.merge(current.xtra) :
-               current.xtra;
-         }
-
-         delete current.xtra;
-      }
-
-   }
 }
 
 /**********************************************************************\
@@ -568,10 +426,11 @@ const attListDecl = {
    XToken: AttListXToken,
 
    parse,
-   assignUnassigned,
    checkWellFormed,
    pTokenToXToken,
 };
+
+const parseAttListDeclaration = parse;
 
 export default attListDecl;
 export {
@@ -581,4 +440,6 @@ export {
    AttDefPToken,
    AttListXToken,
    AttDefXToken,
+
+   parseAttListDeclaration,
 };

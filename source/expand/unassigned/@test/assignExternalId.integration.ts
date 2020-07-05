@@ -10,6 +10,7 @@ import {
    ParameterEntityStartPToken,
    parseExternalId,
 } from 'token';
+import { makeInsertedRange } from 'token-test';
 
 import { assignExternalId } from '../assignExternalId';
 
@@ -51,8 +52,8 @@ describe('assignExternalId() (integration)', () => {
 
          const assignResult = assignExternalId(
             result.peRefPlus,
-            result.externalId,
             result.nextPropName,
+            result.externalId,
          );
 
          expect(assignResult).toEqualRangeless({
@@ -72,14 +73,13 @@ describe('assignExternalId() (integration)', () => {
                   closeQuote: toSToken('"'),
                },
             },
-            unassigned: [],
          });
          done();
       });
    });
 
    it('adds a space to an otherwise missing previous prop name (check unsasigned calls)', (done) => {
-      const expectedString = new SToken(' ', ' ', [helper.makeInsertedRange()]);
+      const expectedString = new SToken(' ', ' ', [makeInsertedRange()]);
       source.addText('%foo;>');
       source.endText();
 
@@ -101,7 +101,7 @@ describe('assignExternalId() (integration)', () => {
             ) as any,
          });
 
-         const assignResult = assignExternalId(result.externalId!, result.peRefPlus);
+         const assignResult = assignExternalId(result.peRefPlus, undefined, result.externalId!);
          expect(assignResult.preSpace).toEqual(expectedString);
          done();
       });

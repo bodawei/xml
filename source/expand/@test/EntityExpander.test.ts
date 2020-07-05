@@ -36,6 +36,7 @@ import {
    unassigned,
 } from 'token';
 
+import * as assignAttListDeclaration from '../unassigned/assignAttListDeclaration';
 import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
 import * as assignNotationDeclaration from '../unassigned/assignNotationDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
@@ -51,11 +52,13 @@ import { EntityNameStack } from '../utils/EntityNameStack';
 describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
+   let assignAttListSpy: jasmine.Spy;
    let assignNotationDeclSpy: jasmine.Spy;
 
    beforeEach(() => {
       expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
       setupConditionalSpy = spyOn(setupConditional, 'setupConditional');
+      assignAttListSpy = spyOn(assignAttListDeclaration, 'assignAttListDeclaration');
       assignNotationDeclSpy = spyOn(assignNotationDeclaration, 'assignNotationDeclaration');
    });
 
@@ -719,7 +722,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          doExpand([attList], true, () => {
-            expect(attList.assignUnassigned).toHaveBeenCalled();
+            expect(assignAttListSpy).toHaveBeenCalled();
             expect(attList.unassigned).toEqual([two]);
             done();
          });

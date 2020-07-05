@@ -5,7 +5,6 @@ import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 
-import unassigned from '../../common/unassigned';
 import {
    parseWordList,
    WordListType,
@@ -77,61 +76,6 @@ describe('wordList (integration)', () => {
                closeSpace: undefined,
             });
             done();
-         });
-      });
-
-   });
-
-   describe('pToken.assignUnassigned()', () => {
-
-      it('fills in a simple list of names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('( one| %foo;');
-         source.endText();
-
-         parseWordList(source, WordListType.NOTATION, (pToken) => {
-            const sourceTwo = new STokenSource(defaultExtractors, new EntityMetaData());
-            sourceTwo.addText('four | five six ||)');
-            sourceTwo.endText();
-
-            unassigned.parseAllValues(sourceTwo, true, (unassignedValues) => {
-               const newPToken = pToken!.newWithUnassigned(unassignedValues!);
-
-               expect(newPToken).toEqualRangeless({
-                  open: SToken.fromString('('),
-                  openSpace: SToken.fromString(' '),
-                  words: [ {
-                     word: SToken.fromString('one'),
-                     wordSpace: undefined,
-                     connector: SToken.fromString('|'),
-                     connectorSpace: SToken.fromString(' '),
-                  }, {
-                     word: SToken.fromString('four'),
-                     wordSpace: SToken.fromString(' '),
-                     connector: SToken.fromString('|'),
-                     connectorSpace: SToken.fromString(' '),
-                  }, {
-                     word: SToken.fromString('five'),
-                     wordSpace: SToken.fromString(' '),
-                     connector: undefined,
-                     connectorSpace: undefined,
-                  }, {
-                     word: SToken.fromString('six'),
-                     wordSpace: SToken.fromString(' '),
-                     connector: SToken.fromString('|'),
-                     connectorSpace: undefined,
-                  }, {
-                     word: undefined,
-                     wordSpace: undefined,
-                     connector: SToken.fromString('|'),
-                     connectorSpace: undefined,
-                  }],
-                  close: SToken.fromString(')'),
-                  closeSpace: undefined,
-               });
-
-               done();
-            });
          });
       });
 

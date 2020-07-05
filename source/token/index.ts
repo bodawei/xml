@@ -2,7 +2,7 @@
 
 import declaration from './bridge/baseDeclaration';
 
-import attListDeclaration, { AttListPToken, ATTLISTDECL_PTOKEN_TYPE } from './attListDeclaration';
+import attListDeclaration, { AttDefPToken, AttListPToken, ATTLISTDECL_PTOKEN_TYPE, parseAttListDeclaration } from './attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN } from './elementDeclaration';
 
 import { AttributeValuePToken } from './common/attribute';
@@ -11,6 +11,7 @@ import { parseAllUnassignedValues } from './common/unassigned';
 import { UnassignedArray, UnassignedType, UnassignedValue, spaceFromSToken, wordFromSToken } from './common/unassigned';
 import literalValue from './common/literalValue';
 import { NamePToken, NameListPToken, ContentParticlePToken } from './contentspec/nameList';
+import { WordListPToken, WordListType, WordListEntryPToken, parseWordList } from './common/wordList';
 import { XmlDeclarationPToken } from './xmlDeclaration';
 import { DocTypeStartPToken } from './docTypeStart';
 import { InternalSubsetStartToken } from './marker/internalSubsetStart';
@@ -146,16 +147,22 @@ export {
    ERROR_TYPE,
 
    AttListPToken,
+   AttDefPToken,
    ElementDeclarationPToken,
    ContentParticlePToken,
    NamePToken,
    NameListPToken,
    UnassignedArray, UnassignedType,
    UnassignedValue,
+   WordListPToken,
+   WordListType,
+   WordListEntryPToken,
    spaceFromSToken,
    wordFromSToken,
    parseExternalId,
    parseAllUnassignedValues,
+   parseAttListDeclaration,
+   parseWordList,
    
    declaration,
 

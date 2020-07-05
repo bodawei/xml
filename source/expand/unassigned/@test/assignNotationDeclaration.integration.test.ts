@@ -18,7 +18,7 @@ import { makeInsertedRange } from 'token-test';
 
 import { assignNotationDeclaration } from '../assignNotationDeclaration';
 
-describe('assignUnassigned() (integration)', () => {
+describe('assignNotationDeclaration() (integration)', () => {
    it('fills in the missing properties, including the preceeding declaration space', (done) => {
       const source = new STokenSource(defaultExtractors, new EntityMetaData());
       source.addText('%foo;>');
@@ -60,7 +60,8 @@ describe('assignUnassigned() (integration)', () => {
                declTypeSpace: new SToken(' ', ' ', [makeInsertedRange()]),
                name: toSToken('notationName'),
                nameSpace: toSToken(' '),
-               peRefPlus,
+               peRefPlus: pToken.unassigned,
+               unassigned: pToken.unassigned,
                extra: [],
                externalId: {
                   type: EXTERNAL_ID,

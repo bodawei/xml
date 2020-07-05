@@ -38,7 +38,9 @@ import {
    TextPToken,
 } from 'token';
 
+import { assignAttListDeclaration } from './unassigned/assignAttListDeclaration';
 import { assignElementDeclaration } from './unassigned/assignElementDeclaration';
+import { assignNotationDeclaration } from './unassigned/assignNotationDeclaration';
 import { EntityDetails } from './utils/EntityDetails';
 import { setupConditional } from './utils/setupConditional';
 import { expandAttributes } from './utils/expandAttributes';
@@ -47,7 +49,6 @@ import { expandUnassigned } from './utils/expandUnassigned';
 import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 import { EntityProcessors, ExpandParams } from './types';
 import { EntityNameStack } from './utils/EntityNameStack';
-import { assignNotationDeclaration } from './unassigned/assignNotationDeclaration';
 
 type DeclToken =
    | AttListPToken
@@ -357,6 +358,8 @@ class EntityExpander {
                assignElementDeclaration(results.newValue, declarationPToken);
             } else if (declarationPToken.type === NOTATION_DECLARATION_PTOKEN) {
                assignNotationDeclaration(results.newValue, declarationPToken);
+            } else if (declarationPToken.type === ATTLISTDECL_PTOKEN_TYPE) {
+               assignAttListDeclaration(results.newValue, declarationPToken);
             } else {
                declarationPToken.assignUnassigned();
             }
