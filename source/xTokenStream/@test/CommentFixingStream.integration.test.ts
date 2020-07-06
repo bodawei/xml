@@ -4,11 +4,9 @@
 import { Transform } from 'stream';
 
 import { EntityMetaData } from 'basic';
-import * as tokens from 'token';
 import {
    CharDataXToken,
    CommentXToken,
-   XmlDeclarationXToken,
    ElementEndXToken,
    ElementStartXToken
 } from 'token';
@@ -16,6 +14,7 @@ import {
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import CommentFixingStream from '../CommentFixingStream';
+import { XmlDeclarationXToken } from 'source/xToken/token/xmlDeclarationXToken';
 
 describe('CommentFixingStream (integration)', () => {
    let pTokenStream: PTokenStream;

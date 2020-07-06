@@ -7,7 +7,7 @@ import { EntityMetaData, EntityKind } from 'basic';
 import * as basic from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from 'sToken';
-import nameList, { XNameList } from '../../token/contentspec/nameList';
+import nameList from '../../token/contentspec/nameList';
 import {
    attListDeclaration,
    elementDeclaration,
@@ -35,7 +35,6 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
    NotationDeclarationXToken,
-   XmlDeclarationXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    GeneralEntityReferenceXToken,
@@ -50,6 +49,7 @@ import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elemen
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import { TextXToken, TextPToken } from 'source/token/text';
 import { UnassignedType } from 'source/token/common/unassigned';
+import { XmlDeclarationXToken } from 'source/xToken/token/xmlDeclarationXToken';
 
 
 describe('CheckXTokenValidStream (unit)', () => {

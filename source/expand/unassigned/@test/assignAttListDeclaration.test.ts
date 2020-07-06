@@ -549,7 +549,7 @@ describe('assignAttListDeclaration() (unit)', () => {
          expect(declPToken.attDefs[0].enumeration).not.toBeUndefined();
       });
 
-      it('assigns no enumeration if enumeration.assignUnassigned consumes no tokens', () => {
+      it('assigns no enumeration if assignWordList() consumes no tokens', () => {
          const declPToken = new AttListPToken({
             open: toSToken('<!'),
             nextPropName: 'type',
@@ -641,7 +641,7 @@ describe('assignAttListDeclaration() (unit)', () => {
    });
 
    describe('unassigned in value', () => {
-      it('does not call nameList.assignUnassigned() if the next property is value', () => {
+      it('does not call assignWordList() if the next property is value', () => {
          const declPToken = new AttListPToken({
             open: toSToken('<!'),
             unassigned: simpleUnassigned,

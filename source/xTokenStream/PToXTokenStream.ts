@@ -41,8 +41,7 @@ import {
    XMLDECL_PTOKEN,
 } from 'token';
 
-import { conditionalSectionPTokenToXToken } from './tokens/conditionalSection';
-import { conditionalClosePTokenToXToken } from './tokens/conditionalClose';
+import { convertPTokenToXToken, conditionalClosePTokenToXToken, conditionalSectionPTokenToXToken } from 'xToken';
 
 class PToXTokenStream extends Transform {
 
@@ -91,9 +90,11 @@ class PToXTokenStream extends Transform {
          case PROCESSING_INSTRUCTION_PTOKEN:
          case SPACE_PTOKEN:
          case TEXT_PTOKEN:
+            this.push(pToken.toXToken());
+            break;
          case TEXTDECL_PTOKEN:
          case XMLDECL_PTOKEN:
-            this.push(pToken.toXToken());
+            this.push(convertPTokenToXToken(pToken));
             break;
          case INTERNAL_SUBSET_START_TOKEN:
          case INTERNAL_SUBSET_END_TOKEN:

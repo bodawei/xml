@@ -68,9 +68,6 @@ describe('elementDeclaration (integration)', () => {
       });
    });
 
-   describe('assignUnassigned()', () => {
-   });
-
    describe('checkWellFormed()', () => {
 
       it('asks the declaration module to look for problems in the declaration part', (done) => {
@@ -117,34 +114,6 @@ describe('elementDeclaration (integration)', () => {
             done();
          });
       });
-
-      // it('calls unassigned.checkExtra() to report on extra values', (done) => {
-      //    const source = new STokenSource(defaultExtractors, new EntityMetaData());
-      //    source.addText('%bar; "other">');
-      //    source.endText();
-
-      //    elementDeclaration.parse(source, declarationPToken, (pToken) => {
-      //       // "expand" what should be there.
-      //       pToken.unassigned.shift(); // get rid of the peref
-      //       pToken.unassigned = [
-      //          new entityStart.ParamPToken({}), {
-      //             type: 'literal',
-      //             openQuote: new SToken('"', '"', new Range()),
-      //             value: [ new text.PToken({ text: new SToken('sys.dtd', 'sys.dtd', new Range()) }) ],
-      //             closeQuote: new SToken('"', '"', new Range()),
-      //          },
-      //          new ParameterEntityEndPToken({}),
-      //       ].concat(pToken.unassigned);
-      //       pToken.externalId.unassigned = pToken.unassigned;
-      //       notationDeclaration.assignUnassigned(pToken);
-      //       const ec = new ErrorCollector(undefined, WellFormedError);
-
-      //       notationDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
-
-      //       expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
-      //       done();
-      //    });
-      // });
 
    });
 

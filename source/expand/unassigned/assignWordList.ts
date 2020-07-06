@@ -5,8 +5,6 @@ import { WordListPToken, UnassignedArray, UnassignedType, WordListEntryPToken } 
 import { assignToProps } from './assignToProps';
 import { DescriptorArray } from './types';
 
-console.log('xxxx', assignToProps.toString());
-
 // Try to fill in the : '(' S?
 function assignListOpen(wlPToken: WordListPToken, unValues: UnassignedArray): void {
    const openDescriptors: DescriptorArray = [];

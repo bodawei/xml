@@ -40,6 +40,7 @@ import {
 
 import { assignAttListDeclaration } from './unassigned/assignAttListDeclaration';
 import { assignElementDeclaration } from './unassigned/assignElementDeclaration';
+import { assignEntityDeclaration } from './unassigned/assignEntityDeclaration';
 import { assignNotationDeclaration } from './unassigned/assignNotationDeclaration';
 import { EntityDetails } from './utils/EntityDetails';
 import { setupConditional } from './utils/setupConditional';
@@ -361,7 +362,7 @@ class EntityExpander {
             } else if (declarationPToken.type === ATTLISTDECL_PTOKEN_TYPE) {
                assignAttListDeclaration(results.newValue, declarationPToken);
             } else {
-               declarationPToken.assignUnassigned();
+               assignEntityDeclaration(results.newValue, declarationPToken);
             }
 
             this.deliverByproducts(results.byproducts);

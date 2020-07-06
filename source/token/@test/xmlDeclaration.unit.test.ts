@@ -1,16 +1,15 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
+import { EntityMetaData, EntityKind } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as misc from '../common/misc';
-import { parseXmlDeclaration, XmlDeclarationPToken, XmlDeclarationXToken } from '../xmlDeclaration';
+import { parseXmlDeclaration, XmlDeclarationPToken } from '../xmlDeclaration';
 import { InstructionStart } from '../bridge/instruction';
-import literal from '../common/literal';
 import * as entityInstr from '../common/entityInstruction';
 
 describe('xmlDeclaration (unit)', () => {
@@ -535,145 +534,6 @@ describe('xmlDeclaration (unit)', () => {
 
          });
 
-      });
-
-   });
-
-   describe('pToken.toXToken()', () => {
-
-      it('sets all parameters using the input', () => {
-         xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.0'),
-            }, {
-               name: SToken.fromString('encoding'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('UTF-99'),
-            }, {
-               name: SToken.fromString('standalone'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('yes'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = xmlDeclPToken.toXToken();
-
-         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'UTF-99', true, xmlDeclPToken));
-      });
-
-      it('sets version to 1.1 if that is what is passed in', () => {
-         xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.1'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = xmlDeclPToken.toXToken();
-
-         expect(result).toEqual(new XmlDeclarationXToken(1.1, undefined, undefined, xmlDeclPToken));
-      });
-
-      it('sets default parameters when input has none', () => {
-         xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = xmlDeclPToken.toXToken();
-
-         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'utf-8', false, xmlDeclPToken));
-      });
-
-      it('sets default values when input values are erronious', () => {
-         xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.2'),
-            }, {
-               name: SToken.fromString('encoding'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('some-encoding'),
-            }, {
-               name: SToken.fromString('standalone'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('bogus'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = xmlDeclPToken.toXToken();
-
-         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'some-encoding', false, xmlDeclPToken));
-      });
-
-      it('treats a mis-cased standalone as the correct case', () => {
-         xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.2'),
-            }, {
-               name: SToken.fromString('encoding'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('some-encoding'),
-            }, {
-               name: SToken.fromString('standalone'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('YES'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = xmlDeclPToken.toXToken();
-
-         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'some-encoding', true, xmlDeclPToken));
       });
 
    });

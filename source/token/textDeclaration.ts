@@ -15,27 +15,9 @@ import { EntityInstructionParam, parseEntityInstruction, sTokensFromPToken } fro
 
 const WFEID = WellFormedError.ID;
 const TEXTDECL_PTOKEN = 'TEXTDECL_PTOKEN';
-const TEXTDECL_XTOKEN = 'TEXTDECL_XTOKEN';
 
 const PARAM_NAMES = [ 'version', 'encoding' ];
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
-const DEFAULT_ENCODING = 'utf-8';
-
-type XmlVersion = 1.0 | 1.1;
-
-class TextDeclarationXToken {
-   public readonly type: typeof TEXTDECL_XTOKEN = TEXTDECL_XTOKEN;
-   public readonly version: XmlVersion;
-   public readonly encoding: string;
-   public readonly pToken?: TextDeclarationPToken;
-
-   constructor(version: XmlVersion, encoding?: string, pToken?: TextDeclarationPToken) {
-      this.version = version;
-      this.encoding = encoding || DEFAULT_ENCODING;
-
-      this.pToken = pToken;
-   }
-}
 
 class TextDeclarationPToken {
    public readonly type: typeof TEXTDECL_PTOKEN = TEXTDECL_PTOKEN;
@@ -54,10 +36,6 @@ class TextDeclarationPToken {
 
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
       checkWellFormed(this, ec, entityMetaData);
-   }
-
-   toXToken(): TextDeclarationXToken {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray(): Array<SToken> {
@@ -151,38 +129,10 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
    }
 }
 
-/**********************************************************************\
- Convert a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: TextDeclarationPToken) {
-   let version: XmlVersion = 1.0;
-   let encoding: string = DEFAULT_ENCODING;
-
-   for (const param of pToken.params) {
-      const name = strOrBlank(param.name);
-      const value = strOrBlank(param.value);
-
-      switch (name.toLowerCase()) {
-         case 'version':
-            version = value === '1.1' ? 1.1 : 1.0;
-            break;
-         case 'encoding':
-            encoding = value;
-            break;
-      }
-   }
-
-   return new TextDeclarationXToken(version, encoding, pToken);
-}
-
-
 
 export {
    TEXTDECL_PTOKEN,
-   TEXTDECL_XTOKEN,
    TextDeclarationPToken,
-   TextDeclarationXToken,
 
    parseTextDeclaration,
 };

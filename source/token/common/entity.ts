@@ -8,14 +8,12 @@ import unassigned, { UnassignedType } from '../common/unassigned';
 import misc from '../common/misc';
 import {  checkExternalIdWellFormed } from '../common/externalId';
 import literal from '../common/literal';
-import { UnassignedValue } from '../common/unassigned';
 import { TextPToken } from '../text';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
-import { assignExternalId } from 'source/expand/unassigned/assignExternalId';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -29,124 +27,11 @@ const WARN = XmlWarning.ID;
 type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
 
 /**********************************************************************\
- assignUnassigned()
-\**********************************************************************/
-
-function assignUnassigned(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken) {
-   const unValues = pToken.unassigned || [];
-
-   if (unValues.length === 0) {
-      delete (pToken as any).unassigned;
-      delete (pToken as any).nextPropName;
-      return;
-   }
-
-   const unexpandedRef = unValues.filter((item: UnassignedValue) => (item.type === 'reference'));
-
-   if (unexpandedRef.length !== 0) {
-      return;
-   }
-
-   const prolog = [
-      { name: 'declTypeSpace', type: 'space' },
-      { name: 'parameter', type: 'word', allowed: /%/ },
-      { name: 'parameterSpace', type: 'space' },
-      { name: 'name', type: 'word' },
-      { name: 'nameSpace', type: 'space' },
-   ];
-   const epilog = [
-      { name: 'externalIdSpace', type: 'space' },
-      { name: 'nData', type: 'word' },
-      { name: 'nDataSpace', type: 'space' },
-      { name: 'nDataName', type: 'word' },
-      { name: 'nDataNameSpace', type: 'space' },
-   ];
-
-   // Help guide where to fill in the unassigned values
-   const inProlog = prolog.filter((item) => item.name === pToken.nextPropName).length > 0;
-   const inExternalId = !!pToken.externalId;
-   const isEntityValueOrExternalId = pToken.nextPropName === 'entityValueOrId';
-   const inEpilog = epilog.filter((item) => item.name === pToken.nextPropName);
-   let doEpilog = inEpilog.length > 0;
-
-   if (inExternalId) {
-      const results = assignExternalId(unValues, pToken.nextPropName, pToken.externalId);
-      if (results.preSpace) {
-         if (pToken.nameSpace) {
-            pToken.nameSpace.merge(results.preSpace);
-         } else {
-            (pToken as any).nameSpace = results.preSpace;
-         }
-      }
-   
-      if (results.externalId) {
-         (pToken as any).externalId = results.externalId;
-      }
-
-      (pToken as any).unassigned = results.unassigned;
-   
-      doEpilog = true;
-   } else {
-      if (inProlog) {
-         unassigned.assignToProps(pToken.unassigned!, pToken, pToken.nextPropName, prolog); // typeHack
-      }
-
-      if ((inProlog || isEntityValueOrExternalId) && pToken.unassigned![0]) { // typeHack
-         const nextNonSpaceThing = (pToken.unassigned as any).find((value: UnassignedValue) => { // typeHack
-            if ((value.type === 'space') ||
-               value.type === 'entityStart' ||
-               value.type === UnassignedType.ENTITY_END) {
-               return;
-            }
-
-            return value;
-         });
-
-         if (nextNonSpaceThing.type === 'literal') {
-            unassigned.assignToProps(pToken.unassigned!, pToken, 'EntityValue', [ // typeHack
-               { name: 'nameSpace', type: 'space' },
-               { name: 'EntityValue', type: 'literal', flatten: true },
-               { name: 'entityValueSpace', type: 'space' },
-            ]);
-         } else {
-            const results = assignExternalId(pToken.unassigned!, undefined, pToken.externalId);
-            if (results.preSpace) {
-               if (pToken.nameSpace) {
-                  pToken.nameSpace.merge(results.preSpace);
-               } else {
-                  (pToken as any).nameSpace = results.preSpace;
-               }
-            }
-         
-            if (results.externalId) {
-               (pToken as any).externalId = results.externalId;
-            }
-      
-            (pToken as any).unassigned = results.unassigned;
-      
-            doEpilog = true;
-         }
-      }
-   }
-
-   if (doEpilog) {
-      unassigned.assignToProps(pToken.unassigned!, pToken, 'externalIdSpace', epilog); // typeHack
-   }
-
-   if (unValues.length !== 0) {
-      (pToken as any).extra = pToken.unassigned;
-   }
-
-   delete (pToken as any).nextPropName;
-   delete (pToken as any).unassigned;
-}
-
-/**********************************************************************\
  checkWellFormed() does normal validation.
 \**********************************************************************/
 
 function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   if (!pToken || (pToken.unassigned && pToken.unassigned.length > 0)) {
+   if (!pToken) {
       return;
    }
 
@@ -200,7 +85,6 @@ function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntit
 }
 
 export {
-   assignUnassigned,
    checkWellFormed,
 
    ExpandedLiteralValuePToken,

@@ -37,6 +37,7 @@ import {
 } from 'token';
 
 import * as assignAttListDeclaration from '../unassigned/assignAttListDeclaration';
+import * as assignEntityDeclaration from '../unassigned/assignEntityDeclaration';
 import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
 import * as assignNotationDeclaration from '../unassigned/assignNotationDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
@@ -53,6 +54,7 @@ describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
    let assignAttListSpy: jasmine.Spy;
+   let assignEntityDeclSpy: jasmine.Spy;
    let assignNotationDeclSpy: jasmine.Spy;
 
    beforeEach(() => {
@@ -60,6 +62,7 @@ describe('EntityExpander (unit)', () => {
       setupConditionalSpy = spyOn(setupConditional, 'setupConditional');
       assignAttListSpy = spyOn(assignAttListDeclaration, 'assignAttListDeclaration');
       assignNotationDeclSpy = spyOn(assignNotationDeclaration, 'assignNotationDeclaration');
+      assignEntityDeclSpy = spyOn(assignEntityDeclaration, 'assignEntityDeclaration');
    });
 
    function harvestTypes(results: Array<PToken>): Array<string> {
@@ -714,7 +717,6 @@ describe('EntityExpander (unit)', () => {
             elementName: toSToken('student'),
             attDefs: [],
             unassigned: [one],
-            assignUnassigned: jasmine.createSpy(),
          });
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
@@ -869,7 +871,6 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('student'),
             value: [new CharRefPToken({ open: toSToken('&#') })],
             unassigned: [one],
-            assignUnassigned: jasmine.createSpy(),
          });
 
          expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
@@ -877,7 +878,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          doExpand([geDecl], true, () => {
-            expect(geDecl.assignUnassigned).toHaveBeenCalled();
+            expect(assignEntityDeclSpy).toHaveBeenCalled();
             expect(geDecl.unassigned).toEqual([two]);
             done();
          });

@@ -1,3 +1,5 @@
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+
 import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken, SToken } from 'sToken';

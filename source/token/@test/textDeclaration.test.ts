@@ -1,16 +1,15 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
+import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as misc from '../common/misc';
-import { parseTextDeclaration, TextDeclarationPToken, TextDeclarationXToken } from '../textDeclaration';
+import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
 import { InstructionStart } from '../bridge/instruction';
-import literal from '../common/literal';
 import * as entityInstr from '../common/entityInstruction';
 
 describe('textDeclaration (unit)', () => {
@@ -321,139 +320,6 @@ describe('textDeclaration (unit)', () => {
 
          });
 
-      });
-
-   });
-
-   describe('pToken.toXToken()', () => {
-
-      it('sets all parameters using the input', () => {
-         textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.0'),
-            }, {
-               name: SToken.fromString('encoding'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('UTF-99'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = textDeclPToken.toXToken();
-
-         expect(result).toEqual(new TextDeclarationXToken(1.0, 'UTF-99', textDeclPToken));
-      });
-
-      it('sets version to 1.1 if that is what is passed in', () => {
-         textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.1'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = textDeclPToken.toXToken();
-
-         expect(result).toEqual(new TextDeclarationXToken(1.1, undefined, textDeclPToken));
-      });
-
-      it('sets default parameters when input has none', () => {
-         textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = textDeclPToken.toXToken();
-
-         expect(result).toEqual(new TextDeclarationXToken(1.0, 'utf-8', textDeclPToken));
-      });
-
-      it('sets default values when input values are erronious', () => {
-         textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.2'),
-            }, {
-               name: SToken.fromString('encoding'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('some-encoding'),
-            }, {
-               name: SToken.fromString('standalone'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('bogus'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = textDeclPToken.toXToken();
-
-         expect(result).toEqual(new TextDeclarationXToken(1.0, 'some-encoding', textDeclPToken));
-      });
-
-      it('treats a mis-cased standalone as the correct case', () => {
-         textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            params: [{
-               name: SToken.fromString('version'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.2'),
-            }, {
-               name: SToken.fromString('encoding'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('some-encoding'),
-            }, {
-               name: SToken.fromString('standalone'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('YES'),
-            }],
-            close: SToken.fromString('?>'),
-         });
-
-         const result = textDeclPToken.toXToken();
-
-         expect(result).toEqual(new TextDeclarationXToken(1.0, 'some-encoding', textDeclPToken));
       });
 
    });

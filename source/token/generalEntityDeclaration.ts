@@ -12,7 +12,7 @@ import { TextPToken } from './text';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
-import { assignUnassigned, checkWellFormed } from './common/entity';
+import { checkWellFormed } from './common/entity';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -80,10 +80,6 @@ class GeneralEntityDeclarationPToken {
       } else {
          this.peRefPlus = [];
       }
-   }
-
-   assignUnassigned() {
-      assignUnassigned(this);
    }
 
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {

@@ -25,11 +25,11 @@ import {
    SpaceXToken,
    TextXToken,
    TextPToken,
-   XmlDeclarationXToken,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
+import { XmlDeclarationXToken } from 'xToken';
 
 type Token = { type: string, pToken?: any };
 type TokenArray = Array<Token>;

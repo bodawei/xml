@@ -15,29 +15,9 @@ import { sTokensFromPToken, EntityInstructionParam, parseEntityInstruction } fro
 
 const WFEID = WellFormedError.ID;
 const XMLDECL_PTOKEN = 'XMLDECL_PTOKEN';
-const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';
 
 const PARAM_NAMES = [ 'version', 'encoding', 'standalone' ];
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
-const DEFAULT_ENCODING = 'utf-8';
-
-type XmlVersion = 1.0 | 1.1;
-
-class XmlDeclarationXToken {
-   public readonly type: typeof XMLDECL_XTOKEN = XMLDECL_XTOKEN;
-   public readonly version: XmlVersion;
-   public readonly encoding: string;
-   public readonly standalone: boolean;
-   public readonly pToken?: XmlDeclarationPToken;
-
-   constructor(version: XmlVersion, encoding?: string, standalone?: boolean, pToken?: XmlDeclarationPToken) {
-      this.version = version;
-      this.encoding = encoding || DEFAULT_ENCODING;
-      this.standalone = standalone || false;
-
-      this.pToken = pToken;
-   }
-}
 
 class XmlDeclarationPToken {
    public readonly type: typeof XMLDECL_PTOKEN = XMLDECL_PTOKEN;
@@ -56,10 +36,6 @@ class XmlDeclarationPToken {
 
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
       checkWellFormed(this, ec, entityMetaData);
-   }
-
-   toXToken(): XmlDeclarationXToken {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray(): Array<SToken> {
@@ -199,40 +175,9 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
    ec.check(params.length === 0, WFEID.XMLDECL_NO_PARAMS);
 }
 
-/**********************************************************************\
- Convert a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: XmlDeclarationPToken) {
-   let version: XmlVersion = 1.0;
-   let encoding: string = DEFAULT_ENCODING;
-   let standalone: boolean = pToken.isStandalone();
-
-   for (const param of pToken.params) {
-      const name = strOrBlank(param.name);
-      const value = strOrBlank(param.value);
-
-      switch (name.toLowerCase()) {
-         case 'version':
-            version = value === '1.1' ? 1.1 : 1.0;
-            break;
-         case 'encoding':
-            encoding = value;
-            break;
-         case 'standalone':
-            standalone = value.toLowerCase() === 'yes' ? true : false;
-            break;
-      }
-   }
-
-   return new XmlDeclarationXToken(version, encoding, standalone, pToken);
-}
-
 export {
    XMLDECL_PTOKEN,
-   XMLDECL_XTOKEN,
    XmlDeclarationPToken,
-   XmlDeclarationXToken,
 
    parseXmlDeclaration,
 };

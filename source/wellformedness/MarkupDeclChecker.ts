@@ -47,7 +47,6 @@ import {
    checkParameterEntity,
    isParamEntityExternal,
 } from './checkUtils';
-import { CONDITIONAL_CLOSE_XTOKEN } from 'source/xTokenStream/tokens/conditionalClose';
 
 enum States {
    PRE = 'PRE',

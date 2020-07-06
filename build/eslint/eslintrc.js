@@ -130,6 +130,7 @@ module.exports = {
    },
    overrides: [ {
       files: [
+         './source/xToken/**/*.ts',
          './source/token/bridge/section.ts',
          './source/token/conditional.ts',
          './source/token/common/externalId.ts',
@@ -151,6 +152,7 @@ module.exports = {
       },
    }, {
       files: [
+         './source/xToken/**/*.test.ts',
          './source/token/**/@test/**/section.ts',
          './source/token/**/@test/**/conditional.ts',
          './source/token/common/**/externalId*test.ts',

@@ -39,8 +39,6 @@ import {
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    SPACE_XTOKEN,
-   TEXTDECL_XTOKEN,
-   XMLDECL_XTOKEN,
 
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
@@ -54,6 +52,8 @@ import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclarat
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import { UnassignedType } from 'source/token/common/unassigned';
+import { TEXTDECL_XTOKEN } from 'source/xToken/token/textDeclarationXToken';
+import { XMLDECL_XTOKEN } from 'source/xToken/token/xmlDeclarationXToken';
 
 type XToken = {
    type: string,

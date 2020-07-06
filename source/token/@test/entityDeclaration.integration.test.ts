@@ -8,11 +8,10 @@ import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import { parseEntityDeclaration } from '../entityDeclaration';
-import { GeneralEntityDeclarationPToken, GENERAL_ENTITY_DECLARATION_PTOKEN } from '../generalEntityDeclaration';
+import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../generalEntityDeclaration';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import unassigned, { UnassignedType } from '../common/unassigned';
+import { UnassignedType } from '../common/unassigned';
 
-import helper from './helper';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from '../parameterEntityReference';
@@ -91,54 +90,6 @@ describe('entityDeclaration (integration)', () => {
             expect(pToken.externalId!.externalType!.str).toEqual('SYSTEM');
             expect((pToken as any).unassigned[0].type).toEqual('reference');
             expect(pToken.close!.str).toEqual('>');
-            done();
-         });
-      });
-
-   });
-
-   describe('assignUnassigned()', () => {
-
-      it('fills in the missing properties, including the preceeding declaration space', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('%foo;>');
-         source.endText();
-
-         parseEntityDeclaration(source, {} as DeclarationPToken, (pToken) => {
-            // "expand" what should be there.
-            const unassignedValue = [{
-                  type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-               }, unassigned.wordFromSToken(SToken.fromString('entityName')),
-               unassigned.spaceFromSToken(SToken.fromString(' ')), {
-                  type: UnassignedType.LITERAL,
-                  token: {
-                     openQuote: SToken.fromString('"'),
-                     value: [ SToken.fromString('foo') ],
-                     closeQuote: SToken.fromString('"'),
-                  }
-               }, {
-                  type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-               }
-            ] as any;
-            (pToken as any).unassigned = unassignedValue;
-            (pToken as any).peRefPlus = unassignedValue;
-
-            (pToken as any).assignUnassigned(); // typeHack
-
-            const makeSToken = makeSTokenMaker();
-            const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
-            expect(pToken).toEqual(new GeneralEntityDeclarationPToken({
-               declTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
-               name: SToken.fromString('entityName'),
-               nameSpace: SToken.fromString(' '),
-               openQuote: SToken.fromString('"'),
-               value: [ SToken.fromString('foo') ],
-               closeQuote: SToken.fromString('"'),
-               entityValueSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
-               close: makeSToken2('>'),
-            }));
             done();
          });
       });
@@ -228,8 +179,7 @@ describe('entityDeclaration (integration)', () => {
 
          parseEntityDeclaration(source, declarationPToken, (pToken) => {
             // "expand" what should be there.
-            (pToken.unassigned as any).shift(); // get rid of the peref
-            (pToken as any).unassigned = [{
+            (pToken as any).extra = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, {
@@ -243,13 +193,12 @@ describe('entityDeclaration (integration)', () => {
                   type: UnassignedType.ENTITY_END,
                   token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
-            ].concat(pToken.unassigned as any) as any;
-            (pToken as any).assignUnassigned(); // typeHAck
+            ];
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             pToken.checkWellFormed(ec, new EntityMetaData());
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ENTITYDECL_EXTRA_TEXT);
+            expect(ec.getErrors()[2].id).toEqual(WellFormedError.ID.ENTITYDECL_EXTRA_TEXT);
             done();
          });
       });

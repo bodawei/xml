@@ -99,7 +99,7 @@ describe('assignNotationDeclaration() (unit)', () => {
       ]);
    });
 
-   it('calls the externalId assignUnassigned() with undefined when the next prop is name', () => {
+   it('calls the assignExternalId() with undefined when the next prop is name', () => {
       notationPToken = new NotationDeclarationPToken({
          open: toSToken('<!'),
          nextPropName: 'name',
@@ -110,7 +110,7 @@ describe('assignNotationDeclaration() (unit)', () => {
       expect(externalIDAssignSpy).toHaveBeenCalledWith(simpleUnassigned, undefined, undefined);
    });
 
-   it('calls the externalId assignUnassigned() with the nextPropName when it is anything but name', () => {
+   it('calls the assignExternalId() with the nextPropName when it is anything but name', () => {
       notationPToken = new NotationDeclarationPToken({
          open: toSToken('<!'),
          nextPropName: 'foo',
@@ -124,7 +124,7 @@ describe('assignNotationDeclaration() (unit)', () => {
       });
    });
 
-   it('fills in the pre-space if this was found by the externalId assignUnassigned()', () => {
+   it('fills in the pre-space if this was found by the assignExternalId()', () => {
       notationPToken = new NotationDeclarationPToken({
          open: toSToken('<!'),
          nextPropName: 'name',
@@ -138,7 +138,7 @@ describe('assignNotationDeclaration() (unit)', () => {
       expect(notationPToken.nameSpace).toEqual(toSToken('xxx'));
    });
 
-   it('merges an existing space with the pre-space if this was found by the externalId assignUnassigned()', () => {
+   it('merges an existing space with the pre-space if this was found by the assignExternalId()', () => {
       notationPToken = new NotationDeclarationPToken({
          open: toSToken('<!'),
          nameSpace: toSToken('---'),
@@ -153,7 +153,7 @@ describe('assignNotationDeclaration() (unit)', () => {
       expect(notationPToken.nameSpace).toEqual(toSToken('---xxx'));
    });
 
-   it('fills in the externalId if this was found by the externalId assignUnassigned()', () => {
+   it('fills in the externalId if this was found by the assignExternalId()', () => {
       notationPToken = new NotationDeclarationPToken({
          open: toSToken('<!'),
          nextPropName: 'name',
@@ -167,7 +167,7 @@ describe('assignNotationDeclaration() (unit)', () => {
       expect(notationPToken.externalId).toEqual({ type: EXTERNAL_ID });
    });
 
-   it('does not affect the externalId if none was returned by assignUnassigned()', () => {
+   it('does not affect the externalId if none was returned by assignExternalId()', () => {
       notationPToken = new NotationDeclarationPToken({
          open: toSToken('<!'),
          nextPropName: 'other',

@@ -15,8 +15,6 @@ import {
    ElementEndPToken,
    ProcessingInstructionPToken,
    TextPToken,
-   XmlDeclarationPToken,
-   TextDeclarationPToken,
    GeneralEntityReferencePToken,
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
@@ -39,8 +37,7 @@ import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { SpacePToken } from 'source/token/space';
 
-import * as conditionalSection from '../tokens/conditionalSection';
-import * as conditionalClose from '../tokens/conditionalClose';
+import * as xTokenStuff from 'xToken';
 
 describe('PToXTokenStream (unit)', () => {
    let tokenStream: PToXTokenStream;
@@ -111,7 +108,7 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls conditional.toXToken()', () => {
       const pToken = new ConditionalPToken({ open: SToken.fromString('<[') });
-      const convertSpy = spyOn(conditionalSection, 'conditionalSectionPTokenToXToken');
+      const convertSpy = spyOn(xTokenStuff, 'conditionalSectionPTokenToXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
@@ -121,12 +118,12 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls conditionalClose.toXToken()', () => {
       const pToken = new ConditionalClosePToken({ open: SToken.fromString(']]>') });
-      spyOn(conditionalClose, 'conditionalClosePTokenToXToken');
+      const convertSpy = spyOn(xTokenStuff, 'conditionalClosePTokenToXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(conditionalClose.conditionalClosePTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(convertSpy).toHaveBeenCalledWith(pToken);
    });
 
    it('calls ElementStartPToken.toXToken()', () => {
@@ -241,26 +238,6 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls processingInstruction.toXToken()', () => {
       const pToken = new ProcessingInstructionPToken({ open: SToken.fromString('') });
-      spyOn(pToken, 'toXToken');
-
-      tokenStream.write(pToken);
-      tokenStream.read();
-
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
-
-   it('calls textDeclaration.toXToken()', () => {
-      const pToken = new TextDeclarationPToken({ open: SToken.fromString('') });
-      spyOn(pToken, 'toXToken');
-
-      tokenStream.write(pToken);
-      tokenStream.read();
-
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
-
-   it('calls xmlDeclaration.toXToken()', () => {
-      const pToken = new XmlDeclarationPToken({ open: SToken.fromString('') });
       spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);

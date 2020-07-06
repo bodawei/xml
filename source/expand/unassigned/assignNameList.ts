@@ -136,7 +136,7 @@ function assignNames(names: Array<ContentParticlePToken>, unValues: UnassignedAr
    }
 }
 
-function assignUnassigned(nameListPToken: NameListPToken, unValues: UnassignedArray): void {
+function assignNameList(nameListPToken: NameListPToken, unValues: UnassignedArray): void {
    if (unValues.length === 0) {
       return;
    }
@@ -149,7 +149,5 @@ function assignUnassigned(nameListPToken: NameListPToken, unValues: UnassignedAr
 
    assignList(nameListPToken, unValues);
 }
-
-const assignNameList = assignUnassigned;
 
 export { assignNameList };

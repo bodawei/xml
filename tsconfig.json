@@ -44,6 +44,7 @@
          "wellformedness": [
             "./source/wellformedness"
          ],
+         "xToken": ["./source/xToken"],
          "xTokenStream": ["./source/xTokenStream"],
       }
    },
