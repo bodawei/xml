@@ -20,6 +20,7 @@ import {
 import checkConditionalStartWellFormed from './tokens/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
 import { strOrBlank, SToken } from 'sToken';
+import { checkMap } from './checkMap';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
@@ -126,6 +127,8 @@ class DocumentChecker {
          errorCollector.appendFrom(specialErrorCollector);
       } else if (pToken.type === 'CONDITIONAL_PTOKEN') {
          checkConditionalStartWellFormed(pToken, errorCollector, this.checkState.emd);
+      } else if (checkMap[pToken.type]) {
+         checkMap[pToken.type](pToken, errorCollector, this.checkState.emd);
       } else if ((pToken as any).checkWellFormed) {
          (pToken as any).checkWellFormed(errorCollector, this.checkState.emd);
       }

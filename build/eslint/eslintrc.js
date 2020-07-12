@@ -131,6 +131,8 @@ module.exports = {
    overrides: [ {
       files: [
          './source/xToken/**/*.ts',
+         './source/**/charRef*.ts',
+         './source/**/parameterEntityReference*.ts',
          './source/token/bridge/section.ts',
          './source/token/conditional.ts',
          './source/token/common/externalId.ts',

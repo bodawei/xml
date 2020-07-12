@@ -43,8 +43,6 @@ import {
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
    TextXToken,
-   CHARREF_XTOKEN,
-   PARAMETER_ENTITY_REFERENCE_XTOKEN,
 } from 'token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -52,8 +50,7 @@ import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclarat
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import { UnassignedType } from 'source/token/common/unassigned';
-import { TEXTDECL_XTOKEN } from 'source/xToken/token/textDeclarationXToken';
-import { XMLDECL_XTOKEN } from 'source/xToken/token/xmlDeclarationXToken';
+import { CHARREF_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN, TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 
 type XToken = {
    type: string,

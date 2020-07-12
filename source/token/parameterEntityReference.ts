@@ -1,38 +1,18 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-202 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
-import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
-import { checkName } from './common/misc';
+import { SToken, STokenSource } from 'sToken';
 
 const PARAMETER_ENTITY_REFERENCE_PTOKEN = 'PARAMETER_ENTITY_REFERENCE_PTOKEN';
-const PARAMETER_ENTITY_REFERENCE_XTOKEN = 'PARAMETER_ENTITY_REFERENCE_XTOKEN';
-const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken: ParameterEntityReferencePToken | undefined) => void;
 
-type ParamReference = {
+type MutableParameterEntityReference = {
    open: SToken;
    openSpace?: SToken;
    name?: SToken;
    nameSpace?: SToken;
    close?: SToken;
 };
-
-/**********************************************************************\
- Provides routines for processing parameter entity reference.
-\**********************************************************************/
-
-class ParameterEntityReferenceXToken {
-   public readonly type: typeof PARAMETER_ENTITY_REFERENCE_XTOKEN = PARAMETER_ENTITY_REFERENCE_XTOKEN;
-   public readonly name: string;
-   public readonly pToken?: ParameterEntityReferencePToken;
-
-   constructor(name: string, pToken?: ParameterEntityReferencePToken) {
-      this.name = name;
-      this.pToken = pToken;
-   }
-}
 
 class ParameterEntityReferencePToken {
    public readonly type: typeof PARAMETER_ENTITY_REFERENCE_PTOKEN = PARAMETER_ENTITY_REFERENCE_PTOKEN;
@@ -42,22 +22,12 @@ class ParameterEntityReferencePToken {
    public readonly nameSpace?: SToken;
    public readonly close?: SToken;
 
-   constructor(param: ParameterEntityReferencePToken | ParamReference) {
-      Object.assign(this, param);
-      this.open = param.open;
-      this.type = PARAMETER_ENTITY_REFERENCE_PTOKEN;
-   }
-
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-      checkWellFormed(this, ec, entityMetaData);
-   }
-
-   toXToken(): ParameterEntityReferenceXToken {
-      return pTokenToXToken(this);
-   }
-
-   toSTokenArray(): Array<SToken> {
-      return sTokensFromPToken(this);
+   constructor(param: ParameterEntityReferencePToken | MutableParameterEntityReference, extras?: MutableParameterEntityReference) {
+      this.open = extras?.open || param.open;
+      this.openSpace = extras?.openSpace || param.openSpace;
+      this.name = extras?.name || param.name;
+      this.nameSpace = extras?.nameSpace || param.nameSpace;
+      this.close = extras?.close || param.close;
    }
 }
 
@@ -83,7 +53,7 @@ function parseParameterEntityReference(source: STokenSource, deliverPToken: Deli
          return;
       }
 
-      const props: ParamReference = {
+      const props: MutableParameterEntityReference = {
          open: result,
       };
 
@@ -97,60 +67,9 @@ function parseParameterEntityReference(source: STokenSource, deliverPToken: Deli
    });
 }
 
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: ParameterEntityReferencePToken, ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-   const entityName = strOrBlank(pToken.name);
-
-   ec.setPos(pToken.open);
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.PEREF_XTRA_SPACE, [ entityName ]);
-
-   ec.setPos(pToken.name);
-   ec.check(!pToken.name, WFEID.PEREF_NO_NAME);
-
-   if (pToken.name) {
-      checkName(pToken.name, ec, entityMetaData, WFEID.PEREF_NAME_INVALID);
-   }
-
-   ec.setPos(pToken.nameSpace);
-   ec.check(pToken.nameSpace, WFEID.PEREF_XTRA_TRAILING_SPACE, [ entityName ]);
-
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.PEREF_NO_SEMICOLON, [ entityName ]);
-}
-
-/**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: ParameterEntityReferencePToken) {
-   return new ParameterEntityReferenceXToken(strOrBlank(pToken.name), pToken);
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: ParameterEntityReferencePToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.open,
-      pToken.openSpace,
-      pToken.name,
-      pToken.nameSpace,
-      pToken.close);
-
-   return builder.sTokenArray;
-}
-
 export {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_XTOKEN,
    ParameterEntityReferencePToken,
-   ParameterEntityReferenceXToken,
 
    parseParameterEntityReference,
 };

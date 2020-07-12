@@ -1,15 +1,21 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, isChar } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
-import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
+import { SToken, STokenSource, toSToken } from '../sToken';
 
 const CHARREF_PTOKEN = 'CHARREF_PTOKEN';
-const CHARREF_XTOKEN = 'CHARREF_XTOKEN';
-const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken?: CharRefPToken) => void;
-type PreToken = { open: SToken, [other: string]: any };
+
+interface MutableCharRefPToken {
+   open: SToken;
+   openSpace?: SToken;
+   hexMarker?: SToken;
+   hexMarkerSpace?: SToken;
+   digits?: SToken;
+   digitsSpace?: SToken;
+   close?: SToken;
+   charCode?: number;
+}
 
 class CharRefPToken {
    public readonly type: typeof CHARREF_PTOKEN = CHARREF_PTOKEN;
@@ -22,35 +28,23 @@ class CharRefPToken {
    public readonly close?: SToken;
    public readonly charCode: number;
 
-   constructor(basePToken: CharRefPToken | PreToken) {
-      this.charCode = 0;
-      Object.assign(this, basePToken);
-
+   constructor(basePToken: CharRefPToken | MutableCharRefPToken, extras?: MutableCharRefPToken) {
       this.type = CHARREF_PTOKEN;
-      this.open = basePToken.open; // Make sure type system knows we always assign open
-   }
+      this.open = extras?.open || basePToken.open;
+      this.openSpace = extras?.openSpace || basePToken.openSpace;
+      this.hexMarker = extras?.hexMarker || basePToken.hexMarker;
+      this.hexMarkerSpace = extras?.hexMarkerSpace || basePToken.hexMarkerSpace;
+      this.digits = extras?.digits || basePToken.digits;
+      this.digitsSpace = extras?.digitsSpace || basePToken.digitsSpace;
+      this.close = extras?.close || basePToken.close;
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      return checkWellFormed(this, ec, entityMetaData);
-   }
+      this.charCode = 0;
 
-   toXToken() {
-      return pTokenToXToken(this);
-   }
-
-   toSTokenArray() {
-      return sTokensFromPToken(this);
-   }
-}
-
-class CharRefXToken {
-   public readonly type: typeof CHARREF_XTOKEN = CHARREF_XTOKEN;
-   public readonly char: string;
-   public readonly pToken?: CharRefPToken;
-
-   constructor(character: string, pToken?: CharRefPToken) {
-      this.char = character;
-      this.pToken = pToken;
+      if (this.digits) {
+         this.charCode = this.hexMarker
+            ? parseInt(this.digits.str, 16)
+            : parseInt(this.digits.str, 10);
+      }
    }
 }
 
@@ -70,139 +64,27 @@ class CharRefXToken {
                      '&#' S? [xX] S? [0-9a-fA-F]+ S? ';'
 \**********************************************************************/
 
-function parseCharRef(source: STokenSource, openSToken: SToken, deliverPToken: DeliverPToken): void {
-   const pToken: PreToken = { open: openSToken };
+function parseCharRef(
+   source: STokenSource,
+   openSToken: SToken,
+   deliverPToken: DeliverPToken,
+): void {
+   const pre: MutableCharRefPToken = { open: openSToken };
 
-   source.extractToObjectNoParams('space', pToken, 'openSpace');
+   source.extractToObjectNoParams('space', pre, 'openSpace');
    source.extract('multi', ['x', 'X'], (hexMarker) => {
-      if (hexMarker) {
-         pToken.hexMarker = hexMarker;
-      }
+      pre.hexMarker = hexMarker;
 
-      source.extractToObjectNoParams('space', pToken, 'hexMarkerSpace');
-      source.extractToObject('digit', hexMarker ? 16 : 10, pToken, 'digits');
-      source.extractToObjectNoParams('space', pToken, 'digitsSpace');
+      source.extractToObjectNoParams('space', pre, 'hexMarkerSpace');
+      source.extractToObject('digit', hexMarker ? 16 : 10, pre, 'digits');
+      source.extractToObjectNoParams('space', pre, 'digitsSpace');
 
       source.extract('match', ';', (closeSToken) => {
-         if (pToken.digits) {
-            pToken.charCode = hexMarker ? parseInt(pToken.digits.str, 16) : parseInt(pToken.digits.str, 10);
-         }
-         pToken.close = closeSToken;
+         pre.close = closeSToken;
 
-         deliverPToken(new CharRefPToken(pToken));
+         deliverPToken(new CharRefPToken(pre));
       });
    });
 }
 
-/**********************************************************************\
- checkWellFormed()
-\**********************************************************************/
-
-function checkWellFormed(pToken: CharRefPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   ec.setPos(pToken.open);
-
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.CHARREF_XTRA_POST_OPEN_SPACE);
-
-   ec.setPos(pToken.hexMarker);
-   ec.check(pToken.hexMarker && pToken.hexMarker.str !== pToken.hexMarker.str.toLowerCase(),
-      WFEID.CHARREF_INVALID_HEX_CASE);
-
-   ec.setPos(pToken.hexMarkerSpace);
-   ec.check(pToken.hexMarkerSpace, WFEID.CHARREF_XTRA_POST_HEX_SPACE);
-
-   ec.setPos(pToken.digits);
-   ec.check(!pToken.digits, WFEID.CHARREF_NO_DIGITS);
-
-   /*
-    * §4.1.0: Well-Formedness Constraint: Legal Character
-    *    Characters referred to using character references must match the production for Char.
-    */
-   if (pToken.digits) {
-      const charNumber = pToken.charCode;
-      let char;
-
-      if (charNumber > 0xFFFF) {
-         const chars = getSurrogatePair(charNumber);
-         char = String.fromCharCode(chars[0]) + String.fromCharCode(chars[1]);
-      } else {
-         char = String.fromCharCode(charNumber);
-      }
-
-      ec.check(!isChar(char, entityMetaData.version), WFEID.CHARREF_INVALID_CHAR, [ pToken.charCode.toString() ]);
-   }
-
-   ec.setPos(pToken.digitsSpace);
-   ec.check(pToken.digitsSpace, WFEID.CHARREF_XTRA_POST_DIGITS_SPACE);
-
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.CHARREF_NO_CLOSE);
-}
-
-// https://dmitripavlutin.com/what-every-javascript-developer-should-know-about-unicode/
-function getSurrogatePair(astralCodePoint: number) {
-   let highSurrogate =
-      Math.floor((astralCodePoint - 0x10000) / 0x400) + 0xD800;
-   let lowSurrogate = (astralCodePoint - 0x10000) % 0x400 + 0xDC00;
-   return [highSurrogate, lowSurrogate];
-}
-
-/**********************************************************************\
- pTokenToXToken
-\**********************************************************************/
-
-function pTokenToXToken(pToken: CharRefPToken): CharRefXToken {
-   let character = ' ';
-
-   if (pToken.digits) {
-      let charNumber;
-
-      if (pToken.hexMarker) {
-         charNumber = parseInt(pToken.digits.str, 16);
-      } else {
-         charNumber = parseInt(pToken.digits.str, 10);
-      }
-
-      if (charNumber > 0xFFFF) {
-         const chars = getSurrogatePair(charNumber);
-         character = String.fromCharCode(chars[0]) + String.fromCharCode(chars[1]);
-      } else {
-         character = String.fromCharCode(charNumber);
-      }
-   }
-
-
-   return new CharRefXToken(character, pToken);
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the component STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: CharRefPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(
-      pToken.open,
-      pToken.openSpace,
-      pToken.hexMarker,
-      pToken.hexMarkerSpace,
-      pToken.digits,
-      pToken.digitsSpace,
-      pToken.close);
-
-   return builder.sTokenArray;
-}
-
-/**********************************************************************\
- Public Interface
-\**********************************************************************/
-
-export {
-   CHARREF_PTOKEN,
-   CHARREF_XTOKEN,
-   CharRefPToken,
-   CharRefXToken,
-
-   parseCharRef,
-};
+export { CHARREF_PTOKEN, CharRefPToken, parseCharRef };

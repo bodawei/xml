@@ -7,6 +7,7 @@ import { SToken, STokenSource, strOrBlank } from 'sToken';
 import { ParameterEntityReferencePToken, parseParameterEntityReference } from '../parameterEntityReference';
 import { TextPToken } from '../text';
 import literal, { LiteralPToken } from '../common/literal';
+import { parameterEntityReferenceToSTokens } from 'source/stringify/tokens/parameterEntityReferenceToSTokens';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
 const TERMINATORS_FOR_NAMELIST = [ '>', '"', '\'', '%', '(', ')', '|', ',', '+', '*', '?' ];
@@ -466,7 +467,7 @@ function getSTokens(unassignedArray: UnassignedArray) {
       } else if (value.type === 'literal') {
          tokens = tokens.concat(literal.getSTokens(value.token));
       } else if (value.type == 'reference') {
-         tokens = tokens.concat(value.token.toSTokenArray());
+         tokens = tokens.concat(parameterEntityReferenceToSTokens(value.token));
       }
    }
 

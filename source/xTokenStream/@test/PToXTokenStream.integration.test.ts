@@ -20,7 +20,7 @@ import {
    GeneralEntityReferenceXToken,
    GeneralEntityDeclarationXToken,
    NotationDeclarationXToken,
-   ParameterEntityReferenceXToken,
+   
    ProcessingInstructionXToken,
    SpaceXToken,
    TextXToken,
@@ -29,7 +29,7 @@ import {
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
-import { XmlDeclarationXToken } from 'xToken';
+import { ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
 
 type Token = { type: string, pToken?: any };
 type TokenArray = Array<Token>;

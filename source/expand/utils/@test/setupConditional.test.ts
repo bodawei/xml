@@ -49,7 +49,10 @@ describe('setupConditional() (unit)', () => {
       testInclude = new TextPToken({ text: toSToken('INCLUDE') });
       pieceMealInclude = [
          new TextPToken({ text: toSToken('INCLUD') }),
-         new CharRefPToken({ open: toSToken('&#'), charCode: 'e'.charCodeAt(0) }),
+         new CharRefPToken({
+            open: toSToken('&#'),
+            digits: toSToken('101'),
+         }),
          new ParameterEntityReferencePToken({ open: toSToken('%') }),
       ];
       testIgnore = new TextPToken({ text: toSToken('IGNORE') });

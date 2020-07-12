@@ -210,15 +210,15 @@ describe('literalValue (unit)', () => {
          expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(mockErrorCollector);
       });
 
-      it('calls charRef.checkWellFormed when there is a charRef in the value', () => {
-         const ref = new charRef.CharRefPToken({ open: SToken.fromString('&#') });
-         const spy = spyOn(ref, 'checkWellFormed');
-         valuePToken.push(ref);
+      // it('calls charRef.checkWellFormed when there is a charRef in the value', () => {
+      //    const ref = new charRef.CharRefPToken({ open: SToken.fromString('&#') });
+      //    const spy = spyOn(ref, 'checkWellFormed');
+      //    valuePToken.push(ref);
 
-         literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
 
-         expect(spy).toHaveBeenCalledWith(mockErrorCollector, emd);
-      });
+      //    expect(spy).toHaveBeenCalledWith(mockErrorCollector, emd);
+      // });
 
    });
 

@@ -7,12 +7,15 @@ import { SToken, STokenSource } from 'sToken';
 import { TextPToken, TextXToken, isTextPToken } from '../text';
 import misc from './misc';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGeneralEntityReference } from '../generalEntityReference';
-import { parseParameterEntityReference, ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
-import { CharRefPToken, CharRefXToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
+import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../parameterEntityReference';
+import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
+import { CharRefXToken } from 'xToken';
+import { checkMap } from 'source/wellformedness/checkMap';
+import { PARAMETER_ENTITY_REFERENCE_XTOKEN, ParameterEntityReferenceXToken } from 'xToken';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -114,8 +117,8 @@ function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityM
       if (isTextPToken(item)) {
          ec.setPos(item.text);
          misc.checkCharWellFormed(item.text, ec, entityMetaData);
-      } else if (item.type === CHARREF_PTOKEN) {
-         item.checkWellFormed(ec, entityMetaData);
+      } else if (item.type === CHARREF_PTOKEN || item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+         checkMap[item.type](item, ec, entityMetaData);
       } else if (!(item instanceof GeneralEntityStartPToken || item instanceof GeneralEntityEndPToken ||
          item instanceof ParameterEntityStartPToken || item instanceof ParameterEntityEndPToken)) {
          item.checkWellFormed(ec, entityMetaData);
@@ -135,6 +138,10 @@ function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
 
       if (isTextPToken(item)) {
          value.push(new TextXToken(item.text.str, item));
+      } else if (item.type === CHARREF_PTOKEN) {
+         value.push(new CharRefXToken(item));
+      } else if (item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+         value.push(new ParameterEntityReferenceXToken(item));
       } else {
          value.push(item.toXToken());
       }

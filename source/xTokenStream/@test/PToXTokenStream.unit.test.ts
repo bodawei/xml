@@ -86,15 +86,15 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls charRef.toXToken()', () => {
-      const pToken = new CharRefPToken({ open: SToken.fromString('&#') });
-      spyOn(pToken, 'toXToken');
+   // it('calls charRef.toXToken()', () => {
+   //    const pToken = new CharRefPToken({ open: SToken.fromString('&#') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    it('calls comment.toXToken()', () => {
       const pToken = new CommentPToken({ open: SToken.fromString('<!--') });
@@ -186,15 +186,15 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls peRef.toXToken() with a parameter entity reference', () => {
-      const pToken = new ParameterEntityReferencePToken({ open: SToken.fromString('&') });
-      spyOn(pToken, 'toXToken');
+   // it('calls peRef.toXToken() with a parameter entity reference', () => {
+   //    const pToken = new ParameterEntityReferencePToken({ open: SToken.fromString('&') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    it('calls geRef.toXToken()', () => {
       const pToken = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });

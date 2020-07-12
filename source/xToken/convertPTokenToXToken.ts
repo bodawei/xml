@@ -1,13 +1,25 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { PToken, XMLDECL_PTOKEN, TEXTDECL_PTOKEN } from 'token';
+import {
+   PToken,
+   XMLDECL_PTOKEN,
+   TEXTDECL_PTOKEN,
+   CHARREF_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+} from 'token';
 
-import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
+import { CharRefXToken } from './token/CharRefXToken';
+import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
+import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
 
 function convertPTokenToXToken(pToken: PToken): XToken {
    switch (pToken.type) {
+      case CHARREF_PTOKEN:
+         return new CharRefXToken(pToken);
+      case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+         return new ParameterEntityReferenceXToken(pToken);
       case TEXTDECL_PTOKEN:
          return new TextDeclarationXToken(pToken);
       case XMLDECL_PTOKEN:

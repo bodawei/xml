@@ -12,13 +12,11 @@ import literal, { LiteralPToken } from './literal';
 import { LiteralValuePToken } from './literalValue';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
-import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { ParameterEntityStartPToken,  } from '../marker/parameterEntityStart';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStart';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from '../generalEntityReference';
-import { ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
-import { CharRefXToken, CharRefPToken } from '../charRef';
+import { CharRefPToken } from '../charRef';
+import { CharRefXToken, ParameterEntityReferenceXToken } from 'xToken';
 
 type ParseOptions = {
    geRef?: boolean;

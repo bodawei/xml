@@ -8,3 +8,4 @@ export * from './StringBundle';
 export * from './token';
 export * from './chars';
 export * from './doAsyncLoop';
+export * from './extractSurrogatePair';

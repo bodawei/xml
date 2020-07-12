@@ -9,13 +9,19 @@ import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../param
 import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from 'error-test';
 
+import * as checks from 'source/wellformedness/tokens/parameterEntityReferenceCheck';
+
+
 describe('ParameterEntityStartPToken (unit)', () => {
    let emd: EntityMetaData;
    let mockErrorCollector: MockErrorCollector;
+   let checkSpy: jasmine.Spy;
 
    beforeEach(() => {
       emd = new EntityMetaData();
       mockErrorCollector = new MockErrorCollector();
+
+      checkSpy = spyOn(checks, 'parameterEntityReferenceCheck');
    });
 
    it('is constructed with the specified name', () => {
@@ -27,11 +33,10 @@ describe('ParameterEntityStartPToken (unit)', () => {
    it('calls checkWellFormed() in the related parameterEntityReferencePToken', () => {
       const reference = new ParameterEntityReferencePToken({ open: SToken.fromString('%') });
       const token = new ParameterEntityStartPToken(reference);
-      const spy = spyOn(reference, 'checkWellFormed');
 
       token.checkWellFormed(mockErrorCollector, emd);
 
-      expect(spy).toHaveBeenCalledWith(mockErrorCollector, emd);
+      expect(checkSpy).toHaveBeenCalledWith(reference, mockErrorCollector, emd);
    });
 
    it('will create an xToken', () => {

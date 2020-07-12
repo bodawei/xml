@@ -7,11 +7,11 @@ import { STokenSource, SToken } from 'sToken';
 
 import { parseParameterEntityReference, ParameterEntityReferencePToken } from '../parameterEntityReference';
 
-describe('parameterEntityReference (integration)', () => {
+describe('ParameterEntityReferencePToken (integration)', () => {
 
    describe('parseParameterEntityReference()', () => {
 
-      it('parses the input, including the parameters which use literal.parse()', (done) => {
+      it('constructs a PToken from the input', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('% foo ;');
          source.endText();

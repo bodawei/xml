@@ -44,7 +44,7 @@ describe('entityValueToSTokenSource() (unit)', () => {
       });
       const result = entityValueToSTokenSource(
          [
-            new CharRefPToken({ open: toSToken('&'), charCode: 65 }),
+            new CharRefPToken({ open: toSToken('&#'), digits: toSToken('65'), charCode: 65 }),
             new TextPToken({ text: toSToken('one') }),
             new ParameterEntityReferencePToken({
                open: toSToken('&'),
