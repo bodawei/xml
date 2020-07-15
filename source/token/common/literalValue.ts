@@ -6,14 +6,14 @@ import { SToken, STokenSource } from 'sToken';
 
 import { TextPToken, TextXToken, isTextPToken } from '../text';
 import misc from './misc';
-import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGeneralEntityReference } from '../generalEntityReference';
+import { GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from '../generalEntityReference';
 import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../parameterEntityReference';
 import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { CharRefXToken } from 'xToken';
+import { CharRefXToken, GeneralEntityReferenceXToken } from 'xToken';
 import { checkMap } from 'source/wellformedness/checkMap';
 import { PARAMETER_ENTITY_REFERENCE_XTOKEN, ParameterEntityReferenceXToken } from 'xToken';
 
@@ -142,6 +142,8 @@ function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
          value.push(new CharRefXToken(item));
       } else if (item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          value.push(new ParameterEntityReferenceXToken(item));
+      } else if (item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+         value.push(new GeneralEntityReferenceXToken(item));
       } else {
          value.push(item.toXToken());
       }

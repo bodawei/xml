@@ -17,8 +17,7 @@ import {
    ElementEndXToken,
    ElementStartXToken,
    ElementEmptyXToken,
-   GeneralEntityReferenceXToken,
-   GeneralEntityDeclarationXToken,
+      GeneralEntityDeclarationXToken,
    NotationDeclarationXToken,
    
    ProcessingInstructionXToken,
@@ -30,6 +29,7 @@ import {
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import { ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
+import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
 
 type Token = { type: string, pToken?: any };
 type TokenArray = Array<Token>;

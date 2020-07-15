@@ -4,8 +4,9 @@ import { ErrorCollector, WellFormedError } from "error";
 import { SToken } from "sToken";
 
 import { AttributeValuePToken, AttributeValueXToken } from '../common/attribute';
-import { GENERAL_ENTITY_REFERENCE_PTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN } from "../generalEntityReference";
+import { GENERAL_ENTITY_REFERENCE_PTOKEN } from "../generalEntityReference";
 import { isTextPToken, isTextXToken } from "../text";
+import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'xToken';
 
 const WFID = WellFormedError.ID;
 const ONE_DOT_ZERO_REV1_REGEX = /^[a-z][a-z](?:-[a-z]+)*$|^[xi](?:-[a-z]+)+$/i;

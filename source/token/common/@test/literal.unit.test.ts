@@ -10,7 +10,8 @@ import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';
 import { TextPToken, TextXToken } from '../../text';
-import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from 'source/token/generalEntityReference';
+import { GeneralEntityReferencePToken } from 'source/token/generalEntityReference';
+import { GeneralEntityReferenceXToken } from 'xToken';
 
 type LiteralValueCallback = (value: LiteralValuePToken) => void;
 
@@ -252,7 +253,7 @@ describe('literal (unit)', () => {
       });
 
       it('copes the value being an entity reference', () => {
-         litValMakeCompatSpy.and.returnValue([ new GeneralEntityReferenceXToken('', new GeneralEntityReferencePToken({ open: SToken.fromString('&') })) ]);
+         litValMakeCompatSpy.and.returnValue([ new GeneralEntityReferenceXToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') })) ]);
          const result = literal.makeOneTokenCompatible(literalPToken);
 
          expect(result).toEqual(undefined);

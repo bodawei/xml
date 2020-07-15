@@ -37,7 +37,7 @@ import {
    ELEMENT_END_XTOKEN,
    ELEMENT_START_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
-   GENERAL_ENTITY_REFERENCE_XTOKEN,
+   
    SPACE_XTOKEN,
 
    NotationDeclarationXToken,
@@ -51,6 +51,7 @@ import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import { UnassignedType } from 'source/token/common/unassigned';
 import { CHARREF_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN, TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
+import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'source/xToken/token/generalEntityReferenceXToken';
 
 type XToken = {
    type: string,
@@ -990,7 +991,7 @@ class CheckXTokenValidStream extends Transform {
    private checkAttributeValueForUnexpandedReferences(value: AttributeValueXToken, errorId: string, attrName: string, elementName: string, context?: SToken) {
       for (const element of value) {
          if (element.type === GENERAL_ENTITY_REFERENCE_XTOKEN || element.type === PARAMETER_ENTITY_REFERENCE_XTOKEN) {
-            this.pushValidityError(errorId, [element.name, attrName, elementName], context);
+            this.pushValidityError(errorId, [(element as any).name, attrName, elementName], context);
          }
       }
    }

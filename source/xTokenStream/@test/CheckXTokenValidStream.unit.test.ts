@@ -37,7 +37,7 @@ import {
    NotationDeclarationXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
-   GeneralEntityReferenceXToken,
+   
    GeneralEntityReferencePToken,
    
    ParameterEntityReferencePToken,
@@ -49,6 +49,7 @@ import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import { TextXToken, TextPToken } from 'source/token/text';
 import { UnassignedType } from 'source/token/common/unassigned';
 import { CharRefXToken, ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
+import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
 
 
 describe('CheckXTokenValidStream (unit)', () => {

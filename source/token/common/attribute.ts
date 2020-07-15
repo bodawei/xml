@@ -14,9 +14,9 @@ import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/genera
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStart';
-import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from '../generalEntityReference';
+import { GeneralEntityReferencePToken } from '../generalEntityReference';
 import { CharRefPToken } from '../charRef';
-import { CharRefXToken, ParameterEntityReferenceXToken } from 'xToken';
+import { CharRefXToken, ParameterEntityReferenceXToken, GeneralEntityReferenceXToken } from 'xToken';
 
 type ParseOptions = {
    geRef?: boolean;

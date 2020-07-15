@@ -8,10 +8,11 @@ import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import literalValue from '../literalValue';
-import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from 'source/token/generalEntityReference';
+import { GeneralEntityReferencePToken } from 'source/token/generalEntityReference';
 import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
 import { CharRefPToken } from 'source/token/charRef';
 import { TextXToken, TextPToken } from 'source/token/text';
+import { GeneralEntityReferenceXToken } from 'xToken';
 
 describe('literalValue (integration)', () => {
    let emd: EntityMetaData;
@@ -134,7 +135,7 @@ describe('literalValue (integration)', () => {
 
             expect(results).toEqual([
                new TextXToken('one', pToken1),
-               new GeneralEntityReferenceXToken('ref', pTokenRef),
+               new GeneralEntityReferenceXToken(pTokenRef),
                new TextXToken('two', pToken2),
             ]);
             done();

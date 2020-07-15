@@ -68,7 +68,7 @@ function setup(pathName: string, done: any) {
    pTokenStream.pipe(entityExpander).pipe(toXToken).pipe(outch);
 };
 
-fdescribe('www', () => {
+xdescribe('www', () => {
    it('xyzzy', (done) => {
       setup('./source/@test/xmlconf/xmlconf.xml', done);
    });

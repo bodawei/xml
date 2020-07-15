@@ -4,11 +4,13 @@ import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { ParameterEntityReferenceXToken } from './token/ParameterEntityReferenceXToken';
+import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 
 type XToken =
    | TextDeclarationXToken
    | XmlDeclarationXToken
    | CharRefXToken
+   | GeneralEntityReferenceXToken
    | ParameterEntityReferenceXToken;
 
 export { XToken };

@@ -11,7 +11,6 @@ import * as misc from '../common/misc';
 
 import {
    GeneralEntityReferencePToken,
-   GeneralEntityReferenceXToken,
    parseGeneralEntityReference,
 } from '../generalEntityReference';
 
@@ -141,25 +140,6 @@ describe('generalEntityReference (unit)', () => {
          });
       });
 
-   });
-
-   describe('pToken.toXToken()', () => {
-
-      it('returns a GeneralEntityReferenceXToken', () => {
-         const token = pePToken.toXToken();
-
-         expect(token).toEqual(new GeneralEntityReferenceXToken('entityName', pePToken));
-      });
-
-      it('returns an entity reference token with a blank name when the name could not be found', () => {
-         pePToken = new GeneralEntityReferencePToken({
-            open: SToken.fromString('&'),
-            close: SToken.fromString(';'),
-         });
-            const token = pePToken.toXToken();
-
-         expect(token).toEqual(new GeneralEntityReferenceXToken('', pePToken));
-      });
    });
 
    describe('toSTokenArray()', () => {

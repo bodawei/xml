@@ -196,15 +196,15 @@ describe('PToXTokenStream (unit)', () => {
    //    expect(pToken.toXToken).toHaveBeenCalledWith();
    // });
 
-   it('calls geRef.toXToken()', () => {
-      const pToken = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
-      spyOn(pToken, 'toXToken');
+   // it('calls geRef.toXToken()', () => {
+   //    const pToken = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    it('calls geStart.toXToken()', () => {
       const pToken = new GeneralEntityStartPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));

@@ -5,6 +5,7 @@ import {
    XMLDECL_PTOKEN,
    TEXTDECL_PTOKEN,
    CHARREF_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
 } from 'token';
 
@@ -13,11 +14,14 @@ import { ParameterEntityReferenceXToken } from './token/parameterEntityReference
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
+import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 
 function convertPTokenToXToken(pToken: PToken): XToken {
    switch (pToken.type) {
       case CHARREF_PTOKEN:
          return new CharRefXToken(pToken);
+      case GENERAL_ENTITY_REFERENCE_PTOKEN:
+         return new GeneralEntityReferenceXToken(pToken);
       case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          return new ParameterEntityReferenceXToken(pToken);
       case TEXTDECL_PTOKEN:

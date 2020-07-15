@@ -231,15 +231,15 @@ describe('literalValue (unit)', () => {
          expect(result).toEqual([ new TextXToken('blah', pToken[0]) ]);
       });
 
-      it('calls reference.toXToken for each reference in the pToken value', () => {
-         const geReference = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
-         const refSpy = spyOn(geReference, 'toXToken');
-         const pToken = [ new TextPToken({ text: SToken.fromString('blah') }), geReference ];
-         literalValue.makeXTokenCompatible(pToken);
+      // it('calls reference.toXToken for each reference in the pToken value', () => {
+      //    const geReference = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
+      //    const refSpy = spyOn(geReference, 'toXToken');
+      //    const pToken = [ new TextPToken({ text: SToken.fromString('blah') }), geReference ];
+      //    literalValue.makeXTokenCompatible(pToken);
 
-         expect(refSpy.calls.count()).toEqual(1);
-         expect(refSpy.calls.argsFor(0)).toEqual([]);
-      });
+      //    expect(refSpy.calls.count()).toEqual(1);
+      //    expect(refSpy.calls.argsFor(0)).toEqual([]);
+      // });
 
       it('copes with no values at all', () => {
          const result = literalValue.makeXTokenCompatible([]);

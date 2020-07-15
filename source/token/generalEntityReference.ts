@@ -6,7 +6,6 @@ import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import { checkName } from './common/misc';
 
 const GENERAL_ENTITY_REFERENCE_PTOKEN = 'GENERAL_ENTITY_REFERENCE_PTOKEN';
-const GENERAL_ENTITY_REFERENCE_XTOKEN = 'GENERAL_ENTITY_REFERENCE_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken: GeneralEntityReferencePToken | void) => void;
@@ -23,17 +22,6 @@ type GeneralReference = {
  This has routines for processing general entity reference.
 \**********************************************************************/
 
-class GeneralEntityReferenceXToken {
-   public readonly type: typeof GENERAL_ENTITY_REFERENCE_XTOKEN = GENERAL_ENTITY_REFERENCE_XTOKEN;
-   public readonly name: string;
-   public readonly pToken?: GeneralEntityReferencePToken;
-
-   constructor(name: string, pToken?: GeneralEntityReferencePToken) {
-      this.name = name;
-      this.pToken = pToken;
-   }
-}
-
 class GeneralEntityReferencePToken {
    public readonly type: typeof GENERAL_ENTITY_REFERENCE_PTOKEN = GENERAL_ENTITY_REFERENCE_PTOKEN;
    public readonly open: SToken;
@@ -49,10 +37,6 @@ class GeneralEntityReferencePToken {
 
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
       checkWellFormed(this, ec, entityMetaData);
-   }
-
-   toXToken(): GeneralEntityReferenceXToken {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray(): Array<SToken> {
@@ -114,14 +98,6 @@ function checkWellFormed(pToken: GeneralEntityReferencePToken, ec: ErrorCollecto
 }
 
 /**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: GeneralEntityReferencePToken) {
-   return new GeneralEntityReferenceXToken(strOrBlank(pToken.name), pToken);
-}
-
-/**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the STokens
 \**********************************************************************/
 
@@ -139,9 +115,7 @@ function sTokensFromPToken(pToken: GeneralEntityReferencePToken): Array<SToken> 
 
 export {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_XTOKEN,
    GeneralEntityReferencePToken,
-   GeneralEntityReferenceXToken,
 
    parseGeneralEntityReference,
 };
