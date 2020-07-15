@@ -1,6 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
 import fs from 'fs';
+import path from 'path';
 import { Transform } from 'stream';
 import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
@@ -48,10 +49,12 @@ function retrieveExternalEntity(
 ): RetrieveResults {
    const sTokenSource = new STokenSource(defaultExtractors, entityMetaData);
 
+   const rootPath = entityMetaData.location.systemId;
    // eslint-disable-next-line
-   const path = (externalId as any).system.value[0].text.str;
+   const pathx = `${path.resolve(`${rootPath}/..`)}/${(externalId as any).system.value[0].text.str}`;
+   // console.log('LOADINg', pathx);
 
-   const data = fs.readFileSync(path, { encoding: 'utf8' });
+   const data = fs.readFileSync(pathx, { encoding: 'utf8' });
 
    sTokenSource.addText(data);
    sTokenSource.endText();
