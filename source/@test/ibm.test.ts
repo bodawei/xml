@@ -11,7 +11,7 @@ import { IbmEntityExpanderStream} from './IbmEntityExpanderStream';
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
-import { CheckWellFormed } from '../stream';
+import { CheckWellFormed } from '../nodeStream';
 
 import XTokenToXmlStream from './XmlTokenToXmlStream';
 

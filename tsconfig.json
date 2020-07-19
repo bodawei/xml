@@ -26,6 +26,9 @@
          "extractor": [
             "./source/extractor"
          ],
+         "nodeStream": [
+            "./source/nodeStream"
+         ],
          "pTokenStream": [
             "./source/pTokenStream"
          ],
@@ -45,15 +48,14 @@
             "./source/wellformedness"
          ],
          "xToken": ["./source/xToken"],
-         "xTokenStream": ["./source/xTokenStream"],
+         "xTokenStream": ["./source/xTokenStream"]
       }
    },
    "include": [
       "build/**/*jasmine*.js",
-      "source/**/*.js",
       "source/**/*.ts",
    ],
    "exclude": [
-      "node_modules",
-   ],
+      "node_modules"
+   ]
 }

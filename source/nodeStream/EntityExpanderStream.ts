@@ -52,7 +52,6 @@ function retrieveExternalEntity(
    const rootPath = entityMetaData.location.systemId;
    // eslint-disable-next-line
    const pathx = `${path.resolve(`${rootPath}/..`)}/${(externalId as any).system.value[0].text.str}`;
-   // console.log('LOADINg', pathx);
 
    const data = fs.readFileSync(pathx, { encoding: 'utf8' });
 

@@ -12,6 +12,7 @@ import {
 
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
+import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
 
 describe('EntityDetails (unit)', () => {
    let entityDetails: EntityDetails;
@@ -243,6 +244,56 @@ describe('EntityDetails (unit)', () => {
 
          const result = entityDetails.getPEDetails('');
          expect(result).toBeUndefined();
+      });
+
+      it('returns a predefined lt entity declaration, even if it was not previously declared', () => {
+         const value = lookupPredefinedEntityValue('lt');
+
+         const result = entityDetails.getGEDetails('lt');
+
+         expect(result).toEqual({
+            token: new GeneralEntityDeclarationPToken({
+               name: toSToken('lt'),
+               value: value,
+            }),
+            isUnparsed: false,
+            isInternal: true,
+            isLoading: false,
+            waiters: [],
+            protoReplacementText: value,
+         } as any);
+      });
+
+      it('returns a predefined gt entity declaration, even if it was not previously declared', () => {
+         const value = lookupPredefinedEntityValue('gt');
+
+         const result = entityDetails.getGEDetails('gt');
+
+         expect(result!.protoReplacementText).toEqual(value);
+      });
+
+      it('returns a predefined amp entity declaration, even if it was not previously declared', () => {
+         const value = lookupPredefinedEntityValue('amp');
+
+         const result = entityDetails.getGEDetails('amp');
+
+         expect(result!.protoReplacementText).toEqual(value);
+      });
+
+      it('returns a predefined apos entity declaration, even if it was not previously declared', () => {
+         const value = lookupPredefinedEntityValue('apos');
+
+         const result = entityDetails.getGEDetails('apos');
+
+         expect(result!.protoReplacementText).toEqual(value);
+      });
+
+      it('returns a predefined quot entity declaration, even if it was not previously declared', () => {
+         const value = lookupPredefinedEntityValue('quot');
+
+         const result = entityDetails.getGEDetails('quot');
+
+         expect(result!.protoReplacementText).toEqual(value);
       });
    });
 

@@ -7,17 +7,40 @@ import {
    CharDataXToken,
    ElementEndXToken,
    ElementStartXToken,
+   TEXT_XTOKEN,
 } from '../token';
+import { CHARREF_XTOKEN, CharRefXToken } from 'xToken';
 
 type Token = { type: string };
 
 class Node {
    public type: string;
    public content: Array<Token>;
+   public attr: Record<string, any>;
 
-   constructor(type: string) {
+   constructor(type: any, attributes: any) {
       this.type = type;
+
+      this.attr = {};
       this.content = [];
+
+      if (attributes) {
+         attributes.forEach((attr: any) => {
+            let value = '';
+            attr.value.forEach((tkn: any) => {
+               switch (tkn.type) {
+                  case TEXT_XTOKEN:
+                     value = value + tkn.text;
+                     break;
+                  case CHARREF_XTOKEN:
+                     value = value + tkn.text;
+                     break;
+               }
+            });
+
+            this.attr[attr.name] = value;
+         });
+      }
    }
 
    addContent(item: Token) {
@@ -45,8 +68,10 @@ class SimpleObj extends Transform {
          leaf = this._stack[this._stack.length - 1];
       }
 
+      // console.log('xToken', xToken);
+
       if (xToken instanceof ElementStartXToken) {
-         const el = new Node(xToken.name);
+         const el = new Node(xToken.name, xToken.attributes);
          if (!this._root) {
             this._root = el;
          } else {
@@ -72,6 +97,9 @@ class SimpleObj extends Transform {
       } else if (xToken instanceof CharDataXToken) {
          // console.log('TEXT ', xToken.text)
          leaf.addContent(xToken.text);
+      } else if (xToken instanceof CharRefXToken) {
+         // console.log('TEXT ', xToken.text)
+         leaf.addContent(xToken.char);
       } else if (xToken instanceof CdataXToken) {
          // console.log('TEXT ', xToken.text)
          leaf.addContent(xToken.text);

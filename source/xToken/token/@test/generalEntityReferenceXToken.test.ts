@@ -26,7 +26,7 @@ describe('ParameterEntityReferenceXToken()', () => {
    });
 
    it('can pass just a name to the constructor function', () => {
-      expect(new GeneralEntityReferenceXToken('foo')).toEqual({
+      expect(new GeneralEntityReferenceXToken('foo')).toEqualProps({
          type: GENERAL_ENTITY_REFERENCE_XTOKEN,
          name: 'foo',
       });

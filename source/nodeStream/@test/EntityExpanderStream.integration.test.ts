@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ENTITY_META_DATA, EntityMetaData, EntityLocation, Offset } from 'basic';
+import { ENTITY_META_DATA, EntityMetaData, EntityLocation, Offset, EntityKind } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { SToken } from 'sToken';
 import {
@@ -52,7 +52,7 @@ describe('EntityExpanderStream (integration)', () => {
    let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData());
+      pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT, 1.0, undefined, new  EntityLocation(__filename)));
       entityExpander = new EntityExpanderStream(true);
 
       pTokenStream.pipe(entityExpander);
@@ -79,7 +79,7 @@ describe('EntityExpanderStream (integration)', () => {
    describe('Case 1: Expand the external subset', () => {
       it('expands the external subset', (done) => {
          pTokenStream.addText(`<?xml version="1.0"?>
-         <!DOCTYPE one SYSTEM "./source/expand/@test/testForCase1.xml">
+         <!DOCTYPE one SYSTEM "./docs/testForCase1.xml">
          <one>&one;</one>`);
          pTokenStream.endText();
 
@@ -188,7 +188,7 @@ describe('EntityExpanderStream (integration)', () => {
    describe('Case 4: Expansion of parameter entity references in the values of external parameter entities', () => {
       it('expands', (done) => {
          pTokenStream.addText(`<?xml version="1.0"?>
-         <!DOCTYPE one SYSTEM "./source/expand/@test/testForCase4.xml" [
+         <!DOCTYPE one SYSTEM "./docs/testForCase4.xml" [
             <!ELEMENT one EMPTY>
          ]>
          <one>&child;</one>`);
@@ -211,7 +211,7 @@ describe('EntityExpanderStream (integration)', () => {
    describe('Case 5: Expansion of parameter entity references in markup declarations but not in literals', () => {
       it('expands', (done) => {
          pTokenStream.addText(`<?xml version="1.0"?>
-         <!DOCTYPE one SYSTEM "./source/expand/@test/testForCase5.xml" [
+         <!DOCTYPE one SYSTEM "./docs/testForCase5.xml" [
             <!ELEMENT one EMPTY>
          ]>
          <one>&epandedEntity;</one>`);
@@ -444,6 +444,63 @@ describe('EntityExpanderStream (integration)', () => {
             done,
          );
       });
+   });
+
+   describe('Other cases', () => {
+      it('expands predefined entities in external general entities', (done) => {
+         pTokenStream.addText(`<?xml version="1.0" encoding="UTF-8"?>
+         <!DOCTYPE TESTSUITE [
+             <!ENTITY jclark-xmltest	SYSTEM "./docs/xmltest.xml">
+         ] >
+         <TESTSUITE>
+            &jclark-xmltest;
+         </TESTSUITE>`);
+         pTokenStream.endText();
+
+         gatherStream(
+            entityExpander,
+            (results) => {
+               const types = results.map((result) => result.type);
+
+               expect((results[21] as CharDataPToken).text.str).toEqual('>');
+               expect(types).toEqual([
+                  ENTITY_META_DATA,
+                  XMLDECL_PTOKEN,
+                  SPACE_PTOKEN,
+                  DOCTYPE_START_PTOKEN,
+                  INTERNAL_SUBSET_START_TOKEN,
+                  SPACE_PTOKEN,
+                  GENERAL_ENTITY_DECLARATION_PTOKEN,
+                  SPACE_PTOKEN,
+                  INTERNAL_SUBSET_END_TOKEN,
+                  DOCTYPE_END_PTOKEN,
+                  SPACE_PTOKEN,
+                  ELEMENT_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  GENERAL_ENTITY_START_PTOKEN,
+                  XMLDECL_PTOKEN,   // <-- This should be a TEXTDEL
+                  CHARDATA_PTOKEN,
+                  ELEMENT_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  ELEMENT_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  GENERAL_ENTITY_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  GENERAL_ENTITY_END_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  ELEMENT_END_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  ELEMENT_END_PTOKEN,
+                  SPACE_PTOKEN,
+                  GENERAL_ENTITY_END_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  ELEMENT_END_PTOKEN
+               ]);
+            },
+            done,
+         );
+      });
+
    });
 
    // it('replaces a parameter entity reference with an entity start and end token', (done) => {

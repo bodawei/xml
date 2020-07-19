@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank } from 'sToken';
+import { strOrBlank, toSToken } from 'sToken';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    EntityValuePToken,
@@ -14,6 +14,7 @@ import {
 } from 'token';
 
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
+import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 
 type LoadingResult = {
    details: InternalGEDetails | InternalPEDetails | void;
@@ -61,10 +62,12 @@ type GEDetails = Readonly<Omit<InternalGEDetails, 'waiters'>>;
  */
 class EntityDetails {
    private externalSubset?: ExternalDtdSubsetPseudoToken;
+   private predefinedGeDetails: GeneralEntityMap;
    private geDetails: GeneralEntityMap;
    private peDetails: ParameterEntityMap;
 
    constructor() {
+      this.predefinedGeDetails = {};
       this.geDetails = {};
       this.peDetails = {};
    }
@@ -123,7 +126,7 @@ class EntityDetails {
       }
    }
 
-   public getGEDetails(name: string): GEDetails | void {
+   public getGEDetails(name: string): GEDetails | undefined {
       return this.getInternalGEDetails(name);
    }
 
@@ -203,13 +206,35 @@ class EntityDetails {
       }
    }
 
-   private getInternalGEDetails(name: string): InternalGEDetails | void {
+   private getInternalGEDetails(name: string): InternalGEDetails | undefined {
       // Recall that !'' is the same as !undefined
       if (!name) {
          return;
       }
 
-      return this.geDetails[name];
+      let result = this.geDetails[name] || this.predefinedGeDetails[name];
+
+      if (!result) {
+         const value = lookupPredefinedEntityValue(name);
+
+         if (value) {
+            result = {
+               token: new GeneralEntityDeclarationPToken({
+                  name: toSToken(name),
+                  value,
+               }),
+               isUnparsed: false,
+               isInternal: true,
+               isLoading: false,
+               waiters: [],
+               protoReplacementText: value,
+            };
+
+            this.predefinedGeDetails[name] = result;
+         }
+      }
+
+      return result;
    }
 
    private getInternalPEDetails(name: string): InternalPEDetails | void {

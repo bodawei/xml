@@ -46,7 +46,7 @@ const PREDEFINED_ENTITIES: NameToEntityValue = {
    ],
 };
 
-function lookupPredefinedEntityValue(name: string): EntityValuePToken | void {
+function lookupPredefinedEntityValue(name: string): EntityValuePToken | undefined {
    return PREDEFINED_ENTITIES[name];
 }
 

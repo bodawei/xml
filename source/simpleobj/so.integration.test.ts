@@ -27,9 +27,11 @@ describe('SimpleObjStream (integration)', () => {
          const result = JSON.parse(JSON.stringify(final));
          expect(result).toEqual({
             type: 'one',
+            attr: {},
             content: [
                '1', {
                   type: 'two',
+                  attr: {},
                   content: [
                      '2',
                   ],
@@ -49,6 +51,7 @@ describe('SimpleObjStream (integration)', () => {
          const result = JSON.parse(JSON.stringify(final));
          expect(result).toEqual({
             type: 'one',
+            attr: {},
             content: [
                '1',
                '<two>2</two>',

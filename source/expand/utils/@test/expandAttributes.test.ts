@@ -110,11 +110,16 @@ describe('expandAttributes() (unit)', () => {
    });
 
    it('calls back with a predefined entity value even when that was not declared', (done) => {
+      params.utils.parseAttributeValue = (
+         sTokenSource: STokenSource,
+         done: (results: AttributeValueResults) => void,
+      ): void => {
+         done({ newValue: [new TextPToken({ text: toSToken('<') })], errors: [] });
+      };
       const ltRef = new GeneralEntityReferencePToken({
          open: toSToken('&'),
          name: toSToken('lt'),
       });
-      const ltEntityValue = lookupPredefinedEntityValue('lt');
 
       expandAttributes(
          [{ value: [textPToken, ltRef] }],
@@ -123,9 +128,9 @@ describe('expandAttributes() (unit)', () => {
          (result) => {
             expect(result[0].newValue).toEqual([
                textPToken,
-               new GeneralEntityStartPToken(ltRef, ltEntityValue),
-               ...(ltEntityValue as AttributeValuePToken),
-               new GeneralEntityEndPToken(ltRef, ltEntityValue),
+               new GeneralEntityStartPToken(ltRef),
+               new TextPToken({ text: toSToken('<') }),
+               new GeneralEntityEndPToken(ltRef),
             ]);
             done();
          },
