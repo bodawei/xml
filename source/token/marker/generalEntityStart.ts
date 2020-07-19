@@ -5,6 +5,7 @@ import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
 import { EntityValuePToken } from '../entityDeclaration';
+import { generalEntityReferenceCheck } from 'source/wellformedness/token/generalEntityReferenceCheck';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.
@@ -22,7 +23,7 @@ class GeneralEntityStartPToken {
    }
 
    checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-      this.referencePToken.checkWellFormed(ec, entityMetaData);
+      generalEntityReferenceCheck(this.referencePToken, ec, entityMetaData);
    }
 
    toXToken() {

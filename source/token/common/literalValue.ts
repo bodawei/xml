@@ -16,6 +16,7 @@ import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { CharRefXToken, GeneralEntityReferenceXToken } from 'xToken';
 import { checkMap } from 'source/wellformedness/checkMap';
 import { PARAMETER_ENTITY_REFERENCE_XTOKEN, ParameterEntityReferenceXToken } from 'xToken';
+import { generalEntityReferenceToSTokens } from 'source/stringify/tokens/generalEntityReferenceToSTokens';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -117,11 +118,9 @@ function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityM
       if (isTextPToken(item)) {
          ec.setPos(item.text);
          misc.checkCharWellFormed(item.text, ec, entityMetaData);
-      } else if (item.type === CHARREF_PTOKEN || item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+      } else if (item.type === CHARREF_PTOKEN || item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN || item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+        // Why not checking reference in start and end?
          checkMap[item.type](item, ec, entityMetaData);
-      } else if (!(item instanceof GeneralEntityStartPToken || item instanceof GeneralEntityEndPToken ||
-         item instanceof ParameterEntityStartPToken || item instanceof ParameterEntityEndPToken)) {
-         item.checkWellFormed(ec, entityMetaData);
       }
    }
 }
@@ -162,7 +161,9 @@ function getSTokens(pToken: LiteralValuePToken) {
    for (let index = 0; index < pToken.length; index++) {
       const item = pToken[index];
 
-      if (!isTextPToken(item)) {
+      if (item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+         results.push(...generalEntityReferenceToSTokens(item));
+         } else if (!isTextPToken(item)) {
          const typeHack: any = item
 
          results = results.concat(typeHack.toSTokenArray());

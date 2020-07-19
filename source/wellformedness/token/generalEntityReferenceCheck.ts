@@ -1,0 +1,35 @@
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
+import { strOrBlank } from 'sToken';
+import { nameCheck } from './util/nameCheck';
+import { GeneralEntityReferencePToken } from 'token';
+const WFEID = WellFormedError.ID;
+
+function generalEntityReferenceCheck(
+   pToken: GeneralEntityReferencePToken,
+   ec: ErrorCollector,
+   entityMetaData: EntityMetaData,
+): void {
+   const entityName = strOrBlank(pToken.name);
+
+   ec.setPos(pToken.open);
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.REFERENCE_XTRA_SPACE, [entityName]);
+
+   ec.setPos(pToken.name);
+   ec.check(!pToken.name, WFEID.REFERENCE_NO_NAME);
+
+   if (pToken.name) {
+      nameCheck(pToken.name, ec, entityMetaData, WFEID.REFERENCE_NAME_INVALID);
+   }
+
+   ec.setPos(pToken.nameSpace);
+   ec.check(pToken.nameSpace, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [entityName]);
+
+   ec.setPos(pToken.close);
+   ec.check(!pToken.close, WFEID.REFERENCE_NO_SEMICOLON, [entityName]);
+}
+
+export { generalEntityReferenceCheck };

@@ -93,9 +93,9 @@ function expandGeRef(
 
    // If there is no declaration, check if it is one of the predefined entities.
    if (!geDetails) {
-      const replacementText = lookupPredefinedEntityValue(entityName);
-      // In this case, we know that the EntityValuePToken and AttributeValuePToken are the same
-      result.expandedFragment = replacementText as AttributeValuePToken | void;
+      // const replacementText = lookupPredefinedEntityValue(entityName);
+      // // In this case, we know that the EntityValuePToken and AttributeValuePToken are the same
+      // result.expandedFragment = replacementText as AttributeValuePToken | void;
 
       geRefExpanded(result);
       return;

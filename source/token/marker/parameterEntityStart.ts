@@ -5,7 +5,7 @@ import { strOrBlank } from 'sToken';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 import { ErrorCollector } from 'error';
 import { EntityMetaData } from 'basic';
-import { parameterEntityReferenceCheck } from 'source/wellformedness/tokens/parameterEntityReferenceCheck';
+import { parameterEntityReferenceCheck } from 'source/wellformedness/token/parameterEntityReferenceCheck';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.

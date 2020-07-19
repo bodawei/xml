@@ -200,15 +200,15 @@ describe('literalValue (unit)', () => {
          expect(spy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
       });
 
-      it('calls reference.checkWellFormed if an entity reference PToken is found', () => {
-         const geRef = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
-         refCheckWellFormedSpy = spyOn(geRef, 'checkWellFormed');
-         valuePToken.push(geRef);
+      // it('calls reference.checkWellFormed if an entity reference PToken is found', () => {
+      //    const geRef = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
+      //    refCheckWellFormedSpy = spyOn(geRef, 'checkWellFormed');
+      //    valuePToken.push(geRef);
 
-         literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
 
-         expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(mockErrorCollector);
-      });
+      //    expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(mockErrorCollector);
+      // });
 
       // it('calls charRef.checkWellFormed when there is a charRef in the value', () => {
       //    const ref = new charRef.CharRefPToken({ open: SToken.fromString('&#') });

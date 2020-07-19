@@ -1,26 +1,18 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-202 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
-import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
-import { checkName } from './common/misc';
+import { SToken, STokenSource } from 'sToken';
 
 const GENERAL_ENTITY_REFERENCE_PTOKEN = 'GENERAL_ENTITY_REFERENCE_PTOKEN';
-const WFEID = WellFormedError.ID;
 
-type DeliverPToken = (pToken: GeneralEntityReferencePToken | void) => void;
+type DeliverPToken = (pToken: GeneralEntityReferencePToken) => void;
 
-type GeneralReference = {
+type MutableGeneralEntityReference = {
    open: SToken;
    openSpace?: SToken;
    name?: SToken;
    nameSpace?: SToken;
    close?: SToken;
 };
-
-/**********************************************************************\
- This has routines for processing general entity reference.
-\**********************************************************************/
 
 class GeneralEntityReferencePToken {
    public readonly type: typeof GENERAL_ENTITY_REFERENCE_PTOKEN = GENERAL_ENTITY_REFERENCE_PTOKEN;
@@ -30,17 +22,12 @@ class GeneralEntityReferencePToken {
    public readonly nameSpace?: SToken;
    public readonly close?: SToken;
 
-   constructor(param: GeneralEntityReferencePToken | GeneralReference) {
-      Object.assign(this, param);
-      this.open = param.open;
-   }
-
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-      checkWellFormed(this, ec, entityMetaData);
-   }
-
-   toSTokenArray(): Array<SToken> {
-      return sTokensFromPToken(this);
+   constructor(param: GeneralEntityReferencePToken | MutableGeneralEntityReference, extras?: MutableGeneralEntityReference ) {
+         this.open = extras?.open || param.open;
+         this.openSpace = extras?.openSpace || param.openSpace;
+         this.name = extras?.name || param.name;
+         this.nameSpace = extras?.nameSpace || param.nameSpace;
+         this.close = extras?.close || param.close;
    }
 }
 
@@ -59,7 +46,7 @@ class GeneralEntityReferencePToken {
 \**********************************************************************/
 
 function parseGeneralEntityReference(source: STokenSource, open: SToken, deliverPToken: DeliverPToken) {
-   const props: GeneralReference = {
+   const props: MutableGeneralEntityReference = {
       open,
    };
 
@@ -70,47 +57,6 @@ function parseGeneralEntityReference(source: STokenSource, open: SToken, deliver
       props.close = sToken;
       deliverPToken(new GeneralEntityReferencePToken(props));
    });
-}
-
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: GeneralEntityReferencePToken, ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-   const entityName = strOrBlank(pToken.name);
-
-   ec.setPos(pToken.open);
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.REFERENCE_XTRA_SPACE, [ entityName ]);
-
-   ec.setPos(pToken.name);
-   ec.check(!pToken.name, WFEID.REFERENCE_NO_NAME);
-
-   if (pToken.name) {
-      checkName(pToken.name, ec, entityMetaData, WFEID.REFERENCE_NAME_INVALID);
-   }
-
-   ec.setPos(pToken.nameSpace);
-   ec.check(pToken.nameSpace, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
-
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: GeneralEntityReferencePToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.open,
-      pToken.openSpace,
-      pToken.name,
-      pToken.nameSpace,
-      pToken.close);
-
-   return builder.sTokenArray;
 }
 
 export {

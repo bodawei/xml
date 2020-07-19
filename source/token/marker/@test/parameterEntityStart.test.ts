@@ -9,7 +9,7 @@ import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../param
 import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from 'error-test';
 
-import * as checks from 'source/wellformedness/tokens/parameterEntityReferenceCheck';
+import * as checks from 'source/wellformedness/token/parameterEntityReferenceCheck';
 
 
 describe('ParameterEntityStartPToken (unit)', () => {

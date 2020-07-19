@@ -9,7 +9,14 @@ import { SToken } from 'sToken';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../generalEntityStart';
 
+import * as checks from 'source/wellformedness/token/generalEntityReferenceCheck';
+
 describe('GeneralEntityStartPToken (unit)', () => {
+   let checkSpy: jasmine.Spy;
+
+   beforeEach(() => {
+      checkSpy = spyOn(checks, 'generalEntityReferenceCheck');
+   });
 
    it('is constructed with the specified name', () => {
       const token = new GeneralEntityStartPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));
@@ -25,11 +32,10 @@ describe('GeneralEntityStartPToken (unit)', () => {
          name: SToken.fromString('foo')
       });
       const token = new GeneralEntityStartPToken(reference);
-      const checkSpy = spyOn(reference, 'checkWellFormed');
 
       token.checkWellFormed(ec, emd);
 
-      expect(checkSpy).toHaveBeenCalledWith(ec, emd);
+      expect(checkSpy).toHaveBeenCalledWith(reference, ec, emd);
    });
 
    it('will create an xToken', () => {

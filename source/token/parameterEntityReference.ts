@@ -22,7 +22,10 @@ class ParameterEntityReferencePToken {
    public readonly nameSpace?: SToken;
    public readonly close?: SToken;
 
-   constructor(param: ParameterEntityReferencePToken | MutableParameterEntityReference, extras?: MutableParameterEntityReference) {
+   constructor(
+      param: ParameterEntityReferencePToken | MutableParameterEntityReference,
+      extras?: MutableParameterEntityReference,
+   ) {
       this.open = extras?.open || param.open;
       this.openSpace = extras?.openSpace || param.openSpace;
       this.name = extras?.name || param.name;
@@ -46,7 +49,6 @@ class ParameterEntityReferencePToken {
 \**********************************************************************/
 
 function parseParameterEntityReference(source: STokenSource, deliverPToken: DeliverPToken) {
-
    source.extract('match', '%', (result) => {
       if (!result) {
          deliverPToken(undefined);
@@ -58,7 +60,7 @@ function parseParameterEntityReference(source: STokenSource, deliverPToken: Deli
       };
 
       source.extractToObjectNoParams('space', props, 'openSpace');
-      source.extractToObject('word', [ ';' ], props, 'name');
+      source.extractToObject('word', [';'], props, 'name');
       source.extractToObjectNoParams('space', props, 'nameSpace');
       source.extract('match', ';', (sToken) => {
          props.close = sToken;
@@ -70,6 +72,5 @@ function parseParameterEntityReference(source: STokenSource, deliverPToken: Deli
 export {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityReferencePToken,
-
    parseParameterEntityReference,
 };

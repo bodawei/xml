@@ -17,7 +17,7 @@ import {
    getFirstSToken,
 } from 'token';
 
-import checkConditionalStartWellFormed from './tokens/conditionalStart';
+import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
 import { strOrBlank, SToken } from 'sToken';
 import { checkMap } from './checkMap';
