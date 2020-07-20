@@ -1,14 +1,14 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
+import { dirname, extname, resolve } from 'path';
 import { Transform } from 'stream';
 
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { EntityExpanderStream } from 'nodeStream';
 import { PToXTokenStream } from 'xTokenStream';
-import SimpleObj from '../simpleobj/so';
+import SimpleObj from '../source/simpleobj/so';
 
 type ContentData = string | SimpleObjData;
 
@@ -20,18 +20,44 @@ type SimpleObjData = {
    content: Array<ContentData>,
 }
 
-type AugmentedSimpleObjData = {
-   type: string,
+type RawTestSuite = {
+   type: 'TESTSUITE',
    attr: {
-      [attrName: string]: string,
-      // testPath: string,
-      // testData?: string,
-      // missingTestFile?: string, // if outputData is absent and outputPath was present, this has a message about why the data could not be found
-      // outputPath?: string,  // this is present if there was an OUTPUT attribute
-      // outputData?: string,
-      // missingOutputFile?: string,  // if testData is absent, this is present
+      PROFILE?: string,
    },
-   content: Array<AugmentedSimpleObjData>,
+   content: Array<RawTestCases>,
+}
+
+type RawTestCases = {
+   type: 'TESTCASES',
+   attr: {
+      'xml:base'?: string,
+      PROFILE?: string,
+   },
+   content: Array<RawTestCases | RawTest>,
+}
+
+type RawTest = {
+   type: 'TEST',
+   attr: {
+      ENTITIES: 'both' | 'none' | 'parameter' | 'general',
+      ID: string,
+      OUTPUT?: string,
+      SECTIONS: string,
+      RECOMMENDTATION: 'XML1.0'|'XML1.1'|'NS1.0'|'NS1.1'|'XML1.0-errata2e'|'XML1.0-errata3e'|'XML1.0-errata4e'|'NS1.0-errata1e',
+      TYPE: 'valid'|'invalid'|'not-wf'|'error',
+      VERSION?: string,
+      EDITION?: string,
+      URI: string,
+      NAMESPACE: 'yes'|'no',
+      testPath: string,
+      testData?: string,
+      missingTestFile?: string, // if outputData is absent and outputPath was present, this has a message about why the data could not be found
+      outputPath?: string,  // this is present if there was an OUTPUT attribute
+      outputData?: string,
+      missingOutputFile?: string,  // if testData is absent, this is present
+   },
+   content: Array<string | ContentData>, // Specifically EM and B
 }
 
 type TestSuite = {
@@ -46,6 +72,11 @@ type TestCases = {
    'xml:base'?: string,
    cases: Array<TestCases>,
    tests: Array<Test>,
+   entityPaths: {
+      [path: string]: {
+         [entityName: string]: string
+      },
+   }
 };
 
 type Test = {
@@ -84,12 +115,12 @@ type Test = {
  * 
  * This also removes text strings from the content properties of test suite and test cases
  */
-function addRelatedData(data: SimpleObjData, currentPath: string): AugmentedSimpleObjData {
+function addRelatedData(data: SimpleObjData, currentPath: string): RawTestSuite | RawTestCases | RawTest {
    let workingPath = currentPath;
-   let result: AugmentedSimpleObjData = {
+   let result: SimpleObjData = {
       type: data.type,
       attr: { ...data.attr },
-      content: [],
+      content: [] as Array<any>, // we seem to need a wildcard here
    };
 
    switch (data.type) {
@@ -97,22 +128,23 @@ function addRelatedData(data: SimpleObjData, currentPath: string): AugmentedSimp
          // Throw away any strings in the content, and process any objects
          data.content.forEach((item: ContentData) => {
             if (typeof item === 'object') {
-               result.content.push(addRelatedData(item, workingPath));
+               result.content.push(addRelatedData(item, workingPath) as any);
             }
          });
-         break;
+         return result as RawTestSuite;
       case 'TESTCASES':
          // xml:base is a partial path to the test data
-         const basePath = `${currentPath}${data.attr['xml:base']}`;
+         const basePath = `${currentPath}${data.attr['xml:base'] || ''}`;
    
          // Throw away any strings in the content, and process any objects
          data.content.forEach((item: ContentData) => {
             if (typeof item === 'object') {
-               result.content.push(addRelatedData(item, basePath));
+               result.content.push(addRelatedData(item, basePath) as any);
             }
          });
-         break;
+         return result as RawTestCases;
       case 'TEST':
+         const entities: Record<string, string> = {};
          try {
             result.attr.testPath = `${workingPath}${data.attr.URI || ''}`;
             result.attr.testData = readFileSync(result.attr.testPath, { encoding: 'utf-8' });
@@ -130,16 +162,16 @@ function addRelatedData(data: SimpleObjData, currentPath: string): AugmentedSimp
          }
 
          result.content = [ ...data.content ];
-         break;
+         return result as any;
+      default:
+         throw new Error(`Unknown token type "${data.type}" found`);
    }
-
-   return result;
 }
 
 /*
- * Converts the AugmentedSimpleObjData into a final object form
+ * Converts the Raw value into a final object form
  */
-function transform(data: AugmentedSimpleObjData): TestSuite | TestCases | Test {
+function transform(data: RawTestSuite | RawTestCases | RawTest ): TestSuite | TestCases | Test {
    let result: TestSuite | TestCases | Test;
 
    switch (data.type) {
@@ -147,18 +179,20 @@ function transform(data: AugmentedSimpleObjData): TestSuite | TestCases | Test {
          result = {
             type: 'TESTSUITE',
             ...data.attr,
-            cases: data.content.map(transform as (item: AugmentedSimpleObjData) => TestCases),
-         } as TestSuite;
-         break;
+            cases: data.content.map(transform as (item: RawTestCases) => TestCases),
+         };
+         return result as TestSuite;
       case 'TESTCASES':
-         const testCases: TestCases = result = {
+         const testCases: TestCases = {
             type: 'TESTCASES',
             ...data.attr,
             tests: [],
             cases: [],
+            entityPaths: {},
          };
+         result = testCases;
 
-         data.content.forEach((item: AugmentedSimpleObjData) => {
+         data.content.forEach((item: RawTestCases | RawTest) => {
             const newItem = transform(item);
 
             if (item.type === 'TEST') {
@@ -167,15 +201,15 @@ function transform(data: AugmentedSimpleObjData): TestSuite | TestCases | Test {
                testCases.cases.push(newItem as TestCases);
             }
          });
-         break;
+         return testCases;
       case 'TEST':
-         const test = result = {
+         const test = {
             type: 'TEST',
             ...data.attr,
             description: '',
          } as Test;
 
-         test.description = data.content.map((item: string | AugmentedSimpleObjData) => {
+         test.description = data.content.map((item: string | ContentData) => {
             if (typeof item === 'string') {
                return item.replace(/[\n ]+/g, ' ').trim();
             } else {
@@ -186,13 +220,55 @@ function transform(data: AugmentedSimpleObjData): TestSuite | TestCases | Test {
                }
             }
          }).join('');
-         break;
+         return test;
    }
-
-   return result!;
 }
 
+function addEntityPaths(data:TestSuite | TestCases | Test): TestSuite | TestCases | Test {
+   switch (data.type) {
+      case 'TESTSUITE':
+         const testSuite: TestSuite = {
+            ...data,
+            cases: data.cases.map(addEntityPaths as (item: TestCases) => TestCases),
+         };
+         return testSuite;
+      case 'TESTCASES':
+         const testCases: TestCases = {
+            ...data,
+            cases: data.cases.map(addEntityPaths as (item: TestCases) => TestCases),
+         };
 
+         testCases.tests.forEach(test => {
+            const dirPath = dirname(test.testPath);
+
+            if (testCases.entityPaths[dirPath]) {
+               return;
+            }
+
+            try {
+               const dirs: Array<string> = readdirSync(dirPath);
+
+               dirs.forEach(fileName => {
+                  const extension = extname(fileName);
+                  const finalPath = resolve(dirPath, fileName);
+                  const stats = statSync(finalPath);
+
+                  if (extension === '.xml' || !stats.isFile()) {
+                     return;
+                  }
+                  testCases.entityPaths[dirPath] = testCases.entityPaths[dirPath] || {};
+   
+                  testCases.entityPaths[dirPath][fileName] = finalPath;
+               });
+            } catch (error) {
+               // ignore this.  We know xmlconf/eduni/namespaces/misc does not exist. D'oh
+            }
+         });
+         return testCases;
+      case 'TEST':
+         return { ...data };
+   }
+}
 
 /*
  * This simple stream simply taks the output from the "SimpleObj" stream
@@ -216,14 +292,15 @@ class RefineObject extends Transform {
       this.outfile = outfile;
    }
 
-   _transform(chunk: any, _: string, done: () => void) {
+   _transform(chunk: SimpleObjData, _: string, done: () => void) {
       if (chunk == null) {
          return;
       }
 
       const augmented = addRelatedData(chunk, this.root);
       const transformed = transform(augmented);
-      writeFileSync(this.outfile, JSON.stringify(transformed, undefined, 2), { encoding: 'utf-8' });
+      const populated = addEntityPaths(transformed);
+      writeFileSync(this.outfile, JSON.stringify(populated, undefined, 2), { encoding: 'utf-8' });
       done();
    }
 }
@@ -255,60 +332,3 @@ function convertTestData(pathName: string, ouputDir: string) {
 const rootDir = process.argv[2];
 const ouputDir = process.argv[3] || `${process.cwd()}/xmlconf.json`;
 convertTestData(rootDir, ouputDir);
-
-
-
-
-/*
-
-   //       if (data.type === 'TESTSUITE') {
-   //    result = {
-   //       type: 'TESTSUITE',
-   //       cases: [],
-   //    };
-   //    let newContent: Array<any> = [];
-
-   //    data.content.forEach((item: any) => {
-   //       if (typeof item === 'object') {
-   //          newContent.push(transform(item));
-   //       }
-   //    });
-
-   //    nd = {...data.attr, type: data.type, cases: newContent };
-   // } else    if (data.type === 'TESTCASES') {
-   //    let tests: Array<any> = [];
-   //    let cass: Array<any> = [];
-
-   //    data.content.forEach((item: any) => {
-   //       if (typeof item === 'object') {
-   //          const newItem = transform(item);
-   //          if (newItem.type === 'TEST') {
-   //             tests.push(newItem);
-   //          } else {
-   //             cass.push(newItem);
-   //          }
-            
-   //       }
-   //    });
-
-   //    nd = {...data.attr, type: data.type, tests: tests, cases: cass };
-   // } else    if (data.type === 'TEST') {
-   //    const newContent = data.content.map((item: any) => {
-   //       if (typeof item === 'string') {
-   //          // console.log('item', `|${item}|${item.trim().replace(/[\n ]+/g, 'x')}|`);
-   //          return item.trim().replace(/[\n ]+/g, ' ');
-   //       } else {
-   //          if (item.type === 'EM') {
-   //             return `_${item.content[0]}_`;
-   //          } else if (item.type === 'B') {
-   //             return `**${item.content[0]}**`;
-   //          } else {
-   //             console.log('what is this', JSON.stringify(item));
-   //          }
-   //       }
-   //    }).join('');
-
-   //    nd = {...data.attr, type: data.type, description: newContent };
-   // }
-
-   */

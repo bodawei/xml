@@ -54,6 +54,7 @@
    "include": [
       "build/**/*jasmine*.js",
       "source/**/*.ts",
+      "build/buildTestData.ts",
    ],
    "exclude": [
       "node_modules"

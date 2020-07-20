@@ -12,7 +12,8 @@
       "test": "xclap live",
       "test:cover": "xclap precommit",
       "test:node": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/new-jasmine.json'",
-      "tn": "ts-node -r tsconfig-paths/register"
+      "tn": "ts-node -r tsconfig-paths/register",
+      "build:xmlconf": "ts-node -r tsconfig-paths/register ./build/buildTestData.ts ./source/@test/xmlconf/ ./source/xmlconf/xmlconf.json"
    },
    "devDependencies": {
       "@babel/cli": "^7.8.4",
