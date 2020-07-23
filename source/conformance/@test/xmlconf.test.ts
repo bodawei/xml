@@ -8,6 +8,7 @@ import { PTokenStream } from "pTokenStream";
 import { PToken } from "token";
 import { PToXTokenStream, CheckXTokenValidStream } from "xTokenStream";
 
+import { TestExpanderStream } from "../TestExpanderStream";
 import { TestSuite, TestCases, Test, TestDetails } from "../types";
 const metadata = require('../xmlconf.json');
 
@@ -61,13 +62,18 @@ describe('XML Conformance tests', () => {
       function setupValidTest(test: TestDetails) {
          const emd = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3, new EntityLocation(test.testPath));
          const pTokenStream = new PTokenStream(emd);
-         const entityExpander = new IbmEntityExpanderStream(resources, true);
+         const entityExpander = new TestExpanderStream(test, true);
          const checkWF = new CheckWellFormed();
          const toXToken = new PToXTokenStream();
          const checkValid = new CheckXTokenValidStream();
    
+         console.log('test.testData', test.testData);
          pTokenStream.pipe(entityExpander).pipe(checkWF).pipe(toXToken).pipe(checkValid);
-         pTokenStream.addText(test.outputData || '');
+         if (test.testData?.indexOf('<?xml ') !== 0) {
+            console.info(`Missing: ${test.ID}`);
+            pTokenStream.addText('<?xml version="1.0"?>');
+         }
+         pTokenStream.addText(test.testData || '');
          pTokenStream.endText();
 
          return checkValid;
@@ -75,7 +81,7 @@ describe('XML Conformance tests', () => {
 
       validTests.forEach(testData => {
 
-         it(`${testData.ID}`, (done) => {
+         fit(`${testData.ID}`, (done) => {
             const checkValid = setupValidTest(testData);
 
             gatherStream(checkValid, (results: Array<PToken>) => {
@@ -83,7 +89,7 @@ describe('XML Conformance tests', () => {
                let errors: Array<any> = results.filter((token: any) => token.type === ERROR_TYPE && token.subtype !== 'WARNING');
 
                if (errors.length > 0) {
-                  console.log(`Validation failure\n\t`);
+                  console.log(`[${testData.ID}] Validation failure\n\t`);
                   // DO We can provide a lot more details from the test metadata
                   console.log(errors.map(item => `${item.id} : ${item.message}`).join('\n\t'));
                }

@@ -144,7 +144,6 @@ function addRelatedData(data: SimpleObjData, currentPath: string): RawTestSuite 
          });
          return result as RawTestCases;
       case 'TEST':
-         const entities: Record<string, string> = {};
          try {
             result.attr.testPath = `${workingPath}${data.attr.URI || ''}`;
             result.attr.testData = readFileSync(result.attr.testPath, { encoding: 'utf-8' });
@@ -256,9 +255,12 @@ function addEntityPaths(data:TestSuite | TestCases | Test): TestSuite | TestCase
                   if (extension === '.xml' || !stats.isFile()) {
                      return;
                   }
+
+                  const testContent = readFileSync(finalPath, { encoding: 'utf-8' });
+
                   testCases.entityPaths[dirPath] = testCases.entityPaths[dirPath] || {};
    
-                  testCases.entityPaths[dirPath][fileName] = finalPath;
+                  testCases.entityPaths[dirPath][fileName] = testContent;
                });
             } catch (error) {
                // ignore this.  We know xmlconf/eduni/namespaces/misc does not exist. D'oh

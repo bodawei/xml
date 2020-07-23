@@ -31,7 +31,8 @@ interface AttributePToken extends LiteralPToken {
    trailingSpace?: SToken;
 };
 
-type AttributeValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
+type AttributeValueElement = TextPToken|CharRefPToken|GeneralEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken;
+type AttributeValuePToken = Array<AttributeValueElement>;
 type AttributeValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 
 type AttributeXToken = {
@@ -282,4 +283,5 @@ export {
    AttributeXToken,
    AttributeValuePToken,
    AttributeValueXToken,
+   AttributeValueElement,
 };

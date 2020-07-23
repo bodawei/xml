@@ -4526,88 +4526,88 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/xmltest/not-wf/sa": {
-              "185.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/sa/185.ent",
-              "null.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/sa/null.ent"
+              "185.ent": "<!ELEMENT doc (#PCDATA)>\r\n",
+              "null.ent": ""
             },
             "./source/@test/xmlconf/xmltest/not-wf/not-sa": {
-              "001.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/001.ent",
-              "003.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/003.ent",
-              "004.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/004.ent",
-              "005.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/005.ent",
-              "006.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/006.ent",
-              "007.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/007.ent",
-              "008.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/008.ent",
-              "009.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/009.ent",
-              "010.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/010.ent",
-              "011.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/not-sa/011.ent"
+              "001.ent": "<![ INCLUDE [\r\n<!ELEMENT doc (#PCDATA)>\r\n]>\r\n",
+              "003.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![ IGNORE [\r\n",
+              "004.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![ INCLUDE [\r\n",
+              "005.ent": "<!ELEMENT doc (#PCDATA)>\r\n%e;\r\n",
+              "006.ent": "<![INCLUDE\r\n<!ELEMENT doc (#PCDATA)>\r\n]]>\r\n",
+              "007.ent": "<!DOCTYPE doc [\r\n<!ELEMENT doc (#PCDATA)>\r\n]>\r\n",
+              "008.ent": "<!ELEMENT doc ANY>\r\n<!ENTITY e \"100%\">\r\n",
+              "009.ent": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % e \"<!--\">\r\n%e; -->\r\n",
+              "010.ent": "<!ENTITY % e \"<!ELEMENT \">\r\n%e; doc (#PCDATA)>\r\n",
+              "011.ent": "<!ENTITY % e1 \"<!ELEMENT \">\r\n<!ENTITY % e2 \">\">\r\n%e1; doc (#PCDATA) %e2;\r\n"
             },
             "./source/@test/xmlconf/xmltest/not-wf/ext-sa": {
-              "001.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/ext-sa/001.ent",
-              "002.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/ext-sa/002.ent",
-              "003.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/not-wf/ext-sa/003.ent"
+              "001.ent": "&e;",
+              "002.ent": "<?xml version=\"1.0\" standalone=\"yes\"?>\r\ndata\r\n\r\n",
+              "003.ent": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\ndata\r\n"
             },
             "./source/@test/xmlconf/xmltest/invalid": {
-              "002.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/invalid/002.ent",
-              "005.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/invalid/005.ent",
-              "006.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/invalid/006.ent"
+              "002.ent": "<!ENTITY % e \"(#PCDATA\">\r\n<!ELEMENT doc %e;)>\r\n",
+              "005.ent": "<!ENTITY % e \">\">\r\n<!ELEMENT doc (#PCDATA) %e;\r\n",
+              "006.ent": "<!ENTITY % e \"(#PCDATA)>\">\r\n<!ELEMENT doc %e;\r\n"
             },
             "./source/@test/xmlconf/xmltest/invalid/not-sa": {
-              "022.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/invalid/not-sa/022.ent"
+              "022.ent": "<!ENTITY % e \"INCLUDE[\">\r\n<!ELEMENT doc (#PCDATA)>\r\n<![ %e; <!ATTLIST doc a1 CDATA \"v1\"> ]]>\r\n"
             },
             "./source/@test/xmlconf/xmltest/valid/sa": {
-              "097.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/sa/097.ent"
+              "097.ent": "<!ATTLIST doc a2 CDATA #IMPLIED>\r\n"
             },
             "./source/@test/xmlconf/xmltest/valid/not-sa": {
-              "001.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/001.ent",
-              "002.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/002.ent",
-              "003-1.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/003-1.ent",
-              "003-2.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/003-2.ent",
-              "004-1.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/004-1.ent",
-              "004-2.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/004-2.ent",
-              "005-1.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/005-1.ent",
-              "005-2.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/005-2.ent",
-              "006.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/006.ent",
-              "007.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/007.ent",
-              "008.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/008.ent",
-              "009.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/009.ent",
-              "010.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/010.ent",
-              "011.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/011.ent",
-              "012.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/012.ent",
-              "013.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/013.ent",
-              "014.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/014.ent",
-              "015.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/015.ent",
-              "016.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/016.ent",
-              "017.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/017.ent",
-              "018.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/018.ent",
-              "019.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/019.ent",
-              "020.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/020.ent",
-              "021.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/021.ent",
-              "023.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/023.ent",
-              "024.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/024.ent",
-              "025.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/025.ent",
-              "026.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/026.ent",
-              "027.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/027.ent",
-              "028.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/028.ent",
-              "029.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/029.ent",
-              "030.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/030.ent",
-              "031-1.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/031-1.ent",
-              "031-2.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/not-sa/031-2.ent"
+              "001.ent": "",
+              "002.ent": "\r",
+              "003-1.ent": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % e SYSTEM \"003-2.ent\">\r\n<!ATTLIST doc a1 CDATA %e; \"v1\">\r\n",
+              "003-2.ent": "",
+              "004-1.ent": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % e1 SYSTEM \"004-2.ent\">\r\n<!ENTITY % e2 \"%e1;\">\r\n%e1;\r\n",
+              "004-2.ent": "<!ATTLIST doc a1 CDATA \"value\">\r\n",
+              "005-1.ent": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % e SYSTEM \"005-2.ent\">\r\n%e;\r\n",
+              "005-2.ent": "<!ATTLIST doc a1 CDATA \"v1\">\r\n",
+              "006.ent": "<!ELEMENT doc EMPTY>\r\n<!ATTLIST doc a1 CDATA \"w1\" a2 CDATA \"w2\">\r\n",
+              "007.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n",
+              "008.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n",
+              "009.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n",
+              "010.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 CDATA \"v2\">\r\n",
+              "011.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n",
+              "012.ent": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n",
+              "013.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![ INCLUDE [\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n]]>\r\n",
+              "014.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![ %e; [\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n]]>\r\n",
+              "015.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![ %e; [\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n]]>\r\n<!ATTLIST doc a2 CDATA \"v2\">\r\n",
+              "016.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![%e;[\r\n<!ATTLIST doc a1 CDATA \"v1\">\r\n]]>\r\n",
+              "017.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY % e \"<!ATTLIST doc a1 CDATA 'v1'>\">\r\n%e;\r\n",
+              "018.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY % e \"'v1'\">\r\n<!ATTLIST doc a1 CDATA %e;>\r\n",
+              "019.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY % e \"'v1'\">\r\n<!ATTLIST doc a1 CDATA%e;>\r\n",
+              "020.ent": "<!ENTITY % e \"doc\">\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST%e;a1 CDATA \"v1\">\r\n",
+              "021.ent": "<!ENTITY % e \"doc a1 CDATA\">\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST %e; \"v1\">\r\n",
+              "023.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY % e1 \"do\">\r\n<!ENTITY % e2 \"c\">\r\n<!ENTITY % e3 \"%e1;%e2;\">\r\n<!ATTLIST %e3; a1 CDATA \"v1\">\r\n",
+              "024.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY % e1 \"'v1'\">\r\n<!ENTITY % e2 'a1 CDATA %e1;'>\r\n<!ATTLIST doc %e2;>\r\n",
+              "025.ent": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % e \"x\">\r\n<!ENTITY % e \"y\">\r\n<!ENTITY % v \"'%e;'\">\r\n<!ATTLIST doc a1 CDATA %v;>\r\n",
+              "026.ent": "<!ATTLIST doc a1 CDATA \"w1\">\r\n",
+              "027.ent": "<!ENTITY % e \"\">\r\n<!ELEMENT doc (#PCDATA %e;)>\r\n",
+              "028.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![INCLUDE[<!ATTLIST doc a1 CDATA \"v1\">]]>\r\n",
+              "029.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![IGNORE[<!ATTLIST doc a1 CDATA \"v1\">]]>\r\n<!ATTLIST doc a1 CDATA \"v2\">\r\n",
+              "030.ent": "<!ELEMENT doc (#PCDATA)>\r\n<![IGNORE[]]>\r\n<![INCLUDE[]]>\r\n",
+              "031-1.ent": "<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY % e SYSTEM \"031-2.ent\">\r\n<!ENTITY e \"<![CDATA[%e;]]>\">\r\n",
+              "031-2.ent": "<!ATTLIST doc a1 CDATA \"v1\">\r\n"
             },
             "./source/@test/xmlconf/xmltest/valid/ext-sa": {
-              "001.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/001.ent",
-              "002.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/002.ent",
-              "003.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/003.ent",
-              "004.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/004.ent",
-              "005.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/005.ent",
-              "006.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/006.ent",
-              "007.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/007.ent",
-              "008.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/008.ent",
-              "009.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/009.ent",
-              "010.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/010.ent",
-              "011.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/011.ent",
-              "012.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/012.ent",
-              "013.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/013.ent",
-              "014.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/xmltest/valid/ext-sa/014.ent"
+              "001.ent": "Data\r\n",
+              "002.ent": "Data",
+              "003.ent": "",
+              "004.ent": "Data\r",
+              "005.ent": "<e/><e/><e/>",
+              "006.ent": "Data\r\n<e/>\r\nMore data\r\n<e/>\r\n",
+              "007.ent": "��Y\u0000",
+              "008.ent": "��<\u0000?\u0000x\u0000m\u0000l\u0000 \u0000e\u0000n\u0000c\u0000o\u0000d\u0000i\u0000n\u0000g\u0000=\u0000\"\u0000U\u0000T\u0000F\u0000-\u00001\u00006\u0000\"\u0000?\u0000>\u0000Y\u0000",
+              "009.ent": "\r",
+              "010.ent": "",
+              "011.ent": "xyzzy\r\n",
+              "012.ent": "&e4;",
+              "013.ent": "<e/>",
+              "014.ent": "����d\u0000a\u0000t\u0000a\u0000"
             }
           }
         }
@@ -4760,12 +4760,12 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/japanese": {
-              "spec.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/japanese/spec.dtd",
-              "weekly-euc-jp.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/japanese/weekly-euc-jp.dtd",
-              "weekly-iso-2022-jp.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/japanese/weekly-iso-2022-jp.dtd",
-              "weekly-shift_jis.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/japanese/weekly-shift_jis.dtd",
-              "weekly-utf-16.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/japanese/weekly-utf-16.dtd",
-              "weekly-utf-8.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/japanese/weekly-utf-8.dtd"
+              "spec.dtd": "<!-- ............................................................... -->\r\n<!-- XML specification DTD ......................................... -->\r\n<!-- ............................................................... -->\r\n\r\n<!--\r\nTYPICAL INVOCATION:\r\n#  <!DOCTYPE spec PUBLIC\r\n#       \"-//W3C//DTD Specification::19980323//EN\"\r\n#       \"http://www.w3.org/XML/Group/DTD/xmlspec.dtd\">\r\n\r\nPURPOSE:\r\n  This DTD was developed for use with the XML family of W3C\r\n  specifications.  It is an XML-compliant DTD based in part on\r\n  the TEI Lite and Sweb DTDs.\r\n\r\nDEPENDENCIES:\r\n  None.\r\n\r\nCHANGE HISTORY:\r\n  The list of changes is at the end of the DTD.\r\n\r\n  For all details, see the design report at:\r\n\r\n    <http://www.w3.org/XML/Group/DTD/xmlspec-report.htm>\r\n\r\n  The \"typical invocation\" FPI always gets updated to reflect the\r\n  date of the most recent changes.\r\n\r\n  Search this file for \"#\" in the first column to see change history\r\n  comments.\r\n\r\nMAINTAINER:\r\n  Eve Maler\r\n  ArborText Inc.\r\n  elm@arbortext.com\r\n  voice: +1 781 270 5750\r\n  fax:   +1 781 273 3760\r\n-->\r\n\r\n<!-- ............................................................... -->\r\n<!-- Entities for characters and symbols ........................... -->\r\n\r\n<!--\r\n#1998-03-10: maler: Added &ldquo; and &rdquo;.\r\n#                   Used 8879:1986-compatible decimal character\r\n#                   references.\r\n#                   Merged charent.mod file back into main file.\r\n-->\r\n\r\n<!ENTITY lt     \"&#38;#60;\">\r\n<!ENTITY gt     \"&#62;\">\r\n<!ENTITY amp    \"&#38;#38;\">\r\n<!ENTITY apos   \"&#39;\">\r\n<!ENTITY quot   \"&#34;\">\r\n<!ENTITY mdash  \"--\">\r\n<!ENTITY nbsp   \"&#160;\">\r\n<!ENTITY ldquo  \"#x201C;\">\r\n<!ENTITY rdquo  \"#x201D;\">\r\n\r\n<!-- ............................................................... -->\r\n<!-- Entities for classes of standalone elements ................... -->\r\n\r\n<!--\r\n#1997-10-16: maler: Added table to %illus.class;.\r\n#1997-11-28: maler: Added htable to %illus.class;.\r\n#1997-12-29: maler: IGNOREd table.\r\n#1998-03-10: maler: Removed SGML Open-specific %illus.class;.\r\n#                   Added \"local\" entities for customization.\r\n-->\r\n\r\n<!ENTITY % local.p.class        \"\">\r\n<!ENTITY % p.class              \"p\r\n                                %local.p.class;\">\r\n\r\n<!ENTITY % local.statusp.class  \"\">\r\n<!ENTITY % statusp.class        \"statusp\r\n                                %local.statusp.class;\">\r\n\r\n<!ENTITY % local.list.class     \"\">\r\n<!ENTITY % list.class           \"ulist|olist|slist|glist\r\n                                %local.list.class;\">\r\n\r\n<!ENTITY % local.speclist.class \"\">\r\n<!ENTITY % speclist.class       \"orglist|blist\r\n                                %local.speclist.class;\">\r\n\r\n<!ENTITY % local.note.class     \"\">\r\n<!ENTITY % note.class           \"note|wfcnote|vcnote\r\n                                %local.note.class;\">\r\n\r\n<!ENTITY % local.illus.class    \"\">\r\n<!ENTITY % illus.class          \"eg|graphic|scrap|htable\r\n                                %local.illus.class;\">\r\n\r\n<!-- ............................................................... -->\r\n<!-- Entities for classes of phrase-level elements ................. -->\r\n\r\n<!--\r\n#1997-12-29: maler: Added xspecref to %ref.class;.\r\n#1998-03-10: maler: Added %ednote.class;.\r\n#                   Added \"local\" entities for customization.\r\n-->\r\n\r\n<!ENTITY % local.annot.class    \"\">\r\n<!ENTITY % annot.class          \"footnote\r\n                                %local.annot.class;\">\r\n\r\n<!ENTITY % local.termdef.class    \"\">\r\n<!ENTITY % termdef.class        \"termdef|term\r\n                                %local.termdef.class;\">\r\n\r\n<!ENTITY % local.emph.class    \"\">\r\n<!ENTITY % emph.class           \"emph|quote\r\n                                %local.emph.class;\">\r\n\r\n<!ENTITY % local.ref.class    \"\">\r\n<!ENTITY % ref.class            \"bibref|specref|termref|titleref\r\n                                |xspecref|xtermref\r\n                                %local.ref.class;\">\r\n\r\n<!ENTITY % local.loc.class    \"\">\r\n<!ENTITY % loc.class            \"loc\r\n                                %local.loc.class;\">\r\n\r\n<!ENTITY % local.tech.class    \"\">\r\n<!ENTITY % tech.class           \"kw|nt|xnt|code\r\n                                %local.tech.class;\">\r\n\r\n<!ENTITY % local.ednote.class    \"\">\r\n<!ENTITY % ednote.class         \"ednote\r\n                                %local.ednote.class;\">\r\n\r\n<!-- ............................................................... -->\r\n<!-- Entities for mixtures of standalone elements .................. -->\r\n\r\n<!--\r\n#1997-09-30: maler: Created %p.mix; to eliminate p from self.\r\n#1997-09-30: maler: Added %speclist.class; to %obj.mix; and %p.mix;.\r\n#1997-09-30: maler: Added %note.class; to %obj.mix; and %p.mix;.\r\n#1997-10-16: maler: Created %entry.mix;.  Note that some elements\r\n#                   left out here are still allowed in termdef,\r\n#                   which entry can contain through %p.pcd.mix;.\r\n#1997-11-28: maler: Added %p.class; to %statusobj.mix;.\r\n#1998-03-10: maler: Added %ednote.class; to all mixtures, except\r\n#                   %p.mix; and %statusobj.mix;, because paragraphs\r\n#                   and status paragraphs will contain ednote\r\n#                   through %p.pcd.mix;.\r\n#1998-03-123: maler: Added %termdef.mix; (broken out from\r\n#                    %termdef.pcd.mix;).\r\n-->\r\n\r\n<!ENTITY % div.mix\r\n        \"%p.class;|%list.class;|%speclist.class;|%note.class;\r\n        |%illus.class;|%ednote.class;\">\r\n<!ENTITY % obj.mix\r\n        \"%p.class;|%list.class;|%speclist.class;|%note.class;\r\n        |%illus.class;|%ednote.class;\">\r\n<!ENTITY % p.mix\r\n        \"%list.class;|%speclist.class;|%note.class;|%illus.class;\">\r\n<!ENTITY % entry.mix\r\n        \"%list.class;|note|eg|graphic|%ednote.class;\">\r\n<!ENTITY % statusobj.mix\r\n        \"%p.class;|%statusp.class;|%list.class;\">\r\n<!ENTITY % hdr.mix\r\n        \"%p.class;|%list.class;|%ednote.class;\">\r\n<!ENTITY % termdef.mix\r\n        \"%note.class;|%illus.class;\">\r\n\r\n<!-- ............................................................... -->\r\n<!-- Entities for mixtures of #PCDATA and phrase-level elements .... -->\r\n\r\n<!--    Note that %termdef.pcd.mix contains %note.class;\r\n        and %illus.class;, considered standalone elements. -->\r\n\r\n<!--\r\n#1997-09-30: maler: Added scrap and %note.class; to %termdef.pcd.mix;.\r\n#1997-11-28: maler: Added %loc.class; to %p.pcd.mix;.\r\n#1998-03-10: maler: Added %ednote.class; to all mixtures.\r\n#1998-03-23: maler: Moved some %termdef.pcd.mix; stuff out to\r\n#                   %termdef.mix;.\r\n-->\r\n\r\n<!ENTITY % p.pcd.mix\r\n        \"#PCDATA|%annot.class;|%termdef.class;|%emph.class;\r\n        |%ref.class;|%tech.class;|%loc.class;|%ednote.class;\">\r\n<!ENTITY % statusp.pcd.mix\r\n        \"#PCDATA|%annot.class;|%termdef.class;|%emph.class;\r\n        |%ref.class;|%tech.class;|%loc.class;|%ednote.class;\">\r\n<!ENTITY % head.pcd.mix\r\n        \"#PCDATA|%annot.class;|%emph.class;|%tech.class;|%ednote.class;\">\r\n<!ENTITY % label.pcd.mix\r\n        \"#PCDATA|%annot.class;|%termdef.class;|%emph.class;|%tech.class;\r\n        |%ednote.class;\">\r\n<!ENTITY % eg.pcd.mix\r\n        \"#PCDATA|%annot.class;|%emph.class;|%ednote.class;\">\r\n<!ENTITY % termdef.pcd.mix\r\n        \"#PCDATA|term|%emph.class;|%ref.class;|%tech.class;\r\n        |%ednote.class;\">\r\n<!ENTITY % bibl.pcd.mix\r\n        \"#PCDATA|%emph.class;|%ref.class;|%loc.class;|%ednote.class;\">\r\n<!ENTITY % tech.pcd.mix\r\n        \"#PCDATA|%ednote.class;\">\r\n<!ENTITY % loc.pcd.mix\r\n        \"#PCDATA|%loc.class;|%ednote.class;\">\r\n\r\n<!-- ............................................................... -->\r\n<!-- Entities for customizable content models ...................... -->\r\n\r\n<!--\r\n#1998-03-10: maler: Added customization entities.\r\n-->\r\n\r\n<!ENTITY % spec.mdl\r\n        \"header, front?, body, back?\">\r\n\r\n<!ENTITY % header.mdl\r\n        \"title, subtitle?, version, w3c-designation, w3c-doctype,\r\n        pubdate, notice*, publoc, prevlocs?, latestloc?, authlist,\r\n        status, abstract, pubstmt?, sourcedesc?, langusage,\r\n        revisiondesc\">\r\n\r\n<!ENTITY % pubdate.mdl\r\n        \"day?, month, year\">\r\n\r\n<!-- ............................................................... -->\r\n<!-- Entities for common attributes ................................ -->\r\n\r\n<!--    key attribute:\r\n        Optionally provides a sorting or indexing key, for cases when\r\n        the element content is inappropriate for this purpose. -->\r\n<!ENTITY % key.att\r\n        'key                    CDATA           #IMPLIED'>\r\n\r\n<!--    def attribute:\r\n        Points to the element where the relevant definition can be\r\n        found, using the IDREF mechanism.  %def.att; is for optional\r\n        def attributes, and %def-req.att; is for required def\r\n        attributes. -->\r\n<!ENTITY % def.att\r\n        'def                    IDREF           #IMPLIED'>\r\n<!ENTITY % def-req.att\r\n        'def                    IDREF           #REQUIRED'>\r\n\r\n<!--    ref attribute:\r\n        Points to the element where more information can be found,\r\n        using the IDREF mechanism.  %ref.att; is for optional\r\n        ref attributes, and %ref-req.att; is for required ref\r\n        attributes. -->\r\n<!ENTITY % ref.att\r\n        'ref                    IDREF           #IMPLIED'>\r\n<!ENTITY % ref-req.att\r\n        'ref                    IDREF           #REQUIRED'>\r\n\r\n<!--\r\n#1998-03-23: maler: Added show and actuate attributes to href.\r\n#                   Added semi-common xml:space attribute.\r\n-->\r\n\r\n<!--    HREF and source attributes:\r\n        Points to the element where more information or source data\r\n        can be found, using the URL (XLL simple link) mechanism.\r\n        For some purposes, is associated with additional XLL\r\n        attributes. %href.att; is for optional HREF attributes,\r\n        and %href-req.att; is for required HREF attributes.\r\n        %source-req.att; is for the source attribute, which\r\n        is always required. -->\r\n<!--\r\n#1998-5-23: brownell:\tTurned \"xml:link\" into \"xml-link\" to\r\n#\t\t\tmatch usage in the XML spec, so that\r\n#\t\t\tvalidation errors aren't reported.\r\n-->\r\n<!ENTITY % href.att\r\n        'xml-link               CDATA           #FIXED \"simple\"\r\n        href                    CDATA           #IMPLIED\r\n        show                    CDATA           #FIXED \"embed\"\r\n        actuate                 CDATA           #FIXED \"auto\"'>\r\n\r\n<!ENTITY % href-req.att\r\n        'xml-link               CDATA           #FIXED \"simple\"\r\n        href                    CDATA           #REQUIRED\r\n        show                    CDATA           #FIXED \"embed\"\r\n        actuate                 CDATA           #FIXED \"auto\"'>\r\n\r\n<!ENTITY % source-req.att\r\n        'xml-link               CDATA           #FIXED \"simple\"\r\n        xml:attributes          NMTOKENS        #FIXED \"href source\"\r\n        source                  CDATA           #REQUIRED\r\n        show                    CDATA           #FIXED \"embed\"\r\n        actuate                 CDATA           #FIXED \"auto\"'>\r\n\r\n<!--    xml:space attribute:\r\n        Indicates that the element contains white space\r\n        that the formatter or other application should retain,\r\n        as appropriate to its function. -->\r\n<!ENTITY % xmlspace.att\r\n        'xml:space              (default\r\n                                |preserve)      #FIXED \"preserve\"'>\r\n\r\n<!--    Common attributes:\r\n        Every element has an ID attribute (sometimes required,\r\n        but usually optional) for links, and a Role attribute\r\n        for extending the useful life of the DTD by allowing\r\n        authors to make subclasses for any element. %common.att;\r\n        is for common attributes where the ID is optional, and\r\n        %common-idreq.att; is for common attributes where the\r\n        ID is required. -->\r\n<!ENTITY % common.att\r\n        'id                     ID              #IMPLIED\r\n        role                    NMTOKEN         #IMPLIED'>\r\n<!ENTITY % common-idreq.att\r\n        'id                     ID              #REQUIRED\r\n        role                    NMTOKEN         #IMPLIED'>\r\n\r\n<!-- ............................................................... -->\r\n<!-- Common elements ............................................... -->\r\n\r\n<!--    head: Title on divisions, productions, and the like -->\r\n<!ELEMENT head (%head.pcd.mix;)*>\r\n<!ATTLIST head %common.att;>\r\n\r\n<!-- ............................................................... -->\r\n<!-- Major specification structure ................................. -->\r\n\r\n<!--\r\n#1998-03-10: maler: Made spec content model easily customizable.\r\n-->\r\n\r\n<!ELEMENT spec (%spec.mdl;)>\r\n<!ATTLIST spec %common.att;>\r\n\r\n<!ELEMENT front (div1+)>\r\n<!ATTLIST front %common.att;>\r\n\r\n<!ELEMENT body (div1+)>\r\n<!ATTLIST body %common.att;>\r\n\r\n<!--\r\n#1997-09-30: maler: Added inform-div1 to back content.\r\n-->\r\n\r\n<!ELEMENT back ((div1+, inform-div1*) | inform-div1+)>\r\n<!ATTLIST back %common.att;>\r\n\r\n<!ELEMENT div1 (head, (%div.mix;)*, div2*)>\r\n<!ATTLIST div1 %common.att;>\r\n\r\n<!--\r\n#1997-09-30: maler: Added inform-div1 declarations.\r\n-->\r\n\r\n<!--    inform-div1: Non-normative division in back matter -->\r\n<!ELEMENT inform-div1 (head, (%div.mix;)*, div2*)>\r\n<!ATTLIST inform-div1 %common.att;>\r\n\r\n<!ELEMENT div2 (head, (%div.mix;)*, div3*)>\r\n<!ATTLIST div2 %common.att;>\r\n\r\n<!ELEMENT div3 (head, (%div.mix;)*, div4*)>\r\n<!ATTLIST div3 %common.att;>\r\n\r\n<!ELEMENT div4 (head, (%div.mix;)*)>\r\n<!ATTLIST div4 %common.att;>\r\n\r\n<!-- Specification header .......... -->\r\n\r\n<!--\r\n#1998-03-10: maler: Made header content model easily customizable.\r\n-->\r\n\r\n<!ELEMENT header (%header.mdl;)>\r\n<!ATTLIST header %common.att;>\r\n\r\n<!--    Example of title: \"Extensible Cheese Language (XCL)\" -->\r\n<!ELEMENT title (#PCDATA)>\r\n<!ATTLIST title %common.att;>\r\n\r\n<!--    Example of subtitle: \"A Cheesy Specification\" -->\r\n<!ELEMENT subtitle (#PCDATA)>\r\n<!ATTLIST subtitle %common.att;>\r\n\r\n<!--    Example of version: \"Version 666.0\" -->\r\n<!ELEMENT version (#PCDATA)>\r\n<!ATTLIST version %common.att;>\r\n\r\n<!--    Example of w3c-designation: \"WD-xcl-19991231\" -->\r\n<!ELEMENT w3c-designation (#PCDATA)>\r\n<!ATTLIST w3c-designation %common.att;>\r\n\r\n<!--    Example of w3c-doctype: \"World Wide Web Consortium Working\r\n        Draft\" -->\r\n<!ELEMENT w3c-doctype (#PCDATA)>\r\n<!ATTLIST w3c-doctype %common.att;>\r\n\r\n<!--\r\n#1998-03-10: maler: Made pubdate content model easily customizable.\r\n-->\r\n\r\n<!ELEMENT pubdate (%pubdate.mdl;)>\r\n<!ATTLIST pubdate %common.att;>\r\n\r\n<!ELEMENT day (#PCDATA)>\r\n<!ATTLIST day %common.att;>\r\n\r\n<!ELEMENT month (#PCDATA)>\r\n<!ATTLIST month %common.att;>\r\n\r\n<!ELEMENT year (#PCDATA)>\r\n<!ATTLIST year %common.att;>\r\n\r\n<!--    Example of notice: \"This draft is for public comment...\" -->\r\n<!ELEMENT notice (%hdr.mix;)+>\r\n<!ATTLIST notice %common.att;>\r\n\r\n<!ELEMENT publoc (loc+)>\r\n<!ATTLIST publoc %common.att;>\r\n\r\n<!ELEMENT prevlocs (loc+)>\r\n<!ATTLIST prevlocs %common.att;>\r\n\r\n<!ELEMENT latestloc (loc+)>\r\n<!ATTLIST latestloc %common.att;>\r\n\r\n<!--      loc (defined in \"Phrase-level elements\" below) -->\r\n\r\n<!ELEMENT authlist (author+)>\r\n<!ATTLIST authlist %common.att;>\r\n\r\n<!--\r\n#1997-09-30: maler: Made affiliation optional.\r\n#1998-03-10: maler: Made email optional.\r\n-->\r\n\r\n<!ELEMENT author (name, affiliation?, email?)>\r\n<!ATTLIST author %common.att;>\r\n\r\n<!ELEMENT name (#PCDATA)>\r\n<!ATTLIST name\r\n        %common.att;\r\n        %key.att;>\r\n\r\n<!ELEMENT affiliation (#PCDATA)>\r\n<!ATTLIST affiliation %common.att;>\r\n\r\n<!ELEMENT email (#PCDATA)>\r\n<!--    HREF attribute:\r\n        email functions as a hypertext reference through this\r\n        required attribute.  Typically the reference would use\r\n        the mailto: scheme. -->\r\n<!ATTLIST email\r\n        %common.att;\r\n        %href-req.att;>\r\n\r\n<!--    The status element now contains both statusp and p, and\r\n        the latter now allows loc.  Use p; statusp will be removed\r\n        eventually. -->\r\n<!ELEMENT status (%statusobj.mix;)+>\r\n<!ATTLIST status %common.att;>\r\n\r\n<!ELEMENT abstract (%hdr.mix;)*>\r\n<!ATTLIST abstract %common.att;>\r\n\r\n<!ELEMENT pubstmt (%hdr.mix;)+>\r\n<!ATTLIST pubstmt %common.att;>\r\n\r\n<!ELEMENT sourcedesc (%hdr.mix;)+>\r\n<!ATTLIST sourcedesc %common.att;>\r\n\r\n<!ELEMENT langusage (language+)>\r\n<!ATTLIST langusage %common.att;>\r\n\r\n<!ELEMENT language (#PCDATA)>\r\n<!ATTLIST language %common.att;>\r\n\r\n<!ELEMENT revisiondesc (%hdr.mix;)+>\r\n<!ATTLIST revisiondesc %common.att;>\r\n\r\n<!-- ............................................................... -->\r\n<!-- Standalone elements ........................................... -->\r\n\r\n<!-- Paragraphs .................... -->\r\n\r\n<!--\r\n#1997-09-30: maler: Changed from %obj.mix; to %p.mix;.\r\n#1997-12-29: maler: Changed order of %p.mix; and %p.pcd.mix; references.\r\n#1997-12-29: maler: Changed order of %statusobj.mix; and %statusp.pcd.mix;\r\n#                   references.\r\n-->\r\n\r\n<!ELEMENT p (%p.pcd.mix;|%p.mix;)*>\r\n<!ATTLIST p %common.att;>\r\n\r\n<!--    statusp: Special paragraph that allows loc inside it (note that\r\n        p now also allows loc) -->\r\n<!ELEMENT statusp (%statusp.pcd.mix;|%statusobj.mix;)*>\r\n<!ATTLIST statusp %common.att;>\r\n\r\n<!-- Lists ......................... -->\r\n\r\n<!ELEMENT ulist (item+)>\r\n<!--    spacing attribute:\r\n        Use \"normal\" to get normal vertical spacing for items;\r\n        use \"compact\" to get less spacing.  The default is dependent\r\n        on the stylesheet. -->\r\n<!ATTLIST ulist\r\n        %common.att;\r\n        spacing         (normal|compact)        #IMPLIED>\r\n\r\n<!ELEMENT olist (item+)>\r\n<!--    spacing attribute:\r\n        Use \"normal\" to get normal vertical spacing for items;\r\n        use \"compact\" to get less spacing.  The default is dependent\r\n        on the stylesheet. -->\r\n<!ATTLIST olist\r\n        %common.att;\r\n        spacing         (normal|compact)        #IMPLIED>\r\n\r\n<!ELEMENT item (%obj.mix;)+>\r\n<!ATTLIST item %common.att;>\r\n\r\n<!ELEMENT slist (sitem+)>\r\n<!ATTLIST slist %common.att;>\r\n\r\n<!ELEMENT sitem (%p.pcd.mix;)*>\r\n<!ATTLIST sitem %common.att;>\r\n\r\n<!ELEMENT glist (gitem+)>\r\n<!ATTLIST glist %common.att;>\r\n\r\n<!ELEMENT gitem (label, def)>\r\n<!ATTLIST gitem %common.att;>\r\n\r\n<!ELEMENT label (%label.pcd.mix;)*>\r\n<!ATTLIST label %common.att;>\r\n\r\n<!ELEMENT def (%obj.mix;)*>\r\n<!ATTLIST def %common.att;>\r\n\r\n<!-- Special lists ................. -->\r\n\r\n<!ELEMENT blist (bibl+)>\r\n<!ATTLIST blist %common.att;>\r\n\r\n<!ELEMENT bibl (%bibl.pcd.mix;)*>\r\n<!--    HREF attribute:\r\n        bibl optionally functions as a hypertext reference to the\r\n        referred-to resource through this attribute. -->\r\n<!ATTLIST bibl\r\n        %common.att;\r\n        %href.att;\r\n        %key.att;>\r\n\r\n<!ELEMENT orglist (member+)>\r\n<!ATTLIST orglist %common.att;>\r\n\r\n<!--\r\n#1997-09-30: maler: Added optional affiliation.\r\n-->\r\n\r\n<!ELEMENT member (name, affiliation?, role?)>\r\n<!ATTLIST member %common.att;>\r\n\r\n<!--      name (defined in \"Specification header\" above) -->\r\n<!--      affiliation (defined in \"Specification header\" above) -->\r\n\r\n<!ELEMENT role (#PCDATA)>\r\n<!ATTLIST role %common.att;>\r\n\r\n<!-- Notes ......................... -->\r\n\r\n<!ELEMENT note (%obj.mix;)+>\r\n<!ATTLIST note %common.att;>\r\n\r\n<!ELEMENT wfcnote (head, (%obj.mix;)+)>\r\n<!--    ID attribute:\r\n        wfcnote must have an ID so that it can be pointed to\r\n        from a wfc element in a production. -->\r\n<!ATTLIST wfcnote\r\n        %common-idreq.att;>\r\n\r\n<!ELEMENT vcnote (head, (%obj.mix;)+)>\r\n<!--    ID attribute:\r\n        vcnote must have an ID so that it can be pointed to\r\n        from a vc element in a production. -->\r\n<!ATTLIST vcnote\r\n        %common-idreq.att;>\r\n\r\n<!-- Illustrations ................. -->\r\n\r\n<!--\r\n#1998-03-23: maler: Added xml:space attribute.\r\n-->\r\n\r\n<!ELEMENT eg (%eg.pcd.mix;)*>\r\n<!ATTLIST eg\r\n        %common.att;\r\n        %xmlspace.att;>\r\n\r\n<!ELEMENT graphic EMPTY>\r\n<!--    source attribute:\r\n        The graphic data must reside at the location pointed to.\r\n        This is a hypertext reference, but for practical purposes,\r\n        for now it should just be a pathname. -->\r\n<!ATTLIST graphic\r\n        %common.att;\r\n        %source-req.att;\r\n        alt             CDATA           #IMPLIED>\r\n\r\n<!--\r\n#1997-11-28: maler: Added prodgroup to scrap and defined it.\r\n-->\r\n\r\n<!ELEMENT scrap (head, (prodgroup+ | prod+ | bnf))>\r\n<!--    lang attribute:\r\n        The scrap can link to a description of the language used,\r\n        found in a language element in the header. -->\r\n<!ATTLIST scrap\r\n        %common.att;\r\n        lang            IDREF           #IMPLIED>\r\n\r\n<!ELEMENT prodgroup (prod+)>\r\n<!--    pcw<n> attributes:\r\n        Presentational attributes to control the width\r\n        of the \"pseudo-table\" columns used to output\r\n        groups of productions. -->\r\n<!ATTLIST prodgroup\r\n        %common.att;\r\n        pcw1            CDATA           #IMPLIED\r\n        pcw2            CDATA           #IMPLIED\r\n        pcw3            CDATA           #IMPLIED\r\n        pcw4            CDATA           #IMPLIED\r\n        pcw5            CDATA           #IMPLIED\r\n>\r\n\r\n<!ELEMENT prod (lhs, (rhs, (com|wfc|vc)*)+)>\r\n<!--    ID attribute:\r\n        The production must have an ID so that cross-references\r\n        (specref) and mentions of nonterminals (nt) can link to\r\n        it. -->\r\n<!ATTLIST prod\r\n        %common-idreq.att;>\r\n\r\n<!ELEMENT lhs (#PCDATA)>\r\n<!ATTLIST lhs %common.att;>\r\n\r\n<!ELEMENT rhs (#PCDATA|nt|xnt|com)*>\r\n<!ATTLIST rhs %common.att;>\r\n\r\n<!--      nt and xnt (defined in \"Phrase-level elements\" below) -->\r\n\r\n<!--\r\n#1997-11-28: maler: Added loc and bibref to com content.\r\n-->\r\n\r\n<!ELEMENT com (#PCDATA|loc|bibref)*>\r\n<!ATTLIST com %common.att;>\r\n\r\n<!--    wfc: Should generate the head of the wfcnote pointed to -->\r\n<!ELEMENT wfc EMPTY>\r\n<!--    def attribute:\r\n        Each well formedness tagline in a production must link to the\r\n        wfcnote that defines it. -->\r\n<!ATTLIST wfc\r\n        %def-req.att;\r\n        %common.att;>\r\n\r\n<!--    vc: Should generate the head of the vcnote pointed to -->\r\n<!ELEMENT vc EMPTY>\r\n<!--    def attribute:\r\n        Each validity tagline in a production must link to the vcnote\r\n        that defines it. -->\r\n<!ATTLIST vc\r\n        %def-req.att;\r\n        %common.att;>\r\n\r\n<!--\r\n#1998-03-23: maler: Added xml:space attribute.\r\n-->\r\n\r\n<!--    bnf: Un-marked-up production -->\r\n<!ELEMENT bnf (%eg.pcd.mix;)*>\r\n<!ATTLIST bnf\r\n        %common.att;\r\n        %xmlspace.att;>\r\n\r\n<!--\r\n#1997-10-16: maler: Added table mechanism.\r\n#1997-11-28: maler: Added non-null system ID to entity declaration.\r\n#                   Added HTML table module.\r\n#1997-12-29: maler: IGNOREd SGML Open table model.\r\n#1998-03-10: maler: Removed SGML Open table model.\r\n#                   Merged html-tbl.mod file into main file.\r\n#                   Added %common.att; to all HTML table elements.\r\n-->\r\n\r\n<!--    TR and TD attributes:\r\n        Alignment attributes.  No default. -->\r\n<!ENTITY % trtd.att\r\n        \"align          (left\r\n                        |center\r\n                        |right)         #IMPLIED\r\n        valign          (top\r\n                        |middle\r\n                        |bottom)        #IMPLIED\">\r\n\r\n<!ELEMENT htable (htbody+)>\r\n<!ATTLIST htable\r\n          border        CDATA           \"0\"\r\n          cellpadding   CDATA           \"0\"\r\n          align         (left\r\n                        |center\r\n                        |right)         \"left\">\r\n\r\n<!ELEMENT htbody (tr+)>\r\n<!ATTLIST htbody %common.att;>\r\n\r\n<!ELEMENT tr     (td+)>\r\n<!ATTLIST tr\r\n        %common.att;\r\n        %trtd.att;>\r\n\r\n<!ELEMENT td     (%p.pcd.mix;)*>\r\n<!ATTLIST td\r\n        %common.att;\r\n        %trtd.att;\r\n        bgcolor         CDATA           #IMPLIED\r\n        rowspan         CDATA           \"1\"\r\n        colspan         CDATA           \"1\">\r\n\r\n<!-- ............................................................... -->\r\n<!-- Phrase-level elements ......................................... -->\r\n\r\n<!--    bibref: Should generate, in square brackets, \"key\" on bibl -->\r\n<!ELEMENT bibref EMPTY>\r\n<!--    ref attribute:\r\n        A bibliography reference must link to the bibl element that\r\n        describes the resource. -->\r\n<!ATTLIST bibref\r\n        %common.att;\r\n        %ref-req.att;>\r\n\r\n<!ELEMENT code (%tech.pcd.mix;)*>\r\n<!ATTLIST code %common.att;>\r\n\r\n<!--\r\n#1998-03-10: maler: Declared ednote and related elements.\r\n-->\r\n\r\n<!ELEMENT ednote (name?, date?, edtext)>\r\n<!ATTLIST ednote %common.att;>\r\n\r\n<!ELEMENT date (#PCDATA)>\r\n<!ATTLIST date %common.att;>\r\n\r\n<!ELEMENT edtext (#PCDATA)>\r\n<!ATTLIST edtext %common.att;>\r\n\r\n<!ELEMENT emph (#PCDATA)>\r\n<!ATTLIST emph %common.att;>\r\n\r\n<!--    footnote: Both footnote content and call to footnote -->\r\n<!ELEMENT footnote (%obj.mix;)+>\r\n<!ATTLIST footnote %common.att;>\r\n\r\n<!ELEMENT kw (%tech.pcd.mix;)*>\r\n<!ATTLIST kw %common.att;>\r\n\r\n<!ELEMENT loc (#PCDATA)>\r\n<!--    HREF attribute:\r\n        The purpose of a loc element is to function as a hypertext\r\n        link to a resource.  (Ideally, the content of loc will also\r\n        mention the URI of the resource, so that readers of the\r\n        printed version will be able to locate the resource.) -->\r\n<!ATTLIST loc\r\n        %common.att;\r\n        %href-req.att;>\r\n\r\n<!ELEMENT nt (#PCDATA)>\r\n<!--    def attribute:\r\n        The nonterminal must link to the production that defines\r\n        it. -->\r\n<!ATTLIST nt\r\n        %common.att;\r\n        %def-req.att;>\r\n\r\n<!--\r\n#1998-03-10: maler: Declared quote.\r\n-->\r\n\r\n<!--    quote: Scare quotes and other purely presentational quotes -->\r\n<!ELEMENT quote (%p.pcd.mix;)*>\r\n<!ATTLIST quote %common.att;>\r\n\r\n<!--    specref: Should generate italic \"[n.n], Section Title\" for\r\n        div, \"n\" for numbered item, or \"[n]\" for production -->\r\n<!ELEMENT specref EMPTY>\r\n<!--    ref attribute:\r\n        The purpose of a specref element is to link to a div, item\r\n        in an olist, or production in the current spec. -->\r\n<!ATTLIST specref\r\n        %common.att;\r\n        %ref-req.att;>\r\n\r\n<!ELEMENT term (#PCDATA)>\r\n<!ATTLIST term %common.att;>\r\n\r\n<!ELEMENT termdef (%termdef.pcd.mix;|%termdef.mix;)*>\r\n<!--    ID attribute:\r\n        A term definition must have an ID so that it can be linked\r\n        to from termref elements. -->\r\n<!--    term attribute:\r\n        The canonical form of the term or phrase being defined must\r\n        appear in this attribute, even if the term or phrase also\r\n        appears in the element content in identical form (e.g., in\r\n        the term element). -->\r\n<!ATTLIST termdef\r\n        %common-idreq.att;\r\n        term            CDATA           #REQUIRED>\r\n\r\n<!ELEMENT termref (#PCDATA)>\r\n<!--    ref attribute:\r\n        A term reference must link to the termdef element that\r\n        defines the term. -->\r\n<!ATTLIST termref\r\n        %common.att;\r\n        %def-req.att;>\r\n\r\n<!ELEMENT titleref (#PCDATA)>\r\n<!--    HREF attribute:\r\n        A title reference can optionally function as a hypertext\r\n        link to the resource with this title. -->\r\n<!ATTLIST titleref\r\n        %common.att;\r\n        %href.att;>\r\n\r\n<!ELEMENT xnt (#PCDATA)>\r\n<!--    HREF attribute:\r\n        The nonterminal must hyperlink to a resource that serves\r\n        to define it (e.g., a production in a related XML\r\n        specification). -->\r\n<!ATTLIST xnt\r\n        %common.att;\r\n        %href-req.att;>\r\n\r\n<!--\r\n#1997-12-29: maler: Declared xspecref.\r\n-->\r\n\r\n<!ELEMENT xspecref (#PCDATA)>\r\n<!--    HREF attribute:\r\n        The spec reference must hyperlink to the resource to\r\n        cross-refer to (e.g., a section in a related XML\r\n        specification). -->\r\n<!ATTLIST xspecref\r\n        %common.att;\r\n        %href-req.att;>\r\n\r\n<!ELEMENT xtermref (#PCDATA)>\r\n<!--    HREF attribute:\r\n        The term reference must hyperlink to the resource that\r\n        serves to define the term (e.g., a term definition in\r\n        a related XML specification). -->\r\n<!ATTLIST xtermref\r\n        %common.att;\r\n        %href-req.att;>\r\n\r\n<!-- ............................................................... -->\r\n<!-- Unused elements for ADEPT ..................................... -->\r\n\r\n<!--\r\n#1997-09-30: maler: Added unusued elements.\r\n#1997-10-14: maler: Fixed div to move nested div to the mixture.\r\n-->\r\n\r\n<!--    The following elements are purposely declared but never\r\n        referenced.  Declaring them allows them to be pasted from\r\n        an HTML document into a document using this DTD in ADEPT.\r\n        The ATD Context Transformation mechanism will try to convert\r\n        them to the appropriate element for this DTD.  While this\r\n        conversion will not work for all fragments, it does allow\r\n        many cases to work reasonably well. -->\r\n\r\n<!ELEMENT div\r\n        (head?, (%div.mix;|ul|ol|h1|h2|h3|h4|h5|h6|div)*)>\r\n<!ELEMENT h1 (%head.pcd.mix;|em|a)*>\r\n<!ELEMENT h2 (%head.pcd.mix;|em|a)*>\r\n<!ELEMENT h3 (%head.pcd.mix;|em|a)*>\r\n<!ELEMENT h4 (%head.pcd.mix;|em|a)*>\r\n<!ELEMENT h5 (%head.pcd.mix;|em|a)*>\r\n<!ELEMENT h6 (%head.pcd.mix;|em|a)*>\r\n<!ELEMENT pre (%eg.pcd.mix;|em)*>\r\n<!ELEMENT ul (item|li)*>\r\n<!ELEMENT ol (item|li)*>\r\n<!ELEMENT li (#PCDATA|%obj.mix;)*>\r\n<!ELEMENT em (#PCDATA)>\r\n<!ELEMENT a (#PCDATA)>\r\n\r\n<!-- ............................................................... -->\r\n<!-- Change history ................................................ -->\r\n\r\n<!--\r\n#1997-08-18: maler\r\n#- Did a major revision.\r\n#1997-09-10: maler\r\n#- Updated FPI.\r\n#- Removed namekey element and put key attribute on name element.\r\n#- Made statusp element and supporting entities.\r\n#- Added slist element with sitem+ content.\r\n#- Required head on scrap and added new bnf subelement.\r\n#- Added an xnt element and allowed it and nt in regular text and rhs.\r\n#- Removed the ntref element.\r\n#- Added back the com element to the content of rhs.\r\n#- Added a key attribute to bibl.\r\n#- Removed the ident element.\r\n#- Added a term element to be used inside termdef.\r\n#- Added an xtermref element parallel to termref.\r\n#- Beefed up DTD comments.\r\n#1997-09-12: maler\r\n#- Allowed term element in general text.\r\n#- Changed bibref to EMPTY.\r\n#- Added ref.class to termdef.pcd.mix.\r\n#1997-09-14: maler\r\n#- Changed main attribute of xtermref from def to href.\r\n#- Added termdef.class to label contents.\r\n#1997-09-30: maler\r\n#- Added character entity module and added new entities.\r\n#- Removed p from appearing directly in self; created %p.mix;.\r\n#- Added inform-div (non-normative division) element.\r\n#- Fixed xtermref comment to mention HREF, not ref.\r\n#- Extended orglist model to allow optional affiliation.\r\n#- Modified author to make affiliation optional.\r\n#- Added %speclist.class; and %note.class; to %obj.mix; and %p.mix;.\r\n#- Added %note.class; and %illus.class; to %termdef.pcd.mix;.\r\n#- Added unused HTML elements.\r\n#- Put empty system ID next to public ID in entity declarations.\r\n#1997-10-14: maler\r\n#- Fixed \"unused\" div content model to move nested div to mixture.\r\n#1997-10-16: maler\r\n#- Added SGML Open Exchange tables.\r\n#1997-11-28: maler\r\n#- Added support for prodgroup and its attributes.\r\n#- Added support for HTML tables.\r\n#- Added loc and bibref to content of com.\r\n#- Added loc to general p content models.\r\n#- Allowed p as alternative to statusp in status.\r\n#- Added non-null system IDs to external parameter entity declarations.\r\n#- (Modified the SGML Open table module to make it XML-compliant.)\r\n#- (Modified the character entity module.)\r\n#1997-12-29: maler\r\n#- Moved #PCDATA occurrences to come before GIs in content models.\r\n#- Removed use of the SGML Open table module.\r\n#- Added xspecref element.\r\n#- Ensured that all FPIs contain 4-digit year.\r\n#- (Modified the character entity module.)\r\n#1997-03-10: maler\r\n#- Merged the character entity and table modules into the main file.\r\n#- Added ldquo and rdquo entities.\r\n#- Added common attributes to prodgroup.\r\n#- Made the email element in header optional.\r\n#- Removed reference to the SGML Open table model.\r\n#- Added ednote element.\r\n#- Added quote element.\r\n#- Updated XLink usage to reflect 3 March 1998 WD.\r\n#- Added \"local\" entities to the class entities for customization.\r\n#- Parameterized several content models to allow for customization.\r\n#1997-03-23: maler\r\n#- Cleaned up some comments and removed some others.\r\n#- Added xml:space semi-common attribute to eg and bnf elements.\r\n#- Added show and embed attributes on all the uses of href.\r\n#- Added %common.att; to all HTML table elements.\r\n#- Added a real URI to the \"typical invocation\" comment.\r\n-->\r\n\r\n<!-- ............................................................... -->\r\n<!-- End of XML specification DTD .................................. -->\r\n<!-- ............................................................... -->\r\n",
+              "weekly-euc-jp.dtd": "<?xml encoding=\"euc-jp\"?>\r\n<!--\r\n*************************************************************************\r\n*                                                                       *\r\n*\tDPSD PDG������DTD\t  weekly.dtd                            *\r\n*                                                                       *\r\n*   Copyright 1997 Fuji Xerox Information Systems Co.,Ltd.              *\r\n*                                                                       *\r\n*************************************************************************\r\n-->\r\n\r\n\r\n<!-- �ѹ�����\r\n    Version 1.0 1997/10/29 ����   ¼�Ŀ�\r\n-->\r\n\r\n<!ELEMENT ����                    (ǯ�, ��̾, ��̳���ꥹ��)>\r\n\r\n<!ELEMENT ǯ�                  (ǯ��, ����, ��)>\r\n<!ELEMENT ǯ��                    (#PCDATA)> <!-- ǯ�٤�ɽ������ -->\r\n<!ELEMENT ����                    (#PCDATA)> <!-- ���٤�ɽ������ -->\r\n<!ELEMENT ��                      (#PCDATA)> <!-- �����ܤ���ɽ������ -->\r\n\r\n<!ELEMENT ��̾                    (��, ̾)>\r\n<!ELEMENT ��                      (#PCDATA)>\r\n<!ELEMENT ̾                      (#PCDATA)>\r\n\r\n<!ELEMENT ��̳���ꥹ��          (��̳���+)>\r\n<!ELEMENT ��̳���                (��̳̾, ��̳������, ��������, \r\n                                   ͽ����ܥꥹ��, \r\n                                   �»ܻ���ꥹ��, \r\n                                   ��Ĺ�ؤ���������ꥹ��,\r\n                                   �������к�?)>\r\n<!ELEMENT ��̳̾                  (#PCDATA)>  <!-- ��̳�����ɰ����򻲾� -->\r\n<!ELEMENT ��̳������              (#PCDATA)>  <!-- ��̳�����ɰ����򻲾� -->\r\n\r\n<!ELEMENT ��������                (���Ѥ�깩��, ���ӹ���, \r\n                                   ����Ѥ�깩��, ������ӹ���)>\r\n<!ELEMENT ���Ѥ�깩��            (#PCDATA)>  <!-- ñ�̤ϻ��� -->\r\n<!ELEMENT ���ӹ���                (#PCDATA)>  <!-- ñ�̤ϻ��� -->\r\n<!ELEMENT ����Ѥ�깩��        (#PCDATA)>  <!-- ñ�̤ϻ��� -->\r\n<!ELEMENT ������ӹ���            (#PCDATA)>  <!-- ñ�̤ϻ��� -->\r\n\r\n<!ELEMENT ͽ����ܥꥹ��          (ͽ�����*)>\r\n<!ELEMENT ͽ�����                ((P | OL | UL)+)>\r\n<!ELEMENT �»ܻ���ꥹ��          (�»ܻ���*)>\r\n<!ELEMENT �»ܻ���                ((P | OL | UL)+)>\r\n<!ELEMENT �������к�              ((P | OL | UL)+)>\r\n\r\n<!ELEMENT ��Ĺ�ؤ���������ꥹ��  (��Ĺ�ؤ���������*)>\r\n<!ELEMENT ��Ĺ�ؤ���������        ((P | OL | UL)+)>\r\n\r\n\r\n<!-- XML�Ǥ��餫����������줿���� -->\r\n<!ENTITY lt     \"&#38;#60;\"> \r\n<!ENTITY gt     \"&#62;\"> \r\n<!ENTITY amp    \"&#38;#38;\"> \r\n<!ENTITY apos   \"&#39;\"> \r\n<!ENTITY quot   \"&#34;\">\r\n\r\n<!-- HTML������Ū�ʥ��� -->\r\n<!ELEMENT P      (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT OL     (LI)*>\r\n<!ELEMENT UL     (LI)*>\r\n<!ELEMENT LI     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT EM     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT STRONG (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT A      (#PCDATA | EM | STRONG)*>\r\n<!ATTLIST A\r\n        name    CDATA   #IMPLIED\r\n        href    CDATA   #IMPLIED\r\n        >\r\n",
+              "weekly-iso-2022-jp.dtd": "<?xml encoding=\"iso-2022-JP\"?>\r\n<!--\r\n*************************************************************************\r\n*                                                                       *\r\n*\tDPSD PDG\u001b$B=5JsMQ\u001b(BDTD\t  weekly.dtd                            *\r\n*                                                                       *\r\n*   Copyright 1997 Fuji Xerox Information Systems Co.,Ltd.              *\r\n*                                                                       *\r\n*************************************************************************\r\n-->\r\n\r\n\r\n<!-- \u001b$BJQ99MzNr\u001b(B\r\n    Version 1.0 1997/10/29 \u001b$B:n@.\u001b(B   \u001b$BB<ED??\u001b(B\r\n-->\r\n\r\n<!ELEMENT \u001b$B=5Js\u001b(B                    (\u001b$BG/7n=5\u001b(B, \u001b$B;aL>\u001b(B, \u001b$B6HL3Js9p%j%9%H\u001b(B)>\r\n\r\n<!ELEMENT \u001b$BG/7n=5\u001b(B                  (\u001b$BG/EY\u001b(B, \u001b$B7nEY\u001b(B, \u001b$B=5\u001b(B)>\r\n<!ELEMENT \u001b$BG/EY\u001b(B                    (#PCDATA)> <!-- \u001b$BG/EY$rI=$9?t;z\u001b(B -->\r\n<!ELEMENT \u001b$B7nEY\u001b(B                    (#PCDATA)> <!-- \u001b$B7nEY$rI=$9?t;z\u001b(B -->\r\n<!ELEMENT \u001b$B=5\u001b(B                      (#PCDATA)> <!-- \u001b$B2?=5L\\$+$rI=$9?t;z\u001b(B -->\r\n\r\n<!ELEMENT \u001b$B;aL>\u001b(B                    (\u001b$B;a\u001b(B, \u001b$BL>\u001b(B)>\r\n<!ELEMENT \u001b$B;a\u001b(B                      (#PCDATA)>\r\n<!ELEMENT \u001b$BL>\u001b(B                      (#PCDATA)>\r\n\r\n<!ELEMENT \u001b$B6HL3Js9p%j%9%H\u001b(B          (\u001b$B6HL3Js9p\u001b(B+)>\r\n<!ELEMENT \u001b$B6HL3Js9p\u001b(B                (\u001b$B6HL3L>\u001b(B, \u001b$B6HL3%3!<%I\u001b(B, \u001b$B9)?t4IM}\u001b(B, \r\n                                   \u001b$BM=Dj9`L\\%j%9%H\u001b(B, \r\n                                   \u001b$B<B;\\;v9`%j%9%H\u001b(B, \r\n                                   \u001b$B>eD9$X$NMW@A;v9`%j%9%H\u001b(B,\r\n                                   \u001b$BLdBjE@BP:v\u001b(B?)>\r\n<!ELEMENT \u001b$B6HL3L>\u001b(B                  (#PCDATA)>  <!-- \u001b$B6HL3%3!<%I0lMw$r;2>H\u001b(B -->\r\n<!ELEMENT \u001b$B6HL3%3!<%I\u001b(B              (#PCDATA)>  <!-- \u001b$B6HL3%3!<%I0lMw$r;2>H\u001b(B -->\r\n\r\n<!ELEMENT \u001b$B9)?t4IM}\u001b(B                (\u001b$B8+@Q$b$j9)?t\u001b(B, \u001b$B<B@S9)?t\u001b(B, \r\n                                   \u001b$BEv7n8+@Q$b$j9)?t\u001b(B, \u001b$BEv7n<B@S9)?t\u001b(B)>\r\n<!ELEMENT \u001b$B8+@Q$b$j9)?t\u001b(B            (#PCDATA)>  <!-- \u001b$BC10L$O;~4V\u001b(B -->\r\n<!ELEMENT \u001b$B<B@S9)?t\u001b(B                (#PCDATA)>  <!-- \u001b$BC10L$O;~4V\u001b(B -->\r\n<!ELEMENT \u001b$BEv7n8+@Q$b$j9)?t\u001b(B        (#PCDATA)>  <!-- \u001b$BC10L$O;~4V\u001b(B -->\r\n<!ELEMENT \u001b$BEv7n<B@S9)?t\u001b(B            (#PCDATA)>  <!-- \u001b$BC10L$O;~4V\u001b(B -->\r\n\r\n<!ELEMENT \u001b$BM=Dj9`L\\%j%9%H\u001b(B          (\u001b$BM=Dj9`L\\\u001b(B*)>\r\n<!ELEMENT \u001b$BM=Dj9`L\\\u001b(B                ((P | OL | UL)+)>\r\n<!ELEMENT \u001b$B<B;\\;v9`%j%9%H\u001b(B          (\u001b$B<B;\\;v9`\u001b(B*)>\r\n<!ELEMENT \u001b$B<B;\\;v9`\u001b(B                ((P | OL | UL)+)>\r\n<!ELEMENT \u001b$BLdBjE@BP:v\u001b(B              ((P | OL | UL)+)>\r\n\r\n<!ELEMENT \u001b$B>eD9$X$NMW@A;v9`%j%9%H\u001b(B  (\u001b$B>eD9$X$NMW@A;v9`\u001b(B*)>\r\n<!ELEMENT \u001b$B>eD9$X$NMW@A;v9`\u001b(B        ((P | OL | UL)+)>\r\n\r\n\r\n<!-- XML\u001b$B$G$\"$i$+$8$aDj5A$5$l$?<BBN\u001b(B -->\r\n<!ENTITY lt     \"&#38;#60;\"> \r\n<!ENTITY gt     \"&#62;\"> \r\n<!ENTITY amp    \"&#38;#38;\"> \r\n<!ENTITY apos   \"&#39;\"> \r\n<!ENTITY quot   \"&#34;\">\r\n\r\n<!-- HTML\u001b$B$NHFMQE*$J%?%0\u001b(B -->\r\n<!ELEMENT P      (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT OL     (LI)*>\r\n<!ELEMENT UL     (LI)*>\r\n<!ELEMENT LI     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT EM     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT STRONG (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT A      (#PCDATA | EM | STRONG)*>\r\n<!ATTLIST A\r\n        name    CDATA   #IMPLIED\r\n        href    CDATA   #IMPLIED\r\n        >\r\n",
+              "weekly-shift_jis.dtd": "<?xml encoding=\"Shift_JIS\"?>\r\n<!--\r\n*************************************************************************\r\n*                                                                       *\r\n*\tDPSD PDG�T��pDTD\t  weekly.dtd                            *\r\n*                                                                       *\r\n*   Copyright 1997 Fuji Xerox Information Systems Co.,Ltd.              *\r\n*                                                                       *\r\n*************************************************************************\r\n-->\r\n\r\n\r\n<!-- �ύX����\r\n    Version 1.0 1997/10/29 �쐬   ���c�^\r\n-->\r\n\r\n<!ELEMENT �T��                    (�N���T, ����, �Ɩ��񍐃��X�g)>\r\n\r\n<!ELEMENT �N���T                  (�N�x, ���x, �T)>\r\n<!ELEMENT �N�x                    (#PCDATA)> <!-- �N�x��\\������ -->\r\n<!ELEMENT ���x                    (#PCDATA)> <!-- ���x��\\������ -->\r\n<!ELEMENT �T                      (#PCDATA)> <!-- ���T�ڂ���\\������ -->\r\n\r\n<!ELEMENT ����                    (��, ��)>\r\n<!ELEMENT ��                      (#PCDATA)>\r\n<!ELEMENT ��                      (#PCDATA)>\r\n\r\n<!ELEMENT �Ɩ��񍐃��X�g          (�Ɩ���+)>\r\n<!ELEMENT �Ɩ���                (�Ɩ���, �Ɩ��R�[�h, �H���Ǘ�, \r\n                                   �\\�荀�ڃ��X�g, \r\n                                   ���{�������X�g, \r\n                                   �㒷�ւ̗v���������X�g,\r\n                                   ���_�΍�?)>\r\n<!ELEMENT �Ɩ���                  (#PCDATA)>  <!-- �Ɩ��R�[�h�ꗗ���Q�� -->\r\n<!ELEMENT �Ɩ��R�[�h              (#PCDATA)>  <!-- �Ɩ��R�[�h�ꗗ���Q�� -->\r\n\r\n<!ELEMENT �H���Ǘ�                (���ς���H��, ���эH��, \r\n                                   �������ς���H��, �������эH��)>\r\n<!ELEMENT ���ς���H��            (#PCDATA)>  <!-- �P�ʂ͎��� -->\r\n<!ELEMENT ���эH��                (#PCDATA)>  <!-- �P�ʂ͎��� -->\r\n<!ELEMENT �������ς���H��        (#PCDATA)>  <!-- �P�ʂ͎��� -->\r\n<!ELEMENT �������эH��            (#PCDATA)>  <!-- �P�ʂ͎��� -->\r\n\r\n<!ELEMENT �\\�荀�ڃ��X�g          (�\\�荀��*)>\r\n<!ELEMENT �\\�荀��                ((P | OL | UL)+)>\r\n<!ELEMENT ���{�������X�g          (���{����*)>\r\n<!ELEMENT ���{����                ((P | OL | UL)+)>\r\n<!ELEMENT ���_�΍�              ((P | OL | UL)+)>\r\n\r\n<!ELEMENT �㒷�ւ̗v���������X�g  (�㒷�ւ̗v������*)>\r\n<!ELEMENT �㒷�ւ̗v������        ((P | OL | UL)+)>\r\n\r\n\r\n<!-- XML�ł��炩���ߒ�`���ꂽ���� -->\r\n<!ENTITY lt     \"&#38;#60;\"> \r\n<!ENTITY gt     \"&#62;\"> \r\n<!ENTITY amp    \"&#38;#38;\"> \r\n<!ENTITY apos   \"&#39;\"> \r\n<!ENTITY quot   \"&#34;\">\r\n\r\n<!-- HTML�̔ėp�I�ȃ^�O -->\r\n<!ELEMENT P      (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT OL     (LI)*>\r\n<!ELEMENT UL     (LI)*>\r\n<!ELEMENT LI     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT EM     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT STRONG (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT A      (#PCDATA | EM | STRONG)*>\r\n<!ATTLIST A\r\n        name    CDATA   #IMPLIED\r\n        href    CDATA   #IMPLIED\r\n        >\r\n",
+              "weekly-utf-16.dtd": "��\u0000<\u0000!\u0000-\u0000-\u0000\r\u0000\n\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000\r\u0000\n\u0000*\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000*\u0000\r\u0000\n\u0000*\u0000\t\u0000D\u0000P\u0000S\u0000D\u0000 \u0000P\u0000D\u0000G�1X1u(\u0000D\u0000T\u0000D\u0000\t\u0000 \u0000 \u0000w\u0000e\u0000e\u0000k\u0000l\u0000y\u0000.\u0000d\u0000t\u0000d\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000*\u0000\r\u0000\n\u0000*\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000*\u0000\r\u0000\n\u0000*\u0000 \u0000 \u0000 \u0000C\u0000o\u0000p\u0000y\u0000r\u0000i\u0000g\u0000h\u0000t\u0000 \u00001\u00009\u00009\u00007\u0000 \u0000F\u0000u\u0000j\u0000i\u0000 \u0000X\u0000e\u0000r\u0000o\u0000x\u0000 \u0000I\u0000n\u0000f\u0000o\u0000r\u0000m\u0000a\u0000t\u0000i\u0000o\u0000n\u0000 \u0000S\u0000y\u0000s\u0000t\u0000e\u0000m\u0000s\u0000 \u0000C\u0000o\u0000.\u0000,\u0000L\u0000t\u0000d\u0000.\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000*\u0000\r\u0000\n\u0000*\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000*\u0000\r\u0000\n\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000*\u0000\r\u0000\n\u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000-\u0000-\u0000 Y\tf�\\ekt\u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000V\u0000e\u0000r\u0000s\u0000i\u0000o\u0000n\u0000 \u00001\u0000.\u00000\u0000 \u00001\u00009\u00009\u00007\u0000/\u00001\u00000\u0000/\u00002\u00009\u0000 O\\b\u0010\u0000 \u0000 \u0000 gQu0w\u001f\u0000\r\u0000\n\u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 �1X1\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(^tg\b�1\u0000,\u0000 l\u000fT\r\u0000,\u0000 imR�X1TJ0�0�0�\u0000)\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 ^tg\b�1\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(^t^�\u0000,\u0000 g\b^�\u0000,\u0000 �1\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 ^t^�\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000<\u0000!\u0000-\u0000-\u0000 ^t^�0��h0Yep[W\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 g\b^�\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000<\u0000!\u0000-\u0000-\u0000 g\b^�0��h0Yep[W\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 �1\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000<\u0000!\u0000-\u0000-\u0000 OU�1v�0K0��h0Yep[W\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 l\u000fT\r\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(l\u000f\u0000,\u0000 T\r\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 l\u000f\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 T\r\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 imR�X1TJ0�0�0�\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(imR�X1TJ\u0000+\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 imR�X1TJ\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(imR�T\r\u0000,\u0000 imR�0�0�0�\u0000,\u0000 ]�ep{�t\u0006\u0000,\u0000 \u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 N�[��\u0005v�0�0�0�\u0000,\u0000 \u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 [�e�N��\u00050�0�0�\u0000,\u0000 \u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 N\n�w0x0n����N��\u00050�0�0�\u0000,\u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 UO�Lp�[�{V\u0000?\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 imR�T\r\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000 \u0000<\u0000!\u0000-\u0000-\u0000 imR�0�0�0�N\u0000��0�S�qg\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 imR�0�0�0�\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000 \u0000<\u0000!\u0000-\u0000-\u0000 imR�0�0�0�N\u0000��0�S�qg\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 ]�ep{�t\u0006\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(��zM0�0�]�ep\u0000,\u0000 [�~>]�ep\u0000,\u0000 \u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 _Sg\b��zM0�0�]�ep\u0000,\u0000 _Sg\b[�~>]�ep\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 ��zM0�0�]�ep\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000 \u0000<\u0000!\u0000-\u0000-\u0000 SXOM0ofB��\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 [�~>]�ep\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000 \u0000<\u0000!\u0000-\u0000-\u0000 SXOM0ofB��\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 _Sg\b��zM0�0�]�ep\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000 \u0000<\u0000!\u0000-\u0000-\u0000 SXOM0ofB��\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 _Sg\b[�~>]�ep\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000)\u0000>\u0000 \u0000 \u0000<\u0000!\u0000-\u0000-\u0000 SXOM0ofB��\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 N�[��\u0005v�0�0�0�\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(N�[��\u0005v�\u0000*\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 N�[��\u0005v�\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000(\u0000P\u0000 \u0000|\u0000 \u0000O\u0000L\u0000 \u0000|\u0000 \u0000U\u0000L\u0000)\u0000+\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 [�e�N��\u00050�0�0�\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000([�e�N��\u0005\u0000*\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 [�e�N��\u0005\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000(\u0000P\u0000 \u0000|\u0000 \u0000O\u0000L\u0000 \u0000|\u0000 \u0000U\u0000L\u0000)\u0000+\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 UO�Lp�[�{V\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000(\u0000P\u0000 \u0000|\u0000 \u0000O\u0000L\u0000 \u0000|\u0000 \u0000U\u0000L\u0000)\u0000+\u0000)\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 N\n�w0x0n����N��\u00050�0�0�\u0000 \u0000 \u0000(N\n�w0x0n����N��\u0005\u0000*\u0000)\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 N\n�w0x0n����N��\u0005\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000(\u0000P\u0000 \u0000|\u0000 \u0000O\u0000L\u0000 \u0000|\u0000 \u0000U\u0000L\u0000)\u0000+\u0000)\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000-\u0000-\u0000 \u0000X\u0000M\u0000L0g0B0�0K0X0�[��0U0�0_[�OS\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000N\u0000T\u0000I\u0000T\u0000Y\u0000 \u0000l\u0000t\u0000 \u0000 \u0000 \u0000 \u0000 \u0000\"\u0000&\u0000#\u00003\u00008\u0000;\u0000#\u00006\u00000\u0000;\u0000\"\u0000>\u0000 \u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000N\u0000T\u0000I\u0000T\u0000Y\u0000 \u0000g\u0000t\u0000 \u0000 \u0000 \u0000 \u0000 \u0000\"\u0000&\u0000#\u00006\u00002\u0000;\u0000\"\u0000>\u0000 \u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000N\u0000T\u0000I\u0000T\u0000Y\u0000 \u0000a\u0000m\u0000p\u0000 \u0000 \u0000 \u0000 \u0000\"\u0000&\u0000#\u00003\u00008\u0000;\u0000#\u00003\u00008\u0000;\u0000\"\u0000>\u0000 \u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000N\u0000T\u0000I\u0000T\u0000Y\u0000 \u0000a\u0000p\u0000o\u0000s\u0000 \u0000 \u0000 \u0000\"\u0000&\u0000#\u00003\u00009\u0000;\u0000\"\u0000>\u0000 \u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000N\u0000T\u0000I\u0000T\u0000Y\u0000 \u0000q\u0000u\u0000o\u0000t\u0000 \u0000 \u0000 \u0000\"\u0000&\u0000#\u00003\u00004\u0000;\u0000\"\u0000>\u0000\r\u0000\n\u0000\r\u0000\n\u0000<\u0000!\u0000-\u0000-\u0000 \u0000H\u0000T\u0000M\u0000L0nlNu(v�0j0�0�\u0000 \u0000-\u0000-\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 \u0000P\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000 \u0000|\u0000 \u0000E\u0000M\u0000 \u0000|\u0000 \u0000S\u0000T\u0000R\u0000O\u0000N\u0000G\u0000 \u0000|\u0000 \u0000A\u0000)\u0000*\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 \u0000O\u0000L\u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000L\u0000I\u0000)\u0000*\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 \u0000U\u0000L\u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000L\u0000I\u0000)\u0000*\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 \u0000L\u0000I\u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000 \u0000|\u0000 \u0000E\u0000M\u0000 \u0000|\u0000 \u0000S\u0000T\u0000R\u0000O\u0000N\u0000G\u0000 \u0000|\u0000 \u0000A\u0000)\u0000*\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 \u0000E\u0000M\u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000 \u0000|\u0000 \u0000E\u0000M\u0000 \u0000|\u0000 \u0000S\u0000T\u0000R\u0000O\u0000N\u0000G\u0000 \u0000|\u0000 \u0000A\u0000)\u0000*\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 \u0000S\u0000T\u0000R\u0000O\u0000N\u0000G\u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000 \u0000|\u0000 \u0000E\u0000M\u0000 \u0000|\u0000 \u0000S\u0000T\u0000R\u0000O\u0000N\u0000G\u0000 \u0000|\u0000 \u0000A\u0000)\u0000*\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000E\u0000L\u0000E\u0000M\u0000E\u0000N\u0000T\u0000 \u0000A\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000(\u0000#\u0000P\u0000C\u0000D\u0000A\u0000T\u0000A\u0000 \u0000|\u0000 \u0000E\u0000M\u0000 \u0000|\u0000 \u0000S\u0000T\u0000R\u0000O\u0000N\u0000G\u0000)\u0000*\u0000>\u0000\r\u0000\n\u0000<\u0000!\u0000A\u0000T\u0000T\u0000L\u0000I\u0000S\u0000T\u0000 \u0000A\u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000n\u0000a\u0000m\u0000e\u0000 \u0000 \u0000 \u0000 \u0000C\u0000D\u0000A\u0000T\u0000A\u0000 \u0000 \u0000 \u0000#\u0000I\u0000M\u0000P\u0000L\u0000I\u0000E\u0000D\u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000h\u0000r\u0000e\u0000f\u0000 \u0000 \u0000 \u0000 \u0000C\u0000D\u0000A\u0000T\u0000A\u0000 \u0000 \u0000 \u0000#\u0000I\u0000M\u0000P\u0000L\u0000I\u0000E\u0000D\u0000\r\u0000\n\u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000 \u0000>\u0000\r\u0000\n",
+              "weekly-utf-8.dtd": "<!--\r\n*************************************************************************\r\n*                                                                       *\r\n*\tDPSD PDG週報用DTD\t  weekly.dtd                            *\r\n*                                                                       *\r\n*   Copyright 1997 Fuji Xerox Information Systems Co.,Ltd.              *\r\n*                                                                       *\r\n*************************************************************************\r\n-->\r\n\r\n\r\n<!-- 変更履歴\r\n    Version 1.0 1997/10/29 作成   村田真\r\n-->\r\n\r\n<!ELEMENT 週報                    (年月週, 氏名, 業務報告リスト)>\r\n\r\n<!ELEMENT 年月週                  (年度, 月度, 週)>\r\n<!ELEMENT 年度                    (#PCDATA)> <!-- 年度を表す数字 -->\r\n<!ELEMENT 月度                    (#PCDATA)> <!-- 月度を表す数字 -->\r\n<!ELEMENT 週                      (#PCDATA)> <!-- 何週目かを表す数字 -->\r\n\r\n<!ELEMENT 氏名                    (氏, 名)>\r\n<!ELEMENT 氏                      (#PCDATA)>\r\n<!ELEMENT 名                      (#PCDATA)>\r\n\r\n<!ELEMENT 業務報告リスト          (業務報告+)>\r\n<!ELEMENT 業務報告                (業務名, 業務コード, 工数管理, \r\n                                   予定項目リスト, \r\n                                   実施事項リスト, \r\n                                   上長への要請事項リスト,\r\n                                   問題点対策?)>\r\n<!ELEMENT 業務名                  (#PCDATA)>  <!-- 業務コード一覧を参照 -->\r\n<!ELEMENT 業務コード              (#PCDATA)>  <!-- 業務コード一覧を参照 -->\r\n\r\n<!ELEMENT 工数管理                (見積もり工数, 実績工数, \r\n                                   当月見積もり工数, 当月実績工数)>\r\n<!ELEMENT 見積もり工数            (#PCDATA)>  <!-- 単位は時間 -->\r\n<!ELEMENT 実績工数                (#PCDATA)>  <!-- 単位は時間 -->\r\n<!ELEMENT 当月見積もり工数        (#PCDATA)>  <!-- 単位は時間 -->\r\n<!ELEMENT 当月実績工数            (#PCDATA)>  <!-- 単位は時間 -->\r\n\r\n<!ELEMENT 予定項目リスト          (予定項目*)>\r\n<!ELEMENT 予定項目                ((P | OL | UL)+)>\r\n<!ELEMENT 実施事項リスト          (実施事項*)>\r\n<!ELEMENT 実施事項                ((P | OL | UL)+)>\r\n<!ELEMENT 問題点対策              ((P | OL | UL)+)>\r\n\r\n<!ELEMENT 上長への要請事項リスト  (上長への要請事項*)>\r\n<!ELEMENT 上長への要請事項        ((P | OL | UL)+)>\r\n\r\n\r\n<!-- XMLであらかじめ定義された実体 -->\r\n<!ENTITY lt     \"&#38;#60;\"> \r\n<!ENTITY gt     \"&#62;\"> \r\n<!ENTITY amp    \"&#38;#38;\"> \r\n<!ENTITY apos   \"&#39;\"> \r\n<!ENTITY quot   \"&#34;\">\r\n\r\n<!-- HTMLの汎用的なタグ -->\r\n<!ELEMENT P      (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT OL     (LI)*>\r\n<!ELEMENT UL     (LI)*>\r\n<!ELEMENT LI     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT EM     (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT STRONG (#PCDATA | EM | STRONG | A)*>\r\n<!ELEMENT A      (#PCDATA | EM | STRONG)*>\r\n<!ATTLIST A\r\n        name    CDATA   #IMPLIED\r\n        href    CDATA   #IMPLIED\r\n        >\r\n"
             }
           }
         }
@@ -6509,19 +6509,19 @@
       "cases": [],
       "entityPaths": {
         "./source/@test/xmlconf/sun/valid": {
-          "dtdtest.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/dtdtest.dtd",
-          "ext01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/ext01.ent",
-          "notation01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/notation01.dtd",
-          "null.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/null.ent",
-          "pe00.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/pe00.dtd",
-          "pe01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/pe01.dtd",
-          "pe01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/pe01.ent",
-          "sa.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/valid/sa.dtd"
+          "dtdtest.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!ELEMENT root ANY>\n\n<!ELEMENT e EMPTY>\n\n<!ELEMENT once (e)>\n<!ELEMENT twice (e,e)>\n\n<!ENTITY % once-or-twice-a \"(e,(e)?)\">\n<!ENTITY % once-or-twice-b \"((e),e?)\">\n<!ENTITY % once-or-twice-c \"((e),(e)?)\">\n<!ENTITY % once-or-twice-d \"(((e)),e?)\">\n<!ENTITY % once-or-twice-e \"(e,(((e)))?)\">\n\n<!-- disallowed by spec; a document error, parser needn't report -->\n<!-- (e?,e) -->\n\n<!ELEMENT once-or-twice-a %once-or-twice-a;>\n<!ELEMENT once-or-twice-b %once-or-twice-b;>\n<!ELEMENT once-or-twice-c %once-or-twice-c;>\n<!ELEMENT once-or-twice-d %once-or-twice-d;>\n<!ELEMENT once-or-twice-e %once-or-twice-e;>\n\n<!-- disallowed by spec; a document error, parser needn't report -->\n<!--\n    <!ELEMENT once-or-twice-X (Xonce;|Xtwice)>\n\t... above, 'X' should be a percent sign but this comment\n\tis being nice to those parsers that try to parse comments\n\t(they shouldn't)\n-->\n\n<!ENTITY % once-or-more-a \"(e+)\">\n<!ENTITY % once-or-more-b \"(e,e*)\">\n<!ENTITY % once-or-more-c \"((e)+)\">\n<!ENTITY % once-or-more-d \"((e),e*)\">\n<!ENTITY % once-or-more-e \"(e,(e)*)\">\n\n<!ELEMENT once-or-more-a  %once-or-more-a;>\n<!ELEMENT once-or-more-b  %once-or-more-b;>\n<!ELEMENT once-or-more-c  %once-or-more-c;>\n<!ELEMENT once-or-more-d  %once-or-more-d;>\n<!ELEMENT once-or-more-e  %once-or-more-e;>\n",
+          "ext01.ent": "<?xml encoding=\"UTF-8\"?>\n<!-- this is really ascii ... ;- -->\n<foo/>\n\n<bar/>\n\n<is> \"dumber than a bag full of hammers\" </is>\n",
+          "notation01.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!NOTATION GIF PUBLIC\n    \"+//ISBN 0-7923-9432-1::Graphic Notation//NOTATION\n     CompuServe Graphic Interchange Format//EN\">\n\n<!ELEMENT test (#PCDATA) >\n\n",
+          "null.ent": "",
+          "pe00.dtd": "<!ELEMENT root (#PCDATA)>\n<!-- Example from XML spec 1.0 section 4.5 -->\n<!ENTITY % pub \"&#xc9;ditions Gallimard\">\n<!ENTITY rights \"All rights reserved\">\n<!ENTITY book \"La Peste: Albert Camus,\n&#xa9; 1947 %pub;. &rights;\">\n",
+          "pe01.dtd": "<!ENTITY % bad-pe SYSTEM \"pe01.ent\">\n<!ELEMENT root EMPTY>\n<!ATTLIST root\n    something\tCDATA\t\t\t\"%not-pe;\"\n    evil\t(doctor | scott)\t\"doctor\"\n    >\n",
+          "pe01.ent": "This is not a legal parameter entity, because\nit does not match the \"markupdecl\" production.\n",
+          "sa.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n    <!ELEMENT root (child|attributes)*>\n    <!ELEMENT child (#PCDATA)>\n    <!ELEMENT attributes EMPTY>\n\n    <!--\n\t2.9 gives validity constraints applying to attributes\n\tin standalone docs:  no external defaults or decls\n\tcausing normalization.\n\n\t3.3.3 describes the normalization rules\n    -->\n\n    <!ATTLIST attributes\n\ttoken\t\t(a|b|c)\t\t\"a\"\n\tnotation\t(nonce|foo|bar)\t#IMPLIED\n\tnmtoken\t\tNMTOKEN\t\t#IMPLIED\n\tnmtokens\tNMTOKENS\t#IMPLIED\n\tid\t\tID\t\t#IMPLIED\n\tidref\t\tIDREF\t\t#IMPLIED\n\tidrefs\t\tIDREFS\t\t#IMPLIED\n\tentity\t\tENTITY\t\t#IMPLIED\n\tentities\tENTITIES\t#IMPLIED\n\tcdata\t\tCDATA\t\t#IMPLIED\n\t>\n    \n    <!-- this needs normalization when used as an ID -->\n    <!ENTITY internal\t\" internal&number; \">\n    <!ENTITY number\t\"42\">\n\n    <!NOTATION nonce\tSYSTEM \"file:/dev/null\">\n    <!NOTATION foo\tPUBLIC \"-//public id//foo\" \"file:/dev/null\">\n    <!NOTATION bar\tSYSTEM \"file:/dev/tty\">\n\n    <!ENTITY unparsed-1 PUBLIC \"-//some public//ID\" \"file:/dev/console\"\n\t\t\tNDATA nonce>\n    <!ENTITY unparsed-2 SYSTEM \"scheme://host/data\"\n\t\t\tNDATA foo>\n"
         },
         "./source/@test/xmlconf/sun/not-wf": {
-          "cond.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/not-wf/cond.dtd",
-          "decl01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/not-wf/decl01.ent",
-          "dtd07.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/sun/not-wf/dtd07.dtd"
+          "cond.dtd": "<!-- test conditional sections -->\n<!ENTITY % MAYBE \"IGNORE\">\n<![%MAYBE;[ <!ENTITY root EMTPY> ]]>\n",
+          "decl01.ent": "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\n<!-- only documents may have standalone decls -->\n",
+          "dtd07.dtd": "<?xml version=\"1.0\"?>\n<!--\n    \"encoding=...\" is mandatory in text declarations.\n\n    All external entities (parameter, general) have optional text\n    declarations; only the document entity may omit this declaration.\n-->\n"
         }
       }
     },
@@ -10046,28 +10046,28 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/oasis": {
-              "p09fail1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p09fail1.dtd",
-              "p09fail2.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p09fail2.dtd",
-              "p09pass1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p09pass1.dtd",
-              "p28pass4.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p28pass4.dtd",
-              "p28pass5.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p28pass5.dtd",
-              "p30fail1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p30fail1.dtd",
-              "p30pass1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p30pass1.dtd",
-              "p30pass2.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p30pass2.dtd",
-              "p31fail1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p31fail1.dtd",
-              "p31pass1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p31pass1.dtd",
-              "p31pass2.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p31pass2.dtd",
-              "p61fail1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p61fail1.dtd",
-              "p61pass1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p61pass1.dtd",
-              "p62fail1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p62fail1.dtd",
-              "p62fail2.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p62fail2.dtd",
-              "p62pass1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p62pass1.dtd",
-              "p63fail1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p63fail1.dtd",
-              "p63fail2.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p63fail2.dtd",
-              "p63pass1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p63pass1.dtd",
-              "p64fail1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p64fail1.dtd",
-              "p64fail2.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p64fail2.dtd",
-              "p64pass1.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/oasis/p64pass1.dtd"
+              "p09fail1.dtd": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % ent1 \"asdf%\">\r\n",
+              "p09fail2.dtd": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % ent1 \"asdf&\">\r\n",
+              "p09pass1.dtd": "<!ELEMENT doc EMPTY>\r\n<!ENTITY % ent1 \"\">\r\n<!ENTITY ent2 \"text2\">\r\n<!ENTITY % ent3 \"<!-- <!DOCTYPE <!ELEMENT <? '''&#34;&ent2; %ent1;\">\r\n<!ENTITY % ent4 '\"\"&#x27;&#39;\"'>\r\n",
+              "p28pass4.dtd": "<!ELEMENT doc EMPTY>\r\n",
+              "p28pass5.dtd": "%rootdecl;\r\n\r\n",
+              "p30fail1.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<!ELEMENT doc EMPTY>\r\n",
+              "p30pass1.dtd": "<!ELEMENT doc EMPTY>\r\n\r\n\r\n",
+              "p30pass2.dtd": "<?xml encoding=\"UTF-8\"?>\r\n<!ELEMENT doc EMPTY>\r\n",
+              "p31fail1.dtd": "<!DOCTYPE doc\r\n[\r\n<!ELEMENT doc EMPTY>\r\n]>\r\n",
+              "p31pass1.dtd": "",
+              "p31pass2.dtd": "<![INCLUDE[\r\n<!ENTITY % rootel \"<!ELEMENT doc EMPTY>\">\r\n]]>\r\n\r\n%rootel;\r\n\r\n<!ATTLIST doc att CDATA #IMPLIED>\r\n\r\n<![IGNORE[\r\n<!ELEMENT doc (a)>\r\n]]>",
+              "p61fail1.dtd": "<!ELEMENT doc EMPTY>\r\n<![TEMP[\r\n<!ATTLIST doc att CDATA #IMPLIED>\r\n]]>\r\n",
+              "p61pass1.dtd": "<![INCLUDE[<![INCLUDE[\r\n<![IGNORE[ ignored ]]>\r\n<!ELEMENT doc EMPTY>\r\n]]>]]>\r\n<![IGNORE[ ignored ]]>\r\n<![IGNORE[ <!ELEMENT doc ignored ]]>\r\n",
+              "p62fail1.dtd": "<![include[\r\n<!ELEMENT doc EMPTY>\r\n]]>\r\n",
+              "p62fail2.dtd": "<![INCLUDE[\r\n<!ELEMENT doc EMPTY>\r\n] ]>\r\n",
+              "p62pass1.dtd": "<![INCLUDE[\r\n<![\r\nINCLUDE\r\n[\r\n<!ELEMENT doc EMPTY>\r\n<![IGNORE[asdfasdf]]>\r\n]]>]]>\r\n<![INCLUDE[]]>\r\n<![INCLUDE[\r\n]]>\r\n<![INCLUDE[ ]]>\r\n\r\n",
+              "p63fail1.dtd": "<!ELEMENT doc EMPTY>\r\n<![ignore[]]>\r\n",
+              "p63fail2.dtd": "<!ELEMENT doc EMPTY>\r\n<![IGNORE[<![]]>\r\n",
+              "p63pass1.dtd": "<!ELEMENT doc EMPTY>\r\n<![IGNORE[\r\n<![INCLUDE[\r\n<!ELEMENT doc\r\n]]>]]>\r\n<![\r\nIGNORE\r\n[\r\n]]>\r\n<![IGNORE[]]>\r\n<![IGNORE[ ]]>\r\n<![IGNORE[\r\n]]>",
+              "p64fail1.dtd": "<!ELEMENT doc EMPTY>\r\n<![IGNORE[ ends must balance ]]>]]>",
+              "p64fail2.dtd": "<!ELEMENT doc EMPTY>\r\n<![IGNORE[ <![ starts must balance ]]>\r\n",
+              "p64pass1.dtd": "<!ELEMENT doc EMPTY>\r\n<![IGNORE[\r\nEverything is ignored within an ignored section, except the\r\nsub-section delimiters '<![' and ']]>'.  These must be balanced,\r\nbut it is no section keyword is required:\r\n<![]]>\r\n<![DUNNO[ ]]>\r\n<![INCLUDE[\r\nasdfasdfasdf\r\n<!OK\r\n]]>\r\n] ]> ]] > ]]>\r\n<![IGNORE[ < ![ <! [ <![]]>]]>\r\n"
             }
           }
         }
@@ -10157,9 +10157,9 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/invalid/P32": {
-                  "ibm32i01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P32/ibm32i01.dtd",
-                  "ibm32i03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P32/ibm32i03.dtd",
-                  "ibm32i04.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P32/ibm32i04.dtd"
+                  "ibm32i01.dtd": "<!ATTLIST animal color CDATA #FIXED \"yellow\">",
+                  "ibm32i03.dtd": "<!ATTLIST animal class NMTOKEN #IMPLIED>",
+                  "ibm32i04.dtd": "<!ELEMENT animal (a,b,c)>\r\n<!ELEMENT a ANY>\r\n<!ELEMENT b EMPTY>\r\n<!ELEMENT c EMPTY>"
                 }
               }
             },
@@ -10307,7 +10307,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/invalid/P49": {
-                  "ibm49i01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P49/ibm49i01.dtd"
+                  "ibm49i01.dtd": "<!ELEMENT a EMPTY>\r\n<!ELEMENT b (#PCDATA|c)* >\r\n<!ELEMENT c ANY>\r\n\r\n<!--* open and close parenthesis are in different PE replace Texts *-->\r\n<!ENTITY % choice1 \"(a|b\">\r\n<!ENTITY % choice2 \"|c)\">\r\n<!ELEMENT child1 %choice1;%choice2; >\r\n\r\n\r\n\r\n"
                 }
               }
             },
@@ -10333,7 +10333,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/invalid/P50": {
-                  "ibm50i01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P50/ibm50i01.dtd"
+                  "ibm50i01.dtd": "<!ELEMENT a EMPTY>\r\n<!ELEMENT b (#PCDATA|c)* >\r\n<!ELEMENT c ANY>\r\n\r\n<!--* PE replace Text has no closing parentheses *-->\r\n<!ENTITY % choice1 \"(a,b,c\">\r\n<!ELEMENT child1 (%choice1;)|c) >\r\n\r\n\r\n\r\n"
                 }
               }
             },
@@ -10373,8 +10373,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/invalid/P51": {
-                  "ibm51i01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P51/ibm51i01.dtd",
-                  "ibm51i03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P51/ibm51i03.dtd"
+                  "ibm51i01.dtd": "<!ELEMENT a (#PCDATA)* >\r\n<!ELEMENT b (#PCDATA) >\r\n<!ELEMENT c ( #PCDATA)*>\r\n\r\n<!ELEMENT d (#PCDATA|c)* >\r\n<!--* PEs are not properly nested *-->\r\n<!--* this one miss closing parenthesis *-->\r\n<!ENTITY % mixed1 \"(#PCDATA|\">\r\n<!ENTITY % mixed2 \"c|b|a)*\">  \r\n<!ELEMENT e %mixed1;%mixed2; >\r\n<!ELEMENT f (#PCDATA| c)* >\r\n<!ELEMENT g ( #PCDATA) >\r\n<!ELEMENT h (#PCDATA )>\r\n\r\n\r\n\r\n",
+                  "ibm51i03.dtd": "<?xml version=\"1.0\"?>\r\n\r\n\r\n\r\n\r\n"
                 }
               }
             },
@@ -10810,10 +10810,10 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/invalid/P68": {
-                  "ibm68i01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P68/ibm68i01.dtd",
-                  "ibm68i02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P68/ibm68i02.dtd",
-                  "ibm68i03.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P68/ibm68i03.ent",
-                  "ibm68i04.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P68/ibm68i04.ent"
+                  "ibm68i01.dtd": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge2;\">\r\n<!--* GE reference therebefore doesn't match declaration *-->\r\n",
+                  "ibm68i02.dtd": "<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n<!--* GE reference in attr default before declaration *-->\r\n<!ENTITY ge1 \"abcdef\">",
+                  "ibm68i03.ent": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge2;\">\r\n<!--* GE reference in above doesn't match declaration *-->\r\n",
+                  "ibm68i04.ent": "<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n<!ENTITY ge1 \"abcdef\">\r\n<!--* GE reference in attr default before declaration *-->\r\n"
                 }
               }
             },
@@ -10881,10 +10881,10 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/invalid/P69": {
-                  "ibm69i01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P69/ibm69i01.dtd",
-                  "ibm69i02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P69/ibm69i02.dtd",
-                  "ibm69i03.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P69/ibm69i03.ent",
-                  "ibm69i04.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/invalid/P69/ibm69i04.ent"
+                  "ibm69i01.dtd": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n<!ENTITY % pe1 \"<!ATTLIST a attr2 CDATA #IMPLIED>\">\r\n%pe2;\r\n<!--* PE reference therebefore doesn't match declaration *-->\r\n",
+                  "ibm69i02.dtd": "<!ELEMENT a EMPTY>\r\n<!ENTITY ge1 \"abcdef\">\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n%pe1;\r\n<!--* PE reference in attr default before declaration *-->\r\n<!ENTITY % pe1 \"<!ATTLIST a attr2 CDATA #IMPLIED>\">\r\n",
+                  "ibm69i03.ent": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA  \"&ge1;\">\r\n<!ENTITY % pe2 \"<!ATTLIST a attr2 CDATA #IMPLIED>\">\r\n%pe3;\r\n<!--* PE reference in above doesn't match declaration *-->\r\n\r\n",
+                  "ibm69i04.ent": "<!ELEMENT a EMPTY>\r\n<!ENTITY ge1 \"abcdef\">\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n%pe2;\r\n<!--* PE reference in attr default before declaration *-->\r\n<!ENTITY % pe2 \"<!ATTLIST a attr2 CDATA #IMPLIED>\">\r\n\r\n\r\n"
                 }
               }
             },
@@ -11878,7 +11878,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P13": {
-                  "student.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P13/student.dtd"
+                  "student.dtd": "<?xml encoding=\"utf-8\"?>\r\n<!-- student.dtd -->\r\n<!ELEMENT student (#PCDATA)> \r\n"
                 }
               }
             },
@@ -12596,7 +12596,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P28": {
-                  "ibm28n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P28/ibm28n01.dtd"
+                  "ibm28n01.dtd": "<!ELEMENT animal EMPTY>"
                 }
               }
             },
@@ -12619,7 +12619,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/p28a": {
-                  "ibm28an01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/p28a/ibm28an01.dtd"
+                  "ibm28an01.dtd": "   <!ENTITY % make_leopard_element \"<!ELEMENT leopard \">\r\n   %make_leopard_element;ANY>\r\n   <!-- This is against WFC:PE Between Declatations in \r\n    production [28a]. In this file, Only one of the first character\r\n    and the last character of a markup declaration is contained \r\n    in the same parameter-entity text replacement.-->\r\n"
                 }
               }
             },
@@ -12708,7 +12708,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P29": {
-                  "cat.txt": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P29/cat.txt"
+                  "cat.txt": "This is a text book about cat."
                 }
               }
             },
@@ -12731,7 +12731,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P30": {
-                  "ibm30n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P30/ibm30n01.dtd"
+                  "ibm30n01.dtd": "<!ELEMENT animal EMPTY>\r\n<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n<!-- Wrong order extSubsetDecl TextDecl in the external DTD -->"
                 }
               }
             },
@@ -12754,7 +12754,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P31": {
-                  "ibm31n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P31/ibm31n01.dtd"
+                  "ibm31n01.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n<!ELEMENT animal EMPTY>\r\n<!ENTITY generalE \"A general entity\">\r\n&generalE;\r\n<!-- Illegal extSubsetDecl in the external DTD -->"
                 }
               }
             },
@@ -12865,8 +12865,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P32": {
-                  "ibm32n06.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P32/ibm32n06.dtd",
-                  "ibm32n09.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P32/ibm32n09.dtd"
+                  "ibm32n06.dtd": "<!ELEMENT animal EMPTY>",
+                  "ibm32n09.dtd": "<!ENTITY animal_content \"This is a yellow tiger\">\r\n"
                 }
               }
             },
@@ -13169,9 +13169,9 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P41": {
-                  "ibm41n.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P41/ibm41n.ent",
-                  "ibm41n10.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P41/ibm41n10.ent",
-                  "ibm41n11.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P41/ibm41n11.ent"
+                  "ibm41n.ent": "<?xml verison=\"1.0\"?>\r\nany",
+                  "ibm41n10.ent": "<?xml verison=\"1.0\"?>\r\nany",
+                  "ibm41n11.ent": "<?xml verison=\"1.0\"?>\r\nany"
                 }
               }
             },
@@ -14545,7 +14545,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P61": {
-                  "ibm61n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P61/ibm61n01.dtd"
+                  "ibm61n01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 61-->\r\n<![NOTINCLUDE[\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n"
                 }
               }
             },
@@ -14645,14 +14645,14 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P62": {
-                  "ibm62n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n01.dtd",
-                  "ibm62n02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n02.dtd",
-                  "ibm62n03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n03.dtd",
-                  "ibm62n04.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n04.dtd",
-                  "ibm62n05.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n05.dtd",
-                  "ibm62n06.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n06.dtd",
-                  "ibm62n07.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n07.dtd",
-                  "ibm62n08.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P62/ibm62n08.dtd"
+                  "ibm62n01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![ include [\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--Negative test with pattern1 of P62-->\r\n<!--include(Case sensitive)-->",
+                  "ibm62n02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![[INCLUDE[\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--Negative test with pattern2 of P62-->\r\n<!--An extra '[' is added-->",
+                  "ibm62n03.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<?[INCLUDE[\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--Negative test with pattern3 of P62-->\r\n<!--An Wrong character is used to proir to [INCLUDE-->",
+                  "ibm62n04.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![[\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--Negative test with pattern4 of P62-->\r\n<!--Missing the required field INCLUDE-->",
+                  "ibm62n05.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![INCLUDE\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--Negative test with pattern5 of P62-->\r\n<!--Missing the required field '[' after INCLUDE-->",
+                  "ibm62n06.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n[INCLUDE\r\n]]>\r\n<!--Negative test with pattern6 of P62-->\r\n<!--Wrong Ordering. External subset declaration prior to the keyword INCLUDE-->\r\n",
+                  "ibm62n07.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![ INCLUDE [\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n\r\n<!--Negative test with pattern7 of P62-->\r\n<!--Missing closing sequence.-->",
+                  "ibm62n08.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!ELEMENT animal ANY>\r\n<!ELEMENT tiger ANY>\r\n<!-- DTD for Production 62-->\r\n<![INCLUDE[\r\n]>\r\n\r\n<!--Negtive test with pattern8 of P62-->\r\n<!--Missing one \"]\" in closing sequence.-->"
                 }
               }
             },
@@ -14741,13 +14741,13 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P63": {
-                  "ibm63n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P63/ibm63n01.dtd",
-                  "ibm63n02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P63/ibm63n02.dtd",
-                  "ibm63n03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P63/ibm63n03.dtd",
-                  "ibm63n04.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P63/ibm63n04.dtd",
-                  "ibm63n05.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P63/ibm63n05.dtd",
-                  "ibm63n06.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P63/ibm63n06.dtd",
-                  "ibm63n07.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P63/ibm63n07.dtd"
+                  "ibm63n01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![ignore[\r\n]]>\r\n<!--Negative test with pattern1 of P63-->\r\n<!--Case sensitive. ignore is used instead of IGNORE -->",
+                  "ibm63n02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![[IGNORE[\r\n<!ELEMENT animal EMPTY>\r\n<!ELEMENT tiger EMPTY>\r\n]]>\r\n<!--Negative test with pattern2 of P63-->\r\n<!--Extra '[' is used before IGNORE. -->",
+                  "ibm63n03.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<?[IGNORE[\r\n]]>\r\n<!--Negative test with pattern3 of P63-->\r\n<!--Wrong Character '?' instead of '!' -->",
+                  "ibm63n04.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![[\r\n]]>\r\n<!--Negative test with pattern4 of P63-->\r\n<!--Missing required field. THe keyword IGNORE is missing -->",
+                  "ibm63n05.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![IGNORE\r\n]]>\r\n<!--Negative test with pattern5 of P63-->\r\n<!--Missing required field( '[' is missing after IGNORE ). -->",
+                  "ibm63n06.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n<!ELEMENT tiger EMPTY>\r\n[IGNORE\r\n]]>\r\n<!--Negative test with pattern6 of P63-->\r\n<!--Wrong Ordering. Ignore sect contents preceding IGNORE. -->",
+                  "ibm63n07.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![IGNORE[\r\n<!ELEMENT animal EMPTY>\r\n<!ELEMENT tiger EMPTY>\r\n\r\n<!--Negative test with pattern5 of P63-->\r\n<!--Missing closing sequence -->"
                 }
               }
             },
@@ -14792,9 +14792,9 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P64": {
-                  "ibm64n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P64/ibm64n01.dtd",
-                  "ibm64n02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P64/ibm64n02.dtd",
-                  "ibm64n03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P64/ibm64n03.dtd"
+                  "ibm64n01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 64-->\r\n<![IGNORE[\r\nstart\r\n<?[\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\nend\r\n]]>\r\n<!--Negative test. Pattern2(Wrong character '?' instead of '[')-->",
+                  "ibm64n02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 64-->\r\n<![IGNORE[\r\nstart\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n\r\nend\r\n]]>\r\n<!--Negative test. Missing closing sequence-->",
+                  "ibm64n03.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 64-->\r\n<![IGNORE[\r\nstart\r\n\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\nend\r\n]]>\r\n<!--Negative test. Missing opening sequence-->"
                 }
               }
             },
@@ -14828,8 +14828,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P65": {
-                  "ibm65n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P65/ibm65n01.dtd",
-                  "ibm65n02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P65/ibm65n02.dtd"
+                  "ibm65n01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 65-->\r\n<![IGNORE[\r\nEverything is ignored within an ignored section, except the\r\nsub-section delimiters .  These must be balanced\r\n]]> this is illegal\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\nhello\r\n]]>\r\n<!--Negative test. Pattern1. Illegal sequence of ']]>'-->",
+                  "ibm65n02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 65-->\r\n<![IGNORE[\r\nEverything is ignored within an ignored section, except the\r\nsub-section delimiters .  These must be balanced\r\n<![\r\nthis is again illegal because it is partial markup\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\nhello\r\n]]>\r\n<!--Negative test. Pattern1. Illegal sequence of '<!['-->"
                 }
               }
             },
@@ -15124,7 +15124,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P68": {
-                  "ibm68n06.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P68/ibm68n06.dtd"
+                  "ibm68n06.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!ENTITY aaa \"aString\">\r\n"
                 }
               }
             },
@@ -15627,7 +15627,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P75": {
-                  "empty.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P75/empty.dtd"
+                  "empty.dtd": "<?xml encoding=\"UTF-8\"?> "
                 }
               }
             },
@@ -15768,10 +15768,10 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P77": {
-                  "ibm77n01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P77/ibm77n01.ent",
-                  "ibm77n02.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P77/ibm77n02.ent",
-                  "ibm77n03.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P77/ibm77n03.ent",
-                  "ibm77n04.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P77/ibm77n04.ent"
+                  "ibm77n01.ent": "<?xml encoding=\"UTF8\" version=\"1.0\" ?>\r\n<!--* Wrong ordering in above TextDecl *-->\r\nANY CONTENT\r\n",
+                  "ibm77n02.ent": "<?XML encoding=\"UTF8\"?>\r\n<!--* Wrong Keyword in above TextDecl *-->\r\nANY CONTENT\r\n",
+                  "ibm77n03.ent": "<?xml encoding=\"UTF-8\">\r\n<!--* Wrong closing sequence in above TextDecl *-->\r\n",
+                  "ibm77n04.ent": "<?xml encoding=\"UTF-8\"\r\n<!--* missing closing sequence in above TextDecl *-->\r\n\r\n"
                 }
               }
             },
@@ -15805,8 +15805,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P78": {
-                  "ibm78n01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P78/ibm78n01.ent",
-                  "ibm78n02.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P78/ibm78n02.ent"
+                  "ibm78n01.ent": "\r\n<!--* Wrong ordering in above TextDecl *-->\r\nANY CONTENT\r\n<?xml  version=\"1.0\" encoding=\"UTF8\"?>",
+                  "ibm78n02.ent": "\r\n<?xml  version=\"1.0\" encoding=\"UTF8\"?>\r\n<!--* Extra space before TextDecl *-->\r\nANY CONTENT\r\n"
                 }
               }
             },
@@ -15840,8 +15840,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/not-wf/P79": {
-                  "ibm79n01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P79/ibm79n01.ent",
-                  "ibm79n02.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/not-wf/P79/ibm79n02.ent"
+                  "ibm79n01.ent": "\r\n<!--* TextDecl in wrong position *-->\r\n<?xml encoding=\"UTF8\"?>",
+                  "ibm79n02.ent": "\r\n<?xml version=\"1.0\" encoding=\"UTF8\"?>\r\n<!--* Extra white space before TextDecl *-->\r\n\r\n"
                 }
               }
             },
@@ -20132,8 +20132,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P09": {
-                  "ibm09v03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P09/ibm09v03.dtd",
-                  "student.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P09/student.dtd"
+                  "ibm09v03.dtd": "<!ELEMENT student (#PCDATA)> \r\n<!-- testing entity value with PEReference -->\r\n \t<!ENTITY % FullName \"first , last\">\r\n\t<!ENTITY Name \"%FullName;\">",
+                  "student.dtd": "<?xml encoding=\"utf-8\"?>\r\n<!-- student.dtd -->\r\n<!ENTITY combine \"My Name is %FullName; and my age is &Age; Again %FullName; %FullName; and my status is \r\n\t\t&Status; &Status; and %FullName; &Age; %FullName; &Status; That is all.\">\r\n"
                 }
               }
             },
@@ -20321,7 +20321,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P11": {
-                  "student.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P11/student.dtd"
+                  "student.dtd": "<?xml encoding=\"utf-8\"?>\r\n<!-- student.dtd -->\r\n<!ELEMENT student (#PCDATA)> \r\n"
                 }
               }
             },
@@ -20389,7 +20389,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P12": {
-                  "student.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P12/student.dtd"
+                  "student.dtd": "<?xml encoding=\"utf-8\"?>\r\n<!-- student.dtd -->\r\n<!ELEMENT student (#PCDATA)> \r\n"
                 }
               }
             },
@@ -20415,7 +20415,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P13": {
-                  "student.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P13/student.dtd"
+                  "student.dtd": "<?xml encoding=\"utf-8\"?>\r\n<!-- student.dtd -->\r\n<!ELEMENT student (#PCDATA)> \r\n"
                 }
               }
             },
@@ -21113,8 +21113,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P28": {
-                  "ibm28v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P28/ibm28v02.dtd",
-                  "ibm28v02.txt": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P28/ibm28v02.txt"
+                  "ibm28v02.dtd": "<!ELEMENT animal (cat|tiger|leopard)+>\r\n",
+                  "ibm28v02.txt": "This is an animal!"
                 }
               }
             },
@@ -21154,7 +21154,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P29": {
-                  "ibm29v01.txt": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P29/ibm29v01.txt"
+                  "ibm29v01.txt": "This animal calss includes tiger, leopard, and cat."
                 }
               }
             },
@@ -21194,8 +21194,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P30": {
-                  "ibm30v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P30/ibm30v01.dtd",
-                  "ibm30v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P30/ibm30v02.dtd"
+                  "ibm30v01.dtd": "<!ELEMENT animal EMPTY>\r\n",
+                  "ibm30v02.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<!ELEMENT animal EMPTY>\r\n"
                 }
               }
             },
@@ -21221,7 +21221,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P31": {
-                  "ibm31v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P31/ibm31v01.dtd"
+                  "ibm31v01.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<![INCLUDE[\r\n<!ENTITY % rootElement \"<!ELEMENT animal ANY>\">\r\n]]>\r\n%rootElement;\r\n\r\n<!-- Following is a makupdecl -->\r\n<!ENTITY % make_tiger_element \"<!ELEMENT tiger EMPTY>\">\r\n%make_tiger_element;\r\n\r\n<![IGNORE[\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\n\r\n\r\n"
                 }
               }
             },
@@ -21289,10 +21289,10 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P32": {
-                  "ibm32v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P32/ibm32v01.dtd",
-                  "ibm32v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P32/ibm32v02.dtd",
-                  "ibm32v03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P32/ibm32v03.dtd",
-                  "ibm32v04.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P32/ibm32v04.dtd"
+                  "ibm32v01.dtd": "<!ELEMENT animal EMPTY>\r\n<!ATTLIST animal color CDATA #FIXED \"yellow\">",
+                  "ibm32v02.dtd": "<!ELEMENT animal (#PCDATA)>\r\n<!ENTITY animal_content \"This is a yellow tiger\">",
+                  "ibm32v03.dtd": "<!ELEMENT animal EMPTY>\r\n<!ATTLIST animal class CDATA #FIXED \"&#41;\">",
+                  "ibm32v04.dtd": "<!ELEMENT animal (#PCDATA|a)* >\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST animal xml:space (default|preserve) 'preserve'>"
                 }
               }
             },
@@ -21626,7 +21626,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P49": {
-                  "ibm49v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P49/ibm49v01.dtd"
+                  "ibm49v01.dtd": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<!ELEMENT a EMPTY>\r\n<!ELEMENT b (#PCDATA|c)* >\r\n<!ELEMENT c ANY>\r\n\r\n<!--* PE replace Text have both parentheses *-->\r\n<!ENTITY % choice1 \"(a|b|c)\">\r\n<!ELEMENT child1 (a ,%choice1;,c )>\r\n<!--* Another legal PE replace Text *--> \r\n<!ENTITY % choice2 \"a|b\">\r\n<!ELEMENT child2 (%choice2;|c) >\r\n\r\n\r\n"
                 }
               }
             },
@@ -21652,7 +21652,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P50": {
-                  "ibm50v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P50/ibm50v01.dtd"
+                  "ibm50v01.dtd": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<!ELEMENT a EMPTY>\r\n<!ELEMENT b (#PCDATA|c)* >\r\n<!ELEMENT c ANY>\r\n\r\n<!--* PE replace Text have both parentheses *-->\r\n<!ENTITY % seq1 \"(a,b,c)\">\r\n<!ELEMENT child1 %seq1; >\r\n<!--* Another legal PE replace Text *--> \r\n<!ENTITY % seq2 \"a,b\">\r\n<!ELEMENT child2 (%seq2;,c) >\r\n\r\n\r\n"
                 }
               }
             },
@@ -21692,7 +21692,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P51": {
-                  "ibm51v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P51/ibm51v02.dtd"
+                  "ibm51v02.dtd": "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n  <!--* PEs are properly nested *-->\r\n  <!ELEMENT a (#PCDATA)* >\r\n  <!ELEMENT b (#PCDATA) >\r\n  <!ELEMENT c ( #PCDATA)*>\r\n\r\n  <!ENTITY % mixed0 \"(#PCDATA|c)*\" >\r\n  <!ENTITY % mixed1 \"%mixed0;\">\r\n  <!ELEMENT d %mixed1; >\r\n  \r\n  <!ENTITY % mixed1.5 \"c| b\" > \r\n  <!ELEMENT e (#PCDATA| %mixed1.5; |a)* >\r\n\r\n  <!ELEMENT f (#PCDATA| c)* >\r\n  <!ELEMENT g ( #PCDATA) >\r\n  <!ELEMENT h (#PCDATA )>\r\n\r\n  <!ENTITY % mixed2 \"( #PCDATA )\">\r\n  <!ELEMENT i %mixed2; >\r\n\r\n"
                 }
               }
             },
@@ -21765,8 +21765,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P54": {
-                  "ibmlogo.gif": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P54/ibmlogo.gif",
-                  "xmltech.gif": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P54/xmltech.gif"
+                  "ibmlogo.gif": "GIF87af\u00001\u0000�\u0000\u0000��������������̙�������̙��f��f��ff�ff�fff3f�3f�3f�3ff33�33f\u00003�\u00003f\u000033\u00003\u0000\u0000\u0000�\u0000\u0000f\u0000\u00003\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000,\u0000\u0000\u0000\u0000f\u00001\u0000\u0000\b�\u00007\b\u001cH����\b\u0013*\\Ȱ�Ç\u0010#J�H��ŋ\u00183j�ȱ�Ǐ C�\u001cI��ɓ(S�\\�\u0012���0c�\u001c(��M\u0007\u0006o�<�\u0013�@\r\u0019{�� Tg��\b�\u0002mɴ�S�E_Ҍzs�УQ9R�JU&W�\u0004�.}J��Y�5\u0017��:4,X�=I�M8�+Μo���˷oź<���k\u0014�H���&\u0015lӯ�ǐ\u0013KU(��׸��z����L̛#�\u001em6�۶\u00023�m�:tH�v%\u000f>�\u0013nhؤs�\u0006��5�ڶY\u0007�\u001d�4���\u0019�\u001d�xj��;��9;���w�7D�{�r�� \n�N�|D�e�\u0005�|=t�Z�ßO�������߯? \u0000;",
+                  "xmltech.gif": "GIF89al\u00022\u0000�\u0000\u0000������������̙��ff�\u0000\u0000����ff�33�\u0000\u0000ffff33f\u0000\u00003f�3f�33�33�33f3\u0000\u0000\u00003�\u00003f\u0000\u0000\u0000����33333���\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000!�\u0004\u0001\u0000\u0000\u0017\u0000,\u0000\u0000\u0000\u0000l\u00022\u0000\u0000\u0005��%�di�h��l�0:�S��v�(ym��O��\u0015w�cq�k.�Ч3jPT���uk�z��xL.���z�n���|N�g��\u001e-����'\u000b����)8B;UR9_O�Zw�]���TE��Q�u�����������g�����0\u0013\u00164�>9@6\u0013GD�NHSHL���F��KX�Z\\��������hwPB����.���53:5��@��֗[VX��������������������\u0010�'�.[\u0005{)\u0001�Dɵ`\f�%d�(٣J��i�ȱ��3� �ك\u0002���(�S��`�ʗ/!T(a\u0012&J\n'(�\\\u0019�\u001b�W��\u001d��\u0005H&K\u00173\u0016��.^H)I?J�J��U9(\\�L��Bͭ0q�к���\b`\u001dt\u0005\u0018��\rrD\u0014\u0010<�\u000b�B���L�� �r�ڵ�J����i�N|\u001b���W>\u000b\u0019�50�:�Y~<5�n����$vBL���Ӥ\u001e�^�V��D\u0005�\n)F{/1_���\u0005;\"���P\u000b\u001fNܞ� �R|\u0005˒lژ\"��\u0014;BgZ�/\"\u000b2�x.\u0014\u0003�u\t��l0��M���\r�����Qg}��+}�k���\u001e��Z�%��\u0016.�\fq\u0003.�$�8�^xզ�nL��\ty�\u0005\u0016�F歑�gdl�\u0006\u0006\u0018���;\u0005��\u0000\u0006\u0005\u0010�A4'\u0012\u0010@��l6Q6\u0000�\b�v\u000b�ј\bo\u0011x�fX\u0018��z\u0018uHa��%8څ��\u0018�\u0000\u0000D\t@\u0000\u0001\u0010P��P>\u0019@\u0015\u0018h)�b(\u0000e�\u0003P�e�R��\"\u001bE�)�pF\t&\u001d\n<\u0019���(P@\u0000R�x���ڈ\u0003A�84N.�\tI[<����]�^�Tg\"2�\f\u0013\tHy�\u0011\b\u0000�\u001b\u000f\b�\u0019�\u0002SFyM\u0003d\"�f\u0003|\u0002@\u0000\u00029H�C�Sz\u0002ĝ��p@����\u001c�,���t4�D�\b[Qg�~�\b�k�͠ Q\r�e\u0016Qx��!\t1G�\u0015\u0004gFzh�>GL0�\u0000�\u0015\u0001@\u0002�1\u0011�%:��\u0001\u0003���\rr\u001e�!\u000fP�[����i�\\�橫��� l\n����\u0003&l�\u001dZ;�'h��\b\bWP���m_P9X\fl\u000b�F2�\u0013\u00169n�\r0 e�E\u0010@�2�$0����;\u0000��:2A�o�\u0010\u0000\u0002��l*\u0013\u0004\f0��x��\u0000���e2��Vm��/� \u000bc��V�fV�\u0007\u001a�\"\u0002Ǩ9\b}�\u0014\u0015+KU�\u00048��@�\t��@\u0000\u0019Hy\u001e�\r�)��s�!t�E\u0019\r@Q\r��\t��Bs��\t[-9P��2�8$'��C��b2/��F�2g�f����FY@\u0011Uv\u0018��\u0005S��>�\t\u0007��2\u000e�\"\u00184=�۱7�\u0003\u0001\b׳ۯ$\u0005�Ұ�A\u001c�V]I\u0007�\u001fX���>܋\f��~z�&\u0016�n:oCV���\u001f����I�[D\u0002\u0001�-gQu�jo�9�\u0011�y�����c��ƫȭ`a�\u000fF\u0010��T@%�B��X#\u0010�u\r\b��`o&� �0HBu�KC��\b\u0011��3�B��R�*\u0000�)LwkY��\u0007\u0000\u001b�n\u0013FSZ�2\u0004�\u0002�h)X�R��%*ᩇ\u0004H\u0011�\u00020D\u0003�Hf\u0001P@��4�&\u0016�\u0000e��\u000b���+f�I/\\�D\u0011\u0007��\u0013A)D����V�D5j`u�Bގ&'��` \u0004\u0019\u00029��\u0003Hx�A�\b����-̤+d�R�Tx��;��\b1�_�b6��\u0015�\u0012�3Q�&�L͌�:�D\u0001\u00000\u0000v5\u0000~�cܓtQ��\u0011ONe�\u0001��\u00183\u0000\u0010�\b�l��rG�[�qEᓿ���\\B�I\\D�^\u0014F5�����\u000e��\u001fi.m�닄�b�\u0011.j�c+�\u000f\u0015y\n\u001eH\u0012�aP��x�Z��]���\"\u0000�B���3��\u0014\u0013�\u0004�LEq�\u0000(\u0011���\u0004�-�<�A\u00171K)�\u0012\u0004�\u001d�\u0002��I��U�tU�\u0003���v�\f�U��Ԓ���)�>\u0013D�J�ì����'\u0010P\u0013�Ƿ!�\n�;$ �2H@\u0006I7�\"\u001d9;��>uhnQd�\u0012�iIyV!��3ܨ���#�r\u0011���ꐈ�L\u0005t�PB�A;��*����r!N�*��1!Je�j\u0019�@�Mٰ�K��*��\u0012\u0015<l+'x�Zl�R�P�P\"���j�1�l\u0010d��\u000b��f l�p����PI�8`zf��[]�pz?\u001c�ni�JgZaVT\u0017�\u0013��8��\u001a;\u001e,\u0000���_kC4�P\u001e��8��\u001d�(/KΌ�0C�y@�[)��xr�f\u001d�����n�@Oأ\u0017|����t\u001e\u0012��MC��\u0006��R����\u0000�Ȳ�S�[b.)�4צ�o~Q�[:�Z%5}\u0011\u0003\u001b������.�Ru %�\u0017\u0012�`\u001ed\u0015qċoD��QG\u00048\u0000-k0�<\u000bQ\u0001���l���\u0003�5h\u0011({=\u0012��\u001ck�Ǻ\u0018���ڊ�\b6�\u0006�B�-��\b0\u0001�v\b�8�_\u0014s�TU��\u0000 .C\u000f�J\t��\u0012�7\\\n&k��ۖu�s*��K�`\u000e\u0007�W\\�\\�\u0001�K�R8�V=�:�w*�%�&-I_I ����>w��K�\u0000S\u0012� �[3g\u0006ߢ/�$6wy��1��D�Q\u0001�\u000b!QJ��V&\\�lT��+\u0007p�x�.��z��6\t���QmMu\u001f�t�e�bY0\u0007VkG������\n\u001e=OD�p�\"�j��&k\u0019e6���9�(q��J X\u0011<Ё\fTIJ�1G\u000bؠr�pMA\u001a��\u0017{�c#�6�!ĭ�lң��\u0012&�N&�Nn\r���7\\d�l�g:�i�\u0005�,ɴ�p����\u0005o9�d��Z�*@\u000bGXWI�R��\u0016��\u0005 S�=�\u001c�=���Y\u0016#h�9k��k\u0004ڏ�D�e\u0018-½af��I$�{E�پmL脤\u000e�\t4\"���{s7H���NP�\u0001D\u0003�wlk��䆵�\rV���Y��DX��\\�)��?d��\r\t�?�\r\u0014\u001fQ\u0016c��\u001a\\\"k\u0010\u0010Vv1A��o<f�\u0012\u001aC��~��g�C\u0017�+��=�� J<V�v���\u001f�4�7R[X��y\u0011��`�U/\u0018�tM|�q�Ny�lȏ�h����Z�kn\b@Q\u0001��Z��\u000b*ؘ\u0005\u0003��\u001c�6o��C\tv��\u001f�1�����\nr!\u0017r\\\u0002\u0007� �S.���3��w�_���\u0014�\u001b��B�\u00046�z�݁���y\u0017{(�,�(�jз�\t�e1U����\u0013\u001c\u001b�P\u0004?��\u0007�Y�8���M\b��\b��4Q�GVq\"%lD?9�xf@\u0000�\u0006\u0016�s{w�W'�\u001f��\u00003\u0011m6a1\u0010�\u0000&�g�D\u0002>p]z�m�\u0011\u000b�AY\u001b42��Xq�\b�$^ަ$D�\u001e8f}��'�B%+�:n2%���rb&6\u0000zT�&jr&�r�oW�$Hh&\u0016�e��\"\u001c�2^G%%�\u0001h\"'V�'_�.vB&[\u0002�C�S����W/�'EnB%hx7L����\u0019?x�h�}��z\"�=}#v�Ё��<$\u0000S%&\u000b��\u0004A�A� \u000eh#5\u0011\u0011s\u001a'\u001b��\u000eA�-o'^\\���p\u0010��5@\u0012!b\u0013T��\u000b���A�\u0002�2\u0017[�$3�Ɗ\t�\"�R\u000e���\u00075}�q\t�#3���\u0004�H\u0000��S6�\u0000/H@\t�)<�\u0006I\u0003��Ё H�:�X�V j�10�9�8\u001b-�\b\u001a�\u0003�r\r\u0005\"�\\S �#�7F6��oK2\f�1\u001a�3!踉�0\u001e��6|�\t��\u000e1���ҏ�Xh��V�t*Ħ3J�q��\u0000�B{��\u0012\u0012x\u0012ԑ{'�\u001f&1A�G\u0002�(�#�5��\u000bp1S�&\u0017�\u0012��4\u001e�A���$��\u0010�!�4�\u001eF�����3)e�f�\u001c�\u0018��^=�� q^\u001cRO���QBq!�QV�.:IyP��Ѓg�\u0003\u0001\u0012@\u0002\u0014X\u001f\u001aig�ag��1��#ߘ\u0007ٓv\u001c�b�(c��=ޤ�\u0007q�ӧh�B�r�wi\u0005b��7�u^��\u00036���q�\u0007r�P|\u001c�G�x\u0004� \u001e��|\t�<T>�r2�H\u001e���sy�sif�E\u0019�.r�Ec�t�m\u0002�m�S����f\u0017n*�\r?�mw�9�xbhy�=e!�����2��\b@F\tU�\\G�\u0007A�\u0000�\"%��\u001a8bAfm�\"B��=�Q�N�-�'T\u0016�b��h�ה����\"\u0017�%JO�\u0005ȵ&p�.�\u0014%�\u0019(�abs�G���\f�m�\u0019\u0017/F���)�\u001a3 -f>��r�\t�\u0004\u001a\u001f��EU24�GxI\u0003lz�\u0017\f�\u0000I���\u0018�鈆&�3uS��<� F@!#�2�a^\u0015� �៥���\u0005����-ҷ�i�\u0000\b@/�\u0002'\u0015*(ڶ\u0007��b?�\u0017B�b�\u0016�\u001d�A,�#\u0018Tb� ��E�%�-�w.\n�V�6,�z�b\t6z�\u0013z��t3\u00070�dZ�fz�h��j��lڦn��p\u001a�r:�tZ�vz�x��z��|ڧ~���\u001a��:�kZ/�ʄ�*�����J\u0000����\u001a��:��Z��z����7����'\u0002��d©��:��Z��z��������ڪ����\u001a��:��Z��z��������ګ�\n�\u0000��&a���z�ƚ�Ⱥ��ڬ����\u001a��:�\u0002\u0010\u0000�z�֚�غ��ڭ����\u001aV�:��Z�����j��z��ڮ����\u001a��:��Z��z��������گ����\u001a��:�\u0004[�\u0006{�\b��\n��\f۰\u000e��\u0010\u001b�\u0012;�\u0014[�\u0016{�\u0018��\u001a��\u001c�ª�\u001f\u001b�R\"�QB��:�([�){�*۲,��&\u001b�++�.K�0;�8[�9{�:۳<��6\u001b�;+�>K�@;�H[�I{�PJ۴L��F\u001b�K+�NK�P;�X[�Y��\u001d۵^��`\u001b�b;�d[�f{�h��j��l۶n��p\u001b�r;�t[�v{�x��z��|۷~��!\u0000\u0000;\u0000;F89al\u00022\u0000�\u0000\u0000������������̙��ff�\u0000\u0000"
                 }
               }
             },
@@ -22134,8 +22134,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P61": {
-                  "ibm61v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P61/ibm61v01.dtd",
-                  "ibm61v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P61/ibm61v02.dtd"
+                  "ibm61v01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 61-->\r\n<![INCLUDE[\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n",
+                  "ibm61v02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 61-->\r\n<![IGNORE[\r\n<!ELEMENT animal ANY>\r\n]]>"
                 }
               }
             },
@@ -22217,11 +22217,11 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P62": {
-                  "ibm62v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P62/ibm62v01.dtd",
-                  "ibm62v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P62/ibm62v02.dtd",
-                  "ibm62v03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P62/ibm62v03.dtd",
-                  "ibm62v04.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P62/ibm62v04.dtd",
-                  "ibm62v05.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P62/ibm62v05.dtd"
+                  "ibm62v01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![INCLUDE[\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--positive test with pattern1 for P62-->",
+                  "ibm62v02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![ INCLUDE[\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--positive test with pattern2 (space included prior to INCLUDE) for P62-->",
+                  "ibm62v03.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![INCLUDE [\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--positive test with pattern3 (space included after INCLUDE) for P62-->",
+                  "ibm62v04.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![ INCLUDE [\r\n<!ELEMENT tiger EMPTY>\r\n<!ELEMENT animal ANY>\r\n]]>\r\n\r\n<!--positive test with pattern4 (space included before and after INCLUDE) for P62-->",
+                  "ibm62v05.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 62-->\r\n<![INCLUDE[\r\n]]>\r\n\r\n<!--Positive test with pattern5 of P62-->\r\n<!--Missing external subset declaration which is o.k.-->"
                 }
               }
             },
@@ -22303,11 +22303,11 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P63": {
-                  "ibm63v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P63/ibm63v01.dtd",
-                  "ibm63v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P63/ibm63v02.dtd",
-                  "ibm63v03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P63/ibm63v03.dtd",
-                  "ibm63v04.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P63/ibm63v04.dtd",
-                  "ibm63v05.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P63/ibm63v05.dtd"
+                  "ibm63v01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![IGNORE[\r\n]]>\r\n<!--Positive test with pattern1 of P63-->\r\n<!-- Positive test. Test for IGNORE with pattern 1. -->",
+                  "ibm63v02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![ IGNORE[\r\n]]>\r\n<!--Positive test with pattern2 of P63-->\r\n<!-- Positive test. Test for IGNORE with pattern 2. -->",
+                  "ibm63v03.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![IGNORE [\r\n]]>\r\n<!--Positive test with pattern3 of P63-->\r\n<!-- Positive test. Test for IGNORE with pattern 3. -->",
+                  "ibm63v04.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![IGNORE[\r\n<!ELEMENT animal EMPTY>\r\n<!ELEMENT tiger EMPTY>\r\n]]>\r\n<!--Positive test with pattern4 of P63-->\r\n<!-- Positive test. Test for IGNORE with pattern 4. -->",
+                  "ibm63v05.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!-- DTD for Production 63-->\r\n<![ IGNORE [\r\n<!ELEMENT animal EMPTY>\r\n<!ELEMENT tiger EMPTY>\r\n]]>\r\n<!--Positive test with pattern5 of P63-->\r\n<!-- Positive test. Test for IGNORE with pattern 5(spaces extra) -->"
                 }
               }
             },
@@ -22361,9 +22361,9 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P64": {
-                  "ibm64v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P64/ibm64v01.dtd",
-                  "ibm64v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P64/ibm64v02.dtd",
-                  "ibm64v03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P64/ibm64v03.dtd"
+                  "ibm64v01.dtd": "<!--dtd for production 64-->\r\n<!ELEMENT doc EMPTY>\r\n<![IGNORE[\r\nEverything is ignored within an ignored section, except the\r\nsub-section delimiters '<![' and ']]>'.  These must be balanced\r\n<!ok\r\n]]>\r\n<!--positive test. Pattern 1-->\r\n",
+                  "ibm64v02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 64-->\r\n<![IGNORE[\r\nEverything is ignored within an ignored section, except the\r\nsub-section delimiters '<![' and ']]>'.  These must be balanced\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\n]]>\r\n<!--Positive test. Pattern2.-->\r\n",
+                  "ibm64v03.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 64-->\r\n<![IGNORE[\r\nbegin\r\nEverything is ignored within an ignored section, except the\r\nsub-section delimiters '<![' and ']]>'.  These must be balanced\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\nnesting\r\n<![\r\n<!ELEMENT tiger (#PCDATA)>\r\n]]>\r\nnesting again\r\n<![\r\n<!ELEMENT abc ANY>\r\n]]>\r\nend\r\n]]>\r\n<!--Positive test. Pattern3.-->\r\n"
                 }
               }
             },
@@ -22403,8 +22403,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P65": {
-                  "ibm65v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P65/ibm65v01.dtd",
-                  "ibm65v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P65/ibm65v02.dtd"
+                  "ibm65v01.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 65-->\r\n<![IGNORE[\r\n\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\n\r\n]]>\r\n<!--Positive test. Pattern1(Empty string)-->",
+                  "ibm65v02.dtd": "<?xml  version=\"1.0\" encoding='UTF-8'?>\r\n<!--dtd for production 65-->\r\n<![IGNORE[\r\nthis is some stringwithout brackets\r\n<![\r\n<!ELEMENT animal EMPTY>\r\n]]>\r\nthis is another string without brackets\r\n]]>\r\n<!--Positive test. Pattern2-->"
                 }
               }
             },
@@ -22488,8 +22488,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P68": {
-                  "ibm68v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P68/ibm68v01.dtd",
-                  "ibm68v02.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P68/ibm68v02.ent"
+                  "ibm68v01.dtd": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n\r\n",
+                  "ibm68v02.ent": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n"
                 }
               }
             },
@@ -22529,8 +22529,8 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P69": {
-                  "ibm69v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P69/ibm69v01.dtd",
-                  "ibm69v02.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P69/ibm69v02.ent"
+                  "ibm69v01.dtd": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n%pe1;\r\n",
+                  "ibm69v02.ent": "<!ENTITY ge1 \"abcdef\">\r\n<!ELEMENT a EMPTY>\r\n<!ATTLIST a attr1 CDATA \"&ge1;\">\r\n<!ENTITY % epe1 \"<!-- comment in PE -->\">\r\n%epe1;\r\n\r\n"
                 }
               }
             },
@@ -22556,7 +22556,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P70": {
-                  "ibm70v01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P70/ibm70v01.ent"
+                  "ibm70v01.ent": "<!-- comment !-->"
                 }
               }
             },
@@ -22582,9 +22582,9 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P78": {
-                  "ibm78v01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P78/ibm78v01.ent",
-                  "ibm78v02.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P78/ibm78v02.ent",
-                  "ibm78v03.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P78/ibm78v03.ent"
+                  "ibm78v01.ent": "<?xml encoding='utf-8'?>\r\nanything legal as PCDATA....\r\nN.B. also tested P77 and P80",
+                  "ibm78v02.ent": "<?xml encoding=\"utf-8\"?>\r\nanything legal as PCDATA....\r\nN.B. also tested P77",
+                  "ibm78v03.ent": "anything legal as PCDATA....\r\ne.g. 12345678E-33, \"hello\""
                 }
               }
             },
@@ -22607,7 +22607,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/valid/P79": {
-                  "ibm79v01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/valid/P79/ibm79v01.ent"
+                  "ibm79v01.ent": "<!ELEMENT name (#PCDATA)>\r\n<!ELEMENT  notebook (#PCDATA)>"
                 }
               }
             },
@@ -23705,9 +23705,9 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/xml-1.1/not-wf/P02": {
-                  "ibm02n64.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P02/ibm02n64.ent",
-                  "ibm02n65.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P02/ibm02n65.ent",
-                  "ibm02n66.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P02/ibm02n66.ent"
+                  "ibm02n64.ent": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!-- Bad Comment 0x0x1: \u0001,  0x2: \u0002,  0x3: \u0003,  0x4: \u0004,  0x5: \u0005,  0x6: \u0006,  0x7: \u0007,  0x8: \b,  0x9: \t,  0xa: \n,  0xb: \u000b,  0xc: \f,  0xd: \r,  0xe: \u000e,  0xf: \u000f,  0x10: \u0010,  0x11: \u0011,  0x12: \u0012,  0x13: \u0013,  0x14: \u0014,  0x15: \u0015,  0x16: \u0016,  0x17: \u0017,  0x18: \u0018,  0x19: \u0019,  0x1a: \u001a,  0x1b: \u001b,  0x1c: \u001c,  0x1d: \u001d,  0x1e: \u001e,  0x1f: \u001f,  0x7f: ,  0x80: ,  0x81: ,  0x82: ,  0x83: ,  0x84: ,  0x85: ,  0x86: ,  0x87: ,  0x88: ,  0x89: ,  0x8a: ,  0x8b: ,  0x8c: ,  0x8d: ,  0x8e: ,  0x8f: ,  0x90: ,  0x91: ,  0x92: ,  0x93: ,  0x94: ,  0x95: ,  0x96: ,  0x97: ,  0x98: ,  0x0:  ,  0x9a: ,  0x9b: ,  0x9c: ,  0x9d: ,  0x9e: ,  0x9f: ,   -->\n",
+                  "ibm02n65.ent": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?BADPI 0x0x1: \u0001,  0x2: \u0002,  0x3: \u0003,  0x4: \u0004,  0x5: \u0005,  0x6: \u0006,  0x7: \u0007,  0x8: \b,  0x9: \t,  0xa: \n,  0xb: \u000b,  0xc: \f,  0xd: \r,  0xe: \u000e,  0xf: \u000f,  0x10: \u0010,  0x11: \u0011,  0x12: \u0012,  0x13: \u0013,  0x14: \u0014,  0x15: \u0015,  0x16: \u0016,  0x17: \u0017,  0x18: \u0018,  0x19: \u0019,  0x1a: \u001a,  0x1b: \u001b,  0x1c: \u001c,  0x1d: \u001d,  0x1e: \u001e,  0x1f: \u001f,  0x7f: ,  0x80: ,  0x81: ,  0x82: ,  0x83: ,  0x84: ,  0x85: ,  0x86: ,  0x87: ,  0x88: ,  0x89: ,  0x8a: ,  0x8b: ,  0x8c: ,  0x8d: ,  0x8e: ,  0x8f: ,  0x90: ,  0x91: ,  0x92: ,  0x93: ,  0x94: ,  0x95: ,  0x96: ,  0x97: ,  0x98: ,  0x0:  ,  0x9a: ,  0x9b: ,  0x9c: ,  0x9d: ,  0x9e: ,  0x9f: ,   ?>\n",
+                  "ibm02n66.ent": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n![CDATA[ 0x0x1: \u0001,  0x2: \u0002,  0x3: \u0003,  0x4: \u0004,  0x5: \u0005,  0x6: \u0006,  0x7: \u0007,  0x8: \b,  0x9: \t,  0xa: \n,  0xb: \u000b,  0xc: \f,  0xd: \r,  0xe: \u000e,  0xf: \u000f,  0x10: \u0010,  0x11: \u0011,  0x12: \u0012,  0x13: \u0013,  0x14: \u0014,  0x15: \u0015,  0x16: \u0016,  0x17: \u0017,  0x18: \u0018,  0x19: \u0019,  0x1a: \u001a,  0x1b: \u001b,  0x1c: \u001c,  0x1d: \u001d,  0x1e: \u001e,  0x1f: \u001f,  0x7f: ,  0x80: ,  0x81: ,  0x82: ,  0x83: ,  0x84: ,  0x85: ,  0x86: ,  0x87: ,  0x88: ,  0x89: ,  0x8a: ,  0x8b: ,  0x8c: ,  0x8d: ,  0x8e: ,  0x8f: ,  0x90: ,  0x91: ,  0x92: ,  0x93: ,  0x94: ,  0x95: ,  0x96: ,  0x97: ,  0x98: ,  0x0:  ,  0x9a: ,  0x9b: ,  0x9c: ,  0x9d: ,  0x9e: ,  0x9f: ,   ]]>\n"
                 }
               }
             },
@@ -24822,32 +24822,32 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/xml-1.1/not-wf/P77": {
-                  "ibm77n01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n01.dtd",
-                  "ibm77n02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n02.dtd",
-                  "ibm77n03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n03.dtd",
-                  "ibm77n04.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n04.ent",
-                  "ibm77n05.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n05.ent",
-                  "ibm77n06.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n06.ent",
-                  "ibm77n07.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n07.dtd",
-                  "ibm77n08.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n08.dtd",
-                  "ibm77n09.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n09.dtd",
-                  "ibm77n10.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n10.ent",
-                  "ibm77n11.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n11.ent",
-                  "ibm77n12.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n12.ent",
-                  "ibm77n13.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n13.dtd",
-                  "ibm77n13.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n13.ent",
-                  "ibm77n14.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n14.dtd",
-                  "ibm77n15.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n15.dtd",
-                  "ibm77n15.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n15.ent",
-                  "ibm77n16.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n16.ent",
-                  "ibm77n17.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n17.ent",
-                  "ibm77n18.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n18.ent",
-                  "ibm77n19.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n19.dtd",
-                  "ibm77n19.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n19.ent",
-                  "ibm77n20.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n20.dtd",
-                  "ibm77n20.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n20.ent",
-                  "ibm77n21.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n21.dtd",
-                  "ibm77n21.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/not-wf/P77/ibm77n21.ent"
+                  "ibm77n01.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"Test content test\">",
+                  "ibm77n02.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<!ELEMENT root (#PCDATA)>\r\n<!-- Bad character #x80  in this comment -->",
+                  "ibm77n03.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<?PITarget  PIData?>\r\n<!ELEMENT root (#PCDATA)>\r\n",
+                  "ibm77n04.ent": "<?xml version='1.0' encoding='UTF-8'?>\r\n",
+                  "ibm77n05.ent": "<?xml version='1.0' encoding='UTF-8'?>\r\n",
+                  "ibm77n06.ent": "<?xml version='1.0' encoding='UTF-8'?>\r\n",
+                  "ibm77n07.dtd": "<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"Test content test\">",
+                  "ibm77n08.dtd": "<?xml encoding=\"UTF-8\"?>\r\n<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"Test content test\">",
+                  "ibm77n09.dtd": "<!ELEMENT root (#PCDATA)>\r\n<!--  bad comment -->",
+                  "ibm77n10.ent": "<?xml encoding=\"UTF-8\"?>\r\n",
+                  "ibm77n11.ent": "",
+                  "ibm77n12.ent": "",
+                  "ibm77n13.dtd": "<?xml version=\"1.0\" encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT root ANY>\r\n<!ENTITY e SYSTEM \"ibm77n13.ent\">\r\n]]>\r\n",
+                  "ibm77n13.ent": "<?xml version=\"1.1\" encoding='UTF-8'?>\r\n<!-- ELEMENT ×node EMPTY -->\r\n",
+                  "ibm77n14.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT root ANY>\r\n<!ELEMENT 0node EMPTY>\r\n]]>\r\n",
+                  "ibm77n15.dtd": "<?xml encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT root ANY>\r\n<!ENTITY e SYSTEM \"ibm77n15.ent\">\r\n]]>\r\n",
+                  "ibm77n15.ent": "<?xml version=\"1.0\" encoding='UTF-8'?>\r\n<?PITarget  ?>\r\n\r\n\r\n",
+                  "ibm77n16.ent": "<?xml encoding='UTF-8'?>\r\n<root/><root/><root/>",
+                  "ibm77n17.ent": "<?xml version=\"1.0\"  encoding='UTF-8'?>\r\n",
+                  "ibm77n18.ent": "<?xml version='1.0'   encoding='UTF-8'?>\r\n<root/><root/><root/>",
+                  "ibm77n19.dtd": "<![INCLUDE [\r\n<!ELEMENT node EMPTY>\r\n<!ELEMENT root ANY>\r\n<!ENTITY e SYSTEM \"ibm77n19.ent\">\r\n]]>",
+                  "ibm77n19.ent": "<!--  -->\r\n",
+                  "ibm77n20.dtd": "<?xml version='1.1' encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT node EMPTY>\r\n<!ELEMENT root ANY>\r\n<!ENTITY e SYSTEM \"ibm77n20.ent\">\r\n]]>",
+                  "ibm77n20.ent": "<?xml encoding='UTF-8'?>\r\n<!-- ELEMENT  EMPTY -->\r\n",
+                  "ibm77n21.dtd": "<![INCLUDE [\r\n<!ENTITY % e SYSTEM \"ibm77n21.ent\">\r\n<!ELEMENT root ANY>\r\n%e;\r\n]]>\r\n",
+                  "ibm77n21.ent": "<?xml encoding='UTF-8'?>\r\n<!-- ELEMENT  EMPTY -->\r\n"
                 }
               }
             }
@@ -24945,7 +24945,7 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/xml-1.1/valid/P02": {
-                  "ibm02v06.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P02/ibm02v06.ent"
+                  "ibm02v06.ent": "<?xml version=\"1.1\" encoding=\"UTF-8\"?>\n<![CDATA[ 0x1: &#x1;,  0x2: &#x2;,  0x3: &#x3;,  0x4: &#x4;,  0x5: &#x5;,  0x6: &#x6;,  0x7: &#x7;,  0x8: &#x8;,  0x9: &#x9;,  0xa: &#xa;,  0xb: &#xb;,  0xc: &#xc;,  0xd: &#xd;,  0xe: &#xe;,  0xf: &#xf;,  0x10: &#x10;,  0x11: &#x11;,  0x12: &#x12;,  0x13: &#x13;,  0x14: &#x14;,  0x15: &#x15;,  0x16: &#x16;,  0x17: &#x17;,  0x18: &#x18;,  0x19: &#x19;,  0x1a: &#x1a;,  0x1b: &#x1b;,  0x1c: &#x1c;,  0x1d: &#x1d;,  0x1e: &#x1e;,  0x1f: &#x1f;,  0x7f: &#x7f;,  0x80: &#x80;,  0x81: &#x81;,  0x82: &#x82;,  0x83: &#x83;,  0x84: &#x84;,  0x85: &#x85;,  0x86: &#x86;,  0x87: &#x87;,  0x88: &#x88;,  0x89: &#x89;,  0x8a: &#x8a;,  0x8b: &#x8b;,  0x8c: &#x8c;,  0x8d: &#x8d;,  0x8e: &#x8e;,  0x8f: &#x8f;,  0x90: &#x90;,  0x91: &#x91;,  0x92: &#x92;,  0x93: &#x93;,  0x94: &#x94;,  0x95: &#x95;,  0x96: &#x96;,  0x97: &#x97;,  0x98: &#x98;,  0x0: &#x0;,  0x9a: &#x9a;,  0x9b: &#x9b;,  0x9c: &#x9c;,  0x9d: &#x9d;,  0x9e: &#x9e;,  0x9f: &#x9f;, \n&#x85;\r\n&#xA0;&#x1234;&#xD7FF;\r\n&#xE000;&#xFEF0;&#xFFFD;\r\n&#x10000;&#x5FEDC;&#x10FFFF;  ]]>\n<?PI 0x1: &#x1;,  0x2: &#x2;,  0x3: &#x3;,  0x4: &#x4;,  0x5: &#x5;,  0x6: &#x6;,  0x7: &#x7;,  0x8: &#x8;,  0x9: &#x9;,  0xa: &#xa;,  0xb: &#xb;,  0xc: &#xc;,  0xd: &#xd;,  0xe: &#xe;,  0xf: &#xf;,  0x10: &#x10;,  0x11: &#x11;,  0x12: &#x12;,  0x13: &#x13;,  0x14: &#x14;,  0x15: &#x15;,  0x16: &#x16;,  0x17: &#x17;,  0x18: &#x18;,  0x19: &#x19;,  0x1a: &#x1a;,  0x1b: &#x1b;,  0x1c: &#x1c;,  0x1d: &#x1d;,  0x1e: &#x1e;,  0x1f: &#x1f;,  0x7f: &#x7f;,  0x80: &#x80;,  0x81: &#x81;,  0x82: &#x82;,  0x83: &#x83;,  0x84: &#x84;,  0x85: &#x85;,  0x86: &#x86;,  0x87: &#x87;,  0x88: &#x88;,  0x89: &#x89;,  0x8a: &#x8a;,  0x8b: &#x8b;,  0x8c: &#x8c;,  0x8d: &#x8d;,  0x8e: &#x8e;,  0x8f: &#x8f;,  0x90: &#x90;,  0x91: &#x91;,  0x92: &#x92;,  0x93: &#x93;,  0x94: &#x94;,  0x95: &#x95;,  0x96: &#x96;,  0x97: &#x97;,  0x98: &#x98;,  0x0: &#x0;,  0x9a: &#x9a;,  0x9b: &#x9b;,  0x9c: &#x9c;,  0x9d: &#x9d;,  0x9e: &#x9e;,  0x9f: &#x9f;,  \n&#x85;\r\n&#xA0;&#x1234;&#xD7FF;\r\n&#xE000;&#xFEF0;&#xFFFD;\r\n&#x10000;&#x5FEDC;&#x10FFFF;  ?>\n<!-- Comment 0x1: &#x1;,  0x2: &#x2;,  0x3: &#x3;,  0x4: &#x4;,  0x5: &#x5;,  0x6: &#x6;,  0x7: &#x7;,  0x8: &#x8;,  0x9: &#x9;,  0xa: &#xa;,  0xb: &#xb;,  0xc: &#xc;,  0xd: &#xd;,  0xe: &#xe;,  0xf: &#xf;,  0x10: &#x10;,  0x11: &#x11;,  0x12: &#x12;,  0x13: &#x13;,  0x14: &#x14;,  0x15: &#x15;,  0x16: &#x16;,  0x17: &#x17;,  0x18: &#x18;,  0x19: &#x19;,  0x1a: &#x1a;,  0x1b: &#x1b;,  0x1c: &#x1c;,  0x1d: &#x1d;,  0x1e: &#x1e;,  0x1f: &#x1f;,  0x7f: &#x7f;,  0x80: &#x80;,  0x81: &#x81;,  0x82: &#x82;,  0x83: &#x83;,  0x84: &#x84;,  0x85: &#x85;,  0x86: &#x86;,  0x87: &#x87;,  0x88: &#x88;,  0x89: &#x89;,  0x8a: &#x8a;,  0x8b: &#x8b;,  0x8c: &#x8c;,  0x8d: &#x8d;,  0x8e: &#x8e;,  0x8f: &#x8f;,  0x90: &#x90;,  0x91: &#x91;,  0x92: &#x92;,  0x93: &#x93;,  0x94: &#x94;,  0x95: &#x95;,  0x96: &#x96;,  0x97: &#x97;,  0x98: &#x98;,  0x0: &#x0;,  0x9a: &#x9a;,  0x9b: &#x9b;,  0x9c: &#x9c;,  0x9d: &#x9d;,  0x9e: &#x9e;,  0x9f: &#x9f;,  \n&#x85;\r\n&#xA0;&#x1234;&#xD7FF;\r\n&#xE000;&#xFEF0;&#xFFFD;\r\n&#x10000;&#x5FEDC;&#x10FFFF;  -->\n\n"
                 }
               }
             },
@@ -25101,11 +25101,11 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/xml-1.1/valid/P03": {
-                  "ibm03v01.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P03/ibm03v01.ent",
-                  "ibm03v02.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P03/ibm03v02.ent",
-                  "ibm03v03.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P03/ibm03v03.ent",
-                  "ibm03v04.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P03/ibm03v04.ent",
-                  "ibm03v09.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P03/ibm03v09.ent"
+                  "ibm03v01.ent": "Data\r",
+                  "ibm03v02.ent": "Data",
+                  "ibm03v03.ent": "\r",
+                  "ibm03v04.ent": "",
+                  "ibm03v09.ent": "<?xml version=\"1.1\"  ?>"
                 }
               }
             },
@@ -25648,36 +25648,36 @@
               "cases": [],
               "entityPaths": {
                 "./source/@test/xmlconf/ibm/xml-1.1/valid/P77": {
-                  "ibm77v01.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v01.dtd",
-                  "ibm77v02.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v02.dtd",
-                  "ibm77v03.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v03.dtd",
-                  "ibm77v04.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v04.ent",
-                  "ibm77v05.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v05.ent",
-                  "ibm77v06.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v06.ent",
-                  "ibm77v07.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v07.dtd",
-                  "ibm77v08.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v08.dtd",
-                  "ibm77v09.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v09.dtd",
-                  "ibm77v10.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v10.ent",
-                  "ibm77v11.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v11.ent",
-                  "ibm77v12.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v12.ent",
-                  "ibm77v13.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v13.dtd",
-                  "ibm77v14.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v14.dtd",
-                  "ibm77v15.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v15.dtd",
-                  "ibm77v16.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v16.ent",
-                  "ibm77v17.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v17.ent",
-                  "ibm77v18.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v18.ent",
-                  "ibm77v19.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v19.dtd",
-                  "ibm77v20.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v20.dtd",
-                  "ibm77v21.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v21.dtd",
-                  "ibm77v22.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v22.ent",
-                  "ibm77v23.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v23.ent",
-                  "ibm77v24.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v24.ent",
-                  "ibm77v25.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v25.dtd",
-                  "ibm77v26.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v26.dtd",
-                  "ibm77v27.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v27.dtd",
-                  "ibm77v28.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v28.ent",
-                  "ibm77v29.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v29.ent",
-                  "ibm77v30.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/ibm/xml-1.1/valid/P77/ibm77v30.ent"
+                  "ibm77v01.dtd": "<?xml version='1.0' encoding='UTF-8'?>\n<![INCLUDE [\n<!ELEMENT Ànode EMPTY>\n<!ELEMENT root ANY>\n]]>\n",
+                  "ibm77v02.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT ῿node EMPTY>\r\n<!ELEMENT root ANY>\r\n]]>",
+                  "ibm77v03.dtd": "<?xml version='1.0' encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT 更node EMPTY>\r\n<!ELEMENT root ANY>\r\n]]>",
+                  "ibm77v04.ent": "<?xml version='1.0' encoding='UTF-8'?>\n<Önode/><Önode/><Önode/>\n",
+                  "ibm77v05.ent": "<?xml version='1.0' encoding='UTF-8'?>\r\n<῿node/><῿node/><῿node/>",
+                  "ibm77v06.ent": "<?xml version='1.0' encoding='UTF-8'?>\r\n<更root/><更root/><更root/>",
+                  "ibm77v07.dtd": "<?xml version='1.1' encoding='UTF-8'?>\n<![INCLUDE [\n<!ELEMENT Ønode EMPTY>\n<!ELEMENT root ANY>\n]]>\n",
+                  "ibm77v08.dtd": "<?xml version='1.1' encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT ῿node EMPTY>\r\n<!ELEMENT root ANY>\r\n]]>",
+                  "ibm77v09.dtd": "<?xml version='1.1' encoding='UTF-8'?>\r\n<![INCLUDE [\r\n<!ELEMENT 更node EMPTY>\r\n<!ELEMENT root ANY>\r\n]]>",
+                  "ibm77v10.ent": "<?xml version='1.1' encoding='UTF-8'?>\n<öroot/><öroot/><öroot/>\n",
+                  "ibm77v11.ent": "<?xml version='1.1' encoding='UTF-8'?>\r\n<῿root/><῿root/><῿root/>",
+                  "ibm77v12.ent": "<?xml version='1.1' encoding='UTF-8'?>\r\n<更root/><更root/><更root/>",
+                  "ibm77v13.dtd": "<![INCLUDE [\n<!ELEMENT ønode EMPTY>\n<!ELEMENT root ANY>\n]]>\n",
+                  "ibm77v14.dtd": "<![INCLUDE [\r\n<!ELEMENT ῿node EMPTY>\r\n<!ELEMENT root ANY>\r\n]]>",
+                  "ibm77v15.dtd": "<![INCLUDE [\r\n<!ELEMENT 更node EMPTY>\r\n<!ELEMENT root ANY>\r\n]]>",
+                  "ibm77v16.ent": "<˿root/><˿root/><˿root/>\n",
+                  "ibm77v17.ent": "<῿root/><῿root/><῿root/>",
+                  "ibm77v18.ent": "<更root/><更root/><更root/>",
+                  "ibm77v19.dtd": "<?xml version='1.1' encoding='UTF-8'?>\r\n<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"This is a test &#x7F;char\">",
+                  "ibm77v20.dtd": "<?xml version='1.1' encoding='UTF-8'?>\r\n<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"This is a test &#x0080;char\">",
+                  "ibm77v21.dtd": "<?xml version='1.1' encoding='UTF-8'?>\r\n<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"This is a test &#x009E;char\">",
+                  "ibm77v22.ent": "<?xml version='1.1' encoding='UTF-8'?>\r\n&#x007F;",
+                  "ibm77v23.ent": "<?xml version='1.1' encoding='UTF-8'?>\r\n&#x0080;",
+                  "ibm77v24.ent": "<?xml version='1.1' encoding='UTF-8'?>\r\n&#x009F;",
+                  "ibm77v25.dtd": "<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"<!-- &#x007F;&#x008F;-->\">",
+                  "ibm77v26.dtd": "<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"<?PITarget &#x0080;&#x0090; PIData?>\">",
+                  "ibm77v27.dtd": "<?xml encoding='UTF-8'?>\r\n<!ELEMENT root (#PCDATA)>\r\n<!ENTITY root_content \"&#x009F;&#x0081;\">",
+                  "ibm77v28.ent": "&#x007F;&#x009F;&#x0080;",
+                  "ibm77v29.ent": "&#x0085;&#x008F;",
+                  "ibm77v30.ent": "<?xml encoding='UTF-8'?>\r\n&#x0001;&#x007F;"
                 }
               }
             }
@@ -26087,13 +26087,13 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/eduni/errata-2e": {
-              "E14.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-2e/E14.dtd",
-              "E18-ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-2e/E18-ent",
-              "E19.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-2e/E19.dtd",
-              "E36.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-2e/E36.dtd",
-              "E38.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-2e/E38.ent",
-              "E60.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-2e/E60.ent",
-              "testcases.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-2e/testcases.dtd"
+              "E14.dtd": "<!ELEMENT foo ANY>\n<!ENTITY % e \"bar CDATA #IMPLIED>\">\n<!ATTLIST foo %e;\n",
+              "E18-ent": "entity from main dir, right!",
+              "E19.dtd": "<!ELEMENT foo ANY>\n<!ENTITY % pe \"hello\">\n<!-- If forward were expanded when ent was declared, we were get an error,\n     but it is bypassed and not expanded until ent is used in the instance -->\n<!ENTITY ent \"%pe; &#33; &forward;\">\n<!ENTITY forward \"goodbye\">\n",
+              "E36.dtd": "<!ELEMENT foo ANY>\n<!ATTLIST foo bar NMTOKENS #IMPLIED>\n",
+              "E38.ent": "<?xml version=\"1.1\" encoding=\"utf-8\"?>\n<foo/>\n",
+              "E60.ent": "<![INCLUDE[<!ATTLIST foo bar CDATA #IMPLIED>]]>\n<![IGNORE[some junk]]>\n",
+              "testcases.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!--\r\n    @(#)testcases.dtd\t1.6 99/01/21\r\n    Original version copyright 1998 by Sun Microsystems, Inc.\r\n    All Rights Reserved.\r\n    Modifications copyright 1999 by OASIS.\r\n\r\n    1999-06-09 00:20\r\n\r\n    DTD describing a database of XML tests.\r\n\r\n    NOTE:  the OASIS/NIST test effort also has a DTD for its test\r\n    environment, but that DTD is not yet suited for automated test\r\n    processing.  (Among other issues, it doesn't record information\r\n    putting any test case into the test matrix.)  If that gets fixed,\r\n    it may be useful to switch over to that DTD.\r\n-->\r\n\r\n<!--\r\n    The root element of the whole collection is TESTSUITE.  While not\r\n    very different from TESTCASES, it must be distinguished due to\r\n    improper processing by IE5.\r\n-->\r\n<!ELEMENT TESTSUITE ( TESTCASES+ )>\r\n<!ATTLIST TESTSUITE \r\n    PROFILE\tCDATA\t\t#IMPLIED\r\n    >\r\n\r\n<!--\r\n    The root element of a collection should be \"TESTCASES\".  It groups \r\n    a set of tests in a particular \"PROFILE\", which is descriptive.  For\r\n    example, a \"Japanese\" profile might group tests with documents\r\n    in standard Japanese encodings, using Japanese characters used\r\n    inside names and name tokens as well as inside text.  Or the\r\n    profile might be associated with the test supplier.\r\n-->\r\n\r\n<!ELEMENT TESTCASES (TEST|TESTCASES)*>\r\n<!ATTLIST TESTCASES\r\n    PROFILE\tCDATA\t\t#IMPLIED\r\n    >\r\n\r\n<!--\r\n    The body of each TEST element is its description, used\r\n    to evaluate the diagnostic produced on negative tests.\r\n    People will generally read this to evaluate whether the\r\n    test failed for the correct reason.\r\n\r\n    The type of (external) ENTITIES required affect the results\r\n    permitted for certain types of nonvalidating parsers.  In\r\n    some cases, errors (even well-formedness errors) can't be seen\r\n    without reading external parameter or general entities.\r\n\r\n    Each test has a unique ID used in diagnostics.\r\n\r\n    Tests with an OUTPUT attribute do dual duty:  not only must parsers\r\n    accept the test, but the data they report must also have \"Second\r\n    Canonical Form\" as found in the specified output file.  (This is\r\n    what James Clark titled \"Canonical XML\", with the addition of the\r\n    NOTATION declarations that all XML parsers are required to report.)\r\n\r\n    The OUTPUT3 attribute is like OUTPUT, but when sent through a\r\n    validating parser the data reported must have the \"Third Canonical\r\n    Form\" as found in the specified output file.  (This is Second\r\n    Canonical form, with declarations of unparsed ENTITY values and\r\n    with all ignorable whitespace removed.)\r\n\r\n    Tests apply to one or more particular SECTIONS.\r\n\r\n    Each test has a TYPE:\r\n    * All parsers must accept \"valid\" testcases.\r\n    * Nonvalidating parsers must also accept \"invalid\" testcases,\r\n      but validating ones must reject them.\r\n    * No parser should accept a \"not-wf\" testcase unless it's a\r\n      nonvalidating parser and the test contains external entities\r\n      that the parser doesn't read.\r\n    * Parsers are not required to report \"errors\".\r\n\r\n    Each test is in a particular XML document, with a URI.  If these\r\n    tests are accessed over a network, the path will be relative to\r\n    the base URI of the document holding the testcase.\r\n-->\r\n\r\n<!ELEMENT TEST (#PCDATA | EM | B)*>\r\n<!ATTLIST TEST\r\n    ENTITIES    (both|none|parameter|general)   \"none\"\r\n    ID          ID                              #REQUIRED\r\n    OUTPUT\tCDATA\t\t\t\t#IMPLIED\r\n    OUTPUT3\tCDATA\t\t\t\t#IMPLIED\r\n    SECTIONS    CDATA                           #REQUIRED\r\n    TYPE        (valid|invalid|not-wf|error)    #REQUIRED\r\n    URI         CDATA                           #REQUIRED\r\n    NAMESPACE   (yes|no)\t\t\t\"yes\"\n    >\r\n\r\n<!--\r\n    Really basic HTML font tweaks, to support highlighting\r\n    some aspects of test descriptions ...\r\n    EM == emphasis (e.g. italics, fun colors)\r\n    B == bold\r\n-->\r\n<!ELEMENT EM (#PCDATA | B)*>\r\n<!ELEMENT B (#PCDATA | EM)*>\r\n"
             }
           }
         }
@@ -26915,16 +26915,16 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/eduni/xml-1.1": {
-              "001.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/001.dtd",
-              "002.pe": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/002.pe",
-              "003.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/003.ent",
-              "004.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/004.ent",
-              "005_1.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/005_1.ent",
-              "005_2.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/005_2.ent",
-              "006_1.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/006_1.ent",
-              "006_2.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/006_2.ent",
-              "009.ent": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/009.ent",
-              "testcases.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/xml-1.1/testcases.dtd"
+              "001.dtd": "<?xml version=\"1.1\" encoding=\"utf-8\"?>\n<!ELEMENT foo ANY>\n",
+              "002.pe": "<?xml version=\"1.1\" encoding=\"utf-8\"?>\n<!ELEMENT foo ANY>\n",
+              "003.ent": "<?xml version=\"1.1\" encoding=\"utf-8\"?>\nsome text\n",
+              "004.ent": "<?xml version=\"1.1\" encoding=\"utf-8\"?>\nsome text\n",
+              "005_1.ent": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n&ent2;\n",
+              "005_2.ent": "<?xml version=\"1.1\" encoding=\"utf-8\"?>\nsome text\n",
+              "006_1.ent": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n&ent2;\n",
+              "006_2.ent": "<?xml version=\"1.1\" encoding=\"utf-8\"?>\nsome text\n",
+              "009.ent": "<?xml version=\"42.88\" encoding=\"utf-8\"?>\nsome text\n",
+              "testcases.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!--\n    @(#)testcases.dtd\t1.6 99/01/21\n    Original version copyright 1998 by Sun Microsystems, Inc.\n    All Rights Reserved.\n    Modifications copyright 1999 by OASIS.\n\n    1999-06-09 00:20\n\n    DTD describing a database of XML tests.\n\n    NOTE:  the OASIS/NIST test effort also has a DTD for its test\n    environment, but that DTD is not yet suited for automated test\n    processing.  (Among other issues, it doesn't record information\n    putting any test case into the test matrix.)  If that gets fixed,\n    it may be useful to switch over to that DTD.\n-->\n\n<!--\n    The root element of the whole collection is TESTSUITE.  While not\n    very different from TESTCASES, it must be distinguished due to\n    improper processing by IE5.\n-->\n<!ELEMENT TESTSUITE ( TESTCASES+ )>\n<!ATTLIST TESTSUITE \n    PROFILE\tCDATA\t\t#IMPLIED\n    >\n\n<!--\n    The root element of a collection should be \"TESTCASES\".  It groups \n    a set of tests in a particular \"PROFILE\", which is descriptive.  For\n    example, a \"Japanese\" profile might group tests with documents\n    in standard Japanese encodings, using Japanese characters used\n    inside names and name tokens as well as inside text.  Or the\n    profile might be associated with the test supplier.\n-->\n\n<!ELEMENT TESTCASES (TEST|TESTCASES)*>\n<!ATTLIST TESTCASES\n    xml:base\tCDATA\t\t#IMPLIED\n    PROFILE\tCDATA\t\t#IMPLIED\n    >\n\n<!--\n    The body of each TEST element is its description, used\n    to evaluate the diagnostic produced on negative tests.\n    People will generally read this to evaluate whether the\n    test failed for the correct reason.\n\n    The type of (external) ENTITIES required affect the results\n    permitted for certain types of nonvalidating parsers.  In\n    some cases, errors (even well-formedness errors) can't be seen\n    without reading external parameter or general entities.\n\n    Each test has a unique ID used in diagnostics.\n\n    Tests with an OUTPUT attribute do dual duty:  not only must parsers\n    accept the test, but the data they report must also have \"Second\n    Canonical Form\" as found in the specified output file.  (This is\n    what James Clark titled \"Canonical XML\", with the addition of the\n    NOTATION declarations that all XML parsers are required to report.)\n\n    The OUTPUT3 attribute is like OUTPUT, but when sent through a\n    validating parser the data reported must have the \"Third Canonical\n    Form\" as found in the specified output file.  (This is Second\n    Canonical form, with declarations of unparsed ENTITY values and\n    with all ignorable whitespace removed.)\n\n    The canonical forms are changed slightly for output files corresponding\n    to XML 1.1 input files.  They start with an XML declaration specifying the\n    version number, and use character references for all C0 and C1 controls.\n    The grammars are changed as follows:\n\n\n    CanonXML    ::= '<?xml version=\"1.1\">' Pi* element Pi*\n    CanonXML2   ::= '<?xml version=\"1.1\">' DTD2? Pi* element Pi*\n    CanonXML3   ::= '<?xml version=\"1.1\">' DTD3? Pi* element Pi*\n    C0          ::= (Unicode characters #x1-#x1F)\n    C1          ::= (Unicode characters #x7F-#x9F)\n    EscapedC0   ::= (Decimal references to C0 characters, &#1; - &#31;)\n    EscapedC1   ::= (Decimal references to C1 characters, &#127; - &#159;)\n    Datachar    ::= '&amp;' | '&lt;' | '&gt;' | '&quot;'\n                  | EscapedC0 | EscapedC1\n                  | (Char - ('&' | '<' | '>' | '\"' | C0 | C1))\n\n\n    where Char is the XML 1.1 rather than 1.0 production of that name.\n \n\n    Tests apply to one or more particular SECTIONS.\n\n    Each test has a TYPE:\n    * All parsers must accept \"valid\" testcases.\n    * Nonvalidating parsers must also accept \"invalid\" testcases,\n      but validating ones must reject them.\n    * No parser should accept a \"not-wf\" testcase unless it's a\n      nonvalidating parser and the test contains external entities\n      that the parser doesn't read.\n    * Parsers are not required to report \"errors\".\n\n    Each test is in a particular XML document, with a URI.  If these\n    tests are accessed over a network, the path will be relative to\n    the base URI of the document holding the testcase.\n\n    Tests which apply only to certain versions of XML list those versions\n    in the VERSION attribute.  An absent VERSION implies that the test\n    applies to all versions.  Parsers should not run tests for versions\n    they do not support.\n\n    Tests which apply only to certain editions of XML list those editions\n    in the EDITION attribute.  An absent EDITION implies that the test\n    applies to all editions.  Parsers should not run tests for editions\n    they do not support.  VERSION should have a single value if\n    EDITION has a value.\n\n    Parsers should enable namespace processing except for tests marked\n    with NAMESPACES=\"no\".  These are tests that use colons in ways\n    inconsistent with the Namespaces spec.\n-->\n\n<!ELEMENT TEST (#PCDATA | EM | B)*>\n\n\n<!ATTLIST TEST\n    ENTITIES    \t(both|none|parameter|general)   \"none\"\n    ID          \tID                              #REQUIRED\n    OUTPUT\t\tCDATA\t\t\t\t#IMPLIED\n    OUTPUT3\t\tCDATA\t\t\t\t#IMPLIED\n    SECTIONS    \tCDATA                           #REQUIRED\n    RECOMMENDATION \t(XML1.0|XML1.1|NS1.0|NS1.1|\n    \t\t\t XML1.0-errata2e|XML1.0-errata3e|XML1.0-errata4e|\n\t\t\t NS1.0-errata1e) \t\"XML1.0\"\n    TYPE        \t(valid|invalid|not-wf|error)    #REQUIRED\n    VERSION \t        NMTOKENS \t\t\t#IMPLIED\n    EDITION \t        NMTOKENS \t\t\t#IMPLIED\n    URI         \tCDATA                           #REQUIRED\n    NAMESPACE   \t(yes|no)\t\t\t\"yes\"\n    >\n\n<!--\n    Really basic HTML font tweaks, to support highlighting\n    some aspects of test descriptions ...\n    EM == emphasis (e.g. italics, fun colors)\n    B == bold\n-->\n<!ELEMENT EM (#PCDATA | B)*>\n<!ELEMENT B (#PCDATA | EM)*>\n"
             }
           }
         }
@@ -27743,7 +27743,7 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/eduni/errata-3e": {
-              "testcases.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-3e/testcases.dtd"
+              "testcases.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!--\r\n    @(#)testcases.dtd\t1.6 99/01/21\r\n    Original version copyright 1998 by Sun Microsystems, Inc.\r\n    All Rights Reserved.\r\n    Modifications copyright 1999 by OASIS.\r\n\r\n    1999-06-09 00:20\r\n\r\n    DTD describing a database of XML tests.\r\n\r\n    NOTE:  the OASIS/NIST test effort also has a DTD for its test\r\n    environment, but that DTD is not yet suited for automated test\r\n    processing.  (Among other issues, it doesn't record information\r\n    putting any test case into the test matrix.)  If that gets fixed,\r\n    it may be useful to switch over to that DTD.\r\n-->\r\n\r\n<!--\r\n    The root element of the whole collection is TESTSUITE.  While not\r\n    very different from TESTCASES, it must be distinguished due to\r\n    improper processing by IE5.\r\n-->\r\n<!ELEMENT TESTSUITE ( TESTCASES+ )>\r\n<!ATTLIST TESTSUITE \r\n    PROFILE\tCDATA\t\t#IMPLIED\r\n    >\r\n\r\n<!--\r\n    The root element of a collection should be \"TESTCASES\".  It groups \r\n    a set of tests in a particular \"PROFILE\", which is descriptive.  For\r\n    example, a \"Japanese\" profile might group tests with documents\r\n    in standard Japanese encodings, using Japanese characters used\r\n    inside names and name tokens as well as inside text.  Or the\r\n    profile might be associated with the test supplier.\r\n-->\r\n\r\n<!ELEMENT TESTCASES (TEST|TESTCASES)*>\r\n<!ATTLIST TESTCASES\r\n    PROFILE\tCDATA\t\t#IMPLIED\r\n    >\r\n\r\n<!--\r\n    The body of each TEST element is its description, used\r\n    to evaluate the diagnostic produced on negative tests.\r\n    People will generally read this to evaluate whether the\r\n    test failed for the correct reason.\r\n\r\n    The type of (external) ENTITIES required affect the results\r\n    permitted for certain types of nonvalidating parsers.  In\r\n    some cases, errors (even well-formedness errors) can't be seen\r\n    without reading external parameter or general entities.\r\n\r\n    Each test has a unique ID used in diagnostics.\r\n\r\n    Tests with an OUTPUT attribute do dual duty:  not only must parsers\r\n    accept the test, but the data they report must also have \"Second\r\n    Canonical Form\" as found in the specified output file.  (This is\r\n    what James Clark titled \"Canonical XML\", with the addition of the\r\n    NOTATION declarations that all XML parsers are required to report.)\r\n\r\n    The OUTPUT3 attribute is like OUTPUT, but when sent through a\r\n    validating parser the data reported must have the \"Third Canonical\r\n    Form\" as found in the specified output file.  (This is Second\r\n    Canonical form, with declarations of unparsed ENTITY values and\r\n    with all ignorable whitespace removed.)\r\n\r\n    Tests apply to one or more particular SECTIONS.\r\n\r\n    Each test has a TYPE:\r\n    * All parsers must accept \"valid\" testcases.\r\n    * Nonvalidating parsers must also accept \"invalid\" testcases,\r\n      but validating ones must reject them.\r\n    * No parser should accept a \"not-wf\" testcase unless it's a\r\n      nonvalidating parser and the test contains external entities\r\n      that the parser doesn't read.\r\n    * Parsers are not required to report \"errors\".\r\n\r\n    Each test is in a particular XML document, with a URI.  If these\r\n    tests are accessed over a network, the path will be relative to\r\n    the base URI of the document holding the testcase.\r\n-->\r\n\r\n<!ELEMENT TEST (#PCDATA | EM | B)*>\r\n<!ATTLIST TEST\r\n    ENTITIES    (both|none|parameter|general)   \"none\"\r\n    ID          ID                              #REQUIRED\r\n    OUTPUT\tCDATA\t\t\t\t#IMPLIED\r\n    OUTPUT3\tCDATA\t\t\t\t#IMPLIED\r\n    SECTIONS    CDATA                           #REQUIRED\r\n    TYPE        (valid|invalid|not-wf|error)    #REQUIRED\r\n    URI         CDATA                           #REQUIRED\r\n    NAMESPACE   (yes|no)\t\t\t\"yes\"\n    >\r\n\r\n<!--\r\n    Really basic HTML font tweaks, to support highlighting\r\n    some aspects of test descriptions ...\r\n    EM == emphasis (e.g. italics, fun colors)\r\n    B == bold\r\n-->\r\n<!ELEMENT EM (#PCDATA | B)*>\r\n<!ELEMENT B (#PCDATA | EM)*>\r\n"
             }
           }
         }
@@ -33356,7 +33356,7 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/eduni/errata-4e": {
-              "testcases.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/errata-4e/testcases.dtd"
+              "testcases.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!--\n    @(#)testcases.dtd\t1.6 99/01/21\n    Original version copyright 1998 by Sun Microsystems, Inc.\n    All Rights Reserved.\n    Modifications copyright 1999 by OASIS.\n\n    1999-06-09 00:20\n\n    DTD describing a database of XML tests.\n\n    NOTE:  the OASIS/NIST test effort also has a DTD for its test\n    environment, but that DTD is not yet suited for automated test\n    processing.  (Among other issues, it doesn't record information\n    putting any test case into the test matrix.)  If that gets fixed,\n    it may be useful to switch over to that DTD.\n-->\n\n<!--\n    The root element of the whole collection is TESTSUITE.  While not\n    very different from TESTCASES, it must be distinguished due to\n    improper processing by IE5.\n-->\n<!ELEMENT TESTSUITE ( TESTCASES+ )>\n<!ATTLIST TESTSUITE \n    PROFILE\tCDATA\t\t#IMPLIED\n    >\n\n<!--\n    The root element of a collection should be \"TESTCASES\".  It groups \n    a set of tests in a particular \"PROFILE\", which is descriptive.  For\n    example, a \"Japanese\" profile might group tests with documents\n    in standard Japanese encodings, using Japanese characters used\n    inside names and name tokens as well as inside text.  Or the\n    profile might be associated with the test supplier.\n-->\n\n<!ELEMENT TESTCASES (TEST|TESTCASES)*>\n<!ATTLIST TESTCASES\n    xml:base\tCDATA\t\t#IMPLIED\n    PROFILE\tCDATA\t\t#IMPLIED\n    >\n\n<!--\n    The body of each TEST element is its description, used\n    to evaluate the diagnostic produced on negative tests.\n    People will generally read this to evaluate whether the\n    test failed for the correct reason.\n\n    The type of (external) ENTITIES required affect the results\n    permitted for certain types of nonvalidating parsers.  In\n    some cases, errors (even well-formedness errors) can't be seen\n    without reading external parameter or general entities.\n\n    Each test has a unique ID used in diagnostics.\n\n    Tests with an OUTPUT attribute do dual duty:  not only must parsers\n    accept the test, but the data they report must also have \"Second\n    Canonical Form\" as found in the specified output file.  (This is\n    what James Clark titled \"Canonical XML\", with the addition of the\n    NOTATION declarations that all XML parsers are required to report.)\n\n    The OUTPUT3 attribute is like OUTPUT, but when sent through a\n    validating parser the data reported must have the \"Third Canonical\n    Form\" as found in the specified output file.  (This is Second\n    Canonical form, with declarations of unparsed ENTITY values and\n    with all ignorable whitespace removed.)\n\n    The canonical forms are changed slightly for output files corresponding\n    to XML 1.1 input files.  They start with an XML declaration specifying the\n    version number, and use character references for all C0 and C1 controls.\n    The grammars are changed as follows:\n\n\n    CanonXML    ::= '<?xml version=\"1.1\">' Pi* element Pi*\n    CanonXML2   ::= '<?xml version=\"1.1\">' DTD2? Pi* element Pi*\n    CanonXML3   ::= '<?xml version=\"1.1\">' DTD3? Pi* element Pi*\n    C0          ::= (Unicode characters #x1-#x1F)\n    C1          ::= (Unicode characters #x7F-#x9F)\n    EscapedC0   ::= (Decimal references to C0 characters, &#1; - &#31;)\n    EscapedC1   ::= (Decimal references to C1 characters, &#127; - &#159;)\n    Datachar    ::= '&amp;' | '&lt;' | '&gt;' | '&quot;'\n                  | EscapedC0 | EscapedC1\n                  | (Char - ('&' | '<' | '>' | '\"' | C0 | C1))\n\n\n    where Char is the XML 1.1 rather than 1.0 production of that name.\n \n\n    Tests apply to one or more particular SECTIONS.\n\n    Each test has a TYPE:\n    * All parsers must accept \"valid\" testcases.\n    * Nonvalidating parsers must also accept \"invalid\" testcases,\n      but validating ones must reject them.\n    * No parser should accept a \"not-wf\" testcase unless it's a\n      nonvalidating parser and the test contains external entities\n      that the parser doesn't read.\n    * Parsers are not required to report \"errors\".\n\n    Each test is in a particular XML document, with a URI.  If these\n    tests are accessed over a network, the path will be relative to\n    the base URI of the document holding the testcase.\n\n    Tests which apply only to certain versions of XML list those versions\n    in the VERSION attribute.  An absent VERSION implies that the test\n    applies to all versions.  Parsers should not run tests for versions\n    they do not support.\n\n    Tests which apply only to certain editions of XML list those editions\n    in the EDITION attribute.  An absent EDITION implies that the test\n    applies to all editions.  Parsers should not run tests for editions\n    they do not support.  VERSION should have a single value if\n    EDITION has a value.\n\n    Parsers should enable namespace processing except for tests marked\n    with NAMESPACES=\"no\".  These are tests that use colons in ways\n    inconsistent with the Namespaces spec.\n-->\n\n<!ELEMENT TEST (#PCDATA | EM | B)*>\n\n\n<!ATTLIST TEST\n    ENTITIES    \t(both|none|parameter|general)   \"none\"\n    ID          \tID                              #REQUIRED\n    OUTPUT\t\tCDATA\t\t\t\t#IMPLIED\n    OUTPUT3\t\tCDATA\t\t\t\t#IMPLIED\n    SECTIONS    \tCDATA                           #REQUIRED\n    RECOMMENDATION \t(XML1.0|XML1.1|NS1.0|NS1.1|\n    \t\t\t XML1.0-errata2e|XML1.0-errata3e|XML1.0-errata4e|\n\t\t\t NS1.0-errata1e) \t\"XML1.0\"\n    TYPE        \t(valid|invalid|not-wf|error)    #REQUIRED\n    VERSION \t        NMTOKENS \t\t\t#IMPLIED\n    EDITION \t        NMTOKENS \t\t\t#IMPLIED\n    URI         \tCDATA                           #REQUIRED\n    NAMESPACE   \t(yes|no)\t\t\t\"yes\"\n    >\n\n<!--\n    Really basic HTML font tweaks, to support highlighting\n    some aspects of test descriptions ...\n    EM == emphasis (e.g. italics, fun colors)\n    B == bold\n-->\n<!ELEMENT EM (#PCDATA | B)*>\n<!ELEMENT B (#PCDATA | EM)*>\n"
             }
           }
         }
@@ -33409,7 +33409,7 @@
           "cases": [],
           "entityPaths": {
             "./source/@test/xmlconf/eduni/namespaces/errata-1e": {
-              "testcases.dtd": "/Users/bodawei/active/hacking/xml/source/@test/xmlconf/eduni/namespaces/errata-1e/testcases.dtd"
+              "testcases.dtd": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<!--\r\n    @(#)testcases.dtd\t1.6 99/01/21\r\n    Original version copyright 1998 by Sun Microsystems, Inc.\r\n    All Rights Reserved.\r\n    Modifications copyright 1999 by OASIS.\r\n\r\n    1999-06-09 00:20\r\n\r\n    DTD describing a database of XML tests.\r\n\r\n    NOTE:  the OASIS/NIST test effort also has a DTD for its test\r\n    environment, but that DTD is not yet suited for automated test\r\n    processing.  (Among other issues, it doesn't record information\r\n    putting any test case into the test matrix.)  If that gets fixed,\r\n    it may be useful to switch over to that DTD.\r\n-->\r\n\r\n<!--\r\n    The root element of the whole collection is TESTSUITE.  While not\r\n    very different from TESTCASES, it must be distinguished due to\r\n    improper processing by IE5.\r\n-->\r\n<!ELEMENT TESTSUITE ( TESTCASES+ )>\r\n<!ATTLIST TESTSUITE \r\n    PROFILE\tCDATA\t\t#IMPLIED\r\n    >\r\n\r\n<!--\r\n    The root element of a collection should be \"TESTCASES\".  It groups \r\n    a set of tests in a particular \"PROFILE\", which is descriptive.  For\r\n    example, a \"Japanese\" profile might group tests with documents\r\n    in standard Japanese encodings, using Japanese characters used\r\n    inside names and name tokens as well as inside text.  Or the\r\n    profile might be associated with the test supplier.\r\n-->\r\n\r\n<!ELEMENT TESTCASES (TEST|TESTCASES)*>\r\n<!ATTLIST TESTCASES\r\n    PROFILE\tCDATA\t\t#IMPLIED\r\n    >\r\n\r\n<!--\r\n    The body of each TEST element is its description, used\r\n    to evaluate the diagnostic produced on negative tests.\r\n    People will generally read this to evaluate whether the\r\n    test failed for the correct reason.\r\n\r\n    The type of (external) ENTITIES required affect the results\r\n    permitted for certain types of nonvalidating parsers.  In\r\n    some cases, errors (even well-formedness errors) can't be seen\r\n    without reading external parameter or general entities.\r\n\r\n    Each test has a unique ID used in diagnostics.\r\n\r\n    Tests with an OUTPUT attribute do dual duty:  not only must parsers\r\n    accept the test, but the data they report must also have \"Second\r\n    Canonical Form\" as found in the specified output file.  (This is\r\n    what James Clark titled \"Canonical XML\", with the addition of the\r\n    NOTATION declarations that all XML parsers are required to report.)\r\n\r\n    The OUTPUT3 attribute is like OUTPUT, but when sent through a\r\n    validating parser the data reported must have the \"Third Canonical\r\n    Form\" as found in the specified output file.  (This is Second\r\n    Canonical form, with declarations of unparsed ENTITY values and\r\n    with all ignorable whitespace removed.)\r\n\r\n    Tests apply to one or more particular SECTIONS.\r\n\r\n    Each test has a TYPE:\r\n    * All parsers must accept \"valid\" testcases.\r\n    * Nonvalidating parsers must also accept \"invalid\" testcases,\r\n      but validating ones must reject them.\r\n    * No parser should accept a \"not-wf\" testcase unless it's a\r\n      nonvalidating parser and the test contains external entities\r\n      that the parser doesn't read.\r\n    * Parsers are not required to report \"errors\".\r\n\r\n    Each test is in a particular XML document, with a URI.  If these\r\n    tests are accessed over a network, the path will be relative to\r\n    the base URI of the document holding the testcase.\r\n-->\r\n\r\n<!ELEMENT TEST (#PCDATA | EM | B)*>\r\n<!ATTLIST TEST\r\n    ENTITIES    (both|none|parameter|general)   \"none\"\r\n    ID          ID                              #REQUIRED\r\n    OUTPUT\tCDATA\t\t\t\t#IMPLIED\r\n    OUTPUT3\tCDATA\t\t\t\t#IMPLIED\r\n    SECTIONS    CDATA                           #REQUIRED\r\n    TYPE        (valid|invalid|not-wf|error)    #REQUIRED\r\n    URI         CDATA                           #REQUIRED\r\n    NAMESPACE   (yes|no)\t\t\t\"yes\"\n    >\r\n\r\n<!--\r\n    Really basic HTML font tweaks, to support highlighting\r\n    some aspects of test descriptions ...\r\n    EM == emphasis (e.g. italics, fun colors)\r\n    B == bold\r\n-->\r\n<!ELEMENT EM (#PCDATA | B)*>\r\n<!ELEMENT B (#PCDATA | EM)*>\r\n"
             }
           }
         }

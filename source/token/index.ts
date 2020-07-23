@@ -5,7 +5,7 @@ import declaration from './bridge/baseDeclaration';
 import attListDeclaration, { AttDefPToken, AttListPToken, ATTLISTDECL_PTOKEN_TYPE, parseAttListDeclaration } from './attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN } from './elementDeclaration';
 
-import { AttributeValuePToken } from './common/attribute';
+import { AttributeValuePToken, AttributeValueElement } from './common/attribute';
 import unassigned from './common/unassigned';
 import { parseAllUnassignedValues } from './common/unassigned';
 import { UnassignedArray, UnassignedType, UnassignedValue, spaceFromSToken, wordFromSToken } from './common/unassigned';
@@ -148,6 +148,7 @@ export {
 
    AttListPToken,
    AttDefPToken,
+   AttributeValueElement,
    ElementDeclarationPToken,
    ContentParticlePToken,
    NamePToken,

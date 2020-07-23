@@ -20,7 +20,8 @@ import { ParameterEntityDeclarationPToken } from './parameterEntityDeclaration';
  declaration.
 \**********************************************************************/
 
-type EntityValuePToken = Array<TextPToken|CharRefPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type EntityValueElement = TextPToken|CharRefPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken;
+type EntityValuePToken = Array<EntityValueElement>;
 
 /**********************************************************************\
  parse() extracts extracts the STokens that make up a general or
@@ -198,7 +199,8 @@ function parseClose(source: STokenSource, pToken: GeneralEntityDeclarationPToken
 }
 
 export {
+   EntityValueElement,
+   EntityValuePToken,
    parse as parseEntityDeclaration,
 
-   EntityValuePToken,
 };

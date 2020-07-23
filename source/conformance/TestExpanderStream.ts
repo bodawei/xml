@@ -1,14 +1,22 @@
+import { dirname } from 'path';
 import { Transform } from 'stream';
 
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
-import { EntityExpander } from 'expand';
+import { EntityExpander, RetrieveResults, AttributeValueResults } from 'expand';
 import { defaultExtractors } from 'extractor';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
-import { AttributeValuePToken, PToken, EntityValuePToken, ExternalId } from 'token';
+import {
+   AttributeValueElement,
+   AttributeValuePToken,
+   PToken,
+   EntityValuePToken,
+   EntityValueElement,
+   ExternalId,
+} from 'token';
 import { PTokenFromLiteralStream } from 'pTokenStream';
 
-import { TestDetails } from './types';
+import { TestCases, TestDetails } from './types';
 
 function parseBody(
    sTokenSource: STokenSource,
@@ -34,7 +42,7 @@ function parseBody(
       expandToken(token, () => {
          paused = false;
          pTokenStream.resume();
-         // between when data arrives and expandToken() calls back, we may have 
+         // between when data arrives and expandToken() calls back, we may have
          // gotten an "end" event.  If so, respond to that.
          checkIfThisCanEnd();
       });
@@ -53,8 +61,7 @@ function parseEntityValue(
    const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
    const results: EntityValuePToken = [];
 
-   // DO #2 need a type EntityValueElement
-   pTokenStream.on('data', (token: PToken) => {
+   pTokenStream.on('data', (token: EntityValueElement) => {
       results.push(token);
    });
    pTokenStream.on('end', () => {
@@ -62,25 +69,39 @@ function parseEntityValue(
    });
 }
 
-// DO #6 retrieve the external entity text for the specified path and filename
-function findEntity(pName: string, name: string, resources: any): string {
-   let result = '';
+function findEntityContent(cases: Array<TestCases>, dir: string, name: string): string {
+   for (const testcase of cases) {
+      if (testcase.entityPaths[dir] && testcase.entityPaths[dir][name]) {
+         return testcase.entityPaths[dir][name];
+      }
+   }
 
-   if (!resources[pName]) {
-      return result;
-   });
+   for (const testcase of cases) {
+      if (testcase.cases.length > 0) {
+         const result = findEntityContent(testcase.cases, dir, name);
 
-   return result;
+         if (result !== '') {
+            return result;
+         }
+      }
+   }
+
+   return '';
 }
 
-// DO #3 We need to actually load all the external entities into the xmlconf.json file
+function findEntity(testDetails: TestDetails, entityName: string): string {
+   const testDir = dirname(testDetails.testPath);
+
+   const entityContent = findEntityContent(testDetails.cases, testDir, entityName);
+
+   return entityContent;
+}
+
 function retrieveExternalEntity(
    testDetails: TestDetails,
    externalId: ExternalId,
    entityMetaData: EntityMetaData,
 ): RetrieveResults {
-   const parts = entityMetaData.location.systemId.match(/.*\/([Pp][0-9]+a?)\/[^\/]+/);
-   const production = parts ? parts[1] : '';
    const systemInfo = externalId.system;
    let entityName = 'ERROR';
 
@@ -89,13 +110,13 @@ function retrieveExternalEntity(
    }
 
    const emd = new EntityMetaData(
-      EntityKind.EXTERNAL,  // Do we use the kind anywhere?
+      EntityKind.EXTERNAL, // Do we use the kind anywhere?
       entityMetaData.version,
       entityMetaData.revision,
       new EntityLocation(entityName),
    );
 
-   const entityText = findEntity(production, entityName, testDetails);
+   const entityText = findEntity(testDetails, entityName);
    // Throw an error if we can't find the entity?
 
    const source = new STokenSource(defaultExtractors, emd);
@@ -110,8 +131,6 @@ function retrieveExternalEntity(
    };
 }
 
-// DO #4 expose AttributeValueResults and ReturnResults in some way
-// DO #5 need an AttributValueElement type
 function parseAttributeValue(
    sTokenSource: STokenSource,
    done: (results: AttributeValueResults) => void,
@@ -119,7 +138,7 @@ function parseAttributeValue(
    const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false, geRef: true });
    const results: AttributeValuePToken = [];
 
-   pTokenStream.on('data', (token: PToken) => {
+   pTokenStream.on('data', (token: AttributeValueElement) => {
       results.push(token);
    });
    pTokenStream.on('end', () => {
