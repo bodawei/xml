@@ -137,7 +137,9 @@ module.exports = {
          './source/token/conditional.ts',
          './source/token/common/externalId.ts',
          './source/expand/**/*.ts',
-         './source/wellformedness/**/*.ts' ],
+         './source/wellformedness/**/*.ts',
+         './source/conformance/**/*.ts',
+      ],
       parser: '@typescript-eslint/parser',
       plugins: [
          '@typescript-eslint',

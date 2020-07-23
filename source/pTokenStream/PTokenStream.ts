@@ -49,7 +49,7 @@ class PTokenStream extends Readable {
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(metaDataOrTokenSource: STokenSource | EntityMetaData) {
+   constructor(metaDataOrTokenSource: STokenSource | EntityMetaData, inContent?: boolean) {
       super({
          objectMode: true,
       });
@@ -63,7 +63,7 @@ class PTokenStream extends Readable {
       }
 
       this._elementStack = [];
-      this._inContent = false;
+      this._inContent = inContent || false;
       this._reportedMetaData = false;
    }
 
