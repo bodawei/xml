@@ -10,8 +10,8 @@
       "source/error/@test/helper.ts",
       "source/error/@test/beforeEach.ts",
       "source/token/@test/beforeEach.ts",
-      "source/sToken/@test/beforeEach.d.ts",
-      "source/sToken/@test/beforeEach.ts"
+      "source/sToken/@test/beforeEach.ts",
+      "source/conformance/@test/helper/beforeEach.ts"
    ],
  
    "stopSpecOnExpectationFailure": false,

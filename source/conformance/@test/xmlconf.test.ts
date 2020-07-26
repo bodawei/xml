@@ -1,109 +1,68 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { Transform } from "stream";
-import { EntityLocation, EntityKind, EntityMetaData } from "basic";
-import { ERROR_TYPE } from "error";
-import { CheckWellFormed } from "nodeStream";
-import { PTokenStream } from "pTokenStream";
-import { PToken } from "token";
-import { PToXTokenStream, CheckXTokenValidStream } from "xTokenStream";
+import { Transform } from 'stream';
+import { EntityLocation, EntityKind, EntityMetaData, XmlRevision, XmlVersion } from 'basic';
+import { CheckWellFormed } from 'nodeStream';
+import { PTokenStream } from 'pTokenStream';
+import { PToken } from 'token';
+import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
 
-import { TestExpanderStream } from "../TestExpanderStream";
-import { TestSuite, TestCases, Test, TestDetails } from "../types";
-const metadata = require('../xmlconf.json');
+import { TestDetails, buildTestDetails } from './helper/buildTestDetails';
+import { gatherPTokens } from './helper/gatherPTokens';
+import { gatherStrings } from './helper/gatherStrings';
+import { makeAllDone } from './helper/makeAllDone';
+import { TestSuite } from './helper/types';
+import { TestExpanderStream } from './helper/TestExpanderStream';
+import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
+import metadata from './data/xmlconf.json';
 
+function setUpStreams(test: TestDetails): Transform {
+   const ver = test.VERSION ? (Number.parseFloat(test.VERSION) as XmlVersion) : 1.0;
+   const defaultRev: XmlRevision = ver === 1.0 ? 5 : 2;
+   const rev = test.EDITION ? (Number.parseInt(test.EDITION, 10) as XmlRevision) : defaultRev;
+   const emd = new EntityMetaData(EntityKind.DOCUMENT, ver, rev, new EntityLocation(test.testPath));
+   const pTokenStream = new PTokenStream(emd);
+   const entityExpander = new TestExpanderStream(test, true);
+   const checkWF = new CheckWellFormed();
+   const toXToken = new PToXTokenStream();
+   const checkValid = new CheckXTokenValidStream();
 
-// DO All of this should go into another routine which returns the sorted set of tests
-const validTests: Array<TestDetails> = [];
+   pTokenStream.pipe(entityExpander).pipe(checkWF).pipe(toXToken).pipe(checkValid);
 
-function walkTest(test: Test, cases: Array<TestCases>, suite: TestSuite): void {
-   // Pruning and inclusion goes here.
+   pTokenStream.addText(test.testData || '');
+   pTokenStream.endText();
 
-   if (test.TYPE === 'valid') {
-      validTests.push({
-         ...test,
-         cases,
-         suite
-      });
-   }
+   return checkValid;
 }
-
-function walkCase(testCase: TestCases, parentCases: Array<TestCases>, suite: TestSuite): void {
-   const allCases = [...parentCases, testCase];
-
-   testCase.cases.forEach((testCase) => walkCase(testCase, allCases, suite));
-   testCase.tests.forEach((test) => walkTest(test, allCases, suite));
-}
-
-function walkSuite(testSuite: TestSuite): void {
-   testSuite.cases.forEach((testCase) => walkCase(testCase, [], testSuite));
-}
-
-walkSuite(metadata);
-
-// DO This should just go into some basic test utility 'cause we do this so much
-function gatherStream(stream: Transform, expect: (results: Array<PToken>) => void) {
-   const cache: Array<PToken> = [];
-
-   stream.on('data', (item: PToken) => {
-      cache.push(item);
-   });
-
-   stream.on('end', () => {
-      expect(cache);
-   });
-}
-
 
 describe('XML Conformance tests', () => {
+   const allDetails = buildTestDetails(metadata as TestSuite);
 
-   describe('valid cases', () => {
+   allDetails.forEach((testData) => {
+      it(`${testData.ID} (${testData.TYPE}) ${testData.description}`, (done) => {
+         const hasOutput = 'outputData' in testData;
+         const testStream = setUpStreams(testData);
+         const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
 
-      function setupValidTest(test: TestDetails) {
-         const emd = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3, new EntityLocation(test.testPath));
-         const pTokenStream = new PTokenStream(emd);
-         const entityExpander = new TestExpanderStream(test, true);
-         const checkWF = new CheckWellFormed();
-         const toXToken = new PToXTokenStream();
-         const checkValid = new CheckXTokenValidStream();
-   
-         console.log('test.testData', test.testData);
-         pTokenStream.pipe(entityExpander).pipe(checkWF).pipe(toXToken).pipe(checkValid);
-         if (test.testData?.indexOf('<?xml ') !== 0) {
-            console.info(`Missing: ${test.ID}`);
-            pTokenStream.addText('<?xml version="1.0"?>');
-         }
-         pTokenStream.addText(test.testData || '');
-         pTokenStream.endText();
+         // If the test details includes output, then we should test that the output matches
+         if (hasOutput) {
+            const toXmlStream = testStream.pipe(new XTokenToXmlStream());
 
-         return checkValid;
-      }
-
-      validTests.forEach(testData => {
-
-         fit(`${testData.ID}`, (done) => {
-            const checkValid = setupValidTest(testData);
-
-            gatherStream(checkValid, (results: Array<PToken>) => {
-               // DO Move the below into an expect handler.
-               let errors: Array<any> = results.filter((token: any) => token.type === ERROR_TYPE && token.subtype !== 'WARNING');
-
-               if (errors.length > 0) {
-                  console.log(`[${testData.ID}] Validation failure\n\t`);
-                  // DO We can provide a lot more details from the test metadata
-                  console.log(errors.map(item => `${item.id} : ${item.message}`).join('\n\t'));
-               }
-
-               expect(errors.length).toEqual(0);
-               done();
+            gatherStrings(toXmlStream, (results: Array<string>) => {
+               expect(results).toEqualNormalized(testData.outputData);
+               doneWhenAllDone();
             });
+         }
 
+         // We also want to test  whether the errors match as expected
+         gatherPTokens(testStream, (results: Array<PToken>) => {
+            if (testData.expectedError) {
+               expect(results).toHaveErrors([testData.expectedError]);
+            } else {
+               expect(results).not.toHaveErrors();
+            }
+            doneWhenAllDone();
          });
-
-         // For valid tests, also need to check output
-
       });
-
    });
-
 });

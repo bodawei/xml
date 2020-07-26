@@ -1,0 +1,126 @@
+/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+
+import {
+   IdToErrorMap,
+   expectedErrorCodes,
+   expectedInvalidCodes,
+   expectedNotWfCodes,
+} from '../data/expectedCodes';
+import { fixTest } from '../data/fixTest';
+import { shouldSkipTest } from './shouldSkipTest';
+import { Test, TestCases, TestDetails, TestSuite } from './types';
+
+interface TestGroups {
+   valid: Array<TestDetails>;
+   invalid: Array<TestDetails>;
+   notWf: Array<TestDetails>;
+   error: Array<TestDetails>;
+}
+
+function buildDetails(
+   test: Test,
+   cases: Array<TestCases>,
+   suite: TestSuite,
+   expected?: IdToErrorMap,
+): TestDetails {
+   let expectedError;
+
+   if (expected && expected[test.ID]) {
+      const entry = expected[test.ID];
+      const id = typeof entry === 'string' ? entry : entry.id;
+      const message = typeof entry === 'string' ? undefined : entry.message;
+
+      expectedError = {
+         id,
+         message,
+      };
+   }
+
+   const newTest = fixTest(test);
+   // Finally, make any uniform modifiactions to the test
+   return {
+      ...newTest,
+      expectedError,
+      cases,
+      suite,
+   };
+}
+
+function groupTest(
+   test: Test,
+   cases: Array<TestCases>,
+   suite: TestSuite,
+   groups: TestGroups,
+): TestGroups {
+   const newError: Array<TestDetails> = [];
+   const newInvalid: Array<TestDetails> = [];
+   const newNotWf: Array<TestDetails> = [];
+   const newValid: Array<TestDetails> = [];
+
+   // Do not run this test if we are wanting to skip it for some reason.
+   if (shouldSkipTest(test)) {
+      return groups;
+   }
+
+   switch (test.TYPE) {
+      case 'valid':
+         newValid.push(buildDetails(test, cases, suite));
+         break;
+      case 'invalid':
+         newInvalid.push(buildDetails(test, cases, suite, expectedInvalidCodes));
+         break;
+      case 'not-wf':
+         newNotWf.push(buildDetails(test, cases, suite, expectedNotWfCodes));
+         break;
+      case 'error':
+         newError.push(buildDetails(test, cases, suite, expectedErrorCodes));
+         break;
+   }
+
+   return {
+      ...groups,
+      error: [...groups.error, ...newError],
+      invalid: [...groups.invalid, ...newInvalid],
+      notWf: [...groups.notWf, ...newNotWf],
+      valid: [...groups.valid, ...newValid],
+   };
+}
+
+function walkCase(
+   testCase: TestCases,
+   parentCases: Array<TestCases>,
+   suite: TestSuite,
+   groups: TestGroups,
+): TestGroups {
+   const allCases = [...parentCases, testCase];
+
+   const intermediateGroups = testCase.cases.reduce(
+      (subGroups, testCase) => walkCase(testCase, allCases, suite, subGroups),
+      groups,
+   );
+
+   return testCase.tests.reduce(
+      (subGroups, test) => groupTest(test, allCases, suite, subGroups),
+      intermediateGroups,
+   );
+}
+
+function walkSuite(testSuite: TestSuite, groups: TestGroups): TestGroups {
+   return testSuite.cases.reduce(
+      (subGroups, testCase) => walkCase(testCase, [], testSuite, subGroups),
+      groups,
+   );
+}
+
+function buildTestDetails(testData: TestSuite): Array<TestDetails> {
+   const results = walkSuite(testData, {
+      error: [],
+      invalid: [],
+      notWf: [],
+      valid: [],
+   });
+
+   return [...results.valid, ...results.invalid, ...results.notWf, ...results.error];
+}
+
+export { TestDetails, TestGroups, buildTestDetails };

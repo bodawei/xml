@@ -57,6 +57,7 @@
       "build/buildTestData.ts",
    ],
    "exclude": [
-      "node_modules"
+      "node_modules",
+      "xmlconfig.json"
    ]
 }

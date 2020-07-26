@@ -86,6 +86,9 @@ const ERROR_TYPE = 'ERROR_TYPE';
 
 type XmlError = {
    type: 'ERROR_TYPE',
+   subtype?: string,
+   id: string,
+   message: string,
 }
 
 type PToken =

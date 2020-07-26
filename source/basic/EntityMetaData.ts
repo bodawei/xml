@@ -107,6 +107,8 @@ class EntityMetaData {
 
 export {
    ENTITY_META_DATA,
+   XmlVersion,
+   XmlRevision,
    EntityKind,
    EntityMetaData,
 };
