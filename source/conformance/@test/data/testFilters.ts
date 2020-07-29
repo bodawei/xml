@@ -572,65 +572,6 @@ const testFilters: FilterData = {
       'o-p01fail2', // comments cannot occur before the prolog
       'o-p01fail3', // only one document element
       'o-p01fail4', // document element must be complete.
-      'o-p02fail1', // Use of illegal character within XML document.
-      'o-p02fail10', // Use of illegal character within XML document.
-      'o-p02fail11', // Use of illegal character within XML document.
-      'o-p02fail12', // Use of illegal character within XML document.
-      'o-p02fail13', // Use of illegal character within XML document.
-      'o-p02fail14', // Use of illegal character within XML document.
-      'o-p02fail15', // Use of illegal character within XML document.
-      'o-p02fail16', // Use of illegal character within XML document.
-      'o-p02fail17', // Use of illegal character within XML document.
-      'o-p02fail18', // Use of illegal character within XML document.
-      'o-p02fail19', // Use of illegal character within XML document.
-      'o-p02fail2', // Use of illegal character within XML document.
-      'o-p02fail20', // Use of illegal character within XML document.
-      'o-p02fail21', // Use of illegal character within XML document.
-      'o-p02fail22', // Use of illegal character within XML document.
-      'o-p02fail23', // Use of illegal character within XML document.
-      'o-p02fail24', // Use of illegal character within XML document.
-      'o-p02fail25', // Use of illegal character within XML document.
-      'o-p02fail26', // Use of illegal character within XML document.
-      'o-p02fail27', // Use of illegal character within XML document.
-      'o-p02fail28', // Use of illegal character within XML document.
-      'o-p02fail29', // Use of illegal character within XML document.
-      'o-p02fail3', // Use of illegal character within XML document.
-      'o-p02fail30', // Use of illegal character within XML document.
-      'o-p02fail31', // Use of illegal character within XML document.
-      'o-p02fail4', // Use of illegal character within XML document.
-      'o-p02fail5', // Use of illegal character within XML document.
-      'o-p02fail6', // Use of illegal character within XML document.
-      'o-p02fail7', // Use of illegal character within XML document.
-      'o-p02fail8', // Use of illegal character within XML document.
-      'o-p02fail9', // Use of illegal character within XML document.
-      'o-p03fail1', // Use of illegal character within XML document.
-      'o-p03fail10', // Use of illegal character within XML document.
-      'o-p03fail11', // Use of illegal character within XML document.
-      'o-p03fail12', // Use of illegal character within XML document.
-      'o-p03fail13', // Use of illegal character within XML document.
-      'o-p03fail14', // Use of illegal character within XML document.
-      'o-p03fail15', // Use of illegal character within XML document.
-      'o-p03fail16', // Use of illegal character within XML document.
-      'o-p03fail17', // Use of illegal character within XML document.
-      'o-p03fail18', // Use of illegal character within XML document.
-      'o-p03fail19', // Use of illegal character within XML document.
-      'o-p03fail2', // Use of illegal character within XML document.
-      'o-p03fail20', // Use of illegal character within XML document.
-      'o-p03fail21', // Use of illegal character within XML document.
-      'o-p03fail22', // Use of illegal character within XML document.
-      'o-p03fail23', // Use of illegal character within XML document.
-      'o-p03fail24', // Use of illegal character within XML document.
-      'o-p03fail25', // Use of illegal character within XML document.
-      'o-p03fail26', // Use of illegal character within XML document.
-      'o-p03fail27', // Use of illegal character within XML document.
-      'o-p03fail28', // Use of illegal character within XML document.
-      'o-p03fail29', // Use of illegal character within XML document.
-      'o-p03fail3', // Use of illegal character within XML document.
-      'o-p03fail4', // Use of illegal character within XML document.
-      'o-p03fail5', // Use of illegal character within XML document.
-      'o-p03fail7', // Use of illegal character within XML document.
-      'o-p03fail8', // Use of illegal character within XML document.
-      'o-p03fail9', // Use of illegal character within XML document.
       'o-p04fail1', // Name contains invalid character.
       'o-p04fail2', // Name contains invalid character.
       'o-p04fail3', // Name contains invalid character.
@@ -823,68 +764,7 @@ const testFilters: FilterData = {
       'ibm-not-wf-P29-ibm29n01.xml', // Tests markupdecl with an illegal markup declaration. A XMLDecl occurs inside the DTD.
       'ibm-not-wf-P29-ibm29n03.xml', // Tests WFC "PEs in Internal Subset". A PE reference occurs inside an ATTlistDecl in the DTD.
       'ibm-not-wf-P71-ibm70n01.xml', // Tests
-      'ibm-1-1-not-wf-P02-ibm02n01.xml', // This test contains embeded control character 0x1.
-      'ibm-1-1-not-wf-P02-ibm02n02.xml', // This test contains embeded control character 0x2.
-      'ibm-1-1-not-wf-P02-ibm02n03.xml', // This test contains embeded control character 0x3.
-      'ibm-1-1-not-wf-P02-ibm02n04.xml', // This test contains embeded control character 0x4.
-      'ibm-1-1-not-wf-P02-ibm02n05.xml', // This test contains embeded control character 0x5.
-      'ibm-1-1-not-wf-P02-ibm02n06.xml', // This test contains embeded control character 0x6.
-      'ibm-1-1-not-wf-P02-ibm02n07.xml', // This test contains embeded control character 0x7.
-      'ibm-1-1-not-wf-P02-ibm02n08.xml', // This test contains embeded control character 0x8.
-      'ibm-1-1-not-wf-P02-ibm02n09.xml', // This test contains embeded control character 0x0.
-      'ibm-1-1-not-wf-P02-ibm02n10.xml', // This test contains embeded control character 0x100.
-      'ibm-1-1-not-wf-P02-ibm02n11.xml', // This test contains embeded control character 0x0B.
-      'ibm-1-1-not-wf-P02-ibm02n12.xml', // This test contains embeded control character 0x0C.
-      'ibm-1-1-not-wf-P02-ibm02n14.xml', // This test contains embeded control character 0x0E.
-      'ibm-1-1-not-wf-P02-ibm02n15.xml', // This test contains embeded control character 0x0F.
-      'ibm-1-1-not-wf-P02-ibm02n16.xml', // This test contains embeded control character 0x10.
-      'ibm-1-1-not-wf-P02-ibm02n17.xml', // This test contains embeded control character 0x11.
-      'ibm-1-1-not-wf-P02-ibm02n18.xml', // This test contains embeded control character 0x12.
-      'ibm-1-1-not-wf-P02-ibm02n19.xml', // This test contains embeded control character 0x13.
-      'ibm-1-1-not-wf-P02-ibm02n20.xml', // This test contains embeded control character 0x14.
-      'ibm-1-1-not-wf-P02-ibm02n21.xml', // This test contains embeded control character 0x15.
-      'ibm-1-1-not-wf-P02-ibm02n22.xml', // This test contains embeded control character 0x16.
-      'ibm-1-1-not-wf-P02-ibm02n23.xml', // This test contains embeded control character 0x17.
-      'ibm-1-1-not-wf-P02-ibm02n24.xml', // This test contains embeded control character 0x18.
-      'ibm-1-1-not-wf-P02-ibm02n25.xml', // This test contains embeded control character 0x19.
-      'ibm-1-1-not-wf-P02-ibm02n26.xml', // This test contains embeded control character 0x1A.
-      'ibm-1-1-not-wf-P02-ibm02n27.xml', // This test contains embeded control character 0x1B.
-      'ibm-1-1-not-wf-P02-ibm02n28.xml', // This test contains embeded control character 0x1C.
-      'ibm-1-1-not-wf-P02-ibm02n29.xml', // This test contains embeded control character 0x1D.
-      'ibm-1-1-not-wf-P02-ibm02n30.xml', // This test contains embeded control character 0x1E.
-      'ibm-1-1-not-wf-P02-ibm02n31.xml', // This test contains embeded control character 0x1F.
-      'ibm-1-1-not-wf-P02-ibm02n32.xml', // This test contains embeded control character 0x7F.
-      'ibm-1-1-not-wf-P02-ibm02n33.xml', // This test contains embeded control character 0x80.
-      'ibm-1-1-not-wf-P02-ibm02n34.xml', // This test contains embeded control character 0x81.
-      'ibm-1-1-not-wf-P02-ibm02n35.xml', // This test contains embeded control character 0x82.
-      'ibm-1-1-not-wf-P02-ibm02n36.xml', // This test contains embeded control character 0x83.
-      'ibm-1-1-not-wf-P02-ibm02n37.xml', // This test contains embeded control character 0x84.
-      'ibm-1-1-not-wf-P02-ibm02n38.xml', // This test contains embeded control characters x82, x83 and x84.
-      'ibm-1-1-not-wf-P02-ibm02n39.xml', // This test contains embeded control character 0x86.
-      'ibm-1-1-not-wf-P02-ibm02n40.xml', // This test contains embeded control character 0x87.
-      'ibm-1-1-not-wf-P02-ibm02n41.xml', // This test contains embeded control character 0x88.
-      'ibm-1-1-not-wf-P02-ibm02n42.xml', // This test contains embeded control character 0x89.
-      'ibm-1-1-not-wf-P02-ibm02n43.xml', // This test contains embeded control character 0x8A.
-      'ibm-1-1-not-wf-P02-ibm02n44.xml', // This test contains embeded control character 0x8B.
-      'ibm-1-1-not-wf-P02-ibm02n45.xml', // This test contains embeded control character 0x8C.
-      'ibm-1-1-not-wf-P02-ibm02n46.xml', // This test contains embeded control character 0x8D.
-      'ibm-1-1-not-wf-P02-ibm02n47.xml', // This test contains embeded control character 0x8E.
-      'ibm-1-1-not-wf-P02-ibm02n48.xml', // This test contains embeded control character 0x8F.
-      'ibm-1-1-not-wf-P02-ibm02n49.xml', // This test contains embeded control character 0x90.
-      'ibm-1-1-not-wf-P02-ibm02n50.xml', // This test contains embeded control character 0x91.
-      'ibm-1-1-not-wf-P02-ibm02n51.xml', // This test contains embeded control character 0x92.
-      'ibm-1-1-not-wf-P02-ibm02n52.xml', // This test contains embeded control character 0x93.
-      'ibm-1-1-not-wf-P02-ibm02n53.xml', // This test contains embeded control character 0x94.
-      'ibm-1-1-not-wf-P02-ibm02n54.xml', // This test contains embeded control character 0x95.
-      'ibm-1-1-not-wf-P02-ibm02n55.xml', // This test contains embeded control character 0x96.
-      'ibm-1-1-not-wf-P02-ibm02n56.xml', // This test contains embeded control character 0x97.
-      'ibm-1-1-not-wf-P02-ibm02n57.xml', // This test contains embeded control character 0x98.
-      'ibm-1-1-not-wf-P02-ibm02n58.xml', // This test contains embeded control character 0x99.
-      'ibm-1-1-not-wf-P02-ibm02n59.xml', // This test contains embeded control character 0x9A.
-      'ibm-1-1-not-wf-P02-ibm02n60.xml', // This test contains embeded control character 0x9B.
-      'ibm-1-1-not-wf-P02-ibm02n61.xml', // This test contains embeded control character 0x9C.
-      'ibm-1-1-not-wf-P02-ibm02n62.xml', // This test contains embeded control character 0x9D.
-      'ibm-1-1-not-wf-P02-ibm02n63.xml', // This test contains embeded control character 0x9E.
+
       'ibm-1-1-not-wf-P02-ibm02n64.xml', // This test contains embeded control characters present in an external entity.
       'ibm-1-1-not-wf-P02-ibm02n65.xml', // This test contains embeded control characters present in an external entity.
       'ibm-1-1-not-wf-P02-ibm02n66.xml', // This test contains embeded control characters present in an external entity.
@@ -893,68 +773,17 @@ const testFilters: FilterData = {
       'ibm-1-1-not-wf-P02-ibm02n69.xml', // This test contains embeded character 0xFFFF.
       'ibm-1-1-not-wf-P02-ibm02n70.xml', // This test contains a reference to character 0xFFFE.
       'ibm-1-1-not-wf-P02-ibm02n71.xml', // This test contains a reference to character 0xFFFF.
-      'ibm-1-1-not-wf-P04-ibm04n01.xml', // Tests an element with an illegal NameStartChar: #x300
-      'ibm-1-1-not-wf-P04-ibm04n02.xml', // Tests an element with an illegal NameStartChar: #0x333
-      'ibm-1-1-not-wf-P04-ibm04n03.xml', // Tests an element with an illegal NameStartChar: #0x369
-      'ibm-1-1-not-wf-P04-ibm04n04.xml', // Tests an element with an illegal NameStartChar: #0x37E
-      'ibm-1-1-not-wf-P04-ibm04n05.xml', // Tests an element with an illegal NameStartChar: #0x2000
-      'ibm-1-1-not-wf-P04-ibm04n06.xml', // Tests an element with an illegal NameStartChar: #0x2001
-      'ibm-1-1-not-wf-P04-ibm04n07.xml', // Tests an element with an illegal NameStartChar: #0x2002
-      'ibm-1-1-not-wf-P04-ibm04n08.xml', // Tests an element with an illegal NameStartChar: #0x2005
-      'ibm-1-1-not-wf-P04-ibm04n09.xml', // Tests an element with an illegal NameStartChar: #0x200B
-      'ibm-1-1-not-wf-P04-ibm04n10.xml', // Tests an element with an illegal NameStartChar: #0x200E
-      'ibm-1-1-not-wf-P04-ibm04n11.xml', // Tests an element with an illegal NameStartChar: #0x200F
-      'ibm-1-1-not-wf-P04-ibm04n12.xml', // Tests an element with an illegal NameStartChar: #0x2069
-      'ibm-1-1-not-wf-P04-ibm04n13.xml', // Tests an element with an illegal NameStartChar: #0x2190
-      'ibm-1-1-not-wf-P04-ibm04n14.xml', // Tests an element with an illegal NameStartChar: #0x23FF
-      'ibm-1-1-not-wf-P04-ibm04n15.xml', // Tests an element with an illegal NameStartChar: #0x280F
-      'ibm-1-1-not-wf-P04-ibm04n16.xml', // Tests an element with an illegal NameStartChar: #0x2A00
-      'ibm-1-1-not-wf-P04-ibm04n17.xml', // Tests an element with an illegal NameStartChar: #0x2EDC
-      'ibm-1-1-not-wf-P04-ibm04n18.xml', // Tests an element with an illegal NameStartChar: #0x2B00
-      'ibm-1-1-not-wf-P04-ibm04n19.xml', // Tests an element with an illegal NameStartChar: #0x2BFF
-      'ibm-1-1-not-wf-P04-ibm04n20.xml', // Tests an element with an illegal NameStartChar: #0x3000
+
       'ibm-1-1-not-wf-P04-ibm04n21.xml', // Tests an element with an illegal NameStartChar: #0xD800
       'ibm-1-1-not-wf-P04-ibm04n22.xml', // Tests an element with an illegal NameStartChar: #0xD801
       'ibm-1-1-not-wf-P04-ibm04n23.xml', // Tests an element with an illegal NameStartChar: #0xDAFF
       'ibm-1-1-not-wf-P04-ibm04n24.xml', // Tests an element with an illegal NameStartChar: #0xDFFF
-      'ibm-1-1-not-wf-P04-ibm04n25.xml', // Tests an element with an illegal NameStartChar: #0xEFFF
-      'ibm-1-1-not-wf-P04-ibm04n26.xml', // Tests an element with an illegal NameStartChar: #0xF1FF
-      'ibm-1-1-not-wf-P04-ibm04n27.xml', // Tests an element with an illegal NameStartChar: #0xF8FF
-      'ibm-1-1-not-wf-P04-ibm04n28.xml', // Tests an element with an illegal NameStartChar: #0xFFFFF
-      'ibm-1-1-not-wf-P04a-ibm04an01.xml', // Tests an element with an illegal NameChar: #xB8
-      'ibm-1-1-not-wf-P04a-ibm04an02.xml', // Tests an element with an illegal NameChar: #0xA1
-      'ibm-1-1-not-wf-P04a-ibm04an03.xml', // Tests an element with an illegal NameChar: #0xAF
-      'ibm-1-1-not-wf-P04a-ibm04an04.xml', // Tests an element with an illegal NameChar: #0x37E
-      'ibm-1-1-not-wf-P04a-ibm04an05.xml', // Tests an element with an illegal NameChar: #0x2000
-      'ibm-1-1-not-wf-P04a-ibm04an06.xml', // Tests an element with an illegal NameChar: #0x2001
-      'ibm-1-1-not-wf-P04a-ibm04an07.xml', // Tests an element with an illegal NameChar: #0x2002
-      'ibm-1-1-not-wf-P04a-ibm04an08.xml', // Tests an element with an illegal NameChar: #0x2005
-      'ibm-1-1-not-wf-P04a-ibm04an09.xml', // Tests an element with an illegal NameChar: #0x200B
-      'ibm-1-1-not-wf-P04a-ibm04an10.xml', // Tests an element with an illegal NameChar: #0x200E
-      'ibm-1-1-not-wf-P04a-ibm04an11.xml', // Tests an element with an illegal NameChar: #0x2038
-      'ibm-1-1-not-wf-P04a-ibm04an12.xml', // Tests an element with an illegal NameChar: #0x2041
-      'ibm-1-1-not-wf-P04a-ibm04an13.xml', // Tests an element with an illegal NameChar: #0x2190
-      'ibm-1-1-not-wf-P04a-ibm04an14.xml', // Tests an element with an illegal NameChar: #0x23FF
-      'ibm-1-1-not-wf-P04a-ibm04an15.xml', // Tests an element with an illegal NameChar: #0x280F
-      'ibm-1-1-not-wf-P04a-ibm04an16.xml', // Tests an element with an illegal NameChar: #0x2A00
-      'ibm-1-1-not-wf-P04a-ibm04an17.xml', // Tests an element with an illegal NameChar: #0xFDD0
-      'ibm-1-1-not-wf-P04a-ibm04an18.xml', // Tests an element with an illegal NameChar: #0xFDEF
-      'ibm-1-1-not-wf-P04a-ibm04an19.xml', // Tests an element with an illegal NameChar: #0x2FFF
-      'ibm-1-1-not-wf-P04a-ibm04an20.xml', // Tests an element with an illegal NameChar: #0x3000
+
       'ibm-1-1-not-wf-P04a-ibm04an21.xml', // Tests an element with an illegal NameChar: #0xD800
       'ibm-1-1-not-wf-P04a-ibm04an22.xml', // Tests an element with an illegal NameChar: #0xD801
       'ibm-1-1-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
       'ibm-1-1-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
-      'ibm-1-1-not-wf-P04a-ibm04an25.xml', // Tests an element with an illegal NameChar: #0xEFFF
-      'ibm-1-1-not-wf-P04a-ibm04an26.xml', // Tests an element with an illegal NameChar: #0xF1FF
-      'ibm-1-1-not-wf-P04a-ibm04an27.xml', // Tests an element with an illegal NameChar: #0xF8FF
-      'ibm-1-1-not-wf-P04a-ibm04an28.xml', // Tests an element with an illegal NameChar: #0xFFFFF
-      'ibm-1-1-not-wf-P05-ibm05n01.xml', // Tests an element with an illegal Name containing #0x0B
-      'ibm-1-1-not-wf-P05-ibm05n02.xml', // Tests an element with an illegal Name containing #0x300
-      'ibm-1-1-not-wf-P05-ibm05n03.xml', // Tests an element with an illegal Name containing #0x36F
-      'ibm-1-1-not-wf-P05-ibm05n04.xml', // Tests an element with an illegal Name containing #0x203F
-      'ibm-1-1-not-wf-P05-ibm05n05.xml', // Tests an element with an illegal Name containing #x2040
-      'ibm-1-1-not-wf-P05-ibm05n06.xml', // Tests an element with an illegal Name containing #0xB7
+
       'ibm-1-1-not-wf-P77-ibm77n01.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains the invalid XML1.1 but valid XML 1.0 character #x7F.
       'ibm-1-1-not-wf-P77-ibm77n02.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a comment with the invalid XML1.1 but valid XML 1.0 character #x80.
       'ibm-1-1-not-wf-P77-ibm77n03.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a PI with the invalid XML1.1 but valid XML 1.0 character #x9F.
@@ -1020,67 +849,19 @@ const testFilters: FilterData = {
       'ht-bh-ns11-007', // Attempt to unbind xmlns 'namespace'
       'ht-bh-ns11-008', // Attempt to unbind xml namespace
       'rmt-e3e-12', // Default values for attributes may not contain references to external entities.
-      'x-ibm-1-0.5-not-wf-P04-ibm04n02.xml', // Tests an element with an illegal NameStartChar: #0x333
-      'x-ibm-1-0.5-not-wf-P04-ibm04n03.xml', // Tests an element with an illegal NameStartChar: #0x369
-      'x-ibm-1-0.5-not-wf-P04-ibm04n04.xml', // Tests an element with an illegal NameStartChar: #0x37E
-      'x-ibm-1-0.5-not-wf-P04-ibm04n05.xml', // Tests an element with an illegal NameStartChar: #0x2000
-      'x-ibm-1-0.5-not-wf-P04-ibm04n06.xml', // Tests an element with an illegal NameStartChar: #0x2001
-      'x-ibm-1-0.5-not-wf-P04-ibm04n07.xml', // Tests an element with an illegal NameStartChar: #0x2002
-      'x-ibm-1-0.5-not-wf-P04-ibm04n08.xml', // Tests an element with an illegal NameStartChar: #0x2005
-      'x-ibm-1-0.5-not-wf-P04-ibm04n09.xml', // Tests an element with an illegal NameStartChar: #0x200B
-      'x-ibm-1-0.5-not-wf-P04-ibm04n10.xml', // Tests an element with an illegal NameStartChar: #0x200E
-      'x-ibm-1-0.5-not-wf-P04-ibm04n11.xml', // Tests an element with an illegal NameStartChar: #0x200F
-      'x-ibm-1-0.5-not-wf-P04-ibm04n12.xml', // Tests an element with an illegal NameStartChar: #0x2069
-      'x-ibm-1-0.5-not-wf-P04-ibm04n13.xml', // Tests an element with an illegal NameStartChar: #0x2190
-      'x-ibm-1-0.5-not-wf-P04-ibm04n14.xml', // Tests an element with an illegal NameStartChar: #0x23FF
-      'x-ibm-1-0.5-not-wf-P04-ibm04n15.xml', // Tests an element with an illegal NameStartChar: #0x280F
-      'x-ibm-1-0.5-not-wf-P04-ibm04n16.xml', // Tests an element with an illegal NameStartChar: #0x2A00
-      'x-ibm-1-0.5-not-wf-P04-ibm04n17.xml', // Tests an element with an illegal NameStartChar: #0x2EDC
-      'x-ibm-1-0.5-not-wf-P04-ibm04n18.xml', // Tests an element with an illegal NameStartChar: #0x2B00
-      'x-ibm-1-0.5-not-wf-P04-ibm04n19.xml', // Tests an element with an illegal NameStartChar: #0x2BFF
-      'x-ibm-1-0.5-not-wf-P04-ibm04n20.xml', // Tests an element with an illegal NameStartChar: #0x3000
+
+      // These appear to have their text mangled in some way
       'x-ibm-1-0.5-not-wf-P04-ibm04n21.xml', // Tests an element with an illegal NameStartChar: #0xD800
       'x-ibm-1-0.5-not-wf-P04-ibm04n22.xml', // Tests an element with an illegal NameStartChar: #0xD801
       'x-ibm-1-0.5-not-wf-P04-ibm04n23.xml', // Tests an element with an illegal NameStartChar: #0xDAFF
       'x-ibm-1-0.5-not-wf-P04-ibm04n24.xml', // Tests an element with an illegal NameStartChar: #0xDFFF
-      'x-ibm-1-0.5-not-wf-P04-ibm04n25.xml', // Tests an element with an illegal NameStartChar: #0xEFFF
-      'x-ibm-1-0.5-not-wf-P04-ibm04n26.xml', // Tests an element with an illegal NameStartChar: #0xF1FF
-      'x-ibm-1-0.5-not-wf-P04-ibm04n27.xml', // Tests an element with an illegal NameStartChar: #0xF8FF
-      'x-ibm-1-0.5-not-wf-P04-ibm04n28.xml', // Tests an element with an illegal NameStartChar: #0xFFFFF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an01.xml', // Tests an element with an illegal NameChar: #xB8
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an02.xml', // Tests an element with an illegal NameChar: #0xA1
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an03.xml', // Tests an element with an illegal NameChar: #0xAF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an04.xml', // Tests an element with an illegal NameChar: #0x37E
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an05.xml', // Tests an element with an illegal NameChar: #0x2000
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an06.xml', // Tests an element with an illegal NameChar: #0x2001
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an07.xml', // Tests an element with an illegal NameChar: #0x2002
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an08.xml', // Tests an element with an illegal NameChar: #0x2005
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an09.xml', // Tests an element with an illegal NameChar: #0x200B
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an10.xml', // Tests an element with an illegal NameChar: #0x200E
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an11.xml', // Tests an element with an illegal NameChar: #0x2038
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an12.xml', // Tests an element with an illegal NameChar: #0x2041
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an13.xml', // Tests an element with an illegal NameChar: #0x2190
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an14.xml', // Tests an element with an illegal NameChar: #0x23FF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an15.xml', // Tests an element with an illegal NameChar: #0x280F
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an16.xml', // Tests an element with an illegal NameChar: #0x2A00
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an17.xml', // Tests an element with an illegal NameChar: #0xFDD0
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an18.xml', // Tests an element with an illegal NameChar: #0xFDEF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an19.xml', // Tests an element with an illegal NameChar: #0x2FFF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an20.xml', // Tests an element with an illegal NameChar: #0x3000
+
+      // These appear to have their text mangled in some way
       'x-ibm-1-0.5-not-wf-P04a-ibm04an21.xml', // Tests an element with an illegal NameChar: #0xD800
       'x-ibm-1-0.5-not-wf-P04a-ibm04an22.xml', // Tests an element with an illegal NameChar: #0xD801
       'x-ibm-1-0.5-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
       'x-ibm-1-0.5-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an25.xml', // Tests an element with an illegal NameChar: #0xEFFF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an26.xml', // Tests an element with an illegal NameChar: #0xF1FF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an27.xml', // Tests an element with an illegal NameChar: #0xF8FF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an28.xml', // Tests an element with an illegal NameChar: #0xFFFFF
-      'x-ibm-1-0.5-not-wf-P05-ibm05n01.xml', // Tests an element with an illegal Name containing #0x0B
-      'x-ibm-1-0.5-not-wf-P05-ibm05n02.xml', // Tests an element with an illegal Name containing #0x300
-      'x-ibm-1-0.5-not-wf-P05-ibm05n03.xml', // Tests an element with an illegal Name containing #0x36F
-      'x-ibm-1-0.5-not-wf-P05-ibm05n04.xml', // Tests an element with an illegal Name containing #0x203F
-      'x-ibm-1-0.5-not-wf-P05-ibm05n05.xml', // Tests an element with an illegal Name containing #x2040
-      'x-ibm-1-0.5-not-wf-P05-ibm05n06.xml', // Tests an element with an illegal Name containing #0xB7
+
       'rmt-ns-e1.0-13a', // The xml namespace must not be declared as the default namespace.
       'rmt-ns-e1.0-13b', // The xmlns namespace must not be declared as the default namespace.
       'rmt-ns-e1.0-13c', // Elements must not have the prefix xmlns.

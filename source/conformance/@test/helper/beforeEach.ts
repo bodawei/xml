@@ -92,17 +92,27 @@ function toHaveErrors(): JestMatcher {
          const errorsFound = actualErrors.map((error) => `${error.id} : ${error.message}`);
          const pass = (!errorsExpected && hasErrors) || (errorsExpected && hasAllExpectedErrors);
 
+         if (errorsFound.length === 0) {
+            errorsFound.push('No errors.');
+         }
+
+         const expectedDisplay = expected
+            .map((info) => {
+               return typeof info === 'string' ? info : info.id;
+            })
+            .join(', ');
+
          if (pass) {
             // expect(results).not.toHaveErrors(['foo', 'bar']);
             if (errorsExpected) {
-               message = `The errors ${expected.join(', ')} were found.`;
+               message = `The errors ${expectedDisplay} were found.`;
             } else {
                // expect(results).not.toHaveErrors();
                message = `Found the following errors:\n\t${errorsFound.join('\n\t')}\n`;
             }
          } else if (errorsExpected) {
             // expect(results).toHaveErrors([ 'foo', 'bar']);
-            message = `Did not find ${expected.join(', ')}, but instead found\n\t${errorsFound.join(
+            message = `Did not find ${expectedDisplay}, but instead found\n\t${errorsFound.join(
                '\n\t',
             )}\n`;
          } else {
