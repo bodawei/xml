@@ -1042,6 +1042,26 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-not-wf-P89-ibm89n11.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P89-ibm89n12.xml': 'PI_TARGET_NAME_INVALID',
 
+   'not-wf-sa-001': 'ATTRIBUTE_INVALID_NAME', // great - Attribute values must start with attribute names, not "?".
+   'not-wf-sa-002': 'ELEMENT_NAME_INVALID', // great - Names may not start with "."; it's not a Letter.
+   'not-wf-sa-003': 'PI_NO_TARGET', // great - Processing Instruction target name is required.
+   'not-wf-sa-004': 'PI_NO_CLOSE', // good - SGML-ism: processing instructions end in '?>' not '>'.
+   'not-wf-sa-005': 'PI_NO_CLOSE', // good - Processing instructions end in '?>' not '?'.
+   'not-wf-sa-006': 'COMMENT_DOUBLE_HYPHEN', // great - XML comments may not contain "--"
+   'not-wf-sa-007': 'REFERENCE_XTRA_TRAILING_SPACE', // great - General entity references have no whitespace after the entity name and before the semicolon.
+   'not-wf-sa-008': 'REFERENCE_NAME_INVALID', // great - Entity references must include names, which don't begin with '.' (it's not a Letter or other name start character).
+   'not-wf-sa-009': 'CHARREF_NO_DIGITS', // great - Character references may have only decimal or numeric strings.
+   'not-wf-sa-010': 'REFERENCE_XTRA_SPACE', // OK - Ampersand may only appear as part of a general entity reference.
+   'not-wf-sa-011': 'ATTRIBUTE_NO_EQUAL', // good - SGML-ism: attribute values must be explicitly assigned a value, it can't act as a boolean toggle.
+   'not-wf-sa-012': 'LITERAL_NO_OPEN_QUOTE', // great - SGML-ism: attribute values must be quoted in all cases.
+   'not-wf-sa-013': 'ATTRIBUTE_INVALID_VALUE', // OK - The quotes on both ends of an attribute value must match.
+   'not-wf-sa-014': 'ATTRIBUTE_INVALID_VALUE', // great - Attribute values may not contain literal '' characters.
+   'not-wf-sa-015': 'LITERAL_NO_OPEN_QUOTE', // OK - Attribute values need a value, not just an equals sign.
+   'not-wf-sa-016': 'ATTRIBUTE_INVALID_NAME', // OK - Attribute values need an associated name.
+   'not-wf-sa-017': 'CDATA_NO_CLOSE', // great? - CDATA sections need a terminating ']]>'.
+   'not-wf-sa-018': 'CDATA_XTRA_SPACE_AFTER_TYPE', // great - CDATA sections begin with a literal '![CDATA[', no space.
+   'not-wf-sa-019': 'ELEMENT_NO_NAME', // great - End tags may not be abbreviated as '/>'.
+   'not-wf-sa-020': 'REFERENCE_XTRA_SPACE', // OK - Attribute values may not contain literal '' characters except as part of an entity reference.
    'o-p02fail1': 'CHARDATA_INVALID_CHAR',
    'o-p02fail10': 'CHARDATA_INVALID_CHAR',
    'o-p02fail11': 'CHARDATA_INVALID_CHAR',

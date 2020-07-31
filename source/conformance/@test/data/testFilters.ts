@@ -316,26 +316,10 @@ const testFilters: FilterData = {
       // Not wellformed
       'not-wf-not-sa-007', // CRASHES. OUT OF MEMORY
       'o-p31fail1', // CRASHES. SOME KIND OF ETERNAL HANG
-      'not-wf-sa-001', // Attribute values must start with attribute names, not "?".
-      'not-wf-sa-002', // Names may not start with "."; it's not a Letter.
-      'not-wf-sa-003', // Processing Instruction target name is required.
-      'not-wf-sa-004', // SGML-ism: processing instructions end in '?>' not '>'.
-      'not-wf-sa-005', // Processing instructions end in '?>' not '?'.
-      'not-wf-sa-006', // XML comments may not contain "--"
-      'not-wf-sa-007', // General entity references have no whitespace after the entity name and before the semicolon.
-      'not-wf-sa-008', // Entity references must include names, which don't begin with '.' (it's not a Letter or other name start character).
-      'not-wf-sa-009', // Character references may have only decimal or numeric strings.
-      'not-wf-sa-010', // Ampersand may only appear as part of a general entity reference.
-      'not-wf-sa-011', // SGML-ism: attribute values must be explicitly assigned a value, it can't act as a boolean toggle.
-      'not-wf-sa-012', // SGML-ism: attribute values must be quoted in all cases.
-      'not-wf-sa-013', // The quotes on both ends of an attribute value must match.
-      'not-wf-sa-014', // Attribute values may not contain literal '' characters.
-      'not-wf-sa-015', // Attribute values need a value, not just an equals sign.
-      'not-wf-sa-016', // Attribute values need an associated name.
-      'not-wf-sa-017', // CDATA sections need a terminating ']]>'.
-      'not-wf-sa-018', // CDATA sections begin with a literal '![CDATA[', no space.
-      'not-wf-sa-019', // End tags may not be abbreviated as '/>'.
-      'not-wf-sa-020', // Attribute values may not contain literal '' characters except as part of an entity reference.
+      // 'not-wf-sa-017', // CDATA sections need a terminating ']]>'.
+      // 'not-wf-sa-018', // CDATA sections begin with a literal '![CDATA[', no space.
+      // 'not-wf-sa-019', // End tags may not be abbreviated as '/>'.
+      // 'not-wf-sa-020', // Attribute values may not contain literal '' characters except as part of an entity reference.
       'not-wf-sa-021', // Attribute values may not contain literal '' characters except as part of an entity reference.
       'not-wf-sa-022', // Character references end with semicolons, always!
       'not-wf-sa-023', // Digits are not valid name start characters.
