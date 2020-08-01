@@ -316,40 +316,7 @@ const testFilters: FilterData = {
       // Not wellformed
       'not-wf-not-sa-007', // CRASHES. OUT OF MEMORY
       'o-p31fail1', // CRASHES. SOME KIND OF ETERNAL HANG
-      // 'not-wf-sa-017', // CDATA sections need a terminating ']]>'.
-      // 'not-wf-sa-018', // CDATA sections begin with a literal '![CDATA[', no space.
-      // 'not-wf-sa-019', // End tags may not be abbreviated as '/>'.
-      // 'not-wf-sa-020', // Attribute values may not contain literal '' characters except as part of an entity reference.
-      'not-wf-sa-021', // Attribute values may not contain literal '' characters except as part of an entity reference.
-      'not-wf-sa-022', // Character references end with semicolons, always!
-      'not-wf-sa-023', // Digits are not valid name start characters.
-      'not-wf-sa-024', // Digits are not valid name start characters.
-      'not-wf-sa-025', // Text may not contain a literal ']]>' sequence.
-      'not-wf-sa-026', // Text may not contain a literal ']]>' sequence.
-      'not-wf-sa-027', // Comments must be terminated with "-->".
-      'not-wf-sa-028', // Processing instructions must end with '?>'.
-      'not-wf-sa-029', // Text may not contain a literal ']]>' sequence.
-      'not-wf-sa-030', // A form feed is not a legal XML character.
-      'not-wf-sa-031', // A form feed is not a legal XML character.
-      'not-wf-sa-032', // A form feed is not a legal XML character.
-      'not-wf-sa-033', // An ESC (octal 033) is not a legal XML character.
-      'not-wf-sa-034', // A form feed is not a legal XML character.
-      'not-wf-sa-035', // The '' character is a markup delimiter and must start an element, CDATA section, PI, or comment.
-      'not-wf-sa-036', // Text may not appear after the root element.
-      'not-wf-sa-037', // Character references may not appear after the root element.
-      'not-wf-sa-038', // Tests the "Unique Att Spec" WF constraint by providing multiple values for an attribute.
-      'not-wf-sa-039', // Tests the Element Type Match WFC', // end tag name must match start tag name.
-      'not-wf-sa-040', // Provides two document elements.
-      'not-wf-sa-041', // Provides two document elements.
-      'not-wf-sa-042', // Invalid End Tag
-      'not-wf-sa-043', // Provides #PCDATA text after the document element.
-      'not-wf-sa-044', // Provides two document elements.
-      'not-wf-sa-045', // Invalid Empty Element Tag
-      'not-wf-sa-046', // This start (or empty element) tag was not terminated correctly.
-      'not-wf-sa-047', // Invalid empty element tag invalid whitespace
-      'not-wf-sa-048', // Provides a CDATA section after the root element.
-      'not-wf-sa-049', // Missing start tag
-      'not-wf-sa-050', // Empty document, with no root element.
+      'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
       'not-wf-sa-051', // CDATA is invalid at top level of document.
       'not-wf-sa-052', // Invalid character reference.
       'not-wf-sa-053', // End tag does not match start tag.

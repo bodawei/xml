@@ -2,7 +2,7 @@
 
 interface ErrorDetails {
    id: string;
-   message?: RegExp;
+   message?: RegExp | string;
 }
 
 interface IdToErrorMap {
@@ -1062,6 +1062,65 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-018': 'CDATA_XTRA_SPACE_AFTER_TYPE', // great - CDATA sections begin with a literal '![CDATA[', no space.
    'not-wf-sa-019': 'ELEMENT_NO_NAME', // great - End tags may not be abbreviated as '/>'.
    'not-wf-sa-020': 'REFERENCE_XTRA_SPACE', // OK - Attribute values may not contain literal '' characters except as part of an entity reference.
+   'not-wf-sa-021': 'REFERENCE_NAME_INVALID', // OK - Attribute values may not contain literal '' characters except as part of an entity reference.
+   'not-wf-sa-022': 'CHARREF_NO_CLOSE', // great - Character references end with semicolons, always!
+   'not-wf-sa-023': 'ATTRIBUTE_INVALID_NAME', // great - Digits are not valid name start characters.
+   'not-wf-sa-024': 'ELEMENT_NAME_INVALID', // great - Digits are not valid name start characters.
+   'not-wf-sa-025': 'CHARDATA_INVALID_SECTION_END', // great - Text may not contain a literal ']]>' sequence.
+   'not-wf-sa-026': 'CHARDATA_INVALID_SECTION_END', // great - Text may not contain a literal ']]>' sequence.
+   'not-wf-sa-027': 'COMMENT_NO_CLOSE', // great - Comments must be terminated with "-->".
+   'not-wf-sa-028': 'PI_NO_CLOSE', // great - Processing instructions must end with '?>'.
+   'not-wf-sa-029': 'CHARDATA_INVALID_SECTION_END', // good - Text may not contain a literal ']]>' sequence.
+   'not-wf-sa-030': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
+   'not-wf-sa-031': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
+   'not-wf-sa-032': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
+   'not-wf-sa-033': 'CHARDATA_INVALID_CHAR', // good? - An ESC (octal 033) is not a legal XML character.
+   'not-wf-sa-034': 'ELEMENT_NAME_INVALID', // OK? - A form feed is not a legal XML character.
+   'not-wf-sa-035': 'ELEMENT_XTRA_LEADING_SPACE', // OK - The '' character is a markup delimiter and must start an element, CDATA section, PI, or comment.
+   'not-wf-sa-036': {
+      // OK - Text may not appear after the root element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARDATA_PTOKEN',
+   },
+   'not-wf-sa-037': {
+      // OK - Character references may not appear after the root element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARREF_PTOKEN',
+   },
+   'not-wf-sa-038': 'ATTRIBUTE_DUPLICATE_NAME', // great - Tests the "Unique Att Spec" WF constraint by providing multiple values for an attribute.
+   'not-wf-sa-039': 'ELEMENT_UNBALANCED', // great - Tests the Element Type Match WFC', // end tag name must match start tag name.
+   'not-wf-sa-040': {
+      // ok - Provides two document elements.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'ELEMENT_START_PTOKEN',
+   },
+   'not-wf-sa-041': {
+      // ok - Provides two document elements.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'ELEMENT_START_PTOKEN',
+   },
+   'not-wf-sa-042': 'ELEMENT_NAME_INVALID', // ok - Invalid End Tag
+   'not-wf-sa-043': {
+      // ok - Provides #PCDATA text after the document element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARDATA_PTOKEN',
+   },
+   'not-wf-sa-044': {
+      // ok - Provides two document elements.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'ELEMENT_EMPTY_PTOKEN',
+   },
+   'not-wf-sa-045': 'ELEMENT_NAME_INVALID', // ok = Invalid Empty Element Tag
+   'not-wf-sa-046': 'ELEMENT_NAME_INVALID', // ok - This start (or empty element) tag was not terminated correctly.
+   'not-wf-sa-047': '', // Invalid empty element tag invalid whitespace
+   'not-wf-sa-048': {
+      // good? - Provides a CDATA section after the root element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-049': 'ELEMENT_UNBALANCED', // ok - Missing start tag
+   'not-wf-sa-050': 'DOC_END_EARLY', // great - Empty document, with no root element.
+
    'o-p02fail1': 'CHARDATA_INVALID_CHAR',
    'o-p02fail10': 'CHARDATA_INVALID_CHAR',
    'o-p02fail11': 'CHARDATA_INVALID_CHAR',
