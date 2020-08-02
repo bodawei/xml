@@ -9,7 +9,890 @@ interface IdToErrorMap {
    [testName: string]: string | ErrorDetails;
 }
 
+const expectedInvalidCodes: IdToErrorMap = {
+   'invalid--002': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // Tests the "Proper Group/PE Nesting" validity constraint by fragmenting a content model between two parameter entities.
+   'invalid--005': 'error', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
+   'invalid--006': 'error', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
+   'invalid-not-sa-022': 'CONDITIONAL_UNKNOWN', // Test the "Proper Conditional Section/ PE Nesting" validity constraint.
+   'inv-dtd01': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC
+   'inv-dtd02': 'ENTITYDECL_UNDECLARED_NOTATION', // Tests the "Notation Declared" VC by using an undeclared notation name.
+   'inv-dtd03': 'CHILDREN_UNEXPECTED_END', // Tests the "Element Valid" VC (clause 2) by omitting a required element.
+   el01: 'ANY_UNDECLARED_ELEMENT', // Tests the Element Valid VC (clause 4) by including an undeclared child element.
+   el02: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1) by including elements in an EMPTY content model.
+   el03: 'UNDECLARED_ELEMENT_IN_MIXED', // Tests the Element Valid VC (clause 3) by including a child element not permitted by a mixed content model.
+   el04: 'ELEMENT_EXTRA_DECLARATION', // Tests the Unique Element Type Declaration VC.
+   el05: 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC.
+   el06: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1), using one of the predefined internal entities inside an EMPTY content model.
+   id01: 'ELEMENTSTART_ID_NAME_INVALID', // Tests the ID (is a Name) VC
+   id02: 'ELEMENTSTART_ID_DUPLICATE', // Tests the ID (appears once) VC
+   id03: 'ATTLISTDECL_EXTRA_ID', // Tests the One ID per Element Type VC
+   id04: 'ATTLISTDECL_ID_BAD_DEFAULT', // meh - Tests the ID Attribute Default VC
+   id05: 'ATTLISTDECL_ID_BAD_DEFAULT', // great Tests the ID Attribute Default VC
+   id06: 'ELEMENTSTART_IDREF_NOT_NAME', // Tests the IDREF (is a Name) VC
+   id07: 'ELEMENTSTART_IDREFS_NOT_NAME', // Tests the IDREFS (is a Names) VC
+   id08: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (matches an ID) VC
+   id09: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (IDREFS matches an ID) VC
+   'inv-not-sa01': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that optional whitespace causes a validity error.
+   'inv-not-sa02': 'REFERENCE_INVALID_STANDALONE', // Tests the Standalone Document Declaration VC, ensuring that attributes needing normalization cause a validity error.
+   'inv-not-sa04': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that attributes needing defaulting cause a validity error.
+   'inv-not-sa05': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that a token attribute that needs normalization causes a validity error.
+   'inv-not-sa06': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that a NOTATION attribute that needs normalization causes a validity error.
+   'inv-not-sa07': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an NMTOKEN attribute needing normalization causes a validity error.
+   'inv-not-sa08': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an NMTOKENS attribute needing normalization causes a validity error.
+   'inv-not-sa09': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ID attribute needing normalization causes a validity error.
+   'inv-not-sa10': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an IDREF attribute needing normalization causes a validity error.
+   'inv-not-sa11': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an IDREFS attribute needing normalization causes a validity error.
+   'inv-not-sa12': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ENTITY attribute needing normalization causes a validity error.
+   'inv-not-sa13': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ENTITIES attribute needing normalization causes a validity error.
+   'inv-not-sa14': 'CHILDREN_XTRA_CONTENT', // CDATA sections containing only whitespace do not match the nonterminal S, and cannot appear in these positions.
+
+   optional01: 'CHILDREN_UNEXPECTED_END', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one is required.
+   optional02: 'INVALID_ELEMENT_IN_CONTENT', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing two children where one is required.
+   optional03: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where two are required.
+   optional04: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where two are required.
+   optional05: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (one construction of that model).
+   optional06: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a second construction of that model).
+   optional07: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a third construction of that model).
+   optional08: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fourth construction of that model).
+   optional09: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fifth construction of that model).
+   optional10: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a basic construction of that model).
+   optional11: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a second construction of that model).
+   optional12: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a third construction of that model).
+   optional13: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fourth construction of that model).
+   optional14: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fifth construction of that model).
+   optional20: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a sixth construction of that model).
+   optional21: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a seventh construction of that model).
+   optional22: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (an eigth construction of that model).
+   optional23: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a ninth construction of that model).
+   optional24: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a tenth construction of that model).
+   optional25: 'CHILDREN_XTRA_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing text content where one or more elements are required.
+   'inv-required00': 'ELEMENTSTART_NO_REQUIRED', // Tests the Required Attribute VC.
+   'inv-required01': 'error', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
+   'inv-required02': 'error', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
+
+   root: 'MISMATCH_ROOT_ELEMENT_TYPE', // Tests the Root Element Type VC
+   attr01: 'ELEMENTSTART_ENTITY_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITY attribute type.
+   attr02: 'ELEMENTSTART_ENTITIES_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITIES attribute type.
+   attr03: 'error', // Tests the "Notation Attributes" VC for the NOTATION attribute type, first clause: value must be one of the ones that's declared.
+   attr04: 'error', // Tests the "Notation Attributes" VC for the NOTATION attribute type, second clause: the names in the declaration must all be declared.
+   attr05: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great - Tests the "Name Token" VC for the NMTOKEN attribute type.
+   attr06: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great Tests the "Name Token" VC for the NMTOKENS attribute type.
+   attr07: 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great Tests the "Enumeration" VC by providing a value which wasn't one of the choices.
+   attr08: 'ELEMENTSTART_FIXED_NOT_RIGHT', // great - Tests the "Fixed Attribute Default" VC by providing the wrong value.
+   attr09: 'ATTLISTDECL_BAD_IDREF_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREF value.
+   attr10: 'ATTLISTDECL_BAD_IDREFS_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREFS value.
+   attr11: 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal ENTITY value.
+   attr12: 'ATTLISTDECL_BAD_ENTITIES_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal ENTITIES value.
+   attr13: 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NMTOKEN value.
+   attr14: 'ATTLISTDECL_BAD_NMTOKENS_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NMTOKENS value.
+   attr15: 'ATTLISTDECL_BAD_NOTATION_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NOTATIONS value.
+   attr16: 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal enumeration value.
+   utf16b: 'error', // Tests reading an invalid "big endian" UTF-16 document
+   utf16l: 'error', // Tests reading an invalid "little endian" UTF-16 document
+   empty: 'CHILDREN_XTRA_CONTENT', // CDATA section containing only white space does not match the nonterminal S, and cannot appear in these positions.
+
+   'o-p01pass1': 'ANY_UNDECLARED_ELEMENT', // no prolog
+   'o-p01pass3': 'ANY_UNDECLARED_ELEMENT', // Misc items after the document
+   'o-p03pass1': 'error', // all valid S characters
+   'o-p04pass1': 'ANY_UNDECLARED_ELEMENT', // names with all valid ASCII characters, and one from each other class in NameChar
+   'o-p05pass1': 'ANY_UNDECLARED_ELEMENT', // various valid Name constructions
+   'o-p06fail1': 'ELEMENTSTART_IDREFS_NOT_NAME', // meh - Requires at least one name.
+   'o-p08fail1': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // at least one Nmtoken is required.
+   'o-p08fail2': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // an invalid Nmtoken character.
+   'o-p10pass1': 'ANY_UNDECLARED_ELEMENT', // But this is not what it is trying to show -  valid attribute values
+   'o-p14pass1': 'error', // valid CharData
+   'o-p15pass1': 'error', // valid comments
+   'o-p16pass1': 'PI_TARGET_HAS_XML', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+   'o-p16pass2': 'error', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.      'o-p16pass3': 'error', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+   'o-p18pass1': 'error', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
+   'o-p22pass1': 'error', // prolog can be empty
+   'o-p22pass2': 'error', // XML declaration only
+   'o-p22pass3': 'error', // XML decl and Misc
+   'o-p23pass1': 'error', // Test shows a valid XML declaration along with version info.
+   'o-p23pass2': 'error', // Test shows a valid XML declaration along with encoding declaration.
+   'o-p23pass3': 'error', // Test shows a valid XML declaration along with Standalone Document Declaration.
+   'o-p23pass4': 'error', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
+   'o-p24pass1': 'error', // Test shows a prolog that has the VersionInfo delimited by double quotes.
+   'o-p24pass2': 'error', // Test shows a prolog that has the VersionInfo delimited by single quotes.
+   'o-p24pass3': 'error', // Test shows whitespace is allowed in prolog before version info.
+   'o-p24pass4': 'error', // Test shows whitespace is allowed in prolog on both sides of equal sign.
+   'o-p25pass1': 'error', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
+   'o-p25pass2': 'error', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
+   'o-p26pass1': 'error', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
+   'o-p27pass1': 'error', // Comments are valid as the Misc part of the prolog.
+   'o-p27pass2': 'error', // Processing Instructions are valid as the Misc part of the prolog.
+   'o-p27pass3': 'error', // Whitespace is valid as the Misc part of the prolog.
+   'o-p27pass4': 'error', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
+   'o-p32pass1': 'error', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p32pass2': 'error', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p39pass1': 'error', // Empty element tag may be used for any element which has no content.
+   'o-p39pass2': 'error', // Character data is valid element content.
+   'o-p40pass1': 'error', // Elements content can be empty.
+   'o-p40pass2': 'error', // Whitespace is valid within a Start-tag.
+   'o-p40pass3': 'error', // Attributes are valid within a Start-tag.
+   'o-p40pass4': 'error', // Whitespace and Multiple Attributes are valid within a Start-tag.
+   'o-p41pass1': 'error', // Attributes are valid within a Start-tag.
+   'o-p41pass2': 'error', // Whitespace is valid within a Start-tags Attribute.
+   'o-p42pass1': 'error', // Test shows proper syntax for an End-tag.
+   'o-p42pass2': 'error', // Whitespace is valid after name in End-tag.
+
+   // WTF. These all look like perfectly good documents, EXCEPT that they are not reporting undeclared elements.  So, there's a bug, but why are the tests marked as invalid?
+   'o-p44pass1': 'error', // Valid display of an Empty Element Tag.
+   'o-p44pass2': 'error', // Empty Element Tags can contain an Attribute.
+   'o-p44pass3': 'error', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
+   'o-p44pass4': 'error', // Whitespace is valid after the name in an Empty Element Tag.
+   'o-p44pass5': 'error', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
+   'o-p66pass1': 'error', // valid character references
+   'o-p74pass1': 'error', // PEDef is either an entity value or an external id
+   'o-p75pass1': 'error', // valid external identifiers
+
+   'o-e2': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Validity Constraint: No duplicate tokens
+   'ibm-invalid-P28-ibm28i01.xml': 'MISMATCH_ROOT_ELEMENT_TYPE', // great
+   'ibm-invalid-P32-ibm32i01.xml': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // great
+   'ibm-invalid-P32-ibm32i03.xml': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // great
+   'ibm-invalid-P32-ibm32i04.xml': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // great
+   'ibm-invalid-P39-ibm39i01.xml': 'CONTENT_IN_EMPTY_ELEMENT', // great
+   'ibm-invalid-P39-ibm39i02.xml': 'CHILDREN_XTRA_CONTENT', // good
+   'ibm-invalid-P39-ibm39i03.xml': 'UNDECLARED_ELEMENT_IN_MIXED', // great
+   'ibm-invalid-P39-ibm39i04.xml': 'ANY_UNDECLARED_ELEMENT', // great
+   'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
+   'ibm-invalid-P41-ibm41i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
+   'ibm-invalid-P45-ibm45i01.xml': 'ELEMENT_EXTRA_DECLARATION', // great
+   'ibm-invalid-P49-ibm49i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
+   'ibm-invalid-P50-ibm50i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
+   'ibm-invalid-P51-ibm51i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
+   'ibm-invalid-P51-ibm51i03.xml': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // great
+   'ibm-invalid-P56-ibm56i01.xml': 'ELEMENTSTART_ID_NAME_INVALID', // great
+   'ibm-invalid-P56-ibm56i02.xml': 'ELEMENTSTART_ID_DUPLICATE', // great
+   'ibm-invalid-P56-ibm56i03.xml': 'ATTLISTDECL_ID_BAD_DEFAULT', // good
+   'ibm-invalid-P56-ibm56i05.xml': 'ATTLISTDECL_ID_BAD_DEFAULT', // good
+   'ibm-invalid-P56-ibm56i06.xml': 'ATTLISTDECL_EXTRA_ID', // good
+   'ibm-invalid-P56-ibm56i07.xml': 'ELEMENTSTART_IDREF_NOT_NAME', // good
+   'ibm-invalid-P56-ibm56i08.xml': 'ELEMENTSTART_IDREF_NO_ID', // great
+   'ibm-invalid-P56-ibm56i09.xml': 'ELEMENTSTART_IDREFS_NOT_NAME', // good
+   'ibm-invalid-P56-ibm56i10.xml': 'ELEMENTSTART_IDREF_NO_ID', // great
+   'ibm-invalid-P56-ibm56i11.xml': 'ELEMENTSTART_ENTITY_NO_ENTITY', // ok
+   'ibm-invalid-P56-ibm56i12.xml': 'ELEMENTSTART_ENTITY_NO_ENTITY', // ok
+   'ibm-invalid-P56-ibm56i13.xml': 'ELEMENTSTART_ENTITY_PARSED_ENTITY', // great
+   'ibm-invalid-P56-ibm56i14.xml': 'ELEMENTSTART_ENTITIES_NOT_NAME', // great
+   'ibm-invalid-P56-ibm56i15.xml': 'ELEMENTSTART_ENTITIES_NO_ENTITY', // great
+   'ibm-invalid-P56-ibm56i16.xml': 'ELEMENTSTART_ENTITIES_PARSED_ENTITY', // ok
+   'ibm-invalid-P56-ibm56i17.xml': 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN',
+   'ibm-invalid-P56-ibm56i18.xml': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // great
+   'ibm-invalid-P58-ibm58i01.xml': 'ELEMENTSTART_NOTATION_NOT_DECLARED', // great
+   'ibm-invalid-P58-ibm58i02.xml': 'ATTLISTDECL_BAD_NOTATION', // great
+   'ibm-invalid-P59-ibm59i01.xml': 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great
+   'ibm-invalid-P60-ibm60i01.xml': 'ELEMENTSTART_NO_REQUIRED', // great
+   'ibm-invalid-P60-ibm60i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
+   'ibm-invalid-P60-ibm60i03.xml': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // great
+   'ibm-invalid-P60-ibm60i04.xml': 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', //great
+   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i01.xml': {
+      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      message: /entity "ge2" was/,
+   },
+   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i02.xml': {
+      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      message: /entity "ge1" was/,
+   },
+   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i03.xml': {
+      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      message: /entity "ge2" was/,
+   },
+   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i04.xml': {
+      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      message: /entity "ge1" was/,
+   },
+   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i01.xml': {
+      id: 'PEREF_UNDEFINED',
+      message: /named "pe2" was/,
+   },
+   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i02.xml': {
+      id: 'PEREF_UNDEFINED',
+      message: /named "pe1" was/,
+   },
+   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i03.xml': {
+      id: 'PEREF_UNDEFINED',
+      message: /named "pe3" was/,
+   },
+   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i04.xml': 'PEREF_UNDEFINED',
+   'ibm-invalid-P76-ibm76i01.xml': 'ENTITYDECL_UNDECLARED_NOTATION',
+
+   'ibm-1-1-valid-P46-ibm46i01.xml': 'error', // An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
+   'ibm-1-1-valid-P46-ibm46i02.xml': 'error', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
+
+   'rmt-e2e-2a': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Duplicate token in enumerated attribute declaration
+   'rmt-e2e-2b': 'ATTLISTDECL_DUPLICATE_NOTATION', // great - Duplicate token in NOTATION attribute declaration
+
+   'rmt-e3e-06a': 'ATTLISTDECL_BAD_IDREF_DEFAULT', // Default values for IDREF attributes must match Name.
+   'rmt-e3e-06b': 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // Default values for ENTITY attributes must match Name.
+   'rmt-e3e-06c': 'ATTLISTDECL_BAD_IDREFS_DEFAULT', // Default values for IDREFS attributes must match Names.
+   'rmt-e3e-06d': 'ATTLISTDECL_BAD_ENTITIES_DEFAULT', // Default values for ENTITIES attributes must match Names.
+   'rmt-e3e-06e': 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', // Default values for NMTOKEN attributes must match Nmtoken.
+   'rmt-e3e-06f': 'ATTLISTDECL_BAD_NMTOKENS_DEFAULT', // Default values for NMTOKENS attributes must match Nmtokens.
+   'rmt-e3e-06g': 'ATTLISTDECL_BAD_NOTATION_DEFAULT', // Default values for NOTATION attributes must match one of the enumerated values.
+   'rmt-e3e-06h': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // Default values for enumerated attributes must match one of the enumerated values.
+   'rmt-e2e-9b': 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // great - An attribute default must be syntactically correct even if unused
+   'rmt-e3e-13': 'GEREF_UNDEFINED', // good - Even internal parameter entity references are enough to make undeclared entities into mere validity errors rather than well-formedness errors.
+
+   'rmt-e2e-14': 'error', // Crashing bug - Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
+   'rmt-e2e-15a': 'CONTENT_IN_EMPTY_ELEMENT', // OK (but twice) Empty content can't contain an entity reference
+   'rmt-e2e-15b': 'CONTENT_IN_EMPTY_ELEMENT', // meh - Empty content can't contain a comment
+   'rmt-e2e-15c': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain a PI
+   'rmt-e2e-15d': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain whitespace
+   'rmt-e2e-15g': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain character reference to whitespace
+   'rmt-e2e-15h': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain entity reference if replacement text is character reference to whitespace
+   'rmt-e2e-20': 'error', // no error - Tokens, after normalization, must be separated by space, not other whitespace characters
+   'rmt-015': 'error', // no error - Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-017': 'error', // no error - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-018': 'error', // no error - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-030': 'error', // no error, but format ouput is bad Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-032': 'error', // no error, but format ouput is bad  Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-036': 'error', // no error, but format ouput is bad  Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-037': 'error', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-048': 'error', // Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-046': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // good - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-052': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-053': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+
+   // Group namespaces
+   'rmt-ns10-017': 'error', // Simple legal case: no namespaces
+   'rmt-ns10-018': 'error', // Simple legal case: default namespace
+   'rmt-ns10-019': 'error', // Simple legal case: prefixed element
+   'rmt-ns10-020': 'error', // Simple legal case: prefixed attribute
+   'rmt-ns10-021': 'error', // Simple legal case: default namespace and unbinding
+   'rmt-ns10-022': 'error', // Simple legal case: default namespace and rebinding
+   'rmt-ns10-024': 'error', // Simple legal case: prefix rebinding
+   'rmt-ns10-027': 'error', // Reserved prefixes and namespaces: using the xml prefix undeclared
+   'rmt-ns10-028': 'error', // Reserved prefixes and namespaces: declaring the xml prefix correctly
+   'rmt-ns10-034': 'error', // Reserved prefixes and namespaces: binding a reserved prefix
+   'rmt-ns10-037': 'error', // Attribute uniqueness: different attributes with same local name
+   'rmt-ns10-038': 'error', // Attribute uniqueness: prefixed and unprefixed attributes with same local name
+   'rmt-ns10-039': 'error', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, with default namespace
+   'rmt-ns10-040': 'error', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, with default namespace and element in default namespace
+   'rmt-ns10-041': 'error', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, element in same namespace as prefixed attribute
+   'rmt-ns10-045': 'error', // Colon in ID attribute name
+   'rmt-ns10-046': 'error', // Colon in ID attribute name
+
+   // Group: some BOM problems. But several of these should be dying and
+   'invalid-bo-1': 'error', // Byte order mark in general entity should go away (big-endian)
+   'invalid-bo-2': 'error', // Byte order mark in general entity should go away (little-endian)
+   'invalid-bo-3': 'error', // Byte order mark in general entity should go away (utf-8)
+   'invalid-bo-4': 'error', // Two byte order marks in general entity produce only one (big-endian)
+   'invalid-bo-5': 'error', // Two byte order marks in general entity produce only one (little-endian)
+   'invalid-bo-6': 'error', // Two byte order marks in general entity produce only one (utf-8)
+   // These are not inalid as of the specified version, but they are not well formed. Why i nthis list?
+   'invalid-sa-140': 'ANY_UNDECLARED_ELEMENT', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
+   'invalid-sa-141': 'ANY_UNDECLARED_ELEMENT', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
+   'x-rmt5-014': 'error', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-016': 'error', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-019': 'error', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
+   'ibm-invalid-P89-ibm89n06.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n07.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n08.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n09.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n10.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n11.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n12.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'hst-bh-005': 'error', // xmlns:xml is an attribute as far as validation is concerned and must be declared
+   'hst-bh-006': 'error', // xmlns:foo is an attribute as far as validation is concerned and must be declared
+};
+
 const expectedNotWfCodes: IdToErrorMap = {
+   'not-wf-sa-001': 'ATTRIBUTE_INVALID_NAME', // great - Attribute values must start with attribute names, not "?".
+   'not-wf-sa-002': 'ELEMENT_NAME_INVALID', // great - Names may not start with "."; it's not a Letter.
+   'not-wf-sa-003': 'PI_NO_TARGET', // great - Processing Instruction target name is required.
+   'not-wf-sa-004': 'PI_NO_CLOSE', // good - SGML-ism: processing instructions end in '?>' not '>'.
+   'not-wf-sa-005': 'PI_NO_CLOSE', // good - Processing instructions end in '?>' not '?'.
+   'not-wf-sa-006': 'COMMENT_DOUBLE_HYPHEN', // great - XML comments may not contain "--"
+   'not-wf-sa-007': 'REFERENCE_XTRA_TRAILING_SPACE', // great - General entity references have no whitespace after the entity name and before the semicolon.
+   'not-wf-sa-008': 'REFERENCE_NAME_INVALID', // great - Entity references must include names, which don't begin with '.' (it's not a Letter or other name start character).
+   'not-wf-sa-009': 'CHARREF_NO_DIGITS', // great - Character references may have only decimal or numeric strings.
+   'not-wf-sa-010': 'REFERENCE_XTRA_SPACE', // OK - Ampersand may only appear as part of a general entity reference.
+   'not-wf-sa-011': 'ATTRIBUTE_NO_EQUAL', // good - SGML-ism: attribute values must be explicitly assigned a value, it can't act as a boolean toggle.
+   'not-wf-sa-012': 'LITERAL_NO_OPEN_QUOTE', // great - SGML-ism: attribute values must be quoted in all cases.
+   'not-wf-sa-013': 'ATTRIBUTE_INVALID_VALUE', // OK - The quotes on both ends of an attribute value must match.
+   'not-wf-sa-014': 'ATTRIBUTE_INVALID_VALUE', // great - Attribute values may not contain literal '' characters.
+   'not-wf-sa-015': 'LITERAL_NO_OPEN_QUOTE', // OK - Attribute values need a value, not just an equals sign.
+   'not-wf-sa-016': 'ATTRIBUTE_INVALID_NAME', // OK - Attribute values need an associated name.
+   'not-wf-sa-017': 'CDATA_NO_CLOSE', // great? - CDATA sections need a terminating ']]>'.
+   'not-wf-sa-018': 'CDATA_XTRA_SPACE_AFTER_TYPE', // great - CDATA sections begin with a literal '![CDATA[', no space.
+   'not-wf-sa-019': 'ELEMENT_NO_NAME', // great - End tags may not be abbreviated as '/>'.
+   'not-wf-sa-020': 'REFERENCE_XTRA_SPACE', // OK - Attribute values may not contain literal '' characters except as part of an entity reference.
+   'not-wf-sa-021': 'REFERENCE_NAME_INVALID', // OK - Attribute values may not contain literal '' characters except as part of an entity reference.
+   'not-wf-sa-022': 'CHARREF_NO_CLOSE', // great - Character references end with semicolons, always!
+   'not-wf-sa-023': 'ATTRIBUTE_INVALID_NAME', // great - Digits are not valid name start characters.
+   'not-wf-sa-024': 'ELEMENT_NAME_INVALID', // great - Digits are not valid name start characters.
+   'not-wf-sa-025': 'CHARDATA_INVALID_SECTION_END', // great - Text may not contain a literal ']]>' sequence.
+   'not-wf-sa-026': 'CHARDATA_INVALID_SECTION_END', // great - Text may not contain a literal ']]>' sequence.
+   'not-wf-sa-027': 'COMMENT_NO_CLOSE', // great - Comments must be terminated with "-->".
+   'not-wf-sa-028': 'PI_NO_CLOSE', // great - Processing instructions must end with '?>'.
+   'not-wf-sa-029': 'CHARDATA_INVALID_SECTION_END', // good - Text may not contain a literal ']]>' sequence.
+   'not-wf-sa-030': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
+   'not-wf-sa-031': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
+   'not-wf-sa-032': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
+   'not-wf-sa-033': 'CHARDATA_INVALID_CHAR', // good? - An ESC (octal 033) is not a legal XML character.
+   'not-wf-sa-034': 'ELEMENT_NAME_INVALID', // OK? - A form feed is not a legal XML character.
+   'not-wf-sa-035': 'ELEMENT_XTRA_LEADING_SPACE', // OK - The '' character is a markup delimiter and must start an element, CDATA section, PI, or comment.
+   'not-wf-sa-036': {
+      // OK - Text may not appear after the root element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARDATA_PTOKEN',
+   },
+   'not-wf-sa-037': {
+      // OK - Character references may not appear after the root element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARREF_PTOKEN',
+   },
+   'not-wf-sa-038': 'ATTRIBUTE_DUPLICATE_NAME', // great - Tests the "Unique Att Spec" WF constraint by providing multiple values for an attribute.
+   'not-wf-sa-039': 'ELEMENT_UNBALANCED', // great - Tests the Element Type Match WFC', // end tag name must match start tag name.
+   'not-wf-sa-040': {
+      // ok - Provides two document elements.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'ELEMENT_START_PTOKEN',
+   },
+   'not-wf-sa-041': {
+      // ok - Provides two document elements.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'ELEMENT_START_PTOKEN',
+   },
+   'not-wf-sa-042': 'ELEMENT_NAME_INVALID', // ok - Invalid End Tag
+   'not-wf-sa-043': {
+      // ok - Provides #PCDATA text after the document element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARDATA_PTOKEN',
+   },
+   'not-wf-sa-044': {
+      // ok - Provides two document elements.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'ELEMENT_EMPTY_PTOKEN',
+   },
+   'not-wf-sa-045': 'ELEMENT_NAME_INVALID', // ok = Invalid Empty Element Tag
+   'not-wf-sa-046': 'ELEMENT_NAME_INVALID', // ok - This start (or empty element) tag was not terminated correctly.
+   'not-wf-sa-047': 'error', // Invalid empty element tag invalid whitespace
+   'not-wf-sa-048': {
+      // good? - Provides a CDATA section after the root element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-049': 'ELEMENT_UNBALANCED', // ok - Missing start tag
+   'not-wf-sa-050': 'DOC_END_EARLY', // great - Empty document, with no root element.
+   'not-wf-sa-051': {
+      // ok - CDATA is invalid at top level of document.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-052': {
+      // ok - Invalid character reference.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARREF_PTOKEN',
+   },
+   'not-wf-sa-053': 'ELEMENT_UNBALANCED', // great - End tag does not match start tag.
+   'not-wf-sa-054': 'error', // PUBLIC requires two literals.
+   'not-wf-sa-055': {
+      // ok - Invalid Document Type Definition format.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'ELEMENT_START_PTOKEN',
+   },
+   'not-wf-sa-056': 'DOCTYPE_NO_CLOSE', // ok - Invalid Document Type Definition format': 'error', // misplaced comment.
+   'not-wf-sa-057': 'ENTITYDECL_NO_CLOSE', // ok - This isn't SGML; comments can't exist in declarations.
+   'not-wf-sa-058': 'WORDLIST_INVALID_NMTOKEN', // great - Invalid character , in ATTLIST enumeration
+   'not-wf-sa-059': 'LITERAL_NO_OPEN_QUOTE', // great - String literal must be in quotes.
+   'not-wf-sa-060': 'ATTLISTDECL_ATTR_TYPE_UNKNOWN', // meh - Invalid type NAME defined in ATTLIST.
+   'not-wf-sa-061': 'EXTERNALID_SYSTEM_NO_LEADING_SPACE', // great - External entity declarations require whitespace between public and system IDs.
+   'not-wf-sa-062': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // great - Entity declarations need space after the entity name.
+   'not-wf-sa-063': {
+      // meh - Conditional sections may only appear in the external DTD subset.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'CONDITIONAL_PTOKEN',
+   },
+   'not-wf-sa-064': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // great - Space is required between attribute type and default values in!ATTLIST...>declarations.
+   'not-wf-sa-065': 'ATTLISTDECL_ATTR_NAME_INVALID', // ok - Space is required between attribute name and type in!ATTLIST...>declarations.
+   'not-wf-sa-066': 'ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE', // great - Required whitespace is missing.
+   'not-wf-sa-067': 'ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE', // great - Space is required between attribute type and default values in!ATTLIST...>declarations.
+   'not-wf-sa-068': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // great - Space is required between NOTATION keyword and list of enumerated choices in!ATTLIST...>declarations.
+   'not-wf-sa-069': 'ENTITYDECL_EXTERNALID_NO_SPACE', // great - Space is required before an NDATA entity annotation.
+   'not-wf-sa-070': 'COMMENT_DOUBLE_HYPHEN', // great - XML comments may not contain "--"
+   'not-wf-sa-071': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-072': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
+   'not-wf-sa-073': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY f.
+   'not-wf-sa-074': 'ELEMENT_UNBALANCED', // great - Internal general parsed entities are only well formed if they match the "content" production.
+   'not-wf-sa-075': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-076': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
+   'not-wf-sa-077': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY bar.
+   'not-wf-sa-078': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
+   'not-wf-sa-079': 'REFERENCE_INVALID_RECURSION', // ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-080': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-081': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
+   'not-wf-sa-082': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
+   'not-wf-sa-083': 'ENTITYDECL_UNDECLARED_NOTATION', // great - Undefined NOTATION n.
+   'not-wf-sa-084': 'REFERENCE_UNPARSED_NO_USE', // great - Tests the_Parsed Entity_WFC by referring to an unparsed entity. (This precedes the error of not declaring that entity's notation, which may be detected any time before the DTD parsing is completed.)
+   'not-wf-sa-085': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
+   'not-wf-sa-086': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
+   'not-wf-sa-087': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
+   'not-wf-sa-088': 'ATTRIBUTE_INVALID_VALUE', // ok - Attribute values are terminated by literal quote characters, and any entity expansion is done afterwards.
+   'not-wf-sa-089': 'ENTITYDECL_NO_CLOSE', // ok - Parameter entities "are" always parsed; NDATA annotations are not permitted.
+   'not-wf-sa-090': 'ATTRIBUTE_INVALID_VALUE', // great - Attributes may not contain a literal "" character; this one has one because of reference expansion.
+   'not-wf-sa-091': 'ENTITYDECL_NO_CLOSE', // ok - Parameter entities "are" always parsed; NDATA annotations are not permitted.
+   'not-wf-sa-092': 'REFERENCE_NAME_INVALID', // ok - The replacement text of this entity has an illegal reference, because the character reference is expanded immediately.
+   'not-wf-sa-093': 'CHARREF_INVALID_HEX_CASE', // great - Hexadecimal character references may not use the uppercase 'X'.
+   'not-wf-sa-094': 'XMLDECL_PARAM_INVALID_CASE', // great - Prolog VERSION must be lowercase.
+   'not-wf-sa-095': 'XMLDECL_ENCODING_INVALID_ORDER', // great - VersionInfo must come before EncodingDecl.
+   'not-wf-sa-096': 'XMLDECL_NO_SPACE_BETWEEN_PARAMS', // great - Space is required before the standalone declaration.
+   'not-wf-sa-097': 'XMLDECL_VERSION_INVALD', // ok - Both quotes surrounding VersionNum must be the same.
+   'not-wf-sa-098': 'error', // Only one "version=..." string may appear in an XML declaration.
+   'not-wf-sa-099': 'XMLDECL_NO_CLOSE', // meh - Only three pseudo-attributes are in the XML declaration, and "valid=..." is not one of them.
+   'not-wf-sa-100': 'XMLDECL_STANDALONE_INVALID_CASE', // great - Only "yes" and "no" are permitted as values of "standalone".
+   'not-wf-sa-101': 'XMLDECL_ENCODING_INVALID', // ok - Space is not permitted in an encoding name.
+   'not-wf-sa-102': 'XMLDECL_VERSION_INVALD', // ok - Provides an illegal XML version number; spaces are illegal.
+   'not-wf-sa-103': 'ELEMENT_UNBALANCED', // ok - End-tag required for element foo.
+   'not-wf-sa-104': 'ELEMENT_UNBALANCED', // ok - Internal general parsed entities are only well formed if they match the "content" production.
+   'not-wf-sa-105': {
+      // ok - Invalid placement of CDATA section.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-106': {
+      // ok - but strange test description - Invalid placement of entity declaration.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARREF_PTOKEN',
+   },
+   'not-wf-sa-107': {
+      // ok - Invalid document type declaration. CDATA alone is invalid.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-108': 'CDATA_XTRA_SPACE_AFTER_TYPE', // great - No space in '![CDATA['.
+   'not-wf-sa-109': {
+      // good - Tags invalid within EntityDecl.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'GENERAL_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-110': {
+      // ok - Entity reference must be in content of element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'GENERAL_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-111': 'ATTRIBUTE_INVALID_NAME', // OK - Entiry reference must be in content of element not Start-tag.
+   'not-wf-sa-112': 'CDATA_INVALID_CASE', // great - CDATA sections start '![CDATA[', not '!cdata['.
+   'not-wf-sa-113': 'error', // Parameter entity values must use valid reference syntax; this reference is malformed.
+   'not-wf-sa-114': 'error', // General entity values must use valid reference syntax; this reference is malformed.
+   'not-wf-sa-115': 'REFERENCE_NO_NAME', // ok - The replacement text of this entity is an illegal character reference, which must be rejected when it is parsed in the context of an attribute value.
+   'not-wf-sa-116': 'CHARREF_NO_CLOSE', // good - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
+   'not-wf-sa-117': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
+   'not-wf-sa-118': 'REFERENCE_NAME_INVALID', // OK - Entity reference expansion is not recursive.
+   'not-wf-sa-119': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
+   'not-wf-sa-120': 'REFERENCE_NO_NAME', // ok - Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,must be doubly quoted': 'error', // encoded either as_amp;_or as_#38;#38;_.
+   'not-wf-sa-121': 'ENTITYDECL_NAME_INVALID', // great - A name of an ENTITY was started with an invalid character.
+   'not-wf-sa-122': 'NAMELIST_NO_DELIM', // meh - Invalid syntax mixed connectors are used.
+   'not-wf-sa-123': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax mismatched parenthesis.
+   'not-wf-sa-124': 'NAMELIST_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
+   'not-wf-sa-125': 'error', // Invalid syntax extra set of parenthesis not necessary.
+   'not-wf-sa-126': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
+   'not-wf-sa-127': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
+   'not-wf-sa-128': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid CDATA syntax.
+   'not-wf-sa-129': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid syntax for Element Type Declaration.
+   'not-wf-sa-130': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
+   'not-wf-sa-131': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
+   'not-wf-sa-132': 'error', // Invalid syntax mixed connectors used.
+   'not-wf-sa-133': 'NAMELIST_NAME_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
+   'not-wf-sa-134': 'NAMELIST_CLOSE_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
+   'not-wf-sa-135': 'NAMELIST_NAME_INVALID', // ok - Invalid character used as connector.
+   'not-wf-sa-136': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Tag omission is invalid in XML.
+   'not-wf-sa-137': 'ELEMENTDECL_NAME_NO_SPACE', // great - Space is required before a content model.
+   'not-wf-sa-138': 'NAMELIST_NO_DELIM', // meh - Invalid syntax for content particle.
+   'not-wf-sa-139': 'NAMELIST_NO_NAMES', // great - The element-content model should not be empty.
+   'not-wf-sa-140': 'ELEMENT_NAME_INVALID', // ok - Character '#x309a;' is a CombiningChar, not a Letter, and so may not begin a name.
+   'not-wf-sa-141': 'ELEMENT_NAME_INVALID', // good - Character #x0E5C is not legal in XML names.
+   'not-wf-sa-142': 'CHARREF_INVALID_CHAR', // good - Character #x0000 is not legal anywhere in an XML document.
+   'not-wf-sa-143': 'CHARREF_INVALID_CHAR', // good - Character #x001F is not legal anywhere in an XML document.
+   'not-wf-sa-144': 'CHARREF_INVALID_CHAR', // good - Character #xFFFF is not legal anywhere in an XML document.
+   'not-wf-sa-145': 'error', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
+   'not-wf-sa-146': 'CHARREF_INVALID_CHAR', // good - Character references must also refer to legal XML characters; #x00110000 is one more than the largest legal character.
+   'not-wf-sa-147': {
+      // good - XML Declaration may not be preceded by whitespace.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-148': {
+      // good - XML Declaration may not be preceded by comments or whitespace.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-149': {
+      // good - XML Declaration may not be within a DTD.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-150': {
+      // good - XML declarations may not be within element content.
+      id: 'CONTENT_INVALID_TOKEN',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-151': {
+      // good - XML declarations may not follow document content.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-152': 'XMLDECL_ENCODING_INVALID_ORDER', // great - XML declarations must include the "version=..." string.
+   'not-wf-sa-153': 'CONTENT_INVALID_TOKEN', // ok - Text declarations may not begin internal parsed entities; they may only appear at the beginning of external parsed (parameter or general) entities.
+   'not-wf-sa-154': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?XML ...?>' is neither an XML declaration nor a legal processing instruction target name.
+   'not-wf-sa-155': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is neither an XML declaration nor a legal processing instruction target name.
+   'not-wf-sa-156': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name.
+   'not-wf-sa-157': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is not a legal processing instruction target name.
+   'not-wf-sa-158': 'ATTLISTDECL_ATTR_TYPE_UNKNOWN', // OK - SGML-ism: "#NOTATION gif" can't have attributes.
+   'not-wf-sa-159': 'error', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
+   'not-wf-sa-160': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
+   'not-wf-sa-161': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
+   'not-wf-sa-162': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
+   'not-wf-sa-163': {
+      // OK - Invalid placement of Parameter entity reference.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'PARAMETER_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-164': {
+      // OK - Invalid placement of Parameter entity reference.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'PARAMETER_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-165': 'MARKUPDECL_INVALID_TOKEN', // OK - Parameter entity declarations must have a space before the '%'.
+   'not-wf-sa-166': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-167': 'CHARDATA_INVALID_CHAR', // good - Character FFFE is not legal anywhere in an XML document.
+   'not-wf-sa-168': 'error', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
+   'not-wf-sa-169': 'error', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
+   'not-wf-sa-170': 'error', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
+   'not-wf-sa-171': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-172': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-173': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-174': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-175': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-176': 'DOC_END_EARLY', // good - Start tags must have matching end tags.
+   'not-wf-sa-177': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-178': 'LITERAL_NO_CLOSE_QUOTE', // good - Invalid syntax matching double quote is missing.
+   'not-wf-sa-179': 'LITERAL_NO_CLOSE_QUOTE', // good - Invalid syntax matching double quote is missing.
+   'not-wf-sa-180': 'REFERENCE_NO_DECLARATION', // good - The_Entity Declared_WFC requires entities to be declared before they are used in an attribute list declaration.
+   'not-wf-sa-181': 'CDATA_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
+   'not-wf-sa-182': 'COMMENT_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
+   'not-wf-sa-183': 'NAMELIST_MIXED_NAME_EXTRA_REPEAT', // good - Mixed content declarations may not include content particles.
+   'not-wf-sa-184': 'NAMELIST_MIXED_INVALID_SUBPARTICLE', // OK - In mixed content models, element names must not be parenthesized.
+   'not-wf-sa-185': 'REFERENCE_NO_DECLARATION', // great - Tests the_Entity Declared_WFC._Note:_a nonvalidating parser is permitted not to report this WFC violation, since it would need to read an external parameter entity to distinguish it from a violation of the_Standalone Declaration_VC.
+   'not-wf-sa-186': 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // great - Whitespace is required between attribute/value pairs.
+
+   'not-wf-not-sa-001': 'error', // Conditional sections must be properly terminated ("]>" used instead of "]]>").
+   'not-wf-not-sa-002': 'error', // Processing instruction target names may not be "XML" in any combination of cases.
+   'not-wf-not-sa-003': 'error', // Conditional sections must be properly terminated ("]]>" omitted).
+   'not-wf-not-sa-004': 'error', // Conditional sections must be properly terminated ("]]>" omitted).
+   'not-wf-not-sa-006': 'error', // Conditional sections need a '[' after the INCLUDE or IGNORE.
+   'not-wf-not-sa-007': 'error', // A!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity.
+   'not-wf-not-sa-008': 'error', // In DTDs, the '%' character must be part of a parameter entity reference.
+   'not-wf-not-sa-009': 'error', // This test violates WFC:PE Between Declarations in Production 28a. The last character of a markup declaration is not contained in the same parameter-entity text replacement.
+   'not-wf-ext-sa-001': 'error', // Tests the_No Recursion_WFC by having an external general entity be self-recursive.
+   'not-wf-ext-sa-002': 'error', // External entities have "text declarations", which do not permit the "standalone=..." attribute that's allowed in XML declarations.
+   'not-wf-ext-sa-003': 'error', // Only one text declaration is permitted; a second one looks like an illegal processing instruction (target names of "xml" in any case are not allowed).
+   'not-wf-sa03': 'error', // Tests the Entity Declared WFC, ensuring that a reference to externally defined entity causes a well-formedness error.
+   attlist01: 'error', // SGML's NUTOKEN is not allowed.
+   attlist02: 'error', // SGML's NUTOKENS attribute type is not allowed.
+   attlist03: 'error', // Comma doesn't separate enumerations, unlike in SGML.
+   attlist04: 'error', // SGML's NUMBER attribute type is not allowed.
+   attlist05: 'error', // SGML's NUMBERS attribute type is not allowed.
+   attlist06: 'error', // SGML's NAME attribute type is not allowed.
+   attlist07: 'error', // SGML's NAMES attribute type is not allowed.
+   attlist08: 'error', // SGML's #CURRENT is not allowed.
+   attlist09: 'error', // SGML's #CONREF is not allowed.
+   attlist10: 'error', // Whitespace required between attributes
+   attlist11: 'error', // Whitespace required between attributes
+   cond01: 'error', // Only INCLUDE and IGNORE are conditional section keywords
+   cond02: 'error', // Must have keyword in conditional sections
+   content01: 'error', // No whitespace before "?" in content model
+   content02: 'error', // No whitespace before "*" in content model
+   content03: 'error', // No whitespace before "+" in content model
+   decl01: 'error', // External entities may not have standalone decls.
+   'nwf-dtd00': 'error', // Comma mandatory in content model
+   'nwf-dtd01': 'error', // Can't mix comma and vertical bar in content models
+   dtd02: 'error', // PE name immediately after "%"
+   dtd03: 'error', // PE name immediately followed by ";"
+   dtd04: 'error', // PUBLIC literal must be quoted
+   dtd05: 'error', // SYSTEM identifier must be quoted
+   dtd07: 'error', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+   element00: 'error', // EOF in middle of incomplete ETAG
+   element01: 'error', // EOF in middle of incomplete ETAG
+   element02: 'error', // Illegal markup (... %>)
+   element03: 'error', // Illegal markup ()
+   element04: 'error', // Illegal markup (!ELEMENT ...>)
+   encoding01: 'error', // Illegal character " " in encoding name
+   encoding02: 'error', // Illegal character "/" in encoding name
+   encoding03: 'error', // Illegal character reference in encoding name
+   encoding04: 'error', // Illegal character ":" in encoding name
+   encoding05: 'error', // Illegal character "@" in encoding name
+   encoding06: 'error', // Illegal character "+" in encoding name
+   encoding07: 'error', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+   pi: 'error', // No space between PI target name and data
+   pubid01: 'error', // Illegal entity ref in public ID
+   pubid02: 'error', // Illegal characters in public ID
+   pubid03: 'error', // Illegal characters in public ID
+   pubid04: 'error', // Illegal characters in public ID
+   pubid05: 'error', // SGML-ism: public ID without system ID
+   sgml01: 'error', // SGML-ism: omitted end tag for EMPTY content
+   sgml02: 'error', // XML declaration must be at the very beginning of a document; it"s not a processing instruction
+   sgml03: 'error', // Comments may not contain "--"
+   sgml04: 'error', // ATTLIST declarations apply to only one element, unlike SGML
+   sgml05: 'error', // ELEMENT declarations apply to only one element, unlike SGML
+   sgml06: 'error', // ATTLIST declarations are never global, unlike in SGML
+   sgml07: 'error', // SGML Tag minimization specifications are not allowed
+   sgml08: 'error', // SGML Tag minimization specifications are not allowed
+   sgml09: 'error', // SGML Content model exception specifications are not allowed
+   sgml10: 'error', // SGML Content model exception specifications are not allowed
+   sgml11: 'error', // CDATA is not a valid content model spec
+   sgml12: 'error', // RCDATA is not a valid content model spec
+   sgml13: 'error', // SGML Unordered content models not allowed
+
+   'o-p01fail1': 'error', // S cannot occur before the prolog
+   'o-p01fail2': 'error', // comments cannot occur before the prolog
+   'o-p01fail3': 'error', // only one document element
+   'o-p01fail4': 'error', // document element must be complete.
+   'o-p02fail1': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail10': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail11': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail12': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail13': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail14': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail15': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail16': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail17': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail18': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail19': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail2': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail20': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail21': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail22': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail23': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail24': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail25': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail26': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail27': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail28': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail29': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail3': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail30': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail31': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail4': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail5': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail6': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail7': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail8': 'CHARDATA_INVALID_CHAR',
+   'o-p02fail9': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail1': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail10': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail11': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail12': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail13': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail14': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail15': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail16': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail17': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail18': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail19': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail2': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail20': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail21': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail22': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail23': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail24': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail25': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail26': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail27': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail28': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail29': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail3': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail4': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail5': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail7': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail8': 'CHARDATA_INVALID_CHAR',
+   'o-p03fail9': 'CHARDATA_INVALID_CHAR',
+   'o-p04fail1': 'error', // Name contains invalid character.
+   'o-p04fail2': 'error', // Name contains invalid character.
+   'o-p04fail3': 'error', // Name contains invalid character.
+   'o-p05fail1': 'error', // a Name cannot start with a digit
+   'o-p05fail2': 'error', // a Name cannot start with a '.'
+   'o-p05fail3': 'error', // a Name cannot start with a "-"
+   'o-p05fail4': 'error', // a Name cannot start with a CombiningChar
+   'o-p05fail5': 'error', // a Name cannot start with an Extender
+   'o-p09fail1': 'error', // EntityValue excludes '%'
+   'o-p09fail2': 'error', // EntityValue excludes ''
+   'o-p09fail3': 'error', // incomplete character reference
+   'o-p09fail4': 'error', // quote types must match
+   'o-p09fail5': 'error', // quote types must match
+   'o-p10fail1': 'error', // attribute values exclude ''
+   'o-p10fail2': 'error', // attribute values exclude ''
+   'o-p10fail3': 'error', // quote types must match
+   'o-p11fail1': 'error', // quote types must match
+   'o-p11fail2': 'error', // cannot contain delimiting quotes
+   'o-p12fail1': 'error', // '"' excluded
+   'o-p12fail2': 'error', // '\' excluded
+   'o-p12fail3': 'error', // entity references excluded
+   'o-p12fail4': 'error', // '>' excluded
+   'o-p12fail5': 'error', // '' excluded
+   'o-p12fail6': 'error', // built-in entity refs excluded
+   'o-p12fail7': 'error', // The public ID has a tab character, which is disallowed
+   'o-p14fail1': 'error', // '' excluded
+   'o-p14fail2': 'error', // '' excluded
+   'o-p14fail3': 'error', // "]]>" excluded
+   'o-p15fail1': 'error', // comments can't end in '-'
+   'o-p15fail2': 'error', // one comment per comment (contrasted with SGML)
+   'o-p15fail3': 'error', // can't include 2 or more adjacent '-'s
+   'o-p16fail1': 'error', // "xml" is an invalid PITarget
+   'o-p16fail2': 'error', // a PITarget must be present
+   'o-p16fail3': 'error', // S after PITarget is required
+   'o-p18fail1': 'error', // no space before "CDATA"
+   'o-p18fail2': 'error', // no space after "CDATA"
+   'o-p18fail3': 'error', // CDSect's can't nest
+   'o-p22fail1': 'error', // prolog must start with XML decl
+   'o-p22fail2': 'error', // prolog must start with XML decl
+   'o-p23fail1': 'error', // "xml" must be lower-case
+   'o-p23fail2': 'error', // VersionInfo must be supplied
+   'o-p23fail3': 'error', // VersionInfo must come first
+   'o-p23fail4': 'error', // SDDecl must come last
+   'o-p23fail5': 'error', // no SGML-type PIs
+   'o-p24fail1': 'error', // quote types must match
+   'o-p24fail2': 'error', // quote types must match
+   'o-p25fail1': 'error', // Comment is illegal in VersionInfo.
+   'o-p26fail1': 'error', // Illegal character in VersionNum.
+   'o-p26fail2': 'error', // Illegal character in VersionNum.
+   'o-p27fail1': 'error', // References aren't allowed in Misc, even if they would resolve to valid Misc.
+   'o-p28fail1': 'error', // only declarations in DTD.
+   'o-p29fail1': 'error', // A processor must not pass unknown declaration types.
+   'o-p30fail1': 'error', // An XML declaration is not the same as a TextDecl
+   'o-p31fail1': 'error', // external subset excludes doctypedecl
+   'o-p32fail1': 'error', // quote types must match
+   'o-p32fail2': 'error', // quote types must match
+   'o-p32fail3': 'error', // initial S is required
+   'o-p32fail4': 'error', // quotes are required
+   'o-p32fail5': 'error', // yes or no must be lower case
+   'o-p39fail1': 'error', // start-tag requires end-tag
+   'o-p39fail2': 'error', // end-tag requires start-tag
+   'o-p39fail3': 'error', // XML documents contain one or more elements
+   'o-p39fail4': 'error', // XML declarations must be correctly terminated
+   'o-p39fail5': 'error', // XML declarations must be correctly terminated
+   'o-p40fail1': 'error', // S is required between attributes
+   'o-p40fail2': 'error', // tags start with names, not nmtokens
+   'o-p40fail3': 'error', // tags start with names, not nmtokens
+   'o-p40fail4': 'error', // no space before name
+   'o-p41fail1': 'error', // quotes are required (contrast with SGML)
+   'o-p41fail2': 'error', // attribute name is required (contrast with SGML)
+   'o-p41fail3': 'error', // Eq required
+   'o-p42fail1': 'error', // no space before name
+   'o-p42fail2': 'error', // cannot end with "/>"
+   'o-p42fail3': 'error', // no NET (contrast with SGML)
+   'o-p43fail1': 'error', // no non-comment declarations
+   'o-p43fail2': 'error', // no conditional sections
+   'o-p43fail3': 'error', // no conditional sections
+   'o-p44fail1': 'error', // Illegal space before Empty element tag.
+   'o-p44fail2': 'error', // Illegal space after Empty element tag.
+   'o-p44fail3': 'error', // Illegal comment in Empty element tag.
+   'o-p44fail4': 'error', // Whitespace required between attributes.
+   'o-p44fail5': 'error', // Duplicate attribute name is illegal.
+   'o-p45fail1': 'error', // ELEMENT must be upper case.
+   'o-p45fail2': 'error', // S before contentspec is required.
+   'o-p45fail3': 'error', // only one content spec
+   'o-p45fail4': 'error', // no comments in declarations (contrast with SGML)
+   'o-p46fail1': 'error', // no parens on declared content
+   'o-p46fail2': 'error', // no inclusions (contrast with SGML)
+   'o-p46fail3': 'error', // no exclusions (contrast with SGML)
+   'o-p46fail4': 'error', // no space before occurrence
+   'o-p46fail5': 'error', // single group
+   'o-p46fail6': 'error', // can't be both declared and modeled
+   'o-p47fail1': 'error', // Invalid operator '|' must match previous operator ','
+   'o-p47fail2': 'error', // Illegal character '-' in Element-content model
+   'o-p47fail3': 'error', // Optional character must follow a name or list
+   'o-p47fail4': 'error', // Illegal space before optional character
+   'o-p48fail1': 'error', // Illegal space before optional character
+   'o-p48fail2': 'error', // Illegal space before optional character
+   'o-p49fail1': 'error', // connectors must match
+   'o-p50fail1': 'error', // connectors must match
+   'o-p51fail1': 'error', // occurrence on #PCDATA group must be *
+   'o-p51fail2': 'error', // occurrence on #PCDATA group must be *
+   'o-p51fail3': 'error', // #PCDATA must come first
+   'o-p51fail4': 'error', // occurrence on #PCDATA group must be *
+   'o-p51fail5': 'error', // only '|' connectors
+   'o-p51fail6': 'error', // Only '|' connectors and occurrence on #PCDATA group must be *
+   'o-p51fail7': 'error', // no nested groups
+   'o-p52fail1': 'error', // A name is required
+   'o-p52fail2': 'error', // A name is required
+   'o-p53fail1': 'error', // S is required before default
+   'o-p53fail2': 'error', // S is required before type
+   'o-p53fail3': 'error', // type is required
+   'o-p53fail4': 'error', // default is required
+   'o-p53fail5': 'error', // name is requried
+   'o-p54fail1': 'error', // don't pass unknown attribute types
+   'o-p55fail1': 'error', // must be upper case
+   'o-p56fail1': 'error', // no IDS type
+   'o-p56fail2': 'error', // no NUMBER type
+   'o-p56fail3': 'error', // no NAME type
+   'o-p56fail4': 'error', // no ENTITYS type - types must be upper case
+   'o-p56fail5': 'error', // types must be upper case
+   'o-p57fail1': 'error', // no keyword for NMTOKEN enumeration
+   'o-p58fail1': 'error', // at least one value required
+   'o-p58fail2': 'error', // separator must be '|'
+   'o-p58fail3': 'error', // notations are NAMEs, not NMTOKENs -- note: Leaving the invalid notation undeclared would cause a validating parser to fail without checking the name syntax, so the notation is declared with an invalid name. A parser that reports error positions should report an error at the AttlistDecl on line 6, before reaching the notation declaration.
+   'o-p58fail4': 'error', // NOTATION must be upper case
+   'o-p58fail5': 'error', // S after keyword is required
+   'o-p58fail6': 'error', // parentheses are require
+   'o-p58fail7': 'error', // values are unquoted
+   'o-p58fail8': 'error', // values are unquoted
+   'o-p59fail1': 'error', // at least one required
+   'o-p59fail2': 'error', // separator must be ","
+   'o-p59fail3': 'error', // values are unquoted
+   'o-p60fail1': 'error', // keywords must be upper case
+   'o-p60fail2': 'error', // S is required after #FIXED
+   'o-p60fail3': 'error', // only #FIXED has both keyword and value
+   'o-p60fail4': 'error', // #FIXED required value
+   'o-p60fail5': 'error', // only one default type
+   'o-p61fail1': 'error', // no other types, including TEMP, which is valid in SGML
+   'o-p62fail1': 'error', // INCLUDE must be upper case
+   'o-p62fail2': 'error', // no spaces in terminating delimiter
+   'o-p63fail1': 'error', // IGNORE must be upper case
+   'o-p63fail2': 'error', // delimiters must be balanced
+   'o-p64fail1': 'error', // section delimiters must balance
+   'o-p64fail2': 'error', // section delimiters must balance
+   'o-p66fail1': 'error', // terminating ';' is required
+   'o-p66fail2': 'error', // no S after '#'
+   'o-p66fail3': 'error', // no hex digits in numeric reference
+   'o-p66fail4': 'error', // only hex digits in hex references
+   'o-p66fail5': 'error', // no references to non-characters
+   'o-p66fail6': 'error', // no references to non-characters
+   'o-p68fail1': 'error', // terminating ';' is required
+   'o-p68fail2': 'error', // no S after ''
+   'o-p68fail3': 'error', // no S before ';'
+   'o-p69fail1': 'error', // terminating ';' is required
+   'o-p69fail2': 'error', // no S after '%'
+   'o-p69fail3': 'error', // no S before ';'
+   'o-p70fail1': 'error', // This is neither
+   'o-p71fail1': 'error', // S is required before EntityDef
+   'o-p71fail2': 'error', // Entity name is a Name, not an NMToken
+   'o-p71fail3': 'error', // no S after "!"
+   'o-p71fail4': 'error', // S is required after "!ENTITY"
+   'o-p72fail1': 'error', // S is required after "!ENTITY"
+   'o-p72fail2': 'error', // S is required after '%'
+   'o-p72fail3': 'error', // S is required after name
+   'o-p72fail4': 'error', // Entity name is a name, not an NMToken
+   'o-p73fail1': 'error', // No typed replacement text
+   'o-p73fail2': 'error', // Only one replacement value
+   'o-p73fail3': 'error', // No NDataDecl on replacement text
+   'o-p73fail4': 'error', // Value is required
+   'o-p73fail5': 'error', // No NDataDecl without value
+   'o-p74fail1': 'error', // no NDataDecls on parameter entities
+   'o-p74fail2': 'error', // value is required
+   'o-p74fail3': 'error', // only one value
+   'o-p75fail1': 'error', // S required after "PUBLIC"
+   'o-p75fail2': 'error', // S required after "SYSTEM"
+   'o-p75fail3': 'error', // S required between literals
+   'o-p75fail4': 'error', // "SYSTEM" implies only one literal
+   'o-p75fail5': 'error', // only one keyword
+   'o-p75fail6': 'error', // "PUBLIC" requires two literals (contrast with SGML)
+   'o-p76fail1': 'error', // S is required before "NDATA"
+   'o-p76fail2': 'error', // "NDATA" is upper-case
+   'o-p76fail3': 'error', // notation name is required
+   'o-p76fail4': 'error', // notation names are Names
+
    'ibm-not-wf-P01-ibm01n01.xml': 'DOC_END_EARLY',
    'ibm-not-wf-P01-ibm01n02.xml': {
       id: 'TOKEN_INVALID_CONTEXT',
@@ -541,7 +1424,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    // §4.1.0 CharRef
    'ibm-not-wf-P66-ibm66n01.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm-not-wf-P66-ibm66n02.xml': 'CHARREF_NO_CLOSE', // great
-   'ibm-not-wf-P66-ibm66n03.xml': 'OK',
+   'ibm-not-wf-P66-ibm66n03.xml': 'error', // Tests CharRef with an illegal character referred to. The "49" is used as the referred character in the CharRef in the EntityDecl in the DTD.
    'ibm-not-wf-P66-ibm66n04.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm-not-wf-P66-ibm66n05.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm-not-wf-P66-ibm66n06.xml': 'CHARREF_INVALID_CHAR', // great
@@ -587,6 +1470,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
 
    // §4.2.0 GEDecl
+   'ibm-not-wf-P71-ibm70n01.xml': 'error', // Tests
    'ibm-not-wf-P71-ibm71n01.xml': {
       id: 'MARKUPDECL_INVALID_TOKEN', // ok - better to notice a bad entity declaration
       message: /UNKNOWNDECL/,
@@ -790,6 +1674,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-not-wf-P85-ibm85n68.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n69.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n70.xml': 'PI_TARGET_NAME_INVALID',
+
    'ibm-not-wf-P85-ibm85n71.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n72.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n73.xml': 'PI_TARGET_NAME_INVALID',
@@ -890,6 +1775,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-not-wf-P85-ibm85n168.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n169.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n170.xml': 'PI_TARGET_NAME_INVALID',
+
    'ibm-not-wf-P85-ibm85n171.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n172.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P85-ibm85n173.xml': 'PI_TARGET_NAME_INVALID',
@@ -1041,333 +1927,6 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-not-wf-P89-ibm89n10.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P89-ibm89n11.xml': 'PI_TARGET_NAME_INVALID',
    'ibm-not-wf-P89-ibm89n12.xml': 'PI_TARGET_NAME_INVALID',
-
-   'not-wf-sa-001': 'ATTRIBUTE_INVALID_NAME', // great - Attribute values must start with attribute names, not "?".
-   'not-wf-sa-002': 'ELEMENT_NAME_INVALID', // great - Names may not start with "."; it's not a Letter.
-   'not-wf-sa-003': 'PI_NO_TARGET', // great - Processing Instruction target name is required.
-   'not-wf-sa-004': 'PI_NO_CLOSE', // good - SGML-ism: processing instructions end in '?>' not '>'.
-   'not-wf-sa-005': 'PI_NO_CLOSE', // good - Processing instructions end in '?>' not '?'.
-   'not-wf-sa-006': 'COMMENT_DOUBLE_HYPHEN', // great - XML comments may not contain "--"
-   'not-wf-sa-007': 'REFERENCE_XTRA_TRAILING_SPACE', // great - General entity references have no whitespace after the entity name and before the semicolon.
-   'not-wf-sa-008': 'REFERENCE_NAME_INVALID', // great - Entity references must include names, which don't begin with '.' (it's not a Letter or other name start character).
-   'not-wf-sa-009': 'CHARREF_NO_DIGITS', // great - Character references may have only decimal or numeric strings.
-   'not-wf-sa-010': 'REFERENCE_XTRA_SPACE', // OK - Ampersand may only appear as part of a general entity reference.
-   'not-wf-sa-011': 'ATTRIBUTE_NO_EQUAL', // good - SGML-ism: attribute values must be explicitly assigned a value, it can't act as a boolean toggle.
-   'not-wf-sa-012': 'LITERAL_NO_OPEN_QUOTE', // great - SGML-ism: attribute values must be quoted in all cases.
-   'not-wf-sa-013': 'ATTRIBUTE_INVALID_VALUE', // OK - The quotes on both ends of an attribute value must match.
-   'not-wf-sa-014': 'ATTRIBUTE_INVALID_VALUE', // great - Attribute values may not contain literal '' characters.
-   'not-wf-sa-015': 'LITERAL_NO_OPEN_QUOTE', // OK - Attribute values need a value, not just an equals sign.
-   'not-wf-sa-016': 'ATTRIBUTE_INVALID_NAME', // OK - Attribute values need an associated name.
-   'not-wf-sa-017': 'CDATA_NO_CLOSE', // great? - CDATA sections need a terminating ']]>'.
-   'not-wf-sa-018': 'CDATA_XTRA_SPACE_AFTER_TYPE', // great - CDATA sections begin with a literal '![CDATA[', no space.
-   'not-wf-sa-019': 'ELEMENT_NO_NAME', // great - End tags may not be abbreviated as '/>'.
-   'not-wf-sa-020': 'REFERENCE_XTRA_SPACE', // OK - Attribute values may not contain literal '' characters except as part of an entity reference.
-   'not-wf-sa-021': 'REFERENCE_NAME_INVALID', // OK - Attribute values may not contain literal '' characters except as part of an entity reference.
-   'not-wf-sa-022': 'CHARREF_NO_CLOSE', // great - Character references end with semicolons, always!
-   'not-wf-sa-023': 'ATTRIBUTE_INVALID_NAME', // great - Digits are not valid name start characters.
-   'not-wf-sa-024': 'ELEMENT_NAME_INVALID', // great - Digits are not valid name start characters.
-   'not-wf-sa-025': 'CHARDATA_INVALID_SECTION_END', // great - Text may not contain a literal ']]>' sequence.
-   'not-wf-sa-026': 'CHARDATA_INVALID_SECTION_END', // great - Text may not contain a literal ']]>' sequence.
-   'not-wf-sa-027': 'COMMENT_NO_CLOSE', // great - Comments must be terminated with "-->".
-   'not-wf-sa-028': 'PI_NO_CLOSE', // great - Processing instructions must end with '?>'.
-   'not-wf-sa-029': 'CHARDATA_INVALID_SECTION_END', // good - Text may not contain a literal ']]>' sequence.
-   'not-wf-sa-030': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
-   'not-wf-sa-031': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
-   'not-wf-sa-032': 'CHARDATA_INVALID_CHAR', // good? - A form feed is not a legal XML character.
-   'not-wf-sa-033': 'CHARDATA_INVALID_CHAR', // good? - An ESC (octal 033) is not a legal XML character.
-   'not-wf-sa-034': 'ELEMENT_NAME_INVALID', // OK? - A form feed is not a legal XML character.
-   'not-wf-sa-035': 'ELEMENT_XTRA_LEADING_SPACE', // OK - The '' character is a markup delimiter and must start an element, CDATA section, PI, or comment.
-   'not-wf-sa-036': {
-      // OK - Text may not appear after the root element.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CHARDATA_PTOKEN',
-   },
-   'not-wf-sa-037': {
-      // OK - Character references may not appear after the root element.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CHARREF_PTOKEN',
-   },
-   'not-wf-sa-038': 'ATTRIBUTE_DUPLICATE_NAME', // great - Tests the "Unique Att Spec" WF constraint by providing multiple values for an attribute.
-   'not-wf-sa-039': 'ELEMENT_UNBALANCED', // great - Tests the Element Type Match WFC', // end tag name must match start tag name.
-   'not-wf-sa-040': {
-      // ok - Provides two document elements.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'ELEMENT_START_PTOKEN',
-   },
-   'not-wf-sa-041': {
-      // ok - Provides two document elements.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'ELEMENT_START_PTOKEN',
-   },
-   'not-wf-sa-042': 'ELEMENT_NAME_INVALID', // ok - Invalid End Tag
-   'not-wf-sa-043': {
-      // ok - Provides #PCDATA text after the document element.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CHARDATA_PTOKEN',
-   },
-   'not-wf-sa-044': {
-      // ok - Provides two document elements.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'ELEMENT_EMPTY_PTOKEN',
-   },
-   'not-wf-sa-045': 'ELEMENT_NAME_INVALID', // ok = Invalid Empty Element Tag
-   'not-wf-sa-046': 'ELEMENT_NAME_INVALID', // ok - This start (or empty element) tag was not terminated correctly.
-   'not-wf-sa-047': 'error', // Invalid empty element tag invalid whitespace
-   'not-wf-sa-048': {
-      // good? - Provides a CDATA section after the root element.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CDATA_PTOKEN',
-   },
-   'not-wf-sa-049': 'ELEMENT_UNBALANCED', // ok - Missing start tag
-   'not-wf-sa-050': 'DOC_END_EARLY', // great - Empty document, with no root element.
-   'not-wf-sa-051': {
-      // ok - CDATA is invalid at top level of document.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CDATA_PTOKEN',
-   },
-   'not-wf-sa-052': {
-      // ok - Invalid character reference.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CHARREF_PTOKEN',
-   },
-   'not-wf-sa-053': 'ELEMENT_UNBALANCED', // great - End tag does not match start tag.
-   'not-wf-sa-055': {
-      // ok - Invalid Document Type Definition format.
-      id: 'MARKUPDECL_INVALID_TOKEN',
-      message: 'ELEMENT_START_PTOKEN',
-   },
-   'not-wf-sa-056': 'DOCTYPE_NO_CLOSE', // ok - Invalid Document Type Definition format': 'error', // misplaced comment.
-   'not-wf-sa-057': 'ENTITYDECL_NO_CLOSE', // ok - This isn't SGML; comments can't exist in declarations.
-   'not-wf-sa-058': 'WORDLIST_INVALID_NMTOKEN', // great - Invalid character , in ATTLIST enumeration
-   'not-wf-sa-059': 'LITERAL_NO_OPEN_QUOTE', // great - String literal must be in quotes.
-   'not-wf-sa-060': 'ATTLISTDECL_ATTR_TYPE_UNKNOWN', // meh - Invalid type NAME defined in ATTLIST.
-   'not-wf-sa-061': 'EXTERNALID_SYSTEM_NO_LEADING_SPACE', // great - External entity declarations require whitespace between public and system IDs.
-   'not-wf-sa-062': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // great - Entity declarations need space after the entity name.
-   'not-wf-sa-063': {
-      // meh - Conditional sections may only appear in the external DTD subset.
-      id: 'MARKUPDECL_INVALID_TOKEN',
-      message: 'CONDITIONAL_PTOKEN',
-   },
-   'not-wf-sa-064': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // great - Space is required between attribute type and default values in!ATTLIST...>declarations.
-   'not-wf-sa-065': 'ATTLISTDECL_ATTR_NAME_INVALID', // ok - Space is required between attribute name and type in!ATTLIST...>declarations.
-   'not-wf-sa-066': 'ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE', // great - Required whitespace is missing.
-   'not-wf-sa-067': 'ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE', // great - Space is required between attribute type and default values in!ATTLIST...>declarations.
-   'not-wf-sa-068': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // great - Space is required between NOTATION keyword and list of enumerated choices in!ATTLIST...>declarations.
-   'not-wf-sa-069': 'ENTITYDECL_EXTERNALID_NO_SPACE', // great - Space is required before an NDATA entity annotation.
-   'not-wf-sa-070': 'COMMENT_DOUBLE_HYPHEN', // great - XML comments may not contain "--"
-   'not-wf-sa-071': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
-   'not-wf-sa-072': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
-   'not-wf-sa-073': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY f.
-   'not-wf-sa-074': 'ELEMENT_UNBALANCED', // great - Internal general parsed entities are only well formed if they match the "content" production.
-   'not-wf-sa-075': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
-   'not-wf-sa-076': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
-   'not-wf-sa-077': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY bar.
-   'not-wf-sa-078': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
-   'not-wf-sa-079': 'REFERENCE_INVALID_RECURSION', // ENTITY can't reference itself directly or indirectly.
-   'not-wf-sa-080': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
-   'not-wf-sa-081': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
-   'not-wf-sa-082': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
-   'not-wf-sa-083': 'ENTITYDECL_UNDECLARED_NOTATION', // great - Undefined NOTATION n.
-   'not-wf-sa-084': 'REFERENCE_UNPARSED_NO_USE', // great - Tests the_Parsed Entity_WFC by referring to an unparsed entity. (This precedes the error of not declaring that entity's notation, which may be detected any time before the DTD parsing is completed.)
-   'not-wf-sa-085': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
-   'not-wf-sa-086': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
-   'not-wf-sa-087': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
-   'not-wf-sa-088': 'ATTRIBUTE_INVALID_VALUE', // ok - Attribute values are terminated by literal quote characters, and any entity expansion is done afterwards.
-   'not-wf-sa-089': 'ENTITYDECL_NO_CLOSE', // ok - Parameter entities "are" always parsed; NDATA annotations are not permitted.
-   'not-wf-sa-090': 'ATTRIBUTE_INVALID_VALUE', // great - Attributes may not contain a literal "" character; this one has one because of reference expansion.
-   'not-wf-sa-091': 'ENTITYDECL_NO_CLOSE', // ok - Parameter entities "are" always parsed; NDATA annotations are not permitted.
-   'not-wf-sa-092': 'REFERENCE_NAME_INVALID', // ok - The replacement text of this entity has an illegal reference, because the character reference is expanded immediately.
-   'not-wf-sa-093': 'CHARREF_INVALID_HEX_CASE', // great - Hexadecimal character references may not use the uppercase 'X'.
-   'not-wf-sa-094': 'XMLDECL_PARAM_INVALID_CASE', // great - Prolog VERSION must be lowercase.
-   'not-wf-sa-095': 'XMLDECL_ENCODING_INVALID_ORDER', // great - VersionInfo must come before EncodingDecl.
-   'not-wf-sa-096': 'XMLDECL_NO_SPACE_BETWEEN_PARAMS', // great - Space is required before the standalone declaration.
-   'not-wf-sa-097': 'XMLDECL_VERSION_INVALD', // ok - Both quotes surrounding VersionNum must be the same.
-   'not-wf-sa-099': 'XMLDECL_NO_CLOSE', // meh - Only three pseudo-attributes are in the XML declaration, and "valid=..." is not one of them.
-   'not-wf-sa-100': 'XMLDECL_STANDALONE_INVALID_CASE', // great - Only "yes" and "no" are permitted as values of "standalone".
-   'not-wf-sa-101': 'XMLDECL_ENCODING_INVALID', // ok - Space is not permitted in an encoding name.
-   'not-wf-sa-102': 'XMLDECL_VERSION_INVALD', // ok - Provides an illegal XML version number; spaces are illegal.
-   'not-wf-sa-103': 'ELEMENT_UNBALANCED', // ok - End-tag required for element foo.
-   'not-wf-sa-104': 'ELEMENT_UNBALANCED', // ok - Internal general parsed entities are only well formed if they match the "content" production.
-   'not-wf-sa-105': {
-      // ok - Invalid placement of CDATA section.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CDATA_PTOKEN',
-   },
-   'not-wf-sa-106': {
-      // ok - but strange test description - Invalid placement of entity declaration.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'CHARREF_PTOKEN',
-   },
-   'not-wf-sa-107': {
-      // ok - Invalid document type declaration. CDATA alone is invalid.
-      id: 'MARKUPDECL_INVALID_TOKEN',
-      message: 'CDATA_PTOKEN',
-   },
-   'not-wf-sa-108': 'CDATA_XTRA_SPACE_AFTER_TYPE', // great - No space in '![CDATA['.
-   'not-wf-sa-109': {
-      // good - Tags invalid within EntityDecl.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'GENERAL_ENTITY_START_PTOKEN',
-   },
-   'not-wf-sa-110': {
-      // ok - Entity reference must be in content of element.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'GENERAL_ENTITY_START_PTOKEN',
-   },
-   'not-wf-sa-111': 'ATTRIBUTE_INVALID_NAME', // OK - Entiry reference must be in content of element not Start-tag.
-   'not-wf-sa-112': 'CDATA_INVALID_CASE', // great - CDATA sections start '![CDATA[', not '!cdata['.
-   'not-wf-sa-115': 'REFERENCE_NO_NAME', // ok - The replacement text of this entity is an illegal character reference, which must be rejected when it is parsed in the context of an attribute value.
-   'not-wf-sa-116': 'CHARREF_NO_CLOSE', // good - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
-   'not-wf-sa-117': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
-   'not-wf-sa-118': 'REFERENCE_NAME_INVALID', // OK - Entity reference expansion is not recursive.
-   'not-wf-sa-119': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
-   'not-wf-sa-120': 'REFERENCE_NO_NAME', // ok - Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,must be doubly quoted': 'error', // encoded either as_amp;_or as_#38;#38;_.
-   'not-wf-sa-121': 'ENTITYDECL_NAME_INVALID', // great - A name of an ENTITY was started with an invalid character.
-   'not-wf-sa-122': 'NAMELIST_NO_DELIM', // meh - Invalid syntax mixed connectors are used.
-   'not-wf-sa-123': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax mismatched parenthesis.
-   'not-wf-sa-124': 'NAMELIST_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
-   'not-wf-sa-128': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid CDATA syntax.
-   'not-wf-sa-129': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid syntax for Element Type Declaration.
-   'not-wf-sa-130': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
-   'not-wf-sa-131': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
-   'not-wf-sa-133': 'NAMELIST_NAME_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
-   'not-wf-sa-134': 'NAMELIST_CLOSE_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
-   'not-wf-sa-135': 'NAMELIST_NAME_INVALID', // ok - Invalid character used as connector.
-   'not-wf-sa-136': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Tag omission is invalid in XML.
-   'not-wf-sa-137': 'ELEMENTDECL_NAME_NO_SPACE', // great - Space is required before a content model.
-   'not-wf-sa-138': 'NAMELIST_NO_DELIM', // meh - Invalid syntax for content particle.
-   'not-wf-sa-139': 'NAMELIST_NO_NAMES', // great - The element-content model should not be empty.
-   'not-wf-sa-140': 'ELEMENT_NAME_INVALID', // ok - Character '#x309a;' is a CombiningChar, not a Letter, and so may not begin a name.
-   'not-wf-sa-141': 'ELEMENT_NAME_INVALID', // good - Character #x0E5C is not legal in XML names.
-   'not-wf-sa-142': 'CHARREF_INVALID_CHAR', // good - Character #x0000 is not legal anywhere in an XML document.
-   'not-wf-sa-143': 'CHARREF_INVALID_CHAR', // good - Character #x001F is not legal anywhere in an XML document.
-   'not-wf-sa-144': 'CHARREF_INVALID_CHAR', // good - Character #xFFFF is not legal anywhere in an XML document.
-   'not-wf-sa-146': 'CHARREF_INVALID_CHAR', // good - Character references must also refer to legal XML characters; #x00110000 is one more than the largest legal character.
-   'not-wf-sa-147': {
-      // good - XML Declaration may not be preceded by whitespace.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'XMLDECL_PTOKEN',
-   },
-   'not-wf-sa-148': {
-      // good - XML Declaration may not be preceded by comments or whitespace.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'XMLDECL_PTOKEN',
-   },
-   'not-wf-sa-149': {
-      // good - XML Declaration may not be within a DTD.
-      id: 'MARKUPDECL_INVALID_TOKEN',
-      message: 'XMLDECL_PTOKEN',
-   },
-   'not-wf-sa-150': {
-      // good - XML declarations may not be within element content.
-      id: 'CONTENT_INVALID_TOKEN',
-      message: 'XMLDECL_PTOKEN',
-   },
-   'not-wf-sa-151': {
-      // good - XML declarations may not follow document content.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'XMLDECL_PTOKEN',
-   },
-   'not-wf-sa-152': 'XMLDECL_ENCODING_INVALID_ORDER', // great - XML declarations must include the "version=..." string.
-   'not-wf-sa-153': 'CONTENT_INVALID_TOKEN', // ok - Text declarations may not begin internal parsed entities; they may only appear at the beginning of external parsed (parameter or general) entities.
-   'not-wf-sa-154': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?XML ...?>' is neither an XML declaration nor a legal processing instruction target name.
-   'not-wf-sa-155': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is neither an XML declaration nor a legal processing instruction target name.
-   'not-wf-sa-156': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name.
-   'not-wf-sa-157': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is not a legal processing instruction target name.
-   'not-wf-sa-158': 'ATTLISTDECL_ATTR_TYPE_UNKNOWN', // OK - SGML-ism: "#NOTATION gif" can't have attributes.
-   'not-wf-sa-160': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
-   'not-wf-sa-161': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
-   'not-wf-sa-162': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
-   'not-wf-sa-163': {
-      // OK - Invalid placement of Parameter entity reference.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'PARAMETER_ENTITY_START_PTOKEN',
-   },
-   'not-wf-sa-164': {
-      // OK - Invalid placement of Parameter entity reference.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'PARAMETER_ENTITY_START_PTOKEN',
-   },
-   'not-wf-sa-165': 'MARKUPDECL_INVALID_TOKEN', // OK - Parameter entity declarations must have a space before the '%'.
-   'not-wf-sa-166': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
-   'not-wf-sa-167': 'CHARDATA_INVALID_CHAR', // good - Character FFFE is not legal anywhere in an XML document.
-   'not-wf-sa-171': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
-   'not-wf-sa-172': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
-   'not-wf-sa-173': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
-   'not-wf-sa-174': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
-   'not-wf-sa-175': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
-   'not-wf-sa-176': 'DOC_END_EARLY', // good - Start tags must have matching end tags.
-   'not-wf-sa-177': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
-   'not-wf-sa-178': 'LITERAL_NO_CLOSE_QUOTE', // good - Invalid syntax matching double quote is missing.
-   'not-wf-sa-179': 'LITERAL_NO_CLOSE_QUOTE', // good - Invalid syntax matching double quote is missing.
-   'not-wf-sa-180': 'REFERENCE_NO_DECLARATION', // good - The_Entity Declared_WFC requires entities to be declared before they are used in an attribute list declaration.
-   'not-wf-sa-181': 'CDATA_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
-   'not-wf-sa-182': 'COMMENT_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
-   'not-wf-sa-183': 'NAMELIST_MIXED_NAME_EXTRA_REPEAT', // good - Mixed content declarations may not include content particles.
-   'not-wf-sa-184': 'NAMELIST_MIXED_INVALID_SUBPARTICLE', // OK - In mixed content models, element names must not be parenthesized.
-   'not-wf-sa-185': 'REFERENCE_NO_DECLARATION', // great - Tests the_Entity Declared_WFC._Note:_a nonvalidating parser is permitted not to report this WFC violation, since it would need to read an external parameter entity to distinguish it from a violation of the_Standalone Declaration_VC.
-   'not-wf-sa-186': 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // great - Whitespace is required between attribute/value pairs.
-
-   'o-p02fail1': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail10': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail11': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail12': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail13': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail14': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail15': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail16': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail17': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail18': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail19': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail2': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail20': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail21': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail22': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail23': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail24': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail25': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail26': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail27': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail28': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail29': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail3': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail30': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail31': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail4': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail5': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail6': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail7': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail8': 'CHARDATA_INVALID_CHAR',
-   'o-p02fail9': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail1': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail10': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail11': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail12': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail13': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail14': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail15': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail16': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail17': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail18': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail19': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail2': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail20': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail21': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail22': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail23': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail24': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail25': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail26': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail27': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail28': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail29': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail3': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail4': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail5': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail7': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail8': 'CHARDATA_INVALID_CHAR',
-   'o-p03fail9': 'CHARDATA_INVALID_CHAR',
-
    'ibm-1-1-not-wf-P02-ibm02n01.xml': 'CHARDATA_INVALID_CHAR',
    'ibm-1-1-not-wf-P02-ibm02n02.xml': 'CHARDATA_INVALID_CHAR',
    'ibm-1-1-not-wf-P02-ibm02n03.xml': 'CHARDATA_INVALID_CHAR',
@@ -1430,7 +1989,14 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-1-1-not-wf-P02-ibm02n61.xml': 'CHARDATA_INVALID_CHAR',
    'ibm-1-1-not-wf-P02-ibm02n62.xml': 'CHARDATA_INVALID_CHAR',
    'ibm-1-1-not-wf-P02-ibm02n63.xml': 'CHARDATA_INVALID_CHAR',
-
+   'ibm-1-1-not-wf-P02-ibm02n64.xml': 'error', // This test contains embeded control characters present in an external entity.
+   'ibm-1-1-not-wf-P02-ibm02n65.xml': 'error', // This test contains embeded control characters present in an external entity.
+   'ibm-1-1-not-wf-P02-ibm02n66.xml': 'error', // This test contains embeded control characters present in an external entity.
+   'ibm-1-1-not-wf-P02-ibm02n67.xml': 'error', // This test contains embeded character 0xD800. (Invalid UTF8 sequence)
+   'ibm-1-1-not-wf-P02-ibm02n68.xml': 'error', // This test contains embeded character 0xFFFE.
+   'ibm-1-1-not-wf-P02-ibm02n69.xml': 'error', // This test contains embeded character 0xFFFF.
+   'ibm-1-1-not-wf-P02-ibm02n70.xml': 'error', // This test contains a reference to character 0xFFFE.
+   'ibm-1-1-not-wf-P02-ibm02n71.xml': 'error', // This test contains a reference to character 0xFFFF.
    'ibm-1-1-not-wf-P04-ibm04n01.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04-ibm04n02.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04-ibm04n03.xml': 'ELEMENT_NAME_INVALID',
@@ -1487,14 +2053,77 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-1-1-not-wf-P04a-ibm04an26.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04a-ibm04an27.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04a-ibm04an28.xml': 'ELEMENT_NAME_INVALID',
-
    'ibm-1-1-not-wf-P05-ibm05n01.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P05-ibm05n02.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P05-ibm05n03.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P05-ibm05n04.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P05-ibm05n05.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P05-ibm05n06.xml': 'ELEMENT_NAME_INVALID',
-
+   'ibm-1-1-not-wf-P77-ibm77n01.xml': 'error', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains the invalid XML1.1 but valid XML 1.0 character #x7F.
+   'ibm-1-1-not-wf-P77-ibm77n02.xml': 'error', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a comment with the invalid XML1.1 but valid XML 1.0 character #x80.
+   'ibm-1-1-not-wf-P77-ibm77n03.xml': 'error', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a PI with the invalid XML1.1 but valid XML 1.0 character #x9F.
+   'ibm-1-1-not-wf-P77-ibm77n04.xml': 'error', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity the contains invalid XML1.1 but valid XML 1.0 character #x89.
+   'ibm-1-1-not-wf-P77-ibm77n05.xml': 'error', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x94.
+   'ibm-1-1-not-wf-P77-ibm77n06.xml': 'error', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9F.
+   'ibm-1-1-not-wf-P77-ibm77n07.xml': 'error', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x7F.
+   'ibm-1-1-not-wf-P77-ibm77n08.xml': 'error', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9B.
+   'ibm-1-1-not-wf-P77-ibm77n09.xml': 'error', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x8D.
+   'ibm-1-1-not-wf-P77-ibm77n10.xml': 'error', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x84.
+   'ibm-1-1-not-wf-P77-ibm77n11.xml': 'error', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x88.
+   'ibm-1-1-not-wf-P77-ibm77n12.xml': 'error', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x8E.
+   'ibm-1-1-not-wf-P77-ibm77n13.xml': 'error', // The VersionNum of the primary document entity is 1.0 and that of the external 		dtd is 1.0. The external dtd contains an external entity whose VersionNum is 1.1.
+   'ibm-1-1-not-wf-P77-ibm77n14.xml': 'error', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.0. The external dtd contains an element declaration with an invalid 		XML 1.1 and 1.0 name.
+   'ibm-1-1-not-wf-P77-ibm77n15.xml': 'error', // The VersionNum of the primary document entity is 1.1 and testDecl of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		1.1 containing a valid XML1.0 but an invalid XML 1.1 character #x7F.
+   'ibm-1-1-not-wf-P77-ibm77n16.xml': 'error', // The VersionNum of the primary document entity is 1.0 and VersioNum of the external 		entity is absent. The replacement text of the entity contains an element followed 		by the valid XML 1.1 of line character NEL #x85 in its empty elem tag.
+   'ibm-1-1-not-wf-P77-ibm77n17.xml': 'error', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 enf of line character NEL #x85.
+   'ibm-1-1-not-wf-P77-ibm77n18.xml': 'error', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 of line character Unicode line separator #x2028.
+   'ibm-1-1-not-wf-P77-ibm77n19.xml': 'error', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x94.
+   'ibm-1-1-not-wf-P77-ibm77n20.xml': 'error', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.1. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x8F.
+   'ibm-1-1-not-wf-P77-ibm77n21.xml': 'error', // The VersionNum of the primary document entity is 1.1 and the texlDecl of the 		external dtd is absent. The external dtd contains a reference to an external 		parameter entity whose VersionNum is absent from the textDecl and it contains 		an invalid XML 1.1 character #x8F.
+   'rmt-e2e-27': 'error', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
+   'rmt-e2e-38': 'error', // XML 1.0 document refers to 1.1 entity
+   'rmt-e2e-61': 'error', // (From John Cowan) An encoding declaration in ASCII specifying an encoding that is not compatible with ASCII (so the document is not in its declared encoding). It should generate a fatal error.
+   'rmt-001': 'error', // External subset has later version number
+   'rmt-002': 'error', // External PE has later version number
+   'rmt-003': 'error', // External general entity has later version number
+   'rmt-004': 'error', // External general entity has later version number (no decl means 1.0)
+   'rmt-005': 'error', // Indirect external general entity has later version number
+   'rmt-011': 'error', // Contains a C1 control, legal in XML 1.0, illegal in XML 1.1
+   'rmt-013': 'error', // Contains a DEL, legal in XML 1.0, illegal in XML 1.1
+   'rmt-014': 'error', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-016': 'error', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-019': 'error', // Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-020': 'error', // Has the first character after the last legal namechar in XML 1.1, illegal in both XML 1.0 and 1.1
+   'rmt-021': 'error', // Has the first character after the last legal namechar in XML 1.1, illegal in both XML 1.0 and 1.1
+   'rmt-038': 'error', // Contains a C0 control character (form-feed), illegal in both XML 1.0 and 1.1
+   'rmt-039': 'error', // Contains a C0 control character (form-feed), illegal in both XML 1.0 and 1.1
+   'rmt-041': 'error', // Contains a C1 control character (partial line up), legal in XML 1.0 but not 1.1
+   'rmt-042': 'error', // Contains a character reference to a C0 control character (form-feed), legal in XML 1.1 but not 1.0
+   'rmt-ns10-009': 'error', // Namespace equality test: plain repetition
+   'rmt-ns10-010': 'error', // Namespace equality test: use of character reference
+   'rmt-ns10-011': 'error', // Namespace equality test: use of entity reference
+   'rmt-ns10-012': 'error', // Namespace inequality test: equal after attribute value normalization
+   'rmt-ns10-013': 'error', // Bad QName syntax: multiple colons
+   'rmt-ns10-014': 'error', // Bad QName syntax: colon at end
+   'rmt-ns10-015': 'error', // Bad QName syntax: colon at start
+   'rmt-ns10-016': 'error', // Bad QName syntax: xmlns:
+   'rmt-ns10-023': 'error', // Illegal use of 1.1-style prefix unbinding in 1.0 document
+   'rmt-ns10-025': 'error', // Unbound element prefix
+   'rmt-ns10-026': 'error', // Unbound attribute prefix
+   'rmt-ns10-029': 'error', // Reserved prefixes and namespaces: declaring the xml prefix incorrectly
+   'rmt-ns10-030': 'error', // Reserved prefixes and namespaces: binding another prefix to the xml namespace
+   'rmt-ns10-031': 'error', // Reserved prefixes and namespaces: declaring the xmlns prefix with its correct URI (illegal)
+   'rmt-ns10-032': 'error', // Reserved prefixes and namespaces: declaring the xmlns prefix with an incorrect URI
+   'rmt-ns10-033': 'error', // Reserved prefixes and namespaces: binding another prefix to the xmlns namespace
+   'rmt-ns10-035': 'error', // Attribute uniqueness: repeated identical attribute
+   'rmt-ns10-036': 'error', // Attribute uniqueness: repeated attribute with different prefixes
+   'rmt-ns10-042': 'error', // Colon in PI name
+   'rmt-ns10-043': 'error', // Colon in entity name
+   'rmt-ns10-044': 'error', // Colon in entity name
+   'rmt-ns11-005': 'error', // Illegal use of prefix that has been unbound
+   'ht-bh-ns11-007': 'error', // Attempt to unbind xmlns 'namespace'
+   'ht-bh-ns11-008': 'error', // Attempt to unbind xml namespace
+   'rmt-e3e-12': 'error', // Default values for attributes may not contain references to external entities.
    'x-ibm-1-0.5-not-wf-P04-ibm04n02.xml': 'ELEMENT_NAME_INVALID',
    'x-ibm-1-0.5-not-wf-P04-ibm04n03.xml': 'ELEMENT_NAME_INVALID',
    'x-ibm-1-0.5-not-wf-P04-ibm04n04.xml': 'ELEMENT_NAME_INVALID',
@@ -1557,80 +2186,32 @@ const expectedNotWfCodes: IdToErrorMap = {
    'x-ibm-1-0.5-not-wf-P05-ibm05n04.xml': 'ELEMENT_NAME_INVALID',
    'x-ibm-1-0.5-not-wf-P05-ibm05n05.xml': 'ELEMENT_NAME_INVALID',
    'x-ibm-1-0.5-not-wf-P05-ibm05n06.xml': 'ELEMENT_NAME_INVALID',
+   'rmt-ns-e1.0-13a': 'error', // The xml namespace must not be declared as the default namespace.
+   'rmt-ns-e1.0-13b': 'error', // The xmlns namespace must not be declared as the default namespace.
+   'rmt-ns-e1.0-13c': 'error', // Elements must not have the prefix xmlns.
+   'hst-bh-001': 'error', // decimal charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
+   'hst-bh-002': 'error', // hex charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
+   'hst-bh-003': 'error', // decimal charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
+   'hst-bh-004': 'error', // hex charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
+   'hst-lhs-007': 'error', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible
+   'hst-lhs-008': 'error', // UTF-16 BOM plus xml decl of utf-8 (using UTF-16 coding) incompatible
+   'hst-lhs-009': 'error', // UTF-16 BOM plus xml decl of utf-8 (using UTF-8 coding) incompatible
 };
 
-const expectedInvalidCodes: IdToErrorMap = {
-   'ibm-invalid-P28-ibm28i01.xml': 'MISMATCH_ROOT_ELEMENT_TYPE', // great
-   'ibm-invalid-P32-ibm32i01.xml': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // great
-   'ibm-invalid-P32-ibm32i03.xml': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // great
-   'ibm-invalid-P32-ibm32i04.xml': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // great
-   'ibm-invalid-P39-ibm39i01.xml': 'CONTENT_IN_EMPTY_ELEMENT', // great
-   'ibm-invalid-P39-ibm39i02.xml': 'CHILDREN_XTRA_CONTENT', // good
-   'ibm-invalid-P39-ibm39i03.xml': 'UNDECLARED_ELEMENT_IN_MIXED', // great
-   'ibm-invalid-P39-ibm39i04.xml': 'ANY_UNDECLARED_ELEMENT', // great
-   'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
-   'ibm-invalid-P41-ibm41i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
-   'ibm-invalid-P45-ibm45i01.xml': 'ELEMENT_EXTRA_DECLARATION', // great
-   'ibm-invalid-P49-ibm49i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
-   'ibm-invalid-P50-ibm50i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
-   'ibm-invalid-P51-ibm51i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
-   'ibm-invalid-P51-ibm51i03.xml': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // great
-   'ibm-invalid-P56-ibm56i01.xml': 'ELEMENTSTART_ID_NAME_INVALID', // great
-   'ibm-invalid-P56-ibm56i02.xml': 'ELEMENTSTART_ID_DUPLICATE', // great
-   'ibm-invalid-P56-ibm56i03.xml': 'ATTLISTDECL_ID_BAD_DEFAULT', // good
-   'ibm-invalid-P56-ibm56i05.xml': 'ATTLISTDECL_ID_BAD_DEFAULT', // good
-   'ibm-invalid-P56-ibm56i06.xml': 'ATTLISTDECL_EXTRA_ID', // good
-   'ibm-invalid-P56-ibm56i07.xml': 'ELEMENTSTART_IDREF_NOT_NAME', // good
-   'ibm-invalid-P56-ibm56i08.xml': 'ELEMENTSTART_IDREF_NO_ID', // great
-   'ibm-invalid-P56-ibm56i09.xml': 'ELEMENTSTART_IDREFS_NOT_NAME', // good
-   'ibm-invalid-P56-ibm56i10.xml': 'ELEMENTSTART_IDREF_NO_ID', // great
-   'ibm-invalid-P56-ibm56i11.xml': 'ELEMENTSTART_ENTITY_NO_ENTITY', // ok
-   'ibm-invalid-P56-ibm56i12.xml': 'ELEMENTSTART_ENTITY_NO_ENTITY', // ok
-   'ibm-invalid-P56-ibm56i13.xml': 'ELEMENTSTART_ENTITY_PARSED_ENTITY', // great
-   'ibm-invalid-P56-ibm56i14.xml': 'ELEMENTSTART_ENTITIES_NOT_NAME', // great
-   'ibm-invalid-P56-ibm56i15.xml': 'ELEMENTSTART_ENTITIES_NO_ENTITY', // great
-   'ibm-invalid-P56-ibm56i16.xml': 'ELEMENTSTART_ENTITIES_PARSED_ENTITY', // ok
-   'ibm-invalid-P56-ibm56i17.xml': 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN',
-   'ibm-invalid-P56-ibm56i18.xml': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // great
-   'ibm-invalid-P58-ibm58i01.xml': 'ELEMENTSTART_NOTATION_NOT_DECLARED', // great
-   'ibm-invalid-P58-ibm58i02.xml': 'ATTLISTDECL_BAD_NOTATION', // great
-   'ibm-invalid-P59-ibm59i01.xml': 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great
-   'ibm-invalid-P60-ibm60i01.xml': 'ELEMENTSTART_NO_REQUIRED', // great
-   'ibm-invalid-P60-ibm60i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
-   'ibm-invalid-P60-ibm60i03.xml': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // great
-   'ibm-invalid-P60-ibm60i04.xml': 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', //great
-   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i01.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
-      message: /entity "ge2" was/,
-   },
-   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i02.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
-      message: /entity "ge1" was/,
-   },
-   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i03.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
-      message: /entity "ge2" was/,
-   },
-   'ibm-invalid-P68-ibm-not-wf-P67-ibm68i04.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
-      message: /entity "ge1" was/,
-   },
-   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i01.xml': {
-      id: 'PEREF_UNDEFINED',
-      message: /named "pe2" was/,
-   },
-   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i02.xml': {
-      id: 'PEREF_UNDEFINED',
-      message: /named "pe1" was/,
-   },
-   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i03.xml': {
-      id: 'PEREF_UNDEFINED',
-      message: /named "pe3" was/,
-   },
-   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i04.xml': 'PEREF_UNDEFINED',
-   'ibm-invalid-P76-ibm76i01.xml': 'ENTITYDECL_UNDECLARED_NOTATION',
+const expectedErrorCodes: IdToErrorMap = {
+   'not-wf-not-sa-005': 'PEREF_UNDEFINED', // Tests the_Entity Declared_VC by referring to an undefined parameter entity within an external entity.
+   'ibm-invalid-P68-ibm68i01.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge2" is referred in the file ibm68i01.dtd", but not declared.
+   'ibm-invalid-P68-ibm68i02.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge1" is referred before declared in the file ibm68i01.dtd".
+   'ibm-invalid-P68-ibm68i03.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge2" is referred in the file ibm68i03.ent", but not declared.
+   'ibm-invalid-P68-ibm68i04.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge1" is referred before declared in the file ibm68i04.ent".
+   'ibm-invalid-P69-ibm69i01.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The Name "pe2" in the PEReference in the file ibm69i01.dtd does not match the Name of any declared PE.
+   'ibm-invalid-P69-ibm69i02.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe1" is referred before declared in the file ibm69i02.dtd
+   'ibm-invalid-P69-ibm69i03.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The Name "pe3" in the PEReference in the file ibm69i03.ent does not match the Name of any declared PE.
+   'ibm-invalid-P69-ibm69i04.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe2" is referred before declared in the file ibm69i04.ent.
+   'ibm-not-wf-P69-ibm69n05.xml': 'REFERENCE_NO_DECLARATION', // good - Based on E29 substantial source: minutes XML-Syntax 1999-02-24 E38 in XML 1.0 Errata, this WFC does not apply to P69, but the VC Entity declared still apply. Tests PEReference which is against P69 WFC: Entity Declared. The PE with the name "paaa" is referred before declared in the DTD.
+   'rmt-008': 'XMLDECL_VERSION_INVALD', // an implausibly-versioned document
+   'rmt-009': 'TEXTDECL_VERSION_INVALD', // External general entity has implausible version number
+   'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
 };
-
-const expectedErrorCodes: IdToErrorMap = {};
 
 export { IdToErrorMap, expectedErrorCodes, expectedNotWfCodes, expectedInvalidCodes };

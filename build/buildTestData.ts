@@ -145,7 +145,12 @@ function addRelatedData(data: SimpleObjData, currentPath: string): RawTestSuite 
          return result as RawTestCases;
       case 'TEST':
          try {
-            result.attr.testPath = `${workingPath}${data.attr.URI || ''}`;
+            let workPath = workingPath;
+            // the eduni directory appears to be malformed!  Who actually ran these tests??
+            if (workPath.indexOf('namespaces/misc') !== -1) {
+               workPath = workPath.replace('namespaces/misc', 'misc');
+            }             
+            result.attr.testPath = `${workPath}${data.attr.URI || ''}`;
             result.attr.testData = readFileSync(result.attr.testPath, { encoding: 'utf-8' });
          } catch (e) {
             result.attr.missingTestFile = e.message;
@@ -251,8 +256,10 @@ function addEntityPaths(data:TestSuite | TestCases | Test): TestSuite | TestCase
                   const extension = extname(fileName);
                   const finalPath = resolve(dirPath, fileName);
                   const stats = statSync(finalPath);
+                  // The eduni directory appears to suffix all files, including entities and dtd files, with .xml.
+                  const isEduni = dirPath.indexOf('eduni') !== -1;
 
-                  if (extension === '.xml' || !stats.isFile()) {
+                  if ((extension === '.xml' && !isEduni) || !stats.isFile()) {
                      return;
                   }
 

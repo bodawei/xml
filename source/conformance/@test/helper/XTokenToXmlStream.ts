@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { XToken, CHARREF_XTOKEN } from 'xToken';
+import { XToken, CHARREF_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 import {
    SPACE_XTOKEN,
    DOCTYPE_START_XTOKEN,
@@ -83,6 +83,11 @@ class XTokenToXmlStream extends Transform {
 
    _transform(xToken: XToken, _: string, done: () => void): void {
       switch (xToken.type) {
+         case XMLDECL_XTOKEN:
+            if (xToken.version === 1.1) {
+               this.push('<?xml version="1.1"?>');
+            }
+            break;
          case SPACE_XTOKEN:
             if (this.inElement) {
                this.push(formatText(xToken.text));

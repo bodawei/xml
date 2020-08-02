@@ -34,7 +34,6 @@ function toEqualNormalized(): JestMatcher {
             };
          }
 
-         console.log('Actual>\n', actualJoined, 'Expected\n', expected);
          return {
             pass: false,
             message: `EXPECTED\n${humanActual}\n\nTO EQUAL\n${humanExpected}\n`,
@@ -105,10 +104,14 @@ function toHaveErrors(): JestMatcher {
          if (pass) {
             // expect(results).not.toHaveErrors(['foo', 'bar']);
             if (errorsExpected) {
-               message = `The errors ${expectedDisplay} were found.`;
+               message = `Was expecting ${expectedDisplay}, but found ${errorsFound.join(
+                  '\n\t',
+               )} instead.`;
             } else {
                // expect(results).not.toHaveErrors();
-               message = `Found the following errors:\n\t${errorsFound.join('\n\t')}\n`;
+               message = `Expected no errors, but found the following errors:\n\t${errorsFound.join(
+                  '\n\t',
+               )}\n`;
             }
          } else if (errorsExpected) {
             // expect(results).toHaveErrors([ 'foo', 'bar']);

@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { dirname } from 'path';
+import { basename, dirname, relative, resolve } from 'path';
 import { Transform } from 'stream';
 
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
@@ -72,7 +72,12 @@ function parseEntityValue(
    });
 }
 
-function findEntityContent(cases: Array<TestCases>, dir: string, name: string): string {
+function findEntityContent(cases: Array<TestCases>, docDir: string, entitySubPath: string): string {
+   const fullPath = resolve(docDir, entitySubPath);
+   const fullTargetDir = dirname(fullPath);
+   const name = basename(fullPath);
+   const dir = `./${relative(process.cwd(), fullTargetDir)}`;
+
    for (const testcase of cases) {
       if (testcase.entityPaths[dir] && testcase.entityPaths[dir][name]) {
          return testcase.entityPaths[dir][name];
