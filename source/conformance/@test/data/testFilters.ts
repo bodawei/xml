@@ -317,142 +317,21 @@ const testFilters: FilterData = {
       'not-wf-not-sa-007', // CRASHES. OUT OF MEMORY
       'o-p31fail1', // CRASHES. SOME KIND OF ETERNAL HANG
       'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
-      'not-wf-sa-051', // CDATA is invalid at top level of document.
-      'not-wf-sa-052', // Invalid character reference.
-      'not-wf-sa-053', // End tag does not match start tag.
       'not-wf-sa-054', // PUBLIC requires two literals.
-      'not-wf-sa-055', // Invalid Document Type Definition format.
-      'not-wf-sa-056', // Invalid Document Type Definition format', // misplaced comment.
-      'not-wf-sa-057', // This isn't SGML; comments can't exist in declarations.
-      'not-wf-sa-058', // Invalid character , in ATTLIST enumeration
-      'not-wf-sa-059', // String literal must be in quotes.
-      'not-wf-sa-060', // Invalid type NAME defined in ATTLIST.
-      'not-wf-sa-061', // External entity declarations require whitespace between public and system IDs.
-      'not-wf-sa-062', // Entity declarations need space after the entity name.
-      'not-wf-sa-063', // Conditional sections may only appear in the external DTD subset.
-      'not-wf-sa-064', // Space is required between attribute type and default values in!ATTLIST...>declarations.
-      'not-wf-sa-065', // Space is required between attribute name and type in!ATTLIST...>declarations.
-      'not-wf-sa-066', // Required whitespace is missing.
-      'not-wf-sa-067', // Space is required between attribute type and default values in!ATTLIST...>declarations.
-      'not-wf-sa-068', // Space is required between NOTATION keyword and list of enumerated choices in!ATTLIST...>declarations.
-      'not-wf-sa-069', // Space is required before an NDATA entity annotation.
-      'not-wf-sa-070', // XML comments may not contain "--"
-      'not-wf-sa-071', // ENTITY can't reference itself directly or indirectly.
-      'not-wf-sa-072', // Undefined ENTITY foo.
-      'not-wf-sa-073', // Undefined ENTITY f.
-      'not-wf-sa-074', // Internal general parsed entities are only well formed if they match the "content" production.
-      'not-wf-sa-075', // ENTITY can't reference itself directly or indirectly.
-      'not-wf-sa-076', // Undefined ENTITY foo.
-      'not-wf-sa-077', // Undefined ENTITY bar.
-      'not-wf-sa-078', // Undefined ENTITY foo.
-      'not-wf-sa-079', // ENTITY can't reference itself directly or indirectly.
-      'not-wf-sa-080', // ENTITY can't reference itself directly or indirectly.
-      'not-wf-sa-081', // This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
-      'not-wf-sa-082', // This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
-      'not-wf-sa-083', // Undefined NOTATION n.
-      'not-wf-sa-084', // Tests the_Parsed Entity_WFC by referring to an unparsed entity. (This precedes the error of not declaring that entity's notation, which may be detected any time before the DTD parsing is completed.)
-      'not-wf-sa-085', // Public IDs may not contain "[".
-      'not-wf-sa-086', // Public IDs may not contain "[".
-      'not-wf-sa-087', // Public IDs may not contain "[".
-      'not-wf-sa-088', // Attribute values are terminated by literal quote characters, and any entity expansion is done afterwards.
-      'not-wf-sa-089', // Parameter entities "are" always parsed; NDATA annotations are not permitted.
-      'not-wf-sa-090', // Attributes may not contain a literal "" character; this one has one because of reference expansion.
-      'not-wf-sa-091', // Parameter entities "are" always parsed; NDATA annotations are not permitted.
-      'not-wf-sa-092', // The replacement text of this entity has an illegal reference, because the character reference is expanded immediately.
-      'not-wf-sa-093', // Hexadecimal character references may not use the uppercase 'X'.
-      'not-wf-sa-094', // Prolog VERSION must be lowercase.
-      'not-wf-sa-095', // VersionInfo must come before EncodingDecl.
-      'not-wf-sa-096', // Space is required before the standalone declaration.
-      'not-wf-sa-097', // Both quotes surrounding VersionNum must be the same.
       'not-wf-sa-098', // Only one "version=..." string may appear in an XML declaration.
-      'not-wf-sa-099', // Only three pseudo-attributes are in the XML declaration, and "valid=..." is not one of them.
-      'not-wf-sa-100', // Only "yes" and "no" are permitted as values of "standalone".
-      'not-wf-sa-101', // Space is not permitted in an encoding name.
-      'not-wf-sa-102', // Provides an illegal XML version number; spaces are illegal.
-      'not-wf-sa-103', // End-tag required for element foo.
-      'not-wf-sa-104', // Internal general parsed entities are only well formed if they match the "content" production.
-      'not-wf-sa-105', // Invalid placement of CDATA section.
-      'not-wf-sa-106', // Invalid placement of entity declaration.
-      'not-wf-sa-107', // Invalid document type declaration. CDATA alone is invalid.
-      'not-wf-sa-108', // No space in '![CDATA['.
-      'not-wf-sa-109', // Tags invalid within EntityDecl.
-      'not-wf-sa-110', // Entity reference must be in content of element.
-      'not-wf-sa-111', // Entiry reference must be in content of element not Start-tag.
-      'not-wf-sa-112', // CDATA sections start '![CDATA[', not '!cdata['.
       'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
       'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-115', // The replacement text of this entity is an illegal character reference, which must be rejected when it is parsed in the context of an attribute value.
-      'not-wf-sa-116', // Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
-      'not-wf-sa-117', // Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
-      'not-wf-sa-118', // Entity reference expansion is not recursive.
-      'not-wf-sa-119', // Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
-      'not-wf-sa-120', // Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,must be doubly quoted', // encoded either as_amp;_or as_#38;#38;_.
-      'not-wf-sa-121', // A name of an ENTITY was started with an invalid character.
-      'not-wf-sa-122', // Invalid syntax mixed connectors are used.
-      'not-wf-sa-123', // Invalid syntax mismatched parenthesis.
-      'not-wf-sa-124', // Invalid format of Mixed-content declaration.
       'not-wf-sa-125', // Invalid syntax extra set of parenthesis not necessary.
       'not-wf-sa-126', // Invalid syntax Mixed-content must be defined as zero or more.
       'not-wf-sa-127', // Invalid syntax Mixed-content must be defined as zero or more.
-      'not-wf-sa-128', // Invalid CDATA syntax.
-      'not-wf-sa-129', // Invalid syntax for Element Type Declaration.
-      'not-wf-sa-130', // Invalid syntax for Element Type Declaration.
-      'not-wf-sa-131', // Invalid syntax for Element Type Declaration.
-      'not-wf-sa-132', // Invalid syntax mixed connectors used.
-      'not-wf-sa-133', // Illegal whitespace before optional character causes syntax error.
-      'not-wf-sa-134', // Illegal whitespace before optional character causes syntax error.
-      'not-wf-sa-135', // Invalid character used as connector.
-      'not-wf-sa-136', // Tag omission is invalid in XML.
-      'not-wf-sa-137', // Space is required before a content model.
-      'not-wf-sa-138', // Invalid syntax for content particle.
-      'not-wf-sa-139', // The element-content model should not be empty.
-      'not-wf-sa-140', // Character '#x309a;' is a CombiningChar, not a Letter, and so may not begin a name.
-      'not-wf-sa-141', // Character #x0E5C is not legal in XML names.
-      'not-wf-sa-142', // Character #x0000 is not legal anywhere in an XML document.
-      'not-wf-sa-143', // Character #x001F is not legal anywhere in an XML document.
-      'not-wf-sa-144', // Character #xFFFF is not legal anywhere in an XML document.
+      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
       'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
-      'not-wf-sa-146', // Character references must also refer to legal XML characters; #x00110000 is one more than the largest legal character.
-      'not-wf-sa-147', // XML Declaration may not be preceded by whitespace.
-      'not-wf-sa-148', // XML Declaration may not be preceded by comments or whitespace.
-      'not-wf-sa-149', // XML Declaration may not be within a DTD.
-      'not-wf-sa-150', // XML declarations may not be within element content.
-      'not-wf-sa-151', // XML declarations may not follow document content.
-      'not-wf-sa-152', // XML declarations must include the "version=..." string.
-      'not-wf-sa-153', // Text declarations may not begin internal parsed entities; they may only appear at the beginning of external parsed (parameter or general) entities.
-      'not-wf-sa-154', // '?XML ...?>' is neither an XML declaration nor a legal processing instruction target name.
-      'not-wf-sa-155', // '?xmL ...?>' is neither an XML declaration nor a legal processing instruction target name.
-      'not-wf-sa-156', // '?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name.
-      'not-wf-sa-157', // '?xmL ...?>' is not a legal processing instruction target name.
-      'not-wf-sa-158', // SGML-ism: "#NOTATION gif" can't have attributes.
       'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
-      'not-wf-sa-160', // Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
-      'not-wf-sa-161', // Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
-      'not-wf-sa-162', // Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
-      'not-wf-sa-163', // Invalid placement of Parameter entity reference.
-      'not-wf-sa-164', // Invalid placement of Parameter entity reference.
-      'not-wf-sa-165', // Parameter entity declarations must have a space before the '%'.
-      'not-wf-sa-166', // Character FFFF is not legal anywhere in an XML document.
-      'not-wf-sa-167', // Character FFFE is not legal anywhere in an XML document.
       'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
       'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
       'not-wf-sa-170', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
-      'not-wf-sa-171', // Character FFFF is not legal anywhere in an XML document.
-      'not-wf-sa-172', // Character FFFF is not legal anywhere in an XML document.
-      'not-wf-sa-173', // Character FFFF is not legal anywhere in an XML document.
-      'not-wf-sa-174', // Character FFFF is not legal anywhere in an XML document.
-      'not-wf-sa-175', // Character FFFF is not legal anywhere in an XML document.
-      'not-wf-sa-176', // Start tags must have matching end tags.
-      'not-wf-sa-177', // Character FFFF is not legal anywhere in an XML document.
-      'not-wf-sa-178', // Invalid syntax matching double quote is missing.
-      'not-wf-sa-179', // Invalid syntax matching double quote is missing.
-      'not-wf-sa-180', // The_Entity Declared_WFC requires entities to be declared before they are used in an attribute list declaration.
-      'not-wf-sa-181', // Internal parsed entities must match the_content_production to be well formed.
-      'not-wf-sa-182', // Internal parsed entities must match the_content_production to be well formed.
-      'not-wf-sa-183', // Mixed content declarations may not include content particles.
-      'not-wf-sa-184', // In mixed content models, element names must not be parenthesized.
-      'not-wf-sa-185', // Tests the_Entity Declared_WFC._Note:_a nonvalidating parser is permitted not to report this WFC violation, since it would need to read an external parameter entity to distinguish it from a violation of the_Standalone Declaration_VC.
-      'not-wf-sa-186', // Whitespace is required between attribute/value pairs.
+      // not-wf-sa-088   seems a bit odd
+
       'not-wf-not-sa-001', // Conditional sections must be properly terminated ("]>" used instead of "]]>").
       'not-wf-not-sa-002', // Processing instruction target names may not be "XML" in any combination of cases.
       'not-wf-not-sa-003', // Conditional sections must be properly terminated ("]]>" omitted).

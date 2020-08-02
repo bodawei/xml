@@ -1112,7 +1112,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
    'not-wf-sa-045': 'ELEMENT_NAME_INVALID', // ok = Invalid Empty Element Tag
    'not-wf-sa-046': 'ELEMENT_NAME_INVALID', // ok - This start (or empty element) tag was not terminated correctly.
-   'not-wf-sa-047': '', // Invalid empty element tag invalid whitespace
+   'not-wf-sa-047': 'error', // Invalid empty element tag invalid whitespace
    'not-wf-sa-048': {
       // good? - Provides a CDATA section after the root element.
       id: 'TOKEN_INVALID_CONTEXT',
@@ -1120,6 +1120,193 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
    'not-wf-sa-049': 'ELEMENT_UNBALANCED', // ok - Missing start tag
    'not-wf-sa-050': 'DOC_END_EARLY', // great - Empty document, with no root element.
+   'not-wf-sa-051': {
+      // ok - CDATA is invalid at top level of document.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-052': {
+      // ok - Invalid character reference.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARREF_PTOKEN',
+   },
+   'not-wf-sa-053': 'ELEMENT_UNBALANCED', // great - End tag does not match start tag.
+   'not-wf-sa-055': {
+      // ok - Invalid Document Type Definition format.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'ELEMENT_START_PTOKEN',
+   },
+   'not-wf-sa-056': 'DOCTYPE_NO_CLOSE', // ok - Invalid Document Type Definition format': 'error', // misplaced comment.
+   'not-wf-sa-057': 'ENTITYDECL_NO_CLOSE', // ok - This isn't SGML; comments can't exist in declarations.
+   'not-wf-sa-058': 'WORDLIST_INVALID_NMTOKEN', // great - Invalid character , in ATTLIST enumeration
+   'not-wf-sa-059': 'LITERAL_NO_OPEN_QUOTE', // great - String literal must be in quotes.
+   'not-wf-sa-060': 'ATTLISTDECL_ATTR_TYPE_UNKNOWN', // meh - Invalid type NAME defined in ATTLIST.
+   'not-wf-sa-061': 'EXTERNALID_SYSTEM_NO_LEADING_SPACE', // great - External entity declarations require whitespace between public and system IDs.
+   'not-wf-sa-062': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // great - Entity declarations need space after the entity name.
+   'not-wf-sa-063': {
+      // meh - Conditional sections may only appear in the external DTD subset.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'CONDITIONAL_PTOKEN',
+   },
+   'not-wf-sa-064': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // great - Space is required between attribute type and default values in!ATTLIST...>declarations.
+   'not-wf-sa-065': 'ATTLISTDECL_ATTR_NAME_INVALID', // ok - Space is required between attribute name and type in!ATTLIST...>declarations.
+   'not-wf-sa-066': 'ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE', // great - Required whitespace is missing.
+   'not-wf-sa-067': 'ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE', // great - Space is required between attribute type and default values in!ATTLIST...>declarations.
+   'not-wf-sa-068': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // great - Space is required between NOTATION keyword and list of enumerated choices in!ATTLIST...>declarations.
+   'not-wf-sa-069': 'ENTITYDECL_EXTERNALID_NO_SPACE', // great - Space is required before an NDATA entity annotation.
+   'not-wf-sa-070': 'COMMENT_DOUBLE_HYPHEN', // great - XML comments may not contain "--"
+   'not-wf-sa-071': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-072': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
+   'not-wf-sa-073': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY f.
+   'not-wf-sa-074': 'ELEMENT_UNBALANCED', // great - Internal general parsed entities are only well formed if they match the "content" production.
+   'not-wf-sa-075': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-076': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
+   'not-wf-sa-077': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY bar.
+   'not-wf-sa-078': 'REFERENCE_NO_DECLARATION', // great - Undefined ENTITY foo.
+   'not-wf-sa-079': 'REFERENCE_INVALID_RECURSION', // ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-080': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
+   'not-wf-sa-081': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
+   'not-wf-sa-082': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
+   'not-wf-sa-083': 'ENTITYDECL_UNDECLARED_NOTATION', // great - Undefined NOTATION n.
+   'not-wf-sa-084': 'REFERENCE_UNPARSED_NO_USE', // great - Tests the_Parsed Entity_WFC by referring to an unparsed entity. (This precedes the error of not declaring that entity's notation, which may be detected any time before the DTD parsing is completed.)
+   'not-wf-sa-085': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
+   'not-wf-sa-086': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
+   'not-wf-sa-087': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
+   'not-wf-sa-088': 'ATTRIBUTE_INVALID_VALUE', // ok - Attribute values are terminated by literal quote characters, and any entity expansion is done afterwards.
+   'not-wf-sa-089': 'ENTITYDECL_NO_CLOSE', // ok - Parameter entities "are" always parsed; NDATA annotations are not permitted.
+   'not-wf-sa-090': 'ATTRIBUTE_INVALID_VALUE', // great - Attributes may not contain a literal "" character; this one has one because of reference expansion.
+   'not-wf-sa-091': 'ENTITYDECL_NO_CLOSE', // ok - Parameter entities "are" always parsed; NDATA annotations are not permitted.
+   'not-wf-sa-092': 'REFERENCE_NAME_INVALID', // ok - The replacement text of this entity has an illegal reference, because the character reference is expanded immediately.
+   'not-wf-sa-093': 'CHARREF_INVALID_HEX_CASE', // great - Hexadecimal character references may not use the uppercase 'X'.
+   'not-wf-sa-094': 'XMLDECL_PARAM_INVALID_CASE', // great - Prolog VERSION must be lowercase.
+   'not-wf-sa-095': 'XMLDECL_ENCODING_INVALID_ORDER', // great - VersionInfo must come before EncodingDecl.
+   'not-wf-sa-096': 'XMLDECL_NO_SPACE_BETWEEN_PARAMS', // great - Space is required before the standalone declaration.
+   'not-wf-sa-097': 'XMLDECL_VERSION_INVALD', // ok - Both quotes surrounding VersionNum must be the same.
+   'not-wf-sa-099': 'XMLDECL_NO_CLOSE', // meh - Only three pseudo-attributes are in the XML declaration, and "valid=..." is not one of them.
+   'not-wf-sa-100': 'XMLDECL_STANDALONE_INVALID_CASE', // great - Only "yes" and "no" are permitted as values of "standalone".
+   'not-wf-sa-101': 'XMLDECL_ENCODING_INVALID', // ok - Space is not permitted in an encoding name.
+   'not-wf-sa-102': 'XMLDECL_VERSION_INVALD', // ok - Provides an illegal XML version number; spaces are illegal.
+   'not-wf-sa-103': 'ELEMENT_UNBALANCED', // ok - End-tag required for element foo.
+   'not-wf-sa-104': 'ELEMENT_UNBALANCED', // ok - Internal general parsed entities are only well formed if they match the "content" production.
+   'not-wf-sa-105': {
+      // ok - Invalid placement of CDATA section.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-106': {
+      // ok - but strange test description - Invalid placement of entity declaration.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'CHARREF_PTOKEN',
+   },
+   'not-wf-sa-107': {
+      // ok - Invalid document type declaration. CDATA alone is invalid.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'CDATA_PTOKEN',
+   },
+   'not-wf-sa-108': 'CDATA_XTRA_SPACE_AFTER_TYPE', // great - No space in '![CDATA['.
+   'not-wf-sa-109': {
+      // good - Tags invalid within EntityDecl.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'GENERAL_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-110': {
+      // ok - Entity reference must be in content of element.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'GENERAL_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-111': 'ATTRIBUTE_INVALID_NAME', // OK - Entiry reference must be in content of element not Start-tag.
+   'not-wf-sa-112': 'CDATA_INVALID_CASE', // great - CDATA sections start '![CDATA[', not '!cdata['.
+   'not-wf-sa-115': 'REFERENCE_NO_NAME', // ok - The replacement text of this entity is an illegal character reference, which must be rejected when it is parsed in the context of an attribute value.
+   'not-wf-sa-116': 'CHARREF_NO_CLOSE', // good - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
+   'not-wf-sa-117': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
+   'not-wf-sa-118': 'REFERENCE_NAME_INVALID', // OK - Entity reference expansion is not recursive.
+   'not-wf-sa-119': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
+   'not-wf-sa-120': 'REFERENCE_NO_NAME', // ok - Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,must be doubly quoted': 'error', // encoded either as_amp;_or as_#38;#38;_.
+   'not-wf-sa-121': 'ENTITYDECL_NAME_INVALID', // great - A name of an ENTITY was started with an invalid character.
+   'not-wf-sa-122': 'NAMELIST_NO_DELIM', // meh - Invalid syntax mixed connectors are used.
+   'not-wf-sa-123': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax mismatched parenthesis.
+   'not-wf-sa-124': 'NAMELIST_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
+   'not-wf-sa-128': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid CDATA syntax.
+   'not-wf-sa-129': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid syntax for Element Type Declaration.
+   'not-wf-sa-130': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
+   'not-wf-sa-131': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
+   'not-wf-sa-133': 'NAMELIST_NAME_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
+   'not-wf-sa-134': 'NAMELIST_CLOSE_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
+   'not-wf-sa-135': 'NAMELIST_NAME_INVALID', // ok - Invalid character used as connector.
+   'not-wf-sa-136': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Tag omission is invalid in XML.
+   'not-wf-sa-137': 'ELEMENTDECL_NAME_NO_SPACE', // great - Space is required before a content model.
+   'not-wf-sa-138': 'NAMELIST_NO_DELIM', // meh - Invalid syntax for content particle.
+   'not-wf-sa-139': 'NAMELIST_NO_NAMES', // great - The element-content model should not be empty.
+   'not-wf-sa-140': 'ELEMENT_NAME_INVALID', // ok - Character '#x309a;' is a CombiningChar, not a Letter, and so may not begin a name.
+   'not-wf-sa-141': 'ELEMENT_NAME_INVALID', // good - Character #x0E5C is not legal in XML names.
+   'not-wf-sa-142': 'CHARREF_INVALID_CHAR', // good - Character #x0000 is not legal anywhere in an XML document.
+   'not-wf-sa-143': 'CHARREF_INVALID_CHAR', // good - Character #x001F is not legal anywhere in an XML document.
+   'not-wf-sa-144': 'CHARREF_INVALID_CHAR', // good - Character #xFFFF is not legal anywhere in an XML document.
+   'not-wf-sa-146': 'CHARREF_INVALID_CHAR', // good - Character references must also refer to legal XML characters; #x00110000 is one more than the largest legal character.
+   'not-wf-sa-147': {
+      // good - XML Declaration may not be preceded by whitespace.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-148': {
+      // good - XML Declaration may not be preceded by comments or whitespace.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-149': {
+      // good - XML Declaration may not be within a DTD.
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-150': {
+      // good - XML declarations may not be within element content.
+      id: 'CONTENT_INVALID_TOKEN',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-151': {
+      // good - XML declarations may not follow document content.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'XMLDECL_PTOKEN',
+   },
+   'not-wf-sa-152': 'XMLDECL_ENCODING_INVALID_ORDER', // great - XML declarations must include the "version=..." string.
+   'not-wf-sa-153': 'CONTENT_INVALID_TOKEN', // ok - Text declarations may not begin internal parsed entities; they may only appear at the beginning of external parsed (parameter or general) entities.
+   'not-wf-sa-154': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?XML ...?>' is neither an XML declaration nor a legal processing instruction target name.
+   'not-wf-sa-155': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is neither an XML declaration nor a legal processing instruction target name.
+   'not-wf-sa-156': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name.
+   'not-wf-sa-157': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is not a legal processing instruction target name.
+   'not-wf-sa-158': 'ATTLISTDECL_ATTR_TYPE_UNKNOWN', // OK - SGML-ism: "#NOTATION gif" can't have attributes.
+   'not-wf-sa-160': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
+   'not-wf-sa-161': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
+   'not-wf-sa-162': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
+   'not-wf-sa-163': {
+      // OK - Invalid placement of Parameter entity reference.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'PARAMETER_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-164': {
+      // OK - Invalid placement of Parameter entity reference.
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'PARAMETER_ENTITY_START_PTOKEN',
+   },
+   'not-wf-sa-165': 'MARKUPDECL_INVALID_TOKEN', // OK - Parameter entity declarations must have a space before the '%'.
+   'not-wf-sa-166': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-167': 'CHARDATA_INVALID_CHAR', // good - Character FFFE is not legal anywhere in an XML document.
+   'not-wf-sa-171': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-172': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-173': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-174': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-175': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-176': 'DOC_END_EARLY', // good - Start tags must have matching end tags.
+   'not-wf-sa-177': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
+   'not-wf-sa-178': 'LITERAL_NO_CLOSE_QUOTE', // good - Invalid syntax matching double quote is missing.
+   'not-wf-sa-179': 'LITERAL_NO_CLOSE_QUOTE', // good - Invalid syntax matching double quote is missing.
+   'not-wf-sa-180': 'REFERENCE_NO_DECLARATION', // good - The_Entity Declared_WFC requires entities to be declared before they are used in an attribute list declaration.
+   'not-wf-sa-181': 'CDATA_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
+   'not-wf-sa-182': 'COMMENT_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
+   'not-wf-sa-183': 'NAMELIST_MIXED_NAME_EXTRA_REPEAT', // good - Mixed content declarations may not include content particles.
+   'not-wf-sa-184': 'NAMELIST_MIXED_INVALID_SUBPARTICLE', // OK - In mixed content models, element names must not be parenthesized.
+   'not-wf-sa-185': 'REFERENCE_NO_DECLARATION', // great - Tests the_Entity Declared_WFC._Note:_a nonvalidating parser is permitted not to report this WFC violation, since it would need to read an external parameter entity to distinguish it from a violation of the_Standalone Declaration_VC.
+   'not-wf-sa-186': 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // great - Whitespace is required between attribute/value pairs.
 
    'o-p02fail1': 'CHARDATA_INVALID_CHAR',
    'o-p02fail10': 'CHARDATA_INVALID_CHAR',
