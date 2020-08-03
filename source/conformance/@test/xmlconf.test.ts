@@ -39,14 +39,6 @@ describe('XML Conformance tests', () => {
    const allDetails = buildTestDetails(metadata as TestSuite);
 
    allDetails.forEach((testData) => {
-      if (testData.TYPE === 'not-wf') {
-         // console.log(testData.ID, testData.expectedError);
-         if (testData.expectedError?.id) {
-            console.log(`'${testData.ID}': ----`);
-         } else {
-            console.log(`'${testData.ID}': 'error', // ${testData.description}`);
-         }
-      }
       fit(`${testData.ID} (${testData.TYPE}) ${testData.description}`, (done) => {
          const hasOutput = 'outputData' in testData;
          const testStream = setUpStreams(testData);
@@ -71,9 +63,9 @@ describe('XML Conformance tests', () => {
             // const xxx = actualErrors.map((error) => `${error.id} : ${error.message}`);
 
             // console.log('-------------------');
-            // console.log('>', testData.ID);
-            // console.log('>', testData.description);
-            // console.log('>', testData.testData?.replace('\\r\\n', '\n').replace('\\n', '\n'));
+            // console.log('ID>   ', testData.ID);
+            // console.log('About>', testData.description);
+            // console.log(testData.testData?.replace('\\r\\n', '\n').replace('\\n', '\n'));
             // console.log('---');
             // console.log(xxx.join('\n'));
 

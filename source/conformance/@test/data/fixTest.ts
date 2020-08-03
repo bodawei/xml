@@ -23,7 +23,7 @@ import { Test } from '../helper/types';
 */
 
 function fixTest(test: Test): Test {
-   if (test.testData?.indexOf('<?xml') !== 0) {
+   if (test.testData?.toLowerCase().indexOf('<?xml') === -1 && test.ID !== 'sgml02') {
       return {
          ...test,
          testData: `<?xml version="1.0"?>${test.testData}`,
