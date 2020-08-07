@@ -42,13 +42,6 @@ const testFilters: FilterData = {
       'v-lang04', // xml:lang violation
       'ibm-valid-P36-ibm36v01.xml', // a xml:lang violation
       'ibm-valid-P85-ibm85v01.xml', // a legal char issue
-      'ibm-1-1-valid-P77-ibm77v04.xml', // a legal char issue
-      'ibm-1-1-valid-P77-ibm77v05.xml', // a legal char issue
-      'ibm-1-1-valid-P77-ibm77v06.xml', // a legal char issue
-      'ibm-1-1-valid-P77-ibm77v07.xml', // not at all clear. A bad character, but why?
-      'ibm-1-1-valid-P77-ibm77v10.xml', // not at all clear. A bad character, but why?
-      'ibm-1-1-valid-P77-ibm77v11.xml', // not at all clear. A bad character, but why?
-      'ibm-1-1-valid-P77-ibm77v12.xml', // not at all clear. A bad character, but why?
       'rmt-e2e-50', // a 1.1 new line problem
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)
       'rmt-006', // xml version match problem
@@ -415,4 +408,5 @@ const testFilters: FilterData = {
    ],
 };
 
+console.log('COUNTDOWN: Number of excluded IDs', Object.keys(testFilters.excludedIds).length);
 export { testFilters };

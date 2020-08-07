@@ -550,6 +550,9 @@ class CheckXTokenValidStream extends Transform {
                   this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, notAllowedParams, sToken);
                }
                break;
+            case TEXTDECL_XTOKEN:
+               // We don't care if there is a TEXTDECL in here.
+               break;
             default:
                this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
                break;
