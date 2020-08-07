@@ -8,10 +8,6 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
-      'valid-sa-049', // special char
-      'valid-sa-050', // special char
-      'valid-sa-051', // utf16
-      'valid-sa-076', // another notation problem
       'valid-sa-087', // char ref in internal entities
       'valid-sa-089', // bad chars
       'valid-sa-090', // notation attributes not handled right
@@ -23,13 +19,8 @@ const testFilters: FilterData = {
       'valid-not-sa-020', // some problem with param entities
       'valid-not-sa-031', // wellformedcheck isn't handling ELIDED_ENTITY_DECLARATION_PTOKEN
       'valid-ext-sa-007', // ?? esxternal entity. maybe also utf16?
-      'valid-ext-sa-008', // utf16
       'valid-ext-sa-014', // some character pboelm.  Seems like it should be ok but not happy
-      'pr-xml-little', // utf16
-      'pr-xml-utf-16', // utf16
       'pr-xml-utf-8', // japanese charas in utf8... what happened
-      'weekly-little', // UTF16!
-      'weekly-utf-16', // UTF16!
       'ext01', // Some external entity problem
       'sa02', // Some standalone problem/ misinterpretation
       'sa03', // Some standalone problem/ misinterpretation
@@ -50,6 +41,16 @@ const testFilters: FilterData = {
       'rmt-012', // 1.1 char problem.
       'rmt-047', // 1.1 char problem.
       'rmt-054', // A character problem
+      // --- UTF16 validity problems
+      'valid-ext-sa-008', // utf16
+      'pr-xml-little', // utf16
+      'pr-xml-utf-16', // utf16
+      'weekly-little', // UTF16!
+      'weekly-utf-16', // UTF16!
+      'valid-sa-049', // UTF16 with BOM
+      'valid-sa-050', // UTF16 with BOM
+      'valid-sa-051', // utf16
+      // -- BOM problem
 
       // Valid / Text problems
       // NOTE: A bunch of the 1.1 ones are easily fixed by adding the <?xml version="1.1" to the output.

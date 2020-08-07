@@ -935,19 +935,7 @@ class CheckXTokenValidStream extends Transform {
             }
          }
       } else if (type === 'NOTATION') {
-         // §3.3.1: Validity constraint: Notation Attributes
-         //    ...all notation names in the declaration must be declared.
          const notationNames: Array<string> = attDef.enumeration || [];
-
-         for (let index = 0; index < notationNames.length; index++) {
-            const notationName = notationNames[index];
-            const notationDecl = this.notations[notationName];
-
-            if (!notationDecl) {
-               this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
-                  [attList.elementName, attDef.name, notationName], pToken.open);
-            }
-         }
 
          if (oneDotZeroRev3OrHigher) {
             // §3.3.1 (for 1.0/>=3): Validity constraint: No Duplicate Tokens
@@ -1256,6 +1244,28 @@ class CheckXTokenValidStream extends Transform {
                }
 
             } else if (attrDef.type === 'NOTATION') {
+               // §3.3.1: Validity constraint: Notation Attributes
+               //    ...all notation names in the declaration must be declared.
+               // However, it is interesting to note that they do not need to have been dceclared
+               // before the ATTLIST.  See valid-sa-076
+               const notationNames: Array<string> = attrDef.enumeration || [];
+               const attDecl = attList.tokens.find(token => {
+                  return !!token.attDefs.find(def => {
+                     return def === attrDef;
+                  });
+               });
+               const pToken = attDecl?.pToken ?? { open: undefined };
+
+               for (let index = 0; index < notationNames.length; index++) {
+                  const notationName = notationNames[index];
+                  const notationDecl = this.notations[notationName];
+
+                  if (!notationDecl) {
+                     this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
+                        [elementType, attrDef.name, notationName], pToken.open);
+                  }
+               }
+
                // §3.3.1: (in 1.0/2+) Validity constraint: One Notation Per Element Type
                //    An element type must not have more than one NOTATION attribute specified.
                notationCount++;
