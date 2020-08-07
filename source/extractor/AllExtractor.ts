@@ -85,6 +85,7 @@ class AllExtractor extends Extractor {
 
          // And make this a peek so we don't consume it.
          this._terminatorMatcher = new PeekExtractor(this.version, matcher);
+
          this._processTerminatorMatcher(segment);
       }
    }
@@ -93,6 +94,7 @@ class AllExtractor extends Extractor {
       // If we still have a terminator matcher, we are in error or working state.
       if (this._terminatorMatcher) {
          const result = this._terminatorMatcher.finish();
+
          const terminatorStatus = this._terminatorMatcher.state;
          delete this._terminatorMatcher;
 
@@ -132,7 +134,15 @@ class AllExtractor extends Extractor {
             break;
          case Extractor.STATE.SUCCESS:
             // Or we matched the terminator, in which case we're done.
-            this._terminatorMatcher!.finish();
+            const result = this._terminatorMatcher!.finish();
+            // Skip the first we passed in, as we already have it.
+            result.segments.shift();
+            // Add each of the remaining segments in a pristine state back to our list
+            for (let info of result.segments) {
+               info.chars = 0;
+               info.columns = 0;
+               this.segInfo.push(info);
+            }
             delete this._terminatorMatcher;
             this.state = Extractor.STATE.SUCCESS;
             break;

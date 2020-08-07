@@ -8,9 +8,7 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
-      'valid-sa-087', // char ref in internal entities
       'valid-sa-089', // bad chars
-      'valid-sa-090', // notation attributes not handled right
       'valid-sa-096', // some error with whitespace
       'valid-not-sa-003', // wellformedcheck isn't handling ELIDED_ENTITY_DECLARATION_PTOKEN
       'valid-not-sa-004', // wellformedcheck isn't handling ELIDED_ENTITY_DECLARATION_PTOKEN

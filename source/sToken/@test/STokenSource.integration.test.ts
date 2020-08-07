@@ -318,6 +318,27 @@ describe('STokenSource (integration)', () => {
          source.endText();
       });
 
+      it('locates a word while leaving the terminator across seguments untouched', (done) => {
+         source.addText('foo/');
+         source.addText('>');
+         source.endText();
+
+         source.extract('word', ['>', '/>'], (sToken) => {
+            expect(sToken!.str).toEqual('foo');
+            expect(source._segments as any).toEqualRangeless([{
+               text: 'foo/',
+               index: 3,
+               range: undefined,
+            },
+            {
+               text: '>',
+               index: 0,
+               range: undefined,
+            }]);
+            done();
+         });
+      });
+
    });
 
 

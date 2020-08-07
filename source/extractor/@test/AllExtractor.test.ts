@@ -347,6 +347,31 @@ describe('AllExtractor', () => {
          });
       });
 
+      it('returns all text when picking up in mid-segment', () => {
+         const extractor = new AllExtractor(1.0, [ '/>' ]);
+         const segment = new Segment('f/');
+         const seg1 = new Segment('f/');
+         seg1.index = 1;
+         extractor.process(segment);
+         extractor.process(new Segment('>'));
+
+         expect(extractor.finish()).toEqual({
+            text: 'f',
+            original: 'f',
+            segments: [ {
+               chars: 1,
+               rows: 0,
+               columns: 1,
+               segment: seg1,
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: new Segment('>'),
+            } ],
+         });
+      });
+
    });
 
    describe('newlines', () => {
