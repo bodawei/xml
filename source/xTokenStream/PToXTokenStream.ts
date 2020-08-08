@@ -39,6 +39,7 @@ import {
    TEXT_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
+   ELIDED_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
 
 import { convertPTokenToXToken, conditionalClosePTokenToXToken, conditionalSectionPTokenToXToken } from 'xToken';
@@ -103,6 +104,8 @@ class PToXTokenStream extends Transform {
          case ENTITY_META_DATA:
          case 'ERROR_TYPE':
             this.push(pToken);
+            break;
+         case ELIDED_ENTITY_DECLARATION_PTOKEN:
             break;
          default:
             this.push(new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, [`Unknown PToken type "${pToken.type}" encountered.`]));

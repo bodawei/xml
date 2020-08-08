@@ -79,6 +79,7 @@ const transitionsByState: StateTable = {
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [attListDecl.PTYPE]: States.EXTERNAL_SUBSET,
+      [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: States.EXTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
@@ -96,6 +97,7 @@ const transitionsByState: StateTable = {
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [attListDecl.PTYPE]: States.EXTERNAL_SUBSET,
+      [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: States.EXTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
@@ -111,6 +113,7 @@ const transitionsByState: StateTable = {
       [TEXTDECL_PTOKEN]: States.INTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [attListDecl.PTYPE]: States.INTERNAL_SUBSET,
+      [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: States.INTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
@@ -127,6 +130,7 @@ const transitionsByState: StateTable = {
       [CONDITIONAL_CLOSE_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [attListDecl.PTYPE]: NO_CHANGE,
+      [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: NO_CHANGE, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
@@ -141,6 +145,7 @@ const transitionsByState: StateTable = {
       [CONDITIONAL_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [attListDecl.PTYPE]: NO_CHANGE,
+      [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: NO_CHANGE, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
@@ -156,6 +161,7 @@ const transitionsByState: StateTable = {
       // §2.8.0 [28a], [28b], [29]
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [attListDecl.PTYPE]: NO_CHANGE,
+      [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: NO_CHANGE, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.

@@ -6,17 +6,17 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      // 'valid-not-sa-031', // wellformedcheck isn't handling ELIDED_ENTITY_DECLARATION_PTOKEN
+   ],
    excludedIds: [
-      'valid-sa-096', // some error with whitespace
-      'valid-not-sa-003', // wellformedcheck isn't handling ELIDED_ENTITY_DECLARATION_PTOKEN
-      'valid-not-sa-004', // wellformedcheck isn't handling ELIDED_ENTITY_DECLARATION_PTOKEN
+      'valid-sa-096', // Do section 3.3.3 some error with whitespace
+      'valid-not-sa-003', // Need to add defaulted attributes
+      'valid-ext-sa-014', // some character pboelm.  Seems like it should be ok but not happy
       'valid-not-sa-015', // bad conditional section.
       'valid-not-sa-016', // bad conditional section.
       'valid-not-sa-020', // some problem with param entities
-      'valid-not-sa-031', // wellformedcheck isn't handling ELIDED_ENTITY_DECLARATION_PTOKEN
       'valid-ext-sa-007', // ?? esxternal entity. maybe also utf16?
-      'valid-ext-sa-014', // some character pboelm.  Seems like it should be ok but not happy
       'pr-xml-utf-8', // japanese charas in utf8... what happened
       'ext01', // Some external entity problem
       'sa02', // Some standalone problem/ misinterpretation
