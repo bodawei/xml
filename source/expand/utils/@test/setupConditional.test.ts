@@ -97,7 +97,9 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, [testIgnore]);
 
       setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result).toEqual({});
+         expect(result).toEqual({
+            sectionType: toSToken('IGNORE'),
+         });
          done();
       });
    });
@@ -107,7 +109,9 @@ describe('setupConditional() (unit)', () => {
       testStack.pushPEName('test');
 
       setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result).toEqual({});
+         expect(result).toEqual({
+            sectionType: testInclude.text,
+         });
          done();
       });
    });
@@ -117,6 +121,15 @@ describe('setupConditional() (unit)', () => {
 
       setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
          expect(result.source).toBeInstanceOf(STokenSource);
+         done();
+      });
+   });
+
+   it('returns an sToken of INCLUDE when the peref is to include', (done) => {
+      params.entityDetails.addEntity(testDecl, [testInclude]);
+
+      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
+         expect(result.sectionType).toEqual(testInclude.text);
          done();
       });
    });

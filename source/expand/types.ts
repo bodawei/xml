@@ -1,5 +1,5 @@
 import { EntityMetaData } from 'basic';
-import { STokenSource } from 'sToken';
+import { STokenSource, SToken } from 'sToken';
 
 import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
@@ -11,6 +11,7 @@ type TokenHandled = () => void;
 type ConditionalInfo = {
    source?: STokenSource | undefined;
    textIsFinished?: () => void;
+   sectionType?: SToken;
 };
 
 type RetrieveResults = {

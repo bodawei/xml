@@ -603,8 +603,16 @@ const expectedNotWfCodes: IdToErrorMap = {
    attlist09: 'ATTLISTDECL_ATTR_DEFAULT_UNKNOWN', // SGML's #CONREF is not allowed.
    attlist10: 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // Whitespace required between attributes
    attlist11: 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // Whitespace required between attributes
-   cond01: 'error', // Only INCLUDE and IGNORE are conditional section keywords
-   cond02: 'error', // Must have keyword in conditional sections
+   cond01: {
+      // Only INCLUDE and IGNORE are conditional section keywords
+      id: 'CONDITIONAL_UNKNOWN',
+      message: 'CDATA',
+   },
+   cond02: {
+      // Must have keyword in conditional sections
+      id: 'CONDITIONAL_UNKNOWN',
+      message: '""',
+   },
    content01: 'NAMELIST_CLOSE_EXTRA_SPACE', // No whitespace before "?" in content model
    content02: 'NAMELIST_CLOSE_EXTRA_SPACE', // No whitespace before "*" in content model
    content03: 'NAMELIST_NAME_EXTRA_SPACE', // No whitespace before "+" in content model

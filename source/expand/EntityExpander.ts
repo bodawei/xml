@@ -283,8 +283,11 @@ class EntityExpander {
             }
          },
          (conditionalState) => {
+            const newStart = new ConditionalPToken(startToken, {
+               sectionType: conditionalState.sectionType,
+            });
             this.expandParams.conditionalStack.push(conditionalState);
-            this.deliverToken(startToken);
+            this.deliverToken(newStart);
             handled();
          },
       );

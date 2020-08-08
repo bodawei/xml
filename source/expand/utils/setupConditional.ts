@@ -8,13 +8,13 @@ import {
 import { ConditionalInfo, ExpandParams } from '../types';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityNameStack } from './EntityNameStack';
-import { strOrBlank, STokenSource } from 'sToken';
+import { strOrBlank, STokenSource, toSToken } from 'sToken';
 import { defaultExtractors } from 'extractor';
 import { ENTITY_META_DATA } from 'basic';
 
 type Done = (result: ConditionalInfo) => void;
 
-function valueIsNotInclude(replacementText: EntityValuePToken): boolean {
+function extractType(replacementText: EntityValuePToken): string {
    let entityText = '';
 
    for (const element of replacementText) {
@@ -25,9 +25,7 @@ function valueIsNotInclude(replacementText: EntityValuePToken): boolean {
       }
    }
 
-   entityText = entityText.trim().toLocaleLowerCase();
-
-   return entityText !== 'include';
+   return entityText.trim();
 }
 
 function setupConditional(
@@ -44,13 +42,17 @@ function setupConditional(
       const entityDetails = expandParams.entityDetails.getPEDetails(entityName);
       const alreadyInEntity = nameStack.hasPEName(entityName);
 
-      if (
-         !entityDetails ||
-         !entityDetails.protoReplacementText ||
-         alreadyInEntity ||
-         valueIsNotInclude(entityDetails.protoReplacementText)
-      ) {
+      if (!entityDetails || !entityDetails.protoReplacementText) {
          done({});
+         return;
+      }
+
+      const sectionTypeText = extractType(entityDetails.protoReplacementText);
+
+      if (alreadyInEntity || sectionTypeText.toLocaleLowerCase() !== 'include') {
+         done({
+            sectionType: toSToken(sectionTypeText),
+         });
          return;
       }
 
@@ -58,6 +60,7 @@ function setupConditional(
       const result: ConditionalInfo = {
          source: sTokenSource,
          textIsFinished: undefined,
+         sectionType: toSToken(sectionTypeText),
       };
 
       done(result);

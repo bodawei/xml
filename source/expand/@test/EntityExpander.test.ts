@@ -958,7 +958,9 @@ describe('EntityExpander (unit)', () => {
             peRef,
          });
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            done();
+            done({
+               sectionType: toSToken('IGNORE'),
+            });
          });
 
          doExpand([condStart], true, () => {
@@ -969,6 +971,29 @@ describe('EntityExpander (unit)', () => {
             expect(args[3]).toEqual(false);
             expect(args[4]).toBeInstanceOf(Function);
             expect(args[5]).toBeInstanceOf(Function);
+            done();
+         });
+      });
+
+      it('creates a new conditional start with the expanded section type added', (done) => {
+         const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
+         condStart = new ConditionalPToken({
+            open: toSToken('<[!'),
+            peRef,
+         });
+         setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
+            done({
+               sectionType: toSToken(' FOO'),
+            });
+         });
+
+         doExpand([condStart], true, (results) => {
+            expect(results[0]).not.toBe(condStart);
+            expect(results[0]).toEqualRangeless({
+               open: toSToken('<[!'),
+               peRef,
+               sectionType: toSToken(' FOO'),
+            });
             done();
          });
       });
