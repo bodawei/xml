@@ -63,7 +63,6 @@ describe('charRef (unit)', () => {
                hexMarker: toSToken('x'),
                digits: toSToken('1f2'),
                close: toSToken(';'),
-               charCode: 498,
             }),
          );
       });
@@ -85,7 +84,6 @@ describe('charRef (unit)', () => {
             digits: toSToken('1f2'),
             digitsSpace: toSToken(' '),
             close: toSToken(';'),
-            charCode: 498,
          });
 
          parseCharRef(mockSource, openSToken, callback);
@@ -111,7 +109,6 @@ describe('charRef (unit)', () => {
             digits: toSToken('1F600'),
             digitsSpace: toSToken(' '),
             close: toSToken(';'),
-            charCode: 0x1f600,
          });
 
          parseCharRef(mockSource, openSToken, callback);

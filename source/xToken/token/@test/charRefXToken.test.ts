@@ -17,7 +17,7 @@ describe('CharRefXToken', () => {
       });
    });
 
-   it('creates an XToken when there are no digits i nthe charRef', () => {
+   it('creates an XToken when there are no digits in the charRef', () => {
       const xToken = new CharRefXToken(
          new CharRefPToken({
             open: toSToken('&#'),
@@ -27,7 +27,7 @@ describe('CharRefXToken', () => {
       );
 
       expect(xToken).toEqualProps({
-         char: '\u0000',
+         char: '',
       });
    });
 

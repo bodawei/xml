@@ -19,7 +19,7 @@ function entityValueToSTokenSource(
    for (const element of entityValue) {
       switch (element.type) {
          case CHARREF_PTOKEN:
-            source.addText(String.fromCharCode(element.charCode));
+            source.addText(element.char);
             break;
          case TEXT_PTOKEN:
             source.addText(element.text.str);

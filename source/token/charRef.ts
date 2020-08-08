@@ -1,6 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource, toSToken } from '../sToken';
+import { extractSurrogatePair } from 'basic';
+import { SToken, STokenSource } from '../sToken';
 
 const CHARREF_PTOKEN = 'CHARREF_PTOKEN';
 
@@ -15,6 +16,7 @@ interface MutableCharRefPToken {
    digitsSpace?: SToken;
    close?: SToken;
    charCode?: number;
+   char?: string;
 }
 
 class CharRefPToken {
@@ -27,6 +29,7 @@ class CharRefPToken {
    public readonly digitsSpace?: SToken;
    public readonly close?: SToken;
    public readonly charCode: number;
+   public readonly char: string;
 
    constructor(basePToken: CharRefPToken | MutableCharRefPToken, extras?: MutableCharRefPToken) {
       this.type = CHARREF_PTOKEN;
@@ -39,11 +42,19 @@ class CharRefPToken {
       this.close = extras?.close || basePToken.close;
 
       this.charCode = 0;
+      this.char = '';
 
       if (this.digits) {
          this.charCode = this.hexMarker
             ? parseInt(this.digits.str, 16)
             : parseInt(this.digits.str, 10);
+
+         if (this.charCode > 0xffff) {
+            const [high, low] = extractSurrogatePair(this.charCode);
+            this.char = String.fromCharCode(high) + String.fromCharCode(low);
+         } else {
+            this.char = String.fromCharCode(this.charCode);
+         }
       }
    }
 }

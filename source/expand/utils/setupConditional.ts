@@ -21,7 +21,7 @@ function valueIsNotInclude(replacementText: EntityValuePToken): boolean {
       if (element.type === TEXT_PTOKEN) {
          entityText += strOrBlank(element.text);
       } else if (element.type === CHARREF_PTOKEN) {
-         entityText += String.fromCharCode(element.charCode);
+         entityText += element.char; // Reminder: It may be multiple utf16 codepoints
       }
    }
 

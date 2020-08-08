@@ -16,18 +16,7 @@ class CharRefXToken {
       if (typeof characterOrPToken === 'string') {
          this.char = characterOrPToken;
       } else {
-         let charCode = characterOrPToken.charCode;
-         let character = String.fromCharCode(0);
-         let pToken = characterOrPToken;
-
-         if (charCode > 0xFFFF) {
-            const [high, low] = extractSurrogatePair(charCode);
-            character = String.fromCharCode(high) + String.fromCharCode(low);
-         } else {
-            character = String.fromCharCode(charCode);
-         }
-         
-         this.char = character;
+         this.char = characterOrPToken.char;
          this.pToken = characterOrPToken;
       }
    }

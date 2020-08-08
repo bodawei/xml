@@ -39,7 +39,7 @@ describe('XML Conformance tests', () => {
    const allDetails = buildTestDetails(metadata as TestSuite);
 
    allDetails.forEach((testData) => {
-      fit(`${testData.ID} (${testData.TYPE}) ${testData.description}`, (done) => {
+      it(`${testData.ID} (${testData.TYPE}) ${testData.description}`, (done) => {
          const hasOutput = 'outputData' in testData;
          const testStream = setUpStreams(testData);
          const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);

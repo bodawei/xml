@@ -50,6 +50,7 @@ import { TextXToken, TextPToken } from 'source/token/text';
 import { UnassignedType } from 'source/token/common/unassigned';
 import { CharRefXToken, ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
 import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
+import { makeDocTypeEnd } from 'token-test';
 
 
 describe('CheckXTokenValidStream (unit)', () => {
@@ -2204,7 +2205,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
             };
 
-            it('reports an error if a notation value has not been declared at ATTLIST declaration time', (done) => {
+            it('reports an error if a notation value used in an ATTLIST has not been declared by end of DTD', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
                const notation = new NotationDeclarationXToken('first', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
@@ -2214,10 +2215,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                   value: [],
                   defaultType: '#IMPLIED',
                }]);
+               const docTypeEnd = new DocTypeEndXToken(makeDocTypeEnd());
 
                validator.write(notation);
                validator.write(elDecl);
                validator.write(attListDecl);
+               validator.write(docTypeEnd);
                validator.end();
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
