@@ -1,5 +1,4 @@
 import { AttFixer } from '../attFix';
-import { makeAttListDeclaration } from 'token-test';
 import {
    AttListPToken,
    ElementStartPToken,
@@ -8,7 +7,6 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    CharRefPToken,
-   EntityValuePToken,
 } from 'token';
 import { toSToken } from 'sToken';
 
@@ -53,7 +51,7 @@ function makeElementStart(value: string): ElementStartPToken {
    return makeElementStartWithValue([new TextPToken({ text: toSToken(value) })]);
 }
 
-describe('attFix', () => {
+fdescribe('attFix', () => {
    let fixAttributes: AttFixer;
    let entityD: AttrValue;
    let entityA: AttrValue;
@@ -134,7 +132,7 @@ describe('attFix', () => {
       ];
       entityDASpace = [
          new GeneralEntityStartPToken(daReference),
-         charSpace,
+         makeTextPToken('  '),
          new GeneralEntityEndPToken(daReference),
       ];
       entityDAEmpty = [
@@ -171,7 +169,7 @@ describe('attFix', () => {
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStart('x    yz'));
+         expect(result).toEqual(makeElementStart('x     yz'));
       });
 
       it('modifies a non-CDATA attribute to trim leading newlines', () => {
@@ -246,6 +244,66 @@ describe('attFix', () => {
                ...entityAEmpty,
                makeTextPToken('B'),
                ...entityDAEmpty,
+            ]),
+         );
+      });
+
+      it('leaves char references in a CDATA attribute unchanged', () => {
+         const attList = makeAttListPToken('CDATA');
+         const elementStart = makeElementStartWithValue([
+            charRefD,
+            charRefD,
+            makeTextPToken('A'),
+            charRefA,
+            charRefA,
+            makeTextPToken('B'),
+            charRefD,
+            charRefA,
+         ]);
+         fixAttributes.processPToken(attList);
+
+         const result = fixAttributes.processPToken(elementStart);
+
+         expect(result).toEqual(
+            makeElementStartWithValue([
+               charRefD,
+               charRefD,
+               makeTextPToken('A'),
+               charRefA,
+               charRefA,
+               makeTextPToken('B'),
+               charRefD,
+               charRefA,
+            ]),
+         );
+      });
+
+      it('leaves char references in a non-CDATA attribute unchanged', () => {
+         const attList = makeAttListPToken('NMTOKENS');
+         const elementStart = makeElementStartWithValue([
+            charRefD,
+            charRefD,
+            makeTextPToken('A'),
+            charRefA,
+            charRefA,
+            makeTextPToken('B'),
+            charRefD,
+            charRefA,
+         ]);
+         fixAttributes.processPToken(attList);
+
+         const result = fixAttributes.processPToken(elementStart);
+
+         expect(result).toEqual(
+            makeElementStartWithValue([
+               charRefD,
+               charRefD,
+               makeTextPToken('A'),
+               charRefA,
+               charRefA,
+               makeTextPToken('B'),
+               charRefD,
+               charRefA,
             ]),
          );
       });
