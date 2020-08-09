@@ -11,6 +11,9 @@
       "resolveJsonModule": true,
       "esModuleInterop": true,
       "paths": {
+         "attFix": [
+            "./source/attFix"
+         ],
          "basic": [
             "./source/basic"
          ],

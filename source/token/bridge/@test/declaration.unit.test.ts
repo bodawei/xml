@@ -30,7 +30,7 @@ describe('declaration (unit)', () => {
             const parse = spyOn(token, 'parseEntityDeclaration');
             const mockSource = new MockSTokenSource([
                [ undefined, 'space' ],
-               [ 'ENTITY', 'word', [ '>' ] ],
+               [ 'ENTITY', 'word', [ '>', '%' ] ],
                [ ' ', 'space' ],
             ]);
 
@@ -52,7 +52,7 @@ describe('declaration (unit)', () => {
             const parse = spyOn(token, 'parseEntityDeclaration');
             const mockSource = new MockSTokenSource([
                [ ' ', 'space' ],
-               [ 'eNtiTy', 'word', [ '>' ] ],
+               [ 'eNtiTy', 'word', [ '>', '%' ] ],
                [ ' ', 'space' ],
             ]);
 

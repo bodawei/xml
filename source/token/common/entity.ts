@@ -4,6 +4,7 @@ import {  EntityMetaData } from 'basic';
 import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
 
+import declaration, { DeclarationPToken } from '../bridge/baseDeclaration';
 import unassigned, { UnassignedType } from '../common/unassigned';
 import misc from '../common/misc';
 import {  checkExternalIdWellFormed } from '../common/externalId';
@@ -14,6 +15,7 @@ import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
+import { checkDeclarationStart } from '../../wellformedness/token/bridge/checkDeclarationStart'
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -37,7 +39,7 @@ function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntit
 
    const enNameText = strOrBlank(pToken.name);
 
-   //   declaration.checkWellFormed((pToken as any), ec, entityMetaData); // TypeHack
+   checkDeclarationStart((pToken as any), ec);
    const declType = strOrBlank(pToken.declType);
 
    ec.setPos(pToken.declType);

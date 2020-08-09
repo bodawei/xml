@@ -48,7 +48,7 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
    start.open = openSToken;
 
    source.extractToObjectNoParams('space', start, 'openSpace');
-   source.extractToObject('word', [ '>' ], start, 'declType');
+   source.extractToObject('word', [ '>', '%' ], start, 'declType');
 
    source.extractNoParams('space', (sToken) => {
       start.declTypeSpace = sToken;
@@ -63,6 +63,7 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
          case 'ATTLIST':
             attListDeclaration.parse(source, start, deliverPToken);
             return;
+         // When you finish this, need to do checkWellFormed on unknown types
       }
 
 

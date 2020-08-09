@@ -161,6 +161,7 @@ module.exports = {
          './source/token/**/@test/**/conditional.ts',
          './source/token/common/**/externalId*test.ts',
          './source/basic/**/*.test.ts',
+         './source/attFix/**/*.ts',
          './source/expand/**/*.test.ts',
       ],
       parser: '@typescript-eslint/parser',

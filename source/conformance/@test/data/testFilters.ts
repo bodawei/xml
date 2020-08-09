@@ -6,19 +6,13 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [
-      // 'valid-not-sa-015', // bad conditional section.
-      // 'valid-not-sa-016', // bad conditional section.
-      // 'cond01', // Only INCLUDE and IGNORE are conditional section keywords
-      // 'cond02', // Must have keyword in conditional sections
-   ],
+   includedIds: [],
    excludedIds: [
       // These two are all attribute fixing.  Seems like a new phase. Could be done in entity expander, but doesn't seem right
       'valid-sa-096', // Do section 3.3.3 some error with whitespace
       'valid-not-sa-003', // Need to add defaulted attributes
+      'valid-not-sa-020', // Default attributes
       //
-      'valid-not-sa-020', // some problem with param entities
-      'valid-ext-sa-007', // ?? esxternal entity. maybe also utf16?
       'pr-xml-utf-8', // japanese charas in utf8... what happened
       'ext01', // Some external entity problem
       'sa02', // Some standalone problem/ misinterpretation
@@ -50,7 +44,7 @@ const testFilters: FilterData = {
       'valid-sa-050', // UTF16 with BOM
       'valid-sa-051', // utf16
       'valid-ext-sa-014', // External entity is utf16 with a BOM.  Oddly, the answer has the BOM in it.  Why isn't that stripped?  Be certain you understand this
-      // -- BOM problem
+      'valid-ext-sa-007', // utf16 BOM
 
       // Valid / Text problems
       // NOTE: A bunch of the 1.1 ones are easily fixed by adding the <?xml version="1.1" to the output.
