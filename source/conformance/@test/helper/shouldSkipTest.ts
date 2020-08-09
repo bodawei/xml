@@ -12,15 +12,17 @@ function isExcluded(testData: Test): boolean {
 }
 
 function isIncluded(testData: Test): boolean {
-   if (testFilters.includedIds.includes(testData.ID)) {
-      return true;
-   }
-
-   return testFilters.includedIds.length === 0;
+   return testFilters.includedIds.includes(testData.ID);
 }
 
 function shouldSkipTest(testData: Test): boolean {
-   return isExcluded(testData) || !isIncluded(testData);
+   if (isIncluded(testData)) {
+      return false;
+   }
+
+   const hasAnyIncludes = testFilters.includedIds.length !== 0;
+
+   return isExcluded(testData) || hasAnyIncludes;
 }
 
 export { shouldSkipTest };

@@ -6,34 +6,41 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      'valid-not-sa-014', // Conditional section with %pe; not unerstood
+      'o-p57pass1', // expansion problem with a pe reference. clearly a bug
+   ],
    excludedIds: [
       // These two are all attribute fixing.  Seems like a new phase. Could be done in entity expander, but doesn't seem right
       'valid-sa-096', // Do section 3.3.3 some error with whitespace
       'valid-not-sa-003', // Need to add defaulted attributes
       'valid-not-sa-020', // Default attributes
-      //
+      //  This messes up with attlists with enumerations.  It doesn't recognize the right wrod boundaries.
+      // but the same is true for element declarations <!ELEMENT %name; (a|b)*>
+      // The solution is either we need to always add other delimiters to word identification
+      // or we need to completely chnage unassigned to just work with strings rather than preparsed
       'pr-xml-utf-8', // japanese charas in utf8... what happened
-      'ext01', // Some external entity problem
+
+      // Misc
+      'o-p69pass1', // misidentifying a recursive call
+      'x-rmt-008b', // version="1.7" allowed in rev 5?
+      'rmt-006', // xml version match problem
+      'rmt-e2e-18', // Need to find entities in subdirectories. And "subdir1/E18-pe" has no extension
+      'ext01', // We are creating PACE_PTOKEN's that we should not
       'sa02', // Some standalone problem/ misinterpretation
       'sa03', // Some standalone problem/ misinterpretation
       'sa04', // Some standalone problem/ misinterpretation
-      'valid-not-sa-014', // Conditional section with %pe; not unerstood
-      'x-rmt-008b', // version="1.7" allowed in rev 5?
-      'o-p57pass1', // expansion problem with a pe reference. clearly a bug
-      'o-p69pass1', // expansion problem with a pe reference. clearly a bug
-      'v-lang03', // xml:lang violation
-      'v-lang04', // xml:lang violation
-      'ibm-valid-P36-ibm36v01.xml', // a xml:lang violation
-      'ibm-valid-P85-ibm85v01.xml', // a legal char issue
-      'rmt-e2e-50', // a 1.1 new line problem
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)
-      'rmt-006', // xml version match problem
-      'rmt-e2e-22', // Starts with a BOM
-      'rmt-e2e-18', // Need to find entities in subdirectories. And "subdir1/E18-pe" has no extension
+      // characters
+      'rmt-e2e-50', // a 1.1 new line problem
       'rmt-012', // 1.1 char problem.
       'rmt-047', // 1.1 char problem.
       'rmt-054', // A character problem
+      'ibm-valid-P85-ibm85v01.xml', // a legal char issue in a pi
+      // xml:lang
+      'v-lang03', // xml:lang violation
+      'v-lang04', // xml:lang violation
+      'ibm-valid-P36-ibm36v01.xml', // a xml:lang violation
       // --- UTF16 validity problems
       'valid-ext-sa-008', // utf16
       'pr-xml-little', // utf16
@@ -45,6 +52,8 @@ const testFilters: FilterData = {
       'valid-sa-051', // utf16
       'valid-ext-sa-014', // External entity is utf16 with a BOM.  Oddly, the answer has the BOM in it.  Why isn't that stripped?  Be certain you understand this
       'valid-ext-sa-007', // utf16 BOM
+      // utf8/BOM
+      'rmt-e2e-22', // Starts with a BOM
 
       // Valid / Text problems
       // NOTE: A bunch of the 1.1 ones are easily fixed by adding the <?xml version="1.1" to the output.

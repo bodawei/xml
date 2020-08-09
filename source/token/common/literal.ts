@@ -99,7 +99,7 @@ function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, e
 }
 
 function makeTokenCompatible(pToken?: LiteralPToken): LiteralValueXToken | void {
-   const pieces = pToken ? pToken.value : [];
+   const pieces = pToken?.value ?? [];
 
    const result = literalValue.makeXTokenCompatible(pieces);
 

@@ -8,7 +8,7 @@ import { makeCharRef } from 'token-test';
 
 import { checkDeclarationStart } from '../checkDeclarationStart';
 
-fdescribe('checkDeclarationStart()', () => {
+describe('checkDeclarationStart()', () => {
    let mockErrorCollector: MockErrorCollector;
    let startPToken: DeclarationStart;
 
