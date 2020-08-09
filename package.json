@@ -13,7 +13,7 @@
       "test:cover": "xclap precommit",
       "test:node": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/new-jasmine.json'",
       "tn": "ts-node -r tsconfig-paths/register",
-      "build:xmlconf": "ts-node -r tsconfig-paths/register ./build/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf-new.json"
+      "build:xmlconf": "ts-node -r tsconfig-paths/register ./build/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json"
    },
    "devDependencies": {
       "@babel/cli": "^7.8.4",

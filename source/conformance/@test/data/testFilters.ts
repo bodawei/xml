@@ -6,10 +6,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [
-      'valid-not-sa-014', // Conditional section with %pe; not unerstood
-      'o-p57pass1', // expansion problem with a pe reference. clearly a bug
-   ],
+   includedIds: [],
    excludedIds: [
       // These two are all attribute fixing.  Seems like a new phase. Could be done in entity expander, but doesn't seem right
       'valid-sa-096', // Do section 3.3.3 some error with whitespace
@@ -22,15 +19,15 @@ const testFilters: FilterData = {
       'pr-xml-utf-8', // japanese charas in utf8... what happened
 
       // Misc
-      'o-p69pass1', // misidentifying a recursive call
       'x-rmt-008b', // version="1.7" allowed in rev 5?
       'rmt-006', // xml version match problem
-      'rmt-e2e-18', // Need to find entities in subdirectories. And "subdir1/E18-pe" has no extension
+      'o-p69pass1', // misidentifying a recursive call
       'ext01', // We are creating PACE_PTOKEN's that we should not
       'sa02', // Some standalone problem/ misinterpretation
       'sa03', // Some standalone problem/ misinterpretation
       'sa04', // Some standalone problem/ misinterpretation
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)
+      'rmt-e2e-18', // Tests relative entity lookup  one in a subdirectlry should be finding relative to the main document, not itself?????
       // characters
       'rmt-e2e-50', // a 1.1 new line problem
       'rmt-012', // 1.1 char problem.

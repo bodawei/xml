@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { dirname, extname, resolve } from 'path';
+import { dirname, extname, relative, resolve } from 'path';
 import { Transform } from 'stream';
 
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
@@ -228,18 +228,55 @@ function transform(data: RawTestSuite | RawTestCases | RawTest ): TestSuite | Te
    }
 }
 
-function addEntityPaths(data:TestSuite | TestCases | Test): TestSuite | TestCases | Test {
+function addDirectory(pathToHere: string, testCases: TestCases, root: string): void {
+   try {
+      const dirEntries: Array<string> = readdirSync(pathToHere);
+
+      dirEntries.forEach(entryName => {
+         const extension = extname(entryName);
+         const finalPath = resolve(pathToHere, entryName);
+         const stats = statSync(finalPath);
+         // The eduni directory in some cases suffixes all files with .xml, and in some cases has no extensions.
+         const isEduni = pathToHere.indexOf('eduni') !== -1;
+
+         // eduni puts some files in subfolders
+         if (!stats.isFile()) {
+            if (!isEduni) {
+               return
+            } else {
+               addDirectory(finalPath, testCases, root);
+               return;
+            }
+         } 
+
+         if (extension === '.xml' && !isEduni) {
+            return;
+         }
+
+         const testContent = readFileSync(finalPath, { encoding: 'utf-8' });
+         const relativePath = (pathToHere[0] !== '.') ? relative(root, pathToHere) : pathToHere;
+
+         testCases.entityPaths[relativePath] = testCases.entityPaths[relativePath] || {};
+         testCases.entityPaths[relativePath][entryName] = testContent;
+      });
+   } catch (error) {
+      console.log('error', error);
+      // ignore this.  We know xmlconf/eduni/namespaces/misc does not exist. D'oh
+   }
+}
+
+function addEntityPaths(root: string, data:TestSuite | TestCases | Test): TestSuite | TestCases | Test {
    switch (data.type) {
       case 'TESTSUITE':
          const testSuite: TestSuite = {
             ...data,
-            cases: data.cases.map(addEntityPaths as (item: TestCases) => TestCases),
+            cases: data.cases.map(addEntityPaths.bind(undefined, root) as (item: TestCases) => TestCases),
          };
          return testSuite;
       case 'TESTCASES':
          const testCases: TestCases = {
             ...data,
-            cases: data.cases.map(addEntityPaths as (item: TestCases) => TestCases),
+            cases: data.cases.map(addEntityPaths.bind(undefined, root) as (item: TestCases) => TestCases),
          };
 
          testCases.tests.forEach(test => {
@@ -249,29 +286,7 @@ function addEntityPaths(data:TestSuite | TestCases | Test): TestSuite | TestCase
                return;
             }
 
-            try {
-               const dirs: Array<string> = readdirSync(dirPath);
-
-               dirs.forEach(fileName => {
-                  const extension = extname(fileName);
-                  const finalPath = resolve(dirPath, fileName);
-                  const stats = statSync(finalPath);
-                  // The eduni directory appears to suffix all files, including entities and dtd files, with .xml.
-                  const isEduni = dirPath.indexOf('eduni') !== -1;
-
-                  if ((extension === '.xml' && !isEduni) || !stats.isFile()) {
-                     return;
-                  }
-
-                  const testContent = readFileSync(finalPath, { encoding: 'utf-8' });
-
-                  testCases.entityPaths[dirPath] = testCases.entityPaths[dirPath] || {};
-   
-                  testCases.entityPaths[dirPath][fileName] = testContent;
-               });
-            } catch (error) {
-               // ignore this.  We know xmlconf/eduni/namespaces/misc does not exist. D'oh
-            }
+            addDirectory(dirPath, testCases, root);
          });
          return testCases;
       case 'TEST':
@@ -308,7 +323,7 @@ class RefineObject extends Transform {
 
       const augmented = addRelatedData(chunk, this.root);
       const transformed = transform(augmented);
-      const populated = addEntityPaths(transformed);
+      const populated = addEntityPaths(this.root, transformed);
       writeFileSync(this.outfile, JSON.stringify(populated, undefined, 2), { encoding: 'utf-8' });
       done();
    }
