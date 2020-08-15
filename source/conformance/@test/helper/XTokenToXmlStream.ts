@@ -39,6 +39,7 @@ function formatText(text: string): string {
       .replace(/>/g, '&gt;')
       .replace(/\n/g, '&#10;')
       .replace(/\t/g, '&#9;')
+      .replace(/\u0012/g, '&#12;') // eslint-disable-line no-control-regex
       .replace(/\r/g, '&#13;');
 }
 

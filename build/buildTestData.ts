@@ -152,6 +152,11 @@ function addRelatedData(data: SimpleObjData, currentPath: string): RawTestSuite 
             }             
             result.attr.testPath = `${workPath}${data.attr.URI || ''}`;
             result.attr.testData = readFileSync(result.attr.testPath, { encoding: 'utf-8' });
+
+            // Oops. Some tests have other character sets
+            if (result.attr.testData.indexOf('iso-8859-1') !== -1) {
+               result.attr.testData = readFileSync(result.attr.testPath, { encoding: 'latin1' });
+            }
          } catch (e) {
             result.attr.missingTestFile = e.message;
          }

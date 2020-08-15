@@ -7,7 +7,8 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      'rmt-006', // xml version match problem
+      'rmt-047', // 1.1 char problem.
+      'rmt-e2e-50', // a 1.1 new line problem
    ],
    excludedIds: [
       // These two are all attribute fixing.  Seems like a new phase. Could be done in entity expander, but doesn't seem right
@@ -19,6 +20,8 @@ const testFilters: FilterData = {
       // The solution is either we need to always add other delimiters to word identification
       // or we need to completely chnage unassigned to just work with strings rather than preparsed
       'pr-xml-utf-8', // japanese charas in utf8... what happened
+      // When tests are running 1.1 test, the xmldecl should override it
+      'rmt-012', // the problem here is that the doc is 1.0, but it is in the 1.1 section.
 
       // Misc
       'o-p69pass1', // misidentifying a recursive call
@@ -29,10 +32,7 @@ const testFilters: FilterData = {
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)
       'rmt-e2e-18', // Tests relative entity lookup  one in a subdirectlry should be finding relative to the main document, not itself?????
       // characters
-      'rmt-e2e-50', // a 1.1 new line problem
-      'rmt-012', // 1.1 char problem.
-      'rmt-047', // 1.1 char problem.
-      'rmt-054', // A character problem
+      'rmt-054', // Unclear what is going wrong
       'ibm-valid-P85-ibm85v01.xml', // a legal char issue in a pi
       // xml:lang
       'v-lang03', // xml:lang violation

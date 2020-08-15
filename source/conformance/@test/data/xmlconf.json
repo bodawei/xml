@@ -26035,7 +26035,7 @@
               "VERSION": "1.1",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/errata-2e/E50.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo bar CDATA #IMPLIED>\n]>\n<foo�bar=\"hello\"/>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo bar CDATA #IMPLIED>\n]>\n<foobar=\"hello\"/>\n",
               "description": "All line-ends are normalized, even those not passed to the application. NB this can only be tested effectively in XML 1.1, since CR is in the S production; in 1.1 we can use NEL which isn't."
             },
             {
@@ -26289,7 +26289,7 @@
               "OUTPUT": "out/010.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/010.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control, legal in XML 1.0, illegal in XML 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control, legal in XML 1.0, illegal in XML 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo></foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/010.xml",
               "outputData": "<foo></foo>",
               "description": "Contains a C1 control, legal in XML 1.0, illegal in XML 1.1"
@@ -26303,7 +26303,7 @@
               "ID": "rmt-011",
               "TYPE": "not-wf",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/011.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control, legal in XML 1.0, illegal in XML 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control, legal in XML 1.0, illegal in XML 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo></foo>\n",
               "description": "Contains a C1 control, legal in XML 1.0, illegal in XML 1.1"
             },
             {
@@ -26343,7 +26343,7 @@
               "TYPE": "not-wf",
               "EDITION": "1 2 3 4",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/014.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a \"long s\" in a name, legal in XML 1.1, illegal in XML 1.0 -->\n<eggſ/>\n\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a \"long s\" in a name, legal in XML 1.1, illegal in XML 1.0 -->\n<eggÅ¿/>\n\n",
               "description": "Has a \"long s\" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition"
             },
             {
@@ -26451,7 +26451,7 @@
               "OUTPUT": "out/022.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/022.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo></foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/022.xml",
               "outputData": "<foo></foo>",
               "description": "Has a NEL character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1"
@@ -26466,7 +26466,7 @@
               "OUTPUT": "out/023.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/023.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo></foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/023.xml",
               "outputData": "<?xml version=\"1.1\"?><foo>&#10;</foo>",
               "description": "Has a NEL character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1"
@@ -26511,7 +26511,7 @@
               "OUTPUT": "out/026.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/026.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has CR-NEL; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>\r�</foo>\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has CR-NEL; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>\r</foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/026.xml",
               "outputData": "<foo>&#10;</foo>",
               "description": "Has CR-NEL; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1"
@@ -26526,7 +26526,7 @@
               "OUTPUT": "out/027.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/027.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has CR-NEL; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>\r�</foo>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has CR-NEL; legal in both XML 1.0 and 1.1, but different\n     canonical output because of normalization in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>\r</foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/027.xml",
               "outputData": "<?xml version=\"1.1\"?><foo>&#10;</foo>",
               "description": "Has CR-NEL; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1"
@@ -26571,7 +26571,7 @@
               "OUTPUT": "out/030.xml",
               "TYPE": "invalid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/030.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in an NMTOKENS attribute; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo bar NMTOKENS #IMPLIED>\n]>\n<foo bar=\"abc�def\"/>\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in an NMTOKENS attribute; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo bar NMTOKENS #IMPLIED>\n]>\n<foo bar=\"abcdef\"/>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/030.xml",
               "outputData": "<foo bar=\"abcdef\"></foo>",
               "description": "Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1"
@@ -26586,7 +26586,7 @@
               "OUTPUT": "out/031.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/031.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in an NMTOKENS attribute; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo bar NMTOKENS #IMPLIED>\n]>\n<foo bar=\"abc�def\"/>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in an NMTOKENS attribute; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo bar NMTOKENS #IMPLIED>\n]>\n<foo bar=\"abcdef\"/>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/031.xml",
               "outputData": "<?xml version=\"1.1\"?><foo bar=\"abc def\"></foo>",
               "description": "Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1"
@@ -26715,7 +26715,7 @@
               "OUTPUT": "out/040.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/040.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control character (partial line up), legal in\n     XML 1.0 but not 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control character (partial line up), legal in\n     XML 1.0 but not 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo></foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/040.xml",
               "outputData": "<foo></foo>",
               "description": "Contains a C1 control character (partial line up), legal in XML 1.0 but not 1.1"
@@ -26729,7 +26729,7 @@
               "ID": "rmt-041",
               "TYPE": "not-wf",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/041.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control character (partial line up), legal in\n     XML 1.0 but not 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Contains a C1 control character (partial line up), legal in\n     XML 1.0 but not 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n]>\n<foo></foo>\n",
               "description": "Contains a C1 control character (partial line up), legal in XML 1.0 but not 1.1"
             },
             {
@@ -26799,7 +26799,7 @@
               "OUTPUT": "out/046.xml",
               "TYPE": "invalid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/046.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in element content whitespace; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo (foo*)>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in element content whitespace; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo (foo*)>\n]>\n<foo></foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/046.xml",
               "outputData": "<foo></foo>",
               "description": "Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1"
@@ -26814,7 +26814,7 @@
               "OUTPUT": "out/047.xml",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/047.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in element content whitespace; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo (foo*)>\n]>\n<foo>�</foo>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Has a NEL character in element content whitespace; well-formed in both\n     XML 1.0 and 1.1, but valid only in 1.1 -->\n<!DOCTYPE foo [\n<!ELEMENT foo (foo*)>\n]>\n<foo></foo>\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/out/047.xml",
               "outputData": "<?xml version=\"1.1\"?><foo>&#10;</foo>",
               "description": "Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1"
@@ -26933,7 +26933,7 @@
               "ID": "rmt-055",
               "TYPE": "error",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/xml-1.1/055.xml",
-              "testData": "<?xml version=\"1.1\"�encoding=\"iso-8859-1\"?>\n<!-- Has a Latin-1 NEL in the XML declaration -->\n<foo/>\n",
+              "testData": "<?xml version=\"1.1\"encoding=\"iso-8859-1\"?>\n<!-- Has a Latin-1 NEL in the XML declaration -->\n<foo/>\n",
               "description": "Has a Latin-1 NEL in the XML declaration (to be made an error in PR)"
             },
             {
@@ -27149,7 +27149,7 @@
               "ID": "rmt-ns10-006",
               "TYPE": "error",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/namespaces/1.0/006.xml",
-              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Namespace name test: an http IRI that is not a URI -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo xmlns CDATA #IMPLIED>\n]>\n<foo xmlns=\"http://example.org/ros�\"/>\n",
+              "testData": "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<!-- Namespace name test: an http IRI that is not a URI -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo xmlns CDATA #IMPLIED>\n]>\n<foo xmlns=\"http://example.org/rosé\"/>\n",
               "description": "Namespace name test: an http IRI that is not a URI"
             },
             {
@@ -27691,7 +27691,7 @@
               "ID": "rmt-ns11-001",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/namespaces/1.1/001.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Namespace name test: a perfectly good http IRI that is not a URI -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo xmlns CDATA #IMPLIED>\n]>\n<foo xmlns=\"http://example.org/ros�\"/>\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Namespace name test: a perfectly good http IRI that is not a URI -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo xmlns CDATA #IMPLIED>\n]>\n<foo xmlns=\"http://example.org/rosé\"/>\n",
               "description": "Namespace name test: a perfectly good http IRI that is not a URI"
             },
             {
@@ -27703,7 +27703,7 @@
               "ID": "rmt-ns11-002",
               "TYPE": "valid",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/namespaces/1.1/002.xml",
-              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Namespace inequality test: different escaping of non-ascii letter -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo xmlns:a CDATA #IMPLIED\n              xmlns:b CDATA #IMPLIED\n              xmlns:c CDATA #IMPLIED>\n<!ELEMENT bar ANY>\n<!ATTLIST bar a:attr CDATA #IMPLIED\n              b:attr CDATA #IMPLIED\n              c:attr CDATA #IMPLIED>\n]>\n<foo xmlns:a=\"http://example.org/ros�\"\n     xmlns:b=\"http://example.org/ros%c3%a9\"\n     xmlns:c=\"http://example.org/ros%c3%A9\">\n\n<bar a:attr=\"1\" b:attr=\"2\" c:attr=\"3\"/>\n\n</foo>\n\n",
+              "testData": "<?xml version=\"1.1\" encoding=\"iso-8859-1\"?>\n<!-- Namespace inequality test: different escaping of non-ascii letter -->\n<!DOCTYPE foo [\n<!ELEMENT foo ANY>\n<!ATTLIST foo xmlns:a CDATA #IMPLIED\n              xmlns:b CDATA #IMPLIED\n              xmlns:c CDATA #IMPLIED>\n<!ELEMENT bar ANY>\n<!ATTLIST bar a:attr CDATA #IMPLIED\n              b:attr CDATA #IMPLIED\n              c:attr CDATA #IMPLIED>\n]>\n<foo xmlns:a=\"http://example.org/rosé\"\n     xmlns:b=\"http://example.org/ros%c3%a9\"\n     xmlns:c=\"http://example.org/ros%c3%A9\">\n\n<bar a:attr=\"1\" b:attr=\"2\" c:attr=\"3\"/>\n\n</foo>\n\n",
               "description": "Namespace inequality test: different escaping of non-ascii letter"
             },
             {
@@ -34127,7 +34127,7 @@
               "ID": "hst-lhs-007",
               "TYPE": "not-wf",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/misc/007.xml",
-              "testData": "﻿<?xml version='1.0' encoding='iso-8859-1'?><x/>\n",
+              "testData": "ï»¿<?xml version='1.0' encoding='iso-8859-1'?><x/>\n",
               "description": "UTF-8 BOM plus xml decl of iso-8859-1 incompatible"
             },
             {
