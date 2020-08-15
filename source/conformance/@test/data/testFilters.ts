@@ -6,10 +6,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [
-      'rmt-047', // 1.1 char problem.
-      'rmt-e2e-50', // a 1.1 new line problem
-   ],
+   includedIds: [],
    excludedIds: [
       // These two are all attribute fixing.  Seems like a new phase. Could be done in entity expander, but doesn't seem right
       'valid-sa-096', // Do section 3.3.3 some error with whitespace
@@ -33,7 +30,6 @@ const testFilters: FilterData = {
       'rmt-e2e-18', // Tests relative entity lookup  one in a subdirectlry should be finding relative to the main document, not itself?????
       // characters
       'rmt-054', // Unclear what is going wrong
-      'ibm-valid-P85-ibm85v01.xml', // a legal char issue in a pi
       // xml:lang
       'v-lang03', // xml:lang violation
       'v-lang04', // xml:lang violation
