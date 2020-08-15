@@ -1,0 +1,54 @@
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
+import { defaultExtractors } from 'extractor';
+import { STokenSource, SToken } from 'sToken';
+
+import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
+import { InstructionStart } from '../../../token/bridge/instruction';
+import { parseXmlDeclaration } from 'token';
+
+describe('xmlDeclaration (integration)', () => {
+   let start: InstructionStart;
+   let emd: EntityMetaData;
+   let source: STokenSource;
+
+   beforeEach(() => {
+      start = {
+         open: SToken.fromString('<?'),
+         openSpace: undefined,
+         target: SToken.fromString('xml'),
+         targetSpace: SToken.fromString(' '),
+      };
+      emd = new EntityMetaData();
+      source = new STokenSource(defaultExtractors, emd);
+   });
+
+   it('reports an error when the target text is malformed (check misc.checkCharWellFormed())', (done) => {
+      source.addText('version "1.0" encoding="usascii"?>');
+      start.target = SToken.fromString('\u0001xml');
+
+      parseXmlDeclaration(source, start, (result) => {
+         const ec = new ErrorCollector(start.open, WellFormedError);
+
+         xmlDeclarationCheck(result, ec, emd);
+
+         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         done();
+      });
+   });
+
+   it('reports an error when the param value is malformed (check misc.checkCharWellFormed())', (done) => {
+      source.addText('version="\u00011.0" encoding="usascii"?>');
+
+      parseXmlDeclaration(source, start, (result) => {
+         const ec = new ErrorCollector(start.open, WellFormedError);
+
+         xmlDeclarationCheck(result, ec, emd);
+
+         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         done();
+      });
+   });
+});

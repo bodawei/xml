@@ -19,7 +19,6 @@ import {
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
-import { strOrBlank, SToken } from 'sToken';
 import { checkMap } from './checkMap';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';

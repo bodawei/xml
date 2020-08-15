@@ -30,10 +30,6 @@ import {
    XMLDECL_PTOKEN,
    TextDeclarationPToken,
 } from 'token';
-
-import { DocumentChecker } from '../DocumentChecker';
-import { CHECKER_DONE, CheckState, Checker } from '../checkUtils';
-
 import {
    makeTextDecl,
    makeProcessingInstruction,
@@ -51,6 +47,10 @@ import {
    makeElementEnd,
    makeElementEmpty,
 } from 'token-test';
+
+import { DocumentChecker } from '../DocumentChecker';
+import { CHECKER_DONE, CheckState, Checker } from '../checkUtils';
+import { checkMap } from '../checkMap';
 
 describe('DocumentChecker (unit)', () => {
    let checker: DocumentChecker;
@@ -134,14 +134,15 @@ describe('DocumentChecker (unit)', () => {
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = spyOn(xmlDecl, 'checkWellFormed');
+         const cwfSpy = spyOn(checkMap, XMLDECL_PTOKEN);
          checker.check(metaData, ec);
 
          checker.check(xmlDecl, ec);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toBeInstanceOf(ErrorCollector);
-         expect(args[1]).toEqual(metaData);
+         expect(args[0]).toBe(xmlDecl);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
       });
 
       it('handles an XmlError with no problems', () => {

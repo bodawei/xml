@@ -43,6 +43,7 @@ Feature: Default attributes
 Cleanup
 - Combined regexes
 - Make regex's global
+- Some of the space processing seems a big janky.
 
 Question
 - What should we be doing about construction

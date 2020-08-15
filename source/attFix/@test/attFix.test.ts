@@ -51,7 +51,7 @@ function makeElementStart(value: string): ElementStartPToken {
    return makeElementStartWithValue([new TextPToken({ text: toSToken(value) })]);
 }
 
-fdescribe('attFix', () => {
+describe('attFix', () => {
    let fixAttributes: AttFixer;
    let entityD: AttrValue;
    let entityA: AttrValue;
