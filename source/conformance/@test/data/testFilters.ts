@@ -7,7 +7,7 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      'x-rmt-008b', // version="1.7" allowed in rev 5?
+      'rmt-006', // xml version match problem
    ],
    excludedIds: [
       // These two are all attribute fixing.  Seems like a new phase. Could be done in entity expander, but doesn't seem right
@@ -21,7 +21,6 @@ const testFilters: FilterData = {
       'pr-xml-utf-8', // japanese charas in utf8... what happened
 
       // Misc
-      'rmt-006', // xml version match problem
       'o-p69pass1', // misidentifying a recursive call
       'ext01', // We are creating PACE_PTOKEN's that we should not
       'sa02', // Some standalone problem/ misinterpretation

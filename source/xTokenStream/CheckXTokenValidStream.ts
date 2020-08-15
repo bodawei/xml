@@ -350,6 +350,9 @@ class CheckXTokenValidStream extends Transform {
          this.emd.revision.toString()];
 
          switch (xToken.type) {
+            case TEXTDECL_XTOKEN:
+               // no problem here.
+               break;
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
                if (!this.elementDeclarations[xToken.name]) {
