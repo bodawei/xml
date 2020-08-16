@@ -1,4 +1,3 @@
-import { AttFixer } from '../attFix';
 import {
    AttListPToken,
    ElementStartPToken,
@@ -9,6 +8,8 @@ import {
    CharRefPToken,
 } from 'token';
 import { toSToken } from 'sToken';
+
+import { AttFixer } from '../attFixer';
 
 type AttrValue = Array<
    GeneralEntityStartPToken | GeneralEntityEndPToken | TextPToken | CharRefPToken

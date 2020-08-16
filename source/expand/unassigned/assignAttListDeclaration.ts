@@ -12,6 +12,7 @@ import {
 
 import { assignToProps } from './assignToProps';
 import { assignWordList } from './assignWordList';
+import { LiteralPToken } from 'source/token/common/literal';
 
 function adjustSpaces(attLiPToken: AttListPToken): void {
    const prevDef: AttDefPToken = attLiPToken.attDefs[0];
@@ -151,6 +152,14 @@ function assignAttListDeclaration(
 
       assignToProps(unValues, nextDef, nextPropName, remainingDescriptors);
 
+      // In this case, we need to extract the parts of value back out. This is icky
+      if (nextDef.value) {
+         const ickyLiteral: LiteralPToken = nextDef.value as any; // We have to force our way around the problem
+
+         nextDef.openQuote = ickyLiteral.openQuote;
+         nextDef.closeQuote = ickyLiteral.closeQuote;
+         nextDef.value = ickyLiteral.value;
+      }
       nextPropName = 'name';
    }
 

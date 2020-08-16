@@ -919,11 +919,13 @@ class CheckXTokenValidStream extends Transform {
                [attList.elementName, attDef.name, defaultText], pToken.open);
          }
       } else if (type === 'NMTOKENS') {
+         console.log('WTF');
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ...of type NMTOKENS must match the Nmtokens production;
          if (hasDefault) {
-            const names = defaultText.split(/ +/);
+            const names = defaultText.split(/ +/).map(name => name.trim()).filter(name => name !== '');
+
             const badNames = [];
 
             for (const name of names) {
@@ -1521,7 +1523,7 @@ class CheckXTokenValidStream extends Transform {
                   this.pushValidityError(code, [parsed.join(', '), elStart.name, attrName], pTokenOpen);
                }
             } else if (attrDef.type === 'NMTOKEN' || attrDef.type === 'NMTOKENS') {
-               const names = attrDef.type === 'NMTOKEN' ? [ attrText ] : attrText.split(/ +/);
+               const names = attrDef.type === 'NMTOKEN' ? [ attrText ] : attrText.split(/ +/).map(name => name.trim()).filter(name => name !== '');
                const badNames = [];
 
                // §3.3.1: Validity Constraint: Name Token

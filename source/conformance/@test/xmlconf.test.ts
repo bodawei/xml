@@ -15,6 +15,7 @@ import { TestSuite } from './helper/types';
 import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
 import metadata from './data/xmlconf.json';
+import { AttFixerStream } from 'nodeStream';
 
 function setUpStreams(test: TestDetails): Transform {
    const ver = test.VERSION ? (Number.parseFloat(test.VERSION) as XmlVersion) : 1.0;
@@ -23,11 +24,12 @@ function setUpStreams(test: TestDetails): Transform {
    const emd = new EntityMetaData(EntityKind.DOCUMENT, ver, rev, new EntityLocation(test.testPath));
    const pTokenStream = new PTokenStream(emd);
    const entityExpander = new TestExpanderStream(test, true);
+   const attFix = new AttFixerStream();
    const checkWF = new CheckWellFormed();
    const toXToken = new PToXTokenStream();
    const checkValid = new CheckXTokenValidStream();
 
-   pTokenStream.pipe(entityExpander).pipe(checkWF).pipe(toXToken).pipe(checkValid);
+   pTokenStream.pipe(entityExpander).pipe(attFix).pipe(checkWF).pipe(toXToken).pipe(checkValid);
 
    pTokenStream.addText(test.testData || '');
    pTokenStream.endText();

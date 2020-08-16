@@ -15,6 +15,7 @@ import { ENTITY_META_DATA, EntityMetaData } from 'basic';
 
 interface AttDetals {
    isCData: boolean;
+   defaultValue?: LiteralValuePToken
 }
 
 interface AttDetailsMap {
@@ -33,14 +34,17 @@ x Bless 3.3.3 in the doc folder
 x Add support for 1.0's \r\n handling
 
 Feature: Streaming
-* Add a stream wrapper around this
-* Add to the test system
+x Add a stream wrapper around this
+x Add to the test system
 
 Feature: Default attributes
-- Find the part of the spec for this
-- Add suport in.
+x Find the part of the spec for this
+x Add suport in.
 
 Cleanup
+- Add docs for the default stuff from 3.3.2
+- Remove adding of defaults from validator
+- integratin test has an extra space
 - Combined regexes
 - Make regex's global
 - Some of the space processing seems a big janky.
@@ -132,7 +136,8 @@ class AttFixer {
             break;
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
-            return this.normalizeElementAttributes(input);
+            const newInput = this.addDefaults(input);
+            return this.normalizeElementAttributes(newInput);
          case ATTLISTDECL_PTOKEN_TYPE:
             this.captureAttributeDetails(input);
             break;
@@ -140,6 +145,52 @@ class AttFixer {
 
       return input;
    }
+
+   private addDefaults(      item: ElementStartPToken | ElementEmptyPToken,
+      ): ElementStartPToken | ElementEmptyPToken {
+         const elementName = strOrBlank(item.name);
+         const attrDefs = this.attDetails[elementName] ?? {  };
+         const attrsPresent: { [name: string]: boolean } = {};
+         let haveAddedOne = false;
+
+         for (const attr of item.attributes) {
+            const attrName = strOrBlank(attr.name);
+
+            if (attrName !== '') {
+               attrsPresent[attrName] = true;
+            }
+         }
+
+         for (const attrName of Object.keys(attrDefs)) {
+            const attrDef = attrDefs[attrName];
+
+            if (!attrsPresent[attrName] && attrDef.defaultValue) {
+               if (!haveAddedOne) {
+                  const previous = item.attributes[item.attributes.length - 1];
+                  if (previous) {
+                     previous.trailingSpace = previous.trailingSpace ?? toSToken(' ');
+                  } else if (!item.nameSpace){
+                     (item as any).nameSpace = toSToken(' ');
+
+                  }
+               }
+
+               haveAddedOne = true;
+
+               item.attributes.push({
+                  name: toSToken(attrName),
+                  equal: toSToken('='),
+                  openQuote: toSToken('"'),
+                  value: attrDef.defaultValue,
+                  closeQuote: toSToken('"'),
+                  trailingSpace: toSToken(' '),
+               });
+            }
+         }
+
+         return item;
+      }
+
 
    private captureAttributeDetails(attList: AttListPToken): void {
       const elementName = strOrBlank(attList.elementName);
@@ -170,6 +221,10 @@ class AttFixer {
          elDetails[attName] = {
             isCData: attType === 'cdata',
          };
+
+         if (def.value) {
+            elDetails[attName].defaultValue = def.value;
+         }
       }
    }
 
@@ -183,7 +238,7 @@ class AttFixer {
       for (const attr of item.attributes) {
          const attrName = strOrBlank(attr.name);
          const attrDefs = this.attDetails[elementName] ?? {};
-         const attrDef = attrDefs[attrName];
+         const attrDef = attrDefs[attrName] ?? { isCData: false };
 
          newAttributes.push({
             ...attr,

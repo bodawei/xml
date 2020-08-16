@@ -6,12 +6,12 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
-   excludedIds: [
-      // These two are all attribute fixing.  Seems like a new phase. Could be done in entity expander, but doesn't seem right
+   includedIds: [
       'valid-sa-096', // Do section 3.3.3 some error with whitespace
       'valid-not-sa-003', // Need to add defaulted attributes
       'valid-not-sa-020', // Default attributes
+   ],
+   excludedIds: [
       //  This messes up with attlists with enumerations.  It doesn't recognize the right wrod boundaries.
       // but the same is true for element declarations <!ELEMENT %name; (a|b)*>
       // The solution is either we need to always add other delimiters to word identification
