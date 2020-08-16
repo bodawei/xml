@@ -626,7 +626,9 @@ describe('assignAttListDeclaration() (unit)', () => {
          const expected: AttDefPToken = {
             name: toSToken('name'),
             enumeration: expectedEnumeration,
+            openQuote: undefined,
             value: [],
+            closeQuote: undefined,
          };
          // consume one unassigned value, so the system thinks we got a nameList
          assignWordListSpy.and.callFake((unassignedVals: Array<any>, list: any) => {

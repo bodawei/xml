@@ -919,7 +919,6 @@ class CheckXTokenValidStream extends Transform {
                [attList.elementName, attDef.name, defaultText], pToken.open);
          }
       } else if (type === 'NMTOKENS') {
-         console.log('WTF');
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ...of type NMTOKENS must match the Nmtokens production;

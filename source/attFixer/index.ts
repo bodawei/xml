@@ -1,1 +1,1 @@
-export * from './attFixer';
+export * from './AttFixer';

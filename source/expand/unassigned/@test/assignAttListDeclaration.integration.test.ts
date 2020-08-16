@@ -115,6 +115,8 @@ describe('assignAttListDeclaration() (integration)', () => {
                   type: toSToken('CDATA'),
                   postTypeSpace: toSToken(' '),
                   value: [],
+                  openQuote: undefined,
+                  closeQuote: undefined,
                },
                {
                   name: toSToken('at2'),
@@ -184,7 +186,9 @@ describe('assignAttListDeclaration() (integration)', () => {
                   postNameSpace: toSToken(' '),
                   type: toSToken('CDATA'),
                   postTypeSpace: toSToken(' '),
+                  openQuote: undefined,
                   value: [],
+                  closeQuote: undefined,
                },
                {
                   name: toSToken('at2'),
@@ -286,7 +290,9 @@ describe('assignAttListDeclaration() (integration)', () => {
                      closeSpace: undefined,
                   }),
                   defaultType: toSToken('#REQUIRED'),
+                  openQuote: undefined,
                   value: [],
+                  closeQuote: undefined,
                },
             ],
             close: toSToken('>'),

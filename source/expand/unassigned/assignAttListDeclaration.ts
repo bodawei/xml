@@ -158,7 +158,7 @@ function assignAttListDeclaration(
 
          nextDef.openQuote = ickyLiteral.openQuote;
          nextDef.closeQuote = ickyLiteral.closeQuote;
-         nextDef.value = ickyLiteral.value;
+         nextDef.value = ickyLiteral.value || [];
       }
       nextPropName = 'name';
    }
