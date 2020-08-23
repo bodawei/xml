@@ -54,7 +54,10 @@ interface ErrorDetails {
 }
 
 interface TestDetails extends Test {
-   readonly expectedError?: ErrorDetails;
+   readonly expectedError?: {
+      // These all are of the form V1R1 or 'default'
+      readonly [versionRevision: string]: ErrorDetails;
+   };
    readonly cases: Array<TestCases>;
    readonly suite: TestSuite;
 }

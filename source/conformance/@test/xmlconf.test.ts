@@ -17,10 +17,7 @@ import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
 import metadata from './data/xmlconf.json';
 import { AttFixerStream } from 'nodeStream';
 
-function setUpStreams(test: TestDetails): Transform {
-   const ver = test.VERSION ? (Number.parseFloat(test.VERSION) as XmlVersion) : 1.0;
-   const defaultRev: XmlRevision = ver === 1.0 ? 5 : 2;
-   const rev = test.EDITION ? (Number.parseInt(test.EDITION, 10) as XmlRevision) : defaultRev;
+function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
    const emd = new EntityMetaData(EntityKind.DOCUMENT, ver, rev, new EntityLocation(test.testPath));
    const pTokenStream = new PTokenStream(emd);
    const entityExpander = new TestExpanderStream(test, true);
@@ -41,42 +38,63 @@ describe('XML Conformance tests', () => {
    const allDetails = buildTestDetails(metadata as TestSuite);
 
    allDetails.forEach((testData) => {
-      it(`${testData.ID} (${testData.TYPE}) ${testData.description}`, (done) => {
-         const hasOutput = 'outputData' in testData;
-         const testStream = setUpStreams(testData);
-         const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
+      const ver = testData.VERSION ? (Number.parseFloat(testData.VERSION) as XmlVersion) : 1.0;
+      const defaultRev: XmlRevision = ver === 1.0 ? 5 : 2;
+      const editionString = testData.EDITION ? testData.EDITION : String(defaultRev);
 
-         // If the test details includes output, then we should test that the output matches
-         if (hasOutput) {
-            const toXmlStream = testStream.pipe(new XTokenToXmlStream());
+      const allEditions = editionString
+         .split(/ +/)
+         .map((ver) => Number.parseInt(ver, 10) as XmlRevision);
 
-            gatherStrings(toXmlStream, (results: Array<string>) => {
-               expect(results).toEqualNormalized(testData.outputData);
+      allEditions.forEach((edition) => {
+         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
+            const hasOutput = 'outputData' in testData;
+            const testStream = setUpStreams(testData, ver, edition);
+            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
+
+            // If the test details includes output, then we should test that the output matches
+            if (hasOutput) {
+               const toXmlStream = testStream.pipe(new XTokenToXmlStream());
+
+               gatherStrings(toXmlStream, (results: Array<string>) => {
+                  expect(results).toEqualNormalized(testData.outputData);
+                  doneWhenAllDone();
+               });
+            }
+
+            // We also want to test  whether the errors match as expected
+            gatherPTokens(testStream, (results: Array<PToken>) => {
+               const key = `V${ver}R${edition}`;
+               let expectedError;
+
+               if (testData.expectedError) {
+                  expectedError = testData.expectedError[key] || testData.expectedError.default;
+
+                  if (expectedError?.id === 'none') {
+                     expectedError = undefined;
+                  }
+               }
+
+               // const actualErrors: Array<any> = results.filter(
+               //    (token) => token.type === 'ERROR_TYPE' && (token as any).subtype !== 'WARNING',
+               // ) as any;
+
+               // const xxx = actualErrors.map((error) => `${error.id} : ${error.message}`);
+
+               // console.log('-------------------');
+               // console.log('ID>   ', testData.ID);
+               // console.log('About>', testData.description);
+               // console.log(testData.testData?.replace('\\r\\n', '\n').replace('\\n', '\n'));
+               // console.log('---');
+               // console.log(xxx.join('\n'));
+
+               if (expectedError) {
+                  expect(results).toHaveErrors([expectedError]);
+               } else {
+                  expect(results).not.toHaveErrors();
+               }
                doneWhenAllDone();
             });
-         }
-
-         // We also want to test  whether the errors match as expected
-         gatherPTokens(testStream, (results: Array<PToken>) => {
-            // const actualErrors: Array<any> = results.filter(
-            //    (token) => token.type === 'ERROR_TYPE' && (token as any).subtype !== 'WARNING',
-            // ) as any;
-
-            // const xxx = actualErrors.map((error) => `${error.id} : ${error.message}`);
-
-            // console.log('-------------------');
-            // console.log('ID>   ', testData.ID);
-            // console.log('About>', testData.description);
-            // console.log(testData.testData?.replace('\\r\\n', '\n').replace('\\n', '\n'));
-            // console.log('---');
-            // console.log(xxx.join('\n'));
-
-            if (testData.expectedError) {
-               expect(results).toHaveErrors([testData.expectedError]);
-            } else {
-               expect(results).not.toHaveErrors();
-            }
-            doneWhenAllDone();
          });
       });
    });

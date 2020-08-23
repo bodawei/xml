@@ -1,9 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-interface ErrorDetails {
-   id: string;
-   message?: RegExp | string;
-}
+import { ErrorDetails } from '../helper/types';
 
 interface IdToErrorMap {
    [testName: string]: string | ErrorDetails;
@@ -2262,6 +2259,8 @@ const expectedErrorCodes: IdToErrorMap = {
    'rmt-008': 'XMLDECL_VERSION_INVALD', // an implausibly-versioned document
    'rmt-009': 'TEXTDECL_VERSION_INVALD', // External general entity has implausible version number
    'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
+   'x-rmt-008--V1R1': 'none', // This input is actually just fine for 1.0/1
+   'x-rmt-008--V1R5': 'none', // This input is actually just fine for 1.0/5
 };
 
 export { IdToErrorMap, expectedErrorCodes, expectedNotWfCodes, expectedInvalidCodes };

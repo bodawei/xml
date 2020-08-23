@@ -9,7 +9,6 @@ const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
       // Introduced problem.  processing version and version in actual doc do not match
-      'x-rmt-008', // the tests are wrong for rev 1, wcihh is what we're doing. Waht should we do with multiple editions?
       'rmt-034', //XMLDECL_VERSION_INVALD
       'rmt-044',
       // Attribute defaulting separate from validatio ncauses problems

@@ -16,7 +16,7 @@ There are three other bodies of data that go into describing all the test to be 
 
 * `testFilters.ts` This is a file which lists any xmlconf tests that should not be run. It has both an exclude section, as well as an include section. The latter actually means "include only these in the run".  Both sections contain arrays of test ID's (as defined in the xmlconf metadata). This has mainly been used as a debugging tool to help more precisely control which tests should be run at any given time.  However, since there is at least one xmlconf test which I think it wrong (ibm-not-wf-P66-ibm66n03.xml), the exclude list includes those too.
 
-* `expectedCodes.ts` For all error, invalid and not-wellformed tests, we need to identify that these tests fail for the right reasons.  Thus, this file contains the expected error code for each test.  In some cases, the error codes are not precise enough, so additional metadata can be included (at this moment, just a substring of the error message that must be matched).
+* `expectedCodes.ts` For all error, invalid and not-wellformed tests, we need to identify that these tests fail for the right reasons.  Thus, this file contains the expected error code for each test.  In some cases, the error codes are not precise enough, so additional metadata can be included (at this moment, just a substring of the error message that must be matched). In addition, some tests will fail in some versions/revisions, but not in others (`x-rmt-008` is a good example). Thus, you can also add an entry of the form `x-rmt-008==V1R5` which indicates that this is the expected error information for Version 1.0, revision 5.  Finally, if the error id value is set to `"none"`, then this is the same as saying that the test will not generate any errors.
 
 * `fixTest.ts` Bafflingly, many tests have minor defects in them (!). Mos notably, hundreds of tests lack an XML declaration (`<?xml version=...?>`). One can only assume that the original builders of these tests were relying on a harness that automatically added that, since it is quite explicit in the specification that that is required. In at least one case, it looks like one of the test answers is wrong, and so this fixes that. See the appendix below for more details.
 
@@ -49,7 +49,12 @@ There are, of course, other routines in this directory that assist in the work, 
 While I haven't combed over every one of the tests in close details, these are some odd things I've noticed:
 
 These are valid, but the condition they say they are checking for is not entirely correctly described.
+
 * ibm-1-1-valid-P77-ibm77v04.xml says that 0xD6 is not a valid 1.0 NameStart charactter, but it looks like it to me (see the production for Letter and BaseChar in rev 4 https://www.w3.org/TR/2006/REC-xml-20060816/#NT-Letter  and even Rev 5: https://www.w3.org/TR/xml/
 * Same for ibm-1-1-valid-P77-ibm77v05.xml concerning 0x01FF
 * ibm-1-1-valid-P77-ibm77v07.xml which concerns 0xD8
 * ibm-1-1-valid-P77-ibm77v10.xml which again concerns 0xF6
+
+These are "wrong":
+
+* x-rmt-008 says for 1.0/1-4 it should fail, but for 1.0/5 it should pass. This is true for revision 2-5, but is not true for 1.0/1.  That is, if the assertion of the test is: if your processor can handle processing revision 5, then a version of 1.7 is legal, as long as it uses no features not found in 1.9.  Well, then, given the syntax for version in 1.0/1, then if you have a processor that can only handle processng revision 1, then 1.7 is legal as long as it only uses 1.0/1 features.

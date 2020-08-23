@@ -8,7 +8,7 @@ import {
 } from '../data/expectedCodes';
 import { fixTest } from '../data/fixTest';
 import { shouldSkipTest } from './shouldSkipTest';
-import { Test, TestCases, TestDetails, TestSuite } from './types';
+import { ErrorDetails, Test, TestCases, TestDetails, TestSuite } from './types';
 
 interface TestGroups {
    valid: Array<TestDetails>;
@@ -17,26 +17,51 @@ interface TestGroups {
    error: Array<TestDetails>;
 }
 
+function constructErrorInfo(
+   expected: IdToErrorMap | undefined,
+   errorId: string,
+): undefined | ErrorDetails {
+   if (!expected || !expected[errorId]) {
+      return undefined;
+   }
+
+   const entry = expected[errorId];
+   const id = typeof entry === 'string' ? entry : entry.id;
+   const message = typeof entry === 'string' ? undefined : entry.message;
+
+   return {
+      id,
+      message,
+   };
+}
+
 function buildDetails(
    test: Test,
    cases: Array<TestCases>,
    suite: TestSuite,
    expected?: IdToErrorMap,
 ): TestDetails {
-   let expectedError;
+   const newTest = fixTest(test);
 
-   if (expected && expected[test.ID]) {
-      const entry = expected[test.ID];
-      const id = typeof entry === 'string' ? entry : entry.id;
-      const message = typeof entry === 'string' ? undefined : entry.message;
+   const expectedError: Record<string, ErrorDetails> = {};
+   const def = constructErrorInfo(expected, test.ID);
 
-      expectedError = {
-         id,
-         message,
-      };
+   if (def) {
+      expectedError.default = def;
    }
 
-   const newTest = fixTest(test);
+   for (const ver of [1.0, 1.1]) {
+      for (const revision of [1, 2, 3, 4, 5, 6]) {
+         const key = `V${ver}R${revision}`;
+         const longKey = `${test.ID}--${key}`;
+         const info = constructErrorInfo(expected, longKey);
+
+         if (info) {
+            expectedError[key] = info;
+         }
+      }
+   }
+
    // Finally, make any uniform modifiactions to the test
    return {
       ...newTest,
