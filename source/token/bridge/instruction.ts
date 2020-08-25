@@ -38,7 +38,7 @@ type DeliverInstruction = (section: ProcessingInstructionPToken | XmlDeclaration
       instruction ::= '<?' S? name? S?
 \**********************************************************************/
 
-function parseInstruction(source: STokenSource, openSToken: SToken, emd: EntityMetaData, deliverPToken: DeliverInstruction) {
+function parseInstruction(source: STokenSource, openSToken: SToken, inDocument: boolean, deliverPToken: DeliverInstruction) {
    const start: InstructionStart = { open: openSToken };
    start.open = openSToken;
 
@@ -50,7 +50,7 @@ function parseInstruction(source: STokenSource, openSToken: SToken, emd: EntityM
       const target = strOrBlank(start.target);
 
       if (target.toLocaleLowerCase() === 'xml') {
-         if (emd.kind == EntityKind.DOCUMENT) {
+         if (inDocument) {
             parseXmlDeclaration(source, start, deliverPToken);
          } else {
             parseTextDeclaration(source, start, deliverPToken);

@@ -31,7 +31,7 @@ describe('instruction (integration)', () => {
          source.addText('xml version="1.0" encoding="ascii"?>');
          source.endText();
 
-         parseInstruction(source, start, new EntityMetaData(EntityKind.DOCUMENT), (parsing) => {
+         parseInstruction(source, start, true, (parsing) => {
             expect(parsing).toEqualRangeless(new XmlDeclarationPToken({
                open: start,
                target: SToken.fromString('xml'),
@@ -66,7 +66,7 @@ describe('instruction (integration)', () => {
          source.addText('xml encoding="ascii"?>');
          source.endText();
 
-         parseInstruction(source, start, new EntityMetaData(EntityKind.EXTERNAL), (parsing) => {
+         parseInstruction(source, start, false, (parsing) => {
             expect(parsing).toEqualRangeless(new TextDeclarationPToken({
                open: start,
                target: SToken.fromString('xml'),
@@ -92,7 +92,7 @@ describe('instruction (integration)', () => {
          source.addText('foo blah?blah?>');
          source.endText();
 
-         parseInstruction(source, start, new EntityMetaData(EntityKind.EXTERNAL), (parsing) => {
+         parseInstruction(source, start, false, (parsing) => {
             expect(parsing).toEqualRangeless(new ProcessingInstructionPToken({
                open: start,
                target: SToken.fromString('foo'),

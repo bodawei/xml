@@ -28,6 +28,7 @@ import {
    TextPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
+import { ContextType } from 'pToken';
 
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
@@ -38,10 +39,14 @@ enum ConditionalState {
    INSIDE_IGNORE,
 }
 
+interface PTokenOptions {
+   context?: ContextType.CONTENT | ContextType.DOCUMENT | ContextType.EXTERNAL_ENTITY;
+}
+
 class PTokenStream extends Readable {
    private _sTokenSource: STokenSource;
    private _elementStack: Array<Token>;
-   private _inContent: boolean;
+   private inContent: boolean;
    private _reportedMetaData: boolean;
    private _parsing: boolean = false;
    private emd: EntityMetaData;
@@ -49,7 +54,7 @@ class PTokenStream extends Readable {
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(metaDataOrTokenSource: STokenSource | EntityMetaData, inContent?: boolean) {
+   constructor(metaDataOrTokenSource: STokenSource | EntityMetaData, options?: PTokenOptions) {
       super({
          objectMode: true,
       });
@@ -62,8 +67,16 @@ class PTokenStream extends Readable {
          this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource);
       }
 
+      let opts: PTokenOptions;
+      
+      if (typeof options === 'boolean') {
+         opts = { context: options ? ContextType.CONTENT : ContextType.DOCUMENT };
+      }else {
+         opts = options || { context: ContextType.DOCUMENT };
+      }
+
       this._elementStack = [];
-      this._inContent = inContent || false;
+      this.inContent = opts.context === ContextType.CONTENT;
       this._reportedMetaData = false;
    }
 
@@ -99,7 +112,7 @@ class PTokenStream extends Readable {
             const resultName = strOrBlank(resultSToken);
 
             if (result.type === ELEMENT_START_PTOKEN) {
-               this._inContent = true;
+               this.inContent = true;
                this._elementStack.push(result);
             } else if (result.type === ELEMENT_END_PTOKEN) {
                const name = resultName;
@@ -109,7 +122,7 @@ class PTokenStream extends Readable {
 
                if (name === topName) {
                   this._elementStack.pop();
-                  this._inContent = this._elementStack.length > 0;
+                  this.inContent = this._elementStack.length > 0;
                }
             }
          }
@@ -122,7 +135,7 @@ class PTokenStream extends Readable {
    _parseGeneral(deliverParse: DeliverPToken) {
       this.emd = this._sTokenSource.metaData;
 
-      if (this._inContent) {
+      if (this.inContent) {
          this._parseContent(deliverParse);
 
       } else {
@@ -254,7 +267,7 @@ class PTokenStream extends Readable {
                parseElementEnd(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-               parseInstruction(this._sTokenSource, markupStartSToken, this.emd, deliverParse);
+               parseInstruction(this._sTokenSource, markupStartSToken, this.emd.isDocumentKind, deliverParse);
                break;
             case '<!--':
                parseComment(this._sTokenSource, markupStartSToken, deliverParse);

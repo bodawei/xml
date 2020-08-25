@@ -3,6 +3,7 @@
 
 import { Token, EntityLocation, EntityMetaData, Range } from 'basic';
 import { defaultExtractors } from 'extractor';
+import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import {
@@ -33,9 +34,9 @@ describe('EntityExpander (integration)', () => {
       inContent: boolean,
       writeToken: ExpandToken,
    ): void {
-      const pTokenStream = new PTokenStream(sTokenSource);
-
-      (pTokenStream as any)._inContent = inContent;
+      const pTokenStream = new PTokenStream(sTokenSource, {
+         context: inContent ? ContextType.CONTENT : ContextType.DOCUMENT,
+      });
 
       pTokenStream.on('data', (token: PToken) => {
          pTokenStream.pause();

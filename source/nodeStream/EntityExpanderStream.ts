@@ -11,11 +11,10 @@ import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
 import { AttributeValueResults, ExpandToken, RetrieveResults } from '../expand/types';
+import { ContextType } from 'pToken';
 
 function parseBody(sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken): void {
-   const pTokenStream = new PTokenStream(sTokenSource);
-
-   (pTokenStream as any)._inContent = inContent;
+   const pTokenStream = new PTokenStream(sTokenSource, { context: inContent ? ContextType.CONTENT : ContextType.DOCUMENT });
 
    pTokenStream.on('data', (token: PToken) => {
       pTokenStream.pause();

@@ -6,7 +6,8 @@ import { Transform } from 'stream';
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { EntityExpander, RetrieveResults, AttributeValueResults } from 'expand';
 import { defaultExtractors } from 'extractor';
-import { PTokenStream } from 'pTokenStream';
+import { ContextType } from 'pToken';
+import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import {
    AttributeValueElement,
@@ -16,7 +17,6 @@ import {
    EntityValueElement,
    ExternalId,
 } from 'token';
-import { PTokenFromLiteralStream } from 'pTokenStream';
 
 import { TestCases } from './types';
 import { TestDetails } from './buildTestDetails';
@@ -26,7 +26,9 @@ function parseBody(
    inContent: boolean,
    expandToken: (token: PToken | undefined, tokenProcessed: () => void) => void,
 ): void {
-   const pTokenStream = new PTokenStream(sTokenSource, inContent);
+   const pTokenStream = new PTokenStream(sTokenSource, {
+      context: inContent ? ContextType.CONTENT : ContextType.DOCUMENT,
+   });
    let seenEnd = false;
    let paused = false;
 

@@ -1,16 +1,13 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
-import { WellFormedError, XmlWarning } from 'error';
-import { MockErrorCollector } from 'error-test';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
+import { EntityLocation, Range } from 'basic';
+import { MockSTokenSource } from 'sToken-test';
 
 import * as pi from '../../processingInstruction';
 import * as textDeclaration from '../../textDeclaration';
 import * as xmlDeclaration from '../../xmlDeclaration';
-import { parseInstruction, InstructionStart } from '../instruction';
-import misc from '../../common/misc';
+import { parseInstruction } from '../instruction';
 import { SToken } from 'sToken';
 
 describe('instruction (unit)', () => {
@@ -35,7 +32,7 @@ describe('instruction (unit)', () => {
             [ undefined, 'space' ],
          ]);
 
-         parseInstruction(mockSource, open, new EntityMetaData(), callback);
+         parseInstruction(mockSource, open, true, callback);
          mockSource.respondInAsyncTime();
 
          const args = piParse.calls.argsFor(0);
@@ -57,7 +54,7 @@ describe('instruction (unit)', () => {
             [ undefined, 'space' ],
          ]);
 
-         parseInstruction(mockSource, open, new EntityMetaData(), callback);
+         parseInstruction(mockSource, open, true, callback);
          mockSource.respondInAsyncTime();
 
          const args = xmlParse.calls.argsFor(0);
@@ -79,7 +76,7 @@ describe('instruction (unit)', () => {
             [ ' ', 'space' ],
          ]);
 
-         parseInstruction(mockSource, open, new EntityMetaData(EntityKind.EXTERNAL), callback);
+         parseInstruction(mockSource, open, false, callback);
          mockSource.respondInAsyncTime();
 
          const args = textParse.calls.argsFor(0);

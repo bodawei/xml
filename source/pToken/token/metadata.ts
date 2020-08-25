@@ -12,7 +12,4 @@ interface MetadataPToken {
    readonly type: typeof METADATA_PTOKEN;
 }
 
-export {
-   METADATA_PTOKEN,
-   MetadataPToken,
-};
+export { METADATA_PTOKEN, MetadataPToken };
