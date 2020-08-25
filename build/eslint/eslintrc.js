@@ -156,12 +156,13 @@ module.exports = {
       },
    }, {
       files: [
+         './source/attFixer/**/*.ts',
+         './source/pToken/**/*.ts',
          './source/xToken/**/*.test.ts',
          './source/token/**/@test/**/section.ts',
          './source/token/**/@test/**/conditional.ts',
          './source/token/common/**/externalId*test.ts',
          './source/basic/**/*.test.ts',
-         './source/attFixer/**/*.ts',
          './source/expand/**/*.test.ts',
       ],
       parser: '@typescript-eslint/parser',

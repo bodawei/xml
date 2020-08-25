@@ -32,6 +32,9 @@
          "nodeStream": [
             "./source/nodeStream"
          ],
+         "pToken": [
+            "./source/pToken"
+         ],
          "pTokenStream": [
             "./source/pTokenStream"
          ],
