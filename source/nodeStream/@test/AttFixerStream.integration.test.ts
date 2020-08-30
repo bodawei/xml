@@ -57,7 +57,7 @@ describe('AttFixerStream (integration)', () => {
       pTokenStream.endText();
 
       gatherPTokens(fixer, (results) => {
-         expect((results[12] as ElementStartPToken).attributes).toEqualRangeless([{
+         expect((results[13] as ElementStartPToken).attributes).toEqualRangeless([{
                name: toSToken('nmtok'),
                value: [new TextPToken({ text: new SToken('3 4', '  3   4  ', []) })],
                postNameSpace: undefined,

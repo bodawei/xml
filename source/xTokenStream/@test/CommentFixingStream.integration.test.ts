@@ -4,7 +4,7 @@
 import { Transform } from 'stream';
 
 import { EntityMetaData, ENTITY_META_DATA } from 'basic';
-import { CONFORMANCE_VERSION } from 'pToken';
+import { CONFORMANCE_VERSION, ENTITY_URI } from 'pToken';
 import {
    CharDataXToken,
    CommentXToken,
@@ -96,7 +96,7 @@ describe('CommentFixingStream (integration)', () => {
          gatherTokens(cf, (results) => {
             const types = results.map(r => r.type);
 
-            expect(types).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
+            expect(types).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_URI, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
             done();
          });
       });

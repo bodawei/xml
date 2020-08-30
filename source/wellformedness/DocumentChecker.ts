@@ -15,7 +15,7 @@ import {
    XMLDECL_PTOKEN,
    getFirstSToken,
 } from 'token';
-import { PToken, CONFORMANCE_VERSION, ParseValue } from 'pToken';
+import { PToken, CONFORMANCE_VERSION, ParseValue, ENTITY_URI } from 'pToken';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
@@ -112,7 +112,7 @@ class DocumentChecker {
       if (pToken.type === ENTITY_META_DATA) {
          this.checkState.emd = pToken;
          return;
-      } else if (pToken.type === CONFORMANCE_VERSION) {
+      } else if (pToken.type === CONFORMANCE_VERSION || pToken.type === ENTITY_URI) {
          return;
       } else if ((pToken as any).type === ERROR_TYPE) {
          return;

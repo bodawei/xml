@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_META_DATA, EntityKind, EntityLocation, EntityMetaData } from 'basic';
-import { PToken, CONFORMANCE_VERSION, ParseValue } from 'pToken';
+import { PToken, CONFORMANCE_VERSION, ParseValue, ENTITY_URI } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -120,6 +120,7 @@ class EntityExpander {
             }
             expanded();
             break;
+         case ENTITY_URI:
          case CONFORMANCE_VERSION:
             if (!this.seenEmd) {
                this.deliverToken(pToken);

@@ -9,6 +9,7 @@ import { CHARDATA_PTOKEN, DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_EN
 import PTokenStream from '../PTokenStream';
 import { CONFORMANCE_VERSION, ParseValue, PToken } from 'pToken';
 import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
+import { ENTITY_URI } from 'source/pToken/token/entityUri';
 
 type TokenArray = Array<ParseValue>;
 
@@ -26,6 +27,10 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.on('end', () => deliverResults(pTokens));
    }
 
+   function findToken(tokens: Array<ParseValue>, type: string): ParseValue | undefined {
+      return tokens.find(t => t.type == type);
+   }
+
    describe('unusual read() situation', () => {
 
       it('ignores a second _read() if one is already in progress', () => {
@@ -37,6 +42,101 @@ describe('PTokenStream (unit)', () => {
          pTokenStream._read();
 
          expect(parseSpy.calls.count()).toEqual(1);
+      });
+
+   });
+
+   describe('ConformanceVersion', () => {
+
+      it('delivers a default version of 1.0/5 if nothing else is specified', (done) => {
+         pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT));
+         pTokenStream.addText('<?xml version="1.0"?>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, CONFORMANCE_VERSION);
+
+            expect(result).toEqual({
+               type: CONFORMANCE_VERSION,
+               version: 1,
+               revision: 5,
+            });
+            done();
+         });
+      });
+
+      it('delivers a default version of 1.1/2 if nothing specified and XML Declaration is 1.1', (done) => {
+         pTokenStream = new PTokenStream(undefined);
+         pTokenStream.addText('<?xml version="1.1"?>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, CONFORMANCE_VERSION);
+
+            expect(result).toEqual({
+               type: CONFORMANCE_VERSION,
+               version: 1.1,
+               revision: 2,
+            });
+            done();
+         });
+      });
+
+      it('delivers a conformance version using the version specified in the options, regardless of what is in the document', (done) => {
+         pTokenStream = new PTokenStream(undefined, {
+            version: 1.0,
+            revision: 3,
+         });
+         pTokenStream.addText('<?xml version="1.1"?>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, CONFORMANCE_VERSION);
+
+            expect(result).toEqual({
+               type: CONFORMANCE_VERSION,
+               version: 1.0,
+               revision: 3,
+            });
+            done();
+         });
+      });
+
+   });
+
+   describe('entity URI', () => {
+
+      it('delivers a generic EntityUri Token when nont provided at construction time', (done) => {
+         pTokenStream.addText('<?xml version="1.0"?>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, ENTITY_URI);
+
+            expect(result).toEqual({
+               type: ENTITY_URI,
+               location: new EntityLocation('./index.xml'),
+            });
+            done();
+         });
+      });
+
+      it('delivers an EntityUri with the option specified in the construction options', (done) => {
+         pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT), {
+            location: new EntityLocation('http://foo.com/bar.xml', 'baz - boo'),
+         });
+         pTokenStream.addText('<?xml version="1.0"?>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, ENTITY_URI);
+
+            expect(result).toEqual({
+               type: ENTITY_URI,
+               location: new EntityLocation('http://foo.com/bar.xml', 'baz - boo'),
+            });
+            done();
+         });
       });
 
    });
@@ -326,7 +426,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, (pTokens) => {
          // 0 is entitymetadata
-         expect(pTokens[2].type).toEqual('UNKNOWNDECL');
+         expect(pTokens[3].type).toEqual('UNKNOWNDECL');
          done();
       });
    });
@@ -350,7 +450,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, (pTokens) => {
          // pTokens 0-2 are metadata, xmldecl, and "one" element open
-         expect((pTokens[4] as any).text.str).toEqual(']'); // typeHack
+         expect((pTokens[5] as any).text.str).toEqual(']'); // typeHack
          done();
       });
    });
@@ -363,7 +463,7 @@ describe('PTokenStream (unit)', () => {
    
          gatherPTokens(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
-            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_URI, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
          });
       });
@@ -395,6 +495,7 @@ describe('PTokenStream (unit)', () => {
             expect(tokenTypes).toEqual([
                ENTITY_META_DATA,
                CONFORMANCE_VERSION,
+               ENTITY_URI,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
                CONDITIONAL_PTOKEN,
@@ -416,6 +517,7 @@ describe('PTokenStream (unit)', () => {
             expect(tokenTypes).toEqual([
                ENTITY_META_DATA,
                CONFORMANCE_VERSION,
+               ENTITY_URI,
                DOCTYPE_START_PTOKEN,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,

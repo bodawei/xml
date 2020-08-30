@@ -2,7 +2,7 @@
 
 import { Readable } from 'stream';
 
-import { EntityMetaData, EntityKind, XmlVersion, XmlRevision } from 'basic';
+import { EntityMetaData, EntityKind, XmlVersion, XmlRevision, EntityLocation } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { ParseValue } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
@@ -33,6 +33,7 @@ import {
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { ContextType } from 'pToken';
 import { ConformanceVersion, CONFORMANCE_VERSION } from 'source/pToken/token/conformanceVersion';
+import { EntityUri, ENTITY_URI } from 'source/pToken/token/entityUri';
 
 type DeliverPToken = (result: ParseValue | null | undefined | Array<ParseValue>) => void; // icky typeHack
 enum ConditionalState {
@@ -46,6 +47,7 @@ interface PTokenOptions {
    context?: ContextType.CONTENT | ContextType.DOCUMENT | ContextType.EXTERNAL_ENTITY;
    version?: XmlVersion;
    revision?: XmlRevision;
+   location?: EntityLocation;
 }
 
 class PTokenStream extends Readable {
@@ -55,13 +57,14 @@ class PTokenStream extends Readable {
    private _reportedMetaData: boolean;
    private _parsing: boolean = false;
    private emd: EntityMetaData;
+   private id: EntityUri;
    private confVer: ConformanceVersion;
    private versionSet: boolean;
    private waitingForInternalClose: boolean = false;
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(metaDataOrTokenSource: STokenSource | EntityMetaData, options?: PTokenOptions) {
+   constructor(metaDataOrTokenSource: STokenSource | EntityMetaData | undefined, options?: PTokenOptions) {
       super({
          objectMode: true,
       });
@@ -76,7 +79,7 @@ class PTokenStream extends Readable {
       if (metaDataOrTokenSource instanceof STokenSource) {
          this.emd = new EntityMetaData(EntityKind.DOCUMENT);
          this._sTokenSource = metaDataOrTokenSource;
-      } else {
+      } else if (metaDataOrTokenSource) {
          this.emd = metaDataOrTokenSource;
          this.confVer = {
             type: CONFORMANCE_VERSION,
@@ -85,6 +88,9 @@ class PTokenStream extends Readable {
          };
          this.versionSet = true;
          this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource);
+      } else {
+         this.emd = new EntityMetaData(EntityKind.DOCUMENT);
+         this._sTokenSource = new STokenSource(defaultExtractors, this.emd);
       }
 
       let opts: PTokenOptions;
@@ -98,12 +104,17 @@ class PTokenStream extends Readable {
       this._elementStack = [];
       this.inContent = opts.context === ContextType.CONTENT;
       this._reportedMetaData = false;
+      this.id = {
+         type: ENTITY_URI,
+         location: options?.location ?? new EntityLocation('./index.xml'),
+      };
 
       if (opts.version) {
+               
          this.confVer = {
             type: CONFORMANCE_VERSION,
             version: opts.version,
-            revision: opts.revision || opts.version === 1 ? 5 : 2,
+            revision: opts.revision ?? (opts.version === 1 ? 5 : 2),
          };
          this.versionSet = true;
       }
@@ -124,19 +135,33 @@ class PTokenStream extends Readable {
       this._parsing = true;
       this._parseGeneral((result) => {
          if (!this._reportedMetaData) {
+            
             this._reportedMetaData = true;
             this.push(this._sTokenSource.metaData);
-
+            
             if (!this.versionSet) {
+               let version = this._sTokenSource.metaData.version;
+               let revision = this._sTokenSource.metaData.revision;
+
+               if (result && !Array.isArray(result) && result.type === XMLDECL_PTOKEN) {
+                  for (let param of result.params) {
+                     if (strOrBlank(param.name) === 'version') {
+                        version = strOrBlank(param.value) === '1.1' ? 1.1 : 1.0;
+                        revision = version === 1.0 ? 5 : 2;
+                     }
+                  }
+               }
+
                this.versionSet = true;
                this.confVer = {
                   type: CONFORMANCE_VERSION,
-                  version: this._sTokenSource.metaData.version,
-                  revision: this._sTokenSource.metaData.revision,
+                  version,
+                  revision,
                };
             }
 
             this.push(this.confVer);
+            this.push(this.id);
          }
 
          // docstart and end may deliver an array(!)

@@ -1,9 +1,8 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ENTITY_META_DATA, EntityMetaData, EntityLocation, Offset, EntityKind } from 'basic';
+import { ENTITY_META_DATA, EntityMetaData, EntityLocation, EntityKind } from 'basic';
 import { PTokenStream } from 'pTokenStream';
-import { SToken } from 'sToken';
 import {
    XMLDECL_PTOKEN,
    CHARREF_PTOKEN,
@@ -26,26 +25,15 @@ import {
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
-   PToken,
    CharDataPToken,
-   ElementEmptyPToken,
-   ElementStartPToken,
-   TextPToken,
-   ParameterEntityStartPToken,
-   ParameterEntityReferencePToken,
-   ParameterEntityEndPToken,
-   GeneralEntityReferencePToken,
-   GeneralEntityEndPToken,
-   ParameterEntityDeclarationPToken,
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
-import { gatherStream, expectError } from './beforeEach';
-import { AttListPToken, ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
-import { CharRefPToken } from 'source/token/charRef';
-import { WellFormedError } from 'error';
+import { gatherStream } from './beforeEach';
+import { ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
+import { ENTITY_URI, ParseValue } from 'pToken';
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
@@ -58,7 +46,7 @@ describe('EntityExpanderStream (integration)', () => {
       pTokenStream.pipe(entityExpander);
    });
 
-   function getIndex(tokens: Array<PToken>, type: string): number {
+   function getIndex(tokens: Array<ParseValue>, type: string): number {
       let found = -1;
 
       for (let index = 0; index < tokens.length; index++) {

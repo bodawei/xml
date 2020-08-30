@@ -1,12 +1,15 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from './token/conformanceVersion';
 import { PToken as PTokenClassic } from 'token';
 
+import { ConformanceVersion } from './token/conformanceVersion';
+import { EntityUri } from './token/entityUri';
+
 export * from './token/conformanceVersion';
+export * from './token/entityUri';
 
 type PToken = PTokenClassic;
-type ParseValue = PToken | ConformanceVersion;
+type ParseValue = PToken | ConformanceVersion | EntityUri;
 
 enum ContextType {
    CONTENT,
