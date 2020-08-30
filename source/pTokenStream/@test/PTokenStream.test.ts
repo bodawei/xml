@@ -4,9 +4,10 @@
 import { EntityLocation, EntityMetaData, Range, EntityKind, ENTITY_META_DATA } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import * as tokenStuff from 'token';
-import { PToken, CHARDATA_PTOKEN, DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN } from 'token';
+import { CHARDATA_PTOKEN, DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN } from 'token';
 
 import PTokenStream from '../PTokenStream';
+import { CONFORMANCE_VERSION, PToken } from 'pToken';
 import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
 
 type Token = { type: string };
@@ -326,7 +327,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, (pTokens) => {
          // 0 is entitymetadata
-         expect(pTokens[1].type).toEqual('UNKNOWNDECL');
+         expect(pTokens[2].type).toEqual('UNKNOWNDECL');
          done();
       });
    });
@@ -350,7 +351,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, (pTokens) => {
          // pTokens 0-2 are metadata, xmldecl, and "one" element open
-         expect((pTokens[3] as any).text.str).toEqual(']'); // typeHack
+         expect((pTokens[4] as any).text.str).toEqual(']'); // typeHack
          done();
       });
    });
@@ -363,7 +364,7 @@ describe('PTokenStream (unit)', () => {
    
          gatherPTokens(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
-            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
          });
       });
@@ -394,6 +395,7 @@ describe('PTokenStream (unit)', () => {
 
             expect(tokenTypes).toEqual([
                ENTITY_META_DATA,
+               CONFORMANCE_VERSION,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
                CONDITIONAL_PTOKEN,
@@ -414,6 +416,7 @@ describe('PTokenStream (unit)', () => {
 
             expect(tokenTypes).toEqual([
                ENTITY_META_DATA,
+               CONFORMANCE_VERSION,
                DOCTYPE_START_PTOKEN,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,

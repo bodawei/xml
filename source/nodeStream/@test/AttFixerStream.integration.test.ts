@@ -3,7 +3,7 @@
 import { EntityMetaData, } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { toSToken, SToken } from 'sToken';
-import { XmlDeclarationPToken, ElementStartPToken, TextPToken } from 'token';
+import { XmlDeclarationPToken, ElementStartPToken, TextPToken, XMLDECL_PTOKEN } from 'token';
 
 import { AttFixerStream } from '../AttFixerStream';
 
@@ -25,7 +25,9 @@ describe('AttFixerStream (integration)', () => {
       pTokenStream.endText();
 
       gatherPTokens(fixer, (results) => {
-         expect(results[1]).toEqualRangeless(new XmlDeclarationPToken({
+         const result = results.find(r => r.type === XMLDECL_PTOKEN);
+
+         expect(result).toEqualRangeless(new XmlDeclarationPToken({
             open: toSToken('<?'),
             target: toSToken('xml'),
             params: [{
@@ -55,7 +57,7 @@ describe('AttFixerStream (integration)', () => {
       pTokenStream.endText();
 
       gatherPTokens(fixer, (results) => {
-         expect((results[11] as ElementStartPToken).attributes).toEqualRangeless([{
+         expect((results[12] as ElementStartPToken).attributes).toEqualRangeless([{
                name: toSToken('nmtok'),
                value: [new TextPToken({ text: new SToken('3 4', '  3   4  ', []) })],
                postNameSpace: undefined,

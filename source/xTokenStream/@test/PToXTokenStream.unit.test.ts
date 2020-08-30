@@ -306,13 +306,11 @@ describe('PToXTokenStream (unit)', () => {
       expect(result).toEqual(new ExternalSubsetEndToken());
    });
 
-   it('throws an error if asked to deal with an unknown pToken type', () => {
+   it('passes unknown tokens through with no changes', () => {
       tokenStream.write({ type: 'BOGUS' });
 
-      const error = tokenStream.read();
       const token = tokenStream.read();
 
-      expect(error).toEqual(new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, [ `Unknown PToken type "BOGUS" encountered.` ]));
       expect(token).toEqual({ type: 'BOGUS' });
    });
 

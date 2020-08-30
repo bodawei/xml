@@ -19,7 +19,6 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
-   PToken,
    ElidedEntityDeclarationPToken,
    InternalSubsetStartToken,
    ParameterEntityStartPToken,
@@ -34,6 +33,8 @@ import {
    TEXT_PTOKEN,
    ConditionalPToken,
 } from 'token';
+import { PToken } from 'pToken';
+
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import {
    ELEMENT_DECLARATION_PTOKEN,

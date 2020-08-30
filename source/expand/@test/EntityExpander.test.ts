@@ -4,6 +4,7 @@
 import { EntityMetaData, EntityKind } from 'basic';
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
+import { PToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
@@ -28,7 +29,6 @@ import {
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    TextPToken,
-   PToken,
    XmlError,
    AttListPToken,
    ParameterEntityReferencePToken,

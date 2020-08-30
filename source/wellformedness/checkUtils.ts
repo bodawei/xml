@@ -1,6 +1,7 @@
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank, SToken } from 'sToken';
+import { PToken } from 'pToken';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -9,7 +10,6 @@ import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
-   PToken,
 } from 'token';
 import { AttributePToken } from 'source/token/common/attribute';
 

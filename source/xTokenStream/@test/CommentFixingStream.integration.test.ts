@@ -3,18 +3,23 @@
 
 import { Transform } from 'stream';
 
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, ENTITY_META_DATA } from 'basic';
+import { CONFORMANCE_VERSION } from 'pToken';
 import {
    CharDataXToken,
    CommentXToken,
    ElementEndXToken,
-   ElementStartXToken
+   ElementStartXToken,
+   COMMENT_XTOKEN,
+   ELEMENT_START_XTOKEN,
+   CHARDATA_XTOKEN,
+   ELEMENT_END_XTOKEN
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import CommentFixingStream from '../CommentFixingStream';
-import { XmlDeclarationXToken } from 'source/xToken/token/xmlDeclarationXToken';
+import { XmlDeclarationXToken, XMLDECL_XTOKEN } from 'source/xToken/token/xmlDeclarationXToken';
 
 describe('CommentFixingStream (integration)', () => {
    let pTokenStream: PTokenStream;
@@ -41,7 +46,9 @@ describe('CommentFixingStream (integration)', () => {
       (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
 
       gatherTokens(cf, (results) => {
-         expect(results[2].text).toEqual(after);
+         const result = results.find(r => r.type === COMMENT_XTOKEN);
+
+         expect(result.text).toEqual(after);
          done();
       });
    }
@@ -87,11 +94,9 @@ describe('CommentFixingStream (integration)', () => {
          (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
 
          gatherTokens(cf, (results) => {
-            expect(results[1] instanceof XmlDeclarationXToken).toEqual(true);
-            expect(results[2] instanceof CommentXToken).toEqual(true);
-            expect(results[3] instanceof ElementStartXToken).toEqual(true);
-            expect(results[4] instanceof CharDataXToken).toEqual(true);
-            expect(results[5] instanceof ElementEndXToken).toEqual(true);
+            const types = results.map(r => r.type);
+
+            expect(types).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
             done();
          });
       });

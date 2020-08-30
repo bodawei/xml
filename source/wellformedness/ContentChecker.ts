@@ -18,9 +18,9 @@ import {
    ElementEmptyPToken,
    ElementStartPToken,
    GeneralEntityStartPToken,
-   PToken,
    getFirstSToken,
 } from 'token';
+import { PToken } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import {
    CHECKER_DONE,

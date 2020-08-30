@@ -1,10 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { MetadataPToken } from './token/metadata';
+import { ConformanceVersion } from './token/conformanceVersion';
+import { PToken as PTokenClassic } from 'token';
 
-export * from './token/metadata';
+export * from './token/conformanceVersion';
 
-type PToken = MetadataPToken;
+type PToken = PTokenClassic | ConformanceVersion;
 
 enum ContextType {
    CONTENT,

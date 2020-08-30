@@ -10,6 +10,7 @@ const METADATA_PTOKEN = 'METADATA_PTOKEN';
  */
 interface MetadataPToken {
    readonly type: typeof METADATA_PTOKEN;
+   readonly subtype: string;
 }
 
 export { METADATA_PTOKEN, MetadataPToken };

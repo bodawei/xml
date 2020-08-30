@@ -1,8 +1,9 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, ENTITY_META_DATA } from 'basic';
 import { defaultExtractors } from 'extractor';
+import { CONFORMANCE_VERSION } from 'pToken';
 import { STokenSource } from 'sToken';
 
 import PTokenStream from '../PTokenStream';
@@ -20,6 +21,7 @@ import {
    PROCESSING_INSTRUCTION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
+   SPACE_PTOKEN,
 } from 'token';
 
 type Token = { type: string };
@@ -146,12 +148,9 @@ describe('PTokenStream (integration)', () => {
 
    it('parses no spaces in element content', (done) => {
       gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
-         expect(results.length).toEqual(6);
-         expect(results[1].type).toEqual('SPACE_PTOKEN');
-         expect(results[2].type).toEqual(ELEMENT_START_PTOKEN);
-         expect(results[3].type).toEqual(CHARDATA_PTOKEN);
-         expect(results[4].type).toEqual(ELEMENT_END_PTOKEN);
-         expect(results[5].type).toEqual('SPACE_PTOKEN');
+         const types = results.map(r => r.type);
+         expect(types).toEqual([
+            ENTITY_META_DATA, CONFORMANCE_VERSION, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
          done();
       });
    });

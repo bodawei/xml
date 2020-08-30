@@ -108,7 +108,6 @@ class PToXTokenStream extends Transform {
          case ELIDED_ENTITY_DECLARATION_PTOKEN:
             break;
          default:
-            this.push(new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, [`Unknown PToken type "${pToken.type}" encountered.`]));
             this.push(pToken);
       }
 

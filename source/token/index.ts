@@ -128,7 +128,9 @@ type PToken =
    | XmlDeclarationPToken
    ;
 
-function getFirstSToken(pToken: PToken): SToken {
+import { PToken as PTokenNew } from 'pToken';
+
+function getFirstSToken(pToken: PTokenNew): SToken {
    let startContext;
 
    if (pToken.type === DOCTYPE_END_PTOKEN) {

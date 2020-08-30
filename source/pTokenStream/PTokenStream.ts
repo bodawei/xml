@@ -29,6 +29,7 @@ import {
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { ContextType } from 'pToken';
+import { ConformanceVersion, CONFORMANCE_VERSION } from 'source/pToken/token/conformanceVersion';
 
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
@@ -50,6 +51,7 @@ class PTokenStream extends Readable {
    private _reportedMetaData: boolean;
    private _parsing: boolean = false;
    private emd: EntityMetaData;
+   private confVer: ConformanceVersion;
    private waitingForInternalClose: boolean = false;
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
@@ -61,9 +63,19 @@ class PTokenStream extends Readable {
 
       if (metaDataOrTokenSource instanceof STokenSource) {
          this.emd = new EntityMetaData(EntityKind.DOCUMENT);
+         this.confVer = {
+            type: CONFORMANCE_VERSION,
+            version: 1,
+            revision: 5,
+         };
          this._sTokenSource = metaDataOrTokenSource;
       } else {
          this.emd = metaDataOrTokenSource;
+         this.confVer = {
+            type: CONFORMANCE_VERSION,
+            version: metaDataOrTokenSource.version,
+            revision: metaDataOrTokenSource.revision,
+         };
          this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource);
       }
 
@@ -97,6 +109,7 @@ class PTokenStream extends Readable {
          if (!this._reportedMetaData) {
             this._reportedMetaData = true;
             this.push(this._sTokenSource.metaData);
+            this.push(this.confVer);
          }
 
          // docstart and end may deliver an array(!)

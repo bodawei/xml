@@ -1,6 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_META_DATA, EntityKind, EntityLocation, EntityMetaData } from 'basic';
+import { PToken, CONFORMANCE_VERSION } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -27,7 +28,6 @@ import {
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
-   PToken,
    XmlError,
    ElidedEntityDeclarationPToken,
    CONDITIONAL_PTOKEN,
@@ -116,6 +116,12 @@ class EntityExpander {
             if (!this.seenEmd) {
                this.seenEmd = true;
                this.expandParams.emd = pToken;
+               this.deliverToken(pToken);
+            }
+            expanded();
+            break;
+         case CONFORMANCE_VERSION:
+            if (!this.seenEmd) {
                this.deliverToken(pToken);
             }
             expanded();
