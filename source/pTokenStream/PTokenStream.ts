@@ -2,8 +2,9 @@
 
 import { Readable } from 'stream';
 
-import { EntityMetaData, EntityKind } from 'basic';
+import { EntityMetaData, EntityKind, XmlVersion, XmlRevision } from 'basic';
 import { defaultExtractors } from 'extractor';
+import { ParseValue } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    ELEMENT_END_PTOKEN,
@@ -26,13 +27,14 @@ import {
    ConditionalClosePToken,
    ConditionalPToken,
    TextPToken,
+   XMLDECL_PTOKEN,
+   ElementStartPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { ContextType } from 'pToken';
 import { ConformanceVersion, CONFORMANCE_VERSION } from 'source/pToken/token/conformanceVersion';
 
-type Token = { type: string, text?: SToken };
-type DeliverPToken = (result: any) => void; // icky typeHack
+type DeliverPToken = (result: ParseValue | null | undefined | Array<ParseValue>) => void; // icky typeHack
 enum ConditionalState {
    NONE,
    INCLUDE,
@@ -42,16 +44,19 @@ enum ConditionalState {
 
 interface PTokenOptions {
    context?: ContextType.CONTENT | ContextType.DOCUMENT | ContextType.EXTERNAL_ENTITY;
+   version?: XmlVersion;
+   revision?: XmlRevision;
 }
 
 class PTokenStream extends Readable {
    private _sTokenSource: STokenSource;
-   private _elementStack: Array<Token>;
+   private _elementStack: Array<ElementStartPToken>;
    private inContent: boolean;
    private _reportedMetaData: boolean;
    private _parsing: boolean = false;
    private emd: EntityMetaData;
    private confVer: ConformanceVersion;
+   private versionSet: boolean;
    private waitingForInternalClose: boolean = false;
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
@@ -61,13 +66,15 @@ class PTokenStream extends Readable {
          objectMode: true,
       });
 
+      this.versionSet = false;
+      this.confVer = {
+         type: CONFORMANCE_VERSION,
+         version: 1,
+         revision: 5,
+      };
+
       if (metaDataOrTokenSource instanceof STokenSource) {
          this.emd = new EntityMetaData(EntityKind.DOCUMENT);
-         this.confVer = {
-            type: CONFORMANCE_VERSION,
-            version: 1,
-            revision: 5,
-         };
          this._sTokenSource = metaDataOrTokenSource;
       } else {
          this.emd = metaDataOrTokenSource;
@@ -76,6 +83,7 @@ class PTokenStream extends Readable {
             version: metaDataOrTokenSource.version,
             revision: metaDataOrTokenSource.revision,
          };
+         this.versionSet = true;
          this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource);
       }
 
@@ -90,6 +98,15 @@ class PTokenStream extends Readable {
       this._elementStack = [];
       this.inContent = opts.context === ContextType.CONTENT;
       this._reportedMetaData = false;
+
+      if (opts.version) {
+         this.confVer = {
+            type: CONFORMANCE_VERSION,
+            version: opts.version,
+            revision: opts.revision || opts.version === 1 ? 5 : 2,
+         };
+         this.versionSet = true;
+      }
    }
 
    addText(text: string) {
@@ -109,6 +126,16 @@ class PTokenStream extends Readable {
          if (!this._reportedMetaData) {
             this._reportedMetaData = true;
             this.push(this._sTokenSource.metaData);
+
+            if (!this.versionSet) {
+               this.versionSet = true;
+               this.confVer = {
+                  type: CONFORMANCE_VERSION,
+                  version: this._sTokenSource.metaData.version,
+                  revision: this._sTokenSource.metaData.revision,
+               };
+            }
+
             this.push(this.confVer);
          }
 
@@ -291,7 +318,7 @@ class PTokenStream extends Readable {
                      this.waitingForInternalClose = true;
                      this.startDocType = pToken;
                   }
-                  deliverParse(pToken);
+                  deliverParse(pToken as any);
                });
                break;
             case '<![':

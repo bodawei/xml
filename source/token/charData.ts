@@ -61,7 +61,7 @@ class CharDataPToken {
       [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
 \**********************************************************************/
 
-function parseCharData(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken|void) => void) {
+function parseCharData(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken|undefined) => void) {
    let terminators = [ '<', '&', ']]>' ].concat(otherTerminators);
 
    source.extract('all', terminators, (sToken) => {

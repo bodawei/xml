@@ -1,6 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, Token } from 'basic';
+import { EntityMetaData } from 'basic';
+import { ParseValue } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    attListDeclaration,
@@ -25,7 +26,7 @@ type DeclarationStart = {
    declTypeSpace?: SToken,
 };
 
-type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<Token>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken) => void;
+type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseValue>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken) => void;
 
 /**********************************************************************\
  parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or

@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_META_DATA, EntityKind, EntityLocation, EntityMetaData } from 'basic';
-import { PToken, CONFORMANCE_VERSION } from 'pToken';
+import { PToken, CONFORMANCE_VERSION, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -59,7 +59,7 @@ type DeclToken =
    | ParameterEntityDeclarationPToken;
 
 type PTokenExpanded = () => void;
-type DeliverPToken = (token: PToken) => void;
+type DeliverPToken = (token: ParseValue) => void;
 
 enum State {
    AT_START,
@@ -110,7 +110,7 @@ class EntityExpander {
       };
    }
 
-   public expandPToken(pToken: PToken, expanded: PTokenExpanded): void {
+   public expandPToken(pToken: ParseValue, expanded: PTokenExpanded): void {
       switch (pToken.type) {
          case ENTITY_META_DATA:
             if (!this.seenEmd) {

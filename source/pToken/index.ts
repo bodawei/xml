@@ -5,7 +5,8 @@ import { PToken as PTokenClassic } from 'token';
 
 export * from './token/conformanceVersion';
 
-type PToken = PTokenClassic | ConformanceVersion;
+type PToken = PTokenClassic;
+type ParseValue = PToken | ConformanceVersion;
 
 enum ContextType {
    CONTENT,
@@ -13,4 +14,4 @@ enum ContextType {
    EXTERNAL_ENTITY,
 }
 
-export { ContextType, PToken };
+export { ContextType, ParseValue, PToken };

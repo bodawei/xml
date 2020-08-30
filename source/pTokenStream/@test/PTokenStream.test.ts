@@ -7,11 +7,10 @@ import * as tokenStuff from 'token';
 import { CHARDATA_PTOKEN, DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN } from 'token';
 
 import PTokenStream from '../PTokenStream';
-import { CONFORMANCE_VERSION, PToken } from 'pToken';
+import { CONFORMANCE_VERSION, ParseValue, PToken } from 'pToken';
 import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
 
-type Token = { type: string };
-type TokenArray = Array<PToken>;
+type TokenArray = Array<ParseValue>;
 
 describe('PTokenStream (unit)', () => {
    let pTokenStream: PTokenStream;

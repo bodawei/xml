@@ -4,7 +4,7 @@
 import { EntityMetaData, EntityKind } from 'basic';
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
-import { PToken } from 'pToken';
+import { PToken, ParseValue } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
@@ -65,7 +65,7 @@ describe('EntityExpander (unit)', () => {
       assignEntityDeclSpy = spyOn(assignEntityDeclaration, 'assignEntityDeclaration');
    });
 
-   function harvestTypes(results: Array<PToken>): Array<string> {
+   function harvestTypes(results: Array<ParseValue>): Array<string> {
       return results.map((element) => element.type);
    }
 
@@ -88,11 +88,11 @@ describe('EntityExpander (unit)', () => {
    }
 
    function doExpand(
-      tokens: Array<PToken>,
+      tokens: Array<ParseValue>,
       validate: boolean,
-      allDone: (results: Array<PToken>) => void,
+      allDone: (results: Array<ParseValue>) => void,
    ): void {
-      const results: Array<PToken> = [];
+      const results: Array<ParseValue> = [];
       const unsent = tokens.slice(0);
 
       const entityExpander = new EntityExpander(validate, results.push.bind(results), {
@@ -432,7 +432,7 @@ describe('EntityExpander (unit)', () => {
                   source: new STokenSource(defaultExtractors, new EntityMetaData()),
                });
             });
-            const results: Array<PToken> = [];
+            const results: Array<ParseValue> = [];
             const entityExpander = new EntityExpander(false, results.push.bind(results), {
                parseBody: (): void => {},
                parseEntityValue: (): void => {},
@@ -1132,7 +1132,7 @@ describe('EntityExpander (unit)', () => {
             const source = new STokenSource(defaultExtractors, new EntityMetaData());
             done({ source });
          });
-         const results: Array<PToken> = [];
+         const results: Array<ParseValue> = [];
          const entityExpander = new EntityExpander(false, results.push.bind(results), {
             parseBody: (): void => {},
             parseEntityValue: (): void => {},

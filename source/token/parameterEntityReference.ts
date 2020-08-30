@@ -48,7 +48,7 @@ class ParameterEntityReferencePToken {
       [69] PEReference ::= '%' S? Name? S? ';'?
 \**********************************************************************/
 
-function parseParameterEntityReference(source: STokenSource, deliverPToken: DeliverPToken) {
+function parseParameterEntityReference(source: STokenSource, deliverPToken: DeliverPToken): void {
    source.extract('match', '%', (result) => {
       if (!result) {
          deliverPToken(undefined);
