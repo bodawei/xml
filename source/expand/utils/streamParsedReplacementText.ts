@@ -23,6 +23,7 @@ import {
 } from './ExternalDtdSubsetPseudoToken';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { ExpandParams } from '../types';
+import { ContextType } from 'pToken';
 
 type DeliverToken = (result: PToken | void, handled: () => void) => void;
 
@@ -62,7 +63,7 @@ function streamParsedReplacementText(
    const { entityDetails, utils, emd } = expandParams;
    let sTokenSource: STokenSource;
    let getErrors: () => Array<XmlError>;
-   let inContent = true;
+   let context = ContextType.DOCUMENT;
    let start: PToken;
    let end: PToken;
 
@@ -75,18 +76,18 @@ function streamParsedReplacementText(
 
    if (reference.type === EXTERNAL_DTD_PSEUDO_TOKEN) {
       ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(reference.externalId, emd));
-      inContent = false;
+      context = ContextType.EXTERNAL_SUBSET;
       start = new ExternalSubsetStartToken();
       end = new ExternalSubsetEndToken();
    } else {
       if (reference.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
          start = new GeneralEntityStartPToken(reference);
          end = new GeneralEntityEndPToken(reference);
-         inContent = true;
+         context = ContextType.GENERAL_ENTITY;
       } else {
          start = new ParameterEntityStartPToken(reference);
          end = new ParameterEntityEndPToken(reference);
-         inContent = false;
+         context = ContextType.PARAMETER_ENTITY;
       }
 
       const details = entityDetails.getReferencedDetails(reference);
@@ -111,7 +112,7 @@ function streamParsedReplacementText(
    }
 
    deliverToken(start, () => {
-      utils.parseBody(sTokenSource, inContent, (result, handled) => {
+      utils.parseBody(sTokenSource, context, (result, handled) => {
          if (!result) {
             deliverMultipleTokens([...getErrors(), end, undefined], deliverToken);
             return;

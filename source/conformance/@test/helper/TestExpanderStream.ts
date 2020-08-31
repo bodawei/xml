@@ -23,11 +23,11 @@ import { TestDetails } from './buildTestDetails';
 
 function parseBody(
    sTokenSource: STokenSource,
-   inContent: boolean,
+   context: ContextType,
    expandToken: (token: PToken | undefined, tokenProcessed: () => void) => void,
 ): void {
    const pTokenStream = new PTokenStream(sTokenSource, {
-      context: inContent ? ContextType.CONTENT : ContextType.DOCUMENT,
+      context,
    });
    let seenEnd = false;
    let paused = false;

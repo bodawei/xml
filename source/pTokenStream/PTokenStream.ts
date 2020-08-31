@@ -44,7 +44,7 @@ enum ConditionalState {
 }
 
 interface PTokenOptions {
-   context?: ContextType.CONTENT | ContextType.DOCUMENT | ContextType.EXTERNAL_ENTITY;
+   context?: ContextType;
    version?: XmlVersion;
    revision?: XmlRevision;
    location?: EntityLocation;
@@ -59,6 +59,7 @@ class PTokenStream extends Readable {
    private emd: EntityMetaData;
    private id: EntityUri;
    private confVer: ConformanceVersion;
+   private context: ContextType = ContextType.DOCUMENT;
    private versionSet: boolean;
    private waitingForInternalClose: boolean = false;
    private conditionalStack: Array<ConditionalState> = [];
@@ -96,13 +97,14 @@ class PTokenStream extends Readable {
       let opts: PTokenOptions;
       
       if (typeof options === 'boolean') {
-         opts = { context: options ? ContextType.CONTENT : ContextType.DOCUMENT };
+         opts = { context: options ? ContextType.GENERAL_ENTITY : ContextType.DOCUMENT };
       }else {
          opts = options || { context: ContextType.DOCUMENT };
       }
 
       this._elementStack = [];
-      this.inContent = opts.context === ContextType.CONTENT;
+      this.context = opts.context || ContextType.DOCUMENT;
+      this.inContent = opts.context === ContextType.GENERAL_ENTITY;
       this._reportedMetaData = false;
       this.id = {
          type: ENTITY_URI,
@@ -160,8 +162,10 @@ class PTokenStream extends Readable {
                };
             }
 
-            this.push(this.confVer);
-            this.push(this.id);
+            if (this.context === ContextType.DOCUMENT) {
+               this.push(this.confVer);
+               this.push(this.id);
+            }
          }
 
          // docstart and end may deliver an array(!)

@@ -11,6 +11,7 @@ import { EntityNameStack } from './EntityNameStack';
 import { strOrBlank, STokenSource, toSToken } from 'sToken';
 import { defaultExtractors } from 'extractor';
 import { ENTITY_META_DATA } from 'basic';
+import { ContextType } from 'pToken';
 
 type Done = (result: ConditionalInfo) => void;
 
@@ -32,7 +33,7 @@ function setupConditional(
    ref: ParameterEntityReferencePToken,
    expandParams: ExpandParams,
    nameStack: EntityNameStack,
-   inContent: boolean,
+   context: ContextType,
    deliverToken: (aToken: PToken, handled: () => void) => void,
    done: Done,
 ): void {
@@ -65,7 +66,7 @@ function setupConditional(
 
       done(result);
 
-      utils.parseBody(sTokenSource, inContent, (nextToken, handled) => {
+      utils.parseBody(sTokenSource, context, (nextToken, handled) => {
          if (nextToken) {
             if (nextToken.type !== ENTITY_META_DATA) {
                deliverToken(nextToken, handled);

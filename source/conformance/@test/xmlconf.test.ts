@@ -16,10 +16,11 @@ import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
 import metadata from './data/xmlconf.json';
 import { AttFixerStream } from 'nodeStream';
+import { ContextType } from 'pToken';
 
 function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
    const emd = new EntityMetaData(EntityKind.DOCUMENT, ver, rev, new EntityLocation(test.testPath));
-   const pTokenStream = new PTokenStream(emd);
+   const pTokenStream = new PTokenStream(emd, { context: ContextType.DOCUMENT });
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
    const checkWF = new CheckWellFormed();

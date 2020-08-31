@@ -12,9 +12,10 @@ type PToken = PTokenClassic;
 type ParseValue = PToken | ConformanceVersion | EntityUri;
 
 enum ContextType {
-   CONTENT,
    DOCUMENT,
-   EXTERNAL_ENTITY,
+   EXTERNAL_SUBSET,
+   PARAMETER_ENTITY,
+   GENERAL_ENTITY,
 }
 
 export { ContextType, ParseValue, PToken };

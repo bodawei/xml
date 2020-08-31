@@ -4,7 +4,7 @@
 import { EntityMetaData, EntityKind } from 'basic';
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
-import { PToken, ParseValue } from 'pToken';
+import { PToken, ParseValue, ContextType } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
@@ -968,7 +968,7 @@ describe('EntityExpander (unit)', () => {
             expect(args[0]).toEqual(peRef);
             expect(args[1].utils).not.toBeUndefined(); // inner awareness
             expect(args[2]).toBeInstanceOf(EntityNameStack);
-            expect(args[3]).toEqual(false);
+            expect(args[3]).toEqual(ContextType.PARAMETER_ENTITY);
             expect(args[4]).toBeInstanceOf(Function);
             expect(args[5]).toBeInstanceOf(Function);
             done();

@@ -15,6 +15,7 @@ import * as addProtoReplacementText from '../addProtoReplacementText';
 import { setupConditional } from '../setupConditional';
 import { EntityDetails } from '../EntityDetails';
 import { EntityNameStack } from '../EntityNameStack';
+import { ContextType } from 'pToken';
 
 describe('setupConditional() (unit)', () => {
    let deliverSpy: jasmine.Spy;
@@ -66,7 +67,7 @@ describe('setupConditional() (unit)', () => {
    });
 
    it('calls addProtoReplacementText() with rqeuired parameters', (done) => {
-      setupConditional(testRef, params, testStack, true, deliverSpy, () => {
+      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
          const args = addProtoReplacementTextSpy.calls.argsFor(0);
 
          expect(args[0]).toEqual(testRef);
@@ -78,90 +79,146 @@ describe('setupConditional() (unit)', () => {
    });
 
    it('returns an empty result when there are no details for the specified reference', (done) => {
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result).toEqual({});
-         done();
-      });
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            expect(result).toEqual({});
+            done();
+         },
+      );
    });
 
    it('returns an empty result when there is no proto replacement text for the details', (done) => {
       params.entityDetails.addEntity(testDecl);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result).toEqual({});
-         done();
-      });
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            expect(result).toEqual({});
+            done();
+         },
+      );
    });
 
    it('returns an empty result when the reference value is ignore', (done) => {
       params.entityDetails.addEntity(testDecl, [testIgnore]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result).toEqual({
-            sectionType: toSToken('IGNORE'),
-         });
-         done();
-      });
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            expect(result).toEqual({
+               sectionType: toSToken('IGNORE'),
+            });
+            done();
+         },
+      );
    });
 
    it('returns an empty result when the reference is in the stack', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
       testStack.pushPEName('test');
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result).toEqual({
-            sectionType: testInclude.text,
-         });
-         done();
-      });
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            expect(result).toEqual({
+               sectionType: testInclude.text,
+            });
+            done();
+         },
+      );
    });
 
    it('returns an STokenSource when the ref is INCLUDE', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result.source).toBeInstanceOf(STokenSource);
-         done();
-      });
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            expect(result.source).toBeInstanceOf(STokenSource);
+            done();
+         },
+      );
    });
 
    it('returns an sToken of INCLUDE when the peref is to include', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result.sectionType).toEqual(testInclude.text);
-         done();
-      });
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            expect(result.sectionType).toEqual(testInclude.text);
+            done();
+         },
+      );
    });
 
    it('returns an STokenSource when the ref is INCLUDE across text and charref', (done) => {
       params.entityDetails.addEntity(testDecl, pieceMealInclude);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         expect(result.source).toBeInstanceOf(STokenSource);
-         done();
-      });
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            expect(result.source).toBeInstanceOf(STokenSource);
+            done();
+         },
+      );
    });
 
    it('calls parseBody() with three parameters when it finds INCLUDE', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         setTimeout(() => {
-            const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            setTimeout(() => {
+               const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
 
-            expect(args[0]).toEqual(result.source);
-            expect(args[1]).toEqual(true);
-            expect(args[2]).toBeInstanceOf(Function);
-            done();
-         }, 0);
-      });
+               expect(args[0]).toEqual(result.source);
+               expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);
+               expect(args[2]).toBeInstanceOf(Function);
+               done();
+            }, 0);
+         },
+      );
    });
 
    it('passes a token through when it is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, () => {
+      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
          setTimeout(() => {
             const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
             const callback = args[2];
@@ -179,7 +236,7 @@ describe('setupConditional() (unit)', () => {
    it('does not pass the entity metadata through when it is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, () => {
+      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
          setTimeout(() => {
             const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
             const callback = args[2];
@@ -195,7 +252,7 @@ describe('setupConditional() (unit)', () => {
    it('calls handled when the entity metadata is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, () => {
+      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
          setTimeout(() => {
             const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
             const callback = args[2];
@@ -212,7 +269,7 @@ describe('setupConditional() (unit)', () => {
    it('calls handled when no value is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, () => {
+      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
          setTimeout(() => {
             const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
             const callback = args[2];
@@ -229,35 +286,49 @@ describe('setupConditional() (unit)', () => {
    it('clears the source when no value is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         setTimeout(() => {
-            const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[2];
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            setTimeout(() => {
+               const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
+               const callback = args[2];
 
-            callback(undefined, () => {});
+               callback(undefined, () => {});
 
-            expect(result.source).toBeUndefined();
-            done();
-         }, 0);
-      });
+               expect(result.source).toBeUndefined();
+               done();
+            }, 0);
+         },
+      );
    });
 
    it('will call the callback if it is set on the result passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude]);
 
-      setupConditional(testRef, params, testStack, true, deliverSpy, (result) => {
-         result.textIsFinished = jasmine.createSpy();
+      setupConditional(
+         testRef,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         (result) => {
+            result.textIsFinished = jasmine.createSpy();
 
-         setTimeout(() => {
-            const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[2];
-            const handled = jasmine.createSpy();
+            setTimeout(() => {
+               const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
+               const callback = args[2];
+               const handled = jasmine.createSpy();
 
-            callback(undefined, handled);
+               callback(undefined, handled);
 
-            expect(result.textIsFinished).toHaveBeenCalled();
-            done();
-         }, 0);
-      });
+               expect(result.textIsFinished).toHaveBeenCalled();
+               done();
+            }, 0);
+         },
+      );
    });
 });

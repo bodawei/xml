@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_META_DATA, EntityKind, EntityLocation, EntityMetaData } from 'basic';
-import { PToken, CONFORMANCE_VERSION, ParseValue, ENTITY_URI } from 'pToken';
+import { PToken, CONFORMANCE_VERSION, ParseValue, ENTITY_URI, ContextType } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -279,7 +279,9 @@ class EntityExpander {
          startToken.peRef,
          this.expandParams,
          this.entityNameStack,
-         this.state === State.IN_CONTENT,
+         this.state === State.IN_CONTENT
+            ? ContextType.GENERAL_ENTITY
+            : ContextType.PARAMETER_ENTITY,
          (token, tokenHandled) => {
             // Specially handle text, as we don't want these fed back into handleText()
             if (token.type === TEXT_PTOKEN) {

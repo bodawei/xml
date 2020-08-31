@@ -4,6 +4,7 @@ import { STokenSource, SToken } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
+import { ContextType } from 'pToken';
 
 type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
@@ -24,7 +25,7 @@ type AttributeValueResults = {
 };
 
 type EntityProcessors = {
-   parseBody: (sTokenSource: STokenSource, inContent: boolean, expandToken: ExpandToken) => void;
+   parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;
    parseEntityValue: (
       sTokenSource: STokenSource,
       done: (results: EntityValuePToken | void) => void,
