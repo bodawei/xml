@@ -103,7 +103,7 @@ class EntityExpander {
             5,
             new EntityLocation('dummy meta data to keep TypeScript happy'),
          ),
-         entityId: new EntityId('dummy'),
+         entityId: new EntityId(''),
          conditionalStack: [],
          entityDetails: new EntityDetails(),
          loadExternalEntities: validating,

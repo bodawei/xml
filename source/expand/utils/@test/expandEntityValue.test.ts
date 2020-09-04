@@ -62,9 +62,9 @@ describe('expandEntityValue() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
-            retrieveExternalEntity: (externalId, entityMetaData): RetrieveResults => {
+            retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, entityMetaData),
+                  sTokenSource: new STokenSource({}, new EntityMetaData()),
                   getErrors: (): Array<XmlError> => [],
                };
             },
@@ -133,7 +133,7 @@ describe('expandEntityValue() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, entityMetaData),
+            sTokenSource: new STokenSource({}, new EntityMetaData()),
             getErrors: (): Array<XmlError> => [],
          };
       };
@@ -157,7 +157,7 @@ describe('expandEntityValue() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, entityMetaData),
+            sTokenSource: new STokenSource({}, new EntityMetaData()),
             getErrors: (): Array<XmlError> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],
@@ -244,7 +244,7 @@ describe('expandEntityValue() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, entityMetaData),
+            sTokenSource: new STokenSource({}, new EntityMetaData()),
             getErrors: (): Array<XmlError> => [],
          };
       };

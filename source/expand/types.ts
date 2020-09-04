@@ -1,7 +1,7 @@
 import { EntityMetaData } from 'basic';
 import { STokenSource, SToken } from 'sToken';
 
-import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
+import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
 import { ContextType, EntityId } from 'pToken';
@@ -30,10 +30,7 @@ type EntityProcessors = {
       sTokenSource: STokenSource,
       done: (results: EntityValuePToken | void) => void,
    ) => void;
-   retrieveExternalEntity: (
-      externalId: ExternalId,
-      entityMetaData: EntityMetaData,
-   ) => RetrieveResults;
+   retrieveExternalEntity: (baseEntity: EntityId, relativeEntity: EntityId) => RetrieveResults;
    parseAttributeValue: (
       sTokenSource: STokenSource,
       done: (results: AttributeValueResults) => void,

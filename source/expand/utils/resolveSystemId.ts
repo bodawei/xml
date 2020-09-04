@@ -61,7 +61,7 @@ function resolveSystemId(baseId: EntityId | undefined, newEntity?: EntityId): st
       return baseId.systemId;
    }
 
-   let resolved = newEntity?.systemId || './index.xml';
+   let resolved = newEntity?.systemId || './index.xml---JUNK';
 
    if (baseId && systemIsRelative(newEntity?.systemId)) {
       resolved = getDirOf(baseId.systemId) + newEntity?.systemId;

@@ -5,13 +5,13 @@ import path from 'path';
 import { Transform } from 'stream';
 import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { EntityExpander } from 'expand';
+import { EntityExpander, resolveSystemId } from 'expand';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
-import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
+import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token';
 
 import { AttributeValueResults, ExpandToken, RetrieveResults } from '../expand/types';
-import { ContextType } from 'pToken';
+import { ContextType, EntityId } from 'pToken';
 
 function parseBody(sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken): void {
    const pTokenStream = new PTokenStream(sTokenSource, { context });
@@ -43,14 +43,13 @@ function parseEntityValue(
 }
 
 function retrieveExternalEntity(
-   externalId: ExternalId,
-   entityMetaData: EntityMetaData,
+   baseEntity: EntityId,
+   relativeEntity: EntityId,
 ): RetrieveResults {
-   const sTokenSource = new STokenSource(defaultExtractors, entityMetaData);
+   const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
 
-   const rootPath = entityMetaData.location.systemId;
-   // eslint-disable-next-line
-   const pathx = `${path.resolve(`${rootPath}/..`)}/${(externalId as any).system.value[0].text.str}`;
+   let pathx = resolveSystemId(baseEntity, relativeEntity);
+   pathx = path.resolve(pathx);
 
    const data = fs.readFileSync(pathx, { encoding: 'utf8' });
 

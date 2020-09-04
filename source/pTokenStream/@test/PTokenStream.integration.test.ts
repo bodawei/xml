@@ -151,7 +151,7 @@ describe('PTokenStream (integration)', () => {
       gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
          const types = results.map(r => r.type);
          expect(types).toEqual([
-            ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_ID, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
+            CONFORMANCE_VERSION, ENTITY_ID, ENTITY_META_DATA, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
          done();
       });
    });

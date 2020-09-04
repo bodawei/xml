@@ -67,9 +67,9 @@ describe('expandUnassigned() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
-            retrieveExternalEntity: (externalId, entityMetaData): RetrieveResults => {
+            retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, entityMetaData),
+                  sTokenSource: new STokenSource({}, new EntityMetaData()),
                   getErrors: (): Array<XmlError> => [],
                };
             },

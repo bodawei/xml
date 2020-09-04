@@ -71,9 +71,9 @@ describe('addProtoReplacementText() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
-            retrieveExternalEntity: (externalId, entityMetaData): RetrieveResults => {
+            retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, entityMetaData),
+                  sTokenSource: new STokenSource({}, new EntityMetaData()),
                   getErrors: (): Array<XmlError> => [],
                };
             },
@@ -214,13 +214,13 @@ describe('addProtoReplacementText() (unit)', () => {
       params.utils.parseEntityValue = (other, localDone): void => {
          done1 = localDone;
       };
-      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+      params.utils.retrieveExternalEntity = (): RetrieveResults => {
          const errors: Array<XmlError> = [];
          for (let index = 0; index < callCount; index++) {
             errors.push(new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS));
          }
          return {
-            sTokenSource: new STokenSource({}, entityMetaData),
+            sTokenSource: new STokenSource({}, new EntityMetaData()),
             getErrors: (): Array<XmlError> => errors,
          };
       };
@@ -252,9 +252,9 @@ describe('addProtoReplacementText() (unit)', () => {
    });
 
    it('does not do any further processing when the entity can not be parsed', (done) => {
-      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+      params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, entityMetaData),
+            sTokenSource: new STokenSource({}, new EntityMetaData()),
             getErrors: (): Array<XmlError> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],

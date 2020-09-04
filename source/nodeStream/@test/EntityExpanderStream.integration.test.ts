@@ -29,18 +29,20 @@ import {
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
+   TEXTDECL_PTOKEN,
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './beforeEach';
 import { ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
-import { ParseValue } from 'pToken';
+import { ParseValue, EntityId, CONFORMANCE_VERSION, ENTITY_ID } from 'pToken';
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT, 1.0, undefined, new  EntityLocation(__filename)));
+      pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT, 1.0, undefined, new  EntityLocation(__filename)), {
+         id: new EntityId(__filename), });
       entityExpander = new EntityExpanderStream(true);
 
       pTokenStream.pipe(entityExpander);
@@ -76,6 +78,8 @@ describe('EntityExpanderStream (integration)', () => {
             (results) => {
                const types = results.map((token: any) => token.type);
                expect(types).toEqual([
+                  CONFORMANCE_VERSION,
+                  ENTITY_ID,
                   ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
@@ -120,6 +124,8 @@ describe('EntityExpanderStream (integration)', () => {
             (results) => {
                const types = results.map((token: any) => token.type);
                expect(types).toEqual([
+                  CONFORMANCE_VERSION,
+                  ENTITY_ID,
                   ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
@@ -307,6 +313,8 @@ describe('EntityExpanderStream (integration)', () => {
                const types = results.map((result) => result.type);
 
                expect(types).toEqual([
+                  CONFORMANCE_VERSION,
+                  ENTITY_ID,
                   ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
@@ -355,6 +363,8 @@ describe('EntityExpanderStream (integration)', () => {
                const types = results.map((result) => result.type);
 
                expect(types).toEqual([
+                  CONFORMANCE_VERSION,
+                  ENTITY_ID,
                   ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
@@ -407,6 +417,8 @@ describe('EntityExpanderStream (integration)', () => {
                const types = results.map((result) => result.type);
 
                expect(types).toEqual([
+                  CONFORMANCE_VERSION,
+                  ENTITY_ID,
                   ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
@@ -450,8 +462,10 @@ describe('EntityExpanderStream (integration)', () => {
             (results) => {
                const types = results.map((result) => result.type);
 
-               expect((results[21] as CharDataPToken).text.str).toEqual('>');
+               expect((results[23] as CharDataPToken).text.str).toEqual('>');
                expect(types).toEqual([
+                  CONFORMANCE_VERSION,
+                  ENTITY_ID,
                   ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
@@ -466,7 +480,7 @@ describe('EntityExpanderStream (integration)', () => {
                   ELEMENT_START_PTOKEN,
                   CHARDATA_PTOKEN,
                   GENERAL_ENTITY_START_PTOKEN,
-                  XMLDECL_PTOKEN,   // <-- This should be a TEXTDEL
+                  TEXTDECL_PTOKEN,
                   CHARDATA_PTOKEN,
                   ELEMENT_START_PTOKEN,
                   CHARDATA_PTOKEN,

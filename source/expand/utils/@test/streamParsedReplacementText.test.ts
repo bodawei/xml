@@ -57,9 +57,9 @@ describe('streamParsedReplacementText() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
-            retrieveExternalEntity: (externalId, entityMetaData): RetrieveResults => {
+            retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, entityMetaData),
+                  sTokenSource: new STokenSource({}, new EntityMetaData()),
                   getErrors: (): Array<XmlError> => [],
                };
             },
@@ -137,7 +137,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, entityMetaData),
+            sTokenSource: new STokenSource({}, new EntityMetaData()),
             getErrors: (): Array<XmlError> => [error1, error2],
          };
       };
@@ -241,7 +241,10 @@ describe('streamParsedReplacementText() (unit)', () => {
          cb();
       });
 
-      expect(retrieveSpy).toHaveBeenCalledWith({ type: EXTERNAL_ID }, params.emd);
+      expect(retrieveSpy).toHaveBeenCalledWith(
+         jasmine.objectContaining({ type: ENTITY_ID, systemId: '' }),
+         jasmine.objectContaining({ type: ENTITY_ID, systemId: './default.xml', publicId: '' }),
+      );
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);
       expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);

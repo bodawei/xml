@@ -14,6 +14,7 @@ import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
 import { strOrBlank } from 'sToken';
 import { EntityNameStack } from './EntityNameStack';
+import { externalIdToEntityId } from 'pToken';
 
 type AddProtoReplacementTextResult = {
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
@@ -44,7 +45,7 @@ function addProtoReplacementText(
    nameStack: EntityNameStack,
    done: Done,
 ): void {
-   const { entityDetails, utils, emd } = expandParams;
+   const { entityDetails, utils, emd, entityId } = expandParams;
    const details = entityDetails.getReferencedDetails(reference);
 
    if (
@@ -62,7 +63,10 @@ function addProtoReplacementText(
       return;
    }
 
-   const { sTokenSource, getErrors } = utils.retrieveExternalEntity(details.token.externalId, emd);
+   const { sTokenSource, getErrors } = utils.retrieveExternalEntity(
+      entityId,
+      externalIdToEntityId(details.token.externalId),
+   );
 
    entityDetails.loadingEntity(details.token);
    entityDetails.waitForLoading(details.token, (info) =>

@@ -3,7 +3,7 @@
 
 import { Token, EntityLocation, EntityMetaData, Range } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { ContextType } from 'pToken';
+import { ContextType, EntityId } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import {
@@ -67,12 +67,12 @@ describe('EntityExpander (integration)', () => {
    }
 
    function retrieveExternalEntity(
-      externalId: ExternalId,
-      entityMetaData: EntityMetaData,
+      baseEntity: EntityId,
+      relativeEntity: EntityId,
    ): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors, entityMetaData);
+      const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
 
-      const str = externalMap[(externalId.system!.value[0] as any).text.str];
+      const str = externalMap[relativeEntity.systemId];
       sTokenSource.addText(str);
       sTokenSource.endText();
 

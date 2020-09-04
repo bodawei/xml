@@ -96,7 +96,7 @@ describe('CommentFixingStream (integration)', () => {
          gatherTokens(cf, (results) => {
             const types = results.map(r => r.type);
 
-            expect(types).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_ID, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
+            expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ENTITY_META_DATA, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
             done();
          });
       });

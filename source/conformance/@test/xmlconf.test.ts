@@ -76,6 +76,10 @@ describe('XML Conformance tests', () => {
                   }
                }
 
+               // console.log(
+               //    'results',
+               //    results.map((r) => r.type),
+               // );
                // const actualErrors: Array<any> = results.filter(
                //    (token) => token.type === 'ERROR_TYPE' && (token as any).subtype !== 'WARNING',
                // ) as any;

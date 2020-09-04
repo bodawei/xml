@@ -116,7 +116,7 @@ describe('PTokenStream (unit)', () => {
             expect(result).toEqual(
                jasmine.objectContaining({
                type: ENTITY_ID,
-               systemId: './index.xml',
+               systemId: './document.xml',
             }));
             done();
          });
@@ -467,7 +467,7 @@ describe('PTokenStream (unit)', () => {
    
          gatherPTokens(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
-            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_ID, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            expect(tokenTypes).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ENTITY_META_DATA, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
          });
       });
@@ -497,9 +497,9 @@ describe('PTokenStream (unit)', () => {
             const tokenTypes = pTokens.map(token => token.type);
 
             expect(tokenTypes).toEqual([
-               ENTITY_META_DATA,
                CONFORMANCE_VERSION,
                ENTITY_ID,
+               ENTITY_META_DATA,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
                CONDITIONAL_PTOKEN,
@@ -519,9 +519,9 @@ describe('PTokenStream (unit)', () => {
             const tokenTypes = pTokens.map(token => token.type);
 
             expect(tokenTypes).toEqual([
-               ENTITY_META_DATA,
                CONFORMANCE_VERSION,
                ENTITY_ID,
+               ENTITY_META_DATA,
                DOCTYPE_START_PTOKEN,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,

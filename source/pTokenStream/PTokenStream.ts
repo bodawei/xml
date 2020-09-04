@@ -104,7 +104,7 @@ class PTokenStream extends Readable {
       this.context = opts.context || ContextType.DOCUMENT;
       this.inContent = opts.context === ContextType.GENERAL_ENTITY;
       this._reportedMetaData = false;
-      this.id = opts.id ?? new EntityId('./index.xml');
+      this.id = opts.id ?? new EntityId('./document.xml');
 
       if (opts.version) {    
          this.confVer = {
@@ -133,7 +133,6 @@ class PTokenStream extends Readable {
          if (!this._reportedMetaData) {
             
             this._reportedMetaData = true;
-            this.push(this._sTokenSource.metaData);
             
             if (!this.versionSet) {
                let version = this._sTokenSource.metaData.version;
@@ -160,6 +159,8 @@ class PTokenStream extends Readable {
                this.push(this.confVer);
                this.push(this.id);
             }
+
+            this.push(this._sTokenSource.metaData);
          }
 
          // docstart and end may deliver an array(!)
@@ -330,7 +331,7 @@ class PTokenStream extends Readable {
                parseElementEnd(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-               parseInstruction(this._sTokenSource, markupStartSToken, this.emd.isDocumentKind, deliverParse);
+               parseInstruction(this._sTokenSource, markupStartSToken, this.context === ContextType.DOCUMENT, deliverParse);
                break;
             case '<!--':
                parseComment(this._sTokenSource, markupStartSToken, deliverParse);

@@ -19,7 +19,7 @@ class EntityId {
    readonly publicId?: string;
 
    constructor(systemId?: string, publicId?: string) {
-      this.systemId = systemId || './index.xml';
+      this.systemId = systemId || './default.xml';
       this.publicId = publicId;
    }
 }
@@ -41,10 +41,10 @@ function valueToString(value: LiteralValuePToken = []): string {
    return pieces.join('');
 }
 
-function externalIdToEntityId(externalId: ExternalId): EntityId {
+function externalIdToEntityId(externalId: ExternalId | undefined): EntityId {
    return new EntityId(
-      valueToString(externalId.system?.value),
-      valueToString(externalId.public?.value),
+      valueToString(externalId?.system?.value),
+      valueToString(externalId?.public?.value),
    );
 }
 

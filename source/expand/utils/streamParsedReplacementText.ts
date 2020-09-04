@@ -23,7 +23,7 @@ import {
 } from './ExternalDtdSubsetPseudoToken';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { ExpandParams } from '../types';
-import { ContextType } from 'pToken';
+import { ContextType, externalIdToEntityId } from 'pToken';
 
 type DeliverToken = (result: PToken | void, handled: () => void) => void;
 
@@ -60,7 +60,7 @@ function streamParsedReplacementText(
    expandParams: ExpandParams,
    deliverToken: DeliverToken,
 ): void {
-   const { entityDetails, utils, emd } = expandParams;
+   const { entityDetails, utils, emd, entityId } = expandParams;
    let sTokenSource: STokenSource;
    let getErrors: () => Array<XmlError>;
    let context = ContextType.DOCUMENT;
@@ -75,7 +75,10 @@ function streamParsedReplacementText(
    }
 
    if (reference.type === EXTERNAL_DTD_PSEUDO_TOKEN) {
-      ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(reference.externalId, emd));
+      ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(
+         entityId,
+         externalIdToEntityId(reference.externalId),
+      ));
       context = ContextType.EXTERNAL_SUBSET;
       start = new ExternalSubsetStartToken();
       end = new ExternalSubsetEndToken();
@@ -104,9 +107,8 @@ function streamParsedReplacementText(
          getErrors = (): Array<XmlError> => [];
       } else {
          ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            details.token.externalId!,
-            emd,
+            entityId,
+            externalIdToEntityId(details.token.externalId),
          ));
       }
    }

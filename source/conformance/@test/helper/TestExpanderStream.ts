@@ -6,7 +6,7 @@ import { Transform } from 'stream';
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { EntityExpander, RetrieveResults, AttributeValueResults } from 'expand';
 import { defaultExtractors } from 'extractor';
-import { ContextType } from 'pToken';
+import { ContextType, EntityId } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import {
@@ -109,27 +109,18 @@ function findEntity(testDetails: TestDetails, entityName: string): string {
 
 function retrieveExternalEntity(
    testDetails: TestDetails,
-   externalId: ExternalId,
-   entityMetaData: EntityMetaData,
+   baseEntity: EntityId,
+   relativeEntity: EntityId,
 ): RetrieveResults {
-   const systemInfo = externalId.system;
-   let entityName = 'ERROR';
+   const entityName = relativeEntity.systemId;
 
-   if (systemInfo && systemInfo.value) {
-      entityName = (systemInfo as any).value[0].text.str;
-   }
-
-   const emd = new EntityMetaData(
-      EntityKind.EXTERNAL, // Do we use the kind anywhere?
-      entityMetaData.version,
-      entityMetaData.revision,
-      new EntityLocation(entityName),
-   );
-
+   // console.log('>>>', baseEntity, relativeEntity);
+   // console.log('RETRIEVE IN TEST EXPANDER', entityName, baseEntity, relativeEntity);
    const entityText = findEntity(testDetails, entityName);
+   // console.log('entityText', entityText, '\n');
    // Throw an error if we can't find the entity?
 
-   const source = new STokenSource(defaultExtractors, emd);
+   const source = new STokenSource(defaultExtractors, new EntityMetaData());
    source.addText(entityText);
    source.endText();
 
