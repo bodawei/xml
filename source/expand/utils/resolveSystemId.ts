@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityUri } from 'pToken';
+import { EntityId } from 'pToken';
 
 // http://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative
 const RELATIVE_REGEX = new RegExp('^([a-z0-9]+:)?//', 'i');
@@ -52,21 +52,21 @@ function systemIsProtocolRelative(systemId: string): boolean {
  * In other words, it is the URI of the resource retrieved after all redirection
  * has occurred.
  */
-function resolveSystemId(entityUrl: EntityUri | undefined, systemId?: string): string {
-   if (!entityUrl) {
-      return systemId || '';
+function resolveSystemId(baseId: EntityId | undefined, newEntity?: EntityId): string {
+   if (!baseId) {
+      return newEntity?.systemId || '';
    }
 
-   if (!systemId) {
-      return entityUrl.location.systemId;
+   if (!newEntity) {
+      return baseId.systemId;
    }
 
-   let resolved = systemId;
+   let resolved = newEntity?.systemId || './index.xml';
 
-   if (entityUrl && systemIsRelative(systemId)) {
-      resolved = getDirOf(entityUrl.location.systemId) + systemId;
-   } else if (entityUrl && systemIsProtocolRelative(systemId)) {
-      resolved = getDirOf(getSystemProtocol(entityUrl.location.systemId)) + systemId;
+   if (baseId && systemIsRelative(newEntity?.systemId)) {
+      resolved = getDirOf(baseId.systemId) + newEntity?.systemId;
+   } else if (baseId && systemIsProtocolRelative(newEntity?.systemId)) {
+      resolved = getDirOf(getSystemProtocol(baseId.systemId)) + newEntity?.systemId;
    }
 
    return resolved;

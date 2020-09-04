@@ -7,9 +7,9 @@ import * as tokenStuff from 'token';
 import { CHARDATA_PTOKEN, DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN } from 'token';
 
 import PTokenStream from '../PTokenStream';
-import { CONFORMANCE_VERSION, ParseValue, PToken } from 'pToken';
+import { CONFORMANCE_VERSION, ParseValue, PToken, ENTITY_ID } from 'pToken';
 import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
-import { ENTITY_URI } from 'source/pToken/token/entityUri';
+import { EntityId } from 'source/pToken/token/entityId';
 
 type TokenArray = Array<ParseValue>;
 
@@ -104,37 +104,41 @@ describe('PTokenStream (unit)', () => {
 
    });
 
-   describe('entity URI', () => {
+   describe('entity id', () => {
 
-      it('delivers a generic EntityUri Token when nont provided at construction time', (done) => {
+      it('delivers a generic EntityId Token when none provided at construction time', (done) => {
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
 
          gatherPTokens(pTokenStream, (results) => {
-            const result = findToken(results, ENTITY_URI);
+            const result = findToken(results, ENTITY_ID);
 
-            expect(result).toEqual({
-               type: ENTITY_URI,
-               location: new EntityLocation('./index.xml'),
-            });
+            expect(result).toEqual(
+               jasmine.objectContaining({
+               type: ENTITY_ID,
+               systemId: './index.xml',
+            }));
             done();
          });
       });
 
-      it('delivers an EntityUri with the option specified in the construction options', (done) => {
+      it('delivers an EntityId with the option specified in the construction options', (done) => {
          pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT), {
-            location: new EntityLocation('http://foo.com/bar.xml', 'baz - boo'),
+            id: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
          });
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
 
          gatherPTokens(pTokenStream, (results) => {
-            const result = findToken(results, ENTITY_URI);
+            const result = findToken(results, ENTITY_ID);
 
-            expect(result).toEqual({
-               type: ENTITY_URI,
-               location: new EntityLocation('http://foo.com/bar.xml', 'baz - boo'),
-            });
+            expect(result).toEqual(
+               jasmine.objectContaining({
+                  type: ENTITY_ID,
+                  systemId: 'http://foo.com/bar.xml',
+                  publicId: 'baz - boo',
+               })
+            );
             done();
          });
       });
@@ -463,7 +467,7 @@ describe('PTokenStream (unit)', () => {
    
          gatherPTokens(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
-            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_URI, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            expect(tokenTypes).toEqual([ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_ID, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
          });
       });
@@ -495,7 +499,7 @@ describe('PTokenStream (unit)', () => {
             expect(tokenTypes).toEqual([
                ENTITY_META_DATA,
                CONFORMANCE_VERSION,
-               ENTITY_URI,
+               ENTITY_ID,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
                CONDITIONAL_PTOKEN,
@@ -517,7 +521,7 @@ describe('PTokenStream (unit)', () => {
             expect(tokenTypes).toEqual([
                ENTITY_META_DATA,
                CONFORMANCE_VERSION,
-               ENTITY_URI,
+               ENTITY_ID,
                DOCTYPE_START_PTOKEN,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,

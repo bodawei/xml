@@ -15,7 +15,7 @@ import {
    XMLDECL_PTOKEN,
    getFirstSToken,
 } from 'token';
-import { PToken, CONFORMANCE_VERSION, ParseValue, ENTITY_URI } from 'pToken';
+import { CONFORMANCE_VERSION, ParseValue, ENTITY_ID } from 'pToken';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
@@ -112,7 +112,7 @@ class DocumentChecker {
       if (pToken.type === ENTITY_META_DATA) {
          this.checkState.emd = pToken;
          return;
-      } else if (pToken.type === CONFORMANCE_VERSION || pToken.type === ENTITY_URI) {
+      } else if (pToken.type === CONFORMANCE_VERSION || pToken.type === ENTITY_ID) {
          return;
       } else if ((pToken as any).type === ERROR_TYPE) {
          return;
@@ -205,7 +205,7 @@ class DocumentChecker {
       }
    }
 
-   private transition(pToken: PToken, ec: ErrorCollector): void {
+   private transition(pToken: ParseValue, ec: ErrorCollector): void {
       const transitions = transitionsByState[this.state];
       const newState = transitions && transitions[pToken.type];
       let badSubset = false;

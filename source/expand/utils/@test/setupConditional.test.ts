@@ -15,7 +15,7 @@ import * as addProtoReplacementText from '../addProtoReplacementText';
 import { setupConditional } from '../setupConditional';
 import { EntityDetails } from '../EntityDetails';
 import { EntityNameStack } from '../EntityNameStack';
-import { ContextType, ENTITY_URI } from 'pToken';
+import { ContextType, ENTITY_ID } from 'pToken';
 
 describe('setupConditional() (unit)', () => {
    let deliverSpy: jasmine.Spy;
@@ -38,9 +38,9 @@ describe('setupConditional() (unit)', () => {
       params = {
          entityDetails: new EntityDetails(),
          emd: new EntityMetaData(),
-         entityUri: {
-            type: ENTITY_URI,
-            location: new EntityLocation(),
+         entityId: {
+            type: ENTITY_ID,
+            systemId: '',
          },
          loadExternalEntities: true,
          conditionalStack: [],

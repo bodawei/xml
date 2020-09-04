@@ -33,7 +33,7 @@ import {
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './beforeEach';
 import { ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
-import { ENTITY_URI, ParseValue } from 'pToken';
+import { ParseValue } from 'pToken';
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;

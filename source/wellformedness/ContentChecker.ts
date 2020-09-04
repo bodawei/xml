@@ -20,7 +20,7 @@ import {
    GeneralEntityStartPToken,
    getFirstSToken,
 } from 'token';
-import { PToken } from 'pToken';
+import { PToken, ParseValue } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import {
    CHECKER_DONE,
@@ -113,7 +113,7 @@ class ContentChecker implements Checker {
       this.geContext = [...geContext];
    }
 
-   check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+   check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
       if (this.state === State.PRE) {
          if (
             pToken.type !== ELEMENT_START_PTOKEN &&
@@ -280,7 +280,7 @@ class ContentChecker implements Checker {
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: PToken, ec: ErrorCollector): boolean {
+   private transition(pToken: ParseValue, ec: ErrorCollector): boolean {
       let newState: State | typeof NO_CHANGE = NO_CHANGE;
 
       if (pToken.type === GENERAL_ENTITY_START_PTOKEN && this.state === State.PRE) {

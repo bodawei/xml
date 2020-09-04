@@ -24,7 +24,7 @@ import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { streamParsedReplacementText } from '../streamParsedReplacementText';
-import { ContextType, ENTITY_URI } from 'pToken';
+import { ContextType, ENTITY_ID } from 'pToken';
 
 function noopFunction(): void {
    // do nothing
@@ -44,9 +44,9 @@ describe('streamParsedReplacementText() (unit)', () => {
 
       params = {
          entityDetails,
-         entityUri: {
-            type: ENTITY_URI,
-            location: new EntityLocation(),
+         entityId: {
+            type: ENTITY_ID,
+            systemId: '',
          },
          loadExternalEntities: true,
          conditionalStack: [],

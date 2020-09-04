@@ -23,7 +23,7 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    SPACE_PTOKEN,
 } from 'token';
-import { ENTITY_URI } from 'source/pToken/token/entityUri';
+import { ENTITY_ID } from 'pToken';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -151,7 +151,7 @@ describe('PTokenStream (integration)', () => {
       gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
          const types = results.map(r => r.type);
          expect(types).toEqual([
-            ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_URI, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
+            ENTITY_META_DATA, CONFORMANCE_VERSION, ENTITY_ID, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
          done();
       });
    });

@@ -1,9 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, EntityLocation } from 'basic';
+import { EntityMetaData } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
-   AttributeValuePToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityEndPToken,
    GeneralEntityReferencePToken,
@@ -16,11 +15,10 @@ import {
 import { expandAttributes } from '../expandAttributes';
 import { ExpandParams, RetrieveResults, AttributeValueResults } from '../../types';
 import { WellFormedError } from 'error';
-import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
 import { EntityNameStack } from '../EntityNameStack';
-import { ENTITY_URI } from 'pToken';
+import { ENTITY_ID } from 'pToken';
 
 describe('expandAttributes() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -49,9 +47,9 @@ describe('expandAttributes() (unit)', () => {
 
       params = {
          emd: new EntityMetaData(),
-         entityUri: {
-            type: ENTITY_URI,
-            location: new EntityLocation(),
+         entityId: {
+            type: ENTITY_ID,
+            systemId: '',
          },
          entityDetails,
          conditionalStack: [],

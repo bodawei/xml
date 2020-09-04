@@ -33,7 +33,7 @@ import {
    TEXT_PTOKEN,
    ConditionalPToken,
 } from 'token';
-import { PToken } from 'pToken';
+import { PToken, ParseValue } from 'pToken';
 
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import {
@@ -339,7 +339,7 @@ class MarkupDeclChecker implements Checker {
       this.declsSeen = {};
    }
 
-   check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+   check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
       if (this.state === States.PRE) {
          if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
             this.inExternalSubset = false;
@@ -483,7 +483,7 @@ class MarkupDeclChecker implements Checker {
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: PToken, ec: ErrorCollector): boolean {
+   private transition(pToken: ParseValue, ec: ErrorCollector): boolean {
       let newState: States | typeof NO_CHANGE | void;
 
       if (pToken.type === PARAMETER_ENTITY_START_PTOKEN && this.state === States.PRE) {

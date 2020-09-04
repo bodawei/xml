@@ -3,13 +3,13 @@
 import { PToken as PTokenClassic } from 'token';
 
 import { ConformanceVersion } from './token/conformanceVersion';
-import { EntityUri } from './token/entityUri';
+import { EntityId } from './token/entityId';
 
 export * from './token/conformanceVersion';
-export * from './token/entityUri';
+export * from './token/entityId';
 
 type PToken = PTokenClassic;
-type ParseValue = PToken | ConformanceVersion | EntityUri;
+type ParseValue = PToken | ConformanceVersion | EntityId;
 
 enum ContextType {
    DOCUMENT,

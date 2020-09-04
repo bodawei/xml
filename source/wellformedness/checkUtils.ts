@@ -1,7 +1,7 @@
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank, SToken } from 'sToken';
-import { PToken } from 'pToken';
+import { PToken, ParseValue } from 'pToken';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -38,7 +38,7 @@ interface CheckerConstructor {
 const CHECKER_DONE = '**Checker Done**';
 
 interface Checker {
-   check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE;
+   check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE;
 }
 
 const WFID = WellFormedError.ID;

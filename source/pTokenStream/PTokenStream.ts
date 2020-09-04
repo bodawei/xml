@@ -31,9 +31,7 @@ import {
    ElementStartPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-import { ContextType } from 'pToken';
-import { ConformanceVersion, CONFORMANCE_VERSION } from 'source/pToken/token/conformanceVersion';
-import { EntityUri, ENTITY_URI } from 'source/pToken/token/entityUri';
+import { CONFORMANCE_VERSION, ConformanceVersion, ContextType, EntityId } from 'pToken';
 
 type DeliverPToken = (result: ParseValue | null | undefined | Array<ParseValue>) => void; // icky typeHack
 enum ConditionalState {
@@ -47,7 +45,7 @@ interface PTokenOptions {
    context?: ContextType;
    version?: XmlVersion;
    revision?: XmlRevision;
-   location?: EntityLocation;
+   id?: EntityId;
 }
 
 class PTokenStream extends Readable {
@@ -57,7 +55,7 @@ class PTokenStream extends Readable {
    private _reportedMetaData: boolean;
    private _parsing: boolean = false;
    private emd: EntityMetaData;
-   private id: EntityUri;
+   private id: EntityId;
    private confVer: ConformanceVersion;
    private context: ContextType = ContextType.DOCUMENT;
    private versionSet: boolean;
@@ -106,13 +104,9 @@ class PTokenStream extends Readable {
       this.context = opts.context || ContextType.DOCUMENT;
       this.inContent = opts.context === ContextType.GENERAL_ENTITY;
       this._reportedMetaData = false;
-      this.id = {
-         type: ENTITY_URI,
-         location: options?.location ?? new EntityLocation('./index.xml'),
-      };
+      this.id = opts.id ?? new EntityId('./index.xml');
 
-      if (opts.version) {
-               
+      if (opts.version) {    
          this.confVer = {
             type: CONFORMANCE_VERSION,
             version: opts.version,

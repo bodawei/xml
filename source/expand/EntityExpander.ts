@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_META_DATA, EntityKind, EntityLocation, EntityMetaData } from 'basic';
-import { PToken, CONFORMANCE_VERSION, ParseValue, ENTITY_URI, ContextType } from 'pToken';
+import { CONFORMANCE_VERSION, ParseValue, ContextType, ENTITY_ID, EntityId } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -103,10 +103,7 @@ class EntityExpander {
             5,
             new EntityLocation('dummy meta data to keep TypeScript happy'),
          ),
-         entityUri: {
-            type: ENTITY_URI,
-            location: new EntityLocation('dummy meta data to keep TypeScript happy'),
-         },
+         entityId: new EntityId('dummy'),
          conditionalStack: [],
          entityDetails: new EntityDetails(),
          loadExternalEntities: validating,
@@ -124,9 +121,9 @@ class EntityExpander {
             }
             expanded();
             break;
-         case ENTITY_URI:
+         case ENTITY_ID:
             if (!this.seenEmd) {
-               this.expandParams.entityUri = pToken;
+               this.expandParams.entityId = pToken;
                this.deliverToken(pToken);
             }
             expanded();
