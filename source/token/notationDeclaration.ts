@@ -1,13 +1,14 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
-import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens, makeEntityLocation } from './common/externalId';
+import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from './common/externalId';
 import misc from './common/misc';
 import unassigned, { UnassignedArray } from './common/unassigned';
 import { DeclarationStart } from './bridge/declaration';
+import { ExternalIdXToken } from 'xToken';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';
 const NOTATION_DECLARATION_XTOKEN = 'NOTATION_DECLARATION_XTOKEN';
@@ -29,10 +30,10 @@ type ProtoToken = DeclarationStart & {
 class NotationDeclarationXToken {
    public readonly type: typeof NOTATION_DECLARATION_XTOKEN = NOTATION_DECLARATION_XTOKEN;
    public readonly name: string;
-   public readonly externalId?: EntityLocation;
+   public readonly externalId?: ExternalIdXToken;
    public pToken?: NotationDeclarationPToken;
 
-   constructor(name: string, externalId?: EntityLocation, pToken?: NotationDeclarationPToken) {
+   constructor(name: string, externalId?: ExternalIdXToken, pToken?: NotationDeclarationPToken) {
       this.name = name;
       this.externalId = externalId;
       this.pToken = pToken;
@@ -180,7 +181,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, 
 
 function pTokenToXToken(pToken: NotationDeclarationPToken): NotationDeclarationXToken {
    return new NotationDeclarationXToken(strOrBlank(pToken.name),
-      makeEntityLocation(pToken.externalId), pToken);
+      pToken.externalId ? new ExternalIdXToken(pToken.externalId) : undefined, pToken);
 }
 
 /**********************************************************************\

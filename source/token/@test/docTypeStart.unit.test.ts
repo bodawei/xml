@@ -4,28 +4,29 @@
 
 import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from'error-test';
-import { SToken, STokenSource } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { SToken, STokenSource, toSToken } from 'sToken';
+import { MockSTokenSource } from 'sToken-test';
 import { WellFormedError } from 'error';
 
 import declaration from '../bridge/baseDeclaration';
-import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
+import { DocTypeStartPToken, parseDocTypeStart, DOCTYPE_START_XTOKEN } from '../docTypeStart';
 import { EXTERNAL_ID } from '../common/externalId';
 import * as externalId from '../common/externalId';
 import misc from '../common/misc';
+import { ExternalIdXToken } from 'xToken';
+import { TextPToken } from '../text';
 
 describe('docTypeStart (unit)', () => {
    let docTypeStartPToken: DocTypeStartPToken;
 
    beforeEach(() => {
-      const makeSToken = makeSTokenMaker();
       docTypeStartPToken = new DocTypeStartPToken({
          open: SToken.fromString('<!'),
-         name: makeSToken('rootElement'),
-         nameSpace: makeSToken(' '),
+         name: toSToken('rootElement'),
+         nameSpace: toSToken(' '),
          externalId: { type: EXTERNAL_ID },
-         externalIdSpace: makeSToken(' '),
-         openSubset: makeSToken('['),
+         externalIdSpace: toSToken(' '),
+         openSubset: toSToken('['),
       });
    });
 
@@ -50,7 +51,7 @@ describe('docTypeStart (unit)', () => {
          parseDocTypeStart(mockSource, { open: SToken.fromString('<!') } as any, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainPTokenProps(docTypeStartPToken);
+         expect(callback).toEqualRangeless(docTypeStartPToken);
       });
 
       it('handles EOF', () => {
@@ -135,22 +136,32 @@ describe('docTypeStart (unit)', () => {
 
    describe('toXToken()', () => {
 
-      beforeEach(() => {
-         spyOn(externalId, 'makeEntityLocation');
-      });
-
-      it('calls externalId.makeEntityLocation', () => {
-         docTypeStartPToken.toXToken();
-
-         expect(externalId.makeEntityLocation).toHaveBeenCalledWith(docTypeStartPToken.externalId);
-      });
-
       it('returns a token with an empty string if no name was found', () => {
          delete (docTypeStartPToken as any).name;
 
          const token = docTypeStartPToken.toXToken();
 
          expect(token.name).toEqual('');
+      });
+
+      it('returns a token with an external Id', () => {
+         docTypeStartPToken = new DocTypeStartPToken({
+            open: SToken.fromString('<!'),
+            name: toSToken('rootElement'),
+            nameSpace: toSToken(' '),
+            externalId: { type: EXTERNAL_ID, system: {
+               value: [ new TextPToken({ text: toSToken('system.xml') }) ],
+            }, public: {
+               value: [ new TextPToken({ text: toSToken('- // public') }) ],
+             },
+            },
+            externalIdSpace: toSToken(' '),
+            openSubset: toSToken('['),
+         });
+
+         const token = docTypeStartPToken.toXToken();
+
+         expect(token.externalId).toEqual(new ExternalIdXToken('system.xml', '- // public'));
       });
 
    });

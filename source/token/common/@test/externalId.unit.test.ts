@@ -12,14 +12,7 @@ import unassigned from '../unassigned';
 import { UnassignedArray, UnassignedType } from '../unassigned';
 
 import literal from '../literal';
-import {
-   EXTERNAL_ID,
-   parseExternalId,
-   getSTokens,
-   makeEntityLocation,
-   checkExternalIdWellFormed,
-   ExternalId,
-} from '../externalId';
+import { EXTERNAL_ID, parseExternalId, getSTokens, checkExternalIdWellFormed } from '../externalId';
 
 describe('externalId (unit)', () => {
    describe('parse()', () => {
@@ -570,125 +563,6 @@ describe('externalId (unit)', () => {
          expect(() => {
             checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
          }).not.toThrow();
-      });
-   });
-
-   describe('makeEntityLocation()', () => {
-      it('returns an EntityLocation with the public and system ids', () => {
-         const expectedSToken = makeSTokenMaker();
-         const pTokenPart = {
-            type: EXTERNAL_ID,
-            peRefPlus: [],
-            externalType: expectedSToken('PUBLIC'),
-            externalTypeSpace: expectedSToken(' '),
-            public: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('pub.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-            publicSpace: expectedSToken(' '),
-            system: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('sys.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-         };
-
-         const externalLoc = makeEntityLocation(pTokenPart);
-
-         expect(externalLoc).toEqual(new EntityLocation('sys.xml', 'pub.xml'));
-      });
-
-      it('returns an EntityLocation with the system id only if there is no public', () => {
-         const expectedSToken = makeSTokenMaker();
-         const pTokenPart = {
-            type: EXTERNAL_ID,
-            peRefPlus: [],
-            externalType: expectedSToken('PUBLIC'),
-            externalTypeSpace: expectedSToken(' '),
-            system: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('sys.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-         };
-
-         const externalLoc = makeEntityLocation(pTokenPart);
-
-         expect(externalLoc).toEqual(new EntityLocation('sys.xml'));
-      });
-
-      it('returns an EntityLocation with the public only if there is no system', () => {
-         const expectedSToken = makeSTokenMaker();
-         const pTokenPart = {
-            type: EXTERNAL_ID,
-            peRefPlus: [],
-            externalType: expectedSToken('PUBLIC'),
-            externalTypeSpace: expectedSToken(' '),
-            public: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('pub.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-         };
-
-         const externalLoc = makeEntityLocation(pTokenPart);
-
-         expect(externalLoc).toEqual(new EntityLocation(undefined, 'pub.xml'));
-      });
-
-      it('returns an EntityLocation with the public only if system has no value in its array', () => {
-         const expectedSToken = makeSTokenMaker();
-         const pTokenPart = {
-            type: EXTERNAL_ID,
-            peRefPlus: [],
-            externalType: expectedSToken('PUBLIC'),
-            externalTypeSpace: expectedSToken(' '),
-            system: {
-               openQuote: expectedSToken('"'),
-               value: [],
-               closeQuote: expectedSToken('"'),
-            },
-            public: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('pub.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-         };
-
-         const externalLoc = makeEntityLocation(pTokenPart);
-
-         expect(externalLoc).toEqual(new EntityLocation(undefined, 'pub.xml'));
-      });
-
-      it('returns an EntityLocation with no public or system if both have empty arrays', () => {
-         const expectedSToken = makeSTokenMaker();
-         const pTokenPart = {
-            type: EXTERNAL_ID,
-            peRefPlus: [],
-            externalType: expectedSToken('PUBLIC'),
-            externalTypeSpace: expectedSToken(' '),
-            system: {
-               openQuote: expectedSToken('"'),
-               value: [],
-               closeQuote: expectedSToken('"'),
-            },
-            public: {
-               openQuote: expectedSToken('"'),
-               value: [],
-               closeQuote: expectedSToken('"'),
-            },
-         };
-
-         const externalLoc = makeEntityLocation(pTokenPart);
-
-         expect(externalLoc).toEqual(new EntityLocation(undefined, undefined));
-      });
-
-      it('returns nothing if no PTokenPart value provided', () => {
-         const externalLoc = makeEntityLocation(undefined);
-
-         expect(externalLoc).toBeUndefined();
       });
    });
 

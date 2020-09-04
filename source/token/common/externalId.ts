@@ -269,28 +269,6 @@ function checkWellFormed(
    }
 }
 
-/**********************************************************************\
- makeEntityLocation() converts a pTokenPart value into a form that
- can be inserted into a token.
-\**********************************************************************/
-
-function makeEntityLocation(pTokenPart: ExternalId | void): EntityLocation | undefined {
-   if (!pTokenPart) {
-      return;
-   }
-
-   const value =
-      pTokenPart.system && pTokenPart.system.value && pTokenPart.system.value.length > 0
-         ? (pTokenPart.system.value[0] as any).text.str
-         : undefined; // typeHack
-   const publicValue =
-      pTokenPart.public && pTokenPart.public.value && pTokenPart.public.value.length > 0
-         ? (pTokenPart.public.value[0] as any).text.str
-         : undefined; // typeHack
-
-   return new EntityLocation(value, publicValue);
-}
-
 function getSTokens(pTokenPart?: ExternalId): Array<SToken> {
    let results: Array<SToken | undefined> = [];
    if (!pTokenPart) {
@@ -309,11 +287,4 @@ function getSTokens(pTokenPart?: ExternalId): Array<SToken> {
 
 const checkExternalIdWellFormed = checkWellFormed;
 
-export {
-   EXTERNAL_ID,
-   ExternalId,
-   parseExternalId,
-   getSTokens,
-   checkExternalIdWellFormed,
-   makeEntityLocation,
-};
+export { EXTERNAL_ID, ExternalId, parseExternalId, getSTokens, checkExternalIdWellFormed };

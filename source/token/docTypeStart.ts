@@ -4,9 +4,10 @@ import { EntityLocation, EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
 
-import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens, makeEntityLocation } from './common/externalId';
+import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import misc from './common/misc';
+import { ExternalIdXToken } from 'xToken';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
@@ -34,13 +35,13 @@ type PreToken = { open: SToken, [ other: string ]: any };
 class DocTypeStartXToken {
    public readonly type: typeof DOCTYPE_START_XTOKEN = DOCTYPE_START_XTOKEN;
    public readonly name: string;
-   public readonly externalLoc: EntityLocation | void;
+   public readonly externalId: ExternalIdXToken | undefined;
    public readonly hasInternalSubset: boolean;
    public pToken?: DocTypeStartPToken;
 
-   constructor(name: string, externalLocation: EntityLocation | void, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
+   constructor(name: string, externalId: ExternalIdXToken | undefined, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
       this.name = name;
-      this.externalLoc = externalLocation;
+      this.externalId = externalId;
       this.hasInternalSubset = hasInternalSubset;
       this.pToken = pToken;
    }
@@ -136,7 +137,7 @@ function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityM
 
 function pTokenToXToken(pToken: DocTypeStartPToken) {
    return new DocTypeStartXToken(strOrBlank(pToken.name),
-   makeEntityLocation(pToken.externalId) as EntityLocation, // typeHack
+      pToken.externalId ? new ExternalIdXToken(pToken.externalId) : undefined,
       !!pToken.openSubset,
       pToken);
 }

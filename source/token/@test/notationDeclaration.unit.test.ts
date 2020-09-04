@@ -17,6 +17,8 @@ import {
    parseNotationDeclaration,
 } from '../notationDeclaration';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
+import { TextPToken } from '../text';
+import { ExternalIdXToken } from 'xToken';
 
 describe('notationdeDeclaration (unit)', () => {
    let notationPToken: NotationDeclarationPToken;
@@ -29,9 +31,6 @@ describe('notationdeDeclaration (unit)', () => {
          declTypeSpace: toSToken(' '),
          name: toSToken('notationName'),
          nameSpace: toSToken(' '),
-         externalId: {
-            type: EXTERNAL_ID,
-         },
          externalIdSpace: toSToken(' '),
          close: toSToken('>'),
       });
@@ -320,16 +319,6 @@ describe('notationdeDeclaration (unit)', () => {
 
    describe('pToken.toXToken()', () => {
 
-      beforeEach(() => {
-         spyOn(externalId, 'makeEntityLocation');
-      });
-
-      it('calls externalId.makeEntityLocation()', () => {
-         notationPToken.toXToken();
-
-         expect(externalId.makeEntityLocation).toHaveBeenCalledWith(notationPToken.externalId);
-      });
-
       it('returns notation declaration token with the name from the parsing', () => {
          const token = notationPToken.toXToken();
 
@@ -341,6 +330,28 @@ describe('notationdeDeclaration (unit)', () => {
          const token = notationPToken.toXToken();
 
          expect(token).toEqual(new NotationDeclarationXToken('', undefined, notationPToken));
+      });
+
+      it('returns a notation declaration with an externalId', () => {
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('NOTATION'),
+            declTypeSpace: toSToken(' '),
+            name: toSToken('notationName'),
+            nameSpace: toSToken(' '),
+            externalId: { type: EXTERNAL_ID, system: {
+               value: [ new TextPToken({ text: toSToken('system.xml') }) ],
+            }, public: {
+               value: [ new TextPToken({ text: toSToken('- // public') }) ],
+             },
+            },
+            externalIdSpace: toSToken(' '),
+            close: toSToken('>'),
+         });
+
+         const token = notationPToken.toXToken();
+
+         expect(token.externalId).toEqual(new ExternalIdXToken('system.xml', '- // public'));
       });
 
    });

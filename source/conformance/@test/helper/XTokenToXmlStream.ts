@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { XToken, CHARREF_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
+import { XToken, CHARREF_XTOKEN, XMLDECL_XTOKEN, ExternalIdXToken } from 'xToken';
 import {
    SPACE_XTOKEN,
    DOCTYPE_START_XTOKEN,
@@ -16,10 +16,9 @@ import {
    TEXT_XTOKEN,
    DocTypeStartXToken,
 } from 'token';
-import { EntityLocation } from 'basic';
 import { AttributeXToken } from 'source/token/common/attribute';
 
-function formatExternalId(externalId?: EntityLocation): string {
+function formatExternalId(externalId?: ExternalIdXToken): string {
    if (!externalId) {
       return '';
    }

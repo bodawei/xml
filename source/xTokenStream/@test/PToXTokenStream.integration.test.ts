@@ -30,6 +30,7 @@ import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import { ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
 import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
+import { ExternalIdXToken } from 'source/xToken/token/externalIdXToken';
 
 type Token = { type: string, pToken?: any };
 type TokenArray = Array<Token>;
@@ -165,7 +166,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('nokenizes a NOTATION declaration', (done) => {
       expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
-         new NotationDeclarationXToken('myNotation', new EntityLocation('sys.xml', 'pub.xml')),
+         new NotationDeclarationXToken('myNotation', new ExternalIdXToken('sys.xml', 'pub.xml')),
       ], done);
    });
 

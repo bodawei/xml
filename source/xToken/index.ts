@@ -5,6 +5,7 @@ export * from './token/generalEntityReferenceXToken';
 export * from './token/parameterEntityReferenceXToken';
 export * from './token/conditionalClose';
 export * from './token/conditionalSection';
+export * from './token/externalIdXToken';
 export * from './token/textDeclarationXToken';
 export * from './token/xmlDeclarationXToken';
 export * from './types';

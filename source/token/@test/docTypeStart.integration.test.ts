@@ -11,6 +11,7 @@ import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
 import { TextPToken } from '../text';
 import { EXTERNAL_ID } from '../common/externalId';
+import { ExternalIdXToken } from 'xToken';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken: DocTypeStartPToken;
@@ -117,7 +118,7 @@ describe('docTypeStart (integration)', () => {
             const token = pToken.toXToken();
 
             expect(token.name).toEqual('rootElement');
-            expect(token.externalLoc).toEqual(new EntityLocation('sys.dtd'));
+            expect(token.externalId).toEqual(new ExternalIdXToken('sys.dtd'));
             expect(token.pToken!.declType).toEqual(declaration.declType);
             done();
          });

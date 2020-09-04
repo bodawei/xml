@@ -1,11 +1,13 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 
 import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from '../parameterEntityDeclaration';
 import * as externalId from '../common/externalId';
 import literal from '../common/literal';
+import { ExternalIdXToken } from 'xToken';
+import { TextPToken } from '../text';
 
 describe('ParameterEntityDeclaration (unit)', () => {
    let pToken: ParameterEntityDeclarationPToken;
@@ -22,19 +24,6 @@ describe('ParameterEntityDeclaration (unit)', () => {
    });
 
    describe('pToken.toXToken()', () => {
-
-      beforeEach(() => {
-         spyOn(externalId, 'makeEntityLocation');
-      });
-
-      it('calls externalId.makeEntityLocation()', () => {
-         delete (pToken as any).value;
-         (pToken as any).externalId = { externalId: true };
-
-         pToken.toXToken();
-
-         expect(externalId.makeEntityLocation).toHaveBeenCalledWith(pToken.externalId);
-      });
 
       it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
          const xToken = pToken.toXToken();
@@ -59,6 +48,26 @@ describe('ParameterEntityDeclaration (unit)', () => {
          expect(xToken).toEqual(new ParameterEntityDeclarationXToken('entityName', [], undefined, pToken));
       });
 
+      it('returns a notation declaration with an externalId', () => {
+         pToken = new ParameterEntityDeclarationPToken({
+            parameter: SToken.fromString('%'),
+            parameterSpace: SToken.fromString(' '),
+            name: SToken.fromString('entityName'),
+            nameSpace: SToken.fromString(' '),
+            value: [ SToken.fromString('value') ],
+            close: SToken.fromString('>'),
+               externalId: { type: externalId.EXTERNAL_ID, system: {
+               value: [ new TextPToken({ text: toSToken('system.xml') }) ],
+            }, public: {
+               value: [ new TextPToken({ text: toSToken('- // public') }) ],
+             },
+            },
+         });
+
+         const token = pToken.toXToken();
+
+         expect(token.externalId).toEqual(new ExternalIdXToken('system.xml', '- // public'));
+      });
    });
 
    describe('toSTokenArray()', () => {

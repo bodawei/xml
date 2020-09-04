@@ -1,11 +1,14 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 
 import { GeneralEntityDeclarationPToken, GeneralEntityDeclarationXToken } from '../generalEntityDeclaration';
 import * as externalId from '../common/externalId';
+import { EXTERNAL_ID } from '../common/externalId';
 import literal from '../common/literal';
+import { TextPToken } from '../text';
+import { ExternalIdXToken } from 'xToken';
 
 describe('generalEntityDeclaration (unit)', () => {
    let pToken: GeneralEntityDeclarationPToken;
@@ -21,20 +24,6 @@ describe('generalEntityDeclaration (unit)', () => {
    });
 
    describe('toXToken()', () => {
-      beforeEach(() => {
-         spyOn(externalId, 'makeEntityLocation');
-      });
-
-      it('calls externalId.makeEntityLocation()', () => {
-         delete (pToken as any).parameter;
-         delete (pToken as any).value;
-         (pToken as any).externalId = { externalId: true };
-
-         pToken.toXToken();
-
-         expect(externalId.makeEntityLocation).toHaveBeenCalledWith(pToken.externalId);
-      });
-
       it('returns an entity declaration token with the name and value found in the parsing', () => {
          delete (pToken as any).parameter;
 
@@ -60,6 +49,26 @@ describe('generalEntityDeclaration (unit)', () => {
          const xToken = pToken.toXToken();
 
          expect(xToken).toEqual(new GeneralEntityDeclarationXToken('entityName', [], undefined, '', pToken));
+      });
+
+      it('returns a entity declaration with an ExternalIdXToken', () => {
+         pToken = new GeneralEntityDeclarationPToken({
+            name: SToken.fromString('entityName'),
+            nameSpace: SToken.fromString(' '),
+            externalIdSpace: SToken.fromString(' '),
+            externalId: {
+               type: EXTERNAL_ID,
+               system: {
+                  value: [new TextPToken({ text: toSToken('system.xml') }) ],
+               },
+            },
+            value: [],
+            close: SToken.fromString('>'),
+         });
+   
+         const xToken = pToken.toXToken();
+
+         expect(xToken).toEqual(new GeneralEntityDeclarationXToken('entityName', [], new ExternalIdXToken('system.xml'), '', pToken));
       });
 
    });

@@ -1,18 +1,19 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import { EntityMetaData } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank, SToken, STokenArrayBuilder } from 'sToken';
 
 import { DeclarationStart } from './bridge/declaration';
 import { UnassignedArray } from './common/unassigned';
-import { ExternalId, makeEntityLocation, getSTokens } from './common/externalId';
+import { ExternalId, getSTokens } from './common/externalId';
 import literal, { LiteralValuePToken } from './common/literal';
 import { TextPToken } from './text';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
 import { checkWellFormed } from './common/entity';
+import { ExternalIdXToken } from 'xToken';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -29,15 +30,15 @@ class ParameterEntityDeclarationXToken {
    public readonly type: typeof PARAMETER_ENTITY_DECLARATION_XTOKEN = PARAMETER_ENTITY_DECLARATION_XTOKEN;
    public readonly name: string;
    public readonly isParameter: boolean;
-   public readonly externalLoc: EntityLocation | void;
+   public readonly externalId: ExternalIdXToken | undefined;
    public readonly value: ExpandedLiteralValuePToken;
    public pToken?: ParameterEntityDeclarationPToken;
 
-   constructor(name: string, value: ExpandedLiteralValuePToken, externalLoc?: EntityLocation | void, pToken?: ParameterEntityDeclarationPToken) {
+   constructor(name: string, value: ExpandedLiteralValuePToken, externalId?: ExternalIdXToken | undefined, pToken?: ParameterEntityDeclarationPToken) {
       this.name = name;
       this.isParameter = true;
       this.value = value;
-      this.externalLoc = externalLoc;
+      this.externalId = externalId;
       this.pToken = pToken;
    }
 }
@@ -100,7 +101,7 @@ class ParameterEntityDeclarationPToken {
 function pTokenToXToken(pToken: ParameterEntityDeclarationPToken) {
    return new ParameterEntityDeclarationXToken(strOrBlank(pToken.name),
    pToken.value as any,
-   makeEntityLocation(pToken.externalId),
+   pToken.externalId ? new ExternalIdXToken(pToken.externalId) : undefined,
    pToken as any);
 }
 

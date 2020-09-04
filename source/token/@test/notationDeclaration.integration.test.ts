@@ -1,21 +1,18 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 
 import { DeclarationStart } from '../bridge/declaration';
 import { EXTERNAL_ID } from '../common/externalId';
-import unassigned, { UnassignedType, UnassignedArray } from '../common/unassigned';
-import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
+import { UnassignedType, UnassignedArray } from '../common/unassigned';
 import { NotationDeclarationPToken, parseNotationDeclaration, NotationDeclarationXToken } from '../notationDeclaration';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
-import helper from './helper';
-import { TextPToken } from '../text';
+import { ExternalIdXToken } from 'xToken';
 
 describe('notationDeclaration (integration)', () => {
    let declarationStart: DeclarationStart;
@@ -185,7 +182,7 @@ describe('notationDeclaration (integration)', () => {
             const token = parsing.toXToken();
 
             token.pToken = undefined;
-            expect(token).toEqual(new NotationDeclarationXToken('foo', new EntityLocation('sys.dtd'))); // typeHack
+            expect(token).toEqual(new NotationDeclarationXToken('foo', new ExternalIdXToken('sys.dtd')));
             done();
          });
       });
