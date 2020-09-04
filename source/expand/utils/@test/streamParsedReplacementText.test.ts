@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, EntityLocation } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -24,7 +24,7 @@ import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { streamParsedReplacementText } from '../streamParsedReplacementText';
-import { ContextType } from 'pToken';
+import { ContextType, ENTITY_URI } from 'pToken';
 
 function noopFunction(): void {
    // do nothing
@@ -44,6 +44,10 @@ describe('streamParsedReplacementText() (unit)', () => {
 
       params = {
          entityDetails,
+         entityUri: {
+            type: ENTITY_URI,
+            location: new EntityLocation(),
+         },
          loadExternalEntities: true,
          conditionalStack: [],
          utils: {

@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, EntityLocation } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
    TextPToken,
@@ -15,7 +15,7 @@ import * as addProtoReplacementText from '../addProtoReplacementText';
 import { setupConditional } from '../setupConditional';
 import { EntityDetails } from '../EntityDetails';
 import { EntityNameStack } from '../EntityNameStack';
-import { ContextType } from 'pToken';
+import { ContextType, ENTITY_URI } from 'pToken';
 
 describe('setupConditional() (unit)', () => {
    let deliverSpy: jasmine.Spy;
@@ -38,6 +38,10 @@ describe('setupConditional() (unit)', () => {
       params = {
          entityDetails: new EntityDetails(),
          emd: new EntityMetaData(),
+         entityUri: {
+            type: ENTITY_URI,
+            location: new EntityLocation(),
+         },
          loadExternalEntities: true,
          conditionalStack: [],
          utils: {

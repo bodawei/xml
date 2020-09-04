@@ -4,7 +4,7 @@ import { STokenSource, SToken } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ExternalId, PToken, XmlError } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
-import { ContextType } from 'pToken';
+import { ContextType, EntityUri } from 'pToken';
 
 type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
@@ -42,6 +42,7 @@ type EntityProcessors = {
 
 type ExpandParams = {
    emd: EntityMetaData;
+   entityUri: EntityUri;
    entityDetails: EntityDetails;
    loadExternalEntities: boolean;
    conditionalStack: Array<ConditionalInfo>;

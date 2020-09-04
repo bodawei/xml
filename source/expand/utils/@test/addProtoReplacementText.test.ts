@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, EntityLocation } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -20,6 +20,7 @@ import { EntityDetails } from '../EntityDetails';
 import * as expandEntityValue from '../expandEntityValue';
 import { addProtoReplacementText } from '../addProtoReplacementText';
 import { EntityNameStack } from '../EntityNameStack';
+import { ENTITY_URI } from 'pToken';
 
 describe('addProtoReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -56,6 +57,10 @@ describe('addProtoReplacementText() (unit)', () => {
 
       params = {
          emd: new EntityMetaData(),
+         entityUri: {
+            type: ENTITY_URI,
+            location: new EntityLocation(),
+         },
          entityDetails,
          conditionalStack: [],
          loadExternalEntities: true,

@@ -17,39 +17,41 @@ import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 
 type LoadingResult = {
-   details: InternalGEDetails | InternalPEDetails | void;
+   details: PrivateGEDetails | PrivatePEDetails | void;
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
 };
 type LoadingCallback = (result: LoadingResult) => void;
 
-type InternalGEDetails = {
+type PrivateGEDetails = {
    token: GeneralEntityDeclarationPToken;
    isUnparsed: boolean;
    isInternal: boolean;
    isLoading: boolean;
    protoReplacementText?: EntityValuePToken;
    waiters: Array<LoadingCallback>;
+   externalLocation?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
-type InternalPEDetails = {
+type PrivatePEDetails = {
    token: ParameterEntityDeclarationPToken;
    isInternal: boolean;
    isLoading: boolean;
    protoReplacementText?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
    waiters: Array<LoadingCallback>;
+   externalLocation?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
 type GeneralEntityMap = {
-   [entityName: string]: InternalGEDetails;
+   [entityName: string]: PrivateGEDetails;
 };
 
 type ParameterEntityMap = {
-   [entityName: string]: InternalPEDetails;
+   [entityName: string]: PrivatePEDetails;
 };
 
 // No reason for anyone externally to see the waiters property.
-type PEDetails = Readonly<Omit<InternalPEDetails, 'waiters'>>;
-type GEDetails = Readonly<Omit<InternalGEDetails, 'waiters'>>;
+type PEDetails = Readonly<Omit<PrivatePEDetails, 'waiters'>>;
+type GEDetails = Readonly<Omit<PrivateGEDetails, 'waiters'>>;
 
 /*
  * This simple class keeps track of all the entity declarations and the
@@ -206,7 +208,7 @@ class EntityDetails {
       }
    }
 
-   private getInternalGEDetails(name: string): InternalGEDetails | undefined {
+   private getInternalGEDetails(name: string): PrivateGEDetails | undefined {
       // Recall that !'' is the same as !undefined
       if (!name) {
          return;
@@ -237,7 +239,7 @@ class EntityDetails {
       return result;
    }
 
-   private getInternalPEDetails(name: string): InternalPEDetails | void {
+   private getInternalPEDetails(name: string): PrivatePEDetails | void {
       // Recall that !'' is the same as !undefined
       if (!name) {
          return;
@@ -248,7 +250,7 @@ class EntityDetails {
 
    private getDeclarationDetails(
       reference: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-   ): InternalGEDetails | InternalPEDetails | void {
+   ): PrivateGEDetails | PrivatePEDetails | void {
       const isPERef = reference instanceof ParameterEntityDeclarationPToken;
       const entityName = strOrBlank(reference.name);
 

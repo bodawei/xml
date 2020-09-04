@@ -103,6 +103,10 @@ class EntityExpander {
             5,
             new EntityLocation('dummy meta data to keep TypeScript happy'),
          ),
+         entityUri: {
+            type: ENTITY_URI,
+            location: new EntityLocation('dummy meta data to keep TypeScript happy'),
+         },
          conditionalStack: [],
          entityDetails: new EntityDetails(),
          loadExternalEntities: validating,
@@ -121,6 +125,12 @@ class EntityExpander {
             expanded();
             break;
          case ENTITY_URI:
+            if (!this.seenEmd) {
+               this.expandParams.entityUri = pToken;
+               this.deliverToken(pToken);
+            }
+            expanded();
+            break;
          case CONFORMANCE_VERSION:
             if (!this.seenEmd) {
                this.deliverToken(pToken);

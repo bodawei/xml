@@ -4,19 +4,15 @@
 import EntityLocation from '../EntityLocation';
 
 describe('EntityLocation', () => {
-
    describe('construction', () => {
-
       it('does not throw an exception', () => {
          expect(() => {
             new EntityLocation();
          }).not.toThrow();
       });
-
    });
 
    describe('systemId', () => {
-
       it('is set from construction', () => {
          expect(new EntityLocation('system').systemId).toEqual('system');
       });
@@ -24,11 +20,9 @@ describe('EntityLocation', () => {
       it('is set to "" if no parameter is specified', () => {
          expect(new EntityLocation().systemId).toEqual('');
       });
-
    });
 
    describe('publicId', () => {
-
       it('is set from construction', () => {
          expect(new EntityLocation('system', 'public').publicId).toEqual('public');
       });
@@ -36,11 +30,9 @@ describe('EntityLocation', () => {
       it('is set to undefined if no parameter is specified', () => {
          expect(new EntityLocation().publicId).toBeUndefined();
       });
-
    });
 
    describe('.equals()', () => {
-
       it('returns false if it does not match another', () => {
          expect(new EntityLocation('y', 'x').equals(new EntityLocation('y'))).toEqual(false);
       });
@@ -48,11 +40,9 @@ describe('EntityLocation', () => {
       it('returns true if it does match another', () => {
          expect(new EntityLocation('y', 'x').equals(new EntityLocation('y', 'x'))).toEqual(true);
       });
-
    });
 
    describe('.resolvedSystemId()', () => {
-
       it('produces the systemId if no base has been set', () => {
          const location = new EntityLocation('system.xml', 'public');
 
@@ -90,7 +80,5 @@ describe('EntityLocation', () => {
 
          expect(child.resolvedSystemId).toEqual('http://one.com/two/system.xml');
       });
-
    });
-
 });
