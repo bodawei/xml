@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
@@ -11,15 +11,13 @@ import attribute from '../attribute';
 import { TextPToken, TextXToken } from '../../text';
 
 describe('attribute (integration)', () => {
-   let emd: EntityMetaData;
    let source: STokenSource;
    let attributesPToken: any;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
 
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      source = new STokenSource(defaultExtractors);
       attributesPToken = [ {
          name: makeSToken('one'),
          postNameSpace: undefined,
@@ -112,7 +110,7 @@ describe('attribute (integration)', () => {
          source.endText();
 
          attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
-            attribute.checkWellFormed(parsing, ec, emd, preSpace, 'x');
+            attribute.checkWellFormed(parsing, ec, new ConformanceVersion(), preSpace, 'x');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
             done();
@@ -124,7 +122,7 @@ describe('attribute (integration)', () => {
          source.endText();
 
          attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
-            attribute.checkWellFormed(parsing, ec, emd, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+            attribute.checkWellFormed(parsing, ec, new ConformanceVersion(), preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
             done();
@@ -132,12 +130,12 @@ describe('attribute (integration)', () => {
       });
 
       it('asks misc.checkWellFormedNameRecommendation() to complain if the name is bad', (done) => {
-         const metaData = new EntityMetaData(undefined, 1.0, 6, undefined);
+         const confVer = new ConformanceVersion(1.0, 6);
          source.addText('xml:foo="value">');
          source.endText();
 
          attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
-            attribute.checkWellFormed(parsing, ec, metaData, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+            attribute.checkWellFormed(parsing, ec, confVer, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRIBUTE_NAME_XMLCOLON_RESERVED);
             done();
@@ -149,7 +147,7 @@ describe('attribute (integration)', () => {
          source.endText();
 
          attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
-            attribute.checkWellFormed(parsing, ec, emd, preSpace, 'x');
+            attribute.checkWellFormed(parsing, ec, new ConformanceVersion(), preSpace, 'x');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
             done();
@@ -161,7 +159,7 @@ describe('attribute (integration)', () => {
          source.endText();
 
          attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
-            attribute.checkWellFormed(parsing, ec, emd, preSpace, 'x');
+            attribute.checkWellFormed(parsing, ec, new ConformanceVersion(), preSpace, 'x');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

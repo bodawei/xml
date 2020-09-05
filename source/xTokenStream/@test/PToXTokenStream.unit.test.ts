@@ -1,6 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { ConformanceVersion } from 'basic';
 import { SToken } from 'sToken';
 import {
    declaration,
@@ -33,8 +34,6 @@ import {
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
-import { EntityMetaData } from 'basic';
-import { WellFormedError } from 'error';
 import { SpacePToken } from 'source/token/space';
 
 import * as xTokenStuff from 'xToken';
@@ -266,12 +265,12 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('passes EntityMetaData through', () => {
-      tokenStream.write(new EntityMetaData());
+   it('passes ConformanceVersion through', () => {
+      tokenStream.write(new ConformanceVersion());
 
       const result = tokenStream.read();
 
-      expect(result).toEqual(new EntityMetaData());
+      expect(result).toEqual(new ConformanceVersion());
    });
 
    it('passes InternalSubsetStart through', () => {

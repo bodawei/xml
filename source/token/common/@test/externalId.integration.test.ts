@@ -1,26 +1,22 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { ParameterEntityReferencePToken, ParameterEntityStartPToken, TextPToken } from 'token';
 
-import helper from '../../@test/helper';
-import { ParameterEntityEndPToken } from '../../marker/parameterEntityEnd';
-import unassigned, { UnassignedType } from '../unassigned';
+import { UnassignedType } from '../unassigned';
 import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from '../externalId';
+import { ConformanceVersion } from 'basic';
 
 describe('externalId (integration)', () => {
    describe('parse()', () => {
-      let emd: EntityMetaData;
       let source: STokenSource;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
+         source = new STokenSource(defaultExtractors);
       });
 
       it('parses the public and system value (check literal.parse())', (done) => {
@@ -88,12 +84,10 @@ describe('externalId (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd: EntityMetaData;
       let source: STokenSource;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
+         source = new STokenSource(defaultExtractors);
       });
 
       it('reports an error when the SYSTEM is missing a quote (check literal.checkCharWellFormed())', (done) => {
@@ -102,7 +96,7 @@ describe('externalId (integration)', () => {
          parseExternalId(source, [], true, (result) => {
             const ec = new ErrorCollector(toSToken('x'), WellFormedError);
 
-            checkExternalIdWellFormed(result.externalId, ec, emd);
+            checkExternalIdWellFormed(result.externalId, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
             done();
@@ -111,12 +105,10 @@ describe('externalId (integration)', () => {
    });
 
    describe('getSTokens()', () => {
-      let emd: EntityMetaData;
       let source: STokenSource;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
+         source = new STokenSource(defaultExtractors);
       });
 
       it('adds all tokens (check literal.getSTokens())', (done) => {

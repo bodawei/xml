@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -28,7 +28,7 @@ describe('elementDeclaration (integration)', () => {
    describe('parse()', () => {
 
       it('parses a PERef (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('%foo;>');
          source.endText();
 
@@ -57,7 +57,7 @@ describe('elementDeclaration (integration)', () => {
       });
 
       it('parses a complex content spec', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? >');
          source.endText();
 
@@ -72,14 +72,14 @@ describe('elementDeclaration (integration)', () => {
 
       it('asks the declaration module to look for problems in the declaration part', (done) => {
          declarationPToken.postOpenSpace = expectedSToken(' ');
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 
          elementDeclaration.parse(source, declarationPToken, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            elementDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
+            elementDeclaration.checkWellFormed(parsing, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
             done();
@@ -87,13 +87,13 @@ describe('elementDeclaration (integration)', () => {
       });
 
       it('calls misc.checkName() to report on invalid names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('$foo ANY>');
          source.endText();
          elementDeclaration.parse(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(result.open, WellFormedError);
 
-            elementDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+            elementDeclaration.checkWellFormed(result, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENTDECL_NAME_INVALID);
             done();
@@ -101,14 +101,14 @@ describe('elementDeclaration (integration)', () => {
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('xmlOne ANY>');
          source.endText();
 
          elementDeclaration.parse(source, declarationPToken, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            elementDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
+            elementDeclaration.checkWellFormed(parsing, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED);
             done();
@@ -127,9 +127,7 @@ const PARSE_TEST_EXPECTED = {
       originalStr: '',
       ranges: [
          {
-            location: {
-               systemId: ''
-            },
+            entityId: { type: 'ENTITY_ID', systemId: '' },
             startIndex: 0,
             startRow: 0,
             startColumn: 0,
@@ -144,9 +142,7 @@ const PARSE_TEST_EXPECTED = {
       originalStr: 'AnElement',
       ranges: [
          {
-            location: {
-               systemId: ''
-            },
+            entityId: { type: 'ENTITY_ID', systemId: '' },
             startIndex: 0,
             startRow: 0,
             startColumn: 0,
@@ -161,9 +157,7 @@ const PARSE_TEST_EXPECTED = {
       originalStr: ' ',
       ranges: [
          {
-            location: {
-               systemId: '',
-            },
+            entityId: { type: 'ENTITY_ID', systemId: '' },
             startIndex: 9,
             startRow: 0,
             startColumn: 9,
@@ -183,9 +177,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: 'one',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 12,
                         startRow: 0,
                         startColumn: 12,
@@ -200,9 +192,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: '*',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 15,
                         startRow: 0,
                         startColumn: 15,
@@ -217,9 +207,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: ' ',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 16,
                         startRow: 0,
                         startColumn: 16,
@@ -235,9 +223,7 @@ const PARSE_TEST_EXPECTED = {
                originalStr: '|',
                ranges: [
                   {
-                     location: {
-                        systemId: '',
-                     },
+                     entityId: { type: 'ENTITY_ID', systemId: '' },
                      startIndex: 17,
                      startRow: 0,
                      startColumn: 17,
@@ -252,9 +238,7 @@ const PARSE_TEST_EXPECTED = {
                originalStr: ' ',
                ranges: [
                   {
-                     location: {
-                        systemId: '',
-                     },
+                     entityId: { type: 'ENTITY_ID', systemId: '' },
                      startIndex: 18,
                      startRow: 0,
                      startColumn: 18,
@@ -272,9 +256,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: 'two',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 19,
                         startRow: 0,
                         startColumn: 19,
@@ -289,9 +271,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: ' ',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 22,
                         startRow: 0,
                         startColumn: 22,
@@ -306,9 +286,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: '+',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 23,
                         startRow: 0,
                         startColumn: 23,
@@ -324,9 +302,7 @@ const PARSE_TEST_EXPECTED = {
                originalStr: '|',
                ranges: [
                   {
-                     location: {
-                        systemId: '',
-                     },
+                     entityId: { type: 'ENTITY_ID', systemId: '' },
                      startIndex: 24,
                      startRow: 0,
                      startColumn: 24,
@@ -348,9 +324,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: 'threeA',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 26,
                                  startRow: 0,
                                  startColumn: 26,
@@ -366,9 +340,7 @@ const PARSE_TEST_EXPECTED = {
                         originalStr: ',',
                         ranges: [
                            {
-                              location: {
-                                 systemId: '',
-                              },
+                              entityId: { type: 'ENTITY_ID', systemId: '' },
                               startIndex: 32,
                               startRow: 0,
                               startColumn: 32,
@@ -386,9 +358,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: 'threeB',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 33,
                                  startRow: 0,
                                  startColumn: 33,
@@ -403,9 +373,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: '?',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 39,
                                  startRow: 0,
                                  startColumn: 39,
@@ -423,9 +391,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: '(',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 25,
                         startRow: 0,
                         startColumn: 25,
@@ -440,9 +406,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: ')',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 40,
                         startRow: 0,
                         startColumn: 40,
@@ -457,9 +421,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: '+',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 41,
                         startRow: 0,
                         startColumn: 41,
@@ -474,9 +436,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: ' ',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 42,
                         startRow: 0,
                         startColumn: 42,
@@ -492,9 +452,7 @@ const PARSE_TEST_EXPECTED = {
                originalStr: '|',
                ranges: [
                   {
-                     location: {
-                        systemId: '',
-                     },
+                     entityId: { type: 'ENTITY_ID', systemId: '' },
                      startIndex: 43,
                      startRow: 0,
                      startColumn: 43,
@@ -509,9 +467,7 @@ const PARSE_TEST_EXPECTED = {
                originalStr: ' ',
                ranges: [
                   {
-                     location: {
-                        systemId: '',
-                     },
+                     entityId: { type: 'ENTITY_ID', systemId: '' },
                      startIndex: 44,
                      startRow: 0,
                      startColumn: 44,
@@ -533,9 +489,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: 'fourA',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 47,
                                  startRow: 0,
                                  startColumn: 47,
@@ -551,9 +505,7 @@ const PARSE_TEST_EXPECTED = {
                         originalStr: ',',
                         ranges: [
                            {
-                              location: {
-                                 systemId: '',
-                              },
+                              entityId: { type: 'ENTITY_ID', systemId: '' },
                               startIndex: 52,
                               startRow: 0,
                               startColumn: 52,
@@ -568,9 +520,7 @@ const PARSE_TEST_EXPECTED = {
                         originalStr: ' ',
                         ranges: [
                            {
-                              location: {
-                                 systemId: '',
-                              },
+                              entityId: { type: 'ENTITY_ID', systemId: '' },
                               startIndex: 53,
                               startRow: 0,
                               startColumn: 53,
@@ -592,9 +542,7 @@ const PARSE_TEST_EXPECTED = {
                                     originalStr: 'fourB1',
                                     ranges: [
                                        {
-                                          location: {
-                                             systemId: '',
-                                          },
+                                          entityId: { type: 'ENTITY_ID', systemId: '' },
                                           startIndex: 55,
                                           startRow: 0,
                                           startColumn: 55,
@@ -609,9 +557,7 @@ const PARSE_TEST_EXPECTED = {
                                     originalStr: ' ',
                                     ranges: [
                                        {
-                                          location: {
-                                             systemId: '',
-                                          },
+                                          entityId: { type: 'ENTITY_ID', systemId: '' },
                                           startIndex: 61,
                                           startRow: 0,
                                           startColumn: 61,
@@ -627,9 +573,7 @@ const PARSE_TEST_EXPECTED = {
                                  originalStr: '|',
                                  ranges: [
                                     {
-                                       location: {
-                                          systemId: '',
-                                       },
+                                       entityId: { type: 'ENTITY_ID', systemId: '' },
                                        startIndex: 62,
                                        startRow: 0,
                                        startColumn: 62,
@@ -644,9 +588,7 @@ const PARSE_TEST_EXPECTED = {
                                  originalStr: ' ',
                                  ranges: [
                                     {
-                                       location: {
-                                          systemId: '',
-                                       },
+                                       entityId: { type: 'ENTITY_ID', systemId: '' },
                                        startIndex: 63,
                                        startRow: 0,
                                        startColumn: 63,
@@ -664,9 +606,7 @@ const PARSE_TEST_EXPECTED = {
                                     originalStr: 'fourB2',
                                     ranges: [
                                        {
-                                          location: {
-                                             systemId: '',
-                                          },
+                                          entityId: { type: 'ENTITY_ID', systemId: '' },
                                           startIndex: 64,
                                           startRow: 0,
                                           startColumn: 64,
@@ -684,9 +624,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: '(',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 54,
                                  startRow: 0,
                                  startColumn: 54,
@@ -701,9 +639,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: ')',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 70,
                                  startRow: 0,
                                  startColumn: 70,
@@ -718,9 +654,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: '*',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 71,
                                  startRow: 0,
                                  startColumn: 71,
@@ -736,9 +670,7 @@ const PARSE_TEST_EXPECTED = {
                         originalStr: ',',
                         ranges: [
                            {
-                              location: {
-                                 systemId: '',
-                              },
+                              entityId: { type: 'ENTITY_ID', systemId: '' },
                               startIndex: 72,
                               startRow: 0,
                               startColumn: 72,
@@ -753,9 +685,7 @@ const PARSE_TEST_EXPECTED = {
                         originalStr: ' ',
                         ranges: [
                            {
-                              location: {
-                                 systemId: '',
-                              },
+                              entityId: { type: 'ENTITY_ID', systemId: '' },
                               startIndex: 73,
                               startRow: 0,
                               startColumn: 73,
@@ -773,9 +703,7 @@ const PARSE_TEST_EXPECTED = {
                            originalStr: 'fourC',
                            ranges: [
                               {
-                                 location: {
-                                    systemId: '',
-                                 },
+                                 entityId: { type: 'ENTITY_ID', systemId: '' },
                                  startIndex: 74,
                                  startRow: 0,
                                  startColumn: 74,
@@ -793,9 +721,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: '(',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 45,
                         startRow: 0,
                         startColumn: 45,
@@ -810,9 +736,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: ' ',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 46,
                         startRow: 0,
                         startColumn: 46,
@@ -827,9 +751,7 @@ const PARSE_TEST_EXPECTED = {
                   originalStr: ')',
                   ranges: [
                      {
-                        location: {
-                           systemId: '',
-                        },
+                        entityId: { type: 'ENTITY_ID', systemId: '' },
                         startIndex: 79,
                         startRow: 0,
                         startColumn: 79,
@@ -847,9 +769,7 @@ const PARSE_TEST_EXPECTED = {
          originalStr: '(',
          ranges: [
             {
-               location: {
-                  systemId: '',
-               },
+               entityId: { type: 'ENTITY_ID', systemId: '' },
                startIndex: 10,
                startRow: 0,
                startColumn: 10,
@@ -864,9 +784,7 @@ const PARSE_TEST_EXPECTED = {
          originalStr: ' ',
          ranges: [
             {
-               location: {
-                  systemId: '',
-               },
+               entityId: { type: 'ENTITY_ID', systemId: '' },
                startIndex: 11,
                startRow: 0,
                startColumn: 11,
@@ -881,9 +799,7 @@ const PARSE_TEST_EXPECTED = {
          originalStr: ')',
          ranges: [
             {
-               location: {
-                  systemId: '',
-               },
+               entityId: { type: 'ENTITY_ID', systemId: '' },
                startIndex: 80,
                startRow: 0,
                startColumn: 80,
@@ -898,9 +814,7 @@ const PARSE_TEST_EXPECTED = {
          originalStr: '?',
          ranges: [
             {
-               location: {
-                  systemId: '',
-               },
+               entityId: { type: 'ENTITY_ID', systemId: '' },
                startIndex: 81,
                startRow: 0,
                startColumn: 81,
@@ -915,9 +829,7 @@ const PARSE_TEST_EXPECTED = {
          originalStr: ' ',
          ranges: [
             {
-               location: {
-                  systemId: '',
-               },
+               entityId: { type: 'ENTITY_ID', systemId: '' },
                startIndex: 82,
                startRow: 0,
                startColumn: 82,
@@ -933,9 +845,7 @@ const PARSE_TEST_EXPECTED = {
       originalStr: '>',
       ranges: [
          {
-            location: {
-               systemId: '',
-            },
+            entityId: { type: 'ENTITY_ID', systemId: '' },
             startIndex: 83,
             startRow: 0,
             startColumn: 83,

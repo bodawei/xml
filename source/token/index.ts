@@ -39,7 +39,6 @@ import { ParameterEntityStartPToken, PARAMETER_ENTITY_START_PTOKEN } from './mar
 import { SpacePToken } from './space';
 import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
 import { ElementEndPToken } from './elementEnd';
-import { EntityMetaData } from 'basic';
 import { SToken } from 'sToken';
 import { TextDeclarationPToken } from './textDeclaration';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
@@ -93,7 +92,6 @@ type XmlError = {
 
 type PToken =
 | XmlError
-   | EntityMetaData
    | AttListPToken
    | CommentPToken
    | CdataPToken

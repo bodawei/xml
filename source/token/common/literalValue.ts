@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { SToken, STokenSource } from 'sToken';
 
@@ -11,11 +11,8 @@ import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETE
 import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
-import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
-import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { CharRefXToken, GeneralEntityReferenceXToken } from 'xToken';
+import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken } from 'xToken';
 import { checkMap } from 'source/wellformedness/checkMap';
-import { PARAMETER_ENTITY_REFERENCE_XTOKEN, ParameterEntityReferenceXToken } from 'xToken';
 import { generalEntityReferenceToSTokens } from 'source/stringify/tokens/generalEntityReferenceToSTokens';
 
 // <typeHack>
@@ -111,16 +108,16 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
  Checks that the PToken is well-formed.
 \**********************************************************************/
 
-function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    for (let index = 0; index < pToken.length; index++) {
       const item = pToken[index];
 
       if (isTextPToken(item)) {
          ec.setPos(item.text);
-         misc.checkCharWellFormed(item.text, ec, entityMetaData);
+         misc.checkCharWellFormed(item.text, ec, confVer);
       } else if (item.type === CHARREF_PTOKEN || item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN || item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
         // Why not checking reference in start and end?
-         checkMap[item.type](item, ec, entityMetaData);
+         checkMap[item.type](item, ec, confVer);
       }
    }
 }

@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ParseValue } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
@@ -44,7 +44,7 @@ type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Arr
       ???
 \**********************************************************************/
 
-function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityMetaData, deliverPToken: DeliverDeclaration) {
+function parseDeclaration(source: STokenSource, openSToken: SToken, confVer: ConformanceVersion, deliverPToken: DeliverDeclaration) {
    const start: DeclarationStart = { open: openSToken };
    start.open = openSToken;
 

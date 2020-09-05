@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, EntityLocation } from 'basic';
+import { ENTITY_ID, EntityId } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
    TextPToken,
@@ -15,7 +15,7 @@ import * as addProtoReplacementText from '../addProtoReplacementText';
 import { setupConditional } from '../setupConditional';
 import { EntityDetails } from '../EntityDetails';
 import { EntityNameStack } from '../EntityNameStack';
-import { ContextType, ENTITY_ID } from 'pToken';
+import { ContextType } from 'pToken';
 
 describe('setupConditional() (unit)', () => {
    let deliverSpy: jasmine.Spy;
@@ -37,7 +37,6 @@ describe('setupConditional() (unit)', () => {
       testStack = new EntityNameStack();
       params = {
          entityDetails: new EntityDetails(),
-         emd: new EntityMetaData(),
          entityId: {
             type: ENTITY_ID,
             systemId: '',
@@ -232,39 +231,6 @@ describe('setupConditional() (unit)', () => {
             callback(testInclude, handled);
 
             expect(deliverSpy).toHaveBeenCalledWith(testInclude, handled);
-            done();
-         }, 0);
-      });
-   });
-
-   it('does not pass the entity metadata through when it is passed to the callback to parseBody()', (done) => {
-      params.entityDetails.addEntity(testDecl, [testInclude]);
-
-      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
-         setTimeout(() => {
-            const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[2];
-
-            callback(new EntityMetaData(), (): void => {});
-
-            expect(deliverSpy).not.toHaveBeenCalled();
-            done();
-         }, 0);
-      });
-   });
-
-   it('calls handled when the entity metadata is passed to the callback to parseBody()', (done) => {
-      params.entityDetails.addEntity(testDecl, [testInclude]);
-
-      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
-         setTimeout(() => {
-            const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[2];
-            const handled = jasmine.createSpy();
-
-            callback(new EntityMetaData(), handled);
-
-            expect(handled).toHaveBeenCalled();
             done();
          }, 0);
       });

@@ -1,4 +1,3 @@
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken, SToken } from 'sToken';
 import {
@@ -20,7 +19,7 @@ import { assignNotationDeclaration } from '../assignNotationDeclaration';
 
 describe('assignNotationDeclaration() (integration)', () => {
    it('fills in the missing properties, including the preceeding declaration space', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('%foo;>');
       source.endText();
 

@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -11,10 +11,10 @@ import declaration, { DeclarationPToken } from '../baseDeclaration';
 
 describe('declaration (unit)', () => {
    let declarationPToken: DeclarationPToken;
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
+      confVer = new ConformanceVersion();
       const makeSToken = makeSTokenMaker();
       declarationPToken = {
          type: declaration.PTYPE,
@@ -92,7 +92,7 @@ describe('declaration (unit)', () => {
       });
 
       it('returns an an error collector', () => {
-         const errors = declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
+         const errors = declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
          expect(errors).toEqual(mockErrorCollector);
       });
@@ -101,7 +101,7 @@ describe('declaration (unit)', () => {
          const makeSToken = makeSTokenMaker();
          declarationPToken.postOpenSpace = makeSToken(' ');
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
@@ -113,7 +113,7 @@ describe('declaration (unit)', () => {
       it('reports an error if there is no declaration type provided', () => {
          delete declarationPToken.declType;
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_NO_DECLTYPE,
@@ -126,7 +126,7 @@ describe('declaration (unit)', () => {
       it('reports an error if the type is not capitalized', () => {
          (declarationPToken as any).declType.str = 'docType';
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
@@ -138,7 +138,7 @@ describe('declaration (unit)', () => {
       it('reports an error if the type is not a valid type', () => {
          (declarationPToken as any).declType.str = 'BOGUSTYPE';
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_UNKNOWN,

@@ -1,6 +1,5 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource, SToken } from 'sToken';
 import {
@@ -19,7 +18,7 @@ import { assignEntityDeclaration } from '../assignEntityDeclaration';
 
 describe('assignEntityDeclaration() (integration)', () => {
    it('fills in the missing properties, including the preceeding declaration space', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('%foo;>');
       source.endText();
 

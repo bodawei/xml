@@ -1,5 +1,6 @@
+import { CONFORMANCE_VERSION, ConformanceVersion } from 'basic';
+import { ParseValue } from 'pToken';
 import {
-   PToken,
    ATTLISTDECL_PTOKEN_TYPE,
    AttListPToken,
    ELEMENT_START_PTOKEN,
@@ -12,7 +13,6 @@ import {
 } from 'token';
 import { strOrBlank, toSToken, SToken } from 'sToken';
 import { LiteralValuePToken } from 'source/token/common/literal';
-import { ENTITY_META_DATA, EntityMetaData } from 'basic';
 import { AttributePToken } from 'source/token/common/attribute';
 
 interface AttDetals {
@@ -200,12 +200,12 @@ function gatherDefaults(
  */
 class AttFixer {
    private attDetails: AttDetailsMap = {};
-   private emd?: EntityMetaData;
+   private confVer?: ConformanceVersion;
 
-   processPToken(input: PToken): PToken {
+   processPToken(input: ParseValue): ParseValue {
       switch (input.type) {
-         case ENTITY_META_DATA:
-            this.emd = this.emd ?? input;
+         case CONFORMANCE_VERSION:
+            this.confVer = this.confVer ?? input;
             break;
          case ATTLISTDECL_PTOKEN_TYPE:
             this.captureAttributeDetails(input);

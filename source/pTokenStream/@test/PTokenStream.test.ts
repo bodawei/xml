@@ -1,15 +1,15 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range, EntityKind, ENTITY_META_DATA } from 'basic';
+import { CONFORMANCE_VERSION, ENTITY_ID, Range } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import * as tokenStuff from 'token';
-import { CHARDATA_PTOKEN, DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN } from 'token';
+import { DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN, CHARDATA_PTOKEN, CharDataPToken } from 'token';
 
 import PTokenStream from '../PTokenStream';
-import { CONFORMANCE_VERSION, ParseValue, PToken, ENTITY_ID } from 'pToken';
+import { ParseValue, PToken, ContextType } from 'pToken';
 import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
-import { EntityId } from 'source/pToken/token/entityId';
+import { EntityId } from 'source/basic/entityId';
 
 type TokenArray = Array<ParseValue>;
 
@@ -17,7 +17,9 @@ describe('PTokenStream (unit)', () => {
    let pTokenStream: PTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT));
+      pTokenStream = new PTokenStream(undefined, {
+         context: ContextType.DOCUMENT,
+      });
    });
 
    function gatherPTokens(pTokenStream: PTokenStream, deliverResults: (result: TokenArray) => void) {
@@ -49,7 +51,9 @@ describe('PTokenStream (unit)', () => {
    describe('ConformanceVersion', () => {
 
       it('delivers a default version of 1.0/5 if nothing else is specified', (done) => {
-         pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT));
+         pTokenStream = new PTokenStream(undefined, {
+            context: ContextType.DOCUMENT,
+         });
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
 
@@ -123,8 +127,9 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers an EntityId with the option specified in the construction options', (done) => {
-         pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT), {
-            id: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
+         pTokenStream = new PTokenStream(undefined, {
+            context: ContextType.DOCUMENT,
+            entityId: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
          });
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
@@ -168,7 +173,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
          expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
@@ -243,7 +248,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
          expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
@@ -257,7 +262,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
          expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
@@ -282,7 +287,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
          expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
@@ -296,7 +301,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
          expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
@@ -309,7 +314,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)));
+         expect(parseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)));
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -335,7 +340,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
          expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
@@ -415,10 +420,11 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!FOO >');
       pTokenStream.endText();
 
+      
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
          expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
@@ -429,8 +435,8 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, (pTokens) => {
-         // 0 is entitymetadata
-         expect(pTokens[3].type).toEqual('UNKNOWNDECL');
+         const result = findToken(pTokens, 'UNKNOWNDECL');
+         expect(result).not.toBeUndefined();
          done();
       });
    });
@@ -453,8 +459,8 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, (pTokens) => {
-         // pTokens 0-2 are metadata, xmldecl, and "one" element open
-         expect((pTokens[5] as any).text.str).toEqual(']'); // typeHack
+         const result = findToken(pTokens, CHARDATA_PTOKEN) as CharDataPToken;
+         expect(result.text.str).toEqual(']'); // typeHack
          done();
       });
    });
@@ -467,7 +473,7 @@ describe('PTokenStream (unit)', () => {
    
          gatherPTokens(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
-            expect(tokenTypes).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ENTITY_META_DATA, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            expect(tokenTypes).toEqual([CONFORMANCE_VERSION, ENTITY_ID, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
          });
       });
@@ -499,7 +505,6 @@ describe('PTokenStream (unit)', () => {
             expect(tokenTypes).toEqual([
                CONFORMANCE_VERSION,
                ENTITY_ID,
-               ENTITY_META_DATA,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
                CONDITIONAL_PTOKEN,
@@ -521,7 +526,6 @@ describe('PTokenStream (unit)', () => {
             expect(tokenTypes).toEqual([
                CONFORMANCE_VERSION,
                ENTITY_ID,
-               ENTITY_META_DATA,
                DOCTYPE_START_PTOKEN,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,

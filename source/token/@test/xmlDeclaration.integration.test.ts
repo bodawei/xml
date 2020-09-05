@@ -1,13 +1,10 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
 
-import { parseXmlDeclaration, XmlDeclarationPToken } from '../xmlDeclaration';
+import { parseXmlDeclaration } from '../xmlDeclaration';
 import { InstructionStart } from '../bridge/instruction';
 
 describe('xmlDeclaration (integration)', () => {
@@ -25,7 +22,7 @@ describe('xmlDeclaration (integration)', () => {
    describe('parseXmlDeclaration()', () => {
 
       it('parses the input, including the parameters which use literal.parse()', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
@@ -36,7 +33,7 @@ describe('xmlDeclaration (integration)', () => {
       });
 
       it('converts the value from literal.parse() to a single SToken', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
@@ -51,7 +48,7 @@ describe('xmlDeclaration (integration)', () => {
    describe('pToken.toSTokenArray()', () => {
 
       it('returns the STokens', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 

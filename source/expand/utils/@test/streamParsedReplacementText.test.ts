@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, EntityLocation } from 'basic';
+import { ENTITY_ID } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -24,7 +24,7 @@ import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { streamParsedReplacementText } from '../streamParsedReplacementText';
-import { ContextType, ENTITY_ID } from 'pToken';
+import { ContextType } from 'pToken';
 
 function noopFunction(): void {
    // do nothing
@@ -59,13 +59,12 @@ describe('streamParsedReplacementText() (unit)', () => {
             },
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, new EntityMetaData()),
+                  sTokenSource: new STokenSource({}),
                   getErrors: (): Array<XmlError> => [],
                };
             },
             parseAttributeValue: noopFunction,
          },
-         emd: new EntityMetaData(),
       };
    });
 
@@ -135,9 +134,9 @@ describe('streamParsedReplacementText() (unit)', () => {
             cb(undefined, noopFunction);
          });
       };
-      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+      params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, new EntityMetaData()),
+            sTokenSource: new STokenSource({}),
             getErrors: (): Array<XmlError> => [error1, error2],
          };
       };
@@ -243,7 +242,7 @@ describe('streamParsedReplacementText() (unit)', () => {
 
       expect(retrieveSpy).toHaveBeenCalledWith(
          jasmine.objectContaining({ type: ENTITY_ID, systemId: '' }),
-         jasmine.objectContaining({ type: ENTITY_ID, systemId: './default.xml', publicId: '' }),
+         jasmine.objectContaining({ type: ENTITY_ID, systemId: '', publicId: '' }),
       );
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);

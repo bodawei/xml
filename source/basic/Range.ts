@@ -1,12 +1,12 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import EntityLocation from './EntityLocation';
+import { EntityId } from './entityId';
 import Offset from './Offset';
 
 /**********************************************************************\
  A range is used to record the start and end of a range of characters
  in an entity.
- It tracks which location (by way of an EntityLocation), plus the start
+ It tracks which location (by way of an EntityId), plus the start
  and end index, row and column within the entity.
 
  It is important to note:
@@ -19,7 +19,7 @@ import Offset from './Offset';
 \**********************************************************************/
 
 class Range {
-   public readonly location: EntityLocation;
+   public readonly entityId: EntityId;
    public readonly startIndex: number;
    public readonly startRow: number;
    public readonly startColumn: number;
@@ -27,12 +27,12 @@ class Range {
    public readonly endRow: number;
    public readonly endColumn: number;
 
-   constructor(location: EntityLocation | Offset,
+   constructor(location: Offset | EntityId,
       index: number = 0, row: number = 0, column: number = 0,
       endIndex: number = 0, endRow: number = 0, endColumn: number = 0) {
 
       if (location instanceof Offset) {
-         this.location = location.location;
+         this.entityId = location.entityId;
          this.startIndex = location.index;
          this.startRow = location.row;
          this.startColumn = location.column;
@@ -42,7 +42,7 @@ class Range {
          return;
       }
 
-      this.location = location;
+      this.entityId = location;
       this.startIndex = index || 0;
       this.startRow = row || 0;
       this.startColumn = column || 0;
@@ -52,7 +52,7 @@ class Range {
    }
 
    clone() {
-      return new Range(this.location, this.startIndex, this.startRow, this.startColumn,
+      return new Range(this.entityId, this.startIndex, this.startRow, this.startColumn,
          this.endIndex, this.endRow, this.endColumn);
    }
 
@@ -61,15 +61,16 @@ class Range {
    }
 
    getStartOffset() {
-      return new Offset(this.location, this.startIndex, this.startRow, this.startColumn);
+      return new Offset(this.entityId, this.startIndex, this.startRow, this.startColumn);
    }
 
    getEndOffset() {
-      return new Offset(this.location, this.endIndex, this.endRow, this.endColumn);
+      return new Offset(this.entityId, this.endIndex, this.endRow, this.endColumn);
    }
 
    equals(other: Range) {
-      return this.location.equals(other.location) &&
+      return this.entityId.systemId === other.entityId.systemId &&
+         this.entityId.publicId === other.entityId.publicId &&
          this.startIndex === other.startIndex &&
          this.startRow === other.startRow &&
          this.startColumn === other.startColumn &&

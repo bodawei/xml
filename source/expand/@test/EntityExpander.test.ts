@@ -1,7 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from 'basic';
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { PToken, ParseValue, ContextType } from 'pToken';
@@ -70,7 +69,7 @@ describe('EntityExpander (unit)', () => {
    }
 
    function retrieveExternalEntity(): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
+      const sTokenSource = new STokenSource(defaultExtractors);
 
       return {
          sTokenSource,
@@ -115,57 +114,6 @@ describe('EntityExpander (unit)', () => {
 
       processNextToken();
    }
-
-   describe('EntityMetaData', () => {
-      let emd: EntityMetaData;
-
-      beforeEach(() => {
-         emd = new EntityMetaData();
-      });
-
-      it('passes the EntityMetaData instance through', (done) => {
-         doExpand([emd], true, (results) => {
-            expect(results).toEqual([emd]);
-            done();
-         });
-      });
-
-      it('swallows subsequent entity meta data tokens', (done) => {
-         const emd2 = new EntityMetaData(EntityKind.EXTERNAL);
-
-         doExpand([emd, emd2], true, (results) => {
-            expect(results).toEqual([emd]);
-            done();
-         });
-      });
-
-      it('passes the EntityMetaData to the utility functions in the expandParams', (done) => {
-         const expandAttributeSpy: jasmine.Spy = spyOn(expandAttributes, 'expandAttributes');
-         expandAttributeSpy.and.callFake((value, params, stack, cb) => {
-            cb([
-               {
-                  newValue: [],
-                  byproducts: [],
-               },
-            ]);
-         });
-         const startElement = new ElementStartPToken({
-            open: toSToken('<'),
-            name: toSToken('student'),
-            attributes: [
-               {
-                  name: toSToken('two'),
-                  value: [new CharRefPToken({ open: toSToken('&#') })],
-               },
-            ],
-         });
-
-         doExpand([emd, startElement], true, () => {
-            expect(expandAttributeSpy.calls.argsFor(0)[1].emd).toEqual(emd);
-            done();
-         });
-      });
-   });
 
    describe('passes most token types through unchanged', () => {
       let textPToken: TextPToken;
@@ -429,7 +377,7 @@ describe('EntityExpander (unit)', () => {
             });
             setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
                done({
-                  source: new STokenSource(defaultExtractors, new EntityMetaData()),
+                  source: new STokenSource(defaultExtractors),
                });
             });
             const results: Array<ParseValue> = [];
@@ -702,7 +650,7 @@ describe('EntityExpander (unit)', () => {
             const callArgs = expandAttributeSpy.calls.mostRecent().args;
 
             expect(callArgs[0]).toEqual(attList.attDefs);
-            expect(callArgs[1].emd).not.toBeUndefined();
+            expect(callArgs[1]).not.toBeUndefined();
             expect(callArgs[2]).toBeInstanceOf(EntityNameStack);
             expect(callArgs[3]).toBeInstanceOf(Function);
             done();
@@ -1023,7 +971,7 @@ describe('EntityExpander (unit)', () => {
             peRef,
          });
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            done({ source: new STokenSource(defaultExtractors, new EntityMetaData()) });
+            done({ source: new STokenSource(defaultExtractors) });
 
             deliver(new TextPToken({ text: toSToken('foo') }), () => {});
          });
@@ -1047,7 +995,7 @@ describe('EntityExpander (unit)', () => {
          });
          let count = 0;
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            done({ source: new STokenSource(defaultExtractors, new EntityMetaData()) });
+            done({ source: new STokenSource(defaultExtractors) });
             count++;
             if (count === 1) {
                deliver(condStart, () => {});
@@ -1074,7 +1022,7 @@ describe('EntityExpander (unit)', () => {
          let sourceSpy: jasmine.Spy;
 
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            const source = new STokenSource(defaultExtractors, new EntityMetaData());
+            const source = new STokenSource(defaultExtractors);
             sourceSpy = spyOn(source, 'addText');
             done({ source });
          });
@@ -1097,7 +1045,7 @@ describe('EntityExpander (unit)', () => {
          });
          let sourceSpy: jasmine.Spy;
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            const source = new STokenSource(defaultExtractors, new EntityMetaData());
+            const source = new STokenSource(defaultExtractors);
             sourceSpy = spyOn(source, 'endText');
             done({ source });
          });
@@ -1129,7 +1077,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            const source = new STokenSource(defaultExtractors, new EntityMetaData());
+            const source = new STokenSource(defaultExtractors);
             done({ source });
          });
          const results: Array<ParseValue> = [];

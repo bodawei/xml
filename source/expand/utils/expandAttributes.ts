@@ -13,7 +13,6 @@ import {
 } from 'token';
 
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
-import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { GEDetails } from './EntityDetails';
 import { ExpandParams } from '../types';
@@ -46,7 +45,10 @@ function parseEntityValueAsAttributeValue(
 ): void {
    const entityValue = geDetails.protoReplacementText;
    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-   const sTokenSource: STokenSource = entityValueToSTokenSource(entityValue!, expandParams.emd);
+   const sTokenSource: STokenSource = entityValueToSTokenSource(
+      entityValue!,
+      expandParams.entityId,
+   );
 
    expandParams.utils.parseAttributeValue(sTokenSource, (result) => {
       // If it still didn't parse into anything useful, abort.

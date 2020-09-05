@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Offset, EntityLocation } from 'basic';
+import { Offset, EntityId } from 'basic';
 
 import { SToken } from 'sToken';
 
@@ -92,7 +92,7 @@ class ErrorCollector {
                this.position.ranges[0].getStartOffset() :
                this.position.ranges[0].getEndOffset();
          } else {
-            posOffset = new Offset(new EntityLocation(), 0, 0, 0);
+            posOffset = new Offset(new EntityId(), 0, 0, 0);
          }
       }
 

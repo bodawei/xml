@@ -1,15 +1,14 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { toSToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
-import { ParameterEntityReferencePToken, TextPToken } from 'token';
+import { TextPToken } from 'token';
 
 import unassigned from '../unassigned';
-import { UnassignedArray, UnassignedType } from '../unassigned';
+import { UnassignedArray } from '../unassigned';
 
 import literal from '../literal';
 import { EXTERNAL_ID, parseExternalId, getSTokens, checkExternalIdWellFormed } from '../externalId';
@@ -430,30 +429,30 @@ describe('externalId (unit)', () => {
       });
 
       it('calls literal.checkWellFormed() to check the PUBLIC value', () => {
-         const emd = new EntityMetaData();
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, emd);
+         const confVer = new ConformanceVersion();
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, confVer);
 
          expect(litWell.calls.argsFor(0)[0]).toEqual(pTokenPart.public);
          expect(litWell.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
-         expect(litWell.calls.argsFor(0)[2]).toEqual(emd);
+         expect(litWell.calls.argsFor(0)[2]).toEqual(confVer);
          expect(litWell.calls.argsFor(0)[3]).toEqual(undefined);
          expect(litWell.calls.argsFor(0)[4] instanceof Function).toEqual(true);
       });
 
       it('calls literal.checkWellFormed() to check the SYSTEM value', () => {
-         const emd = new EntityMetaData();
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, emd);
+         const confVer = new ConformanceVersion();
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, confVer);
 
          expect(litWell.calls.argsFor(1)[0]).toEqual(pTokenPart.system);
          expect(litWell.calls.argsFor(1)[1]).toEqual(mockErrorCollector);
-         expect(litWell.calls.argsFor(1)[2]).toEqual(emd);
+         expect(litWell.calls.argsFor(1)[2]).toEqual(confVer);
          expect(litWell.calls.argsFor(1)[3]).toEqual(WellFormedError.ID.NOUN_EXTERNALID_SYSTEM);
          expect(litWell.calls.argsFor(1)[4]).toEqual(undefined);
       });
 
       it('reports an error if the PUBLIC value has illegal characters', () => {
          pTokenPart.public.value[0].text.str = 'bad&chars';
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          // invoke the callback function
          litWell.calls.argsFor(0)[4]();
@@ -466,7 +465,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports no errors when no PToken part is passed in', () => {
-         checkExternalIdWellFormed(undefined, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(undefined, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
@@ -476,7 +475,7 @@ describe('externalId (unit)', () => {
             return callback ? callback() : undefined;
          });
          delete pTokenPart.public.value;
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
@@ -487,7 +486,7 @@ describe('externalId (unit)', () => {
          });
          pTokenPart.public.value[0].text.str = '{}{}{}{}';
 
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
@@ -499,7 +498,7 @@ describe('externalId (unit)', () => {
       it('reports an error if type is neither PUBLIC or SYSTEM', () => {
          pTokenPart.externalType.str = 'Bogus';
 
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_UNKNOWN,
@@ -511,7 +510,7 @@ describe('externalId (unit)', () => {
       it('reports an error if type is the wrong case', () => {
          pTokenPart.externalType.str = 'public';
 
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
@@ -523,7 +522,7 @@ describe('externalId (unit)', () => {
       it('reports an error if there is no space after the id type', () => {
          delete pTokenPart.externalTypeSpace;
 
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_EXTERNALTYPE_NO_SPACE,
@@ -535,7 +534,7 @@ describe('externalId (unit)', () => {
       it('reports an error if there is no space after a PUBLIC part', () => {
          delete pTokenPart.publicSpace;
 
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
@@ -547,7 +546,7 @@ describe('externalId (unit)', () => {
       it('reports no error if there is no system part', () => {
          delete pTokenPart.system;
 
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -561,7 +560,7 @@ describe('externalId (unit)', () => {
          delete pTokenPart.public;
 
          expect(() => {
-            checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+            checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
          }).not.toThrow();
       });
    });

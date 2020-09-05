@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -29,7 +29,7 @@ describe('notationDeclaration (integration)', () => {
    describe('parse()', () => {
 
       it('produces an externalID when called', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 
@@ -40,7 +40,7 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('parses a PERef (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('%foo;>');
          source.endText();
 
@@ -68,7 +68,7 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('copes with a PERef in the externalId (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('notationName %foo;>');
          source.endText();
          const unassignedValue: UnassignedArray = [{
@@ -110,14 +110,14 @@ describe('notationDeclaration (integration)', () => {
    describe('checkWellFormed()', () => {
 
       it('asks the externalId module to look for well formed problems', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('foo system "sys.dtd">');
          source.endText();
 
          parseNotationDeclaration(source, declarationStart, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
-            parsing.checkWellFormed(ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
             done();
@@ -125,13 +125,13 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('calls misc.checkName() to report on invalid names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('$foo system "sys.dtd">');
          source.endText();
          parseNotationDeclaration(source, declarationStart, (result) => {
             const ec = new ErrorCollector(result.open, WellFormedError);
 
-            result.checkWellFormed(ec, new EntityMetaData());
+            result.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
             done();
@@ -139,14 +139,14 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('xmlOne system "sys.dtd">');
          source.endText();
 
          parseNotationDeclaration(source, declarationStart, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
-            parsing.checkWellFormed(ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED);
             done();
@@ -154,7 +154,7 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('calls unassigned.checkExtra() to report on extra values', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('name SYSTEM %bar; "other">');
          source.endText();
 
@@ -162,7 +162,7 @@ describe('notationDeclaration (integration)', () => {
             pToken.extra = pToken.unassigned;
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
-            pToken.checkWellFormed(ec, new EntityMetaData());
+            pToken.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[2].id).toEqual(WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
             done();
@@ -173,8 +173,8 @@ describe('notationDeclaration (integration)', () => {
 
    describe('pTokenToXToken()', () => {
 
-      it('includes an entityLocation', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      it('includes an externalId', (done) => {
+         const source = new STokenSource(defaultExtractors);
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 
@@ -188,7 +188,7 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('includes the STokens for the externalId and declaration', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 

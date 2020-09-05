@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker, STokenMaker } from 'sToken-test';
@@ -11,13 +10,11 @@ import unassigned from '../unassigned';
 import { TextPToken } from '../../text';
 
 describe('unassigned (integration)', () => {
-   let emd: EntityMetaData;
    let source: STokenSource;
    let makeSToken: STokenMaker;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      source = new STokenSource(defaultExtractors);
       makeSToken = makeSTokenMaker();
    });
 

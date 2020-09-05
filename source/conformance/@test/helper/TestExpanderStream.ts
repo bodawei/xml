@@ -3,10 +3,10 @@
 import { basename, dirname, relative, resolve } from 'path';
 import { Transform } from 'stream';
 
-import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
+import { EntityId } from 'basic';
 import { EntityExpander, RetrieveResults, AttributeValueResults } from 'expand';
 import { defaultExtractors } from 'extractor';
-import { ContextType, EntityId } from 'pToken';
+import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import {
@@ -15,7 +15,6 @@ import {
    PToken,
    EntityValuePToken,
    EntityValueElement,
-   ExternalId,
 } from 'token';
 
 import { TestCases } from './types';
@@ -120,7 +119,7 @@ function retrieveExternalEntity(
    // console.log('entityText', entityText, '\n');
    // Throw an error if we can't find the entity?
 
-   const source = new STokenSource(defaultExtractors, new EntityMetaData());
+   const source = new STokenSource(defaultExtractors);
    source.addText(entityText);
    source.endText();
 

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken, STokenSource } from 'sToken';
 
@@ -80,14 +80,14 @@ function parse(source: STokenSource, options: ParseOptions, done: DeliverPToken)
    });
 }
 
-function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, type: string, checkValue?: () => void) {
+function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, confVer: ConformanceVersion, type: string, checkValue?: () => void) {
    const pToken: LiteralPToken = pTokenPart || { value: [] };
 
    ec.setPos(pToken.openQuote);
    ec.check(!pToken.openQuote, WFEID.LITERAL_NO_OPEN_QUOTE, [ type ]);
 
    const pieces = pToken.value;
-   literalValue.checkWellFormed(pieces, ec, entityMetaData);
+   literalValue.checkWellFormed(pieces, ec, confVer);
 
    if (checkValue) {
       checkValue();

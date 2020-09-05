@@ -1,3 +1,6 @@
+import { defaultExtractors } from 'extractor';
+import { ContextType } from 'pToken';
+import { strOrBlank, STokenSource, toSToken } from 'sToken';
 import {
    ParameterEntityReferencePToken,
    TEXT_PTOKEN,
@@ -8,10 +11,6 @@ import {
 import { ConditionalInfo, ExpandParams } from '../types';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityNameStack } from './EntityNameStack';
-import { strOrBlank, STokenSource, toSToken } from 'sToken';
-import { defaultExtractors } from 'extractor';
-import { ENTITY_META_DATA } from 'basic';
-import { ContextType } from 'pToken';
 
 type Done = (result: ConditionalInfo) => void;
 
@@ -57,7 +56,7 @@ function setupConditional(
          return;
       }
 
-      const sTokenSource = new STokenSource(defaultExtractors, expandParams.emd);
+      const sTokenSource = new STokenSource(defaultExtractors, expandParams.entityId);
       const result: ConditionalInfo = {
          source: sTokenSource,
          textIsFinished: undefined,
@@ -68,11 +67,7 @@ function setupConditional(
 
       utils.parseBody(sTokenSource, context, (nextToken, handled) => {
          if (nextToken) {
-            if (nextToken.type !== ENTITY_META_DATA) {
-               deliverToken(nextToken, handled);
-            } else {
-               handled();
-            }
+            deliverToken(nextToken, handled);
             return;
          }
 

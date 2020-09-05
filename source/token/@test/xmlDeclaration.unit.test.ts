@@ -1,13 +1,9 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from 'basic';
-import { WellFormedError } from 'error';
-import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import * as misc from '../common/misc';
 import { parseXmlDeclaration, XmlDeclarationPToken } from '../xmlDeclaration';
 import { InstructionStart } from '../bridge/instruction';
 import * as entityInstr from '../common/entityInstruction';

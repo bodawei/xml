@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityKind, EntityLocation, EntityMetaData, Range } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { Extractor, Segment, ExtractorMap } from 'extractor';
 
 import SToken from '../SToken';
@@ -11,9 +11,8 @@ import { SegmentInfo } from 'source/extractor/Extractor';
 describe('STokenSource (unit)', () => {
    let sTokenSpy: jasmine.Spy;
    let source: STokenSource;
-   let defaultLoc: EntityLocation;
-   let entityMetaData1dot0: EntityMetaData;
-   let entityMetaData1dot1: EntityMetaData;
+   let confVer1dot0: ConformanceVersion;
+   let confVer1dot1: ConformanceVersion;
    let testExtractors: ExtractorMap;
 
    class AllExtractor extends Extractor {
@@ -124,23 +123,22 @@ describe('STokenSource (unit)', () => {
    }
 
    beforeEach(() => {
-      defaultLoc = new EntityLocation();
-      entityMetaData1dot0 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5, defaultLoc);
-      entityMetaData1dot1 = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2, defaultLoc);
+      confVer1dot0 = new ConformanceVersion(1.0, 5);
+      confVer1dot1 = new ConformanceVersion(1.1, 2);
       testExtractors = {
          foo: Extractor,
          all: AllExtractor,
          tox: ToXExtractor,
       };
 
-      source = new STokenSource(testExtractors, entityMetaData1dot1);
+      source = new STokenSource(testExtractors, undefined, confVer1dot1);
       sTokenSpy = jasmine.createSpy('sTokenSpy');
    });
 
    describe('metadata', () => {
 
-      it('exposes the EntityMetaData it was passed as a metaData property', () => {
-         expect(source.metaData).toEqual(entityMetaData1dot1);
+      it('exposes the ConformanceVersion it was passed as a metaData property', () => {
+         expect(source.metaData).toEqual(confVer1dot1);
       });
 
    });
@@ -155,7 +153,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, entityMetaData1dot0);
+         source = new STokenSource(testExtractors, undefined, confVer1dot0);
          source.addText('this is yours');
          source.extractNoParams('toy', (sToken) => {
             expect(sToken!.str).toEqual('this is ');
@@ -172,7 +170,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, entityMetaData1dot0);
+         source = new STokenSource(testExtractors, undefined, confVer1dot0);
          source.addText('the lorax');
          source.extractNoParams('pass', (sToken) => {
             expect(sToken!.str).toEqual('the lora');
@@ -205,7 +203,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, entityMetaData1dot0);
+         source = new STokenSource(testExtractors, undefined, confVer1dot0);
          source.addText('1');
          source.extractNoParams('test', () => {});
 
@@ -252,7 +250,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, entityMetaData1dot0);
+         source = new STokenSource(testExtractors, undefined, confVer1dot0);
          source.addText('1');
          source.extract('peek', [ 'toXParam' ], () => {});
 
@@ -290,7 +288,7 @@ describe('STokenSource (unit)', () => {
       });
 
       it('carries a range passed on an empty value to the next if it has no range (whitebox)', () => {
-         const testRange = new Range(defaultLoc);
+         const testRange = new Range(new EntityId());
          source.addText('1');
          source.addText('', testRange);
          source.addText('333');
@@ -299,8 +297,8 @@ describe('STokenSource (unit)', () => {
       });
 
       it('ignores the range on an empty value if the next has a range (whitebox)', () => {
-         const testRange1 = new Range(defaultLoc);
-         const testRange2 = new Range(defaultLoc, 5, 6, 7);
+         const testRange1 = new Range(new EntityId());
+         const testRange2 = new Range(new EntityId(), 5, 6, 7);
          source.addText('1');
          source.addText('', testRange1);
          source.addText('333', testRange2);
@@ -416,7 +414,7 @@ describe('STokenSource (unit)', () => {
          source.endText();
          source.extractNoParams('all', (sToken) => {
             expect(sToken).toEqual(new SToken('122333', '122333',
-               new Range(defaultLoc, 0, 0, 0, 6, 0, 6)));
+               new Range(new EntityId(), 0, 0, 0, 6, 0, 6)));
             done();
          });
       });
@@ -452,23 +450,23 @@ describe('STokenSource (unit)', () => {
 
             source.extractNoParams('all', (sToken) => {
                expect(sToken!.ranges).toEqual([
-                  new Range(defaultLoc, 0, 0, 0, 6, 0, 6),
+                  new Range(new EntityId(), 0, 0, 0, 6, 0, 6),
                ]);
                done();
             });
          });
 
          it('returns a SToken with ranges for the segments', (done) => {
-            const loc2 = new EntityLocation('sys2', 'pub2');
-            const loc3 = new EntityLocation('sys3', 'pub3');
-            source.addText('9', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
+            const loc2 = new EntityId('sys2', 'pub2');
+            const loc3 = new EntityId('sys3', 'pub3');
+            source.addText('9', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
             source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
             source.addText('77777', new Range(loc3, 200, 200, 200, 9, 9, 9));
             source.endText();
 
             source.extractNoParams('all', (sToken) => {
                expect(sToken!.ranges).toEqual([
-                  new Range(defaultLoc, 3, 2, 1, 4, 2, 2),
+                  new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
                   new Range(loc2, 100, 100, 100, 102, 100, 102),
                   new Range(loc3, 200, 200, 200, 205, 200, 205),
                ]);
@@ -477,16 +475,16 @@ describe('STokenSource (unit)', () => {
          });
 
          it('delivers a default range to a segment without a range', (done) => {
-            const loc2 = new EntityLocation('sys2', 'pub2');
+            const loc2 = new EntityId('sys2', 'pub2');
 
-            source.addText('9', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
+            source.addText('9', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
             source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
             source.addText('77777');
             source.endText();
 
             source.extractNoParams('all', (sToken) => {
                expect(sToken!.ranges).toEqual([
-                  new Range(defaultLoc, 3, 2, 1, 4, 2, 2),
+                  new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
                   new Range(loc2, 100, 100, 100, 107, 100, 107),
                ]);
                done();
@@ -494,27 +492,27 @@ describe('STokenSource (unit)', () => {
          });
 
          it('treats equal locations, that are different instances, as the same', (done) => {
-            const loc2 = new EntityLocation();  // same location as the defaultLoc
+            const loc2 = new EntityId();  // same location as the new EntityId()
 
-            source.addText('9', new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            source.addText('9', new Range(new EntityId(), 3, 2, 1, 4, 2, 2));
             source.addText('88', new Range(loc2, 4, 2, 2, 6, 2, 4));
             source.addText('77777');
             source.endText();
 
             source.extractNoParams('all', (sToken) => {
-               expect(sToken!.ranges).toEqual([ new Range(defaultLoc, 3, 2, 1, 11, 2, 9) ]);
+               expect(sToken!.ranges).toEqual([ new Range(new EntityId(), 3, 2, 1, 11, 2, 9) ]);
                done();
             });
          });
 
          it('correctly computes range when retrieving multiple STokens from a ranged segment', (done) => {
-            source.addText('a]b', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
+            source.addText('a]b', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
             source.endText();
 
             source.extract('tox', ']', sTokenSpy);
             source.extract('tox', 'b', (sToken) => {
-               expect(sTokenSpy.calls.argsFor(0)[0].firstRange).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
-               expect(sToken!.firstRange).toEqual(new Range(defaultLoc, 4, 2, 2, 5, 2, 3));
+               expect(sTokenSpy.calls.argsFor(0)[0].firstRange).toEqual(new Range(new EntityId(), 3, 2, 1, 4, 2, 2));
+               expect(sToken!.firstRange).toEqual(new Range(new EntityId(), 4, 2, 2, 5, 2, 3));
                done();
             });
          });

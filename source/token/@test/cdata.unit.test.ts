@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
@@ -72,24 +72,24 @@ describe('cdata (unit)', () => {
 
    describe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          spyOn(misc, 'checkCharWellFormed');
       });
 
       it('checks the text is well formed', () => {
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
+         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(cDataPToken.text, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(cDataPToken.text, mockErrorCollector, confVer);
       });
 
       it('reports an error if there is no section type provided', () => {
          delete (cDataPToken as any).sectionType;
 
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
+         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CDATA_NO_TYPE,
@@ -102,7 +102,7 @@ describe('cdata (unit)', () => {
       it('reports an error if the type is not capitalized', () => {
          (cDataPToken as any).sectionType.str = 'cdata';
 
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
+         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CDATA_INVALID_CASE,
@@ -114,7 +114,7 @@ describe('cdata (unit)', () => {
       it('reports an error if there is a no bracket after the type', () => {
          delete (cDataPToken as any).bracket;
 
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
+         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CDATA_NO_SECOND_BRACKET,
@@ -126,7 +126,7 @@ describe('cdata (unit)', () => {
       it('reports an error if there is a space after the <![', () => {
          (cDataPToken as any).openSpace = SToken.fromString(' ');
 
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
+         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_OPEN,
@@ -138,7 +138,7 @@ describe('cdata (unit)', () => {
       it('reports an error if there is a space after the section type', () => {
          (cDataPToken as any).sectionTypeSpace = SToken.fromString(' ');
 
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
+         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_TYPE,
@@ -150,7 +150,7 @@ describe('cdata (unit)', () => {
       it('reports an error if there is no close', () => {
          delete (cDataPToken as any).close;
 
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
+         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CDATA_NO_CLOSE,

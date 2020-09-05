@@ -2,7 +2,7 @@
 
 import { Transform } from 'stream';
 
-import { EntityMetaData, isSpace, isName, isNmToken } from 'basic';
+import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
 import { SToken, strOrBlank } from 'sToken';
 import {
@@ -157,7 +157,7 @@ class CheckXTokenValidStream extends Transform {
    private currentContext: ContentContext | void;
    private idValues: IDMap;
    private unanchoredIDRefs: IDMap;
-   private emd: EntityMetaData = new EntityMetaData();
+   private confVer: ConformanceVersion = new ConformanceVersion();
    private _seenRoot: boolean = false;
    private standalone: boolean = false;
    private externalDeclarations: boolean = false;
@@ -343,11 +343,11 @@ class CheckXTokenValidStream extends Transform {
          //       entity references with their replacement text) consists of character
          //       data , CDATA sections, comments, PIs and child elements whose types
          //       have been declared.
-         const isRestrictiveVersion = (this.emd.isVersion1dot0 && this.emd.revision < 3);
-         const isTolerantVersion = (this.emd.isVersion1dot0 && this.emd.revision > 3)
-            || (this.emd.isVersion1dot1 && this.emd.revision > 1);
-         const notAllowedParams = [declInfo.token.name, this.emd.version.toString(),
-         this.emd.revision.toString()];
+         const isRestrictiveVersion = (this.confVer.version === 1 && this.confVer.revision < 3);
+         const isTolerantVersion = (this.confVer.version === 1 && this.confVer.revision > 3)
+            || (this.confVer.version === 1.1 && this.confVer.revision > 1);
+         const notAllowedParams = [declInfo.token.name, this.confVer.version.toString(),
+         this.confVer.revision.toString()];
 
          switch (xToken.type) {
             case TEXTDECL_XTOKEN:
@@ -407,9 +407,9 @@ class CheckXTokenValidStream extends Transform {
          //       replacing any entity references with their replacement text) consists
          //       of character data (including CDATA sections), comments, PIs and child
          //       elements whose types match names in the content model.
-         const isRestrictiveVersion = (this.emd.isVersion1dot0 && this.emd.revision < 3);
-         const isTolerantVersion = (this.emd.isVersion1dot0 && this.emd.revision > 3)
-            || (this.emd.isVersion1dot1 && this.emd.revision > 1);
+         const isRestrictiveVersion = (this.confVer.version === 1 && this.confVer.revision < 3);
+         const isTolerantVersion = (this.confVer.version === 1 && this.confVer.revision > 3)
+            || (this.confVer.version === 1.1 && this.confVer.revision > 1);
 
          switch (xToken.type) {
             case ELEMENT_START_XTOKEN:
@@ -474,15 +474,15 @@ class CheckXTokenValidStream extends Transform {
          //       resulting from expansion of the character references.
          //  This implementation assumes that the intent was to allow comments and PI's
          //  along with S in the replacement text of entities, so allows this in 1.0/5 and 1.1/2
-         const isNoSpaceAtEndsVersion = (this.emd.isVersion1dot0 && this.emd.revision === 1);
-         const isSpaceAtEndsVersion = (this.emd.isVersion1dot0 && this.emd.revision === 2);
-         const isOnlySInEntityVersion = (this.emd.isVersion1dot0 && (this.emd.revision > 2 && this.emd.revision < 5))
-            || (this.emd.isVersion1dot1 && this.emd.revision === 1);
-         const isTolerantVersion = (this.emd.isVersion1dot0 && this.emd.revision >= 5)
-            || (this.emd.isVersion1dot1 && this.emd.revision >= 2);
+         const isNoSpaceAtEndsVersion = (this.confVer.version === 1 && this.confVer.revision === 1);
+         const isSpaceAtEndsVersion = (this.confVer.version === 1 && this.confVer.revision === 2);
+         const isOnlySInEntityVersion = (this.confVer.version === 1 && (this.confVer.revision > 2 && this.confVer.revision < 5))
+            || (this.confVer.version === 1.1 && this.confVer.revision === 1);
+         const isTolerantVersion = (this.confVer.version === 1 && this.confVer.revision >= 5)
+            || (this.confVer.version === 1.1 && this.confVer.revision >= 2);
 
-         const notAllowedParams = [declInfo.token.name, this.emd.version.toString(),
-         this.emd.revision.toString()];
+         const notAllowedParams = [declInfo.token.name, this.confVer.version.toString(),
+         this.confVer.revision.toString()];
 
          const currentState = declInfo.graph.states[context.stateId];
 
@@ -581,7 +581,7 @@ class CheckXTokenValidStream extends Transform {
           * Because of this we convert any CHARDATA types which contain only whitespace here into spaces
           */
          if (xToken.type === CHARDATA_XTOKEN && context && context.declInfo.type === 'ELEMENT_CONTENT') {
-            if (isSpace(xToken.text)) {
+            if (isSpace(xToken.text, this.confVer.version)) {
                xToken = new SpaceXToken(xToken.text, xToken.pToken);
             }
          }
@@ -707,8 +707,8 @@ class CheckXTokenValidStream extends Transform {
          this.validateDTD();
       }
 
-      if (xToken instanceof EntityMetaData) {
-         this.emd = xToken;
+      if (xToken.type === CONFORMANCE_VERSION) {
+         this.confVer = xToken as any;
       }
 
       this.push(xToken);
@@ -735,7 +735,7 @@ class CheckXTokenValidStream extends Transform {
          // §4.7 Validity constraint: Unique Notation Name
          // A given Name must not be declared in more than one notation declaration.
          const pToken = notationDecl.pToken ? notationDecl.pToken.open : undefined;
-         const errorOnDuplicate = this.emd.isVersion1dot0 && this.emd.revision >= 2 || this.emd.isVersion1dot1;
+         const errorOnDuplicate = this.confVer.version === 1 && this.confVer.revision >= 2 || this.confVer.version === 1.1;
 
          if (errorOnDuplicate) {
             this.pushValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [notationDecl.name], pToken);
@@ -808,7 +808,7 @@ class CheckXTokenValidStream extends Transform {
       const type = attDef.type.toUpperCase();
       const defaultType = attDef.defaultType.toUpperCase();
       const pToken = attList.pToken || {} as AttListPToken; // typeHack
-      const oneDotZeroRev3OrHigher = this.emd.isVersion1dot1 || (this.emd.isVersion1dot0 && this.emd.revision > 2);
+      const oneDotZeroRev3OrHigher = this.confVer.version === 1.1 || (this.confVer.version === 1 && this.confVer.revision > 2);
       const defaultText = getAttributeValueText(attDef);
       const hasDefault = attDef.value.length > 0;
 
@@ -863,7 +863,7 @@ class CheckXTokenValidStream extends Transform {
          //    It doesn't make a lot of sense for an ID to have a default value, but the spec doesn't
          //    forbid this. We allow it, and follow the spirit of this validity constraint to
          //    require that value be a legitimate name
-         if (hasDefault && !isName(defaultText, this.emd.version, this.emd.revision)) {
+         if (hasDefault && !isName(defaultText, this.confVer.version, this.confVer.revision)) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_ID_DEFAULT,
                [attList.elementName, attDef.name, defaultText], pToken.open);
          }
@@ -872,7 +872,7 @@ class CheckXTokenValidStream extends Transform {
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ...of type IDREF or ENTITY must match the Name production;
-         if (hasDefault && !isName(defaultText, this.emd.version, this.emd.revision)) {
+         if (hasDefault && !isName(defaultText, this.confVer.version, this.confVer.revision)) {
             const code = type === 'IDREF' ? ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT
                : ValidityError.ID.ATTLISTDECL_BAD_ENTITY_DEFAULT;
 
@@ -893,7 +893,7 @@ class CheckXTokenValidStream extends Transform {
             const badNames = [];
 
             for (const name of names) {
-               if (!isName(name, this.emd.version, this.emd.revision)) {
+               if (!isName(name, this.confVer.version, this.confVer.revision)) {
                   badNames.push(name);
                }
 
@@ -914,7 +914,7 @@ class CheckXTokenValidStream extends Transform {
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ...of type NMTOKEN must match the Nmtoken production;
-         if (hasDefault && !isNmToken(defaultText, this.emd.version, this.emd.revision)) {
+         if (hasDefault && !isNmToken(defaultText, this.confVer.version, this.confVer.revision)) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
                [attList.elementName, attDef.name, defaultText], pToken.open);
          }
@@ -928,7 +928,7 @@ class CheckXTokenValidStream extends Transform {
             const badNames = [];
 
             for (const name of names) {
-               if (!isNmToken(name, this.emd.version, this.emd.revision)) {
+               if (!isNmToken(name, this.confVer.version, this.confVer.revision)) {
                   badNames.push(name);
                }
             }
@@ -1226,7 +1226,7 @@ class CheckXTokenValidStream extends Transform {
     * Does all checks that can only be done once we have the whole DTD processed
     */
    private validateDTD() {
-      const oneDotZeroRev2OrHigher = this.emd.isVersion1dot1 || (this.emd.isVersion1dot0 && this.emd.revision > 1);
+      const oneDotZeroRev2OrHigher = this.confVer.version === 1.1 || (this.confVer.version === 1 && this.confVer.revision > 1);
 
       Object.keys(this.attrDefsByElementName).forEach((elementType: string) => {
          const attList = this.attrDefsByElementName[elementType];
@@ -1411,7 +1411,7 @@ class CheckXTokenValidStream extends Transform {
             } else if (attrDef.type === 'ID') {
                // §3.3.1: Validity constraint: ID
                //    Values of type ID must match the Name production.  ...
-               if (!isName(attrText, this.emd.version, this.emd.revision)) {
+               if (!isName(attrText, this.confVer.version, this.confVer.revision)) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
                      [attrText, elStart.name, attrName], pTokenOpen);
                }
@@ -1446,7 +1446,7 @@ class CheckXTokenValidStream extends Transform {
                //    values of type IDREFS must match Names...
                for (let index = 0; index < names.length; index++) {
                   const idRef = names[index];
-                  if (!isName(idRef, this.emd.version, this.emd.revision)) {
+                  if (!isName(idRef, this.confVer.version, this.confVer.revision)) {
                      badNames.push(idRef);
                   }
 
@@ -1476,7 +1476,7 @@ class CheckXTokenValidStream extends Transform {
                //    Values of type ENTITY must match the Name production,
                //    values of type ENTITIES must match Names;
                for (let index = 0; index < names.length; index++) {
-                  if (!isName(names[index], this.emd.version, this.emd.revision)) {
+                  if (!isName(names[index], this.confVer.version, this.confVer.revision)) {
                      badNames.push(names[index]);
                   }
                }
@@ -1529,7 +1529,7 @@ class CheckXTokenValidStream extends Transform {
                //    Values of type NMTOKEN must match the Nmtoken production;
                //    values of type NMTOKENS must match Nmtokens.
                for (let index = 0; index < names.length; index++) {
-                  if (!isNmToken(names[index], this.emd.version, this.emd.revision)) {
+                  if (!isNmToken(names[index], this.confVer.version, this.confVer.revision)) {
                      badNames.push(names[index]);
                   }
                }

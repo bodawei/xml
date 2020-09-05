@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -34,7 +34,7 @@ describe('attListDeclaration (integration)', () => {
    describe('parse()', () => {
 
       it('parses an ATTLIST with a couple attributes', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName one CDATA two IDREFS #IMPLICIT>');
          source.endText();
 
@@ -67,7 +67,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses an ATTLIST with a couple attributes with default values', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName one CDATA "1"    two CDATA \'2\'three CDATA "3"    >');
          source.endText();
 
@@ -117,7 +117,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses an ATTLIST with a NOTATION by calling parseWordList()', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName one NOTATION ( one | two) >');
          source.endText();
 
@@ -159,7 +159,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses an ATTLIST with an ENUMERATION by calling wordList.parse()', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName one ( one ) >');
          source.endText();
 
@@ -194,7 +194,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the intial position (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('%foo;>');
          source.endText();
 
@@ -225,7 +225,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the attribute name definition (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName one CDATA #IMPLICIT %foo;>');
          source.endText();
 
@@ -267,7 +267,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the attribute type location (check unassigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName one CDATA #IMPLICIT two%foo;>');
          source.endText();
 
@@ -313,7 +313,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the attribute default type location (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName one CDATA #IMPLICIT two ID %foo;>');
          source.endText();
 
@@ -371,12 +371,12 @@ describe('attListDeclaration (integration)', () => {
 
       // it('asks the declaration module to look for problems in the declaration part', (done) => {
       //    declarationPToken.openSpace = expectedSToken(' ');
-      //    const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      //    const source = new STokenSource(defaultExtractors);
       //    source.addText('foo>');
       //    source.endText();
 
       //    attListDeclaration.parse(source, declarationPToken, (parsing) => {
-      //       attListDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
+      //       attListDeclaration.checkWellFormed(parsing, ec, new ConformanceVersion());
 
       //       expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
       //       done();
@@ -384,11 +384,11 @@ describe('attListDeclaration (integration)', () => {
       // });
 
       it('calls misc.checkName() to report on invalid names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('$foo>');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+            attListDeclaration.checkWellFormed(result, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
             done();
@@ -396,11 +396,11 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('calls misc.checkName() to report on invalid attribute names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName $foo>');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+            attListDeclaration.checkWellFormed(result, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
             done();
@@ -408,11 +408,11 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on invalid attribute names', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName xml:foo>');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+            attListDeclaration.checkWellFormed(result, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
             done();
@@ -420,11 +420,11 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('calls wordList.checkWellFormed() on an enumerated list', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName attr ( $badName ) >');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+            attListDeclaration.checkWellFormed(result, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NMTOKEN);
             done();
@@ -432,11 +432,11 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('calls wordList.checkWellFormed() on a NOTATION list', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName attr2 NOTATION ( goodName | $badName ) >');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+            attListDeclaration.checkWellFormed(result, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NAME);
             done();
@@ -447,8 +447,8 @@ describe('attListDeclaration (integration)', () => {
 
    describe('pTokenToXToken()', () => {
 
-      it('includes an entityLocation', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      it('converts to the expected xtoken', (done) => {
+         const source = new STokenSource(defaultExtractors);
          source.addText('foo>');
          source.endText();
 
@@ -466,7 +466,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('includes an ENUMERATED type', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName attrName ( one | two ) #REQUIRED>');
          source.endText();
 
@@ -487,7 +487,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('includes an NOTATION type', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elName attrName NOTATION ( one | two ) #REQUIRED>');
          source.endText();
 

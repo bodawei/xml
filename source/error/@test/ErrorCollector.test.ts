@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Offset, Range, EntityLocation } from 'basic';
+import { Offset, Range, EntityId } from 'basic';
 import { SToken } from 'sToken';
 
 import ErrorCollector from '../ErrorCollector';
@@ -45,14 +45,14 @@ describe('ErrorCollector', () => {
    describe('report', () => {
       let ec: ErrorCollector;
       let errorId: string;
-      let loc: EntityLocation;
+      let loc: EntityId;
       let constructorSpy: jasmine.Spy;
       let contextStart: SToken;
       let errorStart: SToken;
 
       beforeEach(() => {
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
-         loc = new EntityLocation();
+         loc = new EntityId();
          constructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
          errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
@@ -90,13 +90,13 @@ describe('ErrorCollector', () => {
 
    describe('reportError()', () => {
       let ec: ErrorCollector;
-      let loc: EntityLocation;
+      let loc: EntityId;
       let constructorSpy: jasmine.Spy;
       let contextStart: SToken;
       let errorStart: SToken;
 
       beforeEach(() => {
-         loc = new EntityLocation();
+         loc = new EntityId();
          constructorSpy = jasmine.createSpy('').and.returnValue({ id: 'constructorSpy' });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
          errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
@@ -128,13 +128,13 @@ describe('ErrorCollector', () => {
 
    describe('appendFrom()', () => {
       let ec: ErrorCollector;
-      let loc: EntityLocation;
+      let loc: EntityId;
       let constructorSpy: jasmine.Spy;
       let contextStart: SToken;
       let errorStart: SToken;
 
       beforeEach(() => {
-         loc = new EntityLocation();
+         loc = new EntityId();
          constructorSpy = jasmine.createSpy('').and.returnValue({ id: 'constructorSpy' });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
          errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));

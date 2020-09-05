@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { EntityId } from 'basic';
 import { toSToken } from 'sToken';
 import {
    CharRefPToken,
@@ -14,7 +14,7 @@ import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
 
 describe('entityValueToSTokenSource() (unit)', () => {
    it('returns an empty STokenSource when given an empty EntityValuePToken', (done) => {
-      const result = entityValueToSTokenSource([], new EntityMetaData());
+      const result = entityValueToSTokenSource([], new EntityId());
 
       result.extractNoParams('all', (stoken) => {
          expect(stoken).toBeUndefined();
@@ -25,7 +25,7 @@ describe('entityValueToSTokenSource() (unit)', () => {
    it('returns the text contents of a text token', (done) => {
       const result = entityValueToSTokenSource(
          [new TextPToken({ text: toSToken('wowzers') })],
-         new EntityMetaData(),
+         new EntityId(),
       );
 
       result.extractNoParams('all', (stoken) => {
@@ -57,7 +57,7 @@ describe('entityValueToSTokenSource() (unit)', () => {
             new TextPToken({ text: toSToken('three') }),
             new ParameterEntityEndPToken(otherPERef),
          ],
-         new EntityMetaData(),
+         new EntityId(),
       );
 
       result.extractNoParams('all', (stoken) => {

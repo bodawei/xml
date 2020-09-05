@@ -1,15 +1,15 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { SToken, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { XmlDeclarationPToken } from 'token';
 
 import * as misc from '../../../token/common/misc';
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 import { InstructionStart } from '../../../token/bridge/instruction';
+import { ConformanceVersion } from 'basic';
 
 describe('xmlDeclarationCheck() (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
@@ -42,33 +42,33 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
    describe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          spyOn(misc, 'checkCharWellFormed');
       });
 
       it('calls misc.checkCharWellFormed() on the target value', () => {
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, emd);
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
             xmlDeclPToken.target,
             mockErrorCollector,
-            emd,
+            confVer,
          );
       });
 
       it('calls misc.checkCharWellFormed() on the version value', () => {
          (xmlDeclPToken.params[0].value as any) = toSToken('\u0001');
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, emd);
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
             xmlDeclPToken.params[0].value,
             mockErrorCollector,
-            emd,
+            confVer,
          );
       });
 
@@ -76,12 +76,12 @@ describe('xmlDeclarationCheck() (unit)', () => {
          (xmlDeclPToken.params[0].name as any) = toSToken('encoding');
          (xmlDeclPToken.params[0].value as any) = toSToken('\u0001');
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, emd);
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
             xmlDeclPToken.params[0].value,
             mockErrorCollector,
-            emd,
+            confVer,
          );
       });
 
@@ -89,19 +89,19 @@ describe('xmlDeclarationCheck() (unit)', () => {
          (xmlDeclPToken.params[0].name as any) = toSToken('standalone');
          (xmlDeclPToken.params[0].value as any) = toSToken('\u0001');
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, emd);
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
             xmlDeclPToken.params[0].value,
             mockErrorCollector,
-            emd,
+            confVer,
          );
       });
 
       it('reports an error if there is a space after the "<?"', () => {
          (xmlDeclPToken as any).openSpace = toSToken(' ');
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_SPACE_AFTER_OPEN,
@@ -113,7 +113,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
       it('reports an error if there is no target', () => {
          delete (xmlDeclPToken as any).target;
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_TARGET,
@@ -125,7 +125,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
       it('reports an error if xml is the wrong case', () => {
          (xmlDeclPToken as any).target.str = 'XmL';
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_TARGET_INVALID_CASE,
@@ -137,7 +137,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
       it('reports an error if there is no space after the target', () => {
          delete (xmlDeclPToken as any).targetSpace;
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_SPACE_AFTER_TARGET,
@@ -164,7 +164,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             close: toSToken('?>'),
          });
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
@@ -179,7 +179,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             close: toSToken('?>'),
          });
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_PARAMS,
@@ -206,7 +206,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             close: toSToken('?>'),
          });
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_PARAM_INVALID_CASE,
@@ -218,7 +218,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
       it('reports an error if there is no close', () => {
          xmlDeclPToken = new XmlDeclarationPToken(start);
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_CLOSE,
@@ -252,7 +252,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             close: toSToken('?>'),
          });
 
-         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_SPACE_BETWEEN_PARAMS,
@@ -287,7 +287,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                close: toSToken('?>'),
             });
 
-            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
@@ -314,11 +314,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                close: toSToken('?>'),
             });
 
-            xmlDeclarationCheck(
-               xmlDeclPToken,
-               mockErrorCollector,
-               new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4),
-            );
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 4));
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
@@ -345,11 +341,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                close: toSToken('?>'),
             });
 
-            xmlDeclarationCheck(
-               xmlDeclPToken,
-               mockErrorCollector,
-               new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1),
-            );
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 1));
 
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
          });
@@ -372,11 +364,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                close: toSToken('?>'),
             });
 
-            xmlDeclarationCheck(
-               xmlDeclPToken,
-               mockErrorCollector,
-               new EntityMetaData(EntityKind.DOCUMENT, 1.1, 1),
-            );
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.1, 1));
 
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
          });
@@ -399,11 +387,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                close: toSToken('?>'),
             });
 
-            xmlDeclarationCheck(
-               xmlDeclPToken,
-               mockErrorCollector,
-               new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5),
-            );
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 5));
 
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
          });
@@ -434,7 +418,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   close: toSToken('?>'),
                });
 
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
@@ -468,7 +452,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   close: toSToken('?>'),
                });
 
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
@@ -504,7 +488,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   close: toSToken('?>'),
                });
 
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
@@ -538,11 +522,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   close: toSToken('?>'),
                });
 
-               xmlDeclarationCheck(
-                  xmlDeclPToken,
-                  mockErrorCollector,
-                  new EntityMetaData(EntityKind.EXTERNAL),
-               );
+               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
@@ -576,11 +556,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   close: toSToken('?>'),
                });
 
-               xmlDeclarationCheck(
-                  xmlDeclPToken,
-                  mockErrorCollector,
-                  new EntityMetaData(EntityKind.EXTERNAL),
-               );
+               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
@@ -609,7 +585,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   close: toSToken('?>'),
                });
 
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,

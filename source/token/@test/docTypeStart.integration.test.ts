@@ -1,17 +1,17 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
+import { ExternalIdXToken } from 'xToken';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
 import { TextPToken } from '../text';
 import { EXTERNAL_ID } from '../common/externalId';
-import { ExternalIdXToken } from 'xToken';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken: DocTypeStartPToken;
@@ -42,7 +42,7 @@ describe('docTypeStart (integration)', () => {
    describe('parse()', () => {
 
       it('parses the doctype start', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 
@@ -66,7 +66,7 @@ describe('docTypeStart (integration)', () => {
       });
 
       it('asks the declaration module to report if there is no type', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('rootElement system "sys.dtd" [');
          source.endText();
          delete declaration.declType;
@@ -74,7 +74,7 @@ describe('docTypeStart (integration)', () => {
          parseDocTypeStart(source, declaration, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            parsing.checkWellFormed(ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_NO_DECLTYPE);
             done();
@@ -82,14 +82,14 @@ describe('docTypeStart (integration)', () => {
       });
 
       it('asks the externalId module to look for well formed problems', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('rootElement system "sys.dtd" [');
          source.endText();
 
          parseDocTypeStart(source, declaration, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            parsing.checkWellFormed(ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
             done();
@@ -110,7 +110,7 @@ describe('docTypeStart (integration)', () => {
       });
 
       it('populates the token with data from the PToken', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 

@@ -1,12 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { ConformanceVersion, EntityId } from 'basic';
 import { PToken as PTokenClassic } from 'token';
 
-import { ConformanceVersion } from './token/conformanceVersion';
-import { EntityId } from './token/entityId';
-
-export * from './token/conformanceVersion';
-export * from './token/entityId';
+export * from './util/externalIdToEntityId';
 
 type PToken = PTokenClassic;
 type ParseValue = PToken | ConformanceVersion | EntityId;

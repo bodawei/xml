@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
@@ -82,8 +82,8 @@ class ElementDeclarationPToken extends declaration.PToken {
       return results;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      checkWellFormed(this, ec, confVer);
    }
 }
 
@@ -171,19 +171,19 @@ function parseClose(source: STokenSource, pToken: ElementDeclarationPToken, deli
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorCollector, confVer: ConformanceVersion) {
    if (!pToken || pToken.unassigned) {
       return;
    }
 
    const nameText = strOrBlank(pToken.name);
 
-   declaration.checkWellFormed(pToken, ec, entityMetaData);
+   declaration.checkWellFormed(pToken, ec, confVer);
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ELEMENTDECL_NO_NAME);
-   misc.checkName(pToken.name, ec, entityMetaData, WFEID.ELEMENTDECL_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, 'ELEMENT',
+   misc.checkName(pToken.name, ec, confVer, WFEID.ELEMENTDECL_NAME_INVALID);
+   misc.checkWellFormedNameRecommendation(pToken.name, ec, confVer, 'ELEMENT',
       WARN.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
       WARN.ELEMENTDECL_NAME_XML_RESERVED);
 
@@ -191,7 +191,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorColle
    ec.check(!pToken.postNameSpace, WFEID.ELEMENTDECL_NAME_NO_SPACE, [ nameText ]);
 
    if (pToken.children) {
-      nameList.checkWellFormed(pToken.children, ec, entityMetaData);
+      nameList.checkWellFormed(pToken.children, ec, confVer);
    } else {
       const contentSpec: string = strOrBlank(pToken.contentSpec);
       const upperContentSpec = contentSpec.toLocaleUpperCase();

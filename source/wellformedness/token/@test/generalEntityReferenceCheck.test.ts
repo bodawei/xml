@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { toSToken } from 'sToken';
@@ -10,12 +10,12 @@ import * as util from '../util/nameCheck';
 import { generalEntityReferenceCheck } from '../generalEntityReferenceCheck';
 
 describe('generalEntityReferenceCheck()', () => {
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let mockErrorCollector: MockErrorCollector;
    let gePToken: GeneralEntityReferencePToken;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
+      confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
 
       gePToken = new GeneralEntityReferencePToken({
@@ -30,18 +30,18 @@ describe('generalEntityReferenceCheck()', () => {
    });
 
    it('checks that the name is a valid name', () => {
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, emd);
+      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
       expect(util.nameCheck).toHaveBeenCalledWith(
          gePToken.name,
          mockErrorCollector,
-         emd,
+         confVer,
          WellFormedError.ID.REFERENCE_NAME_INVALID,
       );
    });
 
    it('reports an error if there is a space after the opening %', () => {
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, emd);
+      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.REFERENCE_XTRA_SPACE,
@@ -59,7 +59,7 @@ describe('generalEntityReferenceCheck()', () => {
          close: toSToken(';'),
       });
 
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, emd);
+      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.REFERENCE_NO_NAME,
@@ -69,7 +69,7 @@ describe('generalEntityReferenceCheck()', () => {
    });
 
    it('reports an error if there is a space after the entity name', () => {
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, emd);
+      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.REFERENCE_XTRA_TRAILING_SPACE,
@@ -87,7 +87,7 @@ describe('generalEntityReferenceCheck()', () => {
          close: undefined,
       });
 
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, emd);
+      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.REFERENCE_NO_SEMICOLON,

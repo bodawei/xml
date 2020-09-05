@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 import { toSToken, SToken } from 'sToken';
 import {
    ParameterEntityReferencePToken,
@@ -455,7 +455,7 @@ describe('assignToProps()', () => {
 
       it('merges the combination of several introduced spaces into one space', () => {
          const pToken = {};
-         const space = spaceFromSToken(new SToken(' ', ' ', [new Range(new EntityLocation())]));
+         const space = spaceFromSToken(new SToken(' ', ' ', [new Range(new EntityId())]));
          const word = wordFromSToken(toSToken('firstWord'));
          const unVals: UnassignedArray = [
             word,
@@ -501,7 +501,7 @@ describe('assignToProps()', () => {
                makeInsertedRange(),
                makeInsertedRange(),
                makeInsertedRange(),
-               new Range(new EntityLocation()),
+               new Range(new EntityId()),
             ]),
          });
       });
@@ -566,7 +566,7 @@ describe('assignToProps()', () => {
 
       it('merges a 4.4.8 introduced space into the previous', () => {
          const pToken: any = {
-            one: new SToken('\t', '\t', new Range(new EntityLocation())),
+            one: new SToken('\t', '\t', new Range(new EntityId())),
          };
          const word = wordFromSToken(toSToken('firstWord'));
          const unVals: UnassignedArray = [
@@ -594,7 +594,7 @@ describe('assignToProps()', () => {
          assignToProps(unVals, pToken, 'two', descriptors);
 
          expect(pToken).toEqual({
-            one: new SToken('\t ', '\t ', [new Range(new EntityLocation()), makeInsertedRange()]),
+            one: new SToken('\t ', '\t ', [new Range(new EntityId()), makeInsertedRange()]),
             two: word.token.text,
          });
       });

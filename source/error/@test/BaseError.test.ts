@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Offset, Range, StringBundle } from 'basic';
+import { EntityId, Offset, Range, StringBundle } from 'basic';
 import { SToken } from 'sToken';
 
 import { BaseError, MessageCache } from '../BaseError';
@@ -77,46 +77,46 @@ describe('BaseError()', () => {
       });
 
       it('sets the place', () => {
-         expect(new BaseError(cache, 'TEST', [], new Offset(new EntityLocation(), 0, 1, 2)).place)
-            .toEqual(new Offset(new EntityLocation(), 0, 1, 2));
+         expect(new BaseError(cache, 'TEST', [], new Offset(new EntityId(), 0, 1, 2)).place)
+            .toEqual(new Offset(new EntityId(), 0, 1, 2));
       });
 
       it('sets the place even if a SToken is passed', () => {
          const error = new BaseError(cache, 'TEST', [],
-            new SToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4)));
-         expect(error.place).toEqual(new Offset(new EntityLocation(), 0, 3, 4));
+            new SToken('foo', 'foo', new Range(new EntityId(), 0, 1, 2, 0, 3, 4)));
+         expect(error.place).toEqual(new Offset(new EntityId(), 0, 3, 4));
       });
 
       it('clones the place', () => {
-         const place = new Offset(new EntityLocation(), 0, 1, 2);
+         const place = new Offset(new EntityId(), 0, 1, 2);
 
          expect(new BaseError(cache, 'TEST', [], place).place)
             .not.toBe(place);
       });
 
       it('sets the place even when params omitted', () => {
-         const place = new Offset(new EntityLocation(), 0, 1, 2);
+         const place = new Offset(new EntityId(), 0, 1, 2);
 
          expect(new BaseError(cache, 'TEST', [], place).place)
             .toEqual(place);
       });
 
       it('wraps the context if just an Offset is passed', () => {
-         const place = new Offset(new EntityLocation(), 0, 1, 2);
+         const place = new Offset(new EntityId(), 0, 1, 2);
          expect(new BaseError(cache, 'TEST', [], place, place).context)
             .toEqual([ place ]);
       });
 
       it('wraps the context if just an SToken is passed', () => {
-         const place = new Offset(new EntityLocation(), 0, 1, 2);
-         const sToken = new SToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4));
+         const place = new Offset(new EntityId(), 0, 1, 2);
+         const sToken = new SToken('foo', 'foo', new Range(new EntityId(), 0, 1, 2, 0, 3, 4));
 
          expect(new BaseError(cache, 'TEST', [], place, sToken).context)
             .toEqual([ place ]);
       });
 
       it('clones the context', () => {
-         const place = new Offset(new EntityLocation(), 0, 1, 2);
+         const place = new Offset(new EntityId(), 0, 1, 2);
          const context = place;
 
          expect(new BaseError(cache, 'TEST', [], place, context).context[0])
@@ -124,7 +124,7 @@ describe('BaseError()', () => {
       });
 
       it('sets the context even when params omitted', () => {
-         const place = new Offset(new EntityLocation(), 0, 1, 2);
+         const place = new Offset(new EntityId(), 0, 1, 2);
 
          expect(new BaseError(cache, 'TEST', [], place, place).context)
             .toEqual([ place ]);

@@ -1,7 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -48,7 +47,7 @@ describe('nameList (integration)', () => {
    describe('parse()', () => {
 
       it('parses name list', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('( one+ | two)* ');
          source.endText();
 
@@ -59,7 +58,7 @@ describe('nameList (integration)', () => {
       });
 
       it('parses name list with a PE Ref in it', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('( one+ | %fred;');
          source.endText();
 
@@ -76,7 +75,7 @@ describe('nameList (integration)', () => {
       });
 
       it('parses a nested name list with various delimiters', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('( one+ | ( ( two | three)+ , four)? | five)');
          source.endText();
 

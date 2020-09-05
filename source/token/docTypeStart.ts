@@ -1,6 +1,6 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
 
@@ -67,8 +67,8 @@ class DocTypeStartPToken {
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      return checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -119,14 +119,14 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   declaration.checkWellFormed(pToken as any, ec, entityMetaData); // typeHack
+function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
+   declaration.checkWellFormed(pToken as any, ec, confVer); // typeHack
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.DOCTYPE_NO_NAME);
-   misc.checkName(pToken.name, ec, entityMetaData, WFEID.DOCTYPE_NAME_INVALID);
+   misc.checkName(pToken.name, ec, confVer, WFEID.DOCTYPE_NAME_INVALID);
 
-   checkExternalIdWellFormed(pToken.externalId, ec, entityMetaData);
+   checkExternalIdWellFormed(pToken.externalId, ec, confVer);
 
    ec.setPos(pToken.openSubset);
 }

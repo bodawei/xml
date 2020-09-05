@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -15,115 +15,115 @@ describe('misc', () => {
    describe('checkWellFormedNameRecommendation()', () => {
       let WARN1: string;
       let WARN2: string;
-      let entityMetaData: EntityMetaData;
+      let confVer: ConformanceVersion;
       let ec: ErrorCollector;
 
       beforeEach(() => {
          ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
          ec.reportError = jasmine.createSpy('callbackSpy');
-         entityMetaData = new EntityMetaData();
+         confVer = new ConformanceVersion();
          WARN1 = 'WARN1';
          WARN2 = 'WARN2';
       });
 
       it('adds no errors if a name is not passed in', () => {
-         misc.checkWellFormedNameRecommendation(undefined as any, ec, entityMetaData, 'ELEMENT', WARN1, WARN2);
+         misc.checkWellFormedNameRecommendation(undefined as any, ec, confVer, 'ELEMENT', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no errors if the name does not start with "xml" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('foo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
+            new ConformanceVersion(1, 5), 'ELEMENT', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports a warning if the name starts with "xml" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlblah'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
+            new ConformanceVersion(1, 5), 'ELEMENT', WARN1, WARN2);
 
             expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlblah' ]);
          });
 
       it('reports no errors if this is an xml:lang attriute', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:lang'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
+            new ConformanceVersion(1, 5), 'ATTRIBUTE', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no errors if this is an xml:space attriute', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:space'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
+            new ConformanceVersion(1, 5), 'ATTRIBUTE', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports a warning if XML:LANG is provided', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('XML:LANG'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
+            new ConformanceVersion(1, 5), 'ATTRIBUTE', WARN1, WARN2);
 
          expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'XML:LANG' ]);
       });
 
       it('reports no warning if the version is 1.0/6, and the element name starts with "xml" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
+            new ConformanceVersion(1, 6), 'ELEMENT', WARN1, WARN2);
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports a warning if the version is 1.0/6, and the PI name starts with "xml-"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'PI', WARN1, WARN2);
+            new ConformanceVersion(1, 6), 'PI', WARN1, WARN2);
          expect(ec.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml-Foo' ]);
       });
 
       it('reports a warning if the version is 1.0/6, and the element or attr name starts with "xml:"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ATTRIBUTE', WARN1, WARN2);
+            new ConformanceVersion(1, 6), 'ATTRIBUTE', WARN1, WARN2);
 
          expect(ec.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml:Foo' ]);
       });
 
       it('reports no warning if the version is 1.0/6, and the element name starts with "xml" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
+            new ConformanceVersion(1, 6), 'ELEMENT', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no warning if the version is 1.0/6, and the entity name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ENTITY', WARN1, WARN2);
+            new ConformanceVersion(1, 6), 'ENTITY', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no warning if the version is 1.0/6, and the PI name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'PI', WARN1, WARN2);
+            new ConformanceVersion(1, 6), 'PI', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports a warning if the version is 1.0/5, and the name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
-         new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ENTITY', WARN1, WARN2);
+         new ConformanceVersion(1, 5), 'ENTITY', WARN1, WARN2);
 
          expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlFoo' ]);
       });
 
       it('reports a warning if the version is 1.0/5, and the PI name starts with "xml-"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'PI', WARN1, WARN2);
+            new ConformanceVersion(1, 5), 'PI', WARN1, WARN2);
 
          expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml-Foo' ]);
       });
 
       it('reports a warning if the version is 1.0/5, and the element name starts with "xml:" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), ec,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
+            new ConformanceVersion(1, 5), 'ELEMENT', WARN1, WARN2);
 
          expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml:Foo' ]);
       });
@@ -133,25 +133,25 @@ describe('misc', () => {
    describe('checkName', () => {
       let ec: ErrorCollector;
       let errorId: string;
-      let emdV1R5: EntityMetaData;
+      let confVerV1R5: ConformanceVersion;
       let utilIsName: jasmine.Spy;
 
       beforeEach(() => {
          ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
-         emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
+         confVerV1R5 = new ConformanceVersion(1.0, 5);
          spyOn(ec, 'report');
          utilIsName = spyOn(basic, 'isName');
       });
 
       it('accepts an empty Stoken', () => {
-         misc.checkName(undefined as any, ec, emdV1R5, errorId);
+         misc.checkName(undefined as any, ec, confVerV1R5, errorId);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
 
       it('calls isName()', () => {
-         misc.checkName(SToken.fromString('foo'), ec, emdV1R5, errorId);
+         misc.checkName(SToken.fromString('foo'), ec, confVerV1R5, errorId);
 
          expect(basic.isName).toHaveBeenCalledWith('foo', 1.0, 5);
       });
@@ -159,7 +159,7 @@ describe('misc', () => {
       it('reports an error if isName() returns false', () => {
          utilIsName.and.returnValue(false);
 
-         misc.checkName(SToken.fromString('foo'), ec, emdV1R5, errorId);
+         misc.checkName(SToken.fromString('foo'), ec, confVerV1R5, errorId);
 
          expect(ec.report).toHaveBeenCalledWith(
             errorId, [ 'foo' ], SToken.fromString('foo'));
@@ -170,29 +170,29 @@ describe('misc', () => {
    describe('checkNMToken', () => {
       let ec: ErrorCollector;
       let errorId: string;
-      let emdV1R5: EntityMetaData;
-      let emdV1R4: EntityMetaData;
-      let emdV11R2: EntityMetaData;
+      let confVerV1R5: ConformanceVersion;
+      let confVerV1R4: ConformanceVersion;
+      let confVerV11R2: ConformanceVersion;
       let utilIsNMToken: jasmine.Spy;
 
       beforeEach(() => {
          ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
-         emdV1R4 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4);
-         emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
-         emdV11R2 = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2);
+         confVerV1R4 = new ConformanceVersion(1.0, 4);
+         confVerV1R5 = new ConformanceVersion(1.0, 5);
+         confVerV11R2 = new ConformanceVersion(1.1, 2);
          spyOn(ec, 'report');
          utilIsNMToken = spyOn(basic, 'isNmToken');
       });
 
       it('accepts an empty Stoken', () => {
-         misc.checkNMToken(undefined as any, ec, emdV1R5, errorId);
+         misc.checkNMToken(undefined as any, ec, confVerV1R5, errorId);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
 
       it('calls isNmToken()', () => {
-         misc.checkNMToken(SToken.fromString('foo'), ec, emdV1R5, errorId);
+         misc.checkNMToken(SToken.fromString('foo'), ec, confVerV1R5, errorId);
 
          expect(basic.isNmToken).toHaveBeenCalledWith('foo', 1.0, 5);
       });
@@ -200,7 +200,7 @@ describe('misc', () => {
       it('reports an error if utilIsNMToken() returns false', () => {
          utilIsNMToken.and.returnValue(false);
 
-         misc.checkNMToken(SToken.fromString('foo'), ec, emdV1R5, errorId);
+         misc.checkNMToken(SToken.fromString('foo'), ec, confVerV1R5, errorId);
 
          expect(ec.report).toHaveBeenCalledWith(
             errorId, [ 'foo' ], SToken.fromString('foo'));
@@ -216,13 +216,13 @@ describe('misc', () => {
       });
 
       it('adds no errors if an SToken is not passed in', () => {
-         misc.checkCharWellFormed(undefined as any, mockErrorCollector, new EntityMetaData());
+         misc.checkCharWellFormed(undefined as any, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
 
       it('reports no errors if the SToken has no bad errors', () => {
-         misc.checkCharWellFormed(makeSToken('foo'), mockErrorCollector, new EntityMetaData());
+         misc.checkCharWellFormed(makeSToken('foo'), mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -231,7 +231,7 @@ describe('misc', () => {
          const sToken = makeSToken('b\u0001x\u0000x\uFDD1x\uFDD2xx');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData());
+            new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARDATA_INVALID_CHAR,
@@ -244,7 +244,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\u007F');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
+            new ConformanceVersion(1.1, 2));
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARDATA_INVALID_CHAR,
@@ -257,7 +257,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\u007F');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+            new ConformanceVersion(1.0, 5));
 
          expect(mockErrorCollector.errors.length).toEqual(1);
          expect(mockErrorCollector.errors[0].id).not.toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
@@ -267,7 +267,7 @@ describe('misc', () => {
          const sToken = makeSToken('b\u0001x\u0000x\uFDD1x\uFDD2xx');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData());
+            new ConformanceVersion());
 
          expect(mockErrorCollector).toReportWarning({
             id: XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
@@ -280,7 +280,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\u007F');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+            new ConformanceVersion(1.0, 1));
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -289,7 +289,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\u007F');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+            new ConformanceVersion(1.0, 2));
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -298,7 +298,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\uFDEF');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3));
+            new ConformanceVersion(1.0, 3));
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -307,7 +307,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\uFDEF');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+            new ConformanceVersion(1.0, 5));
 
          expect(mockErrorCollector).toReportWarning({
             id: XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
@@ -320,7 +320,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\u007F');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+            new ConformanceVersion(1.0, 5));
 
          expect(mockErrorCollector).toReportWarning({
             id: XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
@@ -333,7 +333,7 @@ describe('misc', () => {
          const sToken = makeSToken('bad\u007F');
 
          misc.checkCharWellFormed(sToken, mockErrorCollector,
-            new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
+            new ConformanceVersion(1.1, 2));
 
          expect(mockErrorCollector.errors.length).toEqual(1);
          expect(mockErrorCollector.errors[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);

@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -19,7 +19,7 @@ import { TextPToken } from '../text';
 
 describe('entityDeclaration (integration)', () => {
    let declarationPToken: DeclarationPToken;
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let source: STokenSource;
 
    beforeEach(() => {
@@ -29,8 +29,8 @@ describe('entityDeclaration (integration)', () => {
          declType: makeSToken('ENTITY'),
          declTypeSpace: makeSToken('\t'),
       });
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      confVer = new ConformanceVersion();
+      source = new STokenSource(defaultExtractors);
    });
 
    describe('parse()', () => {
@@ -104,7 +104,7 @@ describe('entityDeclaration (integration)', () => {
       //    parseEntityDeclaration(source, declarationPToken, (result) => {
       //       const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-      //       result.checkWellFormed(ec, emd);
+      //       result.checkWellFormed(ec, confVer);
 
       //       expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
       //       done();
@@ -117,7 +117,7 @@ describe('entityDeclaration (integration)', () => {
          parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            result.checkWellFormed(ec, emd);
+            result.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
             done();
@@ -129,7 +129,7 @@ describe('entityDeclaration (integration)', () => {
          parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            result.checkWellFormed(ec, emd);
+            result.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ENTITYDECL_NAME_INVALID);
             done();
@@ -141,7 +141,7 @@ describe('entityDeclaration (integration)', () => {
          parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            result.checkWellFormed(ec, emd);
+            result.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
             done();
@@ -153,7 +153,7 @@ describe('entityDeclaration (integration)', () => {
          parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            result.checkWellFormed(ec, emd);
+            result.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_OPEN_QUOTE);
             done();
@@ -165,7 +165,7 @@ describe('entityDeclaration (integration)', () => {
          parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            result.checkWellFormed(ec, emd);
+            result.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
@@ -173,7 +173,7 @@ describe('entityDeclaration (integration)', () => {
       });
 
       it('calls unassigned.checkExtra() to report on extra values', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('entityName %bar; "other">');
          source.endText();
 
@@ -185,9 +185,9 @@ describe('entityDeclaration (integration)', () => {
                }, {
                   type: UnassignedType.LITERAL,
                   token: {
-                     openQuote: new SToken('"', '"', new Range(new EntityLocation())),
-                     value: [ new TextPToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityLocation())) }) ],
-                     closeQuote: new SToken('"', '"', new Range(new EntityLocation())),
+                     openQuote: new SToken('"', '"', new Range(new EntityId())),
+                     value: [ new TextPToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityId())) }) ],
+                     closeQuote: new SToken('"', '"', new Range(new EntityId())),
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
@@ -196,7 +196,7 @@ describe('entityDeclaration (integration)', () => {
             ];
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            pToken.checkWellFormed(ec, new EntityMetaData());
+            pToken.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[2].id).toEqual(WellFormedError.ID.ENTITYDECL_EXTRA_TEXT);
             done();
@@ -217,12 +217,12 @@ describe('entityDeclaration (integration)', () => {
    //       });
    //    });
 
-   //    it('creates a token with the externalLoc set (externalId.makeEntityLocation())', (done) => {
+   //    it('creates a token with the externalLoc set (externalId.makeEntityId())', (done) => {
    //       source.addText('entityName SYSTEM "sys.xml" >');
    //       parseEntityDeclaration(source, declarationPToken, (pToken) => {
    //          const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-   //          expect(xToken.externalLoc).toEqual(new EntityLocation('sys.xml'));
+   //          expect(xToken.externalLoc).toEqual(new EntityId('sys.xml'));
    //          done();
    //       });
    //    });

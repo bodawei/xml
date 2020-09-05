@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
@@ -11,7 +11,7 @@ import { parseXmlDeclaration } from 'token';
 
 describe('xmlDeclaration (integration)', () => {
    let start: InstructionStart;
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let source: STokenSource;
 
    beforeEach(() => {
@@ -21,8 +21,8 @@ describe('xmlDeclaration (integration)', () => {
          target: SToken.fromString('xml'),
          targetSpace: SToken.fromString(' '),
       };
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      confVer = new ConformanceVersion();
+      source = new STokenSource(defaultExtractors);
    });
 
    it('reports an error when the target text is malformed (check misc.checkCharWellFormed())', (done) => {
@@ -32,7 +32,7 @@ describe('xmlDeclaration (integration)', () => {
       parseXmlDeclaration(source, start, (result) => {
          const ec = new ErrorCollector(start.open, WellFormedError);
 
-         xmlDeclarationCheck(result, ec, emd);
+         xmlDeclarationCheck(result, ec, confVer);
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
          done();
@@ -45,7 +45,7 @@ describe('xmlDeclaration (integration)', () => {
       parseXmlDeclaration(source, start, (result) => {
          const ec = new ErrorCollector(start.open, WellFormedError);
 
-         xmlDeclarationCheck(result, ec, emd);
+         xmlDeclarationCheck(result, ec, confVer);
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
          done();

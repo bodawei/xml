@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -65,11 +65,11 @@ describe('elementEnd', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
       let mockErrorCollector: MockErrorCollector;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          mockErrorCollector = new MockErrorCollector();
 
          spyOn(misc, 'checkName');
@@ -77,22 +77,22 @@ describe('elementEnd', () => {
       });
 
       it('asks the misc module to look for errors in the name', () => {
-         elementEndPToken.checkWellFormed(mockErrorCollector, emd);
+         elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(elementEndPToken.name,
-            mockErrorCollector, emd, WellFormedError.ID.ELEMENT_NAME_INVALID);
+            mockErrorCollector, confVer, WellFormedError.ID.ELEMENT_NAME_INVALID);
       });
 
       it('asks the misc module to look for warnings in the name', () => {
-         elementEndPToken.checkWellFormed(mockErrorCollector, emd);
+         elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(elementEndPToken.name,
-            mockErrorCollector, emd, 'ELEMENT', XmlWarning.ID.ELEMENT_NAME_XMLCOLON_RESERVED,
+            mockErrorCollector, confVer, 'ELEMENT', XmlWarning.ID.ELEMENT_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
       });
 
       it('reports no errors if everything is in order', () => {
-         elementEndPToken.checkWellFormed(mockErrorCollector, emd);
+         elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -101,7 +101,7 @@ describe('elementEnd', () => {
          const makeSToken = makeSTokenMaker();
          (elementEndPToken as any).openSpace = makeSToken(' ');
 
-         elementEndPToken.checkWellFormed(mockErrorCollector, emd);
+         elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
@@ -113,7 +113,7 @@ describe('elementEnd', () => {
       it('reports an error if there is no elment name', () => {
          (elementEndPToken as any).name = undefined;
 
-         elementEndPToken.checkWellFormed(mockErrorCollector, emd);
+         elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_NO_NAME,
@@ -125,7 +125,7 @@ describe('elementEnd', () => {
       it('reports whether there is a close', () => {
          (elementEndPToken as any).close = undefined;
 
-         elementEndPToken.checkWellFormed(mockErrorCollector, emd);
+         elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_NO_CLOSE,

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { STokenSource, STokenArrayBuilder, SToken } from 'sToken';
 
@@ -33,8 +33,8 @@ class DocTypeEndPToken {
       this.type = DOCTYPE_END_PTOKEN;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      return checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -87,7 +87,7 @@ function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken,
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: DocTypeEndPToken, ec: ErrorCollector, emd: EntityMetaData) { // eslint-disable-line no-unused-vars
+function checkWellFormed(pToken: DocTypeEndPToken, ec: ErrorCollector, confVer: ConformanceVersion) { // eslint-disable-line no-unused-vars
    ec.setPos(pToken.closeSubset);
 
    if (!pToken.docTypeStartPToken || !pToken.docTypeStartPToken.openSubset) {

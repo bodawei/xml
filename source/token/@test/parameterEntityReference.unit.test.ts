@@ -1,19 +1,16 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData,  } from 'basic';
 import { MockSTokenSource } from 'sToken-test';
-import { SToken, toSToken } from 'sToken';
-
+import { toSToken } from 'sToken';
 
 import {
    ParameterEntityReferencePToken,
-   parseParameterEntityReference
+   parseParameterEntityReference,
 } from '../parameterEntityReference';
 
 describe('ParameterEntityReferencePToken (unit)', () => {
    let pePToken: ParameterEntityReferencePToken;
-   let emd: EntityMetaData;
 
    beforeEach(() => {
       pePToken = new ParameterEntityReferencePToken({
@@ -35,13 +32,15 @@ describe('ParameterEntityReferencePToken (unit)', () => {
             close: toSToken('E'),
          });
 
-         expect(result).toEqual(new ParameterEntityReferencePToken({
-            open: toSToken('A'),
-            openSpace: toSToken('B'),
-            name: toSToken('C'),
-            nameSpace: toSToken('D'),
-            close: toSToken('E'),
-         }));
+         expect(result).toEqual(
+            new ParameterEntityReferencePToken({
+               open: toSToken('A'),
+               openSpace: toSToken('B'),
+               name: toSToken('C'),
+               nameSpace: toSToken('D'),
+               close: toSToken('E'),
+            }),
+         );
       });
    });
 
@@ -54,11 +53,11 @@ describe('ParameterEntityReferencePToken (unit)', () => {
 
       it('does a full parse', () => {
          const mockSource = new MockSTokenSource([
-            [ '%', 'match', '%' ],
-            [ ' ', 'space' ],
-            [ 'entityName', 'word', [ ';' ] ],
-            [ ' ', 'space' ],
-            [ ';', 'match', ';' ],
+            ['%', 'match', '%'],
+            [' ', 'space'],
+            ['entityName', 'word', [';']],
+            [' ', 'space'],
+            [';', 'match', ';'],
          ]);
 
          parseParameterEntityReference(mockSource, callback);
@@ -68,9 +67,7 @@ describe('ParameterEntityReferencePToken (unit)', () => {
       });
 
       it('copes with no reference at all', () => {
-         const mockSource = new MockSTokenSource([
-            undefined,
-         ]);
+         const mockSource = new MockSTokenSource([undefined]);
 
          parseParameterEntityReference(mockSource, callback);
          mockSource.respondInAsyncTime();
@@ -80,7 +77,7 @@ describe('ParameterEntityReferencePToken (unit)', () => {
 
       it('copes with eof mid-stream', () => {
          const mockSource = new MockSTokenSource([
-            [ '%', 'match', '%' ],
+            ['%', 'match', '%'],
             undefined,
             undefined,
             undefined,
@@ -99,5 +96,4 @@ describe('ParameterEntityReferencePToken (unit)', () => {
          });
       });
    });
-
 });

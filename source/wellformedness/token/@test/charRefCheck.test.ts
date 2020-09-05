@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'error-test';
 import { WellFormedError } from 'error';
 import { toSToken } from 'sToken';
@@ -14,13 +14,13 @@ import { charRefCheck } from '../charRefCheck';
 
 describe('charRefCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let charRefPToken: CharRefPToken;
    let isCharSpy: jasmine.Spy;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
-      emd = new EntityMetaData();
+      confVer = new ConformanceVersion();
       charRefPToken = makeCharRef();
 
       isCharSpy = spyOn(basic, 'isChar');
@@ -33,7 +33,7 @@ describe('charRefCheck()', () => {
          charCode: 66,
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(isCharSpy).toHaveBeenCalledWith('\u0042', 1.0);
    });
@@ -46,7 +46,7 @@ describe('charRefCheck()', () => {
          charCode: 0xffff,
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_INVALID_CHAR,
@@ -62,7 +62,7 @@ describe('charRefCheck()', () => {
          openSpace: toSToken(' '),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_XTRA_POST_OPEN_SPACE,
@@ -78,7 +78,7 @@ describe('charRefCheck()', () => {
          hexMarker: toSToken('X'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_INVALID_HEX_CASE,
@@ -94,7 +94,7 @@ describe('charRefCheck()', () => {
          hexMarkerSpace: toSToken(' '),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_XTRA_POST_HEX_SPACE,
@@ -110,7 +110,7 @@ describe('charRefCheck()', () => {
          digits: undefined,
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_NO_DIGITS,
@@ -126,7 +126,7 @@ describe('charRefCheck()', () => {
          digitsSpace: toSToken(' '),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_XTRA_POST_DIGITS_SPACE,
@@ -143,7 +143,7 @@ describe('charRefCheck()', () => {
          close: undefined,
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, emd);
+      charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_NO_CLOSE,

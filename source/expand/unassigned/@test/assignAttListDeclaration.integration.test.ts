@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { Range, EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import {
@@ -23,7 +23,7 @@ import { assignAttListDeclaration } from '../assignAttListDeclaration';
 
 describe('assignAttListDeclaration() (integration)', () => {
    it('fills in the missing properties, including the preceeding declaration space', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('%foo;>');
       source.endText();
 
@@ -58,7 +58,7 @@ describe('assignAttListDeclaration() (integration)', () => {
                declTypeSpace: new SToken(' ', ' ', [makeInsertedRange()]),
                elementName: toSToken('entityName'),
                postElementNameSpace: new SToken('  ', '  ', [
-                  new Range(new EntityLocation()),
+                  new Range(new EntityId()),
                   makeInsertedRange(),
                ]),
                close: toSToken('>'),
@@ -73,7 +73,7 @@ describe('assignAttListDeclaration() (integration)', () => {
    });
 
    it('fills in the missing attributes', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('elName at1 CDATA %foo;>');
       source.endText();
 
@@ -144,7 +144,7 @@ describe('assignAttListDeclaration() (integration)', () => {
    });
 
    it('identifies an enumeration if the type value is missing', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('elName at1 CDATA %foo;>');
       source.endText();
 
@@ -233,7 +233,7 @@ describe('assignAttListDeclaration() (integration)', () => {
    });
 
    it('will expand a list that is in progress', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('elName at1 (one|%foo;>');
       source.endText();
 

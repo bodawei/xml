@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
@@ -51,8 +51,8 @@ class ProcessingInstructionPToken {
       this.targetSpace = (param as any).targetSpace;
    }
 
-   checkWellFormed(ec: ErrorCollector, emd: EntityMetaData):void {
-      return checkWellFormed(this, ec, emd);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion):void {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken(): ProcessingInstructionXToken {
@@ -98,7 +98,7 @@ function parseProcessingInstruction(source: STokenSource, instr: InstructionStar
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    const targetName = strOrBlank(pToken.target);
    const lcTarget = targetName.toLowerCase();
    const hasXml = lcTarget.indexOf('xml') !== -1;
@@ -109,9 +109,9 @@ function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector
 
    ec.setPos(pToken.target);
    ec.check(!pToken.target, WFEID.PI_NO_TARGET);
-   checkName(pToken.target, ec, entityMetaData, WFEID.PI_TARGET_NAME_INVALID);
+   checkName(pToken.target, ec, confVer, WFEID.PI_TARGET_NAME_INVALID);
    ec.check(hasXml, WFEID.PI_TARGET_HAS_XML, [ targetName ]);
-   checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData, 'PI',
+   checkWellFormedNameRecommendation(pToken.target, ec, confVer, 'PI',
       XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
 
    ec.setPos(pToken.targetSpace);
@@ -120,7 +120,7 @@ function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector
    }
 
    ec.setPos(pToken.instruction);
-   checkCharWellFormed(pToken.instruction, ec, entityMetaData);
+   checkCharWellFormed(pToken.instruction, ec, confVer);
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.PI_NO_CLOSE, [ targetName ]);
 }

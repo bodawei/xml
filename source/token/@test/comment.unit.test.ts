@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Offset } from 'basic';
+import { ConformanceVersion, Offset, EntityId } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
@@ -155,36 +155,36 @@ describe('comment (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          spyOn(misc, 'checkCharWellFormed');
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
       });
 
       it('asks the misc.checkCharWellFormed() to validate the text', () => {
          (commentPToken.text as any).pop();
          (commentPToken.text as any).push(commentPToken.open);  // just need another token here
          (commentPToken.text as any).push(expectedSToken('commentText'));
-         commentPToken.checkWellFormed(mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed)
-            .toHaveBeenCalledWith(commentPToken.text[0], mockErrorCollector, emd);
+            .toHaveBeenCalledWith(commentPToken.text[0], mockErrorCollector, confVer);
          expect(misc.checkCharWellFormed)
-            .toHaveBeenCalledWith(commentPToken.text[1], mockErrorCollector, emd);
+            .toHaveBeenCalledWith(commentPToken.text[1], mockErrorCollector, confVer);
       });
 
       it('reports an error when the content ends with a hyphen', () => {
          commentPToken.text[0].str += '-';
          commentPToken.text[0].originalStr += '-';
 
-         commentPToken.checkWellFormed(mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
             params: undefined,
-            position: new Offset(emd.location, 14, 0, 14),
+            position: new Offset(new EntityId(), 14, 0, 14),
          });
       });
 
@@ -193,7 +193,7 @@ describe('comment (unit)', () => {
          commentPToken.text[0].originalStr += '-';
          commentPToken.text[0].ranges = [];
 
-         commentPToken.checkWellFormed(mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
@@ -206,7 +206,7 @@ describe('comment (unit)', () => {
          (commentPToken.text as any).push(expectedSToken('--'));
          (commentPToken.text as any).push(expectedSToken(' illegal'));
 
-         commentPToken.checkWellFormed(mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_DOUBLE_HYPHEN,
@@ -218,7 +218,7 @@ describe('comment (unit)', () => {
       it('reports an error when there was no closing', () => {
          delete (commentPToken as any).close;
 
-         commentPToken.checkWellFormed(mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_NO_CLOSE,
@@ -232,7 +232,7 @@ describe('comment (unit)', () => {
          (commentPToken.text as any).pop();
          delete (commentPToken as any).close;
 
-         commentPToken.checkWellFormed(mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_NO_CLOSE,

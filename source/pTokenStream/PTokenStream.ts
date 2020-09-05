@@ -2,7 +2,7 @@
 
 import { Readable } from 'stream';
 
-import { EntityMetaData, EntityKind, XmlVersion, XmlRevision, EntityLocation } from 'basic';
+import { CONFORMANCE_VERSION, ConformanceVersion, XmlVersion, XmlRevision, EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { ParseValue } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
@@ -31,7 +31,7 @@ import {
    ElementStartPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-import { CONFORMANCE_VERSION, ConformanceVersion, ContextType, EntityId } from 'pToken';
+import { ContextType } from 'pToken';
 
 type DeliverPToken = (result: ParseValue | null | undefined | Array<ParseValue>) => void; // icky typeHack
 enum ConditionalState {
@@ -45,7 +45,7 @@ interface PTokenOptions {
    context?: ContextType;
    version?: XmlVersion;
    revision?: XmlRevision;
-   id?: EntityId;
+   entityId?: EntityId;
 }
 
 class PTokenStream extends Readable {
@@ -54,7 +54,6 @@ class PTokenStream extends Readable {
    private inContent: boolean;
    private _reportedMetaData: boolean;
    private _parsing: boolean = false;
-   private emd: EntityMetaData;
    private id: EntityId;
    private confVer: ConformanceVersion;
    private context: ContextType = ContextType.DOCUMENT;
@@ -63,34 +62,10 @@ class PTokenStream extends Readable {
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(metaDataOrTokenSource: STokenSource | EntityMetaData | undefined, options?: PTokenOptions) {
+   constructor(metaDataOrTokenSource?: STokenSource | undefined, options?: PTokenOptions) {
       super({
          objectMode: true,
       });
-
-      this.versionSet = false;
-      this.confVer = {
-         type: CONFORMANCE_VERSION,
-         version: 1,
-         revision: 5,
-      };
-
-      if (metaDataOrTokenSource instanceof STokenSource) {
-         this.emd = new EntityMetaData(EntityKind.DOCUMENT);
-         this._sTokenSource = metaDataOrTokenSource;
-      } else if (metaDataOrTokenSource) {
-         this.emd = metaDataOrTokenSource;
-         this.confVer = {
-            type: CONFORMANCE_VERSION,
-            version: metaDataOrTokenSource.version,
-            revision: metaDataOrTokenSource.revision,
-         };
-         this.versionSet = true;
-         this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource);
-      } else {
-         this.emd = new EntityMetaData(EntityKind.DOCUMENT);
-         this._sTokenSource = new STokenSource(defaultExtractors, this.emd);
-      }
 
       let opts: PTokenOptions;
       
@@ -104,7 +79,8 @@ class PTokenStream extends Readable {
       this.context = opts.context || ContextType.DOCUMENT;
       this.inContent = opts.context === ContextType.GENERAL_ENTITY;
       this._reportedMetaData = false;
-      this.id = opts.id ?? new EntityId('./document.xml');
+      this.id = opts.entityId ?? new EntityId('./document.xml');
+      this._sTokenSource = metaDataOrTokenSource || new STokenSource(defaultExtractors);
 
       if (opts.version) {    
          this.confVer = {
@@ -113,7 +89,16 @@ class PTokenStream extends Readable {
             revision: opts.revision ?? (opts.version === 1 ? 5 : 2),
          };
          this.versionSet = true;
+      } else {
+         this.confVer = {
+            type: CONFORMANCE_VERSION,
+            version: 1,
+            revision: 5,
+         };
+         this.versionSet = false;
       }
+
+      this._sTokenSource.setConfVer(this.confVer);
    }
 
    addText(text: string) {
@@ -153,14 +138,13 @@ class PTokenStream extends Readable {
                   version,
                   revision,
                };
+               this._sTokenSource.setConfVer(this.confVer);
             }
 
             if (this.context === ContextType.DOCUMENT) {
                this.push(this.confVer);
                this.push(this.id);
             }
-
-            this.push(this._sTokenSource.metaData);
          }
 
          // docstart and end may deliver an array(!)
@@ -197,8 +181,6 @@ class PTokenStream extends Readable {
    }
 
    _parseGeneral(deliverParse: DeliverPToken) {
-      this.emd = this._sTokenSource.metaData;
-
       if (this.inContent) {
          this._parseContent(deliverParse);
 
@@ -337,7 +319,7 @@ class PTokenStream extends Readable {
                parseComment(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<!':
-               parseDeclaration(this._sTokenSource, markupStartSToken, this.emd, (pToken) => {
+               parseDeclaration(this._sTokenSource, markupStartSToken, this.confVer, (pToken) => {
                   if (pToken instanceof DocTypeStartPToken && pToken.openSubset) {
                      this.waitingForInternalClose = true;
                      this.startDocType = pToken;

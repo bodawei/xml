@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { EntityLocation, EntityKind, EntityMetaData, XmlRevision, XmlVersion } from 'basic';
+import { XmlRevision, XmlVersion } from 'basic';
 import { CheckWellFormed } from 'nodeStream';
 import { PTokenStream } from 'pTokenStream';
 import { PToken } from 'token';
@@ -19,8 +19,11 @@ import { AttFixerStream } from 'nodeStream';
 import { ContextType } from 'pToken';
 
 function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
-   const emd = new EntityMetaData(EntityKind.DOCUMENT, ver, rev, new EntityLocation(test.testPath));
-   const pTokenStream = new PTokenStream(emd, { context: ContextType.DOCUMENT });
+   const pTokenStream = new PTokenStream(undefined, {
+      context: ContextType.DOCUMENT,
+      version: ver,
+      revision: rev,
+   });
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
    const checkWF = new CheckWellFormed();
@@ -48,7 +51,7 @@ describe('XML Conformance tests', () => {
          .map((ver) => Number.parseInt(ver, 10) as XmlRevision);
 
       allEditions.forEach((edition) => {
-         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
+         fit(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
             const hasOutput = 'outputData' in testData;
             const testStream = setUpStreams(testData, ver, edition);
             const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
@@ -80,6 +83,7 @@ describe('XML Conformance tests', () => {
                //    'results',
                //    results.map((r) => r.type),
                // );
+               // console.log(JSON.stringify(results, undefined, 5));
                // const actualErrors: Array<any> = results.filter(
                //    (token) => token.type === 'ERROR_TYPE' && (token as any).subtype !== 'WARNING',
                // ) as any;

@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 import { GeneralEntityDeclarationPToken } from 'token';
@@ -12,22 +12,22 @@ import { TextPToken } from 'source/token/text';
 describe('declaration (integration)', () => {
 
    describe('parseDeclaration()', () => {
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
       let source: STokenSource;
       let start: SToken;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
+         confVer = new ConformanceVersion();
+         source = new STokenSource(defaultExtractors);
          start = SToken.fromString('<!');
       });
 
       it('parses an Entity declaration', (done) => {
-         source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source = new STokenSource(defaultExtractors);
          source.addText('ENTITY foo "theValue">');
          source.endText();
 
-         parseDeclaration(source, start, new EntityMetaData(EntityKind.DOCUMENT), (parsing) => {
+         parseDeclaration(source, start, confVer, (parsing) => {
             expect(parsing).toEqualRangeless(new GeneralEntityDeclarationPToken({
                open: start,
                declType: SToken.fromString('ENTITY'),

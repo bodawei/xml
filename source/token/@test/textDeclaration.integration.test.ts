@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
@@ -25,7 +25,7 @@ describe('textDeclaration (integration)', () => {
    describe('parseXmlDeclaration()', () => {
 
       it('parses the input, including the parameters which use literal.parse()', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
@@ -36,7 +36,7 @@ describe('textDeclaration (integration)', () => {
       });
 
       it('converts the value from literal.parse() to a single SToken', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
@@ -49,12 +49,12 @@ describe('textDeclaration (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
       let source: STokenSource;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
+         confVer = new ConformanceVersion();
+         source = new STokenSource(defaultExtractors);
       });
 
       it('reports an error when the target text is malformed (check misc.checkCharWellFormed())', (done) => {
@@ -64,7 +64,7 @@ describe('textDeclaration (integration)', () => {
          parseTextDeclaration(source, start, (result) => {
             const ec = new ErrorCollector(start.open, WellFormedError);
 
-            result.checkWellFormed(ec, emd);
+            result.checkWellFormed(ec, confVer);
 
             // console.log(ec.getErrors());
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
@@ -78,7 +78,7 @@ describe('textDeclaration (integration)', () => {
          parseTextDeclaration(source, start, (result) => {
             const ec = new ErrorCollector(start.open, WellFormedError);
 
-            result.checkWellFormed(ec, emd);
+            result.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
@@ -90,7 +90,7 @@ describe('textDeclaration (integration)', () => {
    describe('pToken.toSTokenArray()', () => {
 
       it('returns the STokens', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 

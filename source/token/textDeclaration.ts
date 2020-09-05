@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
@@ -34,8 +34,8 @@ class TextDeclarationPToken {
       this.params = this.params;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-      checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
+      checkWellFormed(this, ec, confVer);
    }
 
    toSTokenArray(): Array<SToken> {
@@ -65,13 +65,13 @@ function parseTextDeclaration(source: STokenSource, instStart: InstructionStart,
  Do well formed checking on the PToken from the parse().
 \**********************************************************************/
 
-function checkWellFormed(pToken: TextDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: TextDeclarationPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    ec.setPos(pToken.open);
    ec.setPos(pToken.openSpace);
    ec.check(pToken.openSpace, WFEID.TEXTDECL_SPACE_AFTER_OPEN);
 
    ec.setPos(pToken.target);
-   checkCharWellFormed(pToken.target, ec, entityMetaData);
+   checkCharWellFormed(pToken.target, ec, confVer);
 
    if (pToken.target) {
       const target = strOrBlank(pToken.target);
@@ -84,13 +84,13 @@ function checkWellFormed(pToken: TextDeclarationPToken, ec: ErrorCollector, enti
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);
 
-   checkParameters(pToken.params, ec, entityMetaData);
+   checkParameters(pToken.params, ec, confVer);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.TEXTDECL_NO_CLOSE);
 }
 
-function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: ErrorCollector, confVer: ConformanceVersion) {
    let foundEncoding = false;
 
    for (const param of params) {
@@ -111,7 +111,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, confVer);
             ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.TEXTDECL_VERSION_INVALD, [ valueText ]);
             break;
          case 'encoding':
@@ -122,7 +122,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, confVer);
             ec.check(!valueText.match(ENCODING_REGEXP), WFEID.TEXTDECL_ENCODING_INVALID, [ valueText ]);
             break;
       }

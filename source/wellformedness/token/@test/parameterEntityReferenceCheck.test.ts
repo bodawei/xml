@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { toSToken } from 'sToken';
@@ -10,12 +10,12 @@ import * as util from '../util/nameCheck';
 import { parameterEntityReferenceCheck } from '../parameterEntityReferenceCheck';
 
 describe('parameterEntityReferenceCheck()', () => {
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let mockErrorCollector: MockErrorCollector;
    let pePToken: ParameterEntityReferencePToken;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
+      confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
 
       pePToken = new ParameterEntityReferencePToken({
@@ -30,18 +30,18 @@ describe('parameterEntityReferenceCheck()', () => {
    });
 
    it('checks that the name is a valid name ', () => {
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, emd);
+      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
       expect(util.nameCheck).toHaveBeenCalledWith(
          pePToken.name,
          mockErrorCollector,
-         emd,
+         confVer,
          WellFormedError.ID.PEREF_NAME_INVALID,
       );
    });
 
    it('reports an error if there is a space after the opening % (syntax)', () => {
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, emd);
+      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.PEREF_XTRA_SPACE,
@@ -59,7 +59,7 @@ describe('parameterEntityReferenceCheck()', () => {
          close: toSToken(';'),
       });
 
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, emd);
+      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.PEREF_NO_NAME,
@@ -69,7 +69,7 @@ describe('parameterEntityReferenceCheck()', () => {
    });
 
    it('reports an error if there is a space after the entity name (syntax)', () => {
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, emd);
+      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.PEREF_XTRA_TRAILING_SPACE,
@@ -87,7 +87,7 @@ describe('parameterEntityReferenceCheck()', () => {
          close: undefined,
       });
 
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, emd);
+      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.PEREF_NO_SEMICOLON,

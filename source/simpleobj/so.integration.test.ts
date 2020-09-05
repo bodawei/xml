@@ -1,7 +1,5 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { PTokenStream } from '../pTokenStream';
 import { PToXTokenStream } from '../xTokenStream';
 import SimpleObjStream from './so';
@@ -12,7 +10,7 @@ describe('SimpleObjStream (integration)', () => {
    let objStream: SimpleObjStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData());
+      pTokenStream = new PTokenStream();
       tokenStream = new PToXTokenStream();
       objStream = new SimpleObjStream();
 

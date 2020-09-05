@@ -1,6 +1,6 @@
-/* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
@@ -22,8 +22,8 @@ class GeneralEntityStartPToken {
       this.referencePToken = geReferencePToken;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-      generalEntityReferenceCheck(this.referencePToken, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
+      generalEntityReferenceCheck(this.referencePToken, ec, confVer);
    }
 
    toXToken() {

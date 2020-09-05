@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ENTITY_ID } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -19,7 +19,6 @@ import { expandEntityValue } from '../expandEntityValue';
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import { EntityNameStack } from '../EntityNameStack';
-import { ENTITY_ID } from 'pToken';
 
 describe('expandEntityValue() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -47,7 +46,6 @@ describe('expandEntityValue() (unit)', () => {
       );
 
       params = {
-         emd: new EntityMetaData(),
          entityId: {
             type: ENTITY_ID,
             systemId: '',
@@ -64,7 +62,7 @@ describe('expandEntityValue() (unit)', () => {
             },
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, new EntityMetaData()),
+                  sTokenSource: new STokenSource({}),
                   getErrors: (): Array<XmlError> => [],
                };
             },
@@ -131,9 +129,9 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.parseEntityValue = (sTokenSource, done): void => {
          done([]);
       };
-      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+      params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, new EntityMetaData()),
+            sTokenSource: new STokenSource({}),
             getErrors: (): Array<XmlError> => [],
          };
       };
@@ -155,9 +153,9 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.parseEntityValue = (sTokenSource, done): void => {
          done([]);
       };
-      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+      params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, new EntityMetaData()),
+            sTokenSource: new STokenSource({}),
             getErrors: (): Array<XmlError> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],
@@ -242,9 +240,9 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.parseEntityValue = (sTokenSource, done): void => {
          done([second]);
       };
-      params.utils.retrieveExternalEntity = (externalId, entityMetaData): RetrieveResults => {
+      params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, new EntityMetaData()),
+            sTokenSource: new STokenSource({}),
             getErrors: (): Array<XmlError> => [],
          };
       };

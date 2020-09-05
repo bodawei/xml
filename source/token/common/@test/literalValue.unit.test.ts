@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -111,7 +111,7 @@ describe('literalValue (unit)', () => {
             mockSource.respondInAsyncTime();
 
             expect(generalParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-            expect(generalParseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)));
+            expect(generalParseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)));
             expect(generalParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          });
 
@@ -126,7 +126,7 @@ describe('literalValue (unit)', () => {
             mockSource.respondInAsyncTime();
 
             expect(charRefSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-            expect(charRefSpy.calls.argsFor(0)[1]).toEqual(new SToken('&#', '&#', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)));
+            expect(charRefSpy.calls.argsFor(0)[1]).toEqual(new SToken('&#', '&#', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)));
             expect(charRefSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          });
 
@@ -171,14 +171,13 @@ describe('literalValue (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let miscCheckWellFormedSpy: jasmine.Spy;
-      let refCheckWellFormedSpy: jasmine.Spy;
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
       let valuePToken: LiteralValuePToken;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
 
          valuePToken = [ new TextPToken({ text: SToken.fromString('xxx') }) ];
 
@@ -186,16 +185,16 @@ describe('literalValue (unit)', () => {
       });
 
       it('calls misc.checkCharWellFormed() to check the value', () => {
-         literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+         literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
 
          expect(miscCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
          expect(miscCheckWellFormedSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
-         expect(miscCheckWellFormedSpy.calls.argsFor(0)[2]).toEqual(emd);
+         expect(miscCheckWellFormedSpy.calls.argsFor(0)[2]).toEqual(confVer);
       });
 
       it('sets the position before calling misc.checkWellFormed', () => {
          const spy: jasmine.Spy = mockErrorCollector.setPos as jasmine.Spy;
-         literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+         literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
 
          expect(spy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
       });
@@ -205,7 +204,7 @@ describe('literalValue (unit)', () => {
       //    refCheckWellFormedSpy = spyOn(geRef, 'checkWellFormed');
       //    valuePToken.push(geRef);
 
-      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
 
       //    expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(mockErrorCollector);
       // });
@@ -215,9 +214,9 @@ describe('literalValue (unit)', () => {
       //    const spy = spyOn(ref, 'checkWellFormed');
       //    valuePToken.push(ref);
 
-      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
 
-      //    expect(spy).toHaveBeenCalledWith(mockErrorCollector, emd);
+      //    expect(spy).toHaveBeenCalledWith(mockErrorCollector, confVer);
       // });
 
    });

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, Offset } from 'basic';
+import { ConformanceVersion, Offset } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import misc from './common/misc';
@@ -48,8 +48,8 @@ class CommentPToken {
       this.open = param.open;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      return checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -117,7 +117,7 @@ function extractCommentContent(source: STokenSource, pToken: { open: SToken, [ke
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    ec.setPos(pToken.open);
 
    if (!pToken.text || pToken.text.length === 0) {
@@ -129,7 +129,7 @@ function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, entityMetaDa
       const isDoubleHyphenPiece = textSToken.str === '--';
 
       ec.setPos(textSToken);
-      misc.checkCharWellFormed(textSToken, ec, entityMetaData);
+      misc.checkCharWellFormed(textSToken, ec, confVer);
 
       if (isDoubleHyphenPiece) {
          ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);
@@ -140,7 +140,7 @@ function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, entityMetaDa
          if (range) {
             const originsl = range.getEndOffset();
             // Adjust to the location of the hyphen
-            offset = new Offset(originsl.location, originsl.index - 1, originsl.row, originsl.column - 1);
+            offset = new Offset(originsl.entityId, originsl.index - 1, originsl.row, originsl.column - 1);
          }
 
          ec.report(WFEID.COMMENT_ENDS_WITH_HYPHEN, undefined, offset);

@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -11,7 +11,6 @@ import { parseCdata, CdataPToken } from '../cdata';
 import { SectionStart } from '../bridge/section';
 
 describe('cdata (integration)', () => {
-   let emd: EntityMetaData;
    let source: STokenSource;
    let sectionStart: SectionStart;
    let cDataPToken: CdataPToken;
@@ -19,8 +18,7 @@ describe('cdata (integration)', () => {
    beforeEach(() => {
       const expectedSToken = makeSTokenMaker();
 
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      source = new STokenSource(defaultExtractors);
 
       sectionStart =  {
          open: expectedSToken('<!['),
@@ -38,7 +36,7 @@ describe('cdata (integration)', () => {
    describe('parse()', () => {
 
       it('parses up to the ]]>', (done) => {
-         source.addText('[some text<foo>]]>other', new Range(new EntityLocation(), 8, 0, 8));
+         source.addText('[some text<foo>]]>other', new Range(new EntityId(), 8, 0, 8));
 
          parseCdata(source, sectionStart, (result) => {
             expect(result).toEqual(cDataPToken);
@@ -51,14 +49,14 @@ describe('cdata (integration)', () => {
    describe('checkWellFormed()', () => {
 
       it('reports error if type has an invalid character type', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('[F\u0000xx[');
          source.endText();
 
          parseCdata(source, sectionStart, (pToken) => {
             const ec = new ErrorCollector(SToken.fromString('<!['), WellFormedError);
 
-            pToken.checkWellFormed(ec, new EntityMetaData());
+            pToken.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
@@ -72,7 +70,7 @@ describe('cdata (integration)', () => {
          parseCdata(source, sectionStart, (pToken) => {
             const ec = new ErrorCollector(pToken.open, WellFormedError);
 
-            pToken.checkWellFormed(ec, emd);
+            pToken.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

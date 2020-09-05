@@ -1,15 +1,9 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
 
-import { EntityMetaData, ENTITY_META_DATA } from 'basic';
-import { CONFORMANCE_VERSION, ENTITY_ID } from 'pToken';
+import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import {
-   CharDataXToken,
-   CommentXToken,
-   ElementEndXToken,
-   ElementStartXToken,
    COMMENT_XTOKEN,
    ELEMENT_START_XTOKEN,
    CHARDATA_XTOKEN,
@@ -38,7 +32,7 @@ describe('CommentFixingStream (integration)', () => {
 
    function testTransformation(before: string, after: string, done: () => void) {
       const cf = new CommentFixingStream();
-      pTokenStream = new PTokenStream(new EntityMetaData());
+      pTokenStream = new PTokenStream();
       xTokenStream = new PToXTokenStream();
 
       pTokenStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
@@ -84,7 +78,7 @@ describe('CommentFixingStream (integration)', () => {
    describe('passthrough', () => {
 
       it('passes all tokens through', (done) => {
-         pTokenStream = new PTokenStream(new EntityMetaData());
+         pTokenStream = new PTokenStream();
          xTokenStream = new PToXTokenStream();
 
          pTokenStream.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
@@ -96,7 +90,7 @@ describe('CommentFixingStream (integration)', () => {
          gatherTokens(cf, (results) => {
             const types = results.map(r => r.type);
 
-            expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ENTITY_META_DATA, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
+            expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
             done();
          });
       });

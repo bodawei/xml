@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
@@ -11,12 +11,12 @@ import { CharDataPToken, CharDataXToken, parseCharData } from '../charData';
 // import * as charData from '../charData';
 
 describe('charData (integration)', () => {
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let source: STokenSource;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      confVer = new ConformanceVersion();
+      source = new STokenSource(defaultExtractors);
    });
 
    describe('parse()', () => {
@@ -57,7 +57,7 @@ describe('charData (integration)', () => {
             const pToken = result as CharDataPToken;
             const ec = new ErrorCollector(pToken!.text, WellFormedError);
 
-            pToken!.checkWellFormed(ec, emd);
+            pToken!.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

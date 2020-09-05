@@ -1,18 +1,15 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import { EntityLocation, Range } from 'basic';
+import { Range, EntityId } from 'basic';
 
 import WordExtractor from '../WordExtractor';
 import Segment from '../Segment';
 
 describe('WordExtractor', () => {
-   let defaultLoc: EntityLocation;
    let segmentRange: Range;
 
    beforeEach(() => {
-      defaultLoc = new EntityLocation();
-      segmentRange = new Range(defaultLoc);
+      segmentRange = new Range(new EntityId());
    });
 
    describe('basic behavior', () => {

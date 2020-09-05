@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityKind, EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken } from 'sToken';
 
@@ -14,33 +14,33 @@ import { checkXmlLangWellFormed } from '../langAttribute';
 
 describe('langAttribute (unit)', () => {
    let startSToken: SToken;
-   let emd10_1: EntityMetaData;
-   let emd: EntityMetaData;
+   let confVer10_1: ConformanceVersion;
+   let confVer: ConformanceVersion;
    let ec: ErrorCollector;
 
    beforeEach(() => {
       startSToken = SToken.fromString('x');
       ec = new ErrorCollector(startSToken, WellFormedError);
-      emd10_1 = new EntityMetaData(EntityKind.DOCUMENT, 1, 1);
-      emd = new EntityMetaData();
+      confVer10_1 = new ConformanceVersion(1, 1);
+      confVer = new ConformanceVersion();
    });
 
    describe('checkXmlLangWellFormed()', () => {
 
       it('reports no errors on an empty attribute value', () => {
-         checkXmlLangWellFormed([], ec, emd);
+         checkXmlLangWellFormed([], ec, confVer);
 
          expect(ec.errors.length).toEqual(0);
       });
 
       it('reports no errors on an attribute value that has no problems', () => {
-         checkXmlLangWellFormed([ new TextPToken({ text: SToken.fromString('wh') }) ], ec, emd);
+         checkXmlLangWellFormed([ new TextPToken({ text: SToken.fromString('wh') }) ], ec, confVer);
 
          expect(ec.errors.length).toEqual(0);
       });
 
       it('reports no errors on an attribute xtoken values', () => {
-         checkXmlLangWellFormed([ new TextXToken('wh') ], ec, emd);
+         checkXmlLangWellFormed([ new TextXToken('wh') ], ec, confVer);
 
          expect(ec.errors.length).toEqual(0);
       });
@@ -49,7 +49,7 @@ describe('langAttribute (unit)', () => {
          checkXmlLangWellFormed([
             new TextPToken({ text: SToken.fromString('w') }),
             new TextPToken({ text: SToken.fromString('h') }),
-         ], ec, emd);
+         ], ec, confVer);
 
          expect(ec.errors.length).toEqual(0);
       });
@@ -59,7 +59,7 @@ describe('langAttribute (unit)', () => {
             new GeneralEntityStartPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&'), })),
             new TextPToken({ text: SToken.fromString('wh') }),
             new GeneralEntityEndPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&'), })),
-         ], ec, emd);
+         ], ec, confVer);
 
          expect(ec.errors.length).toEqual(0);
       });
@@ -69,7 +69,7 @@ describe('langAttribute (unit)', () => {
          const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
             [ '99' ], textToken.text, textToken.text);
 
-         checkXmlLangWellFormed([ textToken ], ec, emd);
+         checkXmlLangWellFormed([ textToken ], ec, confVer);
 
          expect(ec.errors).toEqual([ expected ]);
       });
@@ -78,13 +78,13 @@ describe('langAttribute (unit)', () => {
          const textToken = new TextPToken({ text: SToken.fromString('99') });
          const refToken = new GeneralEntityReferencePToken({ open: SToken.fromString('&'), });
 
-         checkXmlLangWellFormed([ textToken, refToken ], ec, emd);
+         checkXmlLangWellFormed([ textToken, refToken ], ec, confVer);
 
          expect(ec.errors.length).toEqual(0);
       });
 
       it('reports no errors with an empty value if rev >= 3', () => {
-         checkXmlLangWellFormed([ new TextPToken({ text: SToken.fromString('') }) ], ec, emd);
+         checkXmlLangWellFormed([ new TextPToken({ text: SToken.fromString('') }) ], ec, confVer);
 
          expect(ec.errors.length).toEqual(0);
       });
@@ -94,7 +94,7 @@ describe('langAttribute (unit)', () => {
          const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
             [ '' ], textToken.text, textToken.text);
 
-         checkXmlLangWellFormed([ textToken ], ec, new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+         checkXmlLangWellFormed([ textToken ], ec, new ConformanceVersion(1.0, 2));
 
          expect(ec.errors).toEqual([ expected ]);
       });
@@ -103,7 +103,7 @@ describe('langAttribute (unit)', () => {
          const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
             [ '' ], startSToken, startSToken);
 
-         checkXmlLangWellFormed([ ], ec, new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+         checkXmlLangWellFormed([ ], ec, new ConformanceVersion(1.0, 2));
 
          expect(ec.errors).toEqual([ expected ]);
       });
@@ -113,7 +113,7 @@ describe('langAttribute (unit)', () => {
          it('allows en as a code', () => {
             const textToken = new TextPToken({ text: SToken.fromString('en') });
 
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
 
             expect(ec.errors.length).toEqual(0);
          });
@@ -121,7 +121,7 @@ describe('langAttribute (unit)', () => {
          it('allows "x-blah-blah" as a code', () => {
             const textToken = new TextPToken({ text: SToken.fromString('x-ABC-a-abcd-abcdefghijklmnopqrstuvwxyz') });
 
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
 
             expect(ec.errors.length).toEqual(0);
          });
@@ -129,7 +129,7 @@ describe('langAttribute (unit)', () => {
          it('allows "X-blah-blah" as a code', () => {
             const textToken = new TextPToken({ text: SToken.fromString('X-ABC-a-abcd-abcdefghijklmnopqrstuvwxyz') });
 
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
 
             expect(ec.errors.length).toEqual(0);
          });
@@ -137,7 +137,7 @@ describe('langAttribute (unit)', () => {
          it('allows "i-blah-blah" as a code', () => {
             const textToken = new TextPToken({ text: SToken.fromString('i-ABC-a-abcd-abcdefghijklmnopqrstuvwxyz') });
 
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
 
             expect(ec.errors.length).toEqual(0);
          });
@@ -145,7 +145,7 @@ describe('langAttribute (unit)', () => {
          it('allows "I-blah-blah" as a code', () => {
             const textToken = new TextPToken({ text: SToken.fromString('I-ABC-a-abcd-abcdefghijklmnopqrstuvwxyz') });
 
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
 
             expect(ec.errors.length).toEqual(0);
          });
@@ -153,7 +153,7 @@ describe('langAttribute (unit)', () => {
          it('allows "zh-blah-blah" as a code', () => {
             const textToken = new TextPToken({ text: SToken.fromString('zh-ABC-a-abcd-abcdefghijklmnopqrstuvwxyz') });
 
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
 
             expect(ec.errors.length).toEqual(0);
          });
@@ -163,7 +163,7 @@ describe('langAttribute (unit)', () => {
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'abc' ], textToken.text, textToken.text);
    
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
    
             expect(ec.errors).toEqual([ expected ]);
          });
@@ -174,7 +174,7 @@ describe('langAttribute (unit)', () => {
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'abcdef' ], textToken1.text, textToken1.text);
    
-            checkXmlLangWellFormed([ textToken1, textToken2 ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken1, textToken2 ], ec, confVer10_1);
    
             expect(ec.errors).toEqual([ expected ]);
          });
@@ -185,7 +185,7 @@ describe('langAttribute (unit)', () => {
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'abc' ], textToken.text, textToken.text);
    
-            checkXmlLangWellFormed([ textXToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textXToken ], ec, confVer10_1);
    
             expect(ec.errors).toEqual([ expected ]);
          });
@@ -195,7 +195,7 @@ describe('langAttribute (unit)', () => {
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'abc' ], startSToken, startSToken);
    
-            checkXmlLangWellFormed([ textXToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textXToken ], ec, confVer10_1);
    
             expect(ec.errors).toEqual([ expected ]);
          });
@@ -205,7 +205,7 @@ describe('langAttribute (unit)', () => {
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'A' ], textToken.text, textToken.text);
    
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
    
             expect(ec.errors).toEqual([ expected ]);
          });
@@ -215,7 +215,7 @@ describe('langAttribute (unit)', () => {
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'e9' ], textToken.text, textToken.text);
    
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
    
             expect(ec.errors).toEqual([ expected ]);
          });
@@ -225,7 +225,7 @@ describe('langAttribute (unit)', () => {
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'en-' ], textToken.text, textToken.text);
    
-            checkXmlLangWellFormed([ textToken ], ec, emd10_1);
+            checkXmlLangWellFormed([ textToken ], ec, confVer10_1);
    
             expect(ec.errors).toEqual([ expected ]);
          });

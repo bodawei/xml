@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -11,10 +11,10 @@ import { CommentPToken, parseComment } from '../comment';
 
 describe('comment (integration)', () => {
    let commentPToken: CommentPToken;
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
+      confVer = new ConformanceVersion();
       const expectedSToken = makeSTokenMaker();
       commentPToken = new CommentPToken({
          open: SToken.fromString(''),
@@ -27,7 +27,7 @@ describe('comment (integration)', () => {
    describe('parse()', () => {
 
       it('produces a full PToken result', (done) => {
-         const source = new STokenSource(defaultExtractors, emd);
+         const source = new STokenSource(defaultExtractors);
          source.addText('my comment-->');
          source.endText();
 
@@ -38,7 +38,7 @@ describe('comment (integration)', () => {
       });
 
       it('parses a comment with double hyphens in it that ends early', (done) => {
-         const source = new STokenSource(defaultExtractors, emd);
+         const source = new STokenSource(defaultExtractors);
          const expectedSToken = makeSTokenMaker();
          const pToken = new CommentPToken({
             open: commentPToken.open,
@@ -64,14 +64,14 @@ describe('comment (integration)', () => {
    describe('checkWellFormed()', () => {
 
       it('reports on invalid characters in the comment', (done) => {
-         const source = new STokenSource(defaultExtractors, emd);
+         const source = new STokenSource(defaultExtractors);
          source.addText('x\u0000y-->');
          source.endText();
 
          parseComment(source, commentPToken.open, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            parsing.checkWellFormed(ec, emd);
+            parsing.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, ENTITY_META_DATA } from 'basic';
+import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { CONFORMANCE_VERSION } from 'pToken';
 import { STokenSource } from 'sToken';
 
 import PTokenStream from '../PTokenStream';
@@ -23,7 +22,6 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    SPACE_PTOKEN,
 } from 'token';
-import { ENTITY_ID } from 'pToken';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -32,7 +30,7 @@ describe('PTokenStream (integration)', () => {
    let pTokenStream: PTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData);
+      pTokenStream = new PTokenStream();
    });
 
    function gatherTokens(stream: PTokenStream, input: string | void, done: (tokens: TokenArray) => void) {
@@ -74,8 +72,7 @@ describe('PTokenStream (integration)', () => {
    describe('construction', () => {
 
       it('uses the provided STokenSource', (done) => {
-         const emd = new EntityMetaData();
-         const source = new STokenSource(defaultExtractors, emd);
+         const source = new STokenSource(defaultExtractors);
          pTokenStream = new PTokenStream(source);
 
          source.addText('blah<elementName>');
@@ -151,7 +148,7 @@ describe('PTokenStream (integration)', () => {
       gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
          const types = results.map(r => r.type);
          expect(types).toEqual([
-            CONFORMANCE_VERSION, ENTITY_ID, ENTITY_META_DATA, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
+            CONFORMANCE_VERSION, ENTITY_ID, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
          done();
       });
    });

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
@@ -34,8 +34,8 @@ class CharDataPToken {
       this.text = props.text;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      return checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -78,9 +78,9 @@ function parseCharData(source: STokenSource, otherTerminators: Array<string>, de
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: CharDataPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: CharDataPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    ec.setPos(pToken.text);
-   misc.checkCharWellFormed(pToken.text, ec, entityMetaData);
+   misc.checkCharWellFormed(pToken.text, ec, confVer);
 }
 
 /**********************************************************************\

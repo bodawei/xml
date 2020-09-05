@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
+import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 const SPACE_PTOKEN = 'SPACE_PTOKEN';
 const SPACE_XTOKEN = 'SPACE_XTOKEN';
@@ -31,8 +31,8 @@ class SpacePToken {
       this.text = props.text;
    }
 
-   checkWellFormed(ec: ErrorCollector, emd: EntityMetaData) {
-      checkWellFormed(this, ec, emd);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -72,7 +72,7 @@ function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|vo
 \**********************************************************************/
 
 // eslint-disable-next-line no-unused-vars
-function checkWellFormed(pToken: SpacePToken, ec: ErrorCollector, emd: EntityMetaData) {
+function checkWellFormed(pToken: SpacePToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    ec.setPos(pToken.text);
 }
 

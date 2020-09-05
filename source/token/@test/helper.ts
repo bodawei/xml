@@ -1,6 +1,6 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 import { toSToken } from 'sToken';
 import {
    CdataPToken,
@@ -36,7 +36,7 @@ import {
 } from 'token';
 
 const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
-const RANGE = new Range(new EntityLocation(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
+const RANGE = new Range(new EntityId(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
 
 function makeInsertedRange() {
    return RANGE.clone();

@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_META_DATA, EntityKind, EntityLocation, EntityMetaData } from 'basic';
-import { CONFORMANCE_VERSION, ParseValue, ContextType, ENTITY_ID, EntityId } from 'pToken';
+import { CONFORMANCE_VERSION, ENTITY_ID, EntityId } from 'basic';
+import { ParseValue, ContextType } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -91,18 +91,11 @@ class EntityExpander {
    private deliverToken: DeliverPToken;
    private expandParams: ExpandParams;
    private state = State.AT_START;
-   private seenEmd = false;
    private entityNameStack: EntityNameStack = new EntityNameStack();
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = deliverPToken;
       this.expandParams = {
-         emd: new EntityMetaData(
-            EntityKind.DOCUMENT,
-            1.0,
-            5,
-            new EntityLocation('dummy meta data to keep TypeScript happy'),
-         ),
          entityId: new EntityId(''),
          conditionalStack: [],
          entityDetails: new EntityDetails(),
@@ -113,25 +106,13 @@ class EntityExpander {
 
    public expandPToken(pToken: ParseValue, expanded: PTokenExpanded): void {
       switch (pToken.type) {
-         case ENTITY_META_DATA:
-            if (!this.seenEmd) {
-               this.seenEmd = true;
-               this.expandParams.emd = pToken;
-               this.deliverToken(pToken);
-            }
-            expanded();
-            break;
          case ENTITY_ID:
-            if (!this.seenEmd) {
-               this.expandParams.entityId = pToken;
-               this.deliverToken(pToken);
-            }
+            this.expandParams.entityId = pToken;
+            this.deliverToken(pToken);
             expanded();
             break;
          case CONFORMANCE_VERSION:
-            if (!this.seenEmd) {
-               this.deliverToken(pToken);
-            }
+            this.deliverToken(pToken);
             expanded();
             break;
          case DOCTYPE_START_PTOKEN:

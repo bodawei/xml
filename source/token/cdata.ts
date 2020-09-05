@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
@@ -44,8 +44,8 @@ class CdataPToken {
       this.open = param.open;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-      checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
+      checkWellFormed(this, ec, confVer);
    }
 
    toXToken(): CdataXToken {
@@ -89,7 +89,7 @@ function parseCdata(source: STokenSource, sectionStart: SectionStart, deliverPTo
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, entityMetaData: EntityMetaData): void {
+function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, confVer: ConformanceVersion): void {
    const typeText = strOrBlank(pToken.sectionType);
 
    ec.setPos(pToken.open);
@@ -116,7 +116,7 @@ function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, entityMetaData
    ec.check(!pToken.bracket, WFEID.CDATA_NO_SECOND_BRACKET, [ typeText ]);
 
    ec.setPos(pToken.text);
-   misc.checkCharWellFormed(pToken.text, ec, entityMetaData);
+   misc.checkCharWellFormed(pToken.text, ec, confVer);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.CDATA_NO_CLOSE);

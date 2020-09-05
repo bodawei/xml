@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { dirname, extname, relative, resolve } from 'path';
 import { Transform } from 'stream';
 
-import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
+import { EntityId } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { EntityExpanderStream } from 'nodeStream';
 import { PToXTokenStream } from 'xTokenStream';
@@ -340,8 +340,11 @@ class RefineObject extends Transform {
  */
 function convertTestData(pathName: string, ouputDir: string) {
    const docPath = resolve(pathName, 'xmlconf.xml');
-   const emd = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3, new EntityLocation(docPath));
-   const pTokenStream = new PTokenStream(emd);
+   const pTokenStream = new PTokenStream(undefined, {
+      version: 1.0,
+      revision: 3,
+      entityId: new EntityId(docPath),
+   });
    const entityExpander = new EntityExpanderStream(true);
    const toXToken = new PToXTokenStream();
    const so = new SimpleObj();

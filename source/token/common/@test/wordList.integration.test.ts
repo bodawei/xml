@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 
@@ -37,7 +37,7 @@ describe('wordList (integration)', () => {
    describe('parseWordList()', () => {
 
       it('parses a simple wordList', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('( one| two) ');
          source.endText();
 
@@ -48,7 +48,7 @@ describe('wordList (integration)', () => {
       });
 
       it('parses a malformed wordList', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('( | two three |');
          source.endText();
 

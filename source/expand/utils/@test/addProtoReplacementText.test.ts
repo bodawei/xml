@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ENTITY_ID } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -20,7 +20,6 @@ import { EntityDetails } from '../EntityDetails';
 import * as expandEntityValue from '../expandEntityValue';
 import { addProtoReplacementText } from '../addProtoReplacementText';
 import { EntityNameStack } from '../EntityNameStack';
-import { ENTITY_ID } from 'pToken';
 
 describe('addProtoReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -56,7 +55,6 @@ describe('addProtoReplacementText() (unit)', () => {
       entityDetails.addEntity(geDecl);
 
       params = {
-         emd: new EntityMetaData(),
          entityId: {
             type: ENTITY_ID,
             systemId: '',
@@ -73,7 +71,7 @@ describe('addProtoReplacementText() (unit)', () => {
             },
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, new EntityMetaData()),
+                  sTokenSource: new STokenSource({}),
                   getErrors: (): Array<XmlError> => [],
                };
             },
@@ -220,7 +218,7 @@ describe('addProtoReplacementText() (unit)', () => {
             errors.push(new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS));
          }
          return {
-            sTokenSource: new STokenSource({}, new EntityMetaData()),
+            sTokenSource: new STokenSource({}),
             getErrors: (): Array<XmlError> => errors,
          };
       };
@@ -254,7 +252,7 @@ describe('addProtoReplacementText() (unit)', () => {
    it('does not do any further processing when the entity can not be parsed', (done) => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}, new EntityMetaData()),
+            sTokenSource: new STokenSource({}),
             getErrors: (): Array<XmlError> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],

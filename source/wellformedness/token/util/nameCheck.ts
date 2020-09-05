@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, isName } from 'basic';
+import { ConformanceVersion, isName } from 'basic';
 import { ErrorCollector } from 'error';
 import { SToken } from 'sToken';
 
@@ -12,10 +12,10 @@ import { SToken } from 'sToken';
 function nameCheck(
    nameSToken: SToken | void,
    ec: ErrorCollector,
-   entityMetaData: EntityMetaData,
+   confVer: ConformanceVersion,
    errorCode: string,
 ): void {
-   if (!nameSToken || isName(nameSToken.str, entityMetaData.version, entityMetaData.revision)) {
+   if (!nameSToken || isName(nameSToken.str, confVer.version, confVer.revision)) {
       return;
    }
 

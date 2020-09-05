@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, isName, isNmToken } from 'basic';
+import { isName, isNmToken, ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { SToken } from 'sToken';
 
@@ -67,8 +67,8 @@ const WHOLENMTOKEN_REGEX11 = /^[-\.A-Za-z0-9:_\u00B7\u00C0-\u00D6\u00F8-\u02FF\u
  character requirements for names.
 \**********************************************************************/
 
-function checkName(nameSToken: SToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, errorCode: string) {
-   if (!nameSToken || isName(nameSToken.str, entityMetaData.version, entityMetaData.revision)) {
+function checkName(nameSToken: SToken | void, ec: ErrorCollector, confVers: ConformanceVersion, errorCode: string) {
+   if (!nameSToken || isName(nameSToken.str, confVers.version, confVers.revision)) {
       return;
    }
 
@@ -80,8 +80,8 @@ function checkName(nameSToken: SToken | void, ec: ErrorCollector, entityMetaData
  character requirements for nmtokens.
 \**********************************************************************/
 
-function checkNMToken(nameTokenSToken: SToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, errorCode: string) {
-   if (!nameTokenSToken || isNmToken(nameTokenSToken.str, entityMetaData.version, entityMetaData.revision)) {
+function checkNMToken(nameTokenSToken: SToken | void, ec: ErrorCollector, confVers: ConformanceVersion, errorCode: string) {
+   if (!nameTokenSToken || isNmToken(nameTokenSToken.str, confVers.version, confVers.revision)) {
       return;
    }
 
@@ -94,12 +94,12 @@ function checkNMToken(nameTokenSToken: SToken | void, ec: ErrorCollector, entity
  version.
 \**********************************************************************/
 
-function checkWellFormedNameRecommendation(nameSToken: SToken | void, ec: ErrorCollector, entityMd: EntityMetaData, nameType: string, v1R6Warning: string, otherWarning: string) {
+function checkWellFormedNameRecommendation(nameSToken: SToken | void, ec: ErrorCollector, confVer: ConformanceVersion, nameType: string, v1R6Warning: string, otherWarning: string) {
    if (!nameSToken) {
       return;
    }
 
-   const isV1R6 = entityMd.isVersion1dot0 && entityMd.revision === 6;
+   const isV1R6 = confVer.version === 1.0 && confVer.revision === 6;
    const name = nameSToken.str;
    const lcName = nameSToken.str.toLowerCase();
 
@@ -179,18 +179,17 @@ function checkWellFormedNameRecommendation(nameSToken: SToken | void, ec: ErrorC
  checkCharWellFormed() does a check whether the text in a particular
  SToken matches the requirments for text.
 
-
  TEMP: This is actually validating that the text is all §2.2's Char with no RestrictedChar's
 \**********************************************************************/
 
-function checkCharWellFormed(sToken: SToken | void, ec: ErrorCollector, entityMd: EntityMetaData) {
+function checkCharWellFormed(sToken: SToken | void, ec: ErrorCollector, confVer: ConformanceVersion) {
    if (!sToken) {
       return;
    }
 
    const badIndices = [];
    const discouragedIndices = [];
-   const badRegEx = entityMd.isVersion1dot1 ? BAD_CHARS_11 : BAD_CHARS_10;
+   const badRegEx = confVer.version === 1.1 ? BAD_CHARS_11 : BAD_CHARS_10;
 
    badRegEx.lastIndex = 0;
    let found = badRegEx.test(sToken.str);
@@ -211,10 +210,10 @@ function checkCharWellFormed(sToken: SToken | void, ec: ErrorCollector, entityMd
 
    let discouragedRegEx: RegExp;
 
-   if (entityMd.isVersion1dot1) {
+   if (confVer.version === 1.1) {
       discouragedRegEx = DISCOURAGED_CHARS_11;
    } else {
-      switch (entityMd.revision) {
+      switch (confVer.revision) {
          case 1:
          case 2:
             return; // no discouraged characters here

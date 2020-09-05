@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 
 import Extractor from '../Extractor';
 import MatchExtractor from '../MatchExtractor';
@@ -9,12 +9,10 @@ import Segment from '../Segment';
 
 describe('MatchExtractor', () => {
    let extractor: Extractor;
-   let defaultLoc: EntityLocation;
    let segmentRange: Range;
 
    beforeEach(() => {
-      defaultLoc = new EntityLocation();
-      segmentRange = new Range(defaultLoc);
+      segmentRange = new Range(new EntityId());
    });
 
    describe('basic behavior', () => {

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData, Offset, Range } from 'basic';
+import { ConformanceVersion, EntityId, Offset, Range } from 'basic';
 import { Extractor, Segment, ExtractorConstructor, ExtractorMap } from 'extractor';
 import { SegmentInfo } from '../extractor/Extractor'; // typeHack
 
@@ -78,7 +78,8 @@ type ExtractorContext = {
 
 class STokenSource {
    public errors: Array<Error>;
-   private _info: EntityMetaData;
+   private confVer: ConformanceVersion;
+   private entityId: EntityId;
    private _extractorInfo: ExtractorMap;
    public _segments: Array<Segment>; // typeHack for testing
    private _version: number;
@@ -88,20 +89,25 @@ class STokenSource {
    private _orphanedRange?: Range;
    private _resuming?: boolean;
 
-   constructor(extractorInfo: ExtractorMap, info: EntityMetaData) {
+   constructor(extractorInfo: ExtractorMap, entityId?: EntityId, confVer?: ConformanceVersion ) {
       this.errors = [];
-      this._info = info;
+      this.entityId = entityId || new EntityId();
+      this.confVer = confVer || new ConformanceVersion();
       this._extractorInfo = extractorInfo;
 
       this._segments = [];
       this._extractors = [];
 
-      this._version = this._info.isVersion1dot0 ? 1.0 : 1.1;
+      this._version = this.confVer.version;
       this._lastOffset = undefined;
    }
 
+   setConfVer(version: ConformanceVersion) {
+      this.confVer = version;
+      this._version = version.version;
+   }
    get metaData() {
-      return this._info;
+      return this.confVer;
    }
 
    addText(text: string, range?: Range) {
@@ -124,7 +130,7 @@ class STokenSource {
          if (rangeToUse) {
             this._lastOffset = rangeToUse.getStartOffset();
          } else {
-            this._lastOffset = new Offset(this._info.location, 0, 0, 0);
+            this._lastOffset = new Offset(this.entityId, 0, 0, 0);
          }
       }
 
@@ -273,16 +279,16 @@ class STokenSource {
          const segment = info.segment;
 
          // If we seem to have changed which entity we are reading from, create a new range.
-         if (segment.range && !(currentRange.location as EntityLocation).equals(segment.range.location)) { // typeHack
+         if (segment.range && !(currentRange.entityId.systemId === segment.range.entityId.systemId && currentRange.entityId.publicId === segment.range.entityId.publicId)) {
             // store the range if it actually has changed
             ranges.push(currentRange);
 
-            currentRange = new Range(segment.range.location,
+            currentRange = new Range(segment.range.entityId,
                segment.range.startIndex, segment.range.startRow, segment.range.startColumn,
                segment.range.startIndex, segment.range.startRow, segment.range.startColumn);
          }
 
-         currentRange = new Range(currentRange.location,
+         currentRange = new Range(currentRange.entityId,
             currentRange.startIndex, currentRange.startRow, currentRange.startColumn,
             currentRange.endIndex + info.chars, currentRange.endRow + info.rows,
             // NEED A test for the following.

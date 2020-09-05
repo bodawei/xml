@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from '../../../extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -24,7 +23,7 @@ describe('declaration (integration)', () => {
    describe('parse()', () => {
 
       it('produces a full pToken', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText(' DOCTYPE ');
          source.endText();
 

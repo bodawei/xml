@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { Range, EntityId } from 'basic';
 import { SToken } from 'sToken';
 import {
    declaration,
@@ -40,7 +40,7 @@ describe('PToXTokenStream (integration)', () => {
    let tokenStream: PToXTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData());
+      pTokenStream = new PTokenStream();
       tokenStream = new PToXTokenStream();
       pTokenStream.pipe(tokenStream);
    });
@@ -145,7 +145,7 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes an ENTITY declaration', (done) => {
-      const pToken = new TextPToken({ text: new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26)) });
+      const pToken = new TextPToken({ text: new SToken('value', 'value', new Range(new EntityId(), 21, 0, 21, 26, 0, 26)) });
 
       expectInputToProduce('<!ENTITY entityName "value">', [
          new GeneralEntityDeclarationXToken('entityName', [ pToken ], undefined, ''),

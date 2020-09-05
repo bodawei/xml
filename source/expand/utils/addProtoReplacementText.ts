@@ -45,7 +45,7 @@ function addProtoReplacementText(
    nameStack: EntityNameStack,
    done: Done,
 ): void {
-   const { entityDetails, utils, emd, entityId } = expandParams;
+   const { entityDetails, utils, entityId } = expandParams;
    const details = entityDetails.getReferencedDetails(reference);
 
    if (

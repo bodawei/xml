@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
@@ -12,7 +12,6 @@ import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclarat
 import misc from '../common/misc';
 import nameList from '../contentspec/nameList';
 import unassigned, { UnassignedType } from '../common/unassigned';
-import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('elementDeclaration (unit)', () => {
    let elementPToken: ElementDeclarationPToken;
@@ -167,7 +166,7 @@ describe('elementDeclaration (unit)', () => {
 
          expect(callback).toContainPTokenProps({
             children: { nameList: true },
-            close: new SToken('>', '>', new Range(new EntityLocation(), 22, 0, 22, 23, 0, 23)),
+            close: new SToken('>', '>', new Range(new EntityId(), 22, 0, 22, 23, 0, 23)),
          });
       });
 
@@ -257,7 +256,7 @@ describe('elementDeclaration (unit)', () => {
          expect(callback).toContainPTokenProps({
             nextPropName: 'midContentSpec',
             unassigned: { values: true },
-            close: new SToken('>', '>', new Range(new EntityLocation(), 22, 0, 22, 23, 0, 23)),
+            close: new SToken('>', '>', new Range(new EntityId(), 22, 0, 22, 23, 0, 23)),
          });
       });
 
@@ -265,10 +264,10 @@ describe('elementDeclaration (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          mockErrorCollector = new MockErrorCollector();
 
          spyOn(declaration, 'checkWellFormed');
@@ -277,15 +276,15 @@ describe('elementDeclaration (unit)', () => {
       });
 
       it('asks the declaration module to look for problems in the declaration part', () => {
-         const emd = new EntityMetaData();
+         const confVer = new ConformanceVersion();
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, emd);
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, confVer);
 
-         expect(declaration.checkWellFormed).toHaveBeenCalledWith(elementPToken, mockErrorCollector, emd);
+         expect(declaration.checkWellFormed).toHaveBeenCalledWith(elementPToken, mockErrorCollector, confVer);
       });
 
       it('reports no errors if the PToken is undefined', () => {
-         elementDeclaration.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(undefined, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -294,7 +293,7 @@ describe('elementDeclaration (unit)', () => {
          delete elementPToken.name;
          elementPToken.unassigned = [];
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -302,7 +301,7 @@ describe('elementDeclaration (unit)', () => {
       it('reports an error if there is no name', () => {
          delete elementPToken.name;
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_NO_NAME,
@@ -313,28 +312,28 @@ describe('elementDeclaration (unit)', () => {
       });
 
       it('calls misc.checkName() to report on bad names', () => {
-         const emd = new EntityMetaData();
+         const confVer = new ConformanceVersion();
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, emd);
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(elementPToken.name,
-            mockErrorCollector, emd, WellFormedError.ID.ELEMENTDECL_NAME_INVALID);
+            mockErrorCollector, confVer, WellFormedError.ID.ELEMENTDECL_NAME_INVALID);
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
-         const emd = new EntityMetaData();
+         const confVer = new ConformanceVersion();
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, emd);
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, confVer);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(elementPToken.name,
-            mockErrorCollector, emd, 'ELEMENT', XmlWarning.ID.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
+            mockErrorCollector, confVer, 'ELEMENT', XmlWarning.ID.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED);
       });
 
       it('reports an error if there is no space after the name', () => {
          delete elementPToken.postNameSpace;
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, emd);
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_NAME_NO_SPACE,
@@ -347,7 +346,7 @@ describe('elementDeclaration (unit)', () => {
       it('reports an error if there was no content spec at all', () => {
          delete elementPToken.contentSpec;
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_NO_SPEC,
@@ -360,7 +359,7 @@ describe('elementDeclaration (unit)', () => {
       it('reports an error if the content spec was an invalid value', () => {
          elementPToken.contentSpec!.str = 'XYZ';
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_SPEC_UNKNOWN,
@@ -372,7 +371,7 @@ describe('elementDeclaration (unit)', () => {
       it('reports an error if the content spec was cased wrong', () => {
          elementPToken.contentSpec!.str = 'any';
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
@@ -384,7 +383,7 @@ describe('elementDeclaration (unit)', () => {
       it('reports an error if there was no closing', () => {
          delete elementPToken.close;
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_NO_CLOSE,
@@ -398,20 +397,20 @@ describe('elementDeclaration (unit)', () => {
          const nameListCWFSpy = spyOn(nameList, 'checkWellFormed');
          elementPToken.children = new nameList.PToken();
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(nameListCWFSpy).toHaveBeenCalledWith(elementPToken.children,
-            mockErrorCollector, new EntityMetaData());
+            mockErrorCollector, new ConformanceVersion());
       });
 
       it('calls unassigned.checkExtra() with extras', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityId(), 0, 0, 0, 0, 0, 0));
          elementPToken.extra = [
             unassigned.wordFromSToken(startSToken),
          ];
 
-         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
+         elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new ConformanceVersion());
 
          expect(unassigned.checkExtra).toHaveBeenCalledWith(elementPToken.extra,
             mockErrorCollector,

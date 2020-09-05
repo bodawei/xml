@@ -1,5 +1,5 @@
 import { pattern as BCP47_REGEX } from 'bcp47-validate';
-import { EntityMetaData } from "basic";
+import { ConformanceVersion } from "basic";
 import { ErrorCollector, WellFormedError } from "error";
 import { SToken } from "sToken";
 
@@ -152,20 +152,20 @@ function hasReference(value: AttributeValue): boolean {
    return false;
 }
 
-function checkXmlLangWellFormed(value: AttributeValue, ec: ErrorCollector, emd: EntityMetaData): void {
+function checkXmlLangWellFormed(value: AttributeValue, ec: ErrorCollector, confVer: ConformanceVersion): void {
    if (hasReference(value)) {
       return;
    }
 
    const attrValue = getAttributeValueText(value);
 
-   if (emd.isVersion1dot0 && emd.revision === 1) {
+   if (confVer.version === 1.0 && confVer.revision === 1) {
       check1dot0rev1(value, attrValue, ec);
       return;
    }
 
    if (attrValue === '' && (
-      emd.isVersion1dot0 && emd.revision >= 3 || emd.isVersion1dot1)) {
+      confVer.version === 1.0 && confVer.revision >= 3 || confVer.version === 1.1)) {
       return;
    }
 

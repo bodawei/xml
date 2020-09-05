@@ -2,23 +2,23 @@
 
 /* eslint-env jasmine */
 
+import { ConformanceVersion } from 'basic';
+import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../parameterEntityStart';
-import { EntityMetaData } from 'basic';
-import { MockErrorCollector } from 'error-test';
 
 import * as checks from 'source/wellformedness/token/parameterEntityReferenceCheck';
 
 
 describe('ParameterEntityStartPToken (unit)', () => {
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let mockErrorCollector: MockErrorCollector;
    let checkSpy: jasmine.Spy;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
+      confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
 
       checkSpy = spyOn(checks, 'parameterEntityReferenceCheck');
@@ -34,9 +34,9 @@ describe('ParameterEntityStartPToken (unit)', () => {
       const reference = new ParameterEntityReferencePToken({ open: SToken.fromString('%') });
       const token = new ParameterEntityStartPToken(reference);
 
-      token.checkWellFormed(mockErrorCollector, emd);
+      token.checkWellFormed(mockErrorCollector, confVer);
 
-      expect(checkSpy).toHaveBeenCalledWith(reference, mockErrorCollector, emd);
+      expect(checkSpy).toHaveBeenCalledWith(reference, mockErrorCollector, confVer);
    });
 
    it('will create an xToken', () => {

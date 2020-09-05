@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range, EntityLocation } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -715,11 +715,11 @@ describe('attListDeclaration (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
 
          spyOn(declaration, 'checkWellFormed');
          spyOn(literal, 'checkWellFormed');
@@ -728,7 +728,7 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('reports no errors if no pToken provided', () => {
-         attListDeclaration.checkWellFormed(undefined, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(undefined, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -737,21 +737,21 @@ describe('attListDeclaration (unit)', () => {
          delete aldPToken.elementName;
          aldPToken.unassigned = [];
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
 
       // it('asks the declaration module to look for problems in the declaration part', () => {
-      //    attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+      //    attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
-      //    expect(declaration.checkWellFormed).toHaveBeenCalledWith(aldPToken, mockErrorCollector, emd);
+      //    expect(declaration.checkWellFormed).toHaveBeenCalledWith(aldPToken, mockErrorCollector, confVer);
       // });
 
       it('reports an error if the declaration type is not all caps', () => {
          aldPToken.declType = SToken.fromString('attlist');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_DECLTYPE_INVALID,
@@ -764,7 +764,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports an error if there is no element name', () => {
          delete aldPToken.elementName;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_NO_ELEMENT_NAME,
@@ -777,7 +777,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports an error if there is no space after the element name and there are attdefs', () => {
          delete aldPToken.postElementNameSpace;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE,
@@ -791,7 +791,7 @@ describe('attListDeclaration (unit)', () => {
          delete aldPToken.postElementNameSpace;
          aldPToken.attDefs = [];
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -800,30 +800,30 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs = [];
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
 
       it('calls misc.checkName() to report on name validity', () => {
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(aldPToken.elementName,
-            mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+            mockErrorCollector, confVer, WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
       });
 
       it('calls misc.checkName() to report on attribute name validity', () => {
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
-            mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
+            mockErrorCollector, confVer, WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on attribute name conformance', () => {
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
-            mockErrorCollector, emd, 'ATTRIBUTE', XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
+            mockErrorCollector, confVer, 'ATTRIBUTE', XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
       });
 
@@ -833,11 +833,11 @@ describe('attListDeclaration (unit)', () => {
             value: [],
          });
          aldPToken.attDefs.push({
-            name: new SToken('att1', 'att1', new Range(new EntityLocation(), 10, 0, 10, 15, 0, 15)),
+            name: new SToken('att1', 'att1', new Range(new EntityId(), 10, 0, 10, 15, 0, 15)),
             value: [],
          });
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportWarning({
             id: XmlWarning.ID.ATTLISTDECL_ATTR_NAME_DUPLICATE,
@@ -850,7 +850,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.attDefs[0].postNameSpace;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NAME_NO_SPACE,
@@ -864,7 +864,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].type = SToken.fromString('bogus');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_UNKNOWN,
@@ -876,7 +876,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is CDATA', () => {
          aldPToken.attDefs[0].type = SToken.fromString('CDATA');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -884,7 +884,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is ID', () => {
          aldPToken.attDefs[0].type = SToken.fromString('ID');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -892,7 +892,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is IDREF', () => {
          aldPToken.attDefs[0].type = SToken.fromString('IDREF');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -900,7 +900,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is IDREFS', () => {
          aldPToken.attDefs[0].type = SToken.fromString('IDREFS');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -908,7 +908,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is ENTITY', () => {
          aldPToken.attDefs[0].type = SToken.fromString('ENTITY');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -916,7 +916,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is ENTITIES', () => {
          aldPToken.attDefs[0].type = SToken.fromString('ENTITIES');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -924,7 +924,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is NMTOKEN', () => {
          aldPToken.attDefs[0].type = SToken.fromString('NMTOKEN');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -932,7 +932,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is NMTOKENS', () => {
          aldPToken.attDefs[0].type = SToken.fromString('NMTOKENS');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -948,7 +948,7 @@ describe('attListDeclaration (unit)', () => {
             closeSpace: SToken.fromString(' '),
          });
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -957,7 +957,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].type = SToken.fromString('cdata');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_INVALID,
@@ -969,7 +969,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports an error this an enumerated type but it has no name list', () => {
          delete aldPToken.attDefs[0].type;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ATTTYPE,
@@ -984,9 +984,9 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.ENUMERATION, { open: SToken.fromString(' ') });
          (aldPToken.attDefs[0].enumeration as any).checkWellFormed = cwfSpy;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
-         expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, emd);
+         expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, confVer);
       });
 
       it('reports an error the enumeration does not end with a space', () => {
@@ -994,7 +994,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.ENUMERATION, { open: SToken.fromString(' ') });
          (aldPToken.attDefs[0].enumeration as any).checkWellFormed = () => {};
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE,
@@ -1006,7 +1006,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports an error this an NOTATION type but it has no name list', () => {
          aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION,
@@ -1021,9 +1021,9 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.NOTATION, { open: SToken.fromString(' ') });
          (aldPToken.attDefs[0].enumeration as any).checkWellFormed = cwfSpy;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
-         expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, emd);
+         expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, confVer);
       });
 
       it('reports an error the NOTATION list does not end with a space', () => {
@@ -1031,7 +1031,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.NOTATION, { open: SToken.fromString(' ') });
          (aldPToken.attDefs[0].enumeration as any).checkWellFormed = () => {};
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE,
@@ -1044,7 +1044,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.attDefs[0].postTypeSpace;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_NO_SPACE,
@@ -1058,7 +1058,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#IMPLICIT');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
@@ -1070,7 +1070,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is #REQUIRED', () => {
          aldPToken.attDefs[0].defaultType = SToken.fromString('#REQUIRED');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -1078,7 +1078,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is #IMPLIED', () => {
          aldPToken.attDefs[0].defaultType = SToken.fromString('#IMPLIED');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -1088,7 +1088,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs[0].postDefaultTypeSpace = SToken.fromString(' ');
          aldPToken.attDefs[0].openQuote = SToken.fromString('"');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -1097,7 +1097,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#required');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID,
@@ -1111,7 +1111,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_SPACE,
@@ -1125,7 +1125,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.attDefs[0].defaultType;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_VALUE,
@@ -1139,7 +1139,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_VALUE,
@@ -1151,10 +1151,10 @@ describe('attListDeclaration (unit)', () => {
 
       it('calls literal.checkWellFormed() with the attribute data', () => {
          aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(literal.checkWellFormed)
-            .toHaveBeenCalledWith(aldPToken.attDefs[0], mockErrorCollector, emd, WellFormedError.ID.NOUN_ATTRIBUTE);
+            .toHaveBeenCalledWith(aldPToken.attDefs[0], mockErrorCollector, confVer, WellFormedError.ID.NOUN_ATTRIBUTE);
       });
 
       it('reports an error if there is a value after a #REQUIRED', () => {
@@ -1162,7 +1162,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs[0].defaultType = SToken.fromString('#REQUIRED');
          aldPToken.attDefs[0].openQuote = SToken.fromString('"');
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_EXTRA_VALUE,
@@ -1175,7 +1175,7 @@ describe('attListDeclaration (unit)', () => {
          const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.close;
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_NO_CLOSE,
@@ -1187,12 +1187,12 @@ describe('attListDeclaration (unit)', () => {
 
       it('reports an error if there is extra text after unassigned', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityId(), 0, 0, 0, 0, 0, 0));
          aldPToken.extra = [
             unassigned.wordFromSToken(startSToken),
          ];
 
-         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, confVer);
 
          expect(unassigned.checkExtra).toHaveBeenCalledWith(aldPToken.extra,
             mockErrorCollector,

@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ENTITY_ID } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
    ParameterEntityReferencePToken,
@@ -18,7 +18,6 @@ import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
 import { EntityNameStack } from '../EntityNameStack';
 import { expandUnassigned } from '../expandUnassigned';
-import { ENTITY_ID } from 'pToken';
 
 describe('expandUnassigned() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -54,7 +53,6 @@ describe('expandUnassigned() (unit)', () => {
       });
 
       params = {
-         emd: new EntityMetaData(),
          entityId: {
             type: ENTITY_ID,
             systemId: '',
@@ -69,7 +67,7 @@ describe('expandUnassigned() (unit)', () => {
             },
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}, new EntityMetaData()),
+                  sTokenSource: new STokenSource({}),
                   getErrors: (): Array<XmlError> => [],
                };
             },

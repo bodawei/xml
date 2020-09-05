@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityId } from 'pToken';
+import { EntityId } from 'basic';
 import { resolveSystemId } from '../resolveSystemId';
 
 describe('resolveSystemId()', () => {

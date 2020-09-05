@@ -1,7 +1,5 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import { EntityMetaData} from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import * as xToken from 'token';
@@ -16,7 +14,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
 
    function expectInputToProduceTypes(input: string | void, options: Object, types: Array<string>, done: () => void) {
       const results: TokenArray = [];
-      const sTokenStream = new STokenSource(defaultExtractors, new EntityMetaData());
+      const sTokenStream = new STokenSource(defaultExtractors);
       const pTokenStream = new PTokenFromLiteralStream(sTokenStream, options);
 
       pTokenStream.on('data', (data: Token) => results.push(data));

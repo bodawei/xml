@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from '../../../error/index';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -158,27 +158,27 @@ describe('literal (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
       let litValCheckWFSpy: jasmine.Spy;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          litValCheckWFSpy = spyOn(literalValue, 'checkWellFormed');
       });
 
       it('calls literalValue.checkWellFormed() to check the value', () => {
-         literal.checkWellFormed(literalPToken, mockErrorCollector, emd, 'foo');
+         literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'foo');
 
          expect(litValCheckWFSpy.calls.argsFor(0)[0]).toEqual(literalPToken.value);
          expect(litValCheckWFSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
-         expect(litValCheckWFSpy.calls.argsFor(0)[2]).toEqual(emd);
+         expect(litValCheckWFSpy.calls.argsFor(0)[2]).toEqual(confVer);
       });
 
       it('reports an error if there is no opening quote', () => {
          delete literalPToken.openQuote;
 
-         literal.checkWellFormed(literalPToken, mockErrorCollector, emd, 'aType');
+         literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'aType');
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.LITERAL_NO_OPEN_QUOTE,
@@ -190,7 +190,7 @@ describe('literal (unit)', () => {
       it('reports an error if there is no close quote', () => {
          delete literalPToken.closeQuote;
 
-         literal.checkWellFormed(literalPToken, mockErrorCollector, emd, 'aType');
+         literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'aType');
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE,

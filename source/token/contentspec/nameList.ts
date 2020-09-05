@@ -1,11 +1,10 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { ConformanceVersion } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import base from '../base';
-import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
 import { Graph } from './nameListGraphTypes';
 import nameListGraph from './nameListGraph';
@@ -219,15 +218,15 @@ function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle:
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: NameListPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: NameListPToken | void, ec: ErrorCollector, confVer: ConformanceVersion) {
    if (!pToken) {
       return;
    }
 
-   checkListWellFormed(pToken, ec, entityMetaData);
+   checkListWellFormed(pToken, ec, confVer);
 }
 
-function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    let delimType: DelimiterType | void = undefined;
    let isMixedType = false;
 
@@ -255,7 +254,7 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
             isMixedType = true;
             delimType = 'CHOICE';
          } else {
-            misc.checkName(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+            misc.checkName(entry.particle.name, ec, confVer, WFEID.NAMELIST_NAME_INVALID);
          }
 
          ec.setPos(entry.particle.postNameSpace);
@@ -277,7 +276,7 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
                ec.report(WFEID.NAMELIST_MIXED_INVALID_SUBPARTICLE, [ index.toString() ]);
             }
 
-            checkListWellFormed(entry.particle, ec, entityMetaData);
+            checkListWellFormed(entry.particle, ec, confVer);
          } else {
             ec.setPos(undefined);
             ec.check(!entry.particle || !entry.particle.name, WFEID.NAMELIST_NO_NAME, [ index.toString() ]);

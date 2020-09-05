@@ -1,6 +1,5 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken, SToken } from 'sToken';
 import {
@@ -17,12 +16,10 @@ import { makeInsertedRange } from 'token-test';
 import { assignExternalId } from '../assignExternalId';
 
 describe('assignExternalId() (integration)', () => {
-   let emd: EntityMetaData;
    let source: STokenSource;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      source = new STokenSource(defaultExtractors);
    });
    it('assigns the public and system value (check unassigned.assignToProps())', (done) => {
       source.addText('PUBLIC\t%publicVal;\t"sys.xml">');

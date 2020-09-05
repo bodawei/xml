@@ -1,7 +1,5 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from '../../../error/index';
 import { defaultExtractors } from '../../../extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -13,14 +11,13 @@ import { ParameterEntityReferencePToken } from 'source/token/parameterEntityRefe
 import { CharRefPToken } from 'source/token/charRef';
 import { TextXToken, TextPToken } from 'source/token/text';
 import { GeneralEntityReferenceXToken } from 'xToken';
+import { ConformanceVersion } from 'basic';
 
 describe('literalValue (integration)', () => {
-   let emd: EntityMetaData;
    let source: STokenSource;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      source = new STokenSource(defaultExtractors);
    });
 
    describe('parse()', () => {
@@ -93,7 +90,7 @@ describe('literalValue (integration)', () => {
          literalValue.parse(source, ['"'], (pToken) => {
             const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
-            literalValue.checkWellFormed(pToken, ec, emd);
+            literalValue.checkWellFormed(pToken, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
@@ -106,7 +103,7 @@ describe('literalValue (integration)', () => {
          literalValue.parse(source, ['"', '&'], (pToken) => {
             const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
-            literalValue.checkWellFormed(pToken, ec, emd);
+            literalValue.checkWellFormed(pToken, ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.REFERENCE_XTRA_SPACE);
             done();

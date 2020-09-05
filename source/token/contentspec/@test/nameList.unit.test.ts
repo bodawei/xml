@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -535,11 +535,11 @@ describe('nameList (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
 
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkNMToken');
@@ -550,7 +550,7 @@ describe('nameList (unit)', () => {
          it('reports an error if no "(" present', () => {
             nlPToken.open = undefined;
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NO_OPEN,
@@ -561,7 +561,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports no errors if no pToken provided', () => {
-            nameList.checkWellFormed(undefined, mockErrorCollector, emd);
+            nameList.checkWellFormed(undefined, mockErrorCollector, confVer);
 
             expect(mockErrorCollector.errors.length).toEqual(0);
          });
@@ -569,7 +569,7 @@ describe('nameList (unit)', () => {
          it('reports an error if no names are present', () => {
             nlPToken.names = [];
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NO_NAMES,
@@ -582,7 +582,7 @@ describe('nameList (unit)', () => {
          it('reports an error if a name in an entry is not present', () => {
             nlPToken.names[1].particle = undefined;
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NO_NAME,
@@ -595,7 +595,7 @@ describe('nameList (unit)', () => {
          it('reports an error if a delimiter in an entry is not present', () => {
             nlPToken.names[0].delimiter = undefined;
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NO_DELIM,
@@ -609,7 +609,7 @@ describe('nameList (unit)', () => {
          it('reports an error if a delimiter is present in the last entry', () => {
             nlPToken.names[1].delimiter = SToken.fromString('|');
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_EXTRA_DELIM,
@@ -622,7 +622,7 @@ describe('nameList (unit)', () => {
             nlPToken.close = undefined;
             const expected: NamePToken = getAsNamePToken(nlPToken.names[1].particle);
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NO_CLOSE,
@@ -635,16 +635,16 @@ describe('nameList (unit)', () => {
       describe('non-mixed children', () => {
 
          it('checks if the name is valid', () => {
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
             const expectedName: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
 
             expect(misc.checkName).toHaveBeenCalledWith(expectedName.name,
-               mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
+               mockErrorCollector, confVer, WellFormedError.ID.NAMELIST_NAME_INVALID);
          });
 
          it('reports an error if the second separator does not match the first "|"', () => {
             nlPToken.names[1].delimiter = SToken.fromString(',');
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
@@ -656,7 +656,7 @@ describe('nameList (unit)', () => {
          it('reports an error if the second separator does not match the first ","', () => {
             nlPToken.names[0].delimiter = SToken.fromString(',');
             nlPToken.names[1].delimiter = SToken.fromString('|');
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_BAD_SEQUENCE,
@@ -666,7 +666,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports an error if there is an extra space between the name and the repeat marker', () => {
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
             const expectedName: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
 
             expect(mockErrorCollector).toReportError({
@@ -680,7 +680,7 @@ describe('nameList (unit)', () => {
             nlPToken.postCloseSpace = SToken.fromString(' ');
             nlPToken.repeat = SToken.fromString('*');
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_CLOSE_EXTRA_SPACE,
@@ -728,7 +728,7 @@ describe('nameList (unit)', () => {
                expectedSubParticleList = subParticle!;
             };
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_CLOSE_EXTRA_SPACE,
@@ -745,7 +745,7 @@ describe('nameList (unit)', () => {
             const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#pcData');;
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_PCDATA_INVALID_CASE,
@@ -759,7 +759,7 @@ describe('nameList (unit)', () => {
             namePToken.name = SToken.fromString('#PCDATA');
             nlPToken.names[0].delimiter = SToken.fromString(',');
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
@@ -786,7 +786,7 @@ describe('nameList (unit)', () => {
             });
             nlPToken.names[1].particle = nameListPToken;
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_MIXED_INVALID_SUBPARTICLE,
@@ -800,7 +800,7 @@ describe('nameList (unit)', () => {
             namePToken.name = SToken.fromString('#PCDATA');
             nlPToken.names[1].particle!.repeat = SToken.fromString('*');
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_MIXED_NAME_EXTRA_REPEAT,
@@ -830,7 +830,7 @@ describe('nameList (unit)', () => {
             });
 
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector.errors.length).toEqual(0);
          });
@@ -840,7 +840,7 @@ describe('nameList (unit)', () => {
             namePToken.name = SToken.fromString('#PCDATA');
             nlPToken.repeat = SToken.fromString('+');
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_MIXED_INVALID_REPEAT,
@@ -853,7 +853,7 @@ describe('nameList (unit)', () => {
             const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_MIXED_INVALID_REPEAT,
@@ -870,7 +870,7 @@ describe('nameList (unit)', () => {
 
             nlPToken.repeat = SToken.fromString('*');
 
-            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd);
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, confVer);
 
             expect(mockErrorCollector.errors.length).toEqual(0);
          });

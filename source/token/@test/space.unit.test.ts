@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
@@ -61,15 +61,15 @@ describe('space (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
       });
 
       it('reports no errors when checking a good PToken', () => {
-         spacePToken.checkWellFormed(mockErrorCollector, emd);
+         spacePToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });

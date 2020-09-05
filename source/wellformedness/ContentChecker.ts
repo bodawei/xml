@@ -1,6 +1,5 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import {
    CDATA_PTOKEN,
@@ -20,14 +19,13 @@ import {
    GeneralEntityStartPToken,
    getFirstSToken,
 } from 'token';
-import { PToken, ParseValue } from 'pToken';
-import { strOrBlank, SToken } from 'sToken';
+import { ParseValue } from 'pToken';
+import { strOrBlank } from 'sToken';
 import {
    CHECKER_DONE,
    Checker,
    CheckState,
    scanAttributeValues,
-   GeneralEntitiesInfo,
    checkGeneralEntity,
 } from './checkUtils';
 

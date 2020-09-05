@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { Range, ConformanceVersion, EntityId } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, STokenMaker } from 'sToken-test';
@@ -45,10 +45,10 @@ describe('entity (unit)', () => {
       let mockErrorCollector: MockErrorCollector;
       let pToken: any;
       let expectedSToken: STokenMaker;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          mockErrorCollector = new MockErrorCollector();
          expectedSToken = makeSTokenMaker();
          pToken = {
@@ -72,24 +72,24 @@ describe('entity (unit)', () => {
       });
 
       it('reports no errors if the entity declaration PToken is undefined', () => {
-         checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
+         checkWellFormed(undefined, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
 
       it('asks the literal module to look for problems in the declaration part', () => {
-         const emd = new EntityMetaData();
+         const confVer = new ConformanceVersion();
 
-         checkWellFormed(pToken, mockErrorCollector, emd);
+         checkWellFormed(pToken, mockErrorCollector, confVer);
 
-         expect(literal.checkWellFormed).toHaveBeenCalledWith(pToken, mockErrorCollector, emd,
+         expect(literal.checkWellFormed).toHaveBeenCalledWith(pToken, mockErrorCollector, confVer,
             WellFormedError.ID.NOUN_ENTITYVALUE);
       });
 
       it('reports an error if % is not followed by a space', () => {
          pToken.parameter = expectedSToken('%');
 
-         checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
+         checkWellFormed(pToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.report)
             .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE, [ 'entityName' ], undefined);
@@ -98,7 +98,7 @@ describe('entity (unit)', () => {
       it('reports an error if there is no name', () => {
          delete pToken.name;
 
-         checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
+         checkWellFormed(pToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_NAME,
@@ -109,24 +109,24 @@ describe('entity (unit)', () => {
       });
 
       it('calls misc.checkName() to report on name validity', () => {
-         checkWellFormed(pToken, mockErrorCollector, emd);
+         checkWellFormed(pToken, mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(pToken.name,
-            mockErrorCollector, emd, WellFormedError.ID.ENTITYDECL_NAME_INVALID);
+            mockErrorCollector, confVer, WellFormedError.ID.ENTITYDECL_NAME_INVALID);
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
-         checkWellFormed(pToken, mockErrorCollector, emd);
+         checkWellFormed(pToken, mockErrorCollector, confVer);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(pToken.name,
-            mockErrorCollector, emd, 'ENTITY', XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
+            mockErrorCollector, confVer, 'ENTITY', XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
       });
 
       it('reports an error if there is no space after the name', () => {
          delete pToken.nameSpace;
 
-         checkWellFormed(pToken, mockErrorCollector, emd);
+         checkWellFormed(pToken, mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE,
@@ -141,12 +141,12 @@ describe('entity (unit)', () => {
          delete pToken.value;
          delete pToken.closeQuote;
          pToken.externalId = { externalId: true };
-         const emd = new EntityMetaData();
+         const confVer = new ConformanceVersion();
 
-         checkWellFormed(pToken, mockErrorCollector, emd);
+         checkWellFormed(pToken, mockErrorCollector, confVer);
 
          expect(externalId.checkExternalIdWellFormed).toHaveBeenCalledWith(pToken.externalId,
-            mockErrorCollector, emd);
+            mockErrorCollector, confVer);
       });
 
       it('reports an error if NDATA is the wrong case', () => {
@@ -154,7 +154,7 @@ describe('entity (unit)', () => {
          pToken.nData = expectedSToken('nData');
          pToken.nDataName = expectedSToken('foo');
 
-         checkWellFormed(new GeneralEntityDeclarationPToken(pToken), mockErrorCollector, emd);
+         checkWellFormed(new GeneralEntityDeclarationPToken(pToken), mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NDATA_INVALID_CASE,
@@ -167,7 +167,7 @@ describe('entity (unit)', () => {
          pToken.externalId = { externalId: true };
          pToken.nData = expectedSToken('nData');
 
-         checkWellFormed(new GeneralEntityDeclarationPToken(pToken), mockErrorCollector, emd);
+         checkWellFormed(new GeneralEntityDeclarationPToken(pToken), mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NDATA_NO_NAME,
@@ -180,12 +180,12 @@ describe('entity (unit)', () => {
          pToken.externalId = { externalId: true };
          pToken.nData = expectedSToken('NDATA');
          pToken.nDataName = expectedSToken('foo');
-         const emd = new EntityMetaData();
+         const confVer = new ConformanceVersion();
 
-         checkWellFormed(new GeneralEntityDeclarationPToken(pToken), mockErrorCollector, emd);
+         checkWellFormed(new GeneralEntityDeclarationPToken(pToken), mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(pToken.nDataName,
-            mockErrorCollector, emd);
+            mockErrorCollector, confVer);
       });
 
       it('reports an error if there is no EnitytValue or ExternalID', () => {
@@ -193,7 +193,7 @@ describe('entity (unit)', () => {
          delete pToken.value;
          delete pToken.closeQuote;
 
-         checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
+         checkWellFormed(pToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_VALUE,
@@ -205,7 +205,7 @@ describe('entity (unit)', () => {
       it('reports an error if there was no closing', () => {
          delete pToken.close;
 
-         checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
+         checkWellFormed(pToken, mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_CLOSE,
@@ -217,12 +217,12 @@ describe('entity (unit)', () => {
 
       it('calls unassigned.checkExtra() with extras', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityId(), 0, 0, 0, 0, 0, 0));
          pToken.extra = [
             unassigned.wordFromSToken(startSToken),
          ];
 
-         checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
+         checkWellFormed(pToken, mockErrorCollector, new ConformanceVersion());
 
          expect(unassigned.checkExtra).toHaveBeenCalledWith(pToken.extra,
             mockErrorCollector,

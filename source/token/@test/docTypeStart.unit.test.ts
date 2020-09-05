@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
@@ -79,11 +79,11 @@ describe('docTypeStart (unit)', () => {
    describe('checkWellFormed()', () => {
       let declCheckWellFormedSpy: jasmine.Spy;
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
 
          declCheckWellFormedSpy = spyOn(declaration, 'checkWellFormed');
          spyOn(misc, 'checkName');
@@ -91,29 +91,29 @@ describe('docTypeStart (unit)', () => {
       });
 
       it('asks the declaration module to look for problems in the declaration part', () => {
-         docTypeStartPToken.checkWellFormed(mockErrorCollector, emd);
+         docTypeStartPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(declCheckWellFormedSpy).toHaveBeenCalledWith(docTypeStartPToken, mockErrorCollector, emd);
+         expect(declCheckWellFormedSpy).toHaveBeenCalledWith(docTypeStartPToken, mockErrorCollector, confVer);
       });
 
       it('asks the misc.checkName() to validate the name', () => {
-         docTypeStartPToken.checkWellFormed(mockErrorCollector, emd);
+         docTypeStartPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(docTypeStartPToken.name,
-            mockErrorCollector, emd, WellFormedError.ID.DOCTYPE_NAME_INVALID);
+            mockErrorCollector, confVer, WellFormedError.ID.DOCTYPE_NAME_INVALID);
       });
 
       it('checks whether externalId is valid', () => {
-         docTypeStartPToken.checkWellFormed(mockErrorCollector, emd);
+         docTypeStartPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(externalId.checkExternalIdWellFormed)
-            .toHaveBeenCalledWith(docTypeStartPToken.externalId, mockErrorCollector, emd);
+            .toHaveBeenCalledWith(docTypeStartPToken.externalId, mockErrorCollector, confVer);
       });
 
       it('reports an error if there is no elment name', () => {
          (docTypeStartPToken as any).name = undefined;
 
-         docTypeStartPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+         docTypeStartPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_NAME,
@@ -123,7 +123,7 @@ describe('docTypeStart (unit)', () => {
       });
 
       it('reports no error if there is an elment name', () => {
-         docTypeStartPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+         docTypeStartPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_NAME,

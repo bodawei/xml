@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 import SToken from '../SToken';
 
 import { makeSToken, RangeMaker, makeSTokenMaker, MockSTokenSource } from './helper';
@@ -12,13 +12,13 @@ describe('SToken test utils', () => {
 
       it('generates defaults when called with no arguments', () => {
          const maker = new RangeMaker();
-         expect(maker.makeRange('foo')).toEqual(new Range(new EntityLocation(), 0, 0, 0, 3, 0, 3));
+         expect(maker.makeRange('foo')).toEqual(new Range(new EntityId(), 0, 0, 0, 3, 0, 3));
       });
 
       it('uses the arguments passed', () => {
-         const maker = new RangeMaker(new EntityLocation('foo.xml', 'bar.xml'), 3, 3, 3);
+         const maker = new RangeMaker(new EntityId('foo.xml', 'bar.xml'), 3, 3, 3);
          expect(maker.makeRange('foo')).toEqual(
-            new Range(new EntityLocation('foo.xml', 'bar.xml'), 3, 3, 3, 6, 3, 6));
+            new Range(new EntityId('foo.xml', 'bar.xml'), 3, 3, 3, 6, 3, 6));
       });
 
    });
@@ -28,7 +28,7 @@ describe('SToken test utils', () => {
       it('makes an SToken with a default range if no range maker provided', () => {
          const sToken = makeSToken('foo');
          expect(sToken).toEqual(
-            new SToken('foo', 'foo', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)));
+            new SToken('foo', 'foo', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)));
       });
 
    });
@@ -38,13 +38,13 @@ describe('SToken test utils', () => {
       it('generates defaults when called with no arguments', () => {
          const maker = makeSTokenMaker();
          expect(maker('foo')).toEqual(
-            new SToken('foo', 'foo', new Range(new EntityLocation(), 0, 0, 0, 3, 0, 3)));
+            new SToken('foo', 'foo', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)));
       });
 
       it('uses the arguments passed', () => {
-         const maker = makeSTokenMaker(new EntityLocation('foo.xml', 'bar.xml'), 3, 3, 3);
+         const maker = makeSTokenMaker(new EntityId('foo.xml', 'bar.xml'), 3, 3, 3);
          expect(maker('foo')).toEqual(
-            new SToken('foo', 'foo', new Range(new EntityLocation('foo.xml', 'bar.xml'), 3, 3, 3, 6, 3, 6)));
+            new SToken('foo', 'foo', new Range(new EntityId('foo.xml', 'bar.xml'), 3, 3, 3, 6, 3, 6)));
       });
 
    });
@@ -84,7 +84,7 @@ describe('SToken test utils', () => {
          ], 99, 100, 101);
 
          expect((mock.expectedValues[0].token as SToken).ranges[0])
-            .toEqual(new Range(new EntityLocation(), 99, 100, 101, 101, 100, 103));
+            .toEqual(new Range(new EntityId(), 99, 100, 101, 101, 100, 103));
       });
 
       it('uses the previous SToken to populate the value for a peek if there is no following', () => {
@@ -200,7 +200,7 @@ describe('SToken test utils', () => {
          mock.extractToObject('all', [], obj, 'propName');
          mock.respondInAsyncTime();
 
-         expect(obj.propName).toEqual(new SToken('one', 'one', [ new Range(new EntityLocation(), 0, 0, 0, 3, 0, 3) ]));
+         expect(obj.propName).toEqual(new SToken('one', 'one', [ new Range(new EntityId(), 0, 0, 0, 3, 0, 3) ]));
       });
 
       it('extractToObject() allows the parameters to be omitted', () => {
@@ -212,7 +212,7 @@ describe('SToken test utils', () => {
          mock.extractToObjectNoParams('all', obj, 'propName');
          mock.respondInAsyncTime();
 
-         expect(obj.propName).toEqual(new SToken('one', 'one', [ new Range(new EntityLocation(), 0, 0, 0, 3, 0, 3) ]));
+         expect(obj.propName).toEqual(new SToken('one', 'one', [ new Range(new EntityId(), 0, 0, 0, 3, 0, 3) ]));
       });
 
       it('extract() extracts the next value to the specified object', () => {
@@ -226,7 +226,7 @@ describe('SToken test utils', () => {
          });
          mock.respondInAsyncTime();
 
-         expect(actual).toEqual(new SToken('one', 'one', [ new Range(new EntityLocation(), 0, 0, 0, 3, 0, 3) ]));
+         expect(actual).toEqual(new SToken('one', 'one', [ new Range(new EntityId(), 0, 0, 0, 3, 0, 3) ]));
       });
 
       it('extract() allows the parameters to be omitted', () => {
@@ -240,7 +240,7 @@ describe('SToken test utils', () => {
          });
          mock.respondInAsyncTime();
 
-         expect(actual).toEqual(new SToken('one', 'one', [ new Range(new EntityLocation(), 0, 0, 0, 3, 0, 3) ]));
+         expect(actual).toEqual(new SToken('one', 'one', [ new Range(new EntityId(), 0, 0, 0, 3, 0, 3) ]));
       });
 
       it('allows undefined to be a returned value', () => {

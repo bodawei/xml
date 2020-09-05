@@ -3,8 +3,8 @@
 
 import { Transform } from 'stream';
 
-import { EntityMetaData, EntityKind } from 'basic';
 import * as basic from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from 'sToken';
 import nameList from '../../token/contentspec/nameList';
@@ -157,7 +157,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          const nOne = new NotationDeclarationXToken('one');
          const nTwo = new NotationDeclarationXToken('one');
 
-         validator.write(new EntityMetaData(undefined, 1.0, 1));
+         validator.write(new ConformanceVersion(1.0, 1));
          validator.write(nOne);
          validator.write(nTwo);
          validator.end();
@@ -733,7 +733,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }]);
                spyOn(basic, 'isName');
 
-               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl1);
                validator.write(attListDecl1);
                validator.write(startToken1);
@@ -856,7 +856,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('it calls isName() with the entity meta data (whitebox)', (done) => {
                spyOn(basic, 'isName');
 
-               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -1079,7 +1079,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('it calls isName() with the entity meta data (whitebox)', (done) => {
                spyOn(basic, 'isName');
 
-               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -1234,7 +1234,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('it calls util.isNmToken() with the entity meta data (whitebox)', (done) => {
                spyOn(basic, 'isNmToken');
 
-               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -2129,7 +2129,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('NOTATION', () => {
 
-            function setup(emd: EntityMetaData) {
+            function setup(ver: ConformanceVersion) {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
@@ -2151,14 +2151,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                   defaultType: '#REQUIRED',
                }]);
 
-               validator.write(emd);
+               validator.write(ver);
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(endOfDocType);
                validator.end();
             };
 
-            function setupEmptyElement(emd: EntityMetaData) {
+            function setupEmptyElement(ver: ConformanceVersion) {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
@@ -2174,14 +2174,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                   value: [],
                }]);
 
-               validator.write(emd);
+               validator.write(ver);
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(endOfDocType);
                validator.end();
             };
 
-            function setupDuplicateNotationValues(emd: EntityMetaData) {
+            function setupDuplicateNotationValues(ver: ConformanceVersion) {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
                const notation1 = new NotationDeclarationXToken('first', undefined);
@@ -2195,7 +2195,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   defaultType: '#IMPLIED',
                }]);
 
-               validator.write(emd);
+               validator.write(ver);
                validator.write(notation1);
                validator.write(notation2);
                validator.write(notation3);
@@ -2229,13 +2229,13 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if a 1.0/1 ATTLISTs NOTATION declaration has duplicate names', (done) => {
-               setupDuplicateNotationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               setupDuplicateNotationValues(new ConformanceVersion(1.0, 1));
 
                expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if a 1.0/3 ATTLISTs NOTATION declaration has duplicate names', (done) => {
-               setupDuplicateNotationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3));
+               setupDuplicateNotationValues(new ConformanceVersion(1.0, 3));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION,
                   ['elementType', 'notationAttr', 'first, third']);
@@ -2243,7 +2243,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if a 1.1/* ATTLISTs NOTATION declaration has duplicate names', (done) => {
-               setupDuplicateNotationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.1, 1));
+               setupDuplicateNotationValues(new ConformanceVersion(1.1, 1));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION,
                   ['elementType', 'notationAttr', 'first, third']);
@@ -2251,13 +2251,13 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if an 1.0/1 ATTLIST has more than one NOTATION attribute', (done) => {
-               setup(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               setup(new ConformanceVersion(1.0, 1));
 
                expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if an 1.0/>1 ATTLIST has more than one NOTATION attribute', (done) => {
-               setup(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+               setup(new ConformanceVersion(1.0, 2));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION,
                   ['elementType', 'notation2']);
@@ -2265,7 +2265,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an 1.1/* ATTLIST has more than one NOTATION attribute', (done) => {
-               setup(new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
+               setup(new ConformanceVersion(1.1, 2));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION,
                   ['elementType', 'notation2']);
@@ -2273,13 +2273,13 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if an 1.0/1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
-               setupEmptyElement(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               setupEmptyElement(new ConformanceVersion(1.0, 1));
 
                expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if an 1.0/>1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
-               setupEmptyElement(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+               setupEmptyElement(new ConformanceVersion(1.0, 2));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
                   ['elementType', 'notation1']);
@@ -2287,7 +2287,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an 1.1/* ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
-               setupEmptyElement(new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
+               setupEmptyElement(new ConformanceVersion(1.1, 2));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
                   ['elementType', 'notation1']);
@@ -2323,7 +2323,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('ENUMERATION', () => {
 
-            function setupDuplicateEnumerationValues(emd: EntityMetaData) {
+            function setupDuplicateEnumerationValues(ver: ConformanceVersion) {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
@@ -2334,7 +2334,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   defaultType: '#IMPLIED',
                }]);
 
-               validator.write(emd);
+               validator.write(ver);
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(endOfDocType);
@@ -2342,13 +2342,13 @@ describe('CheckXTokenValidStream (unit)', () => {
             };
 
             it('reports no error if a 1.0/1 ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
-               setupDuplicateEnumerationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               setupDuplicateEnumerationValues(new ConformanceVersion(1.0, 1));
 
                expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if a 1.0/3 ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
-               setupDuplicateEnumerationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3));
+               setupDuplicateEnumerationValues(new ConformanceVersion(1.0, 3));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
                   ['elementType', 'enumerationAttr', 'first, third']);
@@ -2356,7 +2356,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if a 1.1/* ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
-               setupDuplicateEnumerationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.1, 1));
+               setupDuplicateEnumerationValues(new ConformanceVersion(1.1, 1));
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
                   ['elementType', 'enumerationAttr', 'first, third']);
@@ -2374,7 +2374,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   defaultType: '#IMPLIED',
                }]);
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3));
+               validator.write(new ConformanceVersion(1.0, 3));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(endOfDocType);
@@ -3482,11 +3482,11 @@ describe('CheckXTokenValidStream (unit)', () => {
                }
 
                it(`${causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an ANY element in XML ${version}/${rev} (§3.0.0)`, (done) => {
-                  const emd = new EntityMetaData(EntityKind.DOCUMENT, version, rev);
+                  const confVer = new ConformanceVersion(version, rev);
                   const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                   const startToken = new ElementStartXToken('one', []);
 
-                  validator.write(emd);
+                  validator.write(confVer);
                   validator.write(elementDecl);
                   validator.write(startToken);
                   validator.write(token);
@@ -3556,12 +3556,12 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error when passing char data through it for 1.0/1 (§3.0.0)', (done) => {
-               const emd = new EntityMetaData(EntityKind.DOCUMENT, 1, 1);
+               const confVer = new ConformanceVersion(1, 1);
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const startToken = new ElementStartXToken('one', []);
                const characters = new CharDataXToken('one');
 
-               validator.write(emd);
+               validator.write(confVer);
                validator.write(elementDecl);
                validator.write(startToken);
                validator.write(characters);
@@ -3726,7 +3726,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const commentToken = new CommentXToken('stuff');
                const elStart = new ElementStartXToken('one', []);
 
-               validator.write(new EntityMetaData(undefined, 1.0, 1));
+               validator.write(new ConformanceVersion(1.0, 1));
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(commentToken);
@@ -3748,7 +3748,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const pi = new ProcessingInstructionXToken('stuff', 'other');
                const elStart = new ElementStartXToken('one', []);
 
-               validator.write(new EntityMetaData(undefined, 1.0, 1));
+               validator.write(new ConformanceVersion(1.0, 1));
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(pi);
@@ -3770,7 +3770,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const commentToken = new CommentXToken('stuff');
                const elStart = new ElementStartXToken('one', []);
 
-               validator.write(new EntityMetaData(undefined, 1.0, 3));
+               validator.write(new ConformanceVersion(1.0, 3));
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(commentToken);
@@ -3791,7 +3791,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const pi = new ProcessingInstructionXToken('stuff', 'other');
                const elStart = new ElementStartXToken('one', []);
 
-               validator.write(new EntityMetaData(undefined, 1.1, 1));
+               validator.write(new ConformanceVersion(1.1, 1));
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(pi);
@@ -3810,7 +3810,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               validator.write(new ConformanceVersion(1.0, 1));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new CharDataXToken('test charData'));
@@ -3832,7 +3832,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               validator.write(new ConformanceVersion(1.0, 1));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new CdataXToken('test charData'));
@@ -3852,7 +3852,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(new ConformanceVersion(1.0, 5));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new CdataXToken('test charData'));
@@ -3872,7 +3872,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(new ConformanceVersion(1.0, 5));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new CharDataXToken('test charData'));
@@ -3980,7 +3980,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }
 
                it(`${causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an element in XML ${version}/${rev} (§3.0.0)`, (done) => {
-                  const emd = new EntityMetaData(EntityKind.DOCUMENT, version, rev);
+                  const confVer = new ConformanceVersion(version, rev);
                   const elementDecl2 = new elementDeclaration.XToken('two', 'ANY');
                   const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
                      names: [{
@@ -3992,7 +3992,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   });
                   const startToken = new ElementStartXToken('one', []);
 
-                  validator.write(emd);
+                  validator.write(confVer);
                   validator.write(elementDecl2);
                   validator.write(elementDecl1);
                   validator.write(startToken);
@@ -4017,7 +4017,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               validator.write(new ConformanceVersion(1.0, 1));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new SpaceXToken(' '));
@@ -4040,7 +4040,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               validator.write(new ConformanceVersion(1.0, 1));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new ElementStartXToken('child', []));
@@ -4063,7 +4063,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+               validator.write(new ConformanceVersion(1.0, 2));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new SpaceXToken(' '));
@@ -4085,7 +4085,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+               validator.write(new ConformanceVersion(1.0, 2));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new ElementStartXToken('child', []));
@@ -4107,7 +4107,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new ConformanceVersion(1.0, 4));
                validator.write(new elementDeclaration.XToken('child', 'ANY'));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
@@ -4128,7 +4128,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new ConformanceVersion(1.0, 4));
                validator.write(new elementDeclaration.XToken('child', 'ANY'));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
@@ -4152,7 +4152,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(new ConformanceVersion(1.0, 5));
                validator.write(new elementDeclaration.XToken('child', 'ANY'));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
@@ -4175,7 +4175,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new ConformanceVersion(1.0, 4));
                validator.write(new elementDeclaration.XToken('child', 'ANY'));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
@@ -4196,7 +4196,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new ConformanceVersion(1.0, 4));
                validator.write(new elementDeclaration.XToken('child', 'ANY'));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
@@ -4220,7 +4220,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(new ConformanceVersion(1.0, 5));
                validator.write(new elementDeclaration.XToken('child', 'ANY'));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));

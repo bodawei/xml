@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { XmlWarning, WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken, toSToken } from 'sToken';
@@ -161,11 +161,11 @@ describe('notationdeDeclaration (unit)', () => {
 
    describe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
 
       beforeEach(() => {
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          mockErrorCollector = new MockErrorCollector();
          spyOn(externalId, 'checkExternalIdWellFormed');
          spyOn(misc, 'checkName');
@@ -173,24 +173,24 @@ describe('notationdeDeclaration (unit)', () => {
       });
 
       it('asks the externalId module to look for well formed problems', () => {
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(externalId.checkExternalIdWellFormed)
-            .toHaveBeenCalledWith(notationPToken.externalId, mockErrorCollector, emd);
+            .toHaveBeenCalledWith(notationPToken.externalId, mockErrorCollector, confVer);
       });
 
       it('calls misc.checkName() to report on bad names', () => {
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(notationPToken.name,
-            mockErrorCollector, emd, WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
+            mockErrorCollector, confVer, WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(notationPToken.name,
-            mockErrorCollector, emd, 'NOTATION', XmlWarning.ID.NOTATIONDECL_NAME_XMLDASH_RESERVED,
+            mockErrorCollector, confVer, 'NOTATION', XmlWarning.ID.NOTATIONDECL_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED);
       });
 
@@ -200,7 +200,7 @@ describe('notationdeDeclaration (unit)', () => {
             unassigned: [ { type: UnassignedType.REFERENCE, token: new ParameterEntityReferencePToken({ open: toSToken('<!') })  }],
          });
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_UNASSIGNED,
@@ -225,7 +225,7 @@ describe('notationdeDeclaration (unit)', () => {
             close: toSToken('>'),
          });
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_OPEN_XTRA_SPACE_AFTER,
@@ -241,7 +241,7 @@ describe('notationdeDeclaration (unit)', () => {
             declType: toSToken('notation'),
          });
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_DECLTYPE_INVALID,
@@ -253,7 +253,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('reports an error if there is no name', () => {
          delete (notationPToken as any).name;
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NO_NAME,
@@ -266,7 +266,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('reports an error if there is no space after the name', () => {
          delete (notationPToken as any).nameSpace;
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NAME_NO_SPACE,
@@ -279,7 +279,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('reports an error if there is no external ID', () => {
          (notationPToken as any).externalId = undefined;
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NO_EXTERNALID,
@@ -291,7 +291,7 @@ describe('notationdeDeclaration (unit)', () => {
       it('reports an error if there was no closing', () => {
          delete (notationPToken as any).close;
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NO_CLOSE,
@@ -303,12 +303,12 @@ describe('notationdeDeclaration (unit)', () => {
 
       it('calls unassigned.checkExtra() with extras', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityId(), 0, 0, 0, 0, 0, 0));
          (notationPToken as any).extra = [
             unassigned.wordFromSToken(startSToken),
          ];
 
-         notationPToken.checkWellFormed(mockErrorCollector, emd);
+         notationPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(unassigned.checkExtra).toHaveBeenCalledWith(notationPToken.extra,
             mockErrorCollector,

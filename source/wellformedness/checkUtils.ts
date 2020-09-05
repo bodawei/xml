@@ -1,4 +1,4 @@
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank, SToken } from 'sToken';
 import { PToken, ParseValue } from 'pToken';
@@ -45,7 +45,7 @@ const WFID = WellFormedError.ID;
 const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 class CheckState {
-   public emd: EntityMetaData = new EntityMetaData();
+   public confVer: ConformanceVersion = new ConformanceVersion();
    public generalDecls: GeneralEntitiesInfo = {};
    public paramDecls: ParameterEntitiesInfo = {};
    // public hasAllDecls: boolean = true; // if not validating, a peref got in the way.

@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
@@ -228,34 +228,34 @@ describe('wordList (unit)', () => {
 
    describe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
 
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkNMToken');
       });
 
       it('checks if the enumeration word matches the requirements for words', () => {
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkName).toHaveBeenCalledWith(
-            wlPToken.words[0].word, mockErrorCollector, emd, WellFormedError.ID.WORDLIST_INVALID_NAME);
+            wlPToken.words[0].word, mockErrorCollector, confVer, WellFormedError.ID.WORDLIST_INVALID_NAME);
       });
 
       it('checks if the enumeration word matches the requirements for nmToken', () => {
          wlPToken = new WordListPToken(WordListType.ENUMERATION, wlPToken);
 
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkNMToken).toHaveBeenCalledWith(
-            wlPToken.words[0].word, mockErrorCollector, emd, WellFormedError.ID.WORDLIST_INVALID_NMTOKEN);
+            wlPToken.words[0].word, mockErrorCollector, confVer, WellFormedError.ID.WORDLIST_INVALID_NMTOKEN);
       });
 
       it('reports no errors if a well formed pToken provided', () => {
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -265,7 +265,7 @@ describe('wordList (unit)', () => {
             words: [],
          });
 
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.WORDLIST_NO_WORDS,
@@ -285,7 +285,7 @@ describe('wordList (unit)', () => {
             } ],
          });
 
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.WORDLIST_NO_WORD,
@@ -310,7 +310,7 @@ describe('wordList (unit)', () => {
             } ],
          });
 
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.WORDLIST_NO_CONNECTOR,
@@ -330,7 +330,7 @@ describe('wordList (unit)', () => {
             } ],
          });
 
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.WORDLIST_NO_WORD,
@@ -344,7 +344,7 @@ describe('wordList (unit)', () => {
             close: undefined,
          });
 
-         wlPToken.checkWellFormed(mockErrorCollector, emd);
+         wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.WORDLIST_NO_CLOSE,

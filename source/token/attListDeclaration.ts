@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import unassigned, { UnassignedArray } from './common/unassigned';
@@ -69,8 +69,8 @@ class AttListPToken {
       this.peRefPlus = basePToken.peRefPlus || [];
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      checkWellFormed(this, ec, confVer);
    }
 }
 
@@ -239,14 +239,14 @@ function parseClose(source: STokenSource, pToken: AttListPToken, deliverPToken: 
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, confVer: ConformanceVersion) {
    if (!pToken || pToken.unassigned) {
       return;
    }
 
    // When you rework this, make sure you're doing all the text checking correctly.
 
-   // declaration.checkWellFormed(pToken, ec, entityMetaData);
+   // declaration.checkWellFormed(pToken, ec, confVer);
    const declType = strOrBlank(pToken.declType);
 
    ec.setPos(pToken.declType);
@@ -256,7 +256,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
 
    ec.setPos(pToken.elementName);
    ec.check(!pToken.elementName, WFEID.ATTLISTDECL_NO_ELEMENT_NAME);
-   misc.checkName(pToken.elementName, ec, entityMetaData, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+   misc.checkName(pToken.elementName, ec, confVer, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
 
    ec.setPos(pToken.postElementNameSpace);
    if (pToken.attDefs.length > 0) {
@@ -271,8 +271,8 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       const attName = strOrBlank(attDef.name);
 
       ec.setPos(attDef.name);
-      misc.checkName(attDef.name, ec, entityMetaData, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
-      misc.checkWellFormedNameRecommendation(attDef.name, ec, entityMetaData, 'ATTRIBUTE',
+      misc.checkName(attDef.name, ec, confVer, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
+      misc.checkWellFormedNameRecommendation(attDef.name, ec, confVer, 'ATTRIBUTE',
          WARN.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
          WARN.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
 
@@ -298,7 +298,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
          if (!attDef.enumeration) {
             ec.report(WFEID.ATTLISTDECL_ATTR_NO_ATTTYPE, [ attName, elNameText ]);
          } else {
-            attDef.enumeration.checkWellFormed(ec, entityMetaData);
+            attDef.enumeration.checkWellFormed(ec, confVer);
             ec.check(!attDef.enumeration.closeSpace, WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE, [ attName, elNameText ]);
          }
       } else {
@@ -310,7 +310,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
             if (!attDef.enumeration) {
                ec.report(WFEID.ATTLISTDECL_ATTR_NO_NOTATION, [ attName, elNameText ]);
             } else {
-               attDef.enumeration.checkWellFormed(ec, entityMetaData);
+               attDef.enumeration.checkWellFormed(ec, confVer);
                ec.check(!attDef.enumeration.closeSpace, WFEID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE, [ attName, elNameText ]);
             }
          }
@@ -343,7 +343,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
             ? WFEID.ATTLISTDECL_ATTR_NO_VALUE
             : WFEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ attName, elNameText ]);
        // @@@ need to check and complain if any entity refs are to external entities (general or parameter)
-       literal.checkWellFormed(attDef, ec, entityMetaData, WFEID.NOUN_ATTRIBUTE);
+       literal.checkWellFormed(attDef, ec, confVer, WFEID.NOUN_ATTRIBUTE);
       } else {
          // wtf?
          ec.check(attDef.openQuote, WFEID.ATTLISTDECL_ATTR_EXTRA_VALUE, [ attName, elNameText ]);

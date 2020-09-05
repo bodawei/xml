@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -197,13 +197,13 @@ describe('attribute (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
       let mockErrorCollector: MockErrorCollector;
       let previousSpace: SToken;
       let litCheck: jasmine.Spy;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          const makeToken = makeSTokenMaker();
          previousSpace = makeToken(' ');
          mockErrorCollector = new MockErrorCollector();
@@ -215,35 +215,35 @@ describe('attribute (unit)', () => {
       });
 
       it('calls the misc.checkName() routine', () => {
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd, previousSpace, '');
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer, previousSpace, '');
 
-         expect(misc.checkName).toHaveBeenCalledWith(attributesPChunk[0].name, mockErrorCollector, emd,
+         expect(misc.checkName).toHaveBeenCalledWith(attributesPChunk[0].name, mockErrorCollector, confVer,
             WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
       });
 
       it('calls the langAttribute.checkXmlLangWellFormed() routine', () => {
          attributesPChunk[0].name.str = 'xml:lang';
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          expect(langAttribute.checkXmlLangWellFormed)
-            .toHaveBeenCalledWith(attributesPChunk[0].value, mockErrorCollector, emd);
+            .toHaveBeenCalledWith(attributesPChunk[0].value, mockErrorCollector, confVer);
       });
 
       it('asks the literal module to look for problems in the declaration part', () => {
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          const params = litCheck.calls.argsFor(0);
          expect(params[0]).toEqual(attributesPChunk[0]);
          expect(params[1]).toEqual(mockErrorCollector);
-         expect(params[2]).toEqual(emd);
+         expect(params[2]).toEqual(confVer);
          expect(params[3]).toEqual(WellFormedError.ID.NOUN_ATTRIBUTE);
          expect(params[4] instanceof Function).toEqual(true);
       });
 
       it('reports an error if there is no space before the first attribute name', () => {
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             undefined as any, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          expect(mockErrorCollector).toReportError({
@@ -256,7 +256,7 @@ describe('attribute (unit)', () => {
       it('reports an error if there is no space between the first and second attrs', () => {
          delete attributesPChunk[0].trailingSpace;
 
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          expect(mockErrorCollector).toReportError({
@@ -267,11 +267,11 @@ describe('attribute (unit)', () => {
       });
 
       it('calls the checkWellFormedNameRecommendation() function', () => {
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE, () => {});
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
-            attributesPChunk[0].name, mockErrorCollector, emd, 'ATTRIBUTE',
+            attributesPChunk[0].name, mockErrorCollector, confVer, 'ATTRIBUTE',
             XmlWarning.ID.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ATTRIBUTE_NAME_XML_RESERVED);
       });
@@ -279,10 +279,10 @@ describe('attribute (unit)', () => {
       it('calls the checkName function, if provided', () => {
          const checkName = jasmine.createSpy('checkName spy');
 
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE, checkName);
 
-         expect(checkName).toHaveBeenCalledWith(attributesPChunk[0].name, 0, mockErrorCollector, emd);
+         expect(checkName).toHaveBeenCalledWith(attributesPChunk[0].name, 0, mockErrorCollector, confVer);
       });
 
       it('calls the checkValue function, if provided', () => {
@@ -291,17 +291,17 @@ describe('attribute (unit)', () => {
             callback();
          });
 
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE, undefined, checkValue);
 
          expect(checkValue).toHaveBeenCalledWith(attributesPChunk[0].name,
-            attributesPChunk[0].value, mockErrorCollector, emd);
+            attributesPChunk[0].value, mockErrorCollector, confVer);
       });
 
       it('reports an error if there is no "=" found', () => {
          delete attributesPChunk[0].equal;
 
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          expect(mockErrorCollector).toReportError({
@@ -314,7 +314,7 @@ describe('attribute (unit)', () => {
       it('reports an error if attributes have duplicate names', () => {
          attributesPChunk[1].name.str = attributesPChunk[0].name.str;
 
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          expect(mockErrorCollector).toReportError({
@@ -327,7 +327,7 @@ describe('attribute (unit)', () => {
       it('reports no error if there is a duplicate name but it is not an attribute', () => {
          attributesPChunk[1].name.str = attributesPChunk[0].name.str;
 
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, 'other');
 
          expect(mockErrorCollector.errors.length).toEqual(0);
@@ -344,7 +344,7 @@ describe('attribute (unit)', () => {
             new TextPToken({ text: SToken.fromString('t<o') }),
          ];
 
-         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          expect(mockErrorCollector).toReportError({

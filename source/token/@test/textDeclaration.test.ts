@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -84,43 +84,43 @@ describe('textDeclaration (unit)', () => {
 
    describe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          spyOn(misc, 'checkCharWellFormed');
       });
 
       it('calls misc.checkCharWellFormed() on the target value', () => {
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(textDeclPToken.target, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(textDeclPToken.target, mockErrorCollector, confVer);
       });
 
       it('calls misc.checkCharWellFormed() on the version value', () => {
          (textDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed)
-            .toHaveBeenCalledWith(textDeclPToken.params[0].value, mockErrorCollector, emd);
+            .toHaveBeenCalledWith(textDeclPToken.params[0].value, mockErrorCollector, confVer);
       });
 
       it('calls misc.checkCharWellFormed() on the encoding value', () => {
          (textDeclPToken.params[0].name as any) = SToken.fromString('encoding');
          (textDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed)
-            .toHaveBeenCalledWith(textDeclPToken.params[0].value, mockErrorCollector, emd);
+            .toHaveBeenCalledWith(textDeclPToken.params[0].value, mockErrorCollector, confVer);
       });
 
       it('reports an error if there is a space after the "<?"', () => {
          (textDeclPToken as any).openSpace = SToken.fromString(' ');
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_SPACE_AFTER_OPEN,
@@ -132,7 +132,7 @@ describe('textDeclaration (unit)', () => {
       it('reports an error if there is no target', () => {
          delete (textDeclPToken as any).target;
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_NO_TARGET,
@@ -144,7 +144,7 @@ describe('textDeclaration (unit)', () => {
       it('reports an error if there is no space after the target', () => {
          delete (textDeclPToken as any).targetSpace;
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_NO_SPACE_AFTER_TARGET,
@@ -169,7 +169,7 @@ describe('textDeclaration (unit)', () => {
             close: SToken.fromString('?>'),
          });
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
@@ -184,7 +184,7 @@ describe('textDeclaration (unit)', () => {
             close: SToken.fromString('?>'),
          });
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -205,7 +205,7 @@ describe('textDeclaration (unit)', () => {
             close: SToken.fromString('?>'),
          });
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_PARAM_INVALID_CASE,
@@ -217,7 +217,7 @@ describe('textDeclaration (unit)', () => {
       it('reports an error if there is no close', () => {
          textDeclPToken = new TextDeclarationPToken(start);
 
-         textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+         textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_NO_CLOSE,
@@ -250,7 +250,7 @@ describe('textDeclaration (unit)', () => {
                close: SToken.fromString('?>'),
             });
 
-            textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+            textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.TEXTDECL_VERSION_INVALID_ORDER,
@@ -275,7 +275,7 @@ describe('textDeclaration (unit)', () => {
                close: SToken.fromString('?>'),
             });
 
-            textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+            textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.TEXTDECL_VERSION_INVALD,
@@ -309,7 +309,7 @@ describe('textDeclaration (unit)', () => {
                   close: SToken.fromString('?>'),
                });
 
-               textDeclPToken.checkWellFormed(mockErrorCollector, emd);
+               textDeclPToken.checkWellFormed(mockErrorCollector, confVer);
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.TEXTDECL_ENCODING_INVALID,

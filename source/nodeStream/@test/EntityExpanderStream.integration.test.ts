@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ENTITY_META_DATA, EntityMetaData, EntityLocation, EntityKind } from 'basic';
+import { EntityId, CONFORMANCE_VERSION, ENTITY_ID,  } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import {
    XMLDECL_PTOKEN,
@@ -34,15 +34,18 @@ import {
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './beforeEach';
 import { ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
-import { ParseValue, EntityId, CONFORMANCE_VERSION, ENTITY_ID } from 'pToken';
+import { ParseValue, ContextType } from 'pToken';
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT, 1.0, undefined, new  EntityLocation(__filename)), {
-         id: new EntityId(__filename), });
+      pTokenStream = new PTokenStream(undefined, {
+         context: ContextType.DOCUMENT,
+         version: 1.0,
+         entityId: new EntityId(__filename)
+      });
       entityExpander = new EntityExpanderStream(true);
 
       pTokenStream.pipe(entityExpander);
@@ -80,7 +83,6 @@ describe('EntityExpanderStream (integration)', () => {
                expect(types).toEqual([
                   CONFORMANCE_VERSION,
                   ENTITY_ID,
-                  ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
                   DOCTYPE_START_PTOKEN,
@@ -126,7 +128,6 @@ describe('EntityExpanderStream (integration)', () => {
                expect(types).toEqual([
                   CONFORMANCE_VERSION,
                   ENTITY_ID,
-                  ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
                   DOCTYPE_START_PTOKEN,
@@ -315,7 +316,6 @@ describe('EntityExpanderStream (integration)', () => {
                expect(types).toEqual([
                   CONFORMANCE_VERSION,
                   ENTITY_ID,
-                  ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
                   DOCTYPE_START_PTOKEN,
@@ -365,7 +365,6 @@ describe('EntityExpanderStream (integration)', () => {
                expect(types).toEqual([
                   CONFORMANCE_VERSION,
                   ENTITY_ID,
-                  ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
                   DOCTYPE_START_PTOKEN,
@@ -419,7 +418,6 @@ describe('EntityExpanderStream (integration)', () => {
                expect(types).toEqual([
                   CONFORMANCE_VERSION,
                   ENTITY_ID,
-                  ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
                   DOCTYPE_START_PTOKEN,
@@ -462,11 +460,10 @@ describe('EntityExpanderStream (integration)', () => {
             (results) => {
                const types = results.map((result) => result.type);
 
-               expect((results[23] as CharDataPToken).text.str).toEqual('>');
+               expect((results[22] as CharDataPToken).text.str).toEqual('>');
                expect(types).toEqual([
                   CONFORMANCE_VERSION,
                   ENTITY_ID,
-                  ENTITY_META_DATA,
                   XMLDECL_PTOKEN,
                   SPACE_PTOKEN,
                   DOCTYPE_START_PTOKEN,
@@ -870,8 +867,8 @@ describe('EntityExpanderStream (integration)', () => {
    //    const expected = new WellFormedError(
    //       WellFormedError.ID.REFERENCE_INVALID_RECURSION,
    //       ['first'],
-   //       new Offset(new EntityLocation(), 78, 2, 31),
-   //       new Offset(new EntityLocation(), 77, 2, 30),
+   //       new Offset(new EntityId(), 78, 2, 31),
+   //       new Offset(new EntityId(), 77, 2, 30),
    //    );
    //    expectError(entityExpander, expected, done);
    // });

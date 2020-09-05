@@ -2,14 +2,12 @@
 /* eslint-env jasmine */
 
 import Offset from '../Offset';
-import EntityLocation from '../EntityLocation';
+import { EntityId } from '../entityId';
 
 describe('Offset', () => {
-
    describe('construction', () => {
-
       it('accepts no row/column parameters', () => {
-         const offset = new Offset(new EntityLocation());
+         const offset = new Offset(new EntityId());
 
          expect(offset.index).toEqual(0);
          expect(offset.row).toEqual(0);
@@ -17,56 +15,50 @@ describe('Offset', () => {
       });
 
       it('accepts all parameters', () => {
-         const offset = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
-         const entityLocation: EntityLocation = (offset.location as any); // typeHack
+         const offset = new Offset(new EntityId('s', 'p'), 1, 2, 3);
+         const entityId: EntityId = offset.entityId;
 
-         expect(entityLocation.systemId).toEqual('s');
-         expect(entityLocation.publicId).toEqual('p');
+         expect(entityId.systemId).toEqual('s');
+         expect(entityId.publicId).toEqual('p');
          expect(offset.index).toEqual(1);
          expect(offset.row).toEqual(2);
          expect(offset.column).toEqual(3);
       });
-
    });
 
    describe('clone()', () => {
-
       it('cloned object has same values', () => {
-         const offset = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
+         const offset = new Offset(new EntityId('s', 'p'), 1, 2, 3);
 
          const clone = offset.clone();
 
-         expect(offset.location).toEqual(clone.location);
+         expect(offset.entityId).toEqual(clone.entityId);
          expect(offset.index).toEqual(clone.index);
          expect(offset.row).toEqual(clone.row);
          expect(offset.column).toEqual(clone.column);
       });
-
    });
 
    describe('equal()', () => {
-
       it('reports true when match', () => {
-         const offset1 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
-         const offset2 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
+         const offset1 = new Offset(new EntityId('s', 'p'), 1, 2, 3);
+         const offset2 = new Offset(new EntityId('s', 'p'), 1, 2, 3);
 
          expect(offset1.equals(offset2)).toEqual(true);
       });
 
       it('reports false when ranges do not match', () => {
-         const offset1 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
-         const offset2 = new Offset(new EntityLocation('s', 'p'), 1, 999, 3);
+         const offset1 = new Offset(new EntityId('s', 'p'), 1, 2, 3);
+         const offset2 = new Offset(new EntityId('s', 'p'), 1, 999, 3);
 
          expect(offset1.equals(offset2)).toEqual(false);
       });
 
       it('reports false when location in ranges do not match', () => {
-         const offset1 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
-         const offset2 = new Offset(new EntityLocation('s', 'p2'), 1, 2, 3);
+         const offset1 = new Offset(new EntityId('s', 'p'), 1, 2, 3);
+         const offset2 = new Offset(new EntityId('s', 'p2'), 1, 2, 3);
 
          expect(offset1.equals(offset2)).toEqual(false);
       });
-
    });
-
 });

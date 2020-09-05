@@ -1,12 +1,12 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range, EntityLocation, EntityMetaData } from 'basic';
+import { Range, EntityId,  } from 'basic';
 
 import STokenSource from '../STokenSource';
 import SToken from '../SToken';
 
-const PLACEHOLDER_RANGE = new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1);
+const PLACEHOLDER_RANGE = new Range(new EntityId(), 0, 0, 0, 1, 0, 1);
 const PEEK = '___PEEK___';
 const ANY = '___ANY___';
 
@@ -28,8 +28,8 @@ function makeSToken(text: string, rangeMaker?: RangeMaker) {
 
 type STokenMaker = (text: string) => SToken;
 
-function makeSTokenMaker(location = new EntityLocation(), index = 0, row = 0, column = 0): STokenMaker {
-   const rangeMaker = new RangeMaker(location, index, row, column);
+function makeSTokenMaker(entityId = new EntityId(), index = 0, row = 0, column = 0): STokenMaker {
+   const rangeMaker = new RangeMaker(entityId, index, row, column);
 
    return function maker(text: string) {
       return makeSToken(text, rangeMaker);
@@ -44,13 +44,13 @@ function makeSTokenMaker(location = new EntityLocation(), index = 0, row = 0, co
 \**********************************************************************/
 
 class RangeMaker {
-   public location: EntityLocation;
+   public entityId: EntityId;
    public index: number;
    public column: number;
    public row: number;
 
-   constructor(location = new EntityLocation(), index = 0, row = 0, column = 0) {
-      this.location = location;
+   constructor(entityId = new EntityId(), index = 0, row = 0, column = 0) {
+      this.entityId = entityId;
       this.index = index;
       this.column = column;
       this.row = row;
@@ -64,7 +64,7 @@ class RangeMaker {
       this.index += text.length;
       this.column += text.length;
 
-      return new Range(this.location, oldIndex, oldRow, oldColumn, this.index, this.row, this.column);
+      return new Range(this.entityId, oldIndex, oldRow, oldColumn, this.index, this.row, this.column);
    }
 }
 
@@ -107,7 +107,7 @@ class MockSTokenSource extends STokenSource {
     *  - An array with a PEEK in the first element: [ SToken(next str) ]
     */
    constructor(expectedValues: MockValues, index = 0, row = 0, column = 0) {
-      super({}, new EntityMetaData());
+      super({}, new EntityId());
       const makeToken = makeSTokenMaker(undefined, index, row, column);
 
       this.expectedValues = expectedValues.map((entry) => {
@@ -170,7 +170,7 @@ class MockSTokenSource extends STokenSource {
                token = undefined;
             } else
             if (next && next.token) {
-               token = new SToken(peekString, peekString, new Range(new EntityLocation(),
+               token = new SToken(peekString, peekString, new Range(new EntityId(),
                   next.token.ranges[0].startIndex,
                   next.token.ranges[0].startRow,
                   next.token.ranges[0].startColumn,
@@ -178,7 +178,7 @@ class MockSTokenSource extends STokenSource {
                   next.token.ranges[0].startRow,
                   next.token.ranges[0].startColumn + peekString.length));
             } else if (prev && prev.token && prev.type !== PEEK) {
-               token = new SToken(peekString, peekString, new Range(new EntityLocation(),
+               token = new SToken(peekString, peekString, new Range(new EntityId(),
                   prev.token.ranges[0].endIndex,
                   prev.token.ranges[0].endRow,
                   prev.token.ranges[0].endColumn,
@@ -186,7 +186,7 @@ class MockSTokenSource extends STokenSource {
                   prev.token.ranges[0].endRow,
                   prev.token.ranges[0].endColumn + peekString.length));
             } else {
-               token = new SToken(peekString, peekString, new Range(new EntityLocation(),
+               token = new SToken(peekString, peekString, new Range(new EntityId(),
                   0,
                   0,
                   0,

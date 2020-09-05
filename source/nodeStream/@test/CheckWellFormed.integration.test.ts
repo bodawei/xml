@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Offset, EntityLocation, EntityMetaData, } from 'basic';
+import { Offset, EntityId, } from 'basic';
 import { WellFormedError } from 'error';
 import { PTokenStream } from 'pTokenStream';
 
@@ -15,7 +15,7 @@ describe('CheckWellFormed (integration)', () => {
    let checker: CheckWellFormed;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData());
+      pTokenStream = new PTokenStream();
       checker = new CheckWellFormed();
       pTokenStream.pipe(checker);
    });
@@ -31,8 +31,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><? aTarget',
          new WellFormedError(WellFormedError.ID.PI_SPACE_AFTER_OPEN,
             [ 'aTarget' ],
-            new Offset(new EntityLocation(), 23, 0, 23),
-            new Offset(new EntityLocation(), 21, 0, 21)
+            new Offset(new EntityId(), 23, 0, 23),
+            new Offset(new EntityId(), 21, 0, 21)
          ), done);
    });
 
@@ -40,8 +40,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE [<!ATTLIST $badName>]>',
          new WellFormedError(WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID,
             [ '$badName' ],
-            new Offset(new EntityLocation(), 42, 0, 42),
-            new Offset(new EntityLocation(), 32, 0, 32),
+            new Offset(new EntityId(), 42, 0, 42),
+            new Offset(new EntityId(), 32, 0, 32),
          ), done);
    });
 
@@ -49,8 +49,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><one>bad\u0000data</one><one>bad\u0000data</one>',
          new WellFormedError(WellFormedError.ID.CHARDATA_INVALID_CHAR,
             [ '29' ],
-            new Offset(new EntityLocation(), 26, 0, 26),
-            new Offset(new EntityLocation(), 26, 0, 26)
+            new Offset(new EntityId(), 26, 0, 26),
+            new Offset(new EntityId(), 26, 0, 26)
          ), done);
    });
 
@@ -58,8 +58,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><!-- foo',
          new WellFormedError(WellFormedError.ID.COMMENT_NO_CLOSE,
             undefined,
-            new Offset(new EntityLocation(), 29, 0, 29),
-            new Offset(new EntityLocation(), 21, 0, 21)
+            new Offset(new EntityId(), 29, 0, 29),
+            new Offset(new EntityId(), 21, 0, 21)
          ), done);
    });
 
@@ -67,8 +67,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE $badName SYSTEM "sys.xml"[]>',
          new WellFormedError(WellFormedError.ID.DOCTYPE_NAME_INVALID,
             [ '$badName' ],
-            new Offset(new EntityLocation(), 31, 0, 31),
-            new Offset(new EntityLocation(), 21, 0, 21)
+            new Offset(new EntityId(), 31, 0, 31),
+            new Offset(new EntityId(), 21, 0, 21)
          ), done);
    });
 
@@ -76,8 +76,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE goodName SYSTEM "sys.xml"[]',
          new WellFormedError(WellFormedError.ID.DOCTYPE_NO_CLOSE,
             undefined,
-            new Offset(new EntityLocation(), 58, 0, 58),
-            new Offset(new EntityLocation(), 21, 0, 21)
+            new Offset(new EntityId(), 58, 0, 58),
+            new Offset(new EntityId(), 21, 0, 21)
          ), done);
    });
 
@@ -85,8 +85,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?>< spaceBeforeBad>',
          new WellFormedError(WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
             [ 'spaceBeforeBad' ],
-            new Offset(new EntityLocation(), 22, 0, 22),
-            new Offset(new EntityLocation(), 21, 0, 21)
+            new Offset(new EntityId(), 22, 0, 22),
+            new Offset(new EntityId(), 21, 0, 21)
          ), done);
    });
 
@@ -94,8 +94,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><one></one><two>',
          new WellFormedError(WellFormedError.ID.TOKEN_INVALID_CONTEXT,
             [ ELEMENT_START_PTOKEN ],
-            new Offset(new EntityLocation(), 32, 0, 32),
-            new Offset(new EntityLocation(), 32, 0, 32)
+            new Offset(new EntityId(), 32, 0, 32),
+            new Offset(new EntityId(), 32, 0, 32)
          ), done);
    });
 
@@ -103,8 +103,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?>< spaceBeforeBad/>',
          new WellFormedError(WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
             [ 'spaceBeforeBad' ],
-            new Offset(new EntityLocation(), 22, 0, 22),
-            new Offset(new EntityLocation(), 21, 0, 21)
+            new Offset(new EntityId(), 22, 0, 22),
+            new Offset(new EntityId(), 21, 0, 21)
          ), done);
    });
 
@@ -112,8 +112,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><spaceBeforeBad></ spaceBeforeBad>',
          new WellFormedError(WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
             [ 'spaceBeforeBad' ],
-            new Offset(new EntityLocation(), 39, 0, 39),
-            new Offset(new EntityLocation(), 37, 0, 37)
+            new Offset(new EntityId(), 39, 0, 39),
+            new Offset(new EntityId(), 37, 0, 37)
          ), done);
    });
 
@@ -121,8 +121,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!ELEMENT elDec BOGUS>]>',
          new WellFormedError(WellFormedError.ID.ELEMENTDECL_SPEC_UNKNOWN,
             [ 'elDec', 'BOGUS' ],
-            new Offset(new EntityLocation(), 52, 0, 52),
-            new Offset(new EntityLocation(), 36, 0, 36)
+            new Offset(new EntityId(), 52, 0, 52),
+            new Offset(new EntityId(), 36, 0, 36)
          ), done);
    });
 
@@ -130,8 +130,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY %entityName "frog">]>',
          new WellFormedError(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE,
             [ 'entityName' ],
-            new Offset(new EntityLocation(), 46, 0, 46),
-            new Offset(new EntityLocation(), 36, 0, 36)
+            new Offset(new EntityId(), 46, 0, 46),
+            new Offset(new EntityId(), 36, 0, 36)
          ), done);
    });
 
@@ -139,8 +139,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><one>& entityRef;</one>',
          new WellFormedError(WellFormedError.ID.REFERENCE_XTRA_SPACE,
             [ 'entityRef' ],
-            new Offset(new EntityLocation(), 27, 0, 27),
-            new Offset(new EntityLocation(), 26, 0, 26)
+            new Offset(new EntityId(), 27, 0, 27),
+            new Offset(new EntityId(), 26, 0, 26)
          ), done);
    });
 
@@ -148,8 +148,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><one>% peRef;</one>',
          new WellFormedError(WellFormedError.ID.PEREF_XTRA_SPACE,
             [ 'peRef' ],
-            new Offset(new EntityLocation(), 27, 0, 27),
-            new Offset(new EntityLocation(), 26, 0, 26)
+            new Offset(new EntityId(), 27, 0, 27),
+            new Offset(new EntityId(), 26, 0, 26)
          ), done);
    });
 
@@ -157,8 +157,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!NOTATION $badName SYSTEM "sys.xml">]>',
          new WellFormedError(WellFormedError.ID.NOTATIONDECL_NAME_INVALID,
             [ '$badName' ],
-            new Offset(new EntityLocation(), 47, 0, 47),
-            new Offset(new EntityLocation(), 36, 0, 36)
+            new Offset(new EntityId(), 47, 0, 47),
+            new Offset(new EntityId(), 36, 0, 36)
          ), done);
    });
 
@@ -166,8 +166,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('  ',
          new WellFormedError(WellFormedError.ID.TOKEN_INVALID_CONTEXT,
             [ SPACE_PTOKEN ],
-            new Offset(new EntityLocation(), 0, 0, 0),
-            new Offset(new EntityLocation(), 0, 0, 0)
+            new Offset(new EntityId(), 0, 0, 0),
+            new Offset(new EntityId(), 0, 0, 0)
          ), done);
    });
 
@@ -175,8 +175,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?><![CDATA[foo\u0000 bad',
          new WellFormedError(WellFormedError.ID.CDATA_NO_CLOSE,
             [ 'CDATA' ],
-            new Offset(new EntityLocation(), 38, 0, 38),
-            new Offset(new EntityLocation(), 21, 0, 21)
+            new Offset(new EntityId(), 38, 0, 38),
+            new Offset(new EntityId(), 21, 0, 21)
          ), done);
    });
 
@@ -184,8 +184,8 @@ describe('CheckWellFormed (integration)', () => {
       expectInputToProduce('<?xml VERSION="1.0"?>',
          new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_INVALID_CASE,
             [ 'version', 'VERSION' ],
-            new Offset(new EntityLocation(), 6, 0, 6),
-            new Offset(new EntityLocation(), 0, 0, 0)
+            new Offset(new EntityId(), 6, 0, 6),
+            new Offset(new EntityId(), 0, 0, 0)
          ), done);
    });
 

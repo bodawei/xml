@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -27,7 +27,7 @@ describe('processingInstruction (integration)', () => {
    describe('parse()', () => {
 
       it('asks the instruction module to include a type in the PToken', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('blah blah?>');
          source.endText();
 
@@ -43,14 +43,14 @@ describe('processingInstruction (integration)', () => {
 
       it('asks the instruction module report if there is an extra space', (done) => {
          (piPToken as any).openSpace = SToken.fromString(' '); // typeHack
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('blah blah?>');
          source.endText();
 
          parseProcessingInstruction(source, piPToken as any, (pToken) => {
             const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
-            pToken.checkWellFormed(ec, new EntityMetaData());
+            pToken.checkWellFormed(ec, new ConformanceVersion());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_AFTER_OPEN);
             done();

@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../token/parameterEntityReference'; // WTF?
@@ -14,7 +14,11 @@ import { generalEntityReferenceCheck } from './token/generalEntityReferenceCheck
 import { xmlDeclarationCheck } from './token/xmlDeclarationCheck';
 
 interface CheckMap {
-   [type: string]: (pToken: any, errorCollector: ErrorCollector, emd: EntityMetaData) => void;
+   [type: string]: (
+      pToken: any,
+      errorCollector: ErrorCollector,
+      confVer: ConformanceVersion,
+   ) => void;
 }
 
 const checkMap: CheckMap = {

@@ -1,6 +1,5 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource } from 'sToken';
 import { ContentParticlePToken, NameListPToken, parseAllUnassignedValues } from 'token';
@@ -9,7 +8,7 @@ import { assignNameList } from '../assignNameList';
 
 describe('assignNameList() (integration)', () => {
    it('fills in a simple list of names', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('( one+ | ( ( two | three)+ , four)? | five)');
       source.endText();
 

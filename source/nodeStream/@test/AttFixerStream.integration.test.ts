@@ -1,6 +1,5 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { toSToken, SToken } from 'sToken';
 import { XmlDeclarationPToken, ElementStartPToken, TextPToken, XMLDECL_PTOKEN } from 'token';
@@ -15,7 +14,7 @@ describe('AttFixerStream (integration)', () => {
    let fixer: AttFixerStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData());
+      pTokenStream = new PTokenStream();
       fixer = new AttFixerStream();
       pTokenStream.pipe(fixer);
    });
@@ -57,7 +56,7 @@ describe('AttFixerStream (integration)', () => {
       pTokenStream.endText();
 
       gatherPTokens(fixer, (results) => {
-         expect((results[13] as ElementStartPToken).attributes).toEqualRangeless([{
+         expect((results[12] as ElementStartPToken).attributes).toEqualRangeless([{
                name: toSToken('nmtok'),
                value: [new TextPToken({ text: new SToken('3 4', '  3   4  ', []) })],
                postNameSpace: undefined,

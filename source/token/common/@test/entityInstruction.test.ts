@@ -1,9 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
-import { WellFormedError } from 'error';
-import { MockErrorCollector } from 'error-test';
+import { Range, EntityId } from 'basic';
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -88,9 +86,9 @@ describe('EntityDecl (unit)', () => {
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual({
             pToken: {
-               name: new SToken('version', 'version', new Range(new EntityLocation(), 7, 0, 7, 14, 0, 14)),
+               name: new SToken('version', 'version', new Range(new EntityId(), 7, 0, 7, 14, 0, 14)),
                nameSpace: undefined,
-               equal: new SToken('=', '=', new Range(new EntityLocation(), 14, 0, 14, 15, 0, 15)),
+               equal: new SToken('=', '=', new Range(new EntityId(), 14, 0, 14, 15, 0, 15)),
                equalSpace: undefined,
             },
          });

@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { toSToken } from 'sToken';
@@ -61,7 +61,7 @@ describe('DocumentChecker (unit)', () => {
    let space: SpacePToken;
    let processingInstruction: ProcessingInstructionPToken;
    let ec: MockErrorCollector;
-   let metaData: EntityMetaData;
+   let confVer: ConformanceVersion;
    let textDecl: TextDeclarationPToken;
    let xmlDecl: XmlDeclarationPToken;
    let docTypeStart: DocTypeStartPToken;
@@ -113,7 +113,7 @@ describe('DocumentChecker (unit)', () => {
          dtd: MockChecker,
       });
 
-      metaData = new EntityMetaData();
+      confVer = new ConformanceVersion();
 
       cdata = makeCdata();
       comment = makeComment();
@@ -135,14 +135,14 @@ describe('DocumentChecker (unit)', () => {
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
          const cwfSpy = spyOn(checkMap, XMLDECL_PTOKEN);
-         checker.check(metaData, ec);
+         checker.check(confVer, ec);
 
          checker.check(xmlDecl, ec);
 
          const args = cwfSpy.calls.argsFor(0);
          expect(args[0]).toBe(xmlDecl);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[2]).toEqual(confVer);
       });
 
       it('handles an XmlError with no problems', () => {

@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Transform } from 'stream';
-import { EntityMetaData } from 'basic';
+import { EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { EntityExpander, resolveSystemId } from 'expand';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -11,7 +11,7 @@ import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token';
 
 import { AttributeValueResults, ExpandToken, RetrieveResults } from '../expand/types';
-import { ContextType, EntityId } from 'pToken';
+import { ContextType } from 'pToken';
 
 function parseBody(sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken): void {
    const pTokenStream = new PTokenStream(sTokenSource, { context });
@@ -46,7 +46,7 @@ function retrieveExternalEntity(
    baseEntity: EntityId,
    relativeEntity: EntityId,
 ): RetrieveResults {
-   const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
+   const sTokenSource = new STokenSource(defaultExtractors);
 
    let pathx = resolveSystemId(baseEntity, relativeEntity);
    pathx = path.resolve(pathx);

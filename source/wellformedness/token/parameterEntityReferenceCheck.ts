@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import { nameCheck } from './util/nameCheck';
@@ -10,7 +10,7 @@ const WFEID = WellFormedError.ID;
 function parameterEntityReferenceCheck(
    pToken: ParameterEntityReferencePToken,
    ec: ErrorCollector,
-   entityMetaData: EntityMetaData,
+   confVer: ConformanceVersion,
 ): void {
    const entityName = strOrBlank(pToken.name);
 
@@ -22,7 +22,7 @@ function parameterEntityReferenceCheck(
    ec.check(!pToken.name, WFEID.PEREF_NO_NAME);
 
    if (pToken.name) {
-      nameCheck(pToken.name, ec, entityMetaData, WFEID.PEREF_NAME_INVALID);
+      nameCheck(pToken.name, ec, confVer, WFEID.PEREF_NAME_INVALID);
    }
 
    ec.setPos(pToken.nameSpace);

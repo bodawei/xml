@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -738,7 +738,7 @@ describe('unassigned (unit)', () => {
 
          it('merges the combination of several introduced spaces into one space', () => {
             const pToken = {};
-            const space = unassigned.spaceFromSToken(new SToken(' ', ' ', [ new Range(new EntityLocation()) ]));
+            const space = unassigned.spaceFromSToken(new SToken(' ', ' ', [ new Range(new EntityId()) ]));
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals: UnassignedArray = [ word, {
                type: UnassignedType.ENTITY_START,
@@ -773,7 +773,7 @@ describe('unassigned (unit)', () => {
                   helper.makeInsertedRange(),
                   helper.makeInsertedRange(),
                   helper.makeInsertedRange(),
-                  new Range(new EntityLocation()),
+                  new Range(new EntityId()),
                ]),
             });
          });
@@ -830,7 +830,7 @@ describe('unassigned (unit)', () => {
 
          it('merges a 4.4.8 introduced space into the previous', () => {
             const pToken: any = {
-               one: new SToken('\t', '\t', new Range(new EntityLocation())),
+               one: new SToken('\t', '\t', new Range(new EntityId())),
             };
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals: UnassignedArray = [ {
@@ -851,7 +851,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               one: new SToken('\t ', '\t ', [ new Range(new EntityLocation()), helper.makeInsertedRange() ]),
+               one: new SToken('\t ', '\t ', [ new Range(new EntityId()), helper.makeInsertedRange() ]),
                two: word.token.text,
             });
          });
@@ -1050,7 +1050,7 @@ describe('unassigned (unit)', () => {
       it('adds an error with the text of all the tokens in the provided array', () => {
          const mockErrorCollector = new MockErrorCollector();
          const startSToken = SToken.fromString('one');
-         startSToken.ranges.push(new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
+         startSToken.ranges.push(new Range(new EntityId(), 0, 0, 0, 0, 0, 0));
          const extra: any = [
             unassigned.wordFromSToken(startSToken),
             unassigned.spaceFromSToken(SToken.fromString(' ')),

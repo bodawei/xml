@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -61,7 +61,7 @@ describe('processingInstruction (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
 
       beforeEach(() => {
          const protoPToken = {
@@ -74,7 +74,7 @@ describe('processingInstruction (unit)', () => {
          };
 
          mockErrorCollector = new MockErrorCollector();
-         emd = new EntityMetaData();
+         confVer = new ConformanceVersion();
          piPToken = new ProcessingInstructionPToken(protoPToken);
 
          spyOn(misc, 'checkCharWellFormed');
@@ -83,29 +83,29 @@ describe('processingInstruction (unit)', () => {
 
       it('calls misc.checkName() on the target', () => {
          spyOn(misc, 'checkName');
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(misc.checkName).toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd, WellFormedError.ID.PI_TARGET_NAME_INVALID);
+         expect(misc.checkName).toHaveBeenCalledWith(piPToken.target, mockErrorCollector, confVer, WellFormedError.ID.PI_TARGET_NAME_INVALID);
       });
 
       it('calls misc.checkCharWellFormed() on the instruction data', () => {
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(piPToken.instruction, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(piPToken.instruction, mockErrorCollector, confVer);
       });
 
       it('calls misc.checkWellFormedNameRecommendation()', () => {
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(misc.checkWellFormedNameRecommendation)
-            .toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd, 'PI',
+            .toHaveBeenCalledWith(piPToken.target, mockErrorCollector, confVer, 'PI',
                XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
       });
 
       it('reports an error if there is a space after the "<?"', () => {
          piPToken.openSpace = SToken.fromString(' ');
 
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.PI_SPACE_AFTER_OPEN,
@@ -117,7 +117,7 @@ describe('processingInstruction (unit)', () => {
       it('reports an error if there is no target', () => {
          delete piPToken.target;
 
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.PI_NO_TARGET,
@@ -129,7 +129,7 @@ describe('processingInstruction (unit)', () => {
       it('reports an error if xml in any form shows up in the name', () => {
          piPToken.target = SToken.fromString('fofoXmLTarget');
 
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.PI_TARGET_HAS_XML,
@@ -141,7 +141,7 @@ describe('processingInstruction (unit)', () => {
       it('reports an error if there is no space after the target', () => {
          delete piPToken.targetSpace;
 
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.PI_NO_SPACE_AFTER_TARGET,
@@ -153,7 +153,7 @@ describe('processingInstruction (unit)', () => {
       it('reports an error if there is no close', () => {
          delete piPToken.close;
 
-         piPToken.checkWellFormed(mockErrorCollector, emd);
+         piPToken.checkWellFormed(mockErrorCollector, confVer);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.PI_NO_CLOSE,

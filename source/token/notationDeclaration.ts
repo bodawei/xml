@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
@@ -66,8 +66,8 @@ class NotationDeclarationPToken {
       this.peRefPlus = (props as any).peRefPlus || [];
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      return checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -141,7 +141,7 @@ function getClose(source: STokenSource, protoToken: ProtoToken, deliverPToken: D
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    const nameText: string = strOrBlank(pToken.name);
    const declType = strOrBlank(pToken.declType);
 
@@ -157,8 +157,8 @@ function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, 
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.NOTATIONDECL_NO_NAME);
-   misc.checkName(pToken.name, ec, entityMetaData, WFEID.NOTATIONDECL_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, 'NOTATION',
+   misc.checkName(pToken.name, ec, confVer, WFEID.NOTATIONDECL_NAME_INVALID);
+   misc.checkWellFormedNameRecommendation(pToken.name, ec, confVer, 'NOTATION',
       WARN.NOTATIONDECL_NAME_XMLDASH_RESERVED,
       WARN.NOTATIONDECL_NAME_XML_RESERVED);
 
@@ -166,7 +166,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, 
    ec.check(!pToken.nameSpace, WFEID.NOTATIONDECL_NAME_NO_SPACE, [ nameText ]);
 
    ec.check(!pToken.externalId, WFEID.NOTATIONDECL_NO_EXTERNALID);
-   checkExternalIdWellFormed(pToken.externalId, ec, entityMetaData);
+   checkExternalIdWellFormed(pToken.externalId, ec, confVer);
 
    ec.setPos(pToken.externalIdSpace);
    ec.setPos(pToken.close);

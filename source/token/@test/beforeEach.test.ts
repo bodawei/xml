@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 /* istanbul ignore */ // For some reason istanbul with Safari is picking up this file
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 import { SToken } from 'sToken';
 import { toContainPTokenProps, toEqualRangeless } from './beforeEach';
 
@@ -188,7 +188,7 @@ describe('token custom matchers', () => {
          it('returns a "not" message on success', () => {
             const spy = jasmine.createSpy();
             spy({
-               one: new SToken('one', 'one', new Range(new EntityLocation(), 1, 0, 1, 3, 0, 3)),
+               one: new SToken('one', 'one', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
             const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
@@ -204,7 +204,7 @@ describe('token custom matchers', () => {
          it('allows the expected value to just be a string', () => {
             const spy = jasmine.createSpy();
             spy({
-               one: new SToken('actual', 'actual', new Range(new EntityLocation(), 1, 0, 1, 3, 0, 3)),
+               one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
             const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
@@ -254,7 +254,7 @@ describe('token custom matchers', () => {
          it('returns a message indicating failure, when actual does not have an expected property', () => {
             const spy = jasmine.createSpy();
             spy({
-               one: new SToken('actual', 'actual', new Range(new EntityLocation(), 1, 0, 1, 3, 0, 3)),
+               one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
             const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
@@ -271,11 +271,11 @@ describe('token custom matchers', () => {
          it('returns a message indicating failure, when actual and expected do not match', () => {
             const spy = jasmine.createSpy();
             spy({
-               one: new SToken('actual', 'actual', new Range(new EntityLocation(), 1, 0, 1, 3, 0, 3)),
+               one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
             const result = toEqualRangeless({ equals() { return false; } }, {}).compare(spy, {
-               one: new SToken('expected', 'expected', new Range(new EntityLocation(), 5, 0, 5, 3, 0, 3)),
+               one: new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 5, 3, 0, 3)),
             });
 
             expect(result).toEqual({
@@ -288,7 +288,7 @@ describe('token custom matchers', () => {
          it('replaces undefined values with a marker', () => {
             const spy = jasmine.createSpy();
             spy({
-               one: new SToken('actual', 'actual', new Range(new EntityLocation(), 1, 0, 1, 3, 0, 3)),
+               one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
             const result = toEqualRangeless({ equals() { return false; } }, {}).compare(spy, {
@@ -305,11 +305,11 @@ describe('token custom matchers', () => {
          it('processes arrays as properties', () => {
             const spy = jasmine.createSpy();
             spy({
-               one: [ new SToken('actual', 'actual', new Range(new EntityLocation(), 1, 0, 1, 3, 0, 3)), 5, undefined],
+               one: [ new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)), 5, undefined],
             });
 
             const result = toEqualRangeless({ equals() { return false; } }, {}).compare(spy, {
-               one: [ new SToken('expected', 'expected', new Range(new EntityLocation(), 5, 0, 9, 3, 0, 3)), 5, undefined],
+               one: [ new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 9, 3, 0, 3)), 5, undefined],
             });
 
             expect(result).toEqual({
@@ -322,12 +322,12 @@ describe('token custom matchers', () => {
 
          it('processes arrays as the top level argument', () => {
             const spy = jasmine.createSpy();
-            spy([ new SToken('actual', 'actual', new Range(new EntityLocation(), 1, 0, 1, 3, 0, 3)), 5, undefined]);
+            spy([ new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)), 5, undefined]);
 
             const result = toEqualRangeless({ equals(a: any, b: any) {
                return a === b;
             } }, {}).compare(spy,
-               [ new SToken('expected', 'expected', new Range(new EntityLocation(), 5, 0, 9, 3, 0, 3)), 5, undefined]);
+               [ new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 9, 3, 0, 3)), 5, undefined]);
 
             expect(result).toEqual({
                pass: false,

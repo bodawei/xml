@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
@@ -27,7 +27,7 @@ describe('elementEnd (integration)', () => {
    describe('parse()', () => {
 
       it('parses the end of the element when called', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText('elemName >');
          source.endText();
 
@@ -40,12 +40,12 @@ describe('elementEnd (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd: EntityMetaData;
+      let confVer: ConformanceVersion;
       let source: STokenSource;
 
       beforeEach(() => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
+         confVer = new ConformanceVersion();
+         source = new STokenSource(defaultExtractors);
       });
 
       it('reports an error with "xml" in name (check misc.checkWellFormedNameRecommendation)', (done) => {
@@ -54,7 +54,7 @@ describe('elementEnd (integration)', () => {
          parseElementEnd(source, elementEndPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken.open, WellFormedError);
 
-            pToken.checkWellFormed(ec, emd);
+            pToken.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
             done();
@@ -67,7 +67,7 @@ describe('elementEnd (integration)', () => {
          parseElementEnd(source, elementEndPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken.open, WellFormedError);
 
-            pToken.checkWellFormed(ec, emd);
+            pToken.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
             done();

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank, SToken, STokenArrayBuilder } from 'sToken';
 
@@ -77,8 +77,8 @@ class ParameterEntityDeclarationPToken {
       }
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {

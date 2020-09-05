@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import base, { STokenArray } from '../base';
@@ -86,7 +86,7 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: 
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: DeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: DeclarationPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    ec.setPos(pToken.open);
 
 

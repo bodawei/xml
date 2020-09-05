@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from '../../../error/index';
 import { defaultExtractors } from '../../../extractor';
 import { SToken, STokenSource } from 'sToken';
@@ -14,12 +14,12 @@ import { TextPToken, TextXToken } from 'source/token/text';
 import { GeneralEntityReferenceXToken } from 'xToken';
 
 describe('literal (integration)', () => {
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let source: STokenSource;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      confVer = new ConformanceVersion();
+      source = new STokenSource(defaultExtractors);
    });
 
    describe('parse()', () => {
@@ -102,7 +102,7 @@ describe('literal (integration)', () => {
          }, () => {
             const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
-            literal.checkWellFormed(pToken, ec, emd, 'aType');
+            literal.checkWellFormed(pToken, ec, confVer, 'aType');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
@@ -119,7 +119,7 @@ describe('literal (integration)', () => {
          }, () => {
             const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
-            literal.checkWellFormed(pToken, ec, emd, 'aType');
+            literal.checkWellFormed(pToken, ec, confVer, 'aType');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.REFERENCE_XTRA_SPACE);
             done();

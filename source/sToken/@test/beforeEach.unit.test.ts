@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 
 import { toEqualSTokenText, toEqualSTokenTexts, toEqualSTokenRange } from './beforeEach';
 import SToken from '../SToken';
@@ -10,7 +10,7 @@ describe('sToken beforeEach', () => {
    let range: Range;
 
    beforeEach(() => {
-      range = new Range(new EntityLocation());
+      range = new Range(new EntityId());
    });
 
    describe('toEqualSTokenText', () => {
@@ -174,14 +174,14 @@ describe('sToken beforeEach', () => {
    describe('toEqualSTokenRange()', () => {
 
       beforeEach(() => {
-         range = new Range(new EntityLocation('s', 'p'), 0, 1, 2, 3, 4, 5);
+         range = new Range(new EntityId('s', 'p'), 0, 1, 2, 3, 4, 5);
       });
 
       describe('jasmine use', () => {
 
          // it('reports pass when the range matches', () => {
          //    expect(new SToken('one', 'two', [ range ]))
-         //       .toEqualSTokenRange(new Range(new EntityLocation('s', 'p'), 0, 1, 2, 3, 4, 5));
+         //       .toEqualSTokenRange(new Range(new EntityId('s', 'p'), 0, 1, 2, 3, 4, 5));
          // });
 
          // it('reports an exception if the SToken is undefined', () => {
@@ -192,7 +192,7 @@ describe('sToken beforeEach', () => {
 
          // it('reports no pass if the range does not match', () => {
          //    expect(new SToken('one', 'one', range)).not
-         //       .toEqualSTokenText(new Range(new EntityLocation('s', 'p'), 3, 3, 3, 3, 3));
+         //       .toEqualSTokenText(new Range(new EntityId('s', 'p'), 3, 3, 3, 3, 3));
          // });
 
       });
@@ -217,20 +217,20 @@ describe('sToken beforeEach', () => {
             expect(result).toEqual({
                pass: true,
                message: 'Expected range not to match. ' +
-                  '("{"location":{"systemId":"s","publicId":"p"},"startIndex":0,"startRow":1,"startColumn":2,' +
+                  '("{"entityId":{"type":"ENTITY_ID","systemId":"s","publicId":"p"},"startIndex":0,"startRow":1,"startColumn":2,' +
                   '"endIndex":3,"endRow":4,"endColumn":5}").\n',
             });
          });
 
          it('returns a message indicating failure, on success, when range does not match', () => {
             const result = toEqualSTokenRange().compare(new SToken('testValue', 'testValue', range),
-               new Range(new EntityLocation('s', 'p'), 0, 0, 0, 0, 0, 0));
+               new Range(new EntityId('s', 'p'), 0, 0, 0, 0, 0, 0));
 
             expect(result).toEqual({
                pass: false,
-               message: 'SToken range does not match.\n\tActual:   {"location":{"systemId":"s","publicId":"p"},' +
+               message: 'SToken range does not match.\n\tActual:   {"entityId":{"type":"ENTITY_ID","systemId":"s","publicId":"p"},' +
                   '"startIndex":0,"startRow":1,"startColumn":2,"endIndex":3,"endRow":4,"endColumn":5}\n' +
-                  '\tExpected: {"location":{"systemId":"s","publicId":"p"},"startIndex":0,"startRow":0,' +
+                  '\tExpected: {"entityId":{"type":"ENTITY_ID","systemId":"s","publicId":"p"},"startIndex":0,"startRow":0,' +
                   '"startColumn":0,"endIndex":0,"endRow":0,"endColumn":0}\n',
             });
          });

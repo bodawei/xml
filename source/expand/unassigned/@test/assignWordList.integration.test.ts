@@ -1,4 +1,3 @@
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource } from 'sToken';
 import { WordListType, parseWordList, parseAllUnassignedValues } from 'token';
@@ -7,12 +6,12 @@ import { assignWordList } from '../assignWordList';
 
 describe('assignWordList() (integration)', () => {
    it('fills in a simple list of names', (done) => {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText('( one| %foo;');
       source.endText();
 
       parseWordList(source, WordListType.NOTATION, (pToken: any) => {
-         const sourceTwo = new STokenSource(defaultExtractors, new EntityMetaData());
+         const sourceTwo = new STokenSource(defaultExtractors);
          sourceTwo.addText('four | five six ||)');
          sourceTwo.endText();
 

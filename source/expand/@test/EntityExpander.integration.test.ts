@@ -1,16 +1,15 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, EntityLocation, EntityMetaData, Range } from 'basic';
+import { Token, Range, EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { ContextType, EntityId } from 'pToken';
+import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import {
    AttributeValuePToken,
    ElementStartPToken,
    EntityValuePToken,
-   ExternalId,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    GeneralEntityEndPToken,
@@ -70,7 +69,7 @@ describe('EntityExpander (integration)', () => {
       baseEntity: EntityId,
       relativeEntity: EntityId,
    ): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
+      const sTokenSource = new STokenSource(defaultExtractors);
 
       const str = externalMap[relativeEntity.systemId];
       sTokenSource.addText(str);
@@ -187,15 +186,7 @@ describe('EntityExpander (integration)', () => {
                      text: new SToken(
                         '(middle)',
                         '(middle)',
-                        new Range(
-                           new EntityLocation('dummy meta data to keep TypeScript happy'),
-                           0,
-                           0,
-                           0,
-                           8,
-                           0,
-                           8,
-                        ),
+                        new Range(new EntityId(), 0, 0, 0, 8, 0, 8),
                      ),
                   }),
                   new GeneralEntityEndPToken(ref1),

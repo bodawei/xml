@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 
 import SToken from '../SToken';
 
@@ -10,12 +10,12 @@ describe('SToken', () => {
    describe('construction', () => {
 
       it('creates an SToken with the provided parameters', () => {
-         const sToken = new SToken('one', 'two', new Range(new EntityLocation()));
+         const sToken = new SToken('one', 'two', new Range(new EntityId()));
 
          expect(sToken).toEqualProps({
             str: 'one',
             originalStr: 'two',
-            ranges: [ new Range(new EntityLocation()) ],
+            ranges: [ new Range(new EntityId()) ],
          });
       });
 
@@ -30,12 +30,12 @@ describe('SToken', () => {
       });
 
       it('creates an SToken with a the provided range array', () => {
-         const sToken = new SToken('one', 'two', [ new Range(new EntityLocation()), new Range(new EntityLocation()) ]);
+         const sToken = new SToken('one', 'two', [ new Range(new EntityId()), new Range(new EntityId()) ]);
 
          expect(sToken).toEqualProps({
             str: 'one',
             originalStr: 'two',
-            ranges: [ new Range(new EntityLocation()), new Range(new EntityLocation()) ],
+            ranges: [ new Range(new EntityId()), new Range(new EntityId()) ],
          });
       });
 
@@ -49,7 +49,7 @@ describe('SToken', () => {
          expect(sToken).toEqualProps({
             str: 'one',
             originalStr: 'one',
-            ranges: [ new Range(new EntityLocation()) ],
+            ranges: [ new Range(new EntityId()) ],
          });
       });
 
@@ -58,7 +58,7 @@ describe('SToken', () => {
    describe('.clone()', () => {
 
       it('makes a copy of the current token', () => {
-         const sToken1 = new SToken(' \n', ' \r\n', new Range(new EntityLocation(), 1, 2, 3));
+         const sToken1 = new SToken(' \n', ' \r\n', new Range(new EntityId(), 1, 2, 3));
 
          const clone = sToken1.clone();
 
@@ -66,7 +66,7 @@ describe('SToken', () => {
 
          (sToken1.ranges[0] as any).startIndex = 1000;
 
-         expect(clone).toEqual(new SToken(' \n', ' \r\n', new Range(new EntityLocation(), 1, 2, 3)));
+         expect(clone).toEqual(new SToken(' \n', ' \r\n', new Range(new EntityId(), 1, 2, 3)));
       });
 
    });
@@ -81,11 +81,11 @@ describe('SToken', () => {
 
       it('returns the first range', () => {
          const sToken = new SToken(' \n', ' \r\n', [
-            new Range(new EntityLocation(), 1, 2, 3, 4, 5, 6),
-            new Range(new EntityLocation(), 10, 22, 33, 44, 55, 66),
+            new Range(new EntityId(), 1, 2, 3, 4, 5, 6),
+            new Range(new EntityId(), 10, 22, 33, 44, 55, 66),
          ]);
 
-         expect(sToken.firstRange).toEqual(new Range(new EntityLocation(), 1, 2, 3, 4, 5, 6));
+         expect(sToken.firstRange).toEqual(new Range(new EntityId(), 1, 2, 3, 4, 5, 6));
       });
 
    });
@@ -100,11 +100,11 @@ describe('SToken', () => {
 
       it('returns the first range', () => {
          const sToken = new SToken(' \n', ' \r\n', [
-            new Range(new EntityLocation(), 1, 2, 3, 4, 5, 6),
-            new Range(new EntityLocation(), 10, 22, 33, 44, 55, 66),
+            new Range(new EntityId(), 1, 2, 3, 4, 5, 6),
+            new Range(new EntityId(), 10, 22, 33, 44, 55, 66),
          ]);
 
-         expect(sToken.lastRange).toEqual(new Range(new EntityLocation(), 10, 22, 33, 44, 55, 66));
+         expect(sToken.lastRange).toEqual(new Range(new EntityId(), 10, 22, 33, 44, 55, 66));
       });
 
    });
@@ -135,19 +135,19 @@ describe('SToken', () => {
 
       it('combines range if first has no range', () => {
          const sToken1 = new SToken(' \n', ' \r\n', []);
-         const sToken2 = new SToken('two', 'two', new Range(new EntityLocation(), 1, 2, 3));
+         const sToken2 = new SToken('two', 'two', new Range(new EntityId(), 1, 2, 3));
 
          sToken1.merge(sToken2);
 
          expect(sToken1).toEqualProps({
             str: ' \ntwo',
             originalStr: ' \r\ntwo',
-            ranges: [ new Range(new EntityLocation(), 1, 2, 3) ],
+            ranges: [ new Range(new EntityId(), 1, 2, 3) ],
          });
       });
 
       it('combines range if second has no range', () => {
-         const sToken1 = new SToken(' \n', ' \r\n', new Range(new EntityLocation(), 1, 2, 3));
+         const sToken1 = new SToken(' \n', ' \r\n', new Range(new EntityId(), 1, 2, 3));
          const sToken2 = new SToken('two', 'two', []);
 
          sToken1.merge(sToken2);
@@ -155,38 +155,38 @@ describe('SToken', () => {
          expect(sToken1).toEqualProps({
             str: ' \ntwo',
             originalStr: ' \r\ntwo',
-            ranges: [ new Range(new EntityLocation(), 1, 2, 3) ],
+            ranges: [ new Range(new EntityId(), 1, 2, 3) ],
          });
       });
 
       it('simply concatnates the ranges if the two have no overlap', () => {
-         const sToken1 = new SToken(' \n', ' \r\n', new Range(new EntityLocation('here'), 1, 2, 3));
-         const sToken2 = new SToken('two', 'two', new Range(new EntityLocation('there'), 1, 2, 3));
+         const sToken1 = new SToken(' \n', ' \r\n', new Range(new EntityId('here'), 1, 2, 3));
+         const sToken2 = new SToken('two', 'two', new Range(new EntityId('there'), 1, 2, 3));
 
          sToken1.merge(sToken2);
 
          expect(sToken1.ranges).toEqual([
-            new Range(new EntityLocation('here'), 1, 2, 3),
-            new Range(new EntityLocation('there'), 1, 2, 3),
+            new Range(new EntityId('here'), 1, 2, 3),
+            new Range(new EntityId('there'), 1, 2, 3),
          ]);
       });
 
       it('fuses ranges if they seem to touch', () => {
          const sToken1 = new SToken(' \n', ' \r\n', [
-            new Range(new EntityLocation('here'), 1, 2, 3),
-            new Range(new EntityLocation('foo'), 1, 0, 1, 2, 0, 2),
+            new Range(new EntityId('here'), 1, 2, 3),
+            new Range(new EntityId('foo'), 1, 0, 1, 2, 0, 2),
          ]);
          const sToken2 = new SToken('two', 'two', [
-            new Range(new EntityLocation('foo'), 2, 0, 2, 5, 2, 1),
-            new Range(new EntityLocation('there'), 1, 2, 3),
+            new Range(new EntityId('foo'), 2, 0, 2, 5, 2, 1),
+            new Range(new EntityId('there'), 1, 2, 3),
          ]);
 
          sToken1.merge(sToken2);
 
          expect(sToken1.ranges).toEqual([
-            new Range(new EntityLocation('here'), 1, 2, 3),
-            new Range(new EntityLocation('foo'), 1, 0, 1, 5, 2, 1),
-            new Range(new EntityLocation('there'), 1, 2, 3),
+            new Range(new EntityId('here'), 1, 2, 3),
+            new Range(new EntityId('foo'), 1, 0, 1, 5, 2, 1),
+            new Range(new EntityId('there'), 1, 2, 3),
          ]);
       });
 

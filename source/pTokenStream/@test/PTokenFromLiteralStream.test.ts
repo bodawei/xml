@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range, EntityLocation } from 'basic';
+import { Range, EntityId } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -133,7 +133,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
          ]);
          const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
          const pushSpy = spyOn(pTokenStream, 'push');
-         const sToken = new SToken('&', '&', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2));
+         const sToken = new SToken('&', '&', new Range(new EntityId(), 1, 0, 1, 2, 0, 2));
 
          pTokenStream.read();
          mockSource.respondInAsyncTime();

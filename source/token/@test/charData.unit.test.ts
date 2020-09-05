@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
@@ -83,11 +83,11 @@ describe('charData', () => {
       });
 
       it('asks the checks the text is well formed', () => {
-         const emd = new EntityMetaData();
+         const confVer = new ConformanceVersion();
 
-         charDataPToken.checkWellFormed(mockErrorCollector, emd);
+         charDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, confVer);
       });
 
    });

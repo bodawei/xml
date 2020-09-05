@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -94,7 +94,7 @@ describe('docTypeEnd (unit)', () => {
       });
 
       it('returns no errors if no problems ', () => {
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
@@ -102,7 +102,7 @@ describe('docTypeEnd (unit)', () => {
       it('reports an error if there is no close', () => {
          (docTypeEndPToken as any).close = undefined;
 
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
@@ -114,7 +114,7 @@ describe('docTypeEnd (unit)', () => {
       it('reports an error if there is a "]", but there was no opening "["', () => {
          delete (docTypeStartPToken as any).startInternalSubset;
 
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
@@ -124,7 +124,7 @@ describe('docTypeEnd (unit)', () => {
       });
 
       it('reports an error if there is a "]", but there was no start token', () => {
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,

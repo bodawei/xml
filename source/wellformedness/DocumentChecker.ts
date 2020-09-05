@@ -1,6 +1,6 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { ENTITY_META_DATA } from 'basic';
+import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { ERROR_TYPE, ErrorCollector, WellFormedError } from 'error';
 import {
    COMMENT_PTOKEN,
@@ -15,7 +15,7 @@ import {
    XMLDECL_PTOKEN,
    getFirstSToken,
 } from 'token';
-import { CONFORMANCE_VERSION, ParseValue, ENTITY_ID } from 'pToken';
+import { ParseValue } from 'pToken';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
@@ -109,10 +109,10 @@ class DocumentChecker {
    }
 
    check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
-      if (pToken.type === ENTITY_META_DATA) {
-         this.checkState.emd = pToken;
+      if (pToken.type === CONFORMANCE_VERSION) {
+         this.checkState.confVer = pToken;
          return;
-      } else if (pToken.type === CONFORMANCE_VERSION || pToken.type === ENTITY_ID) {
+      } else if (pToken.type === ENTITY_ID) {
          return;
       } else if ((pToken as any).type === ERROR_TYPE) {
          return;
@@ -124,14 +124,14 @@ class DocumentChecker {
             pToken.docTypeStartPToken.open,
             WellFormedError,
          );
-         pToken.checkWellFormed(specialErrorCollector, this.checkState.emd);
+         pToken.checkWellFormed(specialErrorCollector, this.checkState.confVer);
          errorCollector.appendFrom(specialErrorCollector);
       } else if (pToken.type === 'CONDITIONAL_PTOKEN') {
-         checkConditionalStartWellFormed(pToken, errorCollector, this.checkState.emd);
+         checkConditionalStartWellFormed(pToken, errorCollector, this.checkState.confVer);
       } else if (checkMap[pToken.type]) {
-         checkMap[pToken.type](pToken, errorCollector, this.checkState.emd);
+         checkMap[pToken.type](pToken, errorCollector, this.checkState.confVer);
       } else if ((pToken as any).checkWellFormed) {
-         (pToken as any).checkWellFormed(errorCollector, this.checkState.emd);
+         (pToken as any).checkWellFormed(errorCollector, this.checkState.confVer);
       }
 
       if (this.subChecker) {

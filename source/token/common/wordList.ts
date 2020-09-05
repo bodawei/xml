@@ -1,9 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
-import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
 import misc from './misc';
 
@@ -47,8 +46,8 @@ class WordListPToken {
       this.words = this.words || [];
    }
 
-   checkWellFormed(ec: ErrorCollector, emd: EntityMetaData):void {
-      return checkWellFormed(this, ec, emd);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion):void {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken(): WordListXToken {
@@ -128,7 +127,7 @@ function parseNames(source: STokenSource, deliverPToken: DeliverNamePToken): voi
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: WordListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: WordListPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    ec.setPos(pToken.open);
    ec.setPos(pToken.openSpace);
 
@@ -145,9 +144,9 @@ function checkWellFormed(pToken: WordListPToken, ec: ErrorCollector, entityMetaD
       ec.check(!entry.word, WFEID.WORDLIST_NO_WORD, [ index.toString() ]);
 
       if (pToken.type === ENUMERATION_PTOKEN) {
-         misc.checkNMToken(entry.word, ec, entityMetaData, WFEID.WORDLIST_INVALID_NMTOKEN);
+         misc.checkNMToken(entry.word, ec, confVer, WFEID.WORDLIST_INVALID_NMTOKEN);
       } else {
-         misc.checkName(entry.word, ec, entityMetaData, WFEID.WORDLIST_INVALID_NAME);
+         misc.checkName(entry.word, ec, confVer, WFEID.WORDLIST_INVALID_NAME);
       }
 
       ec.setPos(entry.wordSpace);

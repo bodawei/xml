@@ -1,7 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
@@ -12,7 +11,7 @@ describe('generalEntityReference (integration)', () => {
    describe('parseGeneralEntityReference()', () => {
 
       it('parses the input', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         const source = new STokenSource(defaultExtractors);
          source.addText(' foo ;');
          source.endText();
 

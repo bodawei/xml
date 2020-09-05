@@ -1,20 +1,19 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { defaultExtractors } from '../../../extractor';
 import { STokenSource } from 'sToken';
 
 import { Graph } from '../nameListGraphTypes';
 import nameListToGraph from '../nameListToGraph';
-import nameList, { NameListPToken, XNameList, XName } from '../nameList'
+import nameList, { NameListPToken } from '../nameList'
 
 import collapseAutoTrans from '../collapseAutoTrans';
 
 describe('collapseAutoTrans()', () => {
 
    function prepForDeAuto(input: string, cb: (graph: Graph) => void) {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors);
       source.addText(input);
       source.endText();
       nameList.parse(source, (result) => {

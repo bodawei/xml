@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning,  } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
@@ -44,8 +44,8 @@ type AttributesXToken = Array<AttributeXToken>;
 
 type AttributesPToken = Array<AttributePToken>;
 type DeliverPToken = (result?: AttributesPToken) => void;
-type CheckAttValue = (name: SToken, value: LiteralValuePToken, ec: ErrorCollector, emd: EntityMetaData) => void;
-type CheckAttName = (name: SToken, index: number, ec: ErrorCollector, emd: EntityMetaData) => void;
+type CheckAttValue = (name: SToken, value: LiteralValuePToken, ec: ErrorCollector, confVer: ConformanceVersion) => void;
+type CheckAttName = (name: SToken, index: number, ec: ErrorCollector, confVer: ConformanceVersion) => void;
 
 
 /**********************************************************************\
@@ -126,7 +126,7 @@ function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, optio
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, entityMetaData: EntityMetaData, preceedingSpace: SToken | void, type: string, checkName?: CheckAttName, checkValue?: CheckAttValue) {
+function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, confVer: ConformanceVersion, preceedingSpace: SToken | void, type: string, checkName?: CheckAttName, checkValue?: CheckAttValue) {
    const seenAttrNames: { [ attrName: string ]: true } = {};
 
    for (let index = 0; index < pAttributes.length; index++) {
@@ -147,7 +147,7 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, enti
          // Well-formedness constraint: §3.1: Unique Att Spec
          //    An attribute name must not appear more than once in the same start-tag or empty-element tag.
          ec.check(seenAttrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [ nameText ]);
-         misc.checkWellFormedNameRecommendation(attr.name, ec, entityMetaData, 'ATTRIBUTE',
+         misc.checkWellFormedNameRecommendation(attr.name, ec, confVer, 'ATTRIBUTE',
             WARN.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
             WARN.ATTRIBUTE_NAME_XML_RESERVED);
 
@@ -158,16 +158,16 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, enti
          // has entity references, this won't do any checking.
          //
          if (attr.name.str.toLowerCase() === 'xml:lang') {
-            checkXmlLangWellFormed(attr.value as any, ec, entityMetaData); // TypeHack
+            checkXmlLangWellFormed(attr.value as any, ec, confVer); // TypeHack
          }
 
          seenAttrNames[nameText] = true;
       }
 
-      misc.checkName(attr.name, ec, entityMetaData, WFEID.ATTRIBUTE_INVALID_NAME);
+      misc.checkName(attr.name, ec, confVer, WFEID.ATTRIBUTE_INVALID_NAME);
 
       if (checkName) {
-         checkName(attr.name, index, ec, entityMetaData);
+         checkName(attr.name, index, ec, confVer);
       }
 
       ec.setPos(attr.postNameSpace);
@@ -175,7 +175,7 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, enti
       ec.check(!attr.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
       ec.setPos(attr.postEqualSpace);
 
-      literal.checkWellFormed(attr, ec, entityMetaData, type, () => {
+      literal.checkWellFormed(attr, ec, confVer, type, () => {
          // Well-formedness constraint: §3.1: No < in Attribute Values
          //   The replacement text of any entity referred to directly or indirectly
          //   in an attribute value must not contain a <.
@@ -194,7 +194,7 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, enti
          }
 
          if (checkValue) {
-            checkValue(attr.name, attr.value, ec, entityMetaData);
+            checkValue(attr.name, attr.value, ec, confVer);
          }
       });
    }

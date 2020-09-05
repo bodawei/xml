@@ -1,10 +1,10 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
 
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 import { ErrorCollector } from 'error';
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { parameterEntityReferenceCheck } from 'source/wellformedness/token/parameterEntityReferenceCheck';
 
 /**********************************************************************\
@@ -22,8 +22,8 @@ class ParameterEntityStartPToken {
       this.referencePToken = peReferencePToken;
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-      parameterEntityReferenceCheck(this.referencePToken, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
+      parameterEntityReferenceCheck(this.referencePToken, ec, confVer);
    }
 
    toXToken() {

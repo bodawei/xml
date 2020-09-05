@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
@@ -27,8 +27,8 @@ class ElementEndPToken {
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      return checkWellFormed(this, ec, entityMetaData);
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
+      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -86,14 +86,14 @@ function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (res
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    ec.setPos(pToken.openSpace);
    ec.check(pToken.openSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ELEMENT_NO_NAME);
-   misc.checkName(pToken.name, ec, entityMetaData, WFEID.ELEMENT_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, 'ELEMENT',
+   misc.checkName(pToken.name, ec, confVer, WFEID.ELEMENT_NAME_INVALID);
+   misc.checkWellFormedNameRecommendation(pToken.name, ec, confVer, 'ELEMENT',
       WARN.ELEMENT_NAME_XMLCOLON_RESERVED,
       WARN.ELEMENT_NAME_XML_RESERVED);
 

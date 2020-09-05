@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken } from 'sToken';
 
@@ -25,7 +25,7 @@ describe('GeneralEntityStartPToken (unit)', () => {
    });
 
    it('checkWellFormed() calls checkWellFormed on reference', () => {
-      const emd = new EntityMetaData();
+      const confVer = new ConformanceVersion();
       const ec = new ErrorCollector(SToken.fromString('foo'), WellFormedError);
       const reference = new GeneralEntityReferencePToken({
          open: SToken.fromString('&'),
@@ -33,9 +33,9 @@ describe('GeneralEntityStartPToken (unit)', () => {
       });
       const token = new GeneralEntityStartPToken(reference);
 
-      token.checkWellFormed(ec, emd);
+      token.checkWellFormed(ec, confVer);
 
-      expect(checkSpy).toHaveBeenCalledWith(reference, ec, emd);
+      expect(checkSpy).toHaveBeenCalledWith(reference, ec, confVer);
    });
 
    it('will create an xToken', () => {

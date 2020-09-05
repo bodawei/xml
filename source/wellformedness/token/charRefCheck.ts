@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, isChar, extractSurrogatePair } from 'basic';
+import { ConformanceVersion, isChar, extractSurrogatePair } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { CharRefPToken } from 'token';
 import { strOrBlank } from 'sToken';
@@ -10,7 +10,7 @@ const WFEID = WellFormedError.ID;
 function charRefCheck(
    pToken: CharRefPToken,
    ec: ErrorCollector,
-   entityMetaData: EntityMetaData,
+   confVer: ConformanceVersion,
 ): void {
    ec.setPos(pToken.open);
 
@@ -45,7 +45,7 @@ function charRefCheck(
          char = String.fromCharCode(charNumber);
       }
 
-      ec.check(!isChar(char, entityMetaData.version), WFEID.CHARREF_INVALID_CHAR, [
+      ec.check(!isChar(char, confVer.version), WFEID.CHARREF_INVALID_CHAR, [
          strOrBlank(pToken.digits),
       ]);
    }

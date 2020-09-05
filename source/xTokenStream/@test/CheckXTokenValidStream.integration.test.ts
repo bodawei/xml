@@ -3,7 +3,7 @@
 
 import { Transform } from 'stream';
 
-import { EntityLocation, EntityMetaData, Offset } from 'basic';
+import { EntityId, Offset } from 'basic';
 import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpanderStream } from '../../nodeStream/EntityExpanderStream';
@@ -37,7 +37,7 @@ describe('CheckXTokenValidStream (integration)', () => {
    beforeEach(() => {
       const tokenizer = new PToXTokenStream();
 
-      parser = new PTokenStream(new EntityMetaData());
+      parser = new PTokenStream(undefined);
       validator = new CheckXTokenValidStream();
       replacer = new EntityExpanderStream(true);
       (parser as any).pipe(replacer).pipe(tokenizer).pipe(validator); // typeHack
@@ -45,7 +45,7 @@ describe('CheckXTokenValidStream (integration)', () => {
 
    it('reports an error when the DOCTYPE and first element do not match', (done) => {
       const expected = new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, ['one', 'two'],
-         new Offset(new EntityLocation(), 23, 0, 23));
+         new Offset(new EntityId(), 23, 0, 23));
 
       parser.addText('<?xml version="1.0"?><!DOCTYPE one><two></two>');
       parser.endText();
@@ -55,7 +55,7 @@ describe('CheckXTokenValidStream (integration)', () => {
 
    it('reports an error when the NOTATION is added twice', (done) => {
       const error = new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, ['one'],
-         new Offset(new EntityLocation(), 70, 0, 70));
+         new Offset(new EntityId(), 70, 0, 70));
 
       parser.addText('<?xml version="1.0"?><!DOCTYPE one [<!NOTATION one SYSTEM "-//test">' +
          '<!NOTATION one SYSTEM "-//foo">]>');
@@ -66,7 +66,7 @@ describe('CheckXTokenValidStream (integration)', () => {
 
    it('reports an error if a non-deterministic content model is found', (done) => {
       const error = new WellFormedError(WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
-         ['b (/1/1,/2/1)'], new Offset(new EntityLocation(), 100, 0, 100));
+         ['b (/1/1,/2/1)'], new Offset(new EntityId(), 100, 0, 100));
 
       parser.addText('<?xml version="1.0"?><!DOCTYPE one [');
       parser.addText('  <!ELEMENT a ANY > ');
@@ -83,7 +83,7 @@ describe('CheckXTokenValidStream (integration)', () => {
 
    it('reports an error when the an element type appears at an invalid place in the content', (done) => {
       const error = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, ['one', 'two'],
-         new Offset(new EntityLocation(), 226, 0, 226));
+         new Offset(new EntityId(), 226, 0, 226));
 
       parser.addText('<?xml version="1.0"?><!DOCTYPE one [');
       parser.addText('  <!ELEMENT two ANY >');
@@ -106,7 +106,7 @@ describe('CheckXTokenValidStream (integration)', () => {
 
    it('reports an error when the an element type appears at an invalid place in child content', (done) => {
       const error = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, ['three', 'one'],
-         new Offset(new EntityLocation(), 243, 0, 243));
+         new Offset(new EntityId(), 243, 0, 243));
 
       parser.addText('<?xml version="1.0"?><!DOCTYPE one [');
       parser.addText('  <!ELEMENT two ANY >');
@@ -132,7 +132,7 @@ describe('CheckXTokenValidStream (integration)', () => {
 
       it('reports an error when the an IDREF is not a valid name', (done) => {
          const error = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT, ['root', 'reference', '$good'],
-            new Offset(new EntityLocation(), 118, 3, 17));
+            new Offset(new EntityId(), 118, 3, 17));
 
          parser.addText(`<?xml version="1.0"?><!DOCTYPE root [
             <!ENTITY bad "$">

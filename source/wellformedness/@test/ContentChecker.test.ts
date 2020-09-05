@@ -1,7 +1,5 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { toSToken } from 'sToken';
@@ -28,7 +26,6 @@ import { ContentChecker } from '../ContentChecker';
 import { GeneralEntitiesInfo, CheckState, CHECKER_DONE } from '../checkUtils';
 
 describe('ContentChecker (unit)', () => {
-   let emd: EntityMetaData;
    let ec: MockErrorCollector;
    let textDeclStart: TextDeclarationPToken;
    let elementStart: ElementStartPToken;
@@ -54,7 +51,6 @@ describe('ContentChecker (unit)', () => {
       generalEntityStart = new GeneralEntityStartPToken(generalEntityReference);
       generalEntityEnd = new GeneralEntityEndPToken(generalEntityReference);
 
-      emd = new EntityMetaData();
       ec = new MockErrorCollector();
    });
 

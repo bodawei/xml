@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
@@ -13,12 +13,12 @@ import { TextPToken, TextXToken } from '../text';
 
 describe('elementStart (integration)', () => {
    let elementStartPToken: ElementStartPToken;
-   let emd: EntityMetaData;
+   let confVer: ConformanceVersion;
    let source: STokenSource;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
-      source = new STokenSource(defaultExtractors, emd);
+      confVer = new ConformanceVersion();
+      source = new STokenSource(defaultExtractors);
       const makeSToken = makeSTokenMaker();
       elementStartPToken = new ElementStartPToken({
          open: makeSToken('<'),
@@ -115,7 +115,7 @@ describe('elementStart (integration)', () => {
          parseElementStart(source, elementStartPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            pToken!.checkWellFormed(ec, emd);
+            pToken!.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
             done();
@@ -129,7 +129,7 @@ describe('elementStart (integration)', () => {
          parseElementStart(source, elementStartPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            pToken!.checkWellFormed(ec, emd);
+            pToken!.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
             done();
@@ -142,7 +142,7 @@ describe('elementStart (integration)', () => {
          parseElementStart(source, elementStartPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            pToken!.checkWellFormed(ec, emd);
+            pToken!.checkWellFormed(ec, confVer);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
             done();

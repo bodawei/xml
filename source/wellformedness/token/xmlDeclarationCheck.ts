@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
 import { XmlDeclarationPToken } from 'token';
@@ -16,7 +16,7 @@ const VERSION_11_5_REGEXP = /^1.[0-9]$/;
 /*
  * Check the value of the vesion="1.0" text.
  * This is a bit more complex/not-obvious than you might expect.
- * First, the EntityMetaData instance determines what version of the document we think
+ * First, the ConformanceVersion instance determines what version of the document we think
  * we are parsing. That is often set by this very XML Declaration earlier in parsing,
  * so very often this devolves to checking x === x. However, in some cases someone has
  * enforced that we want to process this as a 1.x document, regardless of what the document
@@ -42,13 +42,13 @@ const VERSION_11_5_REGEXP = /^1.[0-9]$/;
 function checkVersionString(
    versionText: string,
    ec: ErrorCollector,
-   entityMetaData: EntityMetaData,
+   confVer: ConformanceVersion,
 ): void {
-   if (entityMetaData.version === 1 && entityMetaData.revision === 1) {
+   if (confVer.version === 1 && confVer.revision === 1) {
       ec.check(!VERSION_11_1_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [versionText]);
-   } else if (entityMetaData.version === 1 && entityMetaData.revision < 5) {
+   } else if (confVer.version === 1 && confVer.revision < 5) {
       ec.check(versionText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [versionText]);
-   } else if (entityMetaData.version === 1.1) {
+   } else if (confVer.version === 1.1) {
       ec.check(versionText !== '1.1', WFEID.XMLDECL_VERSION_INVALD, [versionText]);
    } else {
       ec.check(!VERSION_11_5_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [versionText]);
@@ -58,7 +58,7 @@ function checkVersionString(
 function checkParameters(
    params: ReadonlyArray<EntityInstructionParam>,
    ec: ErrorCollector,
-   entityMetaData: EntityMetaData,
+   confVer: ConformanceVersion,
 ): void {
    let foundVersion = false;
    let foundEncoding = false;
@@ -92,9 +92,9 @@ function checkParameters(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, confVer);
 
-            checkVersionString(valueText, ec, entityMetaData);
+            checkVersionString(valueText, ec, confVer);
             break;
          case 'encoding':
             foundEncoding = true;
@@ -106,7 +106,7 @@ function checkParameters(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, confVer);
             ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [
                valueText,
             ]);
@@ -120,7 +120,7 @@ function checkParameters(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, confVer);
             ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [
                valueText,
             ]);
@@ -143,14 +143,14 @@ function checkParameters(
 function xmlDeclarationCheck(
    pToken: XmlDeclarationPToken,
    ec: ErrorCollector,
-   entityMetaData: EntityMetaData,
+   confVer: ConformanceVersion,
 ): void {
    ec.setPos(pToken.open);
    ec.setPos(pToken.openSpace);
    ec.check(pToken.openSpace, WFEID.XMLDECL_SPACE_AFTER_OPEN);
 
    ec.setPos(pToken.target);
-   checkCharWellFormed(pToken.target, ec, entityMetaData);
+   checkCharWellFormed(pToken.target, ec, confVer);
    if (pToken.target) {
       const target = strOrBlank(pToken.target);
       const lcTarget = target.toLowerCase();
@@ -162,7 +162,7 @@ function xmlDeclarationCheck(
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.XMLDECL_NO_SPACE_AFTER_TARGET);
 
-   checkParameters(pToken.params, ec, entityMetaData);
+   checkParameters(pToken.params, ec, confVer);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.XMLDECL_NO_CLOSE);

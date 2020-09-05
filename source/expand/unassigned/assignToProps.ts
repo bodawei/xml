@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, Range } from 'basic';
+import { Range, EntityId } from 'basic';
 import { SToken, strOrBlank } from 'sToken';
 import { UnassignedArray, UnassignedValue, UnassignedType, spaceFromSToken } from 'token';
 
@@ -91,7 +91,7 @@ class UnassignedValueCursor {
       const spaceToken = new SToken(
          ' ',
          ' ',
-         new Range(new EntityLocation(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1),
+         new Range(new EntityId(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1),
       );
 
       return spaceFromSToken(spaceToken);

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityId } from 'pToken';
+import { EntityId } from 'basic';
 
 // http://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative
 const RELATIVE_REGEX = new RegExp('^([a-z0-9]+:)?//', 'i');
@@ -29,7 +29,7 @@ function systemIsProtocolRelative(systemId: string): boolean {
 
 /*
  * Returns a resolved URL, which is relative to the location
- * of the base EntityLocation (if set).
+ * of the base EntityId (if set).
  *
  * §4.2.2 [Definition: The SystemLiteral is called the entity's system identifier.
  * It is meant to be converted to a URI reference (as defined in [IETF RFC 3986]),

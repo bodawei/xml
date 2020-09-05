@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Offset, EntityLocation } from 'basic';
+import { Offset, EntityId } from 'basic';
 import { SToken } from 'sToken';
 
 import { XmlWarning } from '../XmlWarning';
@@ -166,16 +166,16 @@ describe('error helper', () => {
             mock.errors = [ {
                id: 'XMLDECL_NO_CLOSE',
                params: undefined,
-               position: new Offset(new EntityLocation(), 1, 2, 3),
+               position: new Offset(new EntityId(), 1, 2, 3),
             } ];
             expect(toReportError({ equals: (a: any, b: any) => (a === b) }).compare(mock,
                {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
-                  position: new Offset(new EntityLocation(), 5, 6, 7),
+                  position: new Offset(new EntityId(), 5, 6, 7),
                })).toEqual({
                   pass: false,
-                  message: 'Positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"location":{"systemId":""},"index":1,"row":2,"column":3}\n  Expected: {"location":{"systemId":""},"index":5,"row":6,"column":7}',
+                  message: 'Positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"entityId":{"type":"ENTITY_ID","systemId":""},"index":1,"row":2,"column":3}\n  Expected: {"entityId":{"type":"ENTITY_ID","systemId":""},"index":5,"row":6,"column":7}',
                });
          });
 
@@ -185,7 +185,7 @@ describe('error helper', () => {
                id: 'XMLDECL_NO_CLOSE',
                params: undefined,
                position: undefined,
-               lastPosition: new Offset(new EntityLocation(), 99, 88, 77),
+               lastPosition: new Offset(new EntityId(), 99, 88, 77),
             } ];
 
             expect(toReportError({ equals: (a: any, b: any) => (a === b) }).compare(mock,
@@ -193,10 +193,10 @@ describe('error helper', () => {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
                   position: undefined,
-                  lastPosition: new Offset(new EntityLocation(), 99, 88, 11),
+                  lastPosition: new Offset(new EntityId(), 99, 88, 11),
                })).toEqual({
                   pass: false,
-                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"location":{"systemId":""},"index":99,"row":88,"column":77}\n  Expected: {"location":{"systemId":""},"index":99,"row":88,"column":11}',
+                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"entityId":{"type":"ENTITY_ID","systemId":""},"index":99,"row":88,"column":77}\n  Expected: {"entityId":{"type":"ENTITY_ID","systemId":""},"index":99,"row":88,"column":11}',
                });
          });
 
@@ -206,7 +206,7 @@ describe('error helper', () => {
                id: 'XMLDECL_NO_CLOSE',
                params: undefined,
                position: undefined,
-               lastPosition: new Offset(new EntityLocation(), 1, 2, 3),
+               lastPosition: new Offset(new EntityId(), 1, 2, 3),
             } ];
 
             expect(toReportError({ equals: (a: any, b: any) => (a === b) }).compare(mock,
@@ -217,7 +217,7 @@ describe('error helper', () => {
                   lastPosition: undefined,
                })).toEqual({
                   pass: false,
-                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"location":{"systemId":""},"index":1,"row":2,"column":3}\n  Expected: undefined',
+                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"entityId":{"type":"ENTITY_ID","systemId":""},"index":1,"row":2,"column":3}\n  Expected: undefined',
                });
          });
 
@@ -239,7 +239,7 @@ describe('error helper', () => {
                id: 'BOGUS_ERR',
                params: undefined,
                position: undefined,
-               lastPosition: new Offset(new EntityLocation(), 1, 2, 3),
+               lastPosition: new Offset(new EntityId(), 1, 2, 3),
             } ];
 
             expect(toReportWarning({ equals: () => true }).compare(mock,

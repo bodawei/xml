@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, Range } from 'basic';
+import { EntityId, Range } from 'basic';
 
 /**********************************************************************\
  A SToken (String token) represents a unit of text. The originalText
@@ -34,7 +34,7 @@ class SToken {
    public ranges: Array<Range>;
 
    static fromString(str: string) {
-      return new SToken(str, str, new Range(new EntityLocation()));
+      return new SToken(str, str, new Range(new EntityId()));
    };
 
    constructor(str: string, originalStr: string, range: Range | Array<Range>) {
@@ -88,7 +88,7 @@ class SToken {
             otherRanges.shift();
 
             // Create a new one which is the union of the two
-            const newLastRange = new Range(lastRange.location,
+            const newLastRange = new Range(lastRange.entityId,
                lastRange.startIndex, lastRange.startRow, lastRange.startColumn,
                firstRange.endIndex, firstRange.endRow, firstRange.endColumn);
 
@@ -104,8 +104,8 @@ class SToken {
 }
 
 function canFuseRanges(range1: Range, range2: Range) {
-   const locationsSame = range1.location === range2.location;
-   const locationsEqual = range1.location.equals(range2.location);
+   const locationsSame = range1.entityId === range2.entityId;
+   const locationsEqual = range1.entityId.systemId === range2.entityId.systemId && range1.entityId.publicId === range2.entityId.publicId;
 
    if (locationsSame || locationsEqual) {
       return range1.getEndOffset().equals(range2.getStartOffset());

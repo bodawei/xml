@@ -1,14 +1,12 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
-import { WellFormedError, XmlWarning } from 'error';
-import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
+import { MockSTokenSource } from 'sToken-test';
 
 import * as token from '../../index';
 import { parseDeclaration, DeclarationStart } from '../declaration';
+import { ConformanceVersion } from 'basic';
 
 describe('declaration (unit)', () => {
    let open: SToken;
@@ -34,7 +32,7 @@ describe('declaration (unit)', () => {
                [ ' ', 'space' ],
             ]);
 
-            parseDeclaration(mockSource, open, new EntityMetaData(), callback);
+            parseDeclaration(mockSource, open, new ConformanceVersion(), callback);
             mockSource.respondInAsyncTime();
 
             const args = parse.calls.argsFor(0);
@@ -56,7 +54,7 @@ describe('declaration (unit)', () => {
                [ ' ', 'space' ],
             ]);
 
-            parseDeclaration(mockSource, open, new EntityMetaData(), callback);
+            parseDeclaration(mockSource, open, new ConformanceVersion(), callback);
             mockSource.respondInAsyncTime();
 
             const args = parse.calls.argsFor(0);

@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, STokenSource, SToken } from 'sToken';
 
 import literal, { LiteralPToken } from './literal';
-import unassigned, { UnassignedType } from './unassigned';
+import unassigned from './unassigned';
 import { UnassignedArray } from './unassigned';
 import { TEXT_PTOKEN } from '../text';
 
@@ -213,7 +213,7 @@ function parseExternalId(
 function checkWellFormed(
    pTokenPart: ExternalId | void,
    ec: ErrorCollector,
-   entityMetaData: EntityMetaData,
+   confVer: ConformanceVersion,
 ): void {
    if (!pTokenPart) {
       return;
@@ -230,33 +230,27 @@ function checkWellFormed(
 
    if (capitalType === 'PUBLIC') {
       // This is very fragile if there is no value.
-      literal.checkWellFormed(
-         pTokenPart.public,
-         ec,
-         entityMetaData,
-         WFEID.NOUN_EXTERNALID_PUBLIC,
-         () => {
-            if (!pTokenPart.public || !pTokenPart.public.value) {
-               return;
+      literal.checkWellFormed(pTokenPart.public, ec, confVer, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
+         if (!pTokenPart.public || !pTokenPart.public.value) {
+            return;
+         }
+         let sToken;
+
+         // we are so confused
+         if (pTokenPart.public.value.length > 0) {
+            if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
+               sToken = (pTokenPart.public.value[0] as any).text; //typeHack
+            } else {
+               sToken = (pTokenPart.public.value[0] as any).str;
             }
-            let sToken;
 
-            // we are so confused
-            if (pTokenPart.public.value.length > 0) {
-               if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
-                  sToken = (pTokenPart.public.value[0] as any).text; //typeHack
-               } else {
-                  sToken = (pTokenPart.public.value[0] as any).str;
-               }
+            const match = PUBID_CHARS.exec(sToken.str);
 
-               const match = PUBID_CHARS.exec(sToken.str);
-
-               ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS, [
-                  sToken.str[match![0].length],
-               ]);
-            }
-         },
-      );
+            ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS, [
+               sToken.str[match![0].length],
+            ]);
+         }
+      });
    }
 
    if (capitalType === 'SYSTEM' || pTokenPart.system) {
@@ -265,7 +259,7 @@ function checkWellFormed(
          ec.check(!pTokenPart.publicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
-      literal.checkWellFormed(pTokenPart.system, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
+      literal.checkWellFormed(pTokenPart.system, ec, confVer, WFEID.NOUN_EXTERNALID_SYSTEM);
    }
 }
 

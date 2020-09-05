@@ -1,8 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
@@ -15,19 +14,17 @@ describe('instruction (integration)', () => {
 
    describe('parseInstruction()', () => {
       let ec: ErrorCollector;
-      let emd: EntityMetaData;
       let source: STokenSource;
       let start: SToken;
 
       it('parses an xml declaration', () => {
-         emd = new EntityMetaData();
-         source = new STokenSource(defaultExtractors, emd);
+         source = new STokenSource(defaultExtractors);
          ec = new ErrorCollector(undefined as any, WellFormedError);
          start = SToken.fromString('<?');
       });
 
       it('parses an XML Declaration', (done) => {
-         source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source = new STokenSource(defaultExtractors);
          source.addText('xml version="1.0" encoding="ascii"?>');
          source.endText();
 
@@ -62,7 +59,7 @@ describe('instruction (integration)', () => {
       });
 
       it('parses a Text Declaration', (done) => {
-         source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source = new STokenSource(defaultExtractors);
          source.addText('xml encoding="ascii"?>');
          source.endText();
 
@@ -88,7 +85,7 @@ describe('instruction (integration)', () => {
       });
 
       it('parses a ProcessingInstruction', (done) => {
-         source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source = new STokenSource(defaultExtractors);
          source.addText('foo blah?blah?>');
          source.endText();
 
