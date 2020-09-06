@@ -2,9 +2,9 @@
 /* eslint-env jasmine */
 
 import { EntityId, CONFORMANCE_VERSION, ENTITY_ID,  } from 'basic';
+import { XMLDECL_PTOKEN } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import {
-   XMLDECL_PTOKEN,
    CHARREF_PTOKEN,
    DOCTYPE_START_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,

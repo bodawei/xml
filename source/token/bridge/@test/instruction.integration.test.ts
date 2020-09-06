@@ -3,11 +3,11 @@
 
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
+import { XmlDeclarationPToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
 import { parseInstruction } from '../instruction';
 import { TextDeclarationPToken } from 'source/token/textDeclaration';
-import { XmlDeclarationPToken } from 'source/token/xmlDeclaration';
 import { ProcessingInstructionPToken } from 'source/token/processingInstruction';
 
 describe('instruction (integration)', () => {

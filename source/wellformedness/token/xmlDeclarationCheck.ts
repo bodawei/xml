@@ -2,8 +2,8 @@
 
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
+import { XmlDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { XmlDeclarationPToken } from 'token';
 
 import { checkCharWellFormed } from '../../token/common/misc';
 import { EntityInstructionParam } from '../../token/common/entityInstruction';

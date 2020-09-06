@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { XmlDeclarationPToken } from "token";
+import { XmlDeclarationPToken } from "pToken";
 import { strOrBlank } from "sToken";
 
 const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';

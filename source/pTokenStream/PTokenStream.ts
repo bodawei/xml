@@ -27,11 +27,11 @@ import {
    ConditionalClosePToken,
    ConditionalPToken,
    TextPToken,
-   XMLDECL_PTOKEN,
+   
    ElementStartPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-import { ContextType } from 'pToken';
+import { XMLDECL_PTOKEN, ContextType } from 'pToken';
 
 type DeliverPToken = (result: ParseValue | null | undefined | Array<ParseValue>) => void; // icky typeHack
 enum ConditionalState {

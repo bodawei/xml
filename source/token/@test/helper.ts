@@ -1,6 +1,7 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
+import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import {
    CdataPToken,
@@ -27,7 +28,6 @@ import {
    SpacePToken,
    TextPToken,
    ParameterEntityDeclarationPToken,
-   XmlDeclarationPToken,
    attListDeclaration,
    elementDeclaration,
    CharDataPToken,

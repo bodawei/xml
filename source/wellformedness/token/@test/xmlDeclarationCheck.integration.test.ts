@@ -3,11 +3,11 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
+import { parseXmlDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 import { InstructionStart } from '../../../token/bridge/instruction';
-import { parseXmlDeclaration } from 'token';
 
 describe('xmlDeclaration (integration)', () => {
    let start: InstructionStart;

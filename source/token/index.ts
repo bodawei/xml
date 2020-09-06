@@ -12,7 +12,6 @@ import { UnassignedArray, UnassignedType, UnassignedValue, spaceFromSToken, word
 import literalValue from './common/literalValue';
 import { NamePToken, NameListPToken, ContentParticlePToken } from './contentspec/nameList';
 import { WordListPToken, WordListType, WordListEntryPToken, parseWordList } from './common/wordList';
-import { XmlDeclarationPToken } from './xmlDeclaration';
 import { DocTypeStartPToken } from './docTypeStart';
 import { InternalSubsetStartToken } from './marker/internalSubsetStart';
 import { InternalSubsetEndToken } from './marker/internalSubsetEnd';
@@ -77,7 +76,6 @@ export * from './processingInstruction';
 export * from './space';
 export * from './text';
 export * from './textDeclaration';
-export * from './xmlDeclaration';
 
 import { EXTERNAL_ID, ExternalId, parseExternalId } from './common/externalId';
 
@@ -123,7 +121,6 @@ type PToken =
    | SpacePToken
    | TextPToken
    | TextDeclarationPToken
-   | XmlDeclarationPToken
    ;
 
 import { ParseValue } from 'pToken';

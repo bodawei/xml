@@ -3,8 +3,8 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { XmlDeclarationPToken } from 'token';
 
 import * as misc from '../../../token/common/misc';
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';

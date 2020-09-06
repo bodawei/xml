@@ -2,19 +2,19 @@
 /* eslint-env jasmine */
 
 import { EntityId, Range } from 'basic';
+import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as pi from '../../processingInstruction';
 import * as textDeclaration from '../../textDeclaration';
-import * as xmlDeclaration from '../../xmlDeclaration';
+import * as xmlDeclaration from '../../../pToken/token/xmlDeclaration';
 import { parseInstruction } from '../instruction';
-import { SToken } from 'sToken';
 
 describe('instruction (unit)', () => {
    let open: SToken;
 
    beforeEach(() => {
-      open = SToken.fromString('<?');
+      open = toSToken('<?');
    });
 
    describe('parseInstruction()', () => {
@@ -47,25 +47,25 @@ describe('instruction (unit)', () => {
       });
 
       it('does a basic parse of an xml declaration', () => {
-         const xmlParse = spyOn(xmlDeclaration, 'parseXmlDeclaration');
          const mockSource = new MockSTokenSource([
             [ undefined, 'space' ],
             [ 'xml', 'word', [ '?>' ] ],
             [ undefined, 'space' ],
+            [ undefined, 'peekWord' ],
+            [ '?>', 'match' ],
          ]);
 
          parseInstruction(mockSource, open, true, callback);
          mockSource.respondInAsyncTime();
 
-         const args = xmlParse.calls.argsFor(0);
-         expect(args[0]).toEqual(mockSource);
-         expect(args[1]).toEqual({
+         const args = callback.calls.argsFor(0);
+         expect(args[0]).toEqualRangeless({
             open: open,
             openSpace: undefined,
-            target: new SToken('xml', 'xml', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
+            target: toSToken('xml'),
             targetSpace: undefined,
+            close: toSToken('?>'),
          });
-         expect(args[2]).toBeInstanceOf(Function);
       });
 
       it('does a basic parse of an text declaration', () => {

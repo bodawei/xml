@@ -128,62 +128,69 @@ module.exports = {
       es6: true,
       node: true,
    },
-   overrides: [ {
-      files: [
-         './source/xToken/**/*.ts',
-         './source/**/charRef*.ts',
-         './source/**/parameterEntityReference*.ts',
-         './source/token/bridge/section.ts',
-         './source/token/conditional.ts',
-         './source/token/common/externalId.ts',
-         './source/expand/**/*.ts',
-         './source/wellformedness/**/*.ts',
-         './source/conformance/**/*.ts',
-      ],
-      parser: '@typescript-eslint/parser',
-      plugins: [
-         '@typescript-eslint',
-         'prettier',
-      ],
-      extends: [
-         'plugin:prettier/recommended',
-         'plugin:@typescript-eslint/eslint-recommended',
-         'plugin:@typescript-eslint/recommended',
-      ],
-      rules: {
-         'prettier/prettier': 'error',
-         'no-unused-vars': 'off',
-      },
-   }, {
-      files: [
-         './source/attFixer/**/*.ts',
-         './source/pToken/**/*.ts',
-         './source/xToken/**/*.test.ts',
-         './source/token/**/@test/**/section.ts',
-         './source/token/**/@test/**/conditional.ts',
-         './source/token/common/**/externalId*test.ts',
-         './source/basic/**/*.test.ts',
-         './source/expand/**/*.test.ts',
-      ],
-      parser: '@typescript-eslint/parser',
-      plugins: [
-         '@typescript-eslint',
-         'prettier',
-      ],
-      extends: [
-         'plugin:prettier/recommended',
-         'plugin:@typescript-eslint/eslint-recommended',
-         'plugin:@typescript-eslint/recommended',
-      ],
-      rules: {
-         'prettier/prettier': 'error',
-         'no-unused-vars': 'off',
-         '@typescript-eslint/no-non-null-assertion': [ 'off' ],
-         '@typescript-eslint/no-empty-function': [ 'off' ],
-      },
-      env: {
-         jasmine: true,
-      },
-   } ],
 
+   overrides: [
+      {
+         files: [
+            './source/attFixer/**/*.ts',
+            './source/basic/**/*.ts',
+            './source/expand/**/*.ts',
+            './source/conformance/**/*.ts',
+            './source/pToken/**/*.ts',
+            './source/stringify/**/*.ts',
+            './source/wellformedness/**/*.ts',
+            './source/xToken/**/*.ts',
+
+            './source/**/charRef*.ts',
+            './source/**/parameterEntityReference*.ts',
+            './source/token/bridge/section.ts',
+            './source/token/conditional.ts',
+            './source/token/common/externalId.ts',
+         ],
+         parser: '@typescript-eslint/parser',
+         plugins: [
+            '@typescript-eslint',
+            'prettier',
+         ],
+         extends: [
+            'plugin:prettier/recommended',
+            'plugin:@typescript-eslint/eslint-recommended',
+            'plugin:@typescript-eslint/recommended',
+         ],
+         rules: {
+            'prettier/prettier': 'error',
+            'no-unused-vars': 'off',
+            // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin
+            '@typescript-eslint/adjacent-overload-signatures': 'error',
+            '@typescript-eslint/array-type': [ 'error', { default: 'array' } ],
+            '@typescript-eslint/await-thenable': 'error',
+            '@typescript-eslint/ban-ts-comment': [ 'error', {
+               'ts-expect-error': 'allow-with-description',
+               'ts-ignore': true,
+               'ts-nocheck': true,
+               'ts-check': false,
+               minimumDescriptionLength: 3,
+            } ],
+            '@typescript-eslint/ban-tslint-comment': 'error',
+            '@typescript-eslint/ban-types': ['error', /* using the defaults */ ],
+            '@typescript-eslint/class-literal-property-style': ["error", "fields"],
+            '@typescript-eslint/consistent-type-assertions': ["error", { assertionStyle: 'as', objectLiteralTypeAssertions: 'never' }],
+            "@typescript-eslint/consistent-type-definitions": ["error", "interface"]
+         },
+         overrides: [
+            {
+               files: [
+                  './source/**/*.test.ts',
+               ],
+               rules: {
+                  '@typescript-eslint/no-non-null-assertion': [ 'off' ],
+                  '@typescript-eslint/no-empty-function': [ 'off' ],
+               },
+               env: {
+                  jasmine: true,
+               },
+            },
+         ],
+      },
+   ],
 };

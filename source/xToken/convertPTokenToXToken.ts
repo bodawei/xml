@@ -1,8 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { XMLDECL_PTOKEN, ParseValue } from 'pToken';
+
 import {
-   PToken,
-   XMLDECL_PTOKEN,
    TEXTDECL_PTOKEN,
    CHARREF_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -16,7 +16,7 @@ import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 
-function convertPTokenToXToken(pToken: PToken): XToken {
+function convertPTokenToXToken(pToken: ParseValue): XToken {
    switch (pToken.type) {
       case CHARREF_PTOKEN:
          return new CharRefXToken(pToken);

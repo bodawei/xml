@@ -5,7 +5,7 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import { parseXmlDeclaration } from '../xmlDeclaration';
-import { InstructionStart } from '../bridge/instruction';
+import { InstructionStart } from '../../../token/bridge/instruction';
 
 describe('xmlDeclaration (integration)', () => {
    let start: InstructionStart;
@@ -20,7 +20,6 @@ describe('xmlDeclaration (integration)', () => {
    });
 
    describe('parseXmlDeclaration()', () => {
-
       it('parses the input, including the parameters which use literal.parse()', (done) => {
          const source = new STokenSource(defaultExtractors);
          source.addText('version="1.0" encoding="ascii" ?>');
@@ -42,24 +41,5 @@ describe('xmlDeclaration (integration)', () => {
             done();
          });
       });
-
    });
-
-   describe('pToken.toSTokenArray()', () => {
-
-      it('returns the STokens', (done) => {
-         const source = new STokenSource(defaultExtractors);
-         source.addText('version="1.0" encoding="ascii" ?>');
-         source.endText();
-
-         parseXmlDeclaration(source, start, (parsing) => {
-            const result = parsing.toSTokenArray();
-
-            expect(result[0]).toEqual(SToken.fromString('<?'));
-            done();
-         });
-      });
-
-   });
-
 });

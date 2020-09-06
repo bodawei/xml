@@ -2,7 +2,8 @@
 
 import { PTokenStream } from 'pTokenStream';
 import { toSToken, SToken } from 'sToken';
-import { XmlDeclarationPToken, ElementStartPToken, TextPToken, XMLDECL_PTOKEN } from 'token';
+import { XmlDeclarationPToken, XMLDECL_PTOKEN } from 'pToken';
+import { ElementStartPToken, TextPToken } from 'token';
 
 import { AttFixerStream } from '../AttFixerStream';
 
@@ -29,6 +30,7 @@ describe('AttFixerStream (integration)', () => {
          expect(result).toEqualRangeless(new XmlDeclarationPToken({
             open: toSToken('<?'),
             target: toSToken('xml'),
+            targetSpace: toSToken(' '),
             params: [{
                name: toSToken('version'),
                nameSpace: undefined,

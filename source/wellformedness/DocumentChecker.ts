@@ -12,10 +12,9 @@ import {
    EXTERNAL_SUBSET_START_TOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    SPACE_PTOKEN,
-   XMLDECL_PTOKEN,
    getFirstSToken,
 } from 'token';
-import { ParseValue } from 'pToken';
+import { XMLDECL_PTOKEN, ParseValue, xmlDeclIsStandalone } from 'pToken';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
@@ -154,7 +153,7 @@ class DocumentChecker {
          case XMLDECL_PTOKEN:
             if (this.state === State.START) {
                // §4.1.0: WFC Entiy Declared requires us to know if we're standalone
-               this.checkState.isStandalone = pToken.isStandalone();
+               this.checkState.isStandalone = xmlDeclIsStandalone(pToken);
             }
             break;
          case DOCTYPE_START_PTOKEN:

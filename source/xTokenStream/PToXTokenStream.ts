@@ -2,6 +2,9 @@
 
 import { Transform } from 'stream';
 
+   
+import { XMLDECL_PTOKEN } from 'pToken';
+
 import {
    declaration,
 
@@ -36,7 +39,6 @@ import {
    SPACE_PTOKEN,
    TEXT_PTOKEN,
    TEXTDECL_PTOKEN,
-   XMLDECL_PTOKEN,
    ELIDED_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
 
