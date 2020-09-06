@@ -362,14 +362,10 @@ describe('DocumentChecker (unit)', () => {
             expect(ec.errors).toEqual([]);
          });
 
-         it('reports an error if something else is found at the start', () => {
+         it('does not report an error if document starts with an element start', () => {
             checker.check(elementStart, ec);
 
-            expect(ec).toReportError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [ELEMENT_START_PTOKEN],
-               position: elementStart.open,
-            });
+            expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
          });
 
          it('reports an error when a textDecl is found at the start', () => {
@@ -382,26 +378,10 @@ describe('DocumentChecker (unit)', () => {
             });
          });
 
-         it('reports an error when a space is found at the start', () => {
+         it('reports no error when a space is found at the start', () => {
             checker.check(space, ec);
 
-            expect(ec).toReportError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [space.type],
-               position: space.text,
-            });
-         });
-
-         it('ignores previous errors and accepts an xml declaration at the start', () => {
-            checker.check(elementStart, ec);
-            checker.check(xmlDecl, ec);
-
-            expect(ec.errors.length).toEqual(1);
-            expect(ec).toReportError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [ELEMENT_START_PTOKEN],
-               position: elementStart.open,
-            });
+            expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
          });
 
          it('reports an error if an xml declaration is found other than at the start of the document', () => {

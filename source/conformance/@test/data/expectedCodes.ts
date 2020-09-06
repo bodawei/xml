@@ -501,17 +501,17 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-147': {
       // good - XML Declaration may not be preceded by whitespace.
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'SPACE_PTOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
    'not-wf-sa-148': {
       // good - XML Declaration may not be preceded by comments or whitespace.
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'COMMENT_PTOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
    'not-wf-sa-149': {
       // good - XML Declaration may not be within a DTD.
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: 'DOCTYPE_START_PTOKEN',
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
    'not-wf-sa-150': {
       // good - XML declarations may not be within element content.
@@ -640,7 +640,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    sgml02: {
       // XML declaration must be at the very beginning of a document; it"s not a processing instruction
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'SPACE_PTOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
    sgml03: 'COMMENT_DOUBLE_HYPHEN', // Comments may not contain "--"
    sgml04: 'ATTLISTDECL_ELEMENT_NAME_INVALID', // ATTLIST declarations apply to only one element, unlike SGML
@@ -657,12 +657,12 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p01fail1': {
       // S cannot occur before the prolog
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'SPACE_PTOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
    'o-p01fail2': {
       // comments cannot occur before the prolog
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'COMMENT_PTOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
    'o-p01fail3': {
       // only one document element
@@ -768,14 +768,12 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p18fail2': 'CDATA_XTRA_SPACE_AFTER_TYPE', // no space after "CDATA"
    'o-p18fail3': 'CHARDATA_INVALID_SECTION_END', // CDSect's can't nest
    'o-p22fail1': {
-      // prolog must start with XML decl
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'SPACE_PTOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
    'o-p22fail2': {
-      // prolog must start with XML decl
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'DOCTYPE_START_PTOKEN',
+      message: 'XMLDECL_PTOKEN',
    },
 
    'o-p23fail1': 'XMLDECL_TARGET_INVALID_CASE', // "xml" must be lower-case
@@ -1107,15 +1105,15 @@ const expectedNotWfCodes: IdToErrorMap = {
    // §2.8 Prolog
    'ibm-not-wf-P22-ibm22n01.xml': {
       id: 'TOKEN_INVALID_CONTEXT',
-      message: /DOCTYPE_START_PTOKEN/,
+      message: /XMLDECL_PTOKEN/,
    },
    'ibm-not-wf-P22-ibm22n02.xml': {
       id: 'TOKEN_INVALID_CONTEXT',
-      message: /COMMENT_PTOKEN/,
+      message: /XMLDECL_PTOKEN/,
    },
    'ibm-not-wf-P22-ibm22n03.xml': {
       id: 'TOKEN_INVALID_CONTEXT',
-      message: /COMMENT_PTOKEN/,
+      message: /XMLDECL_PTOKEN/,
    },
 
    // §2.8 Xml decl
@@ -1174,8 +1172,8 @@ const expectedNotWfCodes: IdToErrorMap = {
 
    // §2.9 markupdecl
    'ibm-not-wf-P29-ibm29n01.xml': {
-      id: 'TOKEN_INVALID_CONTEXT',
-      message: /DOCTYPE_START_PTOKEN/,
+      id: 'MARKUPDECL_INVALID_TOKEN',
+      message: /XMLDECL_PTOKEN/,
    },
    'ibm-not-wf-P29-ibm29n02.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',
    'ibm-not-wf-P29-ibm29n03.xml': 'REFERENCE_INVALID_SUBSET_CONTEXT',

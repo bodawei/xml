@@ -175,7 +175,12 @@ module.exports = {
             '@typescript-eslint/ban-types': ['error', /* using the defaults */ ],
             '@typescript-eslint/class-literal-property-style': ["error", "fields"],
             '@typescript-eslint/consistent-type-assertions': ["error", { assertionStyle: 'as', objectLiteralTypeAssertions: 'never' }],
-            "@typescript-eslint/consistent-type-definitions": ["error", "interface"]
+            "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+            '@typescript-eslint/consistent-type-imports': ["error", {
+               prefer: 'type-imports',
+               disallowTypeAnnotations: true,
+            }],
+}
          },
          overrides: [
             {

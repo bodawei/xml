@@ -162,15 +162,6 @@ describe('CheckWellFormed (integration)', () => {
          ), done);
    });
 
-   it('reports an error when a space is found in the wrong place', (done) => {
-      expectInputToProduce('  ',
-         new WellFormedError(WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-            [ SPACE_PTOKEN ],
-            new Offset(new EntityId(), 0, 0, 0),
-            new Offset(new EntityId(), 0, 0, 0)
-         ), done);
-   });
-
    it('reports an error when an CDATA has a bad character in its content', (done) => {
       expectInputToProduce('<?xml version="1.0"?><![CDATA[foo\u0000 bad',
          new WellFormedError(WellFormedError.ID.CDATA_NO_CLOSE,
