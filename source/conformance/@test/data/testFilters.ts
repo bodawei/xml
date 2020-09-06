@@ -6,7 +6,12 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      // 'ibm-1-1-valid-P03-ibm03v01.xml', // The two character sequence #x0D #x85 in an external entity must be normalized to a single newline.
+      // 'ibm-1-1-valid-P03-ibm03v02.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
+      // 'ibm-1-1-valid-P03-ibm03v03.xml', // The two character sequence #x0D #x85 in an external entity must be normalized to a single newline.
+      // 'ibm-1-1-valid-P03-ibm03v04.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
+   ],
    excludedIds: [
       // Introduced problem.  processing version and version in actual doc do not match
       'rmt-034', //XMLDECL_VERSION_INVALD
@@ -35,7 +40,6 @@ const testFilters: FilterData = {
       'rmt-012', // the problem here is that the doc is 1.0, but it is in the 1.1 section.
 
       // Misc
-      'o-p69pass1', // misidentifying a recursive call
       'ext01', // We are creating PACE_PTOKEN's that we should not
       'sa02', // Some standalone problem/ misinterpretation
       'sa03', // Some standalone problem/ misinterpretation
@@ -87,11 +91,6 @@ const testFilters: FilterData = {
       'ibm-1-1-valid-P03-ibm03v02.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
       'ibm-1-1-valid-P03-ibm03v03.xml', // The two character sequence #x0D #x85 in an external entity must be normalized to a single newline.
       'ibm-1-1-valid-P03-ibm03v04.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v05.xml', // The two character sequence #x0D #x85 in a document entity must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v06.xml', // The single character sequence #x85 in a document entity must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v07.xml', // The single character sequence #x2028 in a document entity must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v08.xml', // The single character sequence #x85 in the XMLDecl must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v09.xml', // The single character sequence #x2028 in the XMLDecl must be normalized to a single newline. (This test is questionable)
       'rmt-007', // A vanilla XML 1.1 document
       'rmt-010', // Contains a C1 control, legal in XML 1.0, illegal in XML 1.1
       'rmt-022', // Has a NEL character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
@@ -132,54 +131,14 @@ const testFilters: FilterData = {
       'utf16b', // Tests reading an invalid "big endian" UTF-16 document
       'utf16l', // Tests reading an invalid "little endian" UTF-16 document
 
-      // I notice that these are all called *pass*, which suggests that they should be considered valid tests.  However, almost all also have well formed errors, too
-      // For some of these, we should probably have a "it wont have this error".
-      'o-p03pass1', // all valid S characters
-      'o-p14pass1', // valid CharData
-      'o-p15pass1', // valid comments
-      'o-p16pass2', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.      'o-p16pass3', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
       'o-p16fail1',
-      'o-p18pass1', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
-      'o-p22pass1', // prolog can be empty
-      'o-p22pass2', // XML declaration only
-      'o-p22pass3', // XML decl and Misc
-      'o-p23pass1', // Test shows a valid XML declaration along with version info.
-      'o-p23pass2', // Test shows a valid XML declaration along with encoding declaration.
-      'o-p23pass3', // Test shows a valid XML declaration along with Standalone Document Declaration.
-      'o-p23pass4', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
-      'o-p24pass1', // Test shows a prolog that has the VersionInfo delimited by double quotes.
-      'o-p24pass2', // Test shows a prolog that has the VersionInfo delimited by single quotes.
-      'o-p24pass3', // Test shows whitespace is allowed in prolog before version info.
-      'o-p24pass4', // Test shows whitespace is allowed in prolog on both sides of equal sign.
-      'o-p25pass1', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
-      'o-p25pass2', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
-      'o-p26pass1', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
-      'o-p27pass1', // Comments are valid as the Misc part of the prolog.
-      'o-p27pass2', // Processing Instructions are valid as the Misc part of the prolog.
-      'o-p27pass3', // Whitespace is valid as the Misc part of the prolog.
-      'o-p27pass4', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
-      'o-p32pass1', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
-      'o-p32pass2', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
-      'o-p39pass1', // Empty element tag may be used for any element which has no content.
-      'o-p39pass2', // Character data is valid element content.
-      'o-p40pass1', // Elements content can be empty.
-      'o-p40pass2', // Whitespace is valid within a Start-tag.
-      'o-p40pass3', // Attributes are valid within a Start-tag.
-      'o-p40pass4', // Whitespace and Multiple Attributes are valid within a Start-tag.
-      'o-p41pass1', // Attributes are valid within a Start-tag.
-      'o-p41pass2', // Whitespace is valid within a Start-tags Attribute.
-      'o-p42pass1', // Test shows proper syntax for an End-tag.
-      'o-p42pass2', // Whitespace is valid after name in End-tag.
-
-      // WTF. These all look like perfectly good documents, EXCEPT that they are not reporting undeclared elements.  So, there's a bug, but why are the tests marked as invalid?
-      'o-p44pass1', // Valid display of an Empty Element Tag.
-      'o-p44pass2', // Empty Element Tags can contain an Attribute.
-      'o-p44pass3', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
-      'o-p44pass4', // Whitespace is valid after the name in an Empty Element Tag.
-      'o-p44pass5', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
-      'o-p66pass1', // valid character references
-      'o-p74pass1', // PEDef is either an entity value or an external id
-      'o-p75pass1', // valid external identifiers
+      'o-p01pass1', // : 'ANY_UNDECLARED_ELEMENT', // no prolog
+      'o-p01pass3', // : 'ANY_UNDECLARED_ELEMENT', // Misc items after the document
+      'o-p04pass1', // : 'ANY_UNDECLARED_ELEMENT', // names with all valid ASCII characters, and one from each other class in NameChar
+      'o-p05pass1', // : 'ANY_UNDECLARED_ELEMENT', // various valid Name constructions
+      'o-p10pass1', // : 'ANY_UNDECLARED_ELEMENT', // But this is not what it is trying to show -  valid attribute values
+      'o-p16pass1', // : 'PI_TARGET_HAS_XML', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+      'o-p69pass1', // misidentifying a recursive call
 
       'ibm-1-1-valid-P46-ibm46i01.xml', // An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
       'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
@@ -307,17 +266,11 @@ const testFilters: FilterData = {
       'o-p51fail1', // occurrence on #PCDATA group must be *
       'o-p51fail2', // occurrence on #PCDATA group must be *
       'o-p66fail6', // no references to non-characters
-      'o-p71fail3', // no S after "!"
       'o-p75fail6', // "PUBLIC" requires two literals (contrast with SGML)
 
       'ibm-not-wf-P01-ibm01n02.xml', // Tests a document with wrong ordering of its prolog and element. The element occurs before the xml declaration and the DTD.
       'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
       'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
-      'ibm-not-wf-P22-ibm22n01.xml', // Tests prolog with wrong field ordering. The XMLDecl occurs after the DTD.
-      'ibm-not-wf-P22-ibm22n02.xml', // Tests prolog with wrong field ordering. The Misc (comment) occurs before the XMLDecl.
-      'ibm-not-wf-P22-ibm22n03.xml', // Tests prolog with wrong field ordering. The XMLDecl occurs after the DTD and a comment. The other comment occurs before the DTD.
-      'ibm-not-wf-P29-ibm29n01.xml', // Tests markupdecl with an illegal markup declaration. A XMLDecl occurs inside the DTD.
-      'ibm-not-wf-P29-ibm29n03.xml', // Tests WFC "PEs in Internal Subset". A PE reference occurs inside an ATTlistDecl in the DTD.
       'ibm-not-wf-P71-ibm70n01.xml', // Tests
 
       'ibm-1-1-not-wf-P02-ibm02n64.xml', // This test contains embeded control characters present in an external entity.
@@ -390,8 +343,6 @@ const testFilters: FilterData = {
       // ////////////
       //
 
-      // We are not handling the EDITION correctly: "EDITION": "1 2 3 4",
-
       // Group: Japanese encodings
       'pr-xml-euc-jp', // Test support for the EUC-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
       'pr-xml-iso-2022-jp', // Test support for the ISO-2022-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
@@ -401,7 +352,6 @@ const testFilters: FilterData = {
       'weekly-shift_jis', // Test support for Shift_JIS encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
       // Group: Other errors
       'uri01', // SYSTEM ids may not have URI fragments
-      'o-p11pass1', // system literals may not contain URI fragments
       'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
       'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
       'rmt-e2e-57', // A value other than preserve or default for xml:space is an error

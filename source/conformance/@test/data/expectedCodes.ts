@@ -88,60 +88,53 @@ const expectedInvalidCodes: IdToErrorMap = {
    utf16l: 'error', // Tests reading an invalid "little endian" UTF-16 document
    empty: 'CHILDREN_XTRA_CONTENT', // CDATA section containing only white space does not match the nonterminal S, and cannot appear in these positions.
 
-   'o-p01pass1': 'ANY_UNDECLARED_ELEMENT', // no prolog
-   'o-p01pass3': 'ANY_UNDECLARED_ELEMENT', // Misc items after the document
-   'o-p03pass1': 'error', // all valid S characters
-   'o-p04pass1': 'ANY_UNDECLARED_ELEMENT', // names with all valid ASCII characters, and one from each other class in NameChar
-   'o-p05pass1': 'ANY_UNDECLARED_ELEMENT', // various valid Name constructions
+   'o-p03pass1': 'none', // all valid S characters
    'o-p06fail1': 'ELEMENTSTART_IDREFS_NOT_NAME', // meh - Requires at least one name.
    'o-p08fail1': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // at least one Nmtoken is required.
    'o-p08fail2': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // an invalid Nmtoken character.
-   'o-p10pass1': 'ANY_UNDECLARED_ELEMENT', // But this is not what it is trying to show -  valid attribute values
-   'o-p14pass1': 'error', // valid CharData
-   'o-p15pass1': 'error', // valid comments
-   'o-p16pass1': 'PI_TARGET_HAS_XML', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p16pass2': 'error', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.      'o-p16pass3': 'error', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p18pass1': 'error', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
-   'o-p22pass1': 'error', // prolog can be empty
-   'o-p22pass2': 'error', // XML declaration only
-   'o-p22pass3': 'error', // XML decl and Misc
-   'o-p23pass1': 'error', // Test shows a valid XML declaration along with version info.
-   'o-p23pass2': 'error', // Test shows a valid XML declaration along with encoding declaration.
-   'o-p23pass3': 'error', // Test shows a valid XML declaration along with Standalone Document Declaration.
-   'o-p23pass4': 'error', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
-   'o-p24pass1': 'error', // Test shows a prolog that has the VersionInfo delimited by double quotes.
-   'o-p24pass2': 'error', // Test shows a prolog that has the VersionInfo delimited by single quotes.
-   'o-p24pass3': 'error', // Test shows whitespace is allowed in prolog before version info.
-   'o-p24pass4': 'error', // Test shows whitespace is allowed in prolog on both sides of equal sign.
-   'o-p25pass1': 'error', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
-   'o-p25pass2': 'error', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
-   'o-p26pass1': 'error', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
-   'o-p27pass1': 'error', // Comments are valid as the Misc part of the prolog.
-   'o-p27pass2': 'error', // Processing Instructions are valid as the Misc part of the prolog.
-   'o-p27pass3': 'error', // Whitespace is valid as the Misc part of the prolog.
-   'o-p27pass4': 'error', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
-   'o-p32pass1': 'error', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
-   'o-p32pass2': 'error', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
-   'o-p39pass1': 'error', // Empty element tag may be used for any element which has no content.
-   'o-p39pass2': 'error', // Character data is valid element content.
-   'o-p40pass1': 'error', // Elements content can be empty.
-   'o-p40pass2': 'error', // Whitespace is valid within a Start-tag.
-   'o-p40pass3': 'error', // Attributes are valid within a Start-tag.
-   'o-p40pass4': 'error', // Whitespace and Multiple Attributes are valid within a Start-tag.
-   'o-p41pass1': 'error', // Attributes are valid within a Start-tag.
-   'o-p41pass2': 'error', // Whitespace is valid within a Start-tags Attribute.
-   'o-p42pass1': 'error', // Test shows proper syntax for an End-tag.
-   'o-p42pass2': 'error', // Whitespace is valid after name in End-tag.
-
-   // WTF. These all look like perfectly good documents, EXCEPT that they are not reporting undeclared elements.  So, there's a bug, but why are the tests marked as invalid?
-   'o-p44pass1': 'error', // Valid display of an Empty Element Tag.
-   'o-p44pass2': 'error', // Empty Element Tags can contain an Attribute.
-   'o-p44pass3': 'error', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
-   'o-p44pass4': 'error', // Whitespace is valid after the name in an Empty Element Tag.
-   'o-p44pass5': 'error', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
-   'o-p66pass1': 'error', // valid character references
-   'o-p74pass1': 'error', // PEDef is either an entity value or an external id
-   'o-p75pass1': 'error', // valid external identifiers
+   'o-p11pass1': 'none', // system literals may not contain URI fragments
+   'o-p14pass1': 'none', // valid CharData
+   'o-p15pass1': 'none', // valid comments
+   'o-p16pass2': 'none', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.      'o-p16pass3': 'error', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+   'o-p18pass1': 'none', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
+   'o-p22pass1': 'none', // prolog can be empty
+   'o-p22pass2': 'none', // XML declaration only
+   'o-p22pass3': 'none', // XML decl and Misc
+   'o-p23pass1': 'none', // Test shows a valid XML declaration along with version info.
+   'o-p23pass2': 'none', // Test shows a valid XML declaration along with encoding declaration.
+   'o-p23pass3': 'none', // Test shows a valid XML declaration along with Standalone Document Declaration.
+   'o-p23pass4': 'none', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
+   'o-p24pass1': 'none', // Test shows a prolog that has the VersionInfo delimited by double quotes.
+   'o-p24pass2': 'none', // Test shows a prolog that has the VersionInfo delimited by single quotes.
+   'o-p24pass3': 'none', // Test shows whitespace is allowed in prolog before version info.
+   'o-p24pass4': 'none', // Test shows whitespace is allowed in prolog on both sides of equal sign.
+   'o-p25pass1': 'none', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
+   'o-p25pass2': 'none', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
+   'o-p26pass1': 'none', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
+   'o-p27pass1': 'none', // Comments are valid as the Misc part of the prolog.
+   'o-p27pass2': 'none', // Processing Instructions are valid as the Misc part of the prolog.
+   'o-p27pass3': 'none', // Whitespace is valid as the Misc part of the prolog.
+   'o-p27pass4': 'none', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
+   'o-p32pass1': 'none', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p32pass2': 'none', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p39pass1': 'none', // Empty element tag may be used for any element which has no content.
+   'o-p39pass2': 'none', // Character data is valid element content.
+   'o-p40pass1': 'none', // Elements content can be empty.
+   'o-p40pass2': 'none', // Whitespace is valid within a Start-tag.
+   'o-p40pass3': 'none', // Attributes are valid within a Start-tag.
+   'o-p40pass4': 'none', // Whitespace and Multiple Attributes are valid within a Start-tag.
+   'o-p41pass1': 'none', // Attributes are valid within a Start-tag.
+   'o-p41pass2': 'none', // Whitespace is valid within a Start-tags Attribute.
+   'o-p42pass1': 'none', // Test shows proper syntax for an End-tag.
+   'o-p42pass2': 'none', // Whitespace is valid after name in End-tag.
+   'o-p44pass1': 'none', // Valid display of an Empty Element Tag.
+   'o-p44pass2': 'none', // Empty Element Tags can contain an Attribute.
+   'o-p44pass3': 'none', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
+   'o-p44pass4': 'none', // Whitespace is valid after the name in an Empty Element Tag.
+   'o-p44pass5': 'none', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
+   'o-p66pass1': 'none', // valid character references
+   'o-p74pass1': 'none', // PEDef is either an entity value or an external id
+   'o-p75pass1': 'none', // valid external identifiers
 
    'o-e2': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Validity Constraint: No duplicate tokens
    'ibm-invalid-P28-ibm28i01.xml': 'MISMATCH_ROOT_ELEMENT_TYPE', // great
@@ -921,7 +914,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p70fail1': 'ENTITYDECL_NAME_INVALID', // ok This is neither
    'o-p71fail1': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // great S is required before EntityDef
    'o-p71fail2': 'ENTITYDECL_NAME_INVALID', // ok Entity name is a Name, not an NMToken
-   'o-p71fail3': 'error', // no S after "!"
+   'o-p71fail3': 'DECL_OPEN_XTRA_SPACE_AFTER', // no S after "!"
    'o-p71fail4': 'MARKUPDECL_INVALID_TOKEN', // ok S is required after "!ENTITY"
    'o-p72fail1': 'DECL_TYPE_NO_SPACE_AFTER', // great
    'o-p72fail2': 'ENTITYDECL_PERCENT_NO_TRAILING_SPACE', // great S is required after '%'

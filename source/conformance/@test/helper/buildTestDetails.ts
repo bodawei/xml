@@ -43,6 +43,15 @@ function buildDetails(
 ): TestDetails {
    const newTest = fixTest(test);
 
+   // There's a set of invalid marked as invalid that are actually valid.
+   if (/o-p[0-9]+pass[0-9]+/.test(newTest.ID)) {
+      return {
+         ...newTest,
+         cases,
+         suite,
+      };
+   }
+
    const expectedError: Record<string, ErrorDetails> = {};
    const def = constructErrorInfo(expected, test.ID);
 

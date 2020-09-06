@@ -73,6 +73,8 @@ class Extractor {
       const LINE_ENDING_REGEX = this.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
       let newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
+      console.log('originalText', originalText, this.version, LINE_ENDING_REGEX, newText);
+
       if (this.lastProcessSawCr) {
          if (originalText[0] === '\n' ||
             (this.version === 1.1 && originalText[0] === '\u0085')) {
