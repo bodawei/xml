@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import { CONFORMANCE_VERSION, ENTITY_ID, Range } from 'basic';
+import { gatherPTokens } from 'pToken-test';
 import { SToken, STokenSource } from 'sToken';
 import * as tokenStuff from 'token';
 import { DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN, CHARDATA_PTOKEN, CharDataPToken } from 'token';
@@ -21,13 +22,6 @@ describe('PTokenStream (unit)', () => {
          context: ContextType.DOCUMENT,
       });
    });
-
-   function gatherPTokens(pTokenStream: PTokenStream, deliverResults: (result: TokenArray) => void) {
-      const pTokens: TokenArray = [];
-
-      pTokenStream.on('data', (pToken: PToken) => pTokens.push(pToken));
-      pTokenStream.on('end', () => deliverResults(pTokens));
-   }
 
    function findToken(tokens: Array<ParseValue>, type: string): ParseValue | undefined {
       return tokens.find(t => t.type == type);
@@ -60,11 +54,12 @@ describe('PTokenStream (unit)', () => {
          gatherPTokens(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
-            expect(result).toEqual({
+            expect(result).toEqual(
+               jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1,
                revision: 5,
-            });
+            }));
             done();
          });
       });
@@ -77,11 +72,12 @@ describe('PTokenStream (unit)', () => {
          gatherPTokens(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
-            expect(result).toEqual({
+            expect(result).toEqual(
+               jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1.1,
                revision: 2,
-            });
+            }));
             done();
          });
       });
@@ -105,6 +101,38 @@ describe('PTokenStream (unit)', () => {
                version: 1.0,
                revision: 3,
             }));
+            done();
+         });
+      });
+
+      it('delivers a conformance version using the default version when neither dor not options set', (done) => {
+         pTokenStream = new PTokenStream();
+         pTokenStream.addText('<one></one>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, CONFORMANCE_VERSION);
+
+            expect(result).toEqual(jasmine.objectContaining({
+               type: CONFORMANCE_VERSION,
+               version: 1.0,
+               revision: 5,
+            }));
+            done();
+         });
+      });
+
+      it('does not deliver a conformance version when the contxt is not document', (done) => {
+         pTokenStream = new PTokenStream(undefined, {
+            context: ContextType.EXTERNAL_SUBSET,
+         });
+         pTokenStream.addText('<one></one>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, CONFORMANCE_VERSION);
+
+            expect(result).toBeUndefined();
             done();
          });
       });
@@ -147,6 +175,22 @@ describe('PTokenStream (unit)', () => {
                   publicId: 'baz - boo',
                })
             );
+            done();
+         });
+      });
+
+      it('delivers no EntityId when this is not a document type', (done) => {
+         pTokenStream = new PTokenStream(undefined, {
+            context: ContextType.EXTERNAL_SUBSET,
+            entityId: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
+         });
+         pTokenStream.addText('<?xml version="1.0"?>');
+         pTokenStream.endText();
+
+         gatherPTokens(pTokenStream, (results) => {
+            const result = findToken(results, ENTITY_ID);
+
+            expect(result).toBeUndefined();
             done();
          });
       });

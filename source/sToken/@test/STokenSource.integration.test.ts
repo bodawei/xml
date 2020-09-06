@@ -16,7 +16,7 @@ describe('STokenSource (integration)', () => {
       confVer1dot1 = new ConformanceVersion(1.1, 2);
       sTokenSpy = jasmine.createSpy('sTokenSpy');
 
-      source = new STokenSource(defaultExtractors, undefined, confVer1dot1);
+      source = new STokenSource(defaultExtractors, undefined);
    });
 
    describe('extract("all")', () => {

@@ -14,7 +14,7 @@ import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
 
 describe('entityValueToSTokenSource() (unit)', () => {
    it('returns an empty STokenSource when given an empty EntityValuePToken', (done) => {
-      const result = entityValueToSTokenSource([], new EntityId(), new ConformanceVersion());
+      const result = entityValueToSTokenSource([], new EntityId());
 
       result.extractNoParams('all', (stoken) => {
          expect(stoken).toBeUndefined();
@@ -26,7 +26,6 @@ describe('entityValueToSTokenSource() (unit)', () => {
       const result = entityValueToSTokenSource(
          [new TextPToken({ text: toSToken('wowzers') })],
          new EntityId(),
-         new ConformanceVersion(),
       );
 
       result.extractNoParams('all', (stoken) => {
@@ -59,7 +58,6 @@ describe('entityValueToSTokenSource() (unit)', () => {
             new ParameterEntityEndPToken(otherPERef),
          ],
          new EntityId(),
-         new ConformanceVersion(),
       );
 
       result.extractNoParams('all', (stoken) => {

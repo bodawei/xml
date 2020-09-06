@@ -8,5 +8,29 @@
     "editor.lightbulb.enabled": false,
     "editor.codeActionsOnSave": {
        "source.fixAll": true
+    },
+
+    "workbench.colorCustomizations": {
+      "terminal.background":"#FCFCF5",
+      "terminal.foreground":"#000000",
+      "terminalCursor.background":"#FF0000",
+      "terminalCursor.foreground":"#880000",
+      "terminal.ansiBlack":"#1D2021",
+      "terminal.ansiBlue":"#0000FF",
+      "terminal.ansiBrightBlack":"#665C54",
+      "terminal.ansiBrightBlue":"#0136e6ad",
+      "terminal.ansiBrightCyan":"#8BA59B",
+      "terminal.ansiBrightGreen":"#95C085",
+      "terminal.ansiBrightMagenta":"#8F4673",
+      "terminal.ansiBrightRed":"#FB543F",
+      "terminal.ansiBrightWhite":"#f5e174",
+      "terminal.ansiBrightYellow":"#FAC03B",
+      "terminal.ansiCyan":"#8BA59B",
+      "terminal.ansiGreen":"#95C085",
+      "terminal.ansiMagenta":"#8F4673",
+      "terminal.ansiRed":"#ff1e00",
+      "terminal.ansiWhite":"#A89984",
+      "terminal.ansiYellow":"#a57401"
     }
+
 }

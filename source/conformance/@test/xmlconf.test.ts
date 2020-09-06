@@ -3,11 +3,11 @@
 import { Transform } from 'stream';
 import { ConformanceVersion, XmlRevision, XmlVersion } from 'basic';
 import { CheckWellFormed } from 'nodeStream';
+import { gatherPTokens } from 'pToken-test';
 import { PTokenStream } from 'pTokenStream';
 import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
 
 import { TestDetails, buildTestDetails } from './helper/buildTestDetails';
-import { gatherPTokens } from './helper/gatherPTokens';
 import { gatherStrings } from './helper/gatherStrings';
 import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
@@ -65,7 +65,7 @@ describe('XML Conformance tests', () => {
             }
 
             // We also want to test  whether the errors match as expected
-            gatherPTokens(testStream, (results) => {
+            gatherPTokens(testStream as any, (results) => {
                const key = `V${ver}R${edition}`;
                let expectedError;
 

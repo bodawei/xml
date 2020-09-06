@@ -3,12 +3,10 @@
 import { PTokenStream } from 'pTokenStream';
 import { toSToken, SToken } from 'sToken';
 import { XmlDeclarationPToken, XMLDECL_PTOKEN } from 'pToken';
+import { gatherPTokens } from 'pToken-test';
 import { ElementStartPToken, TextPToken } from 'token';
 
 import { AttFixerStream } from '../AttFixerStream';
-
-
-import { gatherPTokens } from 'source/conformance/@test/helper/gatherPTokens';
 
 describe('AttFixerStream (integration)', () => {
    let pTokenStream: PTokenStream;

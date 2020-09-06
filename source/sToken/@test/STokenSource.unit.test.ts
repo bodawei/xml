@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, Range, EntityId } from 'basic';
+import { ConformanceVersion, Range, EntityId, CONFORMANCE_VERSION } from 'basic';
 import { Extractor, Segment, ExtractorMap } from 'extractor';
 
 import SToken from '../SToken';
@@ -131,16 +131,8 @@ describe('STokenSource (unit)', () => {
          tox: ToXExtractor,
       };
 
-      source = new STokenSource(testExtractors, undefined, confVer1dot1);
+      source = new STokenSource(testExtractors);
       sTokenSpy = jasmine.createSpy('sTokenSpy');
-   });
-
-   describe('metadata', () => {
-
-      it('exposes the ConformanceVersion it was passed as a metaData property', () => {
-         expect(source.metaData).toEqual(confVer1dot1);
-      });
-
    });
 
    describe('extractor definitions', () => {
@@ -153,7 +145,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, undefined, confVer1dot0);
+         source = new STokenSource(testExtractors);
          source.addText('this is yours');
          source.extractNoParams('toy', (sToken) => {
             expect(sToken!.str).toEqual('this is ');
@@ -170,7 +162,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, undefined, confVer1dot0);
+         source = new STokenSource(testExtractors);
          source.addText('the lorax');
          source.extractNoParams('pass', (sToken) => {
             expect(sToken!.str).toEqual('the lora');
@@ -203,7 +195,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, undefined, confVer1dot0);
+         source = new STokenSource(testExtractors);
          source.addText('1');
          source.extractNoParams('test', () => {});
 
@@ -250,7 +242,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors, undefined, confVer1dot0);
+         source = new STokenSource(testExtractors);
          source.addText('1');
          source.extract('peek', [ 'toXParam' ], () => {});
 
@@ -356,6 +348,11 @@ describe('STokenSource (unit)', () => {
 
       it('passes a version and arbitrary params to the extractor', () => {
          spyOn(testExtractors as any, 'foo'); // testHack
+         source.setConfVer({
+            type: CONFORMANCE_VERSION,
+            version: 1.1,
+            revision: 3,
+         });
 
          source.extract('foo', 55, () => {});
 

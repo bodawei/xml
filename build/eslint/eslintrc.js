@@ -182,15 +182,28 @@ module.exports = {
             }],
             '@typescript-eslint/explicit-function-return-type': ['error', {
                allowExpressions: false,
-               allowTypedFunctionExpressions: true,
+               allowTypedFunctionExpressions: false,
                allowHigherOrderFunctions: true,
                allowConciseArrowFunctionExpressionsStartingWithVoid: true,             
             }],
-            '@typescript-eslint/explicit-function-return-type': ['error', {
-               allowExpressions: true,
-               allowTypedFunctionExpressions: true,
+            '@typescript-eslint/explicit-member-accessibility': ['error', {
+               // defaults
+               accessibility: 'explicit',
+               ignoredMethodNames: [],
+               overrides: {
+                 accessors: 'explicit',
+                 constructors: 'explicit',
+                 methods: 'explicit',
+                 properties: 'explicit',
+                 parameterProperties: 'explicit',
+               }
+            }],
+            '@typescript-eslint/explicit-module-boundary-types': ['error', {
+               allowArgumentsExplicitlyTypedAsAny: true,
+               allowDirectConstAssertionInArrowFunctions: true,
+               allowedNames: [],
                allowHigherOrderFunctions: true,
-               allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+               allowTypedFunctionExpressions: false,
             }],
          },
          overrides: [

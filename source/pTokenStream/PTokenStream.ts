@@ -31,7 +31,7 @@ import {
    ElementStartPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-import { XMLDECL_PTOKEN, ContextType } from 'pToken';
+import { ContextType } from 'pToken';
 
 type DeliverPToken = (result: ParseValue | null | undefined | Array<ParseValue>) => void; // icky typeHack
 enum ConditionalState {
@@ -47,51 +47,38 @@ interface PTokenOptions {
    entityId?: EntityId;
 }
 
+const VERSION_REGEXP = /version=("([^"]*)"|'([^']*)')/i;
+const WHITESPACE_REGEXP = /[\n\t ]+/g;
+
 class PTokenStream extends Readable {
    private _sTokenSource: STokenSource;
    private _elementStack: Array<ElementStartPToken>;
-   private inContent: boolean;
-   private _reportedMetaData: boolean;
    private _parsing: boolean = false;
+   private inContent: boolean;
+   private pushedMetadata: boolean;
    private id: EntityId;
    private confVer: ConformanceVersion;
+   private setConfVer: boolean;
    private context: ContextType = ContextType.DOCUMENT;
-   private versionSet: boolean;
    private waitingForInternalClose: boolean = false;
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(metaDataOrTokenSource?: STokenSource | undefined, options?: PTokenOptions) {
+   constructor(metaDataOrTokenSource?: STokenSource | undefined, options: PTokenOptions =  { context: ContextType.DOCUMENT }) {
       super({
          objectMode: true,
       });
 
-      let opts: PTokenOptions;
-      
-      if (typeof options === 'boolean') {
-         opts = { context: options ? ContextType.GENERAL_ENTITY : ContextType.DOCUMENT };
-      }else {
-         opts = options || { context: ContextType.DOCUMENT };
-      }
-
       this._elementStack = [];
-      this.context = opts.context || ContextType.DOCUMENT;
-      this.inContent = opts.context === ContextType.GENERAL_ENTITY;
-      this._reportedMetaData = false;
-      this.id = opts.entityId ?? new EntityId('./document.xml');
+      this.context = options.context || ContextType.DOCUMENT;
+      this.inContent = options.context === ContextType.GENERAL_ENTITY;
+      this.pushedMetadata = false;
+      this.id = options.entityId ?? new EntityId('./document.xml');
       this._sTokenSource = metaDataOrTokenSource || new STokenSource(defaultExtractors);
 
-      if (opts.confVer) {    
-         this.confVer = new ConformanceVersion(opts.confVer);
-         this.versionSet = true;
-      } else {
-         this.confVer = {
-            type: CONFORMANCE_VERSION,
-            version: 1,
-            revision: 5,
-         };
-         this.versionSet = false;
-      }
+      // We should always get a confVer if we are not the document type.
+      this.confVer = options.confVer ? new ConformanceVersion(options.confVer) : new ConformanceVersion();
+      this.setConfVer = !!options.confVer;
 
       this._sTokenSource.setConfVer(this.confVer);
    }
@@ -105,43 +92,18 @@ class PTokenStream extends Readable {
    }
 
    _read() {
+      if (!this.pushedMetadata && this.context === ContextType.DOCUMENT) {
+         this.examineDeclaration();
+         return;
+      }
+
+      this.pushedMetadata = true;
+
       if (this._parsing) {
          return;
       }
       this._parsing = true;
       this._parseGeneral((result) => {
-         if (!this._reportedMetaData) {
-            
-            this._reportedMetaData = true;
-            
-            if (!this.versionSet) {
-               let version = this._sTokenSource.metaData.version;
-               let revision = this._sTokenSource.metaData.revision;
-
-               if (result && !Array.isArray(result) && result.type === XMLDECL_PTOKEN) {
-                  for (let param of result.params) {
-                     if (strOrBlank(param.name) === 'version') {
-                        version = strOrBlank(param.value) === '1.1' ? 1.1 : 1.0;
-                        revision = version === 1.0 ? 5 : 2;
-                     }
-                  }
-               }
-
-               this.versionSet = true;
-               this.confVer = {
-                  type: CONFORMANCE_VERSION,
-                  version,
-                  revision,
-               };
-               this._sTokenSource.setConfVer(this.confVer);
-            }
-
-            if (this.context === ContextType.DOCUMENT) {
-               this.push(this.confVer);
-               this.push(this.id);
-            }
-         }
-
          // docstart and end may deliver an array(!)
          if (Array.isArray(result)) {
             for (let index = 0; index < result.length - 1; index++) {
@@ -344,6 +306,33 @@ class PTokenStream extends Readable {
       parseDocTypeEnd(this._sTokenSource, this.startDocType!, deliverParse);
    }
 
+
+   /*
+    * Try to peek at the XML Declaration. If it is present, and we have not
+    * already had an XML version imposed on us, use the information from
+    * the declaration to set what versin of the specification we will use
+    * to do our processing, and feed that information into the stream.
+    */
+   private examineDeclaration() {
+      this._sTokenSource.extractNoParams('peekDecl', (sToken) => {
+         if (sToken && !this.setConfVer) {
+            const processedString = sToken.str.replace(WHITESPACE_REGEXP, '');
+            const match = VERSION_REGEXP.exec(processedString);
+            
+            if (match) {
+               const versionNumber = match[2];
+               
+               this.confVer = new ConformanceVersion( versionNumber === '1.1' ? 1.1 : 1);
+               this._sTokenSource.setConfVer(this.confVer);
+            }
+         }
+         
+         this.setConfVer = true;
+         this.pushedMetadata = true;
+         this.push(this.confVer);
+         this.push(this.id);
+      });
+   }
 }
 
 export default PTokenStream;

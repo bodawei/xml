@@ -35,6 +35,9 @@
          "pToken": [
             "./source/pToken"
          ],
+         "pToken-test": [
+            "./source/pToken/@test/helper"
+         ],
          "pTokenStream": [
             "./source/pTokenStream"
          ],

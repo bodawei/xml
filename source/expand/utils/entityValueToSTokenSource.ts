@@ -13,9 +13,8 @@ import { CHARREF_PTOKEN, TEXT_PTOKEN, EntityValuePToken } from 'token';
 function entityValueToSTokenSource(
    entityValue: EntityValuePToken,
    entityId: EntityId,
-   confVer: ConformanceVersion,
 ): STokenSource {
-   const source = new STokenSource(defaultExtractors, entityId, confVer);
+   const source = new STokenSource(defaultExtractors, entityId);
 
    for (const element of entityValue) {
       switch (element.type) {

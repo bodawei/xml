@@ -56,7 +56,7 @@ function setupConditional(
          return;
       }
 
-      const sTokenSource = new STokenSource(defaultExtractors, expandParams.entityId, expandParams.confVer);
+      const sTokenSource = new STokenSource(defaultExtractors, expandParams.entityId);
       const result: ConditionalInfo = {
          source: sTokenSource,
          textIsFinished: undefined,

@@ -4,8 +4,8 @@ import { Extractor } from './Extractor';
 import Segment from './Segment';
 
 const HAS_START = /^\<\?/;
-const HAS_DECL10 = /^\<\?[ \t\r\n]*[xXmMlL](.|[ \t\r\n])*\?\>/;
-const HAS_DECL11 = /^\<\?[ \t\r\n\u0085\u2028]*[xXmMlL](.|[ \t\r\n\u0085\u2028])*\?\>/;
+const HAS_DECL10 = /\<\?[ \t\r\n]*[xXmMlL][^]*\?\>/;
+const HAS_DECL11 = /\<\?[ \t\r\n\u0085\u2028]*[xXmMlL][^]*\?\>/;
 
 /**********************************************************************\
  A PeekDecl is used to locate an XML or Text Declaration at the start
@@ -24,9 +24,9 @@ class PeekDecl extends Extractor {
    process(segment: Segment) {
       const info = this.makeInfo(segment);
       this.segInfo.push(info);
-
+      
       this.rawText += segment.text;
-
+      
       if (this.rawText.length < 5) {
          return;
       }
@@ -38,6 +38,7 @@ class PeekDecl extends Extractor {
 
       const regexp = this.version === 1.0 ? HAS_DECL10 : HAS_DECL11;
       const match = regexp.exec(this.rawText);
+
       if (match) {
          this.state = Extractor.STATE.SUCCESS;
          // Include a dummy segment info.
@@ -45,7 +46,7 @@ class PeekDecl extends Extractor {
          return;
       }
 
-      if(this.rawText.length > 1000) {
+      if (this.rawText.length > 1000) {
          this.state = Extractor.STATE.FAILURE;
       }
    }

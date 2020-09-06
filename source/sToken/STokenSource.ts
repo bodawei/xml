@@ -81,33 +81,27 @@ class STokenSource {
    private confVer: ConformanceVersion;
    private entityId: EntityId;
    private _extractorInfo: ExtractorMap;
-   public _segments: Array<Segment>; // typeHack for testing
-   private _version: number;
-   public _extractors: Array<ExtractorContext>; // typeHack for testing
+   public _segments: Array<Segment>;
+   public _extractors: Array<ExtractorContext>;
    private _lastOffset?: Offset;
    private _allTextAdded: boolean = false;
    private _orphanedRange?: Range;
    private _resuming?: boolean;
 
-   constructor(extractorInfo: ExtractorMap, entityId?: EntityId, confVer?: ConformanceVersion ) {
+   constructor(extractorInfo: ExtractorMap, entityId?: EntityId ) {
       this.errors = [];
       this.entityId = entityId || new EntityId();
-      this.confVer = confVer || new ConformanceVersion();
+      this.confVer = new ConformanceVersion();
       this._extractorInfo = extractorInfo;
 
       this._segments = [];
       this._extractors = [];
 
-      this._version = this.confVer.version;
       this._lastOffset = undefined;
    }
 
    setConfVer(version: ConformanceVersion) {
       this.confVer = version;
-      this._version = version.version;
-   }
-   get metaData() {
-      return this.confVer;
    }
 
    addText(text: string, range?: Range) {
@@ -166,7 +160,7 @@ class STokenSource {
          extractorConstructor = extractorDefinition.extractorConstructor;
 
          if (extractorDefinition.params.extractorConstructor) {
-            params = new extractorDefinition.params.extractorConstructor(this._version, params);
+            params = new extractorDefinition.params.extractorConstructor(this.confVer.version, params);
          } else {
             params = extractorDefinition.params;
          }
@@ -179,7 +173,7 @@ class STokenSource {
       }
 
       const typeHack = extractorConstructor as any;
-      const instance = new typeHack(this._version, params);
+      const instance = new typeHack(this.confVer.version, params);
 
       this._extractors.push({
          extractor: instance,

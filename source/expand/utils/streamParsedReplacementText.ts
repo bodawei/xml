@@ -104,7 +104,6 @@ function streamParsedReplacementText(
          sTokenSource = entityValueToSTokenSource(
             details.protoReplacementText,
             expandParams.entityId,
-            expandParams.confVer
          );
          getErrors = (): Array<XmlError> => [];
       } else {
