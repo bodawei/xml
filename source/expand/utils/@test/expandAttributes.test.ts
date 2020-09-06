@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID } from 'basic';
+import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
    GeneralEntityDeclarationPToken,
@@ -48,6 +48,11 @@ describe('expandAttributes() (unit)', () => {
          entityId: {
             type: ENTITY_ID,
             systemId: '',
+         },
+         confVer: {
+            type: CONFORMANCE_VERSION,
+            version: 1,
+            revision: 5,
          },
          entityDetails,
          conditionalStack: [],

@@ -1,4 +1,4 @@
-import { EntityId } from 'basic';
+import { EntityId, ConformanceVersion } from 'basic';
 import { ContextType } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token';
@@ -24,7 +24,7 @@ type AttributeValueResults = {
 };
 
 type EntityProcessors = {
-   parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;
+   parseBody: (sTokenSource: STokenSource, context: ContextType, confVer: ConformanceVersion, expandToken: ExpandToken) => void;
    parseEntityValue: (
       sTokenSource: STokenSource,
       done: (results: EntityValuePToken | void) => void,
@@ -36,8 +36,9 @@ type EntityProcessors = {
    ) => void;
 };
 
-type ExpandParams = {
+interface ExpandParams {
    entityId: EntityId;
+   confVer: ConformanceVersion;
    entityDetails: EntityDetails;
    loadExternalEntities: boolean;
    conditionalStack: Array<ConditionalInfo>;

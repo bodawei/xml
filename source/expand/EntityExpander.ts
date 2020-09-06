@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { CONFORMANCE_VERSION, ENTITY_ID, EntityId } from 'basic';
+import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
 import { ParseValue, ContextType } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
@@ -97,6 +97,7 @@ class EntityExpander {
       this.deliverToken = deliverPToken;
       this.expandParams = {
          entityId: new EntityId(''),
+         confVer: new ConformanceVersion(),
          conditionalStack: [],
          entityDetails: new EntityDetails(),
          loadExternalEntities: validating,
@@ -112,6 +113,7 @@ class EntityExpander {
             expanded();
             break;
          case CONFORMANCE_VERSION:
+            this.expandParams.confVer = pToken;
             this.deliverToken(pToken);
             expanded();
             break;

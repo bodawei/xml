@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID } from 'basic';
+import { ENTITY_ID, ConformanceVersion } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
    ParameterEntityReferencePToken,
@@ -57,6 +57,7 @@ describe('expandUnassigned() (unit)', () => {
             type: ENTITY_ID,
             systemId: '',
          },
+         confVer: new ConformanceVersion(),
          entityDetails,
          conditionalStack: [],
          loadExternalEntities: true,

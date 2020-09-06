@@ -59,6 +59,7 @@ function expandPeRef(
       const sTokenSource = entityValueToSTokenSource(
          details.protoReplacementText,
          expandParams.entityId,
+         expandParams.confVer,
       );
 
       unassigned.parseAllValues(sTokenSource, isElementDecl, (results?: UnassignedArray) => {

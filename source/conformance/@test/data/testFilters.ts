@@ -7,10 +7,6 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      // 'ibm-1-1-valid-P03-ibm03v01.xml', // The two character sequence #x0D #x85 in an external entity must be normalized to a single newline.
-      // 'ibm-1-1-valid-P03-ibm03v02.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
-      // 'ibm-1-1-valid-P03-ibm03v03.xml', // The two character sequence #x0D #x85 in an external entity must be normalized to a single newline.
-      // 'ibm-1-1-valid-P03-ibm03v04.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
    ],
    excludedIds: [
       // Introduced problem.  processing version and version in actual doc do not match
@@ -87,10 +83,6 @@ const testFilters: FilterData = {
       'notation01', // NOTATION declarations don't need SYSTEM IDs; and externally declared notations may be used to declare unparsed entities in the internal DTD subset. The notation must be reported to the application.
       'sa05', // Like sa01 but this document is standalone since it has no optional whitespace. On output, requires notations to be correctly reported.
       'v-sgml01', // XML permits token reuse, while SGML does not.
-      'ibm-1-1-valid-P03-ibm03v01.xml', // The two character sequence #x0D #x85 in an external entity must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v02.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v03.xml', // The two character sequence #x0D #x85 in an external entity must be normalized to a single newline.
-      'ibm-1-1-valid-P03-ibm03v04.xml', // The single character sequence #x85 in an external entity must be normalized to a single newline.
       'rmt-007', // A vanilla XML 1.1 document
       'rmt-010', // Contains a C1 control, legal in XML 1.0, illegal in XML 1.1
       'rmt-022', // Has a NEL character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1

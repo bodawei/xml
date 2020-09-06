@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, Range, EntityId } from 'basic';
+import { Token, Range, EntityId, ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -31,10 +31,12 @@ describe('EntityExpander (integration)', () => {
    function parseBody(
       sTokenSource: STokenSource,
       context: ContextType,
+      confVer: ConformanceVersion,
       writeToken: ExpandToken,
    ): void {
       const pTokenStream = new PTokenStream(sTokenSource, {
          context,
+         confVer
       });
 
       pTokenStream.on('data', (token: PToken) => {
@@ -69,7 +71,7 @@ describe('EntityExpander (integration)', () => {
       baseEntity: EntityId,
       relativeEntity: EntityId,
    ): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors);
+      const sTokenSource = new STokenSource(defaultExtractors, relativeEntity);
 
       const str = externalMap[relativeEntity.systemId];
       sTokenSource.addText(str);

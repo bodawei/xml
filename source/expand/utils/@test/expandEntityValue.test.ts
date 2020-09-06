@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID } from 'basic';
+import { ENTITY_ID, ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -50,6 +50,7 @@ describe('expandEntityValue() (unit)', () => {
             type: ENTITY_ID,
             systemId: '',
          },
+         confVer: new ConformanceVersion(),
          entityDetails,
          conditionalStack: [],
          loadExternalEntities: true,

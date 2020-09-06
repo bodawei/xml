@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityId, CONFORMANCE_VERSION, ENTITY_ID,  } from 'basic';
+import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion,  } from 'basic';
 import { XMLDECL_PTOKEN } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import {
@@ -43,7 +43,7 @@ describe('EntityExpanderStream (integration)', () => {
    beforeEach(() => {
       pTokenStream = new PTokenStream(undefined, {
          context: ContextType.DOCUMENT,
-         version: 1.0,
+         confVer: new ConformanceVersion(1.0),
          entityId: new EntityId(__filename)
       });
       entityExpander = new EntityExpanderStream(true);

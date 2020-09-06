@@ -3,7 +3,7 @@
 import { basename, dirname, relative, resolve } from 'path';
 import { Transform } from 'stream';
 
-import { EntityId } from 'basic';
+import { EntityId, ConformanceVersion } from 'basic';
 import { EntityExpander, RetrieveResults, AttributeValueResults } from 'expand';
 import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
@@ -23,10 +23,12 @@ import { TestDetails } from './buildTestDetails';
 function parseBody(
    sTokenSource: STokenSource,
    context: ContextType,
+   confVer: ConformanceVersion,
    expandToken: (token: PToken | undefined, tokenProcessed: () => void) => void,
 ): void {
    const pTokenStream = new PTokenStream(sTokenSource, {
       context,
+      confVer,
    });
    let seenEnd = false;
    let paused = false;
@@ -119,7 +121,7 @@ function retrieveExternalEntity(
    // console.log('entityText', entityText, '\n');
    // Throw an error if we can't find the entity?
 
-   const source = new STokenSource(defaultExtractors);
+   const source = new STokenSource(defaultExtractors, relativeEntity);
    source.addText(entityText);
    source.endText();
 

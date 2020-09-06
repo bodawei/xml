@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID } from 'basic';
+import { ENTITY_ID, ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -48,6 +48,7 @@ describe('streamParsedReplacementText() (unit)', () => {
             type: ENTITY_ID,
             systemId: '',
          },
+         confVer: new ConformanceVersion(),
          loadExternalEntities: true,
          conditionalStack: [],
          utils: {
@@ -88,7 +89,7 @@ describe('streamParsedReplacementText() (unit)', () => {
    }
 
    it('delivers the external DTD tokens', (done) => {
-      params.utils.parseBody = (source, context, cb) => {
+      params.utils.parseBody = (source, context, confVer, cb) => {
          cb(textPToken, () => {
             cb(undefined, noopFunction);
          });
@@ -129,7 +130,7 @@ describe('streamParsedReplacementText() (unit)', () => {
    it('delivers any errors before the end token', (done) => {
       const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
       const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE, ['x']);
-      params.utils.parseBody = (source, context, cb) => {
+      params.utils.parseBody = (source, context, confVer, cb) => {
          cb(textPToken, () => {
             cb(undefined, noopFunction);
          });
@@ -177,7 +178,7 @@ describe('streamParsedReplacementText() (unit)', () => {
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end general entity', (done) => {
-      params.utils.parseBody = (source, context, cb) => {
+      params.utils.parseBody = (source, context, confVer, cb) => {
          cb(textPToken, () => {
             cb(undefined, noopFunction);
          });
@@ -251,7 +252,7 @@ describe('streamParsedReplacementText() (unit)', () => {
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end parameter entity', (done) => {
-      params.utils.parseBody = (source, context, cb) => {
+      params.utils.parseBody = (source, context, confVer, cb) => {
          cb(textPToken, () => {
             cb(undefined, () => {
                // do nothing

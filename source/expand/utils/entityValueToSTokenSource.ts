@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityId } from 'basic';
+import { EntityId, ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { CHARREF_PTOKEN, TEXT_PTOKEN, EntityValuePToken } from 'token';
@@ -13,8 +13,9 @@ import { CHARREF_PTOKEN, TEXT_PTOKEN, EntityValuePToken } from 'token';
 function entityValueToSTokenSource(
    entityValue: EntityValuePToken,
    entityId: EntityId,
+   confVer: ConformanceVersion,
 ): STokenSource {
-   const source = new STokenSource(defaultExtractors, entityId);
+   const source = new STokenSource(defaultExtractors, entityId, confVer);
 
    for (const element of entityValue) {
       switch (element.type) {

@@ -3,7 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Transform } from 'stream';
-import { EntityId } from 'basic';
+import { EntityId, ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { EntityExpander, resolveSystemId } from 'expand';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -13,8 +13,8 @@ import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token
 import { AttributeValueResults, ExpandToken, RetrieveResults } from '../expand/types';
 import { ContextType } from 'pToken';
 
-function parseBody(sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken): void {
-   const pTokenStream = new PTokenStream(sTokenSource, { context });
+function parseBody(sTokenSource: STokenSource, context: ContextType, confVer: ConformanceVersion, expandToken: ExpandToken): void {
+   const pTokenStream = new PTokenStream(sTokenSource, { context, confVer });
 
    pTokenStream.on('data', (token: PToken) => {
       pTokenStream.pause();

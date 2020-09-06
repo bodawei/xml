@@ -15,9 +15,17 @@ class ConformanceVersion {
    readonly version: XmlVersion;
    readonly revision: XmlRevision;
 
-   constructor(version: XmlVersion = 1.0, revision: XmlRevision = 5) {
-      this.version = version;
-      this.revision = revision;
+   constructor();
+   constructor(confVer: ConformanceVersion);
+   constructor(version: XmlVersion, revision?: XmlRevision);
+   constructor(verOrConfVer?: XmlVersion | ConformanceVersion, revision?: XmlRevision) {
+      if (typeof verOrConfVer === 'number' || typeof verOrConfVer === 'undefined') {
+         this.version = verOrConfVer || 1.0;
+         this.revision = revision || (this.version === 1  ? 5 : 2);
+      } else {
+         this.version = verOrConfVer.version;
+         this.revision = verOrConfVer.revision;
+      }
    }
 }
 

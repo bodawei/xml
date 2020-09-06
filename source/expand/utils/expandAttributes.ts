@@ -48,6 +48,7 @@ function parseEntityValueAsAttributeValue(
    const sTokenSource: STokenSource = entityValueToSTokenSource(
       entityValue!,
       expandParams.entityId,
+      expandParams.confVer
    );
 
    expandParams.utils.parseAttributeValue(sTokenSource, (result) => {

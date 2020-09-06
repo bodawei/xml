@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, EntityId } from 'basic';
+import { ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import {
    TextPToken,
@@ -37,6 +37,7 @@ describe('setupConditional() (unit)', () => {
       testStack = new EntityNameStack();
       params = {
          entityDetails: new EntityDetails(),
+         confVer: new ConformanceVersion(),
          entityId: {
             type: ENTITY_ID,
             systemId: '',

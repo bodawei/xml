@@ -180,7 +180,12 @@ module.exports = {
                prefer: 'type-imports',
                disallowTypeAnnotations: true,
             }],
-}
+            '@typescript-eslint/explicit-function-return-type': ['error', {
+               allowExpressions: false,
+               allowTypedFunctionExpressions: true,
+               allowHigherOrderFunctions: true,
+               allowConciseArrowFunctionExpressionsStartingWithVoid: true,             
+            }],
          },
          overrides: [
             {

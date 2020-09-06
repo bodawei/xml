@@ -1,10 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { XmlRevision, XmlVersion } from 'basic';
+import { ConformanceVersion, XmlRevision, XmlVersion } from 'basic';
 import { CheckWellFormed } from 'nodeStream';
 import { PTokenStream } from 'pTokenStream';
-import { PToken } from 'token';
 import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
 
 import { TestDetails, buildTestDetails } from './helper/buildTestDetails';
@@ -21,8 +20,7 @@ import { ContextType } from 'pToken';
 function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
    const pTokenStream = new PTokenStream(undefined, {
       context: ContextType.DOCUMENT,
-      version: ver,
-      revision: rev,
+      confVer: new ConformanceVersion(ver, rev),
    });
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
@@ -51,7 +49,7 @@ describe('XML Conformance tests', () => {
          .map((ver) => Number.parseInt(ver, 10) as XmlRevision);
 
       allEditions.forEach((edition) => {
-         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
+         fit(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
             const hasOutput = 'outputData' in testData;
             const testStream = setUpStreams(testData, ver, edition);
             const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);

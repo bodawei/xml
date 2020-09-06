@@ -104,6 +104,7 @@ function streamParsedReplacementText(
          sTokenSource = entityValueToSTokenSource(
             details.protoReplacementText,
             expandParams.entityId,
+            expandParams.confVer
          );
          getErrors = (): Array<XmlError> => [];
       } else {
@@ -115,7 +116,7 @@ function streamParsedReplacementText(
    }
 
    deliverToken(start, () => {
-      utils.parseBody(sTokenSource, context, (result, handled) => {
+      utils.parseBody(sTokenSource, context, expandParams.confVer, (result, handled) => {
          if (!result) {
             deliverMultipleTokens([...getErrors(), end, undefined], deliverToken);
             return;

@@ -88,8 +88,11 @@ describe('PTokenStream (unit)', () => {
 
       it('delivers a conformance version using the version specified in the options, regardless of what is in the document', (done) => {
          pTokenStream = new PTokenStream(undefined, {
-            version: 1.0,
-            revision: 3,
+            confVer: {
+               type: CONFORMANCE_VERSION,
+               version: 1.0,
+               revision: 3,
+            },
          });
          pTokenStream.addText('<?xml version="1.1"?>');
          pTokenStream.endText();

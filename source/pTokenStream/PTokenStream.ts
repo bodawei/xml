@@ -43,8 +43,7 @@ enum ConditionalState {
 
 interface PTokenOptions {
    context?: ContextType;
-   version?: XmlVersion;
-   revision?: XmlRevision;
+   confVer?: ConformanceVersion;
    entityId?: EntityId;
 }
 
@@ -82,12 +81,8 @@ class PTokenStream extends Readable {
       this.id = opts.entityId ?? new EntityId('./document.xml');
       this._sTokenSource = metaDataOrTokenSource || new STokenSource(defaultExtractors);
 
-      if (opts.version) {    
-         this.confVer = {
-            type: CONFORMANCE_VERSION,
-            version: opts.version,
-            revision: opts.revision ?? (opts.version === 1 ? 5 : 2),
-         };
+      if (opts.confVer) {    
+         this.confVer = new ConformanceVersion(opts.confVer);
          this.versionSet = true;
       } else {
          this.confVer = {
