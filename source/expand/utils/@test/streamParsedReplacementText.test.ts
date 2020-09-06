@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion } from 'basic';
+import { ENTITY_ID, ConformanceVersion, CONFORMANCE_VERSION } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -174,7 +174,8 @@ describe('streamParsedReplacementText() (unit)', () => {
       expect(args[0]).toBeInstanceOf(STokenSource);
       expect(args[0]._segments[0].text).toEqual('foo');
       expect(args[1]).toEqual(ContextType.GENERAL_ENTITY);
-      expect(args[2]).toBeInstanceOf(Function);
+      expect(args[2].type).toEqual(CONFORMANCE_VERSION);
+      expect(args[3]).toBeInstanceOf(Function);
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end general entity', (done) => {
@@ -248,7 +249,8 @@ describe('streamParsedReplacementText() (unit)', () => {
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);
       expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);
-      expect(args[2]).toBeInstanceOf(Function);
+      expect(args[2].type).toEqual(CONFORMANCE_VERSION);
+      expect(args[3]).toBeInstanceOf(Function);
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end parameter entity', (done) => {

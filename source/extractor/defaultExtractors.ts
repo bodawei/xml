@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import AllExtractor from './AllExtractor';
 import CharExtractor from './CharExtractor';
@@ -9,6 +9,7 @@ import PeekExtractor from './PeekExtractor';
 import SpaceExtractor from './SpaceExtractor';
 import WordExtractor from './WordExtractor';
 import { Extractor } from '../extractor';
+import PeekDecl from './PeekDecl';
 
 type ExtractorParams = Array<any>|any;
 type ExtractorConstructor = { new (...args: any[]): Extractor } ;
@@ -46,6 +47,7 @@ const defaultExtractors: ExtractorMap = {
          extractorConstructor: CharExtractor,
       },
    },
+   peekDecl: PeekDecl,
    peekSpace: {
       extractorConstructor: PeekExtractor,
       params: {

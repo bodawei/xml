@@ -100,11 +100,11 @@ describe('PTokenStream (unit)', () => {
          gatherPTokens(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
-            expect(result).toEqual({
+            expect(result).toEqual(jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1.0,
                revision: 3,
-            });
+            }));
             done();
          });
       });

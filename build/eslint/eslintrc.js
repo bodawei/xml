@@ -186,6 +186,12 @@ module.exports = {
                allowHigherOrderFunctions: true,
                allowConciseArrowFunctionExpressionsStartingWithVoid: true,             
             }],
+            '@typescript-eslint/explicit-function-return-type': ['error', {
+               allowExpressions: true,
+               allowTypedFunctionExpressions: true,
+               allowHigherOrderFunctions: true,
+               allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+            }],
          },
          overrides: [
             {
