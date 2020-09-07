@@ -5,8 +5,7 @@ import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as token from '../../index';
-import { parseDeclaration, DeclarationStart } from '../declaration';
-import { ConformanceVersion } from 'basic';
+import { parseDeclaration } from '../declaration';
 
 describe('declaration (unit)', () => {
    let open: SToken;
@@ -32,7 +31,7 @@ describe('declaration (unit)', () => {
                [ ' ', 'space' ],
             ]);
 
-            parseDeclaration(mockSource, open, new ConformanceVersion(), callback);
+            parseDeclaration(mockSource, open, callback);
             mockSource.respondInAsyncTime();
 
             const args = parse.calls.argsFor(0);
@@ -54,7 +53,7 @@ describe('declaration (unit)', () => {
                [ ' ', 'space' ],
             ]);
 
-            parseDeclaration(mockSource, open, new ConformanceVersion(), callback);
+            parseDeclaration(mockSource, open, callback);
             mockSource.respondInAsyncTime();
 
             const args = parse.calls.argsFor(0);

@@ -23,12 +23,10 @@ import { TestDetails } from './buildTestDetails';
 function parseBody(
    sTokenSource: STokenSource,
    context: ContextType,
-   confVer: ConformanceVersion,
    expandToken: (token: PToken | undefined, tokenProcessed: () => void) => void,
 ): void {
    const pTokenStream = new PTokenStream(sTokenSource, {
       context,
-      confVer,
    });
    let seenEnd = false;
    let paused = false;

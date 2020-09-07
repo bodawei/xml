@@ -57,6 +57,7 @@ function setupConditional(
       }
 
       const sTokenSource = new STokenSource(defaultExtractors, expandParams.entityId);
+      sTokenSource.setConfVer(expandParams.confVer);
       const result: ConditionalInfo = {
          source: sTokenSource,
          textIsFinished: undefined,
@@ -65,7 +66,7 @@ function setupConditional(
 
       done(result);
 
-      utils.parseBody(sTokenSource, context, expandParams.confVer, (nextToken, handled) => {
+      utils.parseBody(sTokenSource, context, (nextToken, handled) => {
          if (nextToken) {
             deliverToken(nextToken, handled);
             return;

@@ -27,7 +27,7 @@ describe('declaration (integration)', () => {
          source.addText('ENTITY foo "theValue">');
          source.endText();
 
-         parseDeclaration(source, start, confVer, (parsing) => {
+         parseDeclaration(source, start, (parsing) => {
             expect(parsing).toEqualRangeless(new GeneralEntityDeclarationPToken({
                open: start,
                declType: SToken.fromString('ENTITY'),

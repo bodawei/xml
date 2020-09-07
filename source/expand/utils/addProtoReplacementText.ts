@@ -67,6 +67,7 @@ function addProtoReplacementText(
       entityId,
       externalIdToEntityId(details.token.externalId),
    );
+   sTokenSource.setConfVer(expandParams.confVer);
 
    entityDetails.loadingEntity(details.token);
    entityDetails.waitForLoading(details.token, (info) =>

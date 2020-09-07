@@ -220,8 +220,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -295,8 +294,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -309,8 +307,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -334,8 +331,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -348,8 +344,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -387,8 +382,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -471,8 +465,7 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2].type).toEqual(CONFORMANCE_VERSION);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });

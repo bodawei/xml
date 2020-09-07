@@ -21,6 +21,7 @@ describe('assignExternalId() (integration)', () => {
    beforeEach(() => {
       source = new STokenSource(defaultExtractors);
    });
+
    it('assigns the public and system value (check unassigned.assignToProps())', (done) => {
       source.addText('PUBLIC\t%publicVal;\t"sys.xml">');
       source.endText();

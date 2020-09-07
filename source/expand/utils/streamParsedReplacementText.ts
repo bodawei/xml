@@ -115,7 +115,8 @@ function streamParsedReplacementText(
    }
 
    deliverToken(start, () => {
-      utils.parseBody(sTokenSource, context, expandParams.confVer, (result, handled) => {
+      sTokenSource.setConfVer(expandParams.confVer);
+      utils.parseBody(sTokenSource, context, (result, handled) => {
          if (!result) {
             deliverMultipleTokens([...getErrors(), end, undefined], deliverToken);
             return;

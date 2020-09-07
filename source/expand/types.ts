@@ -24,7 +24,7 @@ type AttributeValueResults = {
 };
 
 type EntityProcessors = {
-   parseBody: (sTokenSource: STokenSource, context: ContextType, confVer: ConformanceVersion, expandToken: ExpandToken) => void;
+   parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;
    parseEntityValue: (
       sTokenSource: STokenSource,
       done: (results: EntityValuePToken | void) => void,

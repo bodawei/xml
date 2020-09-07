@@ -13,8 +13,8 @@ import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token
 import { AttributeValueResults, ExpandToken, RetrieveResults } from '../expand/types';
 import { ContextType } from 'pToken';
 
-function parseBody(sTokenSource: STokenSource, context: ContextType, confVer: ConformanceVersion, expandToken: ExpandToken): void {
-   const pTokenStream = new PTokenStream(sTokenSource, { context, confVer });
+function parseBody(sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken): void {
+   const pTokenStream = new PTokenStream(sTokenSource, { context });
 
    pTokenStream.on('data', (token: PToken) => {
       pTokenStream.pause();

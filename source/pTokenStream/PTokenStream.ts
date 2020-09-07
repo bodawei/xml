@@ -80,7 +80,10 @@ class PTokenStream extends Readable {
       this.confVer = options.confVer ? new ConformanceVersion(options.confVer) : new ConformanceVersion();
       this.setConfVer = !!options.confVer;
 
-      this._sTokenSource.setConfVer(this.confVer);
+      // In all other contexts, the EntityExpander will already have set the ConformanceVersion on the sTokenSource
+      if (this.context === ContextType.DOCUMENT) {
+         this._sTokenSource.setConfVer(this.confVer);
+      }
    }
 
    addText(text: string) {
@@ -276,7 +279,7 @@ class PTokenStream extends Readable {
                parseComment(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<!':
-               parseDeclaration(this._sTokenSource, markupStartSToken, this.confVer, (pToken) => {
+               parseDeclaration(this._sTokenSource, markupStartSToken, (pToken) => {
                   if (pToken instanceof DocTypeStartPToken && pToken.openSubset) {
                      this.waitingForInternalClose = true;
                      this.startDocType = pToken;

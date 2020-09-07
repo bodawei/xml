@@ -89,7 +89,7 @@ describe('streamParsedReplacementText() (unit)', () => {
    }
 
    it('delivers the external DTD tokens', (done) => {
-      params.utils.parseBody = (source, context, confVer, cb) => {
+      params.utils.parseBody = (source, context, cb) => {
          cb(textPToken, () => {
             cb(undefined, noopFunction);
          });
@@ -130,7 +130,7 @@ describe('streamParsedReplacementText() (unit)', () => {
    it('delivers any errors before the end token', (done) => {
       const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
       const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE, ['x']);
-      params.utils.parseBody = (source, context, confVer, cb) => {
+      params.utils.parseBody = (source, context, cb) => {
          cb(textPToken, () => {
             cb(undefined, noopFunction);
          });
@@ -174,12 +174,11 @@ describe('streamParsedReplacementText() (unit)', () => {
       expect(args[0]).toBeInstanceOf(STokenSource);
       expect(args[0]._segments[0].text).toEqual('foo');
       expect(args[1]).toEqual(ContextType.GENERAL_ENTITY);
-      expect(args[2].type).toEqual(CONFORMANCE_VERSION);
-      expect(args[3]).toBeInstanceOf(Function);
+      expect(args[2]).toBeInstanceOf(Function);
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end general entity', (done) => {
-      params.utils.parseBody = (source, context, confVer, cb) => {
+      params.utils.parseBody = (source, context, cb) => {
          cb(textPToken, () => {
             cb(undefined, noopFunction);
          });
@@ -219,7 +218,7 @@ describe('streamParsedReplacementText() (unit)', () => {
 
    it('calls parseBody() with the content from the external PE declaration and that it is not in the content', () => {
       const parseBodySpy = spyOn(params.utils, 'parseBody');
-      const sTokenSource: STokenSource = { fake: true } as any;
+      const sTokenSource: STokenSource = { fake: true, setConfVer: () => {} } as any;
       const peDecl = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('pe'),
@@ -249,12 +248,11 @@ describe('streamParsedReplacementText() (unit)', () => {
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);
       expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);
-      expect(args[2].type).toEqual(CONFORMANCE_VERSION);
-      expect(args[3]).toBeInstanceOf(Function);
+      expect(args[2]).toBeInstanceOf(Function);
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end parameter entity', (done) => {
-      params.utils.parseBody = (source, context, confVer, cb) => {
+      params.utils.parseBody = (source, context, cb) => {
          cb(textPToken, () => {
             cb(undefined, () => {
                // do nothing

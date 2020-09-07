@@ -44,7 +44,7 @@ type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Arr
       ???
 \**********************************************************************/
 
-function parseDeclaration(source: STokenSource, openSToken: SToken, confVer: ConformanceVersion, deliverPToken: DeliverDeclaration) {
+function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToken: DeliverDeclaration) {
    const start: DeclarationStart = { open: openSToken };
    start.open = openSToken;
 

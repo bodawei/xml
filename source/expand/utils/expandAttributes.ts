@@ -49,6 +49,7 @@ function parseEntityValueAsAttributeValue(
       entityValue!,
       expandParams.entityId,
    );
+   sTokenSource.setConfVer(expandParams.confVer);
 
    expandParams.utils.parseAttributeValue(sTokenSource, (result) => {
       // If it still didn't parse into anything useful, abort.

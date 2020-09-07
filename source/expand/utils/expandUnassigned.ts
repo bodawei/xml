@@ -60,6 +60,7 @@ function expandPeRef(
          details.protoReplacementText,
          expandParams.entityId,
       );
+      sTokenSource.setConfVer(expandParams.confVer);
 
       unassigned.parseAllValues(sTokenSource, isElementDecl, (results?: UnassignedArray) => {
          callback({

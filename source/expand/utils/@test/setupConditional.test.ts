@@ -212,8 +212,7 @@ describe('setupConditional() (unit)', () => {
 
                expect(args[0]).toEqual(result.source);
                expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);
-               expect(args[2].type).toEqual(CONFORMANCE_VERSION);
-               expect(args[3]).toBeInstanceOf(Function);
+               expect(args[2]).toBeInstanceOf(Function);
                done();
             }, 0);
          },
@@ -226,7 +225,7 @@ describe('setupConditional() (unit)', () => {
       setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
          setTimeout(() => {
             const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[3];
+            const callback = args[2];
             // eslint-disable-next-line func-style
             const handled = (): void => {};
 
@@ -244,7 +243,7 @@ describe('setupConditional() (unit)', () => {
       setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
          setTimeout(() => {
             const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[3];
+            const callback = args[2];
             const handled = jasmine.createSpy();
 
             callback(undefined, handled);
@@ -267,7 +266,7 @@ describe('setupConditional() (unit)', () => {
          (result) => {
             setTimeout(() => {
                const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-               const callback = args[3];
+               const callback = args[2];
 
                callback(undefined, () => {});
 
@@ -292,7 +291,7 @@ describe('setupConditional() (unit)', () => {
 
             setTimeout(() => {
                const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-               const callback = args[3];
+               const callback = args[2];
                const handled = jasmine.createSpy();
 
                callback(undefined, handled);

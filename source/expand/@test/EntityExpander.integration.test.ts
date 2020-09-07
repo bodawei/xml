@@ -31,12 +31,10 @@ describe('EntityExpander (integration)', () => {
    function parseBody(
       sTokenSource: STokenSource,
       context: ContextType,
-      confVer: ConformanceVersion,
       writeToken: ExpandToken,
    ): void {
       const pTokenStream = new PTokenStream(sTokenSource, {
          context,
-         confVer
       });
 
       pTokenStream.on('data', (token: PToken) => {
