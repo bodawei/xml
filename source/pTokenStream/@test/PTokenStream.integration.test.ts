@@ -30,7 +30,7 @@ describe('PTokenStream (integration)', () => {
    let pTokenStream: PTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream();
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
    });
 
    function gatherTokens(stream: PTokenStream, input: string | void, done: (tokens: TokenArray) => void) {

@@ -16,9 +16,12 @@ import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
 import metadata from './data/xmlconf.json';
 import { AttFixerStream } from 'nodeStream';
 import { ContextType } from 'pToken';
+import { STokenSource } from 'sToken';
+import { defaultExtractors } from 'extractor';
 
 function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
-   const pTokenStream = new PTokenStream(undefined, {
+   const sTokenSource = new STokenSource(defaultExtractors);
+   const pTokenStream = new PTokenStream(sTokenSource, {
       context: ContextType.DOCUMENT,
       confVer: new ConformanceVersion(ver, rev),
    });

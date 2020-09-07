@@ -9,13 +9,15 @@ import CheckWellFormed from '../CheckWellFormed';
 
 import { expectError } from './utils';
 import { ELEMENT_START_PTOKEN, SPACE_PTOKEN } from 'token';
+import { STokenSource } from 'sToken';
+import { defaultExtractors } from 'extractor';
 
 describe('CheckWellFormed (integration)', () => {
    let pTokenStream: PTokenStream;
    let checker: CheckWellFormed;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream();
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
       checker = new CheckWellFormed();
       pTokenStream.pipe(checker);
    });

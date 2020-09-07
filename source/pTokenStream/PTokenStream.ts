@@ -64,7 +64,7 @@ class PTokenStream extends Readable {
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(metaDataOrTokenSource?: STokenSource | undefined, options: PTokenOptions =  { context: ContextType.DOCUMENT }) {
+   constructor(sTokenSource: STokenSource, options: PTokenOptions =  { context: ContextType.DOCUMENT }) {
       super({
          objectMode: true,
       });
@@ -74,7 +74,7 @@ class PTokenStream extends Readable {
       this.inContent = options.context === ContextType.GENERAL_ENTITY;
       this.pushedMetadata = false;
       this.id = options.entityId ?? new EntityId('./document.xml');
-      this._sTokenSource = metaDataOrTokenSource || new STokenSource(defaultExtractors);
+      this._sTokenSource = sTokenSource;
 
       // We should always get a confVer if we are not the document type.
       this.confVer = options.confVer ? new ConformanceVersion(options.confVer) : new ConformanceVersion();

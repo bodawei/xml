@@ -11,6 +11,7 @@ import PTokenStream from '../PTokenStream';
 import { ParseValue, PToken, ContextType } from 'pToken';
 import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
 import { EntityId } from 'source/basic/entityId';
+import { defaultExtractors } from 'extractor';
 
 type TokenArray = Array<ParseValue>;
 
@@ -18,7 +19,7 @@ describe('PTokenStream (unit)', () => {
    let pTokenStream: PTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(undefined, {
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
          context: ContextType.DOCUMENT,
       });
    });
@@ -45,7 +46,7 @@ describe('PTokenStream (unit)', () => {
    describe('ConformanceVersion', () => {
 
       it('delivers a default version of 1.0/5 if nothing else is specified', (done) => {
-         pTokenStream = new PTokenStream(undefined, {
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
             context: ContextType.DOCUMENT,
          });
          pTokenStream.addText('<?xml version="1.0"?>');
@@ -65,7 +66,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers a default version of 1.1/2 if nothing specified and XML Declaration is 1.1', (done) => {
-         pTokenStream = new PTokenStream(undefined);
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
          pTokenStream.addText('<?xml version="1.1"?>');
          pTokenStream.endText();
 
@@ -83,7 +84,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers a conformance version using the version specified in the options, regardless of what is in the document', (done) => {
-         pTokenStream = new PTokenStream(undefined, {
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
             confVer: {
                type: CONFORMANCE_VERSION,
                version: 1.0,
@@ -106,7 +107,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers a conformance version using the default version when neither dor not options set', (done) => {
-         pTokenStream = new PTokenStream();
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
          pTokenStream.addText('<one></one>');
          pTokenStream.endText();
 
@@ -123,7 +124,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('does not deliver a conformance version when the contxt is not document', (done) => {
-         pTokenStream = new PTokenStream(undefined, {
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
             context: ContextType.EXTERNAL_SUBSET,
          });
          pTokenStream.addText('<one></one>');
@@ -158,7 +159,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers an EntityId with the option specified in the construction options', (done) => {
-         pTokenStream = new PTokenStream(undefined, {
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
             context: ContextType.DOCUMENT,
             entityId: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
          });
@@ -180,7 +181,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers no EntityId when this is not a document type', (done) => {
-         pTokenStream = new PTokenStream(undefined, {
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
             context: ContextType.EXTERNAL_SUBSET,
             entityId: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
          });

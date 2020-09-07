@@ -1,19 +1,20 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { PTokenStream } from 'pTokenStream';
-import { toSToken, SToken } from 'sToken';
+import { toSToken, SToken, STokenSource } from 'sToken';
 import { XmlDeclarationPToken, XMLDECL_PTOKEN } from 'pToken';
 import { gatherPTokens } from 'pToken-test';
 import { ElementStartPToken, TextPToken } from 'token';
 
 import { AttFixerStream } from '../AttFixerStream';
+import { defaultExtractors } from 'extractor';
 
 describe('AttFixerStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let fixer: AttFixerStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream();
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
       fixer = new AttFixerStream();
       pTokenStream.pipe(fixer);
    });

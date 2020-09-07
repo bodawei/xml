@@ -10,6 +10,8 @@ import { EntityExpanderStream } from '../../nodeStream/EntityExpanderStream';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import PToXTokenStream from '../PToXTokenStream';
+import { STokenSource } from 'sToken';
+import { defaultExtractors } from 'extractor';
 
 describe('CheckXTokenValidStream (integration)', () => {
    let validator: CheckXTokenValidStream;
@@ -37,7 +39,7 @@ describe('CheckXTokenValidStream (integration)', () => {
    beforeEach(() => {
       const tokenizer = new PToXTokenStream();
 
-      parser = new PTokenStream(undefined);
+      parser = new PTokenStream(new STokenSource(defaultExtractors));
       validator = new CheckXTokenValidStream();
       replacer = new EntityExpanderStream(true);
       (parser as any).pipe(replacer).pipe(tokenizer).pipe(validator); // typeHack

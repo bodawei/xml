@@ -3,6 +3,8 @@
 import { PTokenStream } from '../pTokenStream';
 import { PToXTokenStream } from '../xTokenStream';
 import SimpleObjStream from './so';
+import { STokenSource } from 'sToken';
+import { defaultExtractors } from 'extractor';
 
 describe('SimpleObjStream (integration)', () => {
    let pTokenStream: PTokenStream;
@@ -10,7 +12,7 @@ describe('SimpleObjStream (integration)', () => {
    let objStream: SimpleObjStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream();
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
       tokenStream = new PToXTokenStream();
       objStream = new SimpleObjStream();
 

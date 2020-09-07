@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Range, EntityId } from 'basic';
-import { SToken } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 import {
    declaration,
 
@@ -31,6 +31,7 @@ import PToXTokenStream from '../PToXTokenStream';
 import { ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
 import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
 import { ExternalIdXToken } from 'source/xToken/token/externalIdXToken';
+import { defaultExtractors } from 'extractor';
 
 type Token = { type: string, pToken?: any };
 type TokenArray = Array<Token>;
@@ -40,7 +41,7 @@ describe('PToXTokenStream (integration)', () => {
    let tokenStream: PToXTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream();
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
       tokenStream = new PToXTokenStream();
       pTokenStream.pipe(tokenStream);
    });

@@ -35,13 +35,15 @@ import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './beforeEach';
 import { ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
 import { ParseValue, ContextType } from 'pToken';
+import { STokenSource } from 'sToken';
+import { defaultExtractors } from 'extractor';
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(undefined, {
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
          context: ContextType.DOCUMENT,
          confVer: new ConformanceVersion(1.0),
          entityId: new EntityId(__filename)
