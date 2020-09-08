@@ -164,13 +164,14 @@ module.exports = {
             '@typescript-eslint/adjacent-overload-signatures': 'error',
             '@typescript-eslint/array-type': [ 'error', { default: 'array' } ],
             '@typescript-eslint/await-thenable': 'error',
-            '@typescript-eslint/ban-ts-comment': [ 'error', {
-               'ts-expect-error': 'allow-with-description',
-               'ts-ignore': true,
-               'ts-nocheck': true,
-               'ts-check': false,
-               minimumDescriptionLength: 3,
-            } ],
+            '@typescript-eslint/ban-ts-comment': [ 'error' ],
+            // , {
+            //    'ts-expect-error': 'allow-with-description',
+            //    'ts-ignore': true,
+            //    'ts-nocheck': true,
+            //    'ts-check': false,
+            //    minimumDescriptionLength: 3,
+            // } ],
             '@typescript-eslint/ban-tslint-comment': 'error',
             '@typescript-eslint/ban-types': ['error', /* using the defaults */ ],
             '@typescript-eslint/class-literal-property-style': ["error", "fields"],
@@ -180,12 +181,13 @@ module.exports = {
                prefer: 'type-imports',
                disallowTypeAnnotations: true,
             }],
-            '@typescript-eslint/explicit-function-return-type': ['error', {
-               allowExpressions: false,
-               allowTypedFunctionExpressions: false,
-               allowHigherOrderFunctions: true,
-               allowConciseArrowFunctionExpressionsStartingWithVoid: true,             
-            }],
+            '@typescript-eslint/explicit-function-return-type': ['error' ],
+            // , {
+            //    allowExpressions: false,
+            //    allowTypedFunctionExpressions: false,
+            //    allowHigherOrderFunctions: true,
+            //    allowConciseArrowFunctionExpressionsStartingWithVoid: true,             
+            // }],
             '@typescript-eslint/explicit-member-accessibility': ['error', {
                // defaults
                accessibility: 'explicit',

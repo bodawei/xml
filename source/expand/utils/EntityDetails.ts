@@ -15,6 +15,7 @@ import {
 
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
+import { OpaqueEntityLoc } from '../types';
 
 type LoadingResult = {
    details: PrivateGEDetails | PrivatePEDetails | void;
@@ -29,7 +30,7 @@ type PrivateGEDetails = {
    isLoading: boolean;
    protoReplacementText?: EntityValuePToken;
    waiters: Array<LoadingCallback>;
-   externalLocation?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+   entityLoc?: OpaqueEntityLoc; // set only when isInternal is false.
 };
 
 type PrivatePEDetails = {
@@ -38,7 +39,7 @@ type PrivatePEDetails = {
    isLoading: boolean;
    protoReplacementText?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
    waiters: Array<LoadingCallback>;
-   externalLocation?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+   entityLoc?: OpaqueEntityLoc; // set only when isInternal is false.
 };
 
 type GeneralEntityMap = {
@@ -95,6 +96,7 @@ class EntityDetails {
    public addEntity(
       pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
       expandedInternalValue?: EntityValuePToken,
+      resolvedLocation?: OpaqueEntityLoc,
    ): void {
       const name = strOrBlank(pToken.name);
 
@@ -108,6 +110,7 @@ class EntityDetails {
             isInternal: !pToken.externalId,
             isUnparsed: !!pToken.nData,
             isLoading: false,
+            entityLoc: resolvedLocation,
             waiters: [],
          };
 
@@ -119,6 +122,7 @@ class EntityDetails {
             token: pToken,
             isInternal: !pToken.externalId,
             isLoading: false,
+            entityLoc: resolvedLocation,
             waiters: [],
          };
 

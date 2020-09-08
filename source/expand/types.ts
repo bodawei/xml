@@ -23,6 +23,8 @@ type AttributeValueResults = {
    errors: Array<XmlError>;
 };
 
+type OpaqueEntityLoc = any;
+
 type EntityProcessors = {
    parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;
    parseEntityValue: (
@@ -34,6 +36,7 @@ type EntityProcessors = {
       sTokenSource: STokenSource,
       done: (results: AttributeValueResults) => void,
    ) => void;
+   resolveEntityId?: (base: EntityId | OpaqueEntityLoc, child: EntityId) => OpaqueEntityLoc;
 };
 
 interface ExpandParams {
@@ -43,7 +46,7 @@ interface ExpandParams {
    loadExternalEntities: boolean;
    conditionalStack: Array<ConditionalInfo>;
    utils: EntityProcessors;
-};
+}
 
 export {
    AttributeValueResults,
@@ -52,4 +55,5 @@ export {
    RetrieveResults,
    EntityProcessors,
    ExpandToken,
+   OpaqueEntityLoc,
 };

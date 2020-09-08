@@ -52,7 +52,7 @@ describe('XML Conformance tests', () => {
          .map((ver) => Number.parseInt(ver, 10) as XmlRevision);
 
       allEditions.forEach((edition) => {
-         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
+         fit(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
             const hasOutput = 'outputData' in testData;
             const testStream = setUpStreams(testData, ver, edition);
             const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
