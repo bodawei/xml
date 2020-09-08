@@ -21,11 +21,11 @@ interface TestCases {
 
 interface Test {
    readonly type: 'TEST';
-   readonly ENTITIES: 'both' | 'none' | 'parameter' | 'general';
+   readonly ENTITIES?: 'both' | 'none' | 'parameter' | 'general';
    readonly ID: string;
    readonly OUTPUT?: string;
    readonly SECTIONS: string;
-   readonly RECOMMENDATION:
+   readonly RECOMMENDATION?:
       | 'XML1.0'
       | 'XML1.1'
       | 'NS1.0'
@@ -38,7 +38,7 @@ interface Test {
    readonly VERSION?: string;
    readonly EDITION?: string;
    readonly URI: string;
-   readonly NAMESPACE: 'yes' | 'no';
+   readonly NAMESPACE?: 'yes' | 'no';
    readonly testPath: string;
    readonly testData?: string;
    readonly missingTestFile?: string; // if outputData is absent and outputPath was present, this has a message about why the data could not be found

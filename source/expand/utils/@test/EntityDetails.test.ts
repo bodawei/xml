@@ -156,6 +156,7 @@ describe('EntityDetails (unit)', () => {
             isUnparsed: false,
             isInternal: true,
             isLoading: false,
+            entityLoc: undefined,
             waiters: [],
          });
       });
@@ -212,6 +213,7 @@ describe('EntityDetails (unit)', () => {
             token: decl1,
             isInternal: true,
             isLoading: false,
+            entityLoc: undefined,
             waiters: [],
          });
       });
@@ -260,6 +262,7 @@ describe('EntityDetails (unit)', () => {
             isInternal: true,
             isLoading: false,
             waiters: [],
+            entityLoc: undefined,
             protoReplacementText: value,
          } as any);
       });
@@ -312,6 +315,7 @@ describe('EntityDetails (unit)', () => {
             isInternal: true,
             isLoading: false,
             isUnparsed: false,
+            entityLoc: undefined,
             waiters: [],
          });
       });
@@ -333,6 +337,7 @@ describe('EntityDetails (unit)', () => {
             token: decl1,
             isInternal: true,
             isLoading: false,
+            entityLoc: undefined,
             waiters: [],
          });
       });

@@ -148,6 +148,9 @@ module.exports = {
             './source/token/common/externalId.ts',
          ],
          parser: '@typescript-eslint/parser',
+         parserOptions: {
+            project: './tsconfig.json'
+         },
          plugins: [
             '@typescript-eslint',
             'prettier',
@@ -162,7 +165,7 @@ module.exports = {
             'no-unused-vars': 'off',
             // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin
             '@typescript-eslint/adjacent-overload-signatures': 'error',
-            '@typescript-eslint/array-type': [ 'error', { default: 'array' } ],
+            // '@typescript-eslint/array-type': [ 'error', { default: 'array' } ],
             '@typescript-eslint/await-thenable': 'error',
             '@typescript-eslint/ban-ts-comment': [ 'error' ],
             // , {
