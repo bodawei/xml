@@ -17,7 +17,7 @@ const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
 \**********************************************************************/
 
 class SpaceExtractor extends Extractor {
-   private foundSpace: boolean = false;
+   private foundSpace = false;
 
    process(segment: Segment) {
       const spaceRegexp = this.version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;

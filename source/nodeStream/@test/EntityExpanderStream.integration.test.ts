@@ -29,12 +29,12 @@ import {
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-   TEXTDECL_PTOKEN,
+   
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './beforeEach';
 import { ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
-import { ParseValue, ContextType } from 'pToken';
+import { TEXTDECL_PTOKEN,ParseValue, ContextType } from 'pToken';
 import { STokenSource } from 'sToken';
 import { defaultExtractors } from 'extractor';
 

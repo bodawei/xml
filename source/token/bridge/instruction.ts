@@ -1,10 +1,9 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { parseXmlDeclaration, XmlDeclarationPToken } from 'pToken';
+import { TextDeclarationPToken, XmlDeclarationPToken, parseXmlDeclaration, parseTextDeclaration,  } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import { ProcessingInstructionPToken, parseProcessingInstruction } from '../processingInstruction';
-import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
 
 /**********************************************************************\
  The instruction namespace bridges input far enough to decide

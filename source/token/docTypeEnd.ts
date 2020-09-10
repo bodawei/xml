@@ -17,7 +17,7 @@ const WFEID = WellFormedError.ID;
 const DOCTYPE_END_PTOKEN = 'DOCTYPE_END_PTOKEN';
 const DOCTYPE_END_XTOKEN = 'DOCTYPE_END_XTOKEN';
 
-type PreToken = { docTypeStartPToken: DocTypeStartPToken, [ other: string ]: any };
+type PreToken = { docTypeStartPToken: DocTypeStartPToken; [ other: string ]: any };
 
 class DocTypeEndPToken {
    public readonly type: typeof DOCTYPE_END_PTOKEN = DOCTYPE_END_PTOKEN;
@@ -119,7 +119,7 @@ function sTokensFromPToken(pToken: DocTypeEndPToken): Array<SToken> {
       pToken.closeSubsetSpace,
       pToken.close);
 
-      return builder.sTokenArray;
+   return builder.sTokenArray;
 }
 
 export {

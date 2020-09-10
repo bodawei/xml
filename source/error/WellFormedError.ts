@@ -10,7 +10,7 @@ const WELL_FORMED_ERROR_SUBTYPE = 'WELL_FORMED_ERROR';
 const messages: MessageCache = {
    code: messagesAndStrings.code,
    message: new StringBundle(messagesAndStrings.message),
-}
+};
 
 /**********************************************************************\
  WellFormedError holds inforamtion about a syntax error

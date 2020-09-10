@@ -52,7 +52,7 @@ function isSpace(candidate: string, version: XMLVersion = 1.0): boolean {
 \**********************************************************************/
 
 function isName(candidate: string, version: XMLVersion = 1.0, revision: XMLRevision = 5): boolean {
-   const use11Names = version === 1.1 || version === 1.0 && revision >= 5;
+   const use11Names = version === 1.1 || (version === 1.0 && revision >= 5);
    const regEx = use11Names ? WHOLENAME_REGEX11 : WHOLENAME_REGEX10;
 
    return !!regEx.exec(candidate);
@@ -79,13 +79,16 @@ function isName(candidate: string, version: XMLVersion = 1.0, revision: XMLRevis
       [89] Extender      ::= #x00B7 | #x02D0 | #x02D1 | #x0387 | #x0640 | #x0E46 | #x0EC6 | #x3005 | [#x3031-#x3035] | [#x309D-#x309E] | [#x30FC-#x30FE]
 \**********************************************************************/
 
-function isNmToken(candidate: string, version: XMLVersion = 1.0, revision: XMLRevision = 5): boolean {
-   const use11Names = version === 1.1 || version === 1.0 && revision >= 5;
+function isNmToken(
+   candidate: string,
+   version: XMLVersion = 1.0,
+   revision: XMLRevision = 5,
+): boolean {
+   const use11Names = version === 1.1 || (version === 1.0 && revision >= 5);
    const regEx = use11Names ? WHOLENMTOKEN_REGEX11 : WHOLENMTOKEN_REGEX10;
 
    return !!regEx.exec(candidate);
 }
-
 
 /**********************************************************************\
  SYNTAX
@@ -106,13 +109,14 @@ const NOT_CHAR10 = /[\u0000\u0001-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g
 const NOT_CHAR11 = /[\u0000\uFFFE\uFFFF]/g;
 
 // https://dmitripavlutin.com/what-every-javascript-developer-should-know-about-unicode/
-function getAstralCodePoint(highSurrogate: string, lowSurrogate: string) {
-   return (highSurrogate.charCodeAt(0) - 0xD800) * 0x400
-       + lowSurrogate.charCodeAt(0) - 0xDC00 + 0x10000;
- }
+function getAstralCodePoint(highSurrogate: string, lowSurrogate: string): number {
+   return (
+      (highSurrogate.charCodeAt(0) - 0xd800) * 0x400 + lowSurrogate.charCodeAt(0) - 0xdc00 + 0x10000
+   );
+}
 
 function isChar(char: string, version: XMLVersion = 1.0): boolean {
-   const regEx = (version === 1.1) ? NOT_CHAR11 : NOT_CHAR10;
+   const regEx = version === 1.1 ? NOT_CHAR11 : NOT_CHAR10;
 
    if (char.length > 1) {
       if (char.length !== 2) {
@@ -121,13 +125,12 @@ function isChar(char: string, version: XMLVersion = 1.0): boolean {
 
       const code = getAstralCodePoint(char[0], char[1]);
 
-      return (code <= 0x10FFFF && code >= 0x10000);
+      return code <= 0x10ffff && code >= 0x10000;
    }
 
    regEx.lastIndex = 0;
    return !regEx.exec(char);
 }
-
 
 /**********************************************************************\
  SYNTAX
@@ -150,10 +153,4 @@ function isRestrictedChar(char: string, version: XMLVersion = 1.0): boolean {
    return !!RESTRICTED_CHAR11.exec(char);
 }
 
-export {
-   isName,
-   isNmToken,
-   isSpace,
-   isChar,
-   isRestrictedChar,
-};
+export { isName, isNmToken, isSpace, isChar, isRestrictedChar };

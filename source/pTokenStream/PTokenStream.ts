@@ -27,7 +27,7 @@ import {
    ConditionalClosePToken,
    ConditionalPToken,
    TextPToken,
-   
+
    ElementStartPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
@@ -53,18 +53,18 @@ const WHITESPACE_REGEXP = /[\n\t ]+/g;
 class PTokenStream extends Readable {
    private _sTokenSource: STokenSource;
    private _elementStack: Array<ElementStartPToken>;
-   private _parsing: boolean = false;
+   private _parsing = false;
    private inContent: boolean;
    private pushedMetadata: boolean;
    private id: EntityId;
    private confVer: ConformanceVersion;
    private setConfVer: boolean;
    private context: ContextType = ContextType.DOCUMENT;
-   private waitingForInternalClose: boolean = false;
+   private waitingForInternalClose = false;
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(sTokenSource: STokenSource, options: PTokenOptions =  { context: ContextType.DOCUMENT }) {
+   constructor(sTokenSource: STokenSource, options: PTokenOptions = { context: ContextType.DOCUMENT }) {
       super({
          objectMode: true,
       });
@@ -145,14 +145,14 @@ class PTokenStream extends Readable {
          this._parseContent(deliverParse);
 
       } else {
-         const conditionalState = this.conditionalStack.length === 0 ? ConditionalState.NONE : this.conditionalStack[this.conditionalStack.length -1];
+         const conditionalState = this.conditionalStack.length === 0 ? ConditionalState.NONE : this.conditionalStack[this.conditionalStack.length - 1];
 
          if (conditionalState === ConditionalState.IGNORE || conditionalState === ConditionalState.INSIDE_IGNORE) {
-            this._sTokenSource.extract('multi', ['<![', ']]>'] , (sToken) => {
+            this._sTokenSource.extract('multi', [ '<![', ']]>' ], (sToken) => {
                const valueFound = strOrBlank(sToken);
 
                if (!sToken) {
-                  this._sTokenSource.extract('all', ['<![', ']]>'] , (sToken) => {
+                  this._sTokenSource.extract('all', [ '<![', ']]>' ], (sToken) => {
                      if (!sToken) {
                         deliverParse(null);
                      } else {
@@ -177,7 +177,7 @@ class PTokenStream extends Readable {
                         deliverParse(conditionalClose);
                      }
                      break;
-                  }
+               }
             });
             return;
          }
@@ -245,7 +245,7 @@ class PTokenStream extends Readable {
                let terminators: Array<string> = [];
 
                if (this.waitingForInternalClose) {
-                  terminators = ['%'];
+                  terminators = [ '%' ];
                }
 
                parseCharData(this._sTokenSource, terminators, (result) => {
@@ -309,7 +309,6 @@ class PTokenStream extends Readable {
       parseDocTypeEnd(this._sTokenSource, this.startDocType!, deliverParse);
    }
 
-
    /*
     * Try to peek at the XML Declaration. If it is present, and we have not
     * already had an XML version imposed on us, use the information from
@@ -321,15 +320,15 @@ class PTokenStream extends Readable {
          if (sToken && !this.setConfVer) {
             const processedString = sToken.str.replace(WHITESPACE_REGEXP, '');
             const match = VERSION_REGEXP.exec(processedString);
-            
+
             if (match) {
                const versionNumber = match[2];
-               
-               this.confVer = new ConformanceVersion( versionNumber === '1.1' ? 1.1 : 1);
+
+               this.confVer = new ConformanceVersion(versionNumber === '1.1' ? 1.1 : 1);
                this._sTokenSource.setConfVer(this.confVer);
             }
          }
-         
+
          this.setConfVer = true;
          this.pushedMetadata = true;
          this.push(this.confVer);

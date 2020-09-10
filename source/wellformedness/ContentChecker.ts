@@ -13,13 +13,12 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
-   TEXTDECL_PTOKEN,
    ElementEmptyPToken,
    ElementStartPToken,
    GeneralEntityStartPToken,
    getFirstSToken,
 } from 'token';
-import { ParseValue } from 'pToken';
+import { TEXTDECL_PTOKEN, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    CHECKER_DONE,
@@ -38,11 +37,11 @@ enum State {
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
-type StateTable = {
+interface StateTable {
    [startState: string]: {
       [tokenType: string]: State | typeof NO_CHANGE;
    };
-};
+}
 
 const WFID = WellFormedError.ID;
 

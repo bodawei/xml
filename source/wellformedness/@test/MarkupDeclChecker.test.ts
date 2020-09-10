@@ -3,13 +3,13 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { TextDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
    CommentPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
-   TextDeclarationPToken,
    InternalSubsetStartToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,

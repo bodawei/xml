@@ -51,7 +51,7 @@ class ProcessingInstructionPToken {
       this.targetSpace = (param as any).targetSpace;
    }
 
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion):void {
+   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
       return checkWellFormed(this, ec, confVer);
    }
 

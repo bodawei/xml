@@ -2,12 +2,12 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { TEXTDECL_PTOKEN, TextDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
    GENERAL_ENTITY_END_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
-   TEXTDECL_PTOKEN,
    CdataPToken,
    CommentPToken,
    ElementEndPToken,
@@ -18,7 +18,6 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityReferencePToken,
    NotationDeclarationPToken,
-   TextDeclarationPToken,
    CharDataPToken,
 } from 'token';
 

@@ -34,7 +34,7 @@ class PTokenFromLiteralStream extends Transform {
       this.sTokenSource = sTokenSource;
       this.peRef = !!options.peRef;
       this.geRef = !!options.geRef;
-      this.terminators = this.peRef ? ['&', '%'] : ['&'];
+      this.terminators = this.peRef ? [ '&', '%' ] : [ '&' ];
    }
 
    _read() {
@@ -62,13 +62,13 @@ class PTokenFromLiteralStream extends Transform {
                return;
             }
 
-               this.sTokenSource.extractNoParams('char', (sToken) => {
-                  if (this.geRef) {
-                     parseGeneralEntityReference(this.sTokenSource, sToken!, (pToken) => this.push(pToken));
-                  } else {
-                     this.push(new TextPToken({ text: sToken! }));
-                  }
-               });
+            this.sTokenSource.extractNoParams('char', (sToken) => {
+               if (this.geRef) {
+                  parseGeneralEntityReference(this.sTokenSource, sToken!, (pToken) => this.push(pToken));
+               } else {
+                  this.push(new TextPToken({ text: sToken! }));
+               }
+            });
          });
       });
    }

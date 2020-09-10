@@ -8,12 +8,12 @@ import { SToken } from '../sToken';
 \**********************************************************************/
 
 declare class STokenArray extends Array<SToken> {
-   public pushSTokens(...STokens: Array<SToken|void>):void;
-};
+   public pushSTokens(...STokens: Array<SToken|void>): void;
+}
 
 function pushIfNotVoid(this: STokenArray, ...items: Array<SToken|void>) {
    for (let index = 0; index < items.length; index++) {
-      const item = items[index]
+      const item = items[index];
       if (item) {
          this.push(item);
       }
@@ -47,7 +47,7 @@ class BaseParsedToken {
    }
 }
 
-const base =  {
+const base = {
    PToken: BaseParsedToken,
 };
 

@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
-import MatchExtractor from './MatchExtractor'
+import MatchExtractor from './MatchExtractor';
 import Segment from './Segment';
 
 type MatcherMap = {
@@ -24,9 +24,9 @@ class MultiMatchExtractor extends Extractor {
    private _matchLength: number;
    private _matchers: MatcherMap;
    private _firstSegment?: Segment;
-   private _firstIndex: number = 0;
+   private _firstIndex = 0;
    private _lastSegment?: Segment;
-   private _lastIndex: number = 0;
+   private _lastIndex = 0;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(version: number, candidates: Array<string>) {

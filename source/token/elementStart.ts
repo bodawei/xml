@@ -15,7 +15,7 @@ const ELEMENT_START_XTOKEN = 'ELEMENT_START_XTOKEN';
 const ELEMENT_EMPTY_XTOKEN = 'ELEMENT_EMPTY_XTOKEN';
 
 type DeliverElementStartPToken = (pToken?: ElementStartPToken|ElementEmptyPToken) => void;
-type ProtoToken = { open: SToken, [ any: string]: any };
+type ProtoToken = { open: SToken; [ any: string]: any };
 
 /**********************************************************************\
  The elementStart namespace contains the usual tools for processing
@@ -217,7 +217,7 @@ function sTokensFromPToken(pToken: ElementStartPToken | ElementEmptyPToken): Arr
       sTokens,
       pToken.close);
 
-      return builder.sTokenArray;
+   return builder.sTokenArray;
 }
 
 export {

@@ -20,11 +20,11 @@
  base locale.
 \**********************************************************************/
 
-type Locale = {
+interface Locale {
    [key: string]: string;
 }
 
-type LocaleMap = {
+interface LocaleMap {
    [localeName: string]: Locale;
 }
 
@@ -32,7 +32,7 @@ const BRACES = /\{([{}])\}/g;
 
 // If we find {{} (a { inside of {}'s) or {}}, remove the
 // escaping outer braces
-function unescapeBraces(message: string) {
+function unescapeBraces(message: string): string {
    // interestingly, this is usually much faster than 2 replaces.
    return message.replace(BRACES, '$1');
 }
@@ -43,7 +43,9 @@ class StringBundle {
 
    constructor(locales: LocaleMap) {
       if (!locales.base) {
-         throw new Error('Strings must at least have a locale called "base", with an object value.');
+         throw new Error(
+            'Strings must at least have a locale called "base", with an object value.',
+         );
       }
 
       this.locales = locales;
@@ -67,12 +69,12 @@ class StringBundle {
     A string, or undefined if no relevant string can be found.
    \**********************************************************************/
 
-   lookup(key: string, localeNames?: string|Array<string>) {
+   lookup(key: string, localeNames?: string | Array<string>): string {
       let locale: Locale;
 
       if (localeNames) {
          if (!Array.isArray(localeNames)) {
-            localeNames = [ localeNames ];
+            localeNames = [localeNames];
          }
 
          for (let index = 0; index < localeNames.length; index++) {
@@ -121,14 +123,18 @@ class StringBundle {
     A string, or undefined if no relevant string can be found.
    \**********************************************************************/
 
-   substitute(key: string, params?: string|Array<string>, localNames?: string|Array<string>) {
+   substitute(
+      key: string,
+      params?: string | Array<string>,
+      localNames?: string | Array<string>,
+   ): string | undefined {
       let message = this.lookup(key, localNames);
 
       if (!params || !message) {
          return message ? unescapeBraces(message) : undefined;
       }
 
-      let paramsArray = Array.isArray(params) ? params: [ params ];
+      const paramsArray = Array.isArray(params) ? params : [params];
 
       for (let index = 0; index < paramsArray.length; index++) {
          // jsperf says this is faster than just doing the two replaces
@@ -156,7 +162,7 @@ class StringBundle {
     None
    \**********************************************************************/
 
-   addLocale(localeName: string, locale: Locale) {
+   addLocale(localeName: string, locale: Locale): void {
       this.locales[localeName] = locale;
    }
 
@@ -170,7 +176,7 @@ class StringBundle {
     The strings for that locale
    \**********************************************************************/
 
-   removeLocale(localeName: string) {
+   removeLocale(localeName: string): Locale {
       const temp = this.locales[localeName];
       delete this.locales[localeName];
 
@@ -178,8 +184,4 @@ class StringBundle {
    }
 }
 
-export {
-   StringBundle,
-   LocaleMap,
-   Locale,
-};
+export { StringBundle, LocaleMap, Locale };

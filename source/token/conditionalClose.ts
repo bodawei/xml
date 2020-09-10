@@ -5,7 +5,7 @@ import { SToken } from 'sToken';
 const CONDITIONAL_CLOSE_PTOKEN = 'CONDITIONAL_CLOSE_PTOKEN';
 
 type ConditionalProps = {
-   open: SToken,
+   open: SToken;
 }
 
 /**********************************************************************\
@@ -24,7 +24,6 @@ class ConditionalClosePToken {
       this.open = param.open;
    }
 }
-
 
 export {
    CONDITIONAL_CLOSE_PTOKEN,

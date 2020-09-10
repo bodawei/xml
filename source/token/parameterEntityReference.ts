@@ -6,13 +6,13 @@ const PARAMETER_ENTITY_REFERENCE_PTOKEN = 'PARAMETER_ENTITY_REFERENCE_PTOKEN';
 
 type DeliverPToken = (pToken: ParameterEntityReferencePToken | undefined) => void;
 
-type MutableParameterEntityReference = {
+interface MutableParameterEntityReference {
    open: SToken;
    openSpace?: SToken;
    name?: SToken;
    nameSpace?: SToken;
    close?: SToken;
-};
+}
 
 class ParameterEntityReferencePToken {
    public readonly type: typeof PARAMETER_ENTITY_REFERENCE_PTOKEN = PARAMETER_ENTITY_REFERENCE_PTOKEN;

@@ -3,13 +3,20 @@
 import { ConformanceVersion, EntityId } from 'basic';
 import { PToken as PTokenClassic } from 'token';
 
+import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
 
+export * from './token/textDeclaration';
 export * from './token/xmlDeclaration';
 export * from './util/externalIdToEntityId';
 
 type PToken = PTokenClassic;
-type ParseValue = PToken | ConformanceVersion | EntityId | XmlDeclarationPToken;
+type ParseValue =
+   | PToken
+   | ConformanceVersion
+   | EntityId
+   | TextDeclarationPToken
+   | XmlDeclarationPToken;
 
 enum ContextType {
    DOCUMENT,

@@ -87,7 +87,7 @@ function parseComment(source: STokenSource, commentOpen: SToken, deliverPToken: 
    extractCommentContent(source, pToken, deliverPToken);
 }
 
-function extractCommentContent(source: STokenSource, pToken: { open: SToken, [key: string]: any }, deliverPToken: DeliverPToken) {
+function extractCommentContent(source: STokenSource, pToken: { open: SToken; [key: string]: any }, deliverPToken: DeliverPToken) {
    source.extract('all', [ '--' ], (textSToken) => {
       if (textSToken) {
          pToken.text.push(textSToken);

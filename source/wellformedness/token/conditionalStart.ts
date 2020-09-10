@@ -1,4 +1,3 @@
-import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import { ConditionalPToken } from 'token';
@@ -8,7 +7,6 @@ const WFEID = WellFormedError.ID;
 function checkConditionalStartWellFormed(
    pToken: ConditionalPToken | undefined,
    ec: ErrorCollector,
-   confVer: ConformanceVersion,
 ): void {
    if (!pToken) {
       return;

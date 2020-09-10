@@ -22,12 +22,12 @@ class GeneralEntityReferencePToken {
    public readonly nameSpace?: SToken;
    public readonly close?: SToken;
 
-   constructor(param: GeneralEntityReferencePToken | MutableGeneralEntityReference, extras?: MutableGeneralEntityReference ) {
-         this.open = extras?.open || param.open;
-         this.openSpace = extras?.openSpace || param.openSpace;
-         this.name = extras?.name || param.name;
-         this.nameSpace = extras?.nameSpace || param.nameSpace;
-         this.close = extras?.close || param.close;
+   constructor(param: GeneralEntityReferencePToken | MutableGeneralEntityReference, extras?: MutableGeneralEntityReference) {
+      this.open = extras?.open || param.open;
+      this.openSpace = extras?.openSpace || param.openSpace;
+      this.name = extras?.name || param.name;
+      this.nameSpace = extras?.nameSpace || param.nameSpace;
+      this.close = extras?.close || param.close;
    }
 }
 

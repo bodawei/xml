@@ -9,7 +9,7 @@ type Position = SToken | Offset | void;
 declare class ErrorToken {
    public readonly id: string;
    constructor(id: string, params: Array<string>, position: Position, context: Position);
-};
+}
 
 type ErrConstFunc = typeof ErrorToken;
 
@@ -86,14 +86,12 @@ class ErrorCollector {
          posOffset = position.clone();
       } else if (position) {
          posOffset = position.ranges[0].getStartOffset();
+      } else if (this.position) {
+         posOffset = this.posStart ?
+            this.position.ranges[0].getStartOffset() :
+            this.position.ranges[0].getEndOffset();
       } else {
-         if (this.position) {
-            posOffset = this.posStart ?
-               this.position.ranges[0].getStartOffset() :
-               this.position.ranges[0].getEndOffset();
-         } else {
-            posOffset = new Offset(new EntityId(), 0, 0, 0);
-         }
+         posOffset = new Offset(new EntityId(), 0, 0, 0);
       }
 
       this.errors.push(new constructor(code, params, posOffset, this.context));

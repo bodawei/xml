@@ -8,24 +8,24 @@ import { EntityDetails } from './utils/EntityDetails';
 type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
 
-type ConditionalInfo = {
+interface ConditionalInfo {
    source?: STokenSource | undefined;
    textIsFinished?: () => void;
    sectionType?: SToken;
-};
+}
 
-type RetrieveResults = {
+interface RetrieveResults {
    sTokenSource: STokenSource;
    getErrors: () => Array<XmlError>;
-};
-type AttributeValueResults = {
+}
+interface AttributeValueResults {
    newValue: AttributeValuePToken | void;
    errors: Array<XmlError>;
-};
+}
 
 type OpaqueEntityLoc = any;
 
-type EntityProcessors = {
+interface EntityProcessors {
    parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;
    parseEntityValue: (
       sTokenSource: STokenSource,
@@ -37,7 +37,7 @@ type EntityProcessors = {
       done: (results: AttributeValueResults) => void,
    ) => void;
    resolveEntityId?: (base: EntityId | OpaqueEntityLoc, child: EntityId) => OpaqueEntityLoc;
-};
+}
 
 interface ExpandParams {
    entityId: EntityId;

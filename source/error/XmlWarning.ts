@@ -10,7 +10,7 @@ const WARNING_SUBTYPE = 'WARNING';
 const messages: MessageCache = {
    code: messagesAndStrings.code,
    message: new StringBundle(messagesAndStrings.message),
-}
+};
 
 /**********************************************************************\
  XmlWarning holds inforamtion about a warnings

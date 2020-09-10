@@ -1,6 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
+import { TEXTDECL_PTOKEN, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
@@ -18,7 +19,6 @@ import {
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    SPACE_PTOKEN,
-   TEXTDECL_PTOKEN,
    ElidedEntityDeclarationPToken,
    InternalSubsetStartToken,
    ParameterEntityStartPToken,
@@ -33,7 +33,6 @@ import {
    TEXT_PTOKEN,
    ConditionalPToken,
 } from 'token';
-import { PToken, ParseValue } from 'pToken';
 
 import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
 import {
@@ -63,11 +62,11 @@ enum States {
 const WFID = WellFormedError.ID;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
-type StateTable = {
+interface StateTable {
    [startState: string]: {
       [tokenType: string]: States | typeof NO_CHANGE;
    };
-};
+}
 
 const transitionsByState: StateTable = {
    [States.PRE]: {
@@ -175,11 +174,11 @@ const transitionsByState: StateTable = {
    [States.DONE]: {},
 };
 
-type DeclarationInfo = {
+interface DeclarationInfo {
    [declName: string]: {
       referenceTokens: Array<ParameterEntityReferencePToken>;
    };
-};
+}
 
 /*
  * Extract information out of a declaration that we will need to do other
@@ -332,14 +331,14 @@ class MarkupDeclChecker implements Checker {
    private peContext: Array<string>;
    private declsSeen: DeclarationInfo;
 
-   constructor(checkState: CheckState, peContext: Array<string>, inExternalSubset = false) {
+   public constructor(checkState: CheckState, peContext: Array<string>, inExternalSubset = false) {
       this.checkState = checkState;
       this.inExternalSubset = inExternalSubset;
       this.peContext = peContext;
       this.declsSeen = {};
    }
 
-   check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+   public check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
       if (this.state === States.PRE) {
          if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
             this.inExternalSubset = false;

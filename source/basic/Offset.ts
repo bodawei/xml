@@ -13,23 +13,25 @@ class Offset {
    public readonly row: number;
    public readonly column: number;
 
-   constructor(location: EntityId | EntityId, index: number = 0, row: number = 0, column: number = 0) {
+   constructor(location: EntityId | EntityId, index = 0, row = 0, column = 0) {
       this.entityId = new EntityId(location.systemId, location.publicId);
       this.index = index;
       this.row = row;
       this.column = column;
    }
 
-   clone() {
+   clone(): Offset {
       return new Offset(this.entityId, this.index, this.row, this.column);
    }
 
-   equals(other: Offset) {
-      return this.entityId.systemId === other.entityId.systemId &&
+   equals(other: Offset): boolean {
+      return (
+         this.entityId.systemId === other.entityId.systemId &&
          this.entityId.publicId === other.entityId.publicId &&
          this.index === other.index &&
          this.row === other.row &&
-         this.column === other.column;
+         this.column === other.column
+      );
    }
 }
 

@@ -51,7 +51,7 @@ class PeekExtractor extends Extractor {
          info.chars = subInfo.chars;
          info.rows = subInfo.rows;
          info.columns = subInfo.columns;
-         (info.segment as Segment).index = 0;   // typeHack
+         (info.segment as Segment).index = 0; // typeHack
       }
 
       if (this.segInfo[0]) {

@@ -11,7 +11,7 @@ const WARN = XmlWarning.ID;
 const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
 const ELEMENT_END_XTOKEN = 'ELEMENT_END_XTOKEN';
 
-type PreToken = { open: SToken, [ other: string ]: any };
+type PreToken = { open: SToken; [ other: string ]: any };
 
 class ElementEndPToken {
    public readonly type: typeof ELEMENT_END_PTOKEN = ELEMENT_END_PTOKEN;
@@ -125,7 +125,7 @@ function sTokensFromPToken(pToken: ElementEndPToken): Array<SToken> {
       pToken.nameSpace,
       pToken.close);
 
-      return builder.sTokenArray;
+   return builder.sTokenArray;
 }
 
 export {

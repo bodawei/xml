@@ -37,7 +37,7 @@ import {
    ELEMENT_END_XTOKEN,
    ELEMENT_START_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
-   
+
    SPACE_XTOKEN,
 
    NotationDeclarationXToken,
@@ -54,26 +54,26 @@ import { CHARREF_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN, TEXTDECL_XTOKEN, XML
 import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'source/xToken/token/generalEntityReferenceXToken';
 
 type XToken = {
-   type: string,
-   [name: string]: any,
+   type: string;
+   [name: string]: any;
 };
 
 type StreamCallback = () => void;
 
 type ElementAttributes = {
-   [elementName: string]: AttDefinitions,
+   [elementName: string]: AttDefinitions;
 };
 
 type AttInfo = {
-   def: AttDefXToken,
-   externallyDeclared: boolean, // §2.9
+   def: AttDefXToken;
+   externallyDeclared: boolean; // §2.9
 }
 
 type AttDefinitions = {
-   tokens: Array<AttListXToken>,
+   tokens: Array<AttListXToken>;
    attributes: {
-      [attrName: string]: AttInfo,
-   },
+      [attrName: string]: AttInfo;
+   };
 }
 
 type MixedChildrenMap = {
@@ -81,32 +81,32 @@ type MixedChildrenMap = {
 };
 
 type AnyContentDeclInfo = {
-   type: 'ANY_CONTENT',
-   token: ElementDeclaration,
+   type: 'ANY_CONTENT';
+   token: ElementDeclaration;
 }
 
 type EmptyContentDeclInfo = {
-   type: 'EMPTY_CONTENT',
-   token: ElementDeclaration,
+   type: 'EMPTY_CONTENT';
+   token: ElementDeclaration;
 }
 
 type MixedContentDeclInfo = {
-   type: 'MIXED_CONTENT',
-   token: ElementDeclaration,
-   children: MixedChildrenMap,
+   type: 'MIXED_CONTENT';
+   token: ElementDeclaration;
+   children: MixedChildrenMap;
 }
 
 type ElementContentDeclInfo = {
-   type: 'ELEMENT_CONTENT',
-   externallyDeclared: boolean, // §2.9
-   token: ElementDeclaration,
-   graph: Graph,
+   type: 'ELEMENT_CONTENT';
+   externallyDeclared: boolean; // §2.9
+   token: ElementDeclaration;
+   graph: Graph;
 }
 
 type ElementDeclInfo = AnyContentDeclInfo | EmptyContentDeclInfo | MixedContentDeclInfo | ElementContentDeclInfo;
 type ContentContext = {
    declInfo: ElementDeclInfo;
-   atElementContentStart: boolean;  // consider extracting these into a sub-object
+   atElementContentStart: boolean; // consider extracting these into a sub-object
    lastElementContentValue: string;
    elementContentEntityRefStack: Array<string>;
    stateId: number;
@@ -114,9 +114,9 @@ type ContentContext = {
 
 type IDMap = {
    [idValue: string]: {
-      token: ElementStartXToken | ElementEmptyXToken,
-      attrName: string,
-   }
+      token: ElementStartXToken | ElementEmptyXToken;
+      attrName: string;
+   };
 };
 
 type AttributeMap = { [name: string]: AttributeXToken };
@@ -130,7 +130,7 @@ type EntityInfoMap = {
    [entityName: string]: EntityInfo;
 }
 
-const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
+const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
 
 function getAttributeValueText(attribute: any): string {
    const rawValue = attribute.value;
@@ -158,11 +158,11 @@ class CheckXTokenValidStream extends Transform {
    private idValues: IDMap;
    private unanchoredIDRefs: IDMap;
    private confVer: ConformanceVersion = new ConformanceVersion();
-   private _seenRoot: boolean = false;
-   private standalone: boolean = false;
-   private externalDeclarations: boolean = false;
-   private inInternalSubset: boolean = false;
-   private internalEntityDepth: number = 0;
+   private _seenRoot = false;
+   private standalone = false;
+   private externalDeclarations = false;
+   private inInternalSubset = false;
+   private internalEntityDepth = 0;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -208,7 +208,7 @@ class CheckXTokenValidStream extends Transform {
       const externallyDeclared = attInfo ? attInfo.externallyDeclared : false;
       const isCData = !attrDef || attrDef.type === 'CDATA';
       let prevHadTrailingSpace = true; // consider the start to already be space terminated
-      let prevPiece: { text: string } | void = undefined;
+      let prevPiece: { text: string } | void;
       const newValue = [];
       let cDataDifference = false;
 
@@ -216,10 +216,9 @@ class CheckXTokenValidStream extends Transform {
          const piece = attribute.value[index];
 
          if (!isTextXToken(piece)) {
-            newValue.push(piece)
+            newValue.push(piece);
             continue;
          }
-
 
          let str = piece.text;
          const cDataText = str.replace(/[ \r\n\t]/g, ' ');
@@ -245,7 +244,7 @@ class CheckXTokenValidStream extends Transform {
          if (cDataText !== newPiece.text) {
             cDataDifference = true;
          }
-      };
+      }
 
       if (prevHadTrailingSpace && prevPiece) {
          prevPiece!.text = prevPiece!.text.replace(/ $/, ''); // typeHack
@@ -260,7 +259,7 @@ class CheckXTokenValidStream extends Transform {
       //   which would be produced in the absence of the declaration
       if (this.standalone && cDataDifference && externallyDeclared) {
          this.pushValidityError(ValidityError.ID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
-            [elName, attribute.name], pToken);
+            [ elName, attribute.name ], pToken);
       }
 
       return newValue;
@@ -282,15 +281,13 @@ class CheckXTokenValidStream extends Transform {
                   } else {
                      errorId = ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED;
                   }
+               } else if (part instanceof ParameterEntityStartXToken) {
+                  errorId = ValidityError.ID.ATTLISTDECL_PARAMENTITY_EXTERNAL_DECLARED;
                } else {
-                  if (part instanceof ParameterEntityStartXToken) {
-                     errorId = ValidityError.ID.ATTLISTDECL_PARAMENTITY_EXTERNAL_DECLARED;
-                  } else {
-                     errorId = ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED;
-                  }
+                  errorId = ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED;
                }
 
-               this.pushValidityError(errorId, [part.name, attrName], pTokenOpen);
+               this.pushValidityError(errorId, [ part.name, attrName ], pTokenOpen);
             }
 
             depth++;
@@ -320,7 +317,7 @@ class CheckXTokenValidStream extends Transform {
       if (!context) {
          return;
       }
-      let declInfo = context.declInfo;
+      const declInfo = context.declInfo;
 
       if (declInfo.type === 'EMPTY_CONTENT') {
          // §3.0.0 Validity Constraint: Element Valid
@@ -330,7 +327,7 @@ class CheckXTokenValidStream extends Transform {
          //  [Note: we will never get here if an ElementEmpty was enccountered)
          if (!(xToken instanceof ElementEndXToken)) {
             this.pushValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
-               [declInfo.token.name], sToken);
+               [ declInfo.token.name ], sToken);
          }
       } else if (declInfo.type === 'ANY_CONTENT') {
          // §3.0.0 Validity Constraint: Element Valid
@@ -346,8 +343,8 @@ class CheckXTokenValidStream extends Transform {
          const isRestrictiveVersion = (this.confVer.version === 1 && this.confVer.revision < 3);
          const isTolerantVersion = (this.confVer.version === 1 && this.confVer.revision > 3)
             || (this.confVer.version === 1.1 && this.confVer.revision > 1);
-         const notAllowedParams = [declInfo.token.name, this.confVer.version.toString(),
-         this.confVer.revision.toString()];
+         const notAllowedParams = [ declInfo.token.name, this.confVer.version.toString(),
+            this.confVer.revision.toString() ];
 
          switch (xToken.type) {
             case TEXTDECL_XTOKEN:
@@ -357,7 +354,7 @@ class CheckXTokenValidStream extends Transform {
             case ELEMENT_EMPTY_XTOKEN:
                if (!this.elementDeclarations[xToken.name]) {
                   this.pushValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT,
-                     [declInfo.token.name, xToken.name], sToken);
+                     [ declInfo.token.name, xToken.name ], sToken);
                }
                break;
             case ELEMENT_END_XTOKEN:
@@ -381,7 +378,7 @@ class CheckXTokenValidStream extends Transform {
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
                if (isRestrictiveVersion) {
-                  this.pushValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [declInfo.token.name], sToken);
+                  this.pushValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ declInfo.token.name ], sToken);
                }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
@@ -391,7 +388,7 @@ class CheckXTokenValidStream extends Transform {
                // }
                break;
             default:
-               this.pushValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [declInfo.token.name], sToken);
+               this.pushValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ declInfo.token.name ], sToken);
                break;
          }
       } else if (declInfo.type === 'MIXED_CONTENT') {
@@ -416,7 +413,7 @@ class CheckXTokenValidStream extends Transform {
             case ELEMENT_EMPTY_XTOKEN:
                if (!declInfo.children[xToken.name]) {
                   this.pushValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-                     [declInfo.token.name, xToken.name], sToken);
+                     [ declInfo.token.name, xToken.name ], sToken);
                }
                break;
             case CHARREF_XTOKEN:
@@ -439,12 +436,12 @@ class CheckXTokenValidStream extends Transform {
             case PROCESSING_INSTRUCTION_XTOKEN:
                if (isRestrictiveVersion) {
                   this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
-                     [declInfo.token.name], sToken);
+                     [ declInfo.token.name ], sToken);
                }
                break;
             default:
                this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
-                  [declInfo.token.name], sToken);
+                  [ declInfo.token.name ], sToken);
                break;
          }
       } else { // 'ELEMENT_CONTENT'
@@ -481,8 +478,8 @@ class CheckXTokenValidStream extends Transform {
          const isTolerantVersion = (this.confVer.version === 1 && this.confVer.revision >= 5)
             || (this.confVer.version === 1.1 && this.confVer.revision >= 2);
 
-         const notAllowedParams = [declInfo.token.name, this.confVer.version.toString(),
-         this.confVer.revision.toString()];
+         const notAllowedParams = [ declInfo.token.name, this.confVer.version.toString(),
+            this.confVer.revision.toString() ];
 
          const currentState = declInfo.graph.states[context.stateId];
 
@@ -501,15 +498,15 @@ class CheckXTokenValidStream extends Transform {
 
                if (!destState) {
                   this.pushValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT,
-                     [declInfo.token.name, xToken.name], sToken);
+                     [ declInfo.token.name, xToken.name ], sToken);
                } else {
                   context.stateId = destState.stateId;
                }
                break;
             case ELEMENT_END_XTOKEN:
                if (currentState.done !== true) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [declInfo.token.name,
-                  Object.keys(currentState.trans).join(', ')], sToken);
+                  this.pushValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [ declInfo.token.name,
+                     Object.keys(currentState.trans).join(', ') ], sToken);
                }
 
                if (isNoSpaceAtEndsVersion && context.lastElementContentValue === SPACE_XTOKEN) {
@@ -538,7 +535,7 @@ class CheckXTokenValidStream extends Transform {
                // whether those spaces are content or throwaway S.
 
                if (this.standalone && declInfo.externallyDeclared) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [declInfo.token.name], sToken);
+                  this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
                }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
@@ -616,9 +613,9 @@ class CheckXTokenValidStream extends Transform {
        *    match that in an entity declaration.
        */
       if (xToken.type === GENERAL_ENTITY_REFERENCE_XTOKEN) {
-         this.pushValidityError(ValidityError.ID.GEREF_UNDEFINED, [xToken.name], pToken);
+         this.pushValidityError(ValidityError.ID.GEREF_UNDEFINED, [ xToken.name ], pToken);
       } else if (xToken.type === PARAMETER_ENTITY_REFERENCE_XTOKEN) {
-         this.pushValidityError(ValidityError.ID.PEREF_UNDEFINED, [xToken.name], pToken);
+         this.pushValidityError(ValidityError.ID.PEREF_UNDEFINED, [ xToken.name ], pToken);
       }
 
       if (xToken instanceof NotationDeclarationXToken) {
@@ -634,12 +631,12 @@ class CheckXTokenValidStream extends Transform {
       } else if (xToken instanceof GeneralEntityStartXToken) {
          if (this.isInvalidEntityReference(xToken)) {
             this.pushValidityError(ValidityError.ID.ENTITY_EXTERNAL_DECLARED,
-               [xToken.name], pToken);
+               [ xToken.name ], pToken);
          }
       } else if (xToken instanceof ParameterEntityStartXToken) {
          if (this.isInvalidEntityReference(xToken)) {
             this.pushValidityError(ValidityError.ID.PARAMENTITY_EXTERNAL_DECLARED,
-               [xToken.name], pToken);
+               [ xToken.name ], pToken);
          }
 
          if (this.inInternalSubset) {
@@ -661,7 +658,7 @@ class CheckXTokenValidStream extends Transform {
       } else if (xToken instanceof ElementStartXToken || xToken instanceof ElementEmptyXToken) {
          if (!this._seenRoot) {
             if (this.docType && xToken.name !== this.docType.name) {
-               this.pushValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [this.docType.name, xToken.name],
+               this.pushValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ this.docType.name, xToken.name ],
                   this.docType.pToken && this.docType.pToken.open);
             }
             this._seenRoot = true;
@@ -698,7 +695,7 @@ class CheckXTokenValidStream extends Transform {
          this.validateElementStart(xToken);
       } else if (xToken instanceof ElementEndXToken) {
          this.contentStack.pop();
-         this.currentContext = this.contentStack[this.contentStack.length -1];
+         this.currentContext = this.contentStack[this.contentStack.length - 1];
 
          if (this.contentStack.length === 0) {
             this.validateDocumentEnd();
@@ -723,7 +720,7 @@ class CheckXTokenValidStream extends Transform {
       // §4.2 If the same entity is declared more than once, ... at user option,
       // an XML processor may issue a warning if entities are declared multiple times.
       if (seen[name]) {
-         const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [name]);
+         const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ name ]);
          this.push(warning);
       }
 
@@ -738,7 +735,7 @@ class CheckXTokenValidStream extends Transform {
          const errorOnDuplicate = this.confVer.version === 1 && this.confVer.revision >= 2 || this.confVer.version === 1.1;
 
          if (errorOnDuplicate) {
-            this.pushValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [notationDecl.name], pToken);
+            this.pushValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ notationDecl.name ], pToken);
          }
          return;
       }
@@ -762,11 +759,11 @@ class CheckXTokenValidStream extends Transform {
          //   attribute-list declaration for a given element type ... For interoperability,
          //   an XML processor may at user option issue a warning when more than one
          //   attribute-list declaration is provided for a given element type,
-         this.pushWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [elName], openSToken, openSToken);
+         this.pushWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ elName ], openSToken, openSToken);
          attrDefs.tokens.push(attListDecl);
       } else {
          attrDefs = {
-            tokens: [attListDecl],
+            tokens: [ attListDecl ],
             attributes: {},
          };
          this.attrDefsByElementName[elName] = attrDefs;
@@ -777,7 +774,7 @@ class CheckXTokenValidStream extends Transform {
       // Note: This takes the position that if the element wasn't declared before this, it is a warning.
       // Conceivably this should wait until the end of the DTD and then make this assessment.
       if (!this.elementDeclarations[elName]) {
-         this.pushWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL, [elName], openSToken, openSToken);
+         this.pushWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL, [ elName ], openSToken, openSToken);
       }
 
       for (let index = 0; index < attListDecl.attDefs.length; index++) {
@@ -798,7 +795,7 @@ class CheckXTokenValidStream extends Transform {
             // §3.3.0: ... For interoperability, an XML processor may at user option
             //   issue a warning when ... more than one attribute definition is provided for a given
             //   attribute, but this is not an error.
-            this.pushWarning(XmlWarning.ID.ATTLISTDECL_ATTR_EXTRA_DECLARATION, [elName, attDef.name],
+            this.pushWarning(XmlWarning.ID.ATTLISTDECL_ATTR_EXTRA_DECLARATION, [ elName, attDef.name ],
                openSToken, openSToken);
          }
       }
@@ -821,22 +818,20 @@ class CheckXTokenValidStream extends Transform {
       if (attDef.name.toLowerCase() === 'xml:space') {
          if (attDef.name !== 'xml:space') {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_CASE,
-               [attList.elementName, attDef.name], pToken.open);
+               [ attList.elementName, attDef.name ], pToken.open);
          }
 
          if (attDef.type !== 'ENUMERATION' || !attDef.enumeration) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_TYPE,
-               [attList.elementName], pToken.open);
+               [ attList.elementName ], pToken.open);
+         } else if (attDef.enumeration.length === 0) {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_MISSING_ENUMRATION,
+               [ attList.elementName ], pToken.open);
          } else {
-            if (attDef.enumeration.length === 0) {
-               this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_MISSING_ENUMRATION,
-                  [attList.elementName], pToken.open);
-            } else {
-               for (const element of attDef.enumeration) {
-                  if (element !== 'preserve' && element !== 'default') {
-                     this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_ENUMRATION,
-                        [attList.elementName, element,], pToken.open);
-                  }
+            for (const element of attDef.enumeration) {
+               if (element !== 'preserve' && element !== 'default') {
+                  this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_ENUMRATION,
+                     [ attList.elementName, element ], pToken.open);
                }
             }
          }
@@ -856,7 +851,7 @@ class CheckXTokenValidStream extends Transform {
          //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
          if (defaultType !== '#IMPLIED' && defaultType !== '#REQUIRED') {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
-               [attList.elementName, attDef.name, defaultType], pToken.open);
+               [ attList.elementName, attDef.name, defaultType ], pToken.open);
          }
 
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
@@ -865,7 +860,7 @@ class CheckXTokenValidStream extends Transform {
          //    require that value be a legitimate name
          if (hasDefault && !isName(defaultText, this.confVer.version, this.confVer.revision)) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_ID_DEFAULT,
-               [attList.elementName, attDef.name, defaultText], pToken.open);
+               [ attList.elementName, attDef.name, defaultText ], pToken.open);
          }
       } else if (type === 'IDREF' || type === 'ENTITY') {
 
@@ -876,13 +871,13 @@ class CheckXTokenValidStream extends Transform {
             const code = type === 'IDREF' ? ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT
                : ValidityError.ID.ATTLISTDECL_BAD_ENTITY_DEFAULT;
 
-            this.pushValidityError(code, [attList.elementName, attDef.name, defaultText], pToken.open);
+            this.pushValidityError(code, [ attList.elementName, attDef.name, defaultText ], pToken.open);
          }
 
          // §2.9
          if (type === 'ENTITY' && this.isInvalidEntityReference(defaultText)) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED,
-               [defaultText, attDef.name], pToken.open);
+               [ defaultText, attDef.name ], pToken.open);
          }
       } else if (type === 'IDREFS' || type === 'ENTITIES') {
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
@@ -900,14 +895,14 @@ class CheckXTokenValidStream extends Transform {
                // §2.9
                if (type === 'ENTITIES' && this.isInvalidEntityReference(name)) {
                   this.pushValidityError(ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED,
-                     [name, attDef.name], pToken.open);
+                     [ name, attDef.name ], pToken.open);
                }
             }
 
             if (badNames.length > 0) {
                const code = type === 'IDREFS' ? ValidityError.ID.ATTLISTDECL_BAD_IDREFS_DEFAULT
                   : ValidityError.ID.ATTLISTDECL_BAD_ENTITIES_DEFAULT;
-               this.pushValidityError(code, [attList.elementName, attDef.name, badNames.join(', ')], pToken.open);
+               this.pushValidityError(code, [ attList.elementName, attDef.name, badNames.join(', ') ], pToken.open);
             }
          }
       } else if (type === 'NMTOKEN') {
@@ -916,7 +911,7 @@ class CheckXTokenValidStream extends Transform {
          //    ...of type NMTOKEN must match the Nmtoken production;
          if (hasDefault && !isNmToken(defaultText, this.confVer.version, this.confVer.revision)) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
-               [attList.elementName, attDef.name, defaultText], pToken.open);
+               [ attList.elementName, attDef.name, defaultText ], pToken.open);
          }
       } else if (type === 'NMTOKENS') {
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
@@ -935,7 +930,7 @@ class CheckXTokenValidStream extends Transform {
 
             if (badNames.length > 0) {
                this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
-                  [attList.elementName, attDef.name, badNames.join(', ')], pToken.open);
+                  [ attList.elementName, attDef.name, badNames.join(', ') ], pToken.open);
             }
          }
       } else if (type === 'NOTATION') {
@@ -948,7 +943,7 @@ class CheckXTokenValidStream extends Transform {
 
             if (duplicates.length > 0) {
                this.pushValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION,
-                  [attList.elementName, attDef.name, duplicates.join(', ')], pToken.open);
+                  [ attList.elementName, attDef.name, duplicates.join(', ') ], pToken.open);
             }
          }
 
@@ -957,7 +952,7 @@ class CheckXTokenValidStream extends Transform {
          //    ... of an enumerated type (either a NOTATION type or an enumeration) must match one of the enumerated values.
          if (hasDefault && notationNames.indexOf(defaultText) === -1) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
-               [attList.elementName, attDef.name, notationNames.join(', '), defaultText], pToken.open);
+               [ attList.elementName, attDef.name, notationNames.join(', '), defaultText ], pToken.open);
          }
       } else if (attDef.type === 'ENUMERATION') {
          const enumerationNames: Array<string> = attDef.enumeration || [];
@@ -969,7 +964,7 @@ class CheckXTokenValidStream extends Transform {
 
             if (duplicates.length > 0) {
                this.pushValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
-                  [attList.elementName, attDef.name, duplicates.join(', ')], pToken.open);
+                  [ attList.elementName, attDef.name, duplicates.join(', ') ], pToken.open);
             }
          }
 
@@ -978,7 +973,7 @@ class CheckXTokenValidStream extends Transform {
          //    ... of an enumerated type (either a NOTATION type or an enumeration) must match one of the enumerated values.
          if (hasDefault && enumerationNames.indexOf(defaultText) === -1) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
-               [attList.elementName, attDef.name, enumerationNames.join(', '), defaultText], pToken.open);
+               [ attList.elementName, attDef.name, enumerationNames.join(', '), defaultText ], pToken.open);
          }
       }
    }
@@ -986,7 +981,7 @@ class CheckXTokenValidStream extends Transform {
    private checkAttributeValueForUnexpandedReferences(value: AttributeValueXToken, errorId: string, attrName: string, elementName: string, context?: SToken) {
       for (const element of value) {
          if (element.type === GENERAL_ENTITY_REFERENCE_XTOKEN || element.type === PARAMETER_ENTITY_REFERENCE_XTOKEN) {
-            this.pushValidityError(errorId, [(element as any).name, attrName, elementName], context);
+            this.pushValidityError(errorId, [ (element as any).name, attrName, elementName ], context);
          }
       }
    }
@@ -1019,7 +1014,7 @@ class CheckXTokenValidStream extends Transform {
       //    An element type must not be declared more than once.
       if (this.elementDeclarations[elDecl.name]) {
          this.pushValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
-            [elDecl.name], openSToken);
+            [ elDecl.name ], openSToken);
          return;
       }
 
@@ -1054,7 +1049,7 @@ class CheckXTokenValidStream extends Transform {
 
             if (!this.elementDeclarations[childName]) {
                this.pushWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
-                  [elDecl.name, childNames[index]], openSToken, undefined);
+                  [ elDecl.name, childNames[index] ], openSToken, undefined);
             }
          }
 
@@ -1074,7 +1069,7 @@ class CheckXTokenValidStream extends Transform {
             names.forEach((child: XName) => {
                if (childrenNames[child.name]) {
                   this.pushValidityError(ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
-                     [elDecl.name, child.name], openSToken);
+                     [ elDecl.name, child.name ], openSToken);
                }
 
                if (child.name && child.name.toLocaleUpperCase() !== '#PCDATA') {
@@ -1104,7 +1099,7 @@ class CheckXTokenValidStream extends Transform {
 
             if (cases.length > 0) {
                const wfe = new WellFormedError(WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
-                  [cases.join(',')], openSToken, undefined);
+                  [ cases.join(',') ], openSToken, undefined);
 
                this.push(wfe);
             }
@@ -1113,7 +1108,7 @@ class CheckXTokenValidStream extends Transform {
                token: elDecl,
                type: 'ELEMENT_CONTENT',
                externallyDeclared: this.externalDeclarations, // §2.9
-               graph
+               graph,
             };
          }
       }
@@ -1181,22 +1176,22 @@ class CheckXTokenValidStream extends Transform {
                if (insideContentSpec && entityDepth === 0 && topEntityRef) {
                   if (parenDepth !== 0) {
                      const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-                        [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
+                        [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
                      this.push(error);
                   }
-      
+
                   if (endedWithConnector) {
                      const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                        [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
+                        [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
                      this.push(warning);
                   }
-      
+
                   if (!sawNonWhite) {
                      const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                        [elName, topEntityRef.name!.str], topEntityRef.open, pToken.open); // typeHack
+                        [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
                      this.push(warning);
                   }
-      
+
                   sawNonWhite = false;
                   endedWithConnector = false;
                   topEntityRef = undefined;
@@ -1233,7 +1228,6 @@ class CheckXTokenValidStream extends Transform {
          let idCount = 0;
          let notationCount = 0;
 
-
          Object.keys(attList.attributes).forEach((name) => {
             const attrDef = attList.attributes[name].def;
 
@@ -1243,7 +1237,7 @@ class CheckXTokenValidStream extends Transform {
                idCount++;
 
                if (idCount > 1) {
-                  this.pushValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID, [elementType, attrDef.name], undefined);
+                  this.pushValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID, [ elementType, attrDef.name ], undefined);
 
                }
 
@@ -1266,7 +1260,7 @@ class CheckXTokenValidStream extends Transform {
 
                   if (!notationDecl) {
                      this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
-                        [elementType, attrDef.name, notationName], pToken.open);
+                        [ elementType, attrDef.name, notationName ], pToken.open);
                   }
                }
 
@@ -1276,7 +1270,7 @@ class CheckXTokenValidStream extends Transform {
 
                if (oneDotZeroRev2OrHigher && notationCount > 1) {
                   this.pushValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION,
-                     [elementType, attrDef.name], undefined);
+                     [ elementType, attrDef.name ], undefined);
                }
 
                // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element
@@ -1287,7 +1281,7 @@ class CheckXTokenValidStream extends Transform {
 
                   if (elementDecl && elementDecl.type === 'EMPTY_CONTENT') {
                      this.pushValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
-                        [elementType, attrDef.name], undefined);
+                        [ elementType, attrDef.name ], undefined);
                   }
                }
             }
@@ -1298,12 +1292,12 @@ class CheckXTokenValidStream extends Transform {
          if (genEntity.notationDataName) {
             const pTokenOpen = genEntity.pToken ? genEntity.pToken.open : undefined;
             const nDataName = genEntity.notationDataName;
-  
+
             // §4.2.2: Validity Constraint: Notation Declared
             // The Name must match the declared name of a notation.
             if (!this.notations[nDataName]) {
                this.pushValidityError(ValidityError.ID.ENTITYDECL_UNDECLARED_NOTATION,
-                  [genEntity.name, nDataName], pTokenOpen);
+                  [ genEntity.name, nDataName ], pTokenOpen);
             }
          }
       });
@@ -1318,7 +1312,7 @@ class CheckXTokenValidStream extends Transform {
          const pToken = idRefInfo.token.pToken && idRefInfo.token.pToken.open;
 
          this.pushValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
-            [idName, idRefInfo.token.name, idRefInfo.attrName], pToken, pToken);
+            [ idName, idRefInfo.token.name, idRefInfo.attrName ], pToken, pToken);
       });
    }
 
@@ -1383,7 +1377,7 @@ class CheckXTokenValidStream extends Transform {
                   //
                   if (this.standalone && attrInfo.externallyDeclared) {
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
-                        [elStart.name, attDefName], pTokenOpen);
+                        [ elStart.name, attDefName ], pTokenOpen);
                   }
 
                   attributesByName[attDefName] = newAttribute;
@@ -1407,13 +1401,13 @@ class CheckXTokenValidStream extends Transform {
 
             if (!attrDef) {
                this.pushValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [elStart.name, attrName], pTokenOpen);
+                  [ elStart.name, attrName ], pTokenOpen);
             } else if (attrDef.type === 'ID') {
                // §3.3.1: Validity constraint: ID
                //    Values of type ID must match the Name production.  ...
                if (!isName(attrText, this.confVer.version, this.confVer.revision)) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
-                     [attrText, elStart.name, attrName], pTokenOpen);
+                     [ attrText, elStart.name, attrName ], pTokenOpen);
                }
 
                // §3.3.1: Validity constraint: ID
@@ -1423,12 +1417,12 @@ class CheckXTokenValidStream extends Transform {
 
                if (previous.token) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-                     [attrText, elStart.name, attrName, previous.token.name, previous.attrName], pTokenOpen);
+                     [ attrText, elStart.name, attrName, previous.token.name, previous.attrName ], pTokenOpen);
                } else {
                   this.idValues[attrText] = {
                      token: elStart,
                      attrName: attrDef.name,
-                  }
+                  };
                }
 
                // §3.3.1: Validiatity Constraint: IDREF
@@ -1466,7 +1460,7 @@ class CheckXTokenValidStream extends Transform {
                   const code = attrDef.type === 'IDREF' ?
                      ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME :
                      ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME;
-                  this.pushValidityError(code, [badNames.join(', '), elStart.name, attrName], pTokenOpen);
+                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pTokenOpen);
                }
             } else if (attrDef.type === 'ENTITY' || attrDef.type === 'ENTITIES') {
                const names = attrDef.type === 'ENTITY' ? [ attrText ] : attrText.split(/ +/);// Can't happen once normalization happens
@@ -1485,7 +1479,7 @@ class CheckXTokenValidStream extends Transform {
                   const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME;
-                  this.pushValidityError(code, [badNames.join(', '), elStart.name, attrName], pTokenOpen);
+                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pTokenOpen);
                }
 
                const undeclared = [];
@@ -1504,7 +1498,7 @@ class CheckXTokenValidStream extends Transform {
 
                   if (this.isInvalidEntityReference(names[index])) {
                      this.pushValidityError(ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED, // @@ rename
-                        [names[index], attrName], pTokenOpen);
+                        [ names[index], attrName ], pTokenOpen);
                   }
                }
 
@@ -1512,14 +1506,14 @@ class CheckXTokenValidStream extends Transform {
                   const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_NO_ENTITY :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_NO_ENTITY;
-                  this.pushValidityError(code, [undeclared.join(', '), elStart.name, attrName], pTokenOpen);
+                  this.pushValidityError(code, [ undeclared.join(', '), elStart.name, attrName ], pTokenOpen);
                }
 
                if (parsed.length > 0) {
                   const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_PARSED_ENTITY :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_PARSED_ENTITY;
-                  this.pushValidityError(code, [parsed.join(', '), elStart.name, attrName], pTokenOpen);
+                  this.pushValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pTokenOpen);
                }
             } else if (attrDef.type === 'NMTOKEN' || attrDef.type === 'NMTOKENS') {
                const names = attrDef.type === 'NMTOKEN' ? [ attrText ] : attrText.split(/ +/).map(name => name.trim()).filter(name => name !== '');
@@ -1538,22 +1532,22 @@ class CheckXTokenValidStream extends Transform {
                   const code = attrDef.type === 'NMTOKEN' ?
                      ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN :
                      ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
-                  this.pushValidityError(code, [badNames.join(', '), elStart.name, attrName], pTokenOpen);
+                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pTokenOpen);
                }
             } else if (attrDef.type === 'NOTATION' || attrDef.type === 'ENUMERATION') {
-               let declaredNames = attrDef.enumeration || [];
+               const declaredNames = attrDef.enumeration || [];
 
                if (declaredNames.indexOf(attrText) === -1) {
                   if (attrDef.type === 'NOTATION') {
                      // §3.3.1: Validity Constraint: Notation Attributes
                      //    Values of this type must match one of the notation names included in the declaration; ...
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
-                        [attrText, elStart.name, attrName, declaredNames.join(', ')], pTokenOpen);
+                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pTokenOpen);
                   } else {
                      // §3.3.1: Validity Constraint: Enumeration
                      //    Values of this type must match one of the Nmtoken tokens in the declaration.
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
-                        [attrText, elStart.name, attrName, declaredNames.join(', ')], pTokenOpen);
+                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pTokenOpen);
                   }
                }
             }
@@ -1566,7 +1560,7 @@ class CheckXTokenValidStream extends Transform {
                const attrDefaultText = getAttributeValueText(attrDef);
                if (attrText !== attrDefaultText) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_FIXED_NOT_RIGHT,
-                     [elStart.name, attrName, attrDefaultText, attrText], pTokenOpen);
+                     [ elStart.name, attrName, attrDefaultText, attrText ], pTokenOpen);
                }
             }
          }
@@ -1580,7 +1574,7 @@ class CheckXTokenValidStream extends Transform {
 
             if (attributeNames.indexOf(requiredName) === -1) {
                this.pushValidityError(ValidityError.ID.ELEMENTSTART_NO_REQUIRED,
-                  [elStart.name, requiredName], pTokenOpen, pTokenOpen);
+                  [ elStart.name, requiredName ], pTokenOpen, pTokenOpen);
             }
          }
       }
@@ -1611,7 +1605,7 @@ class CheckXTokenValidStream extends Transform {
       }
 
       if (warningId) {
-         this.pushWarning(warningId, [elStart.name], pTokenOpen, pTokenOpen);
+         this.pushWarning(warningId, [ elStart.name ], pTokenOpen, pTokenOpen);
       }
    }
 }
@@ -1631,6 +1625,6 @@ function getNamesFromList(children: XNameList): NamesMap {
    }
 
    return childNames;
-};
+}
 
 export default CheckXTokenValidStream;

@@ -35,7 +35,7 @@ class SToken {
 
    static fromString(str: string) {
       return new SToken(str, str, new Range(new EntityId()));
-   };
+   }
 
    constructor(str: string, originalStr: string, range: Range | Array<Range>) {
       this.str = str;

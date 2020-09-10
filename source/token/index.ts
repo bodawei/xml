@@ -39,7 +39,6 @@ import { SpacePToken } from './space';
 import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
 import { ElementEndPToken } from './elementEnd';
 import { SToken } from 'sToken';
-import { TextDeclarationPToken } from './textDeclaration';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 export * from './entityDeclaration';
 
@@ -75,17 +74,16 @@ export * from './parameterEntityReference';
 export * from './processingInstruction';
 export * from './space';
 export * from './text';
-export * from './textDeclaration';
 
 import { EXTERNAL_ID, ExternalId, parseExternalId } from './common/externalId';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
 type XmlError = {
-   type: 'ERROR_TYPE',
-   subtype?: string,
-   id: string,
-   message: string,
+   type: 'ERROR_TYPE';
+   subtype?: string;
+   id: string;
+   message: string;
 }
 
 type PToken =
@@ -120,7 +118,6 @@ type PToken =
    | ProcessingInstructionPToken
    | SpacePToken
    | TextPToken
-   | TextDeclarationPToken
    ;
 
 import { ParseValue } from 'pToken';
@@ -164,7 +161,7 @@ export {
    parseAllUnassignedValues,
    parseAttListDeclaration,
    parseWordList,
-   
+
    declaration,
 
    attListDeclaration,

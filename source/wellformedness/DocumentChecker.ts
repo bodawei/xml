@@ -22,16 +22,16 @@ import { checkMap } from './checkMap';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
-type StateTable = {
+interface StateTable {
    [startState: string]: {
       [tokenType: string]: State | typeof NO_CHANGE;
    };
-};
+}
 
-type CheckerMap = {
+interface CheckerMap {
    content: CheckerConstructor;
    dtd: CheckerConstructor;
-};
+}
 
 enum State {
    START = 'START', // §2.1.0: Production [1]
@@ -87,12 +87,6 @@ const transitionsByState: StateTable = {
    },
 };
 
-enum EntityType {
-   DOCUMENT,
-   GENERAL,
-   PARAMETER,
-}
-
 /*
  * This checks the syntactic/well-formedness details of a document entity and the well-formedness
  * constraints of tokens within the document.
@@ -132,7 +126,7 @@ class DocumentChecker {
          pToken.checkWellFormed(specialErrorCollector, this.checkState.confVer);
          errorCollector.appendFrom(specialErrorCollector);
       } else if (pToken.type === 'CONDITIONAL_PTOKEN') {
-         checkConditionalStartWellFormed(pToken, errorCollector, this.checkState.confVer);
+         checkConditionalStartWellFormed(pToken, errorCollector);
       } else if (checkMap[pToken.type]) {
          checkMap[pToken.type](pToken, errorCollector, this.checkState.confVer);
       } else if ((pToken as any).checkWellFormed) {

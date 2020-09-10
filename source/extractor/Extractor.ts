@@ -17,7 +17,7 @@ type SegmentInfo = {
 type ExtractResult = {
    text: string;
    original: string;
-   segments: Array<SegmentInfo>
+   segments: Array<SegmentInfo>;
 }
 
 const LINE_ENDING_10_REGEX = /(\r\n)|(\r)/g;
@@ -37,7 +37,7 @@ enum ExtractorState {
 \**********************************************************************/
 
 class Extractor {
-   private lastProcessSawCr: boolean = false;
+   private lastProcessSawCr = false;
    protected version: number;
    protected text: Array<string>;
    protected normalizedText: Array<string>;
@@ -65,7 +65,7 @@ class Extractor {
          text: '',
          original: '',
       };
-   };
+   }
 
    protected processText(originalText: string, info: SegmentInfo) {
       // §2.11 This section does converson of line endings of various
@@ -137,5 +137,5 @@ export {
    ExtractResult,
    SegmentInfo,
    DoneSegment,
-   ExtractorState
+   ExtractorState,
 };

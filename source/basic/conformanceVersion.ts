@@ -21,7 +21,7 @@ class ConformanceVersion {
    constructor(verOrConfVer?: XmlVersion | ConformanceVersion, revision?: XmlRevision) {
       if (typeof verOrConfVer === 'number' || typeof verOrConfVer === 'undefined') {
          this.version = verOrConfVer || 1.0;
-         this.revision = revision || (this.version === 1  ? 5 : 2);
+         this.revision = revision || (this.version === 1 ? 5 : 2);
       } else {
          this.version = verOrConfVer.version;
          this.revision = verOrConfVer.revision;

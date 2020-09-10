@@ -50,12 +50,12 @@ class ElementDeclarationPToken extends declaration.PToken {
    public extra?: UnassignedArray;
    public nextPropName?: string;
 
-   constructor(props?: Object) {
+   constructor(props?: Record<string, any>) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ELEMENTDECL, props);
 
       if (props) {
-         this.peRefPlus = (props as any).peRefPlus || []
+         this.peRefPlus = (props as any).peRefPlus || [];
       } else {
          this.peRefPlus = [];
       }
@@ -219,7 +219,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorColle
 \**********************************************************************/
 
 function pTokenToXToken(pToken: ElementDeclarationPToken) {
-   let contentSpec: string = strOrBlank(pToken.contentSpec);   // We will introduce garbage here
+   let contentSpec: string = strOrBlank(pToken.contentSpec); // We will introduce garbage here
    let children: XNameList | void;
 
    if (pToken.children) {
@@ -228,7 +228,7 @@ function pTokenToXToken(pToken: ElementDeclarationPToken) {
    }
 
    return new ElementDeclaration(strOrBlank(pToken.name),
-   contentSpec, children, pToken);
+      contentSpec, children, pToken);
 }
 
 const elementDeclaration = {

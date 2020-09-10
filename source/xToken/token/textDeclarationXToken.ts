@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { TextDeclarationPToken } from 'token';
+import { TextDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 const DEFAULT_ENCODING = 'utf-8';

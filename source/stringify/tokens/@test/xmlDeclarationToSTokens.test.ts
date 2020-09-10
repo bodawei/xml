@@ -35,5 +35,4 @@ describe('xmlDeclarationToSTokens (unit)', () => {
 
       expect(entitySpy).toHaveBeenCalledWith(xmlDeclPToken);
    });
-
 });

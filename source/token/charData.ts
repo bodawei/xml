@@ -62,7 +62,7 @@ class CharDataPToken {
 \**********************************************************************/
 
 function parseCharData(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken|undefined) => void) {
-   let terminators = [ '<', '&', ']]>' ].concat(otherTerminators);
+   const terminators = [ '<', '&', ']]>' ].concat(otherTerminators);
 
    source.extract('all', terminators, (sToken) => {
       if (!sToken) {

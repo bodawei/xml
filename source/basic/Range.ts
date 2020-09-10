@@ -27,10 +27,15 @@ class Range {
    public readonly endRow: number;
    public readonly endColumn: number;
 
-   constructor(location: Offset | EntityId,
-      index: number = 0, row: number = 0, column: number = 0,
-      endIndex: number = 0, endRow: number = 0, endColumn: number = 0) {
-
+   constructor(
+      location: Offset | EntityId,
+      index = 0,
+      row = 0,
+      column = 0,
+      endIndex = 0,
+      endRow = 0,
+      endColumn = 0,
+   ) {
       if (location instanceof Offset) {
          this.entityId = location.entityId;
          this.startIndex = location.index;
@@ -51,32 +56,41 @@ class Range {
       this.endColumn = endColumn || 0;
    }
 
-   clone() {
-      return new Range(this.entityId, this.startIndex, this.startRow, this.startColumn,
-         this.endIndex, this.endRow, this.endColumn);
+   clone(): Range {
+      return new Range(
+         this.entityId,
+         this.startIndex,
+         this.startRow,
+         this.startColumn,
+         this.endIndex,
+         this.endRow,
+         this.endColumn,
+      );
    }
 
-   toString() {
+   toString(): string {
       return JSON.stringify(this);
    }
 
-   getStartOffset() {
+   getStartOffset(): Offset {
       return new Offset(this.entityId, this.startIndex, this.startRow, this.startColumn);
    }
 
-   getEndOffset() {
+   getEndOffset(): Offset {
       return new Offset(this.entityId, this.endIndex, this.endRow, this.endColumn);
    }
 
-   equals(other: Range) {
-      return this.entityId.systemId === other.entityId.systemId &&
+   equals(other: Range): boolean {
+      return (
+         this.entityId.systemId === other.entityId.systemId &&
          this.entityId.publicId === other.entityId.publicId &&
          this.startIndex === other.startIndex &&
          this.startRow === other.startRow &&
          this.startColumn === other.startColumn &&
          this.endIndex === other.endIndex &&
          this.endRow === other.endRow &&
-         this.endColumn === other.endColumn;
+         this.endColumn === other.endColumn
+      );
    }
 }
 

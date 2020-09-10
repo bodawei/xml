@@ -10,7 +10,7 @@ const VALIDITY_ERROR_SUBTYPE = 'VALIDITY_ERROR';
 const messages: MessageCache = {
    code: messagesAndStrings.code,
    message: new StringBundle(messagesAndStrings.message),
-}
+};
 
 /**********************************************************************\
  ValidityError holds inforamtion about a validity check error

@@ -1,12 +1,11 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { GeneralEntityReferencePToken } from "token";
-import { toSToken } from "sToken";
+import { GeneralEntityReferencePToken } from 'token';
+import { toSToken } from 'sToken';
 
-import { generalEntityReferenceToSTokens} from '../generalEntityReferenceToSTokens';
+import { generalEntityReferenceToSTokens } from '../generalEntityReferenceToSTokens';
 
 describe('toSTokenArray()', () => {
-
    it('returns all the STokens', () => {
       const gePToken = new GeneralEntityReferencePToken({
          open: toSToken('&'),
@@ -24,5 +23,4 @@ describe('toSTokenArray()', () => {
          gePToken.close!,
       ]);
    });
-
 });

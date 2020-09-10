@@ -23,7 +23,7 @@ describe('SimpleObjStream (integration)', () => {
       pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<two>2</two>1</one>');
       pTokenStream.endText();
 
-      objStream.on('data', (final: Object) => {
+      objStream.on('data', (final: Record<string, any>) => {
          const result = JSON.parse(JSON.stringify(final));
          expect(result).toEqual({
             type: 'one',
@@ -47,7 +47,7 @@ describe('SimpleObjStream (integration)', () => {
       pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>');
       pTokenStream.endText();
 
-      objStream.on('data', (final: Object) => {
+      objStream.on('data', (final: Record<string, any>) => {
          const result = JSON.parse(JSON.stringify(final));
          expect(result).toEqual({
             type: 'one',

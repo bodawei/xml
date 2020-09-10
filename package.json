@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.188.0",
+   "version": "0.188.2",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -8,7 +8,8 @@
    "private": true,
    "scripts": {
       "build:watch": "babel --no-babelrc --config-file ./build/babelrc-new.json5 --extensions '.ts' --watch 'source/**/*.ts' --out-dir ./temp/build/",
-      "check": "prettier --write  'source/expand/**/*.ts'",
+      "check": "prettier --write  'source/expand/**/*.ts' 'source/pToken/**/*.ts' 'source/wellformedness/**/*.ts' 'source/stringify/**/*.ts'",
+      "lint": "eslint --fix --config ./.eslintrc.json source/**/*.ts",
       "test": "xclap live",
       "test:cover": "xclap precommit",
       "test:node": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/new-jasmine.json' ",
@@ -36,6 +37,7 @@
       "babelify": "^10.0.0",
       "browserify": "^16.5.0",
       "browserify-istanbul": "^3.0.1",
+      "eslint-config-airbnb-base": "^14.2.0",
       "eslint-config-prettier": "^6.10.1",
       "eslint-plugin-prettier": "^3.1.2",
       "grunt": "1.0.4",

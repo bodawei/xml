@@ -13,7 +13,7 @@ class AttFixerStream extends Transform {
          objectMode: true,
       });
 
-      this.fixer = new AttFixer()
+      this.fixer = new AttFixer();
    }
 
    _transform(token: PToken, encoding: string, done: () => void): void {

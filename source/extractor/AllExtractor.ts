@@ -116,7 +116,7 @@ class AllExtractor extends Extractor {
 
    private addRemainderOfSegment(info: SegmentInfo): void {
       const segment: Segment = info.segment as Segment;
-      const remainderOfSegment = segment.text.substr(segment.index)
+      const remainderOfSegment = segment.text.substr(segment.index);
 
       this.processText(remainderOfSegment, info);
       segment.index = segment.text.length;
@@ -138,7 +138,7 @@ class AllExtractor extends Extractor {
             // Skip the first we passed in, as we already have it.
             result.segments.shift();
             // Add each of the remaining segments in a pristine state back to our list
-            for (let info of result.segments) {
+            for (const info of result.segments) {
                info.chars = 0;
                info.columns = 0;
                this.segInfo.push(info);
@@ -183,7 +183,7 @@ class AllExtractor extends Extractor {
 
    _addCharAndContinue(origSegment: Segment, info: SegmentInfo) {
       this.processText(origSegment.text[origSegment.index], info);
-      origSegment.index ++;
+      origSegment.index++;
    }
 
 }

@@ -2,8 +2,7 @@
 
 import { Transform } from 'stream';
 
-   
-import { XMLDECL_PTOKEN } from 'pToken';
+import { TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
 
 import {
    declaration,
@@ -38,7 +37,7 @@ import {
    PROCESSING_INSTRUCTION_PTOKEN,
    SPACE_PTOKEN,
    TEXT_PTOKEN,
-   TEXTDECL_PTOKEN,
+
    ELIDED_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
 
@@ -53,7 +52,7 @@ class PToXTokenStream extends Transform {
       });
    }
 
-   _transform(pToken: any, _: string, done: () => void) { // typeHack
+   _transform(pToken: any, encoding: string, done: () => void) { // typeHack
       switch (pToken.type) {
          case declaration.PTYPE:
             this.push(declaration.pTokenToXToken(pToken));
@@ -89,7 +88,7 @@ class PToXTokenStream extends Transform {
          case SPACE_PTOKEN:
          case TEXT_PTOKEN:
             this.push(pToken.toXToken());
-                           break;
+            break;
          case CHARREF_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:

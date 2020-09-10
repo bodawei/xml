@@ -13,7 +13,7 @@ const HEX_DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 \**********************************************************************/
 
 class DigitExtractor extends Extractor {
-   private foundDigit: boolean = false;
+   private foundDigit = false;
    private base: 10 | 16;
 
    constructor(version: number, base: 10 | 16) {

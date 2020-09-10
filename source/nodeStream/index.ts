@@ -5,5 +5,5 @@ import {EntityExpanderStream} from './EntityExpanderStream';
 export {
    AttFixerStream,
    CheckWellFormed,
-   EntityExpanderStream
+   EntityExpanderStream,
 };

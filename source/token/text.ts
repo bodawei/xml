@@ -105,5 +105,5 @@ export {
 
    parseText,
    isTextPToken,
-   isTextXToken
+   isTextXToken,
 };

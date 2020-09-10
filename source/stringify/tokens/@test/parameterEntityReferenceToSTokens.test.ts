@@ -1,10 +1,9 @@
-import { ParameterEntityReferencePToken } from "token";
-import { toSToken } from "sToken";
+import { ParameterEntityReferencePToken } from 'token';
+import { toSToken } from 'sToken';
 
-import { parameterEntityReferenceToSTokens} from '../parameterEntityReferenceToSTokens';
+import { parameterEntityReferenceToSTokens } from '../parameterEntityReferenceToSTokens';
 
 describe('toSTokenArray()', () => {
-
    it('returns all the STokens', () => {
       const pePToken = new ParameterEntityReferencePToken({
          open: toSToken('%'),
@@ -22,5 +21,4 @@ describe('toSTokenArray()', () => {
          pePToken.close!,
       ]);
    });
-
 });

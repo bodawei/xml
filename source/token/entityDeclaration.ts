@@ -82,7 +82,7 @@ function parseWordOrPERef(source: STokenSource, pToken: GeneralEntityDeclaration
          if (pToken.parameter && semicolon) {
             unassigned.parseAllValues(source, false, (values) => {
                const entityRef = new ParameterEntityReferencePToken({
-                  open: pToken.parameter!,  // typeHack
+                  open: pToken.parameter!, // typeHack
                   openSpace: pToken.parameterSpace,
                   name: pToken.name,
                   nameSpace: pToken.nameSpace,
@@ -90,7 +90,7 @@ function parseWordOrPERef(source: STokenSource, pToken: GeneralEntityDeclaration
                });
                (pToken as any).unassigned = values;
                (pToken as any).nextPropName = 'parameter';
-               (pToken.unassigned as any).unshift({  // typeHack
+               (pToken.unassigned as any).unshift({ // typeHack
                   type: 'reference',
                   token: entityRef,
                });

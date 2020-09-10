@@ -1,7 +1,7 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
-import { XmlDeclarationPToken } from 'pToken';
+import { TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import {
    CdataPToken,
@@ -17,7 +17,7 @@ import {
    GeneralEntityStartPToken,
    NotationDeclarationPToken,
    ProcessingInstructionPToken,
-   TextDeclarationPToken,
+   
    InternalSubsetStartToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,

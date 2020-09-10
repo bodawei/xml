@@ -17,7 +17,7 @@ type DeliverPToken = (pToken: ConditionalPToken) => void;
  a Conditional Section element
 \**********************************************************************/
 
-type ConditionalProps = {
+interface ConditionalProps {
    open?: SToken;
    openSpace?: SToken;
    sectionType?: SToken;
@@ -25,7 +25,7 @@ type ConditionalProps = {
    peRefPlus?: Array<ParameterEntityReferencePToken>;
    sectionTypeSpace?: SToken;
    bracket?: SToken;
-};
+}
 
 type ConditionalCore = ConditionalProps & {
    open: SToken;

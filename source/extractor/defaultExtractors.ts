@@ -17,7 +17,7 @@ type ExtractorConstructor = { new (...args: any[]): Extractor } ;
 type ExtractorDefinition = ExtractorConstructor | {
    extractorConstructor: ExtractorConstructor;
    params: ExtractorParams | {
-      extractorConstructor: ExtractorConstructor,
+      extractorConstructor: ExtractorConstructor;
    };
 };
 
@@ -66,4 +66,4 @@ export {
    ExtractorConstructor,
    ExtractorMap,
    defaultExtractors,
-}
+};

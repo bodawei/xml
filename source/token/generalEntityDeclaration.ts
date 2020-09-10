@@ -24,7 +24,7 @@ import { ExternalIdXToken } from 'xToken';
 const GENERAL_ENTITY_DECLARATION_PTOKEN = 'GENERAL_ENTITY_DECLARATION_PTOKEN';
 const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
 
-type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;  // @@ why are these PTokens?  And where did the text come from, and has it been scanned for chars?
+type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>; // @@ why are these PTokens?  And where did the text come from, and has it been scanned for chars?
 
 class GeneralEntityDeclarationXToken {
    public readonly type: typeof GENERAL_ENTITY_DECLARATION_XTOKEN = GENERAL_ENTITY_DECLARATION_XTOKEN;
@@ -69,7 +69,7 @@ class GeneralEntityDeclarationPToken {
    public readonly extra?: UnassignedArray;
    public readonly nextPropName?: string;
 
-   constructor(props: Object | DeclarationStart) {
+   constructor(props: Record<string, any> | DeclarationStart) {
       Object.assign(this, props);
 
       this.open = (props as any).open;
@@ -77,7 +77,7 @@ class GeneralEntityDeclarationPToken {
       this.type = GENERAL_ENTITY_DECLARATION_PTOKEN;
 
       if (props) {
-         this.peRefPlus = (props as any).peRefPlus || []
+         this.peRefPlus = (props as any).peRefPlus || [];
       } else {
          this.peRefPlus = [];
       }
@@ -133,9 +133,9 @@ function sTokensFromPToken(pToken: GeneralEntityDeclarationPToken): Array<SToken
       pToken.externalIdSpace,
       pToken.entityValueSpace,
       pToken.close,
-      );
+   );
 
-      // Where to unassigned go?
+   // Where to unassigned go?
 
    return builder.sTokenArray;
 }

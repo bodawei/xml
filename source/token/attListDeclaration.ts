@@ -30,7 +30,7 @@ type AttDefPToken = {
    postNameSpace?: SToken;
    type?: SToken;
    postTypeSpace?: SToken;
-   enumeration?: WordListPToken, // has its own post list space
+   enumeration?: WordListPToken; // has its own post list space
    defaultType?: SToken;
    postDefaultTypeSpace?: SToken;
    openQuote?: SToken;
@@ -65,7 +65,7 @@ class AttListPToken {
          this.attDefs = [];
       }
 
-      this.open = basePToken.open
+      this.open = basePToken.open;
       this.peRefPlus = basePToken.peRefPlus || [];
    }
 
@@ -133,7 +133,7 @@ function parseAttName(source: STokenSource, pToken: AttListPToken, done: Deliver
 
          const attDef = {
             name: attrName,
-            value: []
+            value: [],
          };
          pToken.attDefs.push(attDef);
 
@@ -264,7 +264,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, confV
    }
 
    const attNames: {
-      [name: string]: AttDefPToken,
+      [name: string]: AttDefPToken;
    } = {};
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
@@ -342,8 +342,8 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, confV
          ec.check(!attDef.openQuote, upperDefType === ''
             ? WFEID.ATTLISTDECL_ATTR_NO_VALUE
             : WFEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ attName, elNameText ]);
-       // @@@ need to check and complain if any entity refs are to external entities (general or parameter)
-       literal.checkWellFormed(attDef, ec, confVer, WFEID.NOUN_ATTRIBUTE);
+         // @@@ need to check and complain if any entity refs are to external entities (general or parameter)
+         literal.checkWellFormed(attDef, ec, confVer, WFEID.NOUN_ATTRIBUTE);
       } else {
          // wtf?
          ec.check(attDef.openQuote, WFEID.ATTLISTDECL_ATTR_EXTRA_VALUE, [ attName, elNameText ]);
@@ -404,7 +404,7 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
          xTokenAttrDef.enumeration = attDef.enumeration.toXToken();
       }
 
-      const result = literal.makeTokenCompatible(attDef)
+      const result = literal.makeTokenCompatible(attDef);
       if (result) {
          xTokenAttrDef.value = result;
       }

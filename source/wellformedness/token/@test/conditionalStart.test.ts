@@ -23,9 +23,11 @@ describe('checkWellFormed()', () => {
    });
 
    it('reports an error if an unknown type is provided', () => {
-      (conditionalPToken.sectionType as any) = toSToken('bogus'); // typehack
+      conditionalPToken = new ConditionalPToken(conditionalPToken, {
+         sectionType: toSToken('bogus'),
+      });
 
-      checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector, confVer);
+      checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CONDITIONAL_UNKNOWN,
@@ -36,9 +38,11 @@ describe('checkWellFormed()', () => {
    });
 
    it('reports an error if a type is the wrong case', () => {
-      (conditionalPToken.sectionType as any) = toSToken('ignore'); // typehack
+      conditionalPToken = new ConditionalPToken(conditionalPToken, {
+         sectionType: toSToken('ignore'),
+      });
 
-      checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector, confVer);
+      checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CONDITIONAL_INVALID_CASE,

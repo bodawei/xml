@@ -30,10 +30,10 @@ class Node {
             attr.value.forEach((tkn: any) => {
                switch (tkn.type) {
                   case TEXT_XTOKEN:
-                     value = value + tkn.text;
+                     value += tkn.text;
                      break;
                   case CHARREF_XTOKEN:
-                     value = value + tkn.text;
+                     value += tkn.text;
                      break;
                }
             });

@@ -1,7 +1,7 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
-import { strOrBlank, SToken } from 'sToken';
-import { PToken, ParseValue } from 'pToken';
+import { strOrBlank } from 'sToken';
+import { ParseValue } from 'pToken';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -13,23 +13,23 @@ import {
 } from 'token';
 import { AttributePToken } from 'source/token/common/attribute';
 
-type GeneralEntitiesInfo = {
+interface GeneralEntitiesInfo {
    [name: string]: {
       token: GeneralEntityDeclarationPToken;
       declaredInInternalSubset: boolean;
    };
-};
+}
 
-type ParameterEntitiesInfo = {
+interface ParameterEntitiesInfo {
    [name: string]: ParameterEntityDeclarationPToken;
-};
+}
 
-type EntityInfo = {
+interface EntityInfo {
    generalDecls: GeneralEntitiesInfo;
    paramDecls: ParameterEntitiesInfo;
    hasAllDecls: boolean;
    peRefCount: number;
-};
+}
 
 interface CheckerConstructor {
    new (checkState: CheckState, geContext: Array<string>): Checker;

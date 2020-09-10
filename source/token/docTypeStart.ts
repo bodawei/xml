@@ -30,7 +30,7 @@ const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
  be in the case that there is no internal subset.
 \**********************************************************************/
 
-type PreToken = { open: SToken, [ other: string ]: any };
+type PreToken = { open: SToken; [ other: string ]: any };
 
 class DocTypeStartXToken {
    public readonly type: typeof DOCTYPE_START_XTOKEN = DOCTYPE_START_XTOKEN;

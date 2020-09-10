@@ -6,8 +6,8 @@ import * as tokenNs from 'token';
 import { ElementDeclaration, isXName } from '../token/elementDeclaration';
 import nameList, { XName, XNameList } from '../token/contentspec/nameList';
 
-const ATTR_TYPES = ['CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION'];
-const DEFAULT_TYPES = ['#FIXED', '#REQUIRED', '#IMPLIED'];
+const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
+const DEFAULT_TYPES = [ '#FIXED', '#REQUIRED', '#IMPLIED' ];
 
 /**********************************************************************\
  A simple stream that forces malformed XTokens to be correct.
@@ -36,7 +36,6 @@ class FixingStream extends Transform {
       } else if (token instanceof tokenNs.elementDeclaration.XToken) {
          adjustElementDeclaration(token);
       }
-
 
       this.push(token);
 
@@ -79,7 +78,7 @@ function adjustAttListDeclaration(token: any) {
  *  - If this is Mixed (first item is #PCDATA) flatten any hierarchical items,
  *    make sure it is a CHOICE list, and the repeat is correct.
  */
-const ALLOWED_CONTENT_SPEC_TYPES = ['ANY', 'EMPTY', 'CHILDREN'];
+const ALLOWED_CONTENT_SPEC_TYPES = [ 'ANY', 'EMPTY', 'CHILDREN' ];
 
 function adjustElementDeclaration(token: ElementDeclaration) {
    const contentSpecType = token.contentSpecType || '';

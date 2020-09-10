@@ -8,8 +8,8 @@ const ERROR_TYPE = 'ERROR_TYPE';
 type Position = SToken | Offset | void;
 
 type MessageCache = {
-   code: { [id: string]: number },
-   message: StringBundle,
+   code: { [id: string]: number };
+   message: StringBundle;
 };
 
 /**********************************************************************\
@@ -39,12 +39,12 @@ type MessageCache = {
     references &bar; and &bar; references %badName;, this should
     be "badName". If a SToken is specified, its startOffset will
     be used.
-    
+
  Most properties are identical to their construction parameters.
  The context property, however, will initially be an array (either
  empty or with the contextOffset). Other parts of the system may
  add in other contexts in the chain of references that lead to this
- error. 
+ error.
 \**********************************************************************/
 
 class BaseError {

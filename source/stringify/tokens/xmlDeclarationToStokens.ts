@@ -5,7 +5,6 @@ import { XmlDeclarationPToken } from 'pToken';
 
 import { sTokensFromPToken } from '../../token/common/entityInstruction';
 
-
 function xmlDeclarationToSTokens(pToken: XmlDeclarationPToken): Array<SToken> {
    return sTokensFromPToken(pToken);
 }

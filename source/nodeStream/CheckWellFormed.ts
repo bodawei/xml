@@ -2,9 +2,9 @@
 
 import { Transform } from 'stream';
 
-import { ErrorCollector, WellFormedError, } from 'error';
-import { SToken, } from 'sToken';
-import { getFirstSToken, PToken, } from 'token';
+import { ErrorCollector, WellFormedError } from 'error';
+import { SToken } from 'sToken';
+import { getFirstSToken, PToken } from 'token';
 import { ContentChecker, DocumentChecker, MarkupDeclChecker } from 'wellformedness';
 
 /*
@@ -64,7 +64,7 @@ class CheckWellFormed extends Transform {
 
       const errors = errorCollector.getErrors();
 
-      for (let error of errors) {
+      for (const error of errors) {
          this.push(error);
       }
 
@@ -78,7 +78,7 @@ class CheckWellFormed extends Transform {
 
       const errors = errorCollector.getErrors();
 
-      for (let error of errors) {
+      for (const error of errors) {
          this.push(error);
       }
 

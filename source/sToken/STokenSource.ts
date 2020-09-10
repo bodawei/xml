@@ -84,11 +84,11 @@ class STokenSource {
    public _segments: Array<Segment>;
    public _extractors: Array<ExtractorContext>;
    private _lastOffset?: Offset;
-   private _allTextAdded: boolean = false;
+   private _allTextAdded = false;
    private _orphanedRange?: Range;
    private _resuming?: boolean;
 
-   constructor(extractorInfo: ExtractorMap, entityId?: EntityId ) {
+   constructor(extractorInfo: ExtractorMap, entityId?: EntityId) {
       this.errors = [];
       this.entityId = entityId || new EntityId();
       this.confVer = new ConformanceVersion();
@@ -138,11 +138,11 @@ class STokenSource {
       this._resumeOperation();
    }
 
-   extractToObjectNoParams(type: string, obj: Object, name: string): void {
+   extractToObjectNoParams(type: string, obj: Record<string, any>, name: string): void {
       this.extractToObject(type, undefined, obj, name);
    }
 
-   extractToObject(type: string, params: any, obj: Object, name: string): void {
+   extractToObject(type: string, params: any, obj: Record<string, any>, name: string): void {
       this.extract(type, params, (sToken) => {
          (obj as any)[name] = sToken; // typeHack
       });
@@ -265,7 +265,7 @@ class STokenSource {
       const ranges = [];
       // this._lastOffset can't be undefined, since it is set as soon as text is added,
       // and we won't have ranges to compute if no text has been adde
-      let currentRange = new Range(this._lastOffset!);  // start off where we left off
+      let currentRange = new Range(this._lastOffset!); // start off where we left off
 
       // Just iterate through the segInfos, and accumulate the chars consumed
       for (let index = 0; index < segInfos.length; index++) {

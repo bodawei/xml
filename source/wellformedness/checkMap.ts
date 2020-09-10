@@ -2,7 +2,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
-import { XMLDECL_PTOKEN } from 'pToken';
+import { TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../token/parameterEntityReference'; // WTF?
 import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference'; // WTF?
@@ -11,6 +11,7 @@ import { CHARREF_PTOKEN } from '../token/charRef'; // WTF?
 import { charRefCheck } from './token/charRefCheck';
 import { parameterEntityReferenceCheck } from './token/parameterEntityReferenceCheck';
 import { generalEntityReferenceCheck } from './token/generalEntityReferenceCheck';
+import { textDeclarationCheck } from './token/textDeclarationCheck';
 import { xmlDeclarationCheck } from './token/xmlDeclarationCheck';
 
 interface CheckMap {
@@ -25,6 +26,7 @@ const checkMap: CheckMap = {
    [CHARREF_PTOKEN]: charRefCheck,
    [GENERAL_ENTITY_REFERENCE_PTOKEN]: generalEntityReferenceCheck,
    [PARAMETER_ENTITY_REFERENCE_PTOKEN]: parameterEntityReferenceCheck,
+   [TEXTDECL_PTOKEN]: textDeclarationCheck,
    [XMLDECL_PTOKEN]: xmlDeclarationCheck,
 };
 

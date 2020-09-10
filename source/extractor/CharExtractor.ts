@@ -13,7 +13,7 @@ import Segment from './Segment';
 \**********************************************************************/
 
 class CharExtractor extends Extractor {
-   private foundCR: boolean = false;
+   private foundCR = false;
 
    process(segment: Segment): void {
       const info = this.makeInfo(segment);
@@ -53,7 +53,7 @@ class CharExtractor extends Extractor {
    _incrementSegment(segment: Segment, info: SegmentInfo, foundChar: string): void {
       // do not increment if no character
       if (foundChar) {
-         segment.index ++;
+         segment.index++;
       }
 
       if (segment.atEnd()) {
@@ -68,7 +68,7 @@ class CharExtractor extends Extractor {
 
       if (candidate === '\n' || (candidate === '\u0085' && this.version === 1.1)) {
          this.text.push(candidate);
-         info.chars ++;
+         info.chars++;
          this._incrementSegment(segment, info, candidate);
       }
    }

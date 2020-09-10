@@ -17,8 +17,8 @@ const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken: NotationDeclarationPToken) => void;
 type ProtoToken = DeclarationStart & {
-   type: string,
-   [key: string] : any,
+   type: string;
+   [key: string]: any;
 };
 
 /**********************************************************************\
@@ -135,7 +135,6 @@ function getClose(source: STokenSource, protoToken: ProtoToken, deliverPToken: D
       deliverPToken(new NotationDeclarationPToken(protoToken));
    });
 }
-
 
 /**********************************************************************\
  checkWellFormed() does check on validity
