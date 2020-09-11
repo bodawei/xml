@@ -216,7 +216,7 @@ describe('literal (unit)', () => {
       });
 
       it('copes with no quoted value at all', () => {
-         delete literalPToken.value;
+         delete (literalPToken as any).value;
          const result = literal.makeTokenCompatible(literalPToken);
 
          expect(result).toEqual(undefined);

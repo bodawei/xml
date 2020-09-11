@@ -39,24 +39,4 @@ describe('processingInstruction (integration)', () => {
 
    });
 
-   describe('checkWellFormed()', () => {
-
-      it('asks the instruction module report if there is an extra space', (done) => {
-         (piPToken as any).openSpace = SToken.fromString(' '); // typeHack
-         const source = new STokenSource(defaultExtractors);
-         source.addText('blah blah?>');
-         source.endText();
-
-         parseProcessingInstruction(source, piPToken as any, (pToken) => {
-            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
-
-            pToken.checkWellFormed(ec, new ConformanceVersion());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_AFTER_OPEN);
-            done();
-         });
-      });
-
-   });
-
 });

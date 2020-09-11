@@ -6,14 +6,16 @@ import {
    CHARREF_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   PROCESSING_INSTRUCTION_PTOKEN,
 } from 'token';
 
 import { CharRefXToken } from './token/CharRefXToken';
+import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
+import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
-import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 
 function convertPTokenToXToken(pToken: ParseValue): XToken {
    switch (pToken.type) {
@@ -23,6 +25,8 @@ function convertPTokenToXToken(pToken: ParseValue): XToken {
          return new GeneralEntityReferenceXToken(pToken);
       case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          return new ParameterEntityReferenceXToken(pToken);
+      case PROCESSING_INSTRUCTION_PTOKEN:
+         return new ProcessingInstructionXToken(pToken);
       case TEXTDECL_PTOKEN:
          return new TextDeclarationXToken(pToken);
       case XMLDECL_PTOKEN:

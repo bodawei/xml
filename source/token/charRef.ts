@@ -21,14 +21,23 @@ interface MutableCharRefPToken {
 
 class CharRefPToken {
    public readonly type: typeof CHARREF_PTOKEN = CHARREF_PTOKEN;
+
    public readonly open: SToken;
+
    public readonly openSpace?: SToken;
+
    public readonly hexMarker?: SToken;
+
    public readonly hexMarkerSpace?: SToken;
+
    public readonly digits?: SToken;
+
    public readonly digitsSpace?: SToken;
+
    public readonly close?: SToken;
+
    public readonly charCode: number;
+
    public readonly char: string;
 
    constructor(basePToken: CharRefPToken | MutableCharRefPToken, extras?: MutableCharRefPToken) {

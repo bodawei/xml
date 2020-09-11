@@ -28,9 +28,4 @@ function conditionalSectionPTokenToXToken(pToken: ConditionalPToken) {
    return token;
 }
 
-export {
-   CONDITIONAL_XTOKEN,
-   ConditionalXToken,
-
-   conditionalSectionPTokenToXToken,
-};
+export { CONDITIONAL_XTOKEN, ConditionalXToken, conditionalSectionPTokenToXToken };

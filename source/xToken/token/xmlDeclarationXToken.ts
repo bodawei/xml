@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { XmlDeclarationPToken } from "pToken";
-import { strOrBlank } from "sToken";
+import { XmlDeclarationPToken } from 'pToken';
+import { strOrBlank } from 'sToken';
 
 const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';
 
@@ -16,8 +16,18 @@ class XmlDeclarationXToken {
    public pToken?: XmlDeclarationPToken;
 
    constructor(pToken: XmlDeclarationPToken);
-   constructor(version: XmlVersion, encoding?: string, standalone?: boolean, pToken?: XmlDeclarationPToken);
-   constructor(versionOrPToken: XmlVersion | XmlDeclarationPToken, encoding?: string, standalone?: boolean, pToken?: XmlDeclarationPToken) {
+   constructor(
+      version: XmlVersion,
+      encoding?: string,
+      standalone?: boolean,
+      pToken?: XmlDeclarationPToken,
+   );
+   constructor(
+      versionOrPToken: XmlVersion | XmlDeclarationPToken,
+      encoding?: string,
+      standalone?: boolean,
+      pToken?: XmlDeclarationPToken,
+   ) {
       this.version = 1.0;
       this.encoding = encoding || DEFAULT_ENCODING;
       this.standalone = standalone || false;
@@ -27,13 +37,13 @@ class XmlDeclarationXToken {
          this.pToken = pToken;
          return;
       }
-      
+
       this.pToken = versionOrPToken;
 
       for (const param of versionOrPToken.params) {
          const name = strOrBlank(param.name);
          const value = strOrBlank(param.value);
-   
+
          switch (name.toLowerCase()) {
             case 'version':
                this.version = value === '1.1' ? 1.1 : 1.0;
@@ -46,10 +56,7 @@ class XmlDeclarationXToken {
                break;
          }
       }
-   }  
+   }
 }
 
-export {
-   XMLDECL_XTOKEN,
-   XmlDeclarationXToken,
-}
+export { XMLDECL_XTOKEN, XmlDeclarationXToken };

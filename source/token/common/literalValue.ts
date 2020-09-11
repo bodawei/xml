@@ -12,7 +12,6 @@ import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken } from 'xToken';
-import { checkMap } from 'source/wellformedness/checkMap';
 import { generalEntityReferenceToSTokens } from 'source/stringify/tokens/generalEntityReferenceToSTokens';
 
 // <typeHack>
@@ -26,6 +25,8 @@ type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
 type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
 type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
+
+let checkMap: { [typeName: string]: (item: any, ec: ErrorCollector, confVer: ConformanceVersion) => void };
 
 /**********************************************************************\
  This the value part of an literal value (that is, the text between
@@ -109,6 +110,10 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
 \**********************************************************************/
 
 function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, confVer: ConformanceVersion) {
+   if (!checkMap) {
+      ({ checkMap } = require('source/wellformedness/checkMap'));
+   }
+
    for (let index = 0; index < pToken.length; index++) {
       const item = pToken[index];
 

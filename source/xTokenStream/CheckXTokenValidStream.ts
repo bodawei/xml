@@ -36,7 +36,6 @@ import {
    ELEMENT_EMPTY_XTOKEN,
    ELEMENT_END_XTOKEN,
    ELEMENT_START_XTOKEN,
-   PROCESSING_INSTRUCTION_XTOKEN,
 
    SPACE_XTOKEN,
 
@@ -50,7 +49,7 @@ import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclarat
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import { UnassignedType } from 'source/token/common/unassigned';
-import { CHARREF_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN, TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
+import { CHARREF_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'source/xToken/token/generalEntityReferenceXToken';
 
 type XToken = {

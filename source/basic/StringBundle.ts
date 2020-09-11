@@ -39,6 +39,7 @@ function unescapeBraces(message: string): string {
 
 class StringBundle {
    public preferredLocale: string;
+
    private locales: LocaleMap;
 
    constructor(locales: LocaleMap) {

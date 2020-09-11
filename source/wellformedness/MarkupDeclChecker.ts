@@ -320,15 +320,21 @@ function checkDeclaration(
  */
 class MarkupDeclChecker implements Checker {
    private state: States = States.PRE;
+
    private start!:
       | InternalSubsetStartToken
       | ExternalSubsetStartToken
       | ParameterEntityStartPToken
       | ConditionalPToken;
+
    private inExternalSubset = false;
+
    private checkState: CheckState;
+
    private embeddedChecker?: MarkupDeclChecker;
+
    private peContext: Array<string>;
+
    private declsSeen: DeclarationInfo;
 
    public constructor(checkState: CheckState, peContext: Array<string>, inExternalSubset = false) {

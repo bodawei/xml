@@ -4,7 +4,7 @@
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../bridge/instruction';
 import * as entityInstr from '../../../token/common/entityInstruction';
 
 import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';

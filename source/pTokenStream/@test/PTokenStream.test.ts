@@ -4,8 +4,10 @@
 import { CONFORMANCE_VERSION, ENTITY_ID, Range } from 'basic';
 import { gatherPTokens } from 'pToken-test';
 import { SToken, STokenSource } from 'sToken';
-import * as tokenStuff from 'token';
 import { DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN, CHARDATA_PTOKEN, CharDataPToken } from 'token';
+
+import * as pTokenStuff from 'pToken';
+import * as tokenStuff from 'token';
 
 import PTokenStream from '../PTokenStream';
 import { ParseValue, PToken, ContextType } from 'pToken';
@@ -389,7 +391,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseInstruction()', (done) => {
-      const parseSpy = spyOn(tokenStuff, 'parseInstruction').and.callThrough();
+      const parseSpy = spyOn(pTokenStuff, 'parseInstruction').and.callThrough();
       pTokenStream.addText('<?something foo?>');
       pTokenStream.endText();
 

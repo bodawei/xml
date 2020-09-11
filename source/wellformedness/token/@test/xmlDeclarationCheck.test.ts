@@ -8,7 +8,7 @@ import { toSToken } from 'sToken';
 
 import * as misc from '../../../token/common/misc';
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 import { ConformanceVersion } from 'basic';
 
 describe('xmlDeclarationCheck() (unit)', () => {

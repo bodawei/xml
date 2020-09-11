@@ -1,8 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
-import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
+import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
+import { TextDeclarationXToken } from './token/textDeclarationXToken';
+import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/ParameterEntityReferenceXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 
@@ -17,16 +18,16 @@ import {
    ElementEndXToken,
    ElementStartXToken,
    NotationDeclarationXToken,
-   ProcessingInstructionXToken,
    SpaceXToken,
 } from 'token';
 
 type XToken =
-   | TextDeclarationXToken
-   | XmlDeclarationXToken
    | CharRefXToken
    | GeneralEntityReferenceXToken
    | ParameterEntityReferenceXToken
+   | ProcessingInstructionXToken
+   | TextDeclarationXToken
+   | XmlDeclarationXToken
    // additions
    | CharDataXToken
    | CdataXToken
@@ -36,7 +37,6 @@ type XToken =
    | ElementEndXToken
    | ElementStartXToken
    | NotationDeclarationXToken
-   | ProcessingInstructionXToken
    | SpaceXToken;
 
 export { XToken };

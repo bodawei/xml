@@ -24,13 +24,6 @@ interface ParameterEntitiesInfo {
    [name: string]: ParameterEntityDeclarationPToken;
 }
 
-interface EntityInfo {
-   generalDecls: GeneralEntitiesInfo;
-   paramDecls: ParameterEntitiesInfo;
-   hasAllDecls: boolean;
-   peRefCount: number;
-}
-
 interface CheckerConstructor {
    new (checkState: CheckState, geContext: Array<string>): Checker;
 }
@@ -46,12 +39,18 @@ const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 class CheckState {
    public confVer: ConformanceVersion = new ConformanceVersion();
+
    public generalDecls: GeneralEntitiesInfo = {};
+
    public paramDecls: ParameterEntitiesInfo = {};
+
    // public hasAllDecls: boolean = true; // if not validating, a peref got in the way.
    public peRefCount = 0;
+
    public isStandalone = false;
+
    public hasNoDTD = false;
+
    public hasExternalDTD = false;
 }
 

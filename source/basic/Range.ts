@@ -20,11 +20,17 @@ import Offset from './Offset';
 
 class Range {
    public readonly entityId: EntityId;
+
    public readonly startIndex: number;
+
    public readonly startRow: number;
+
    public readonly startColumn: number;
+
    public readonly endIndex: number;
+
    public readonly endRow: number;
+
    public readonly endColumn: number;
 
    constructor(

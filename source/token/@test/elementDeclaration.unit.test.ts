@@ -93,7 +93,7 @@ describe('elementDeclaration (unit)', () => {
 
       it('does a parse of an element declaration with a non-list content spec', () => {
          // delete the things that our mocking of declaration will not return
-         delete elementPToken.open;
+         delete (elementPToken as any).open;
          delete elementPToken.postOpenSpace;
          delete elementPToken.declType;
          delete elementPToken.postDeclTypeSpace;
@@ -114,7 +114,7 @@ describe('elementDeclaration (unit)', () => {
 
       it('does a parse of an element declaration that ends early', () => {
          // delete the things that our mocking of declaration will not return
-         delete elementPToken.open;
+         delete (elementPToken as any).open;
          delete elementPToken.postOpenSpace;
          delete elementPToken.declType;
          delete elementPToken.postDeclTypeSpace;

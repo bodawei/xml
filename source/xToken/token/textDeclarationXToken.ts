@@ -16,10 +16,14 @@ class TextDeclarationXToken {
 
    constructor(pToken: TextDeclarationPToken);
    constructor(version: XmlVersion, encoding?: string, pToken?: TextDeclarationPToken);
-   constructor(versionOrPToken: XmlVersion | TextDeclarationPToken, encoding?: string, pToken?: TextDeclarationPToken) {
+   constructor(
+      versionOrPToken: XmlVersion | TextDeclarationPToken,
+      encoding?: string,
+      pToken?: TextDeclarationPToken,
+   ) {
       this.version = 1.0;
       this.encoding = encoding || DEFAULT_ENCODING;
-      
+
       if (typeof versionOrPToken === 'number') {
          this.version = versionOrPToken;
          this.pToken = pToken;
@@ -27,11 +31,11 @@ class TextDeclarationXToken {
       }
 
       this.pToken = versionOrPToken;
-   
+
       for (const param of versionOrPToken.params) {
          const name = strOrBlank(param.name);
          const value = strOrBlank(param.value);
-   
+
          switch (name.toLowerCase()) {
             case 'version':
                this.version = value === '1.1' ? 1.1 : 1.0;
@@ -41,7 +45,6 @@ class TextDeclarationXToken {
                break;
          }
       }
-   
    }
 }
 

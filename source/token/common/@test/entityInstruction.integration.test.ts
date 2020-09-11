@@ -5,7 +5,7 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import { parseEntityInstruction } from '../entityInstruction';
-import { InstructionStart } from '../../bridge/instruction';
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 describe('entityInstruction (integration)', () => {
 

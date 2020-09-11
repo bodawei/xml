@@ -43,7 +43,6 @@ import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 export * from './entityDeclaration';
 
 export * from './bridge/declaration';
-export * from './bridge/instruction';
 export * from './bridge/section';
 
 export * from './marker/externalSubsetEnd';

@@ -5,7 +5,7 @@ import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { XmlDeclarationPToken, parseXmlDeclaration, xmlDeclIsStandalone } from '../xmlDeclaration';
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../bridge/instruction';
 import * as entityInstr from '../../../token/common/entityInstruction';
 
 describe('xmlDeclaration (unit)', () => {

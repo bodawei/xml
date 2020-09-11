@@ -98,10 +98,15 @@ const transitionsByState: StateTable = {
  */
 class ContentChecker implements Checker {
    private state: State;
+
    private start!: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
+
    private elementNameStack: Array<string> = [];
+
    private embeddedChecker?: ContentChecker;
+
    private checkState: CheckState;
+
    private geContext: Array<string>;
 
    constructor(checkState: CheckState, geContext: Array<string>) {

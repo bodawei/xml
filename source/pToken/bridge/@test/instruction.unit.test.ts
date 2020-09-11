@@ -5,9 +5,8 @@ import { EntityId, Range } from 'basic';
 import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import * as pi from '../../processingInstruction';
-import * as textDeclaration from '../../../pToken/token/textDeclaration';
-import * as xmlDeclaration from '../../../pToken/token/xmlDeclaration';
+import * as pTokenThings from 'pToken';
+import * as pi from '../../../token/processingInstruction';
 import { parseInstruction } from '../instruction';
 
 describe('instruction (unit)', () => {
@@ -27,9 +26,9 @@ describe('instruction (unit)', () => {
       it('does a basic parse of a processing instruction', () => {
          const piParse = spyOn(pi, 'parseProcessingInstruction');
          const mockSource = new MockSTokenSource([
-            [ undefined, 'space' ],
-            [ undefined, 'word', [ '?>' ] ],
-            [ undefined, 'space' ],
+            [undefined, 'space'],
+            [undefined, 'word', ['?>']],
+            [undefined, 'space'],
          ]);
 
          parseInstruction(mockSource, open, true, callback);
@@ -48,11 +47,11 @@ describe('instruction (unit)', () => {
 
       it('does a basic parse of an xml declaration', () => {
          const mockSource = new MockSTokenSource([
-            [ undefined, 'space' ],
-            [ 'xml', 'word', [ '?>' ] ],
-            [ undefined, 'space' ],
-            [ undefined, 'peekWord' ],
-            [ '?>', 'match' ],
+            [undefined, 'space'],
+            ['xml', 'word', ['?>']],
+            [undefined, 'space'],
+            [undefined, 'peekWord'],
+            ['?>', 'match'],
          ]);
 
          parseInstruction(mockSource, open, true, callback);
@@ -69,11 +68,11 @@ describe('instruction (unit)', () => {
       });
 
       it('does a basic parse of an text declaration', () => {
-         const textParse = spyOn(textDeclaration, 'parseTextDeclaration');
+         const textParse = spyOn(pTokenThings, 'parseTextDeclaration');
          const mockSource = new MockSTokenSource([
-            [ '\t', 'space' ],
-            [ 'xml', 'word', [ '?>' ] ],
-            [ ' ', 'space' ],
+            ['\t', 'space'],
+            ['xml', 'word', ['?>']],
+            [' ', 'space'],
          ]);
 
          parseInstruction(mockSource, open, false, callback);
@@ -89,7 +88,5 @@ describe('instruction (unit)', () => {
          });
          expect(args[2]).toBeInstanceOf(Function);
       });
-
    });
-
 });

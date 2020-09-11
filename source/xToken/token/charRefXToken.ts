@@ -1,6 +1,5 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { extractSurrogatePair } from 'basic';
 import { CharRefPToken } from 'token';
 
 const CHARREF_XTOKEN = 'CHARREF_XTOKEN';
@@ -21,6 +20,5 @@ class CharRefXToken {
       }
    }
 }
-
 
 export { CHARREF_XTOKEN, CharRefXToken };

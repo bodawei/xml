@@ -1,13 +1,13 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { XToken, CHARREF_XTOKEN, XMLDECL_XTOKEN, ExternalIdXToken } from 'xToken';
+import { XToken, CHARREF_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,
+   XMLDECL_XTOKEN, ExternalIdXToken } from 'xToken';
 import {
    SPACE_XTOKEN,
    DOCTYPE_START_XTOKEN,
    NOTATION_DECLARATION_XTOKEN,
    DOCTYPE_END_XTOKEN,
-   PROCESSING_INSTRUCTION_XTOKEN,
    ELEMENT_EMPTY_XTOKEN,
    ELEMENT_START_XTOKEN,
    ELEMENT_END_XTOKEN,

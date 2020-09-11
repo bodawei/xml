@@ -2,10 +2,13 @@
 
 export * from './token/charRefXToken';
 export * from './token/generalEntityReferenceXToken';
+export * from './token/processingInstructionXToken';
 export * from './token/parameterEntityReferenceXToken';
 export * from './token/conditionalClose';
 export * from './token/conditionalSection';
 export * from './token/externalIdXToken';
+
+// Fully converted
 export * from './token/textDeclarationXToken';
 export * from './token/xmlDeclarationXToken';
 export * from './types';

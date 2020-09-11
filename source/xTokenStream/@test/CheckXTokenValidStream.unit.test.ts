@@ -11,7 +11,6 @@ import nameList from '../../token/contentspec/nameList';
 import {
    attListDeclaration,
    elementDeclaration,
-   ProcessingInstructionXToken,
 
    SPACE_XTOKEN,
 
@@ -48,7 +47,7 @@ import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elemen
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import { TextXToken, TextPToken } from 'source/token/text';
 import { UnassignedType } from 'source/token/common/unassigned';
-import { CharRefXToken, ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
+import { CharRefXToken, ParameterEntityReferenceXToken,    ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
 import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
 import { makeDocTypeEnd } from 'token-test';
 

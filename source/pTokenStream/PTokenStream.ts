@@ -4,7 +4,7 @@ import { Readable } from 'stream';
 
 import { CONFORMANCE_VERSION, ConformanceVersion, XmlVersion, XmlRevision, EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { ParseValue } from 'pToken';
+import { ParseValue,   parseInstruction, } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    ELEMENT_END_PTOKEN,
@@ -19,7 +19,6 @@ import {
    parseElementEnd,
    parseElementStart,
    parseGeneralEntityReference,
-   parseInstruction,
    parseParameterEntityReference,
    parseSpace,
    ELEMENT_START_PTOKEN,

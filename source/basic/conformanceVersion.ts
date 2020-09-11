@@ -12,7 +12,9 @@ const CONFORMANCE_VERSION = 'CONFORMANCE_VERSION';
  */
 class ConformanceVersion {
    readonly type: typeof CONFORMANCE_VERSION = CONFORMANCE_VERSION;
+
    readonly version: XmlVersion;
+
    readonly revision: XmlRevision;
 
    constructor();

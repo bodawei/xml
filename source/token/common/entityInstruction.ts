@@ -2,7 +2,7 @@
 
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
-import { InstructionStart } from '../bridge/instruction';
+import { InstructionStart } from '../../pToken/bridge/instruction';
 import literal from './literal';
 import { TEXT_PTOKEN, TextPToken } from '../text';
 

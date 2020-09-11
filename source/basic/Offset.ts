@@ -9,8 +9,11 @@ import { EntityId } from './entityId';
 
 class Offset {
    public readonly entityId: EntityId;
+
    public readonly index: number;
+
    public readonly row: number;
+
    public readonly column: number;
 
    constructor(location: EntityId | EntityId, index = 0, row = 0, column = 0) {

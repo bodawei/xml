@@ -2,7 +2,7 @@
 
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
-import { InstructionStart } from '../../token/bridge/instruction';
+import { InstructionStart } from '../bridge/instruction';
 import {
    EntityInstructionParam,
    parseEntityInstruction,

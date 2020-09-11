@@ -19,9 +19,4 @@ function conditionalClosePTokenToXToken(pToken: ConditionalClosePToken) {
    return token;
 }
 
-export {
-   CONDITIONAL_CLOSE_XTOKEN,
-   ConditionalCloseXToken,
-
-   conditionalClosePTokenToXToken,
-};
+export { CONDITIONAL_CLOSE_XTOKEN, ConditionalCloseXToken, conditionalClosePTokenToXToken };

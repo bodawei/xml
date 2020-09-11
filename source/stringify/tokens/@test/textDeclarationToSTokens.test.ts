@@ -4,7 +4,7 @@
 import { TextDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
 
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 import * as entityInstr from '../../../token/common/entityInstruction';
 
 import { textDeclarationToSTokens } from '../textDeclarationToSTokens';

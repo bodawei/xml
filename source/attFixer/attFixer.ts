@@ -200,6 +200,7 @@ function gatherDefaults(
  */
 class AttFixer {
    private attDetails: AttDetailsMap = {};
+
    private confVer?: ConformanceVersion;
 
    processPToken(input: ParseValue): ParseValue {

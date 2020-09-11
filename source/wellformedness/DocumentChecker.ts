@@ -97,10 +97,15 @@ const transitionsByState: StateTable = {
  */
 class DocumentChecker {
    private state: State = State.START;
+
    private checkState: CheckState = new CheckState();
+
    private subChecker?: Checker;
+
    private checkers: CheckerMap;
+
    private internalSubsetSeen = false;
+
    private externalSubsetSeen = false;
 
    constructor(checkerMap: CheckerMap) {

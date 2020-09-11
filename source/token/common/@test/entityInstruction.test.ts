@@ -7,7 +7,7 @@ import { MockSTokenSource } from 'sToken-test';
 
 import * as misc from '../misc';
 import { parseEntityInstruction, EntityInstruction, sTokensFromPToken } from '../entityInstruction';
-import { InstructionStart } from '../../bridge/instruction';
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 import literal from '../literal';
 
 describe('EntityDecl (unit)', () => {

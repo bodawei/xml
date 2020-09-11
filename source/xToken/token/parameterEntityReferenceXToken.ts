@@ -22,7 +22,4 @@ class ParameterEntityReferenceXToken {
    }
 }
 
-export {
-   PARAMETER_ENTITY_REFERENCE_XTOKEN,
-   ParameterEntityReferenceXToken
-}
+export { PARAMETER_ENTITY_REFERENCE_XTOKEN, ParameterEntityReferenceXToken };

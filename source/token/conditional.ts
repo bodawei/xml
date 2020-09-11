@@ -49,12 +49,19 @@ function arrayOfPERefs(
 
 class ConditionalPToken {
    public readonly type: typeof CONDITIONAL_PTOKEN = CONDITIONAL_PTOKEN;
+
    public readonly open: SToken;
+
    public readonly openSpace: SToken | undefined;
+
    public readonly sectionType: SToken | undefined;
+
    public readonly peRef: ParameterEntityReferencePToken | undefined;
+
    public readonly peRefPlus: Array<ParameterEntityReferencePToken> | undefined;
+
    public readonly sectionTypeSpace: SToken | undefined;
+
    public readonly bracket: SToken | undefined;
 
    constructor(

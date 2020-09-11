@@ -90,7 +90,7 @@ describe('FixingStream (unit)', () => {
             defaultType: '#IMPLIED',
             value: [],
          };
-         delete value.type;
+         delete (value as any).type;
          const before = new tokenNs.attListDeclaration.XToken('elName', [value], dummyPToken);
 
          fs.write(before);

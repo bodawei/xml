@@ -12,7 +12,9 @@ const ENTITY_ID = 'ENTITY_ID';
  */
 class EntityId {
    readonly type: typeof ENTITY_ID = ENTITY_ID;
+
    readonly systemId: string;
+
    readonly publicId?: string;
 
    constructor(systemId?: string, publicId?: string) {

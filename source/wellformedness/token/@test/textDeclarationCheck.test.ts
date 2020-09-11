@@ -8,7 +8,7 @@ import { TextDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
 
 import * as misc from '../../../token/common/misc';
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 import { textDeclarationCheck } from '../textDeclarationCheck';
 

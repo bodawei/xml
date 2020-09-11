@@ -269,7 +269,7 @@ module.exports = {
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/indent.md
            // https://eslint.org/docs/rules/indent
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-         //   indent: 'off',
+           indent: 'off',
          //   '@typescript-eslint/indent': ['error', 3], // baseStyleRules.indent,
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/init-declarations.md
@@ -281,15 +281,15 @@ module.exports = {
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/keyword-spacing.md
            // https://eslint.org/docs/rules/keyword-spacing
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-         //   'keyword-spacing': 'off',
-         //   '@typescript-eslint/keyword-spacing': baseStyleRules['keyword-spacing'],
+           'keyword-spacing': 'off',
+           '@typescript-eslint/keyword-spacing': baseStyleRules['keyword-spacing'],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/lines-between-class-members.md
            // https://eslint.org/docs/rules/lines-between-class-members
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-         //   'lines-between-class-members': 'off',
-         //   '@typescript-eslint/lines-between-class-members':
-         //     baseStyleRules['lines-between-class-members'],
+           'lines-between-class-members': 'off',
+           '@typescript-eslint/lines-between-class-members':
+             baseStyleRules['lines-between-class-members'],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-array-constructor.md
            // https://eslint.org/docs/rules/no-array-constructor

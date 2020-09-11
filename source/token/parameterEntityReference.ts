@@ -16,10 +16,15 @@ interface MutableParameterEntityReference {
 
 class ParameterEntityReferencePToken {
    public readonly type: typeof PARAMETER_ENTITY_REFERENCE_PTOKEN = PARAMETER_ENTITY_REFERENCE_PTOKEN;
+
    public readonly open: SToken;
+
    public readonly openSpace?: SToken;
+
    public readonly name?: SToken;
+
    public readonly nameSpace?: SToken;
+
    public readonly close?: SToken;
 
    constructor(

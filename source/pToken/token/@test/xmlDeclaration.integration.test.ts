@@ -5,7 +5,7 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import { parseXmlDeclaration } from '../xmlDeclaration';
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../bridge/instruction';
 
 describe('xmlDeclaration (integration)', () => {
    let start: InstructionStart;

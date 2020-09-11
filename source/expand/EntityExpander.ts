@@ -89,8 +89,11 @@ enum State {
 
 class EntityExpander {
    private deliverToken: DeliverPToken;
+
    private expandParams: ExpandParams;
+
    private state = State.AT_START;
+
    private entityNameStack: EntityNameStack = new EntityNameStack();
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {

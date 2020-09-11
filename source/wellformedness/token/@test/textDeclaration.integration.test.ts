@@ -7,7 +7,7 @@ import { defaultExtractors } from 'extractor';
 import { parseTextDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 import { textDeclarationCheck } from '../textDeclarationCheck';
 

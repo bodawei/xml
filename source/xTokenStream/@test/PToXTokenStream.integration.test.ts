@@ -20,7 +20,6 @@ import {
       GeneralEntityDeclarationXToken,
    NotationDeclarationXToken,
    
-   ProcessingInstructionXToken,
    SpaceXToken,
    TextXToken,
    TextPToken,
@@ -28,7 +27,7 @@ import {
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
-import { ParameterEntityReferenceXToken, XmlDeclarationXToken } from 'xToken';
+import { ParameterEntityReferenceXToken,    ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
 import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
 import { ExternalIdXToken } from 'source/xToken/token/externalIdXToken';
 import { defaultExtractors } from 'extractor';

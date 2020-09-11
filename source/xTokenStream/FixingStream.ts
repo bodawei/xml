@@ -93,7 +93,7 @@ function adjustElementDeclaration(token: ElementDeclaration) {
    }
 
    if (token.contentSpecType === 'ANY' || token.contentSpecType === 'EMPTY') {
-      delete token.children;
+      delete (token as any).children;
    }
 
    if (token.children) {

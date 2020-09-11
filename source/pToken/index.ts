@@ -6,6 +6,7 @@ import { PToken as PTokenClassic } from 'token';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
 
+export * from './bridge/instruction';
 export * from './token/textDeclaration';
 export * from './token/xmlDeclaration';
 export * from './util/externalIdToEntityId';

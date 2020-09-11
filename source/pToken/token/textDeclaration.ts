@@ -2,7 +2,7 @@
 
 import { SToken, STokenSource } from 'sToken';
 
-import { InstructionStart } from '../../token/bridge/instruction';
+import { InstructionStart } from '../bridge/instruction';
 import {
    EntityInstructionParam,
    parseEntityInstruction,
@@ -24,11 +24,17 @@ interface RawTextDeclaration {
 
 class TextDeclarationPToken {
    public readonly type: typeof TEXTDECL_PTOKEN = TEXTDECL_PTOKEN;
+
    public readonly open: SToken;
+
    public readonly openSpace?: SToken;
+
    public readonly target?: SToken;
+
    public readonly targetSpace?: SToken;
+
    public readonly params: ReadonlyArray<EntityInstructionParam> = [];
+
    public readonly close?: SToken;
 
    constructor(
@@ -74,7 +80,7 @@ function parseTextDeclaration(
    source: STokenSource,
    instStart: InstructionStart,
    deliverPToken: (result: TextDeclarationPToken) => void,
-) {
+): void {
    parseEntityInstruction(source, instStart, PARAM_NAMES, (protoToken) => {
       deliverPToken(new TextDeclarationPToken(protoToken));
    });

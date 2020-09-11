@@ -1,9 +1,17 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { TextDeclarationPToken, XmlDeclarationPToken, parseXmlDeclaration, parseTextDeclaration,  } from 'pToken';
+import {
+   TextDeclarationPToken,
+   XmlDeclarationPToken,
+   parseXmlDeclaration,
+   parseTextDeclaration,
+} from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
-import { ProcessingInstructionPToken, parseProcessingInstruction } from '../processingInstruction';
+import {
+   ProcessingInstructionPToken,
+   parseProcessingInstruction,
+} from '../../token/processingInstruction';
 
 /**********************************************************************\
  The instruction namespace bridges input far enough to decide
@@ -11,13 +19,15 @@ import { ProcessingInstructionPToken, parseProcessingInstruction } from '../proc
  Processing Instruction.
 \**********************************************************************/
 
-type InstructionStart = {
-   open: SToken,
-   openSpace?: SToken,
-   target?: SToken,
-   targetSpace?: SToken,
-};
-type DeliverInstruction = (section: ProcessingInstructionPToken | XmlDeclarationPToken | TextDeclarationPToken) => void;
+interface InstructionStart {
+   open: SToken;
+   openSpace?: SToken;
+   target?: SToken;
+   targetSpace?: SToken;
+}
+type DeliverInstruction = (
+   section: ProcessingInstructionPToken | XmlDeclarationPToken | TextDeclarationPToken,
+) => void;
 
 /**********************************************************************\
  parseInstruction() extracts a ProcessingInstructionPToken or
@@ -36,12 +46,17 @@ type DeliverInstruction = (section: ProcessingInstructionPToken | XmlDeclaration
       instruction ::= '<?' S? name? S?
 \**********************************************************************/
 
-function parseInstruction(source: STokenSource, openSToken: SToken, inDocument: boolean, deliverPToken: DeliverInstruction) {
+function parseInstruction(
+   source: STokenSource,
+   openSToken: SToken,
+   inDocument: boolean,
+   deliverPToken: DeliverInstruction,
+): void {
    const start: InstructionStart = { open: openSToken };
    start.open = openSToken;
 
    source.extractToObjectNoParams('space', start, 'openSpace');
-   source.extractToObject('word', [ '?>' ], start, 'target');
+   source.extractToObject('word', ['?>'], start, 'target');
 
    source.extractNoParams('space', (sToken) => {
       start.targetSpace = sToken;
@@ -59,8 +74,4 @@ function parseInstruction(source: STokenSource, openSToken: SToken, inDocument: 
    });
 }
 
-export {
-   InstructionStart,
-
-   parseInstruction,
-};
+export { InstructionStart, parseInstruction };

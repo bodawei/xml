@@ -84,7 +84,6 @@ class PToXTokenStream extends Transform {
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_END_PTOKEN:
          case PARAMETER_ENTITY_START_PTOKEN:
-         case PROCESSING_INSTRUCTION_PTOKEN:
          case SPACE_PTOKEN:
          case TEXT_PTOKEN:
             this.push(pToken.toXToken());
@@ -92,6 +91,7 @@ class PToXTokenStream extends Transform {
          case CHARREF_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+         case PROCESSING_INSTRUCTION_PTOKEN:
          case TEXTDECL_PTOKEN:
          case XMLDECL_PTOKEN:
             this.push(convertPTokenToXToken(pToken));

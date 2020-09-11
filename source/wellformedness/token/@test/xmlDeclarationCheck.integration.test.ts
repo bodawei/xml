@@ -7,7 +7,7 @@ import { parseXmlDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
-import { InstructionStart } from '../../../token/bridge/instruction';
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 describe('xmlDeclaration (integration)', () => {
    let start: InstructionStart;

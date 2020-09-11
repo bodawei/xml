@@ -235,15 +235,15 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls processingInstruction.toXToken()', () => {
-      const pToken = new ProcessingInstructionPToken({ open: SToken.fromString('') });
-      spyOn(pToken, 'toXToken');
+   // it('calls processingInstruction.toXToken()', () => {
+   //    const pToken = new ProcessingInstructionPToken({ open: SToken.fromString('') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    it('calls spacePToken.toXToken()', () => {
       const pToken = new SpacePToken({ text: SToken.fromString(' ') });
