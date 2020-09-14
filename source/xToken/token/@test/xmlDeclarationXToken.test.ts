@@ -14,7 +14,7 @@ describe('XmlDeclarationXToken()', () => {
          openSpace: toSToken(' '),
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
-         params: [
+         fields: [
             {
                name: toSToken('version'),
                nameSpace: toSToken(' '),
@@ -51,7 +51,7 @@ describe('XmlDeclarationXToken()', () => {
          openSpace: toSToken(' '),
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
-         params: [
+         fields: [
             {
                name: toSToken('version'),
                nameSpace: toSToken(' '),
@@ -74,7 +74,7 @@ describe('XmlDeclarationXToken()', () => {
          openSpace: toSToken(' '),
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
-         params: [],
+         fields: [],
          close: toSToken('?>'),
       });
 
@@ -89,7 +89,7 @@ describe('XmlDeclarationXToken()', () => {
          openSpace: toSToken(' '),
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
-         params: [
+         fields: [
             {
                name: toSToken('version'),
                nameSpace: toSToken(' '),
@@ -126,7 +126,7 @@ describe('XmlDeclarationXToken()', () => {
          openSpace: toSToken(' '),
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
-         params: [
+         fields: [
             {
                name: toSToken('version'),
                nameSpace: toSToken(' '),

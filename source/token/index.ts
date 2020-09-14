@@ -23,7 +23,6 @@ import { CharDataPToken } from './charData';
 import { CommentPToken } from './comment';
 import { ConditionalPToken } from './conditional';
 import { ConditionalClosePToken } from './conditionalClose';
-import { ProcessingInstructionPToken } from './processingInstruction';
 import { CharRefPToken } from './charRef';
 import { ElidedEntityDeclarationPToken } from './ElidedEntityDeclarationPToken';
 import { TextPToken } from './text';
@@ -70,7 +69,7 @@ export * from './generalEntityReference';
 export * from './notationDeclaration';
 export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
-export * from './processingInstruction';
+export * from '../pToken/token/processingInstruction';
 export * from './space';
 export * from './text';
 
@@ -114,7 +113,6 @@ type PToken =
    | ParameterEntityEndPToken
    | ParameterEntityReferencePToken
    | ParameterEntityStartPToken
-   | ProcessingInstructionPToken
    | SpacePToken
    | TextPToken
    ;

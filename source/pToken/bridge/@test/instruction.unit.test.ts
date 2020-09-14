@@ -6,7 +6,7 @@ import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as pTokenThings from 'pToken';
-import * as pi from '../../../token/processingInstruction';
+import * as pi from '../../token/processingInstruction';
 import { parseInstruction } from '../instruction';
 
 describe('instruction (unit)', () => {

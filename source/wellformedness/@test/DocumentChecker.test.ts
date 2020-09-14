@@ -79,7 +79,7 @@ describe('DocumentChecker (unit)', () => {
          subState = checkState;
       }
 
-      check(pToken: PToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+      check(pToken: PToken): void | typeof CHECKER_DONE {
          subParams = arguments; // eslint-disable-line prefer-rest-params
          if (pToken.type === ELEMENT_EMPTY_PTOKEN) {
             return CHECKER_DONE;
@@ -203,7 +203,7 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('passes standalone flag', () => {
-            (xmlDecl.params as any).push({
+            (xmlDecl.fields as any).push({
                name: toSToken('standalone'),
                value: toSToken('yes'),
             });
@@ -235,7 +235,7 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('repeated XML Declarations do not affect the first one', () => {
-            (xmlDecl.params as any).push({
+            (xmlDecl.fields as any).push({
                name: toSToken('standalone'),
                value: toSToken('yes'),
             });
@@ -304,7 +304,7 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('passes standalone flag', () => {
-            (xmlDecl.params as any).push({
+            (xmlDecl.fields as any).push({
                name: toSToken('standalone'),
                value: toSToken('yes'),
             });
@@ -337,7 +337,7 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('repeated XML Declarations do not affect the first one', () => {
-            (xmlDecl.params as any).push({
+            (xmlDecl.fields as any).push({
                name: toSToken('standalone'),
                value: toSToken('yes'),
             });

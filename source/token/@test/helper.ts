@@ -273,7 +273,7 @@ function makeTextDecl(): TextDeclarationPToken {
       openSpace: undefined,
       target: toSToken('xml'),
       targetSpace: toSToken(' '),
-      params: [
+      fields: [
          {
             name: toSToken('version'),
             nameSpace: undefined,
@@ -292,7 +292,7 @@ function makeXmlDecl(): XmlDeclarationPToken {
       openSpace: undefined,
       target: toSToken('xml'),
       targetSpace: toSToken(' '),
-      params: [
+      fields: [
          {
             name: toSToken('version'),
             nameSpace: undefined,

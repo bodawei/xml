@@ -11,7 +11,7 @@ import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    ProcessingInstructionPToken,
    parseProcessingInstruction,
-} from '../../token/processingInstruction';
+} from '../token/processingInstruction';
 
 /**********************************************************************\
  The instruction namespace bridges input far enough to decide

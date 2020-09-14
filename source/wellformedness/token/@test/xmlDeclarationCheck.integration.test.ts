@@ -9,7 +9,7 @@ import { STokenSource, SToken } from 'sToken';
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 import { InstructionStart } from '../../../pToken/bridge/instruction';
 
-describe('xmlDeclaration (integration)', () => {
+describe('xmlDeclarationCheck (integration)', () => {
    let start: InstructionStart;
    let confVer: ConformanceVersion;
    let source: STokenSource;
@@ -43,7 +43,7 @@ describe('xmlDeclaration (integration)', () => {
       source.addText('version="\u00011.0" encoding="usascii"?>');
 
       parseXmlDeclaration(source, start, (result) => {
-         const ec = new ErrorCollector(start.open, WellFormedError);
+         const ec = new ErrorCollector(result.open, WellFormedError);
 
          xmlDeclarationCheck(result, ec, confVer);
 

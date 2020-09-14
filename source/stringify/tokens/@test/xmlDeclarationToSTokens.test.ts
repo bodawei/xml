@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { xmlDeclarationToSTokens } from '../xmlDeclarationToSTokens';
-import * as entityInstr from '../../../token/common/entityInstruction';
+
+import * as fieldedInstr from '../common/fieldedInstructionToSTokens';
 
 describe('xmlDeclarationToSTokens (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
@@ -16,7 +16,7 @@ describe('xmlDeclarationToSTokens (unit)', () => {
          openSpace: undefined,
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
-         params: [
+         fields: [
             {
                name: toSToken('version'),
                nameSpace: undefined,
@@ -28,8 +28,8 @@ describe('xmlDeclarationToSTokens (unit)', () => {
       });
    });
 
-   it('calls entityInstruction.sTokensFromPToken', () => {
-      const entitySpy = spyOn(entityInstr, 'sTokensFromPToken');
+   it('calls fieldedInstructionToSTokens()', () => {
+      const entitySpy = spyOn(fieldedInstr, 'fieldedInstructionToSTokens');
 
       xmlDeclarationToSTokens(xmlDeclPToken);
 

@@ -1,13 +1,12 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
-import * as entityInstr from '../../../token/common/entityInstruction';
-
 import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
+
+import * as fieldedInstr from '../../common/fieldedInstruction';
 
 describe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;
@@ -19,7 +18,7 @@ describe('textDeclaration (unit)', () => {
          openSpace: undefined,
          target: SToken.fromString('xml'),
          targetSpace: SToken.fromString(' '),
-         params: [
+         fields: [
             {
                name: SToken.fromString('version'),
                nameSpace: undefined,
@@ -44,10 +43,10 @@ describe('textDeclaration (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         entitySpy = spyOn(entityInstr, 'parseEntityInstruction');
+         entitySpy = spyOn(fieldedInstr, 'parseFieldedInstruction');
       });
 
-      it('calls parseEntityInstruction()', () => {
+      it('calls parseInstructionCommon()', () => {
          const mockSource = new MockSTokenSource([]);
 
          parseTextDeclaration(mockSource, start, callback);
@@ -64,7 +63,7 @@ describe('textDeclaration (unit)', () => {
          entitySpy.and.callFake((_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
             cb({
                open: SToken.fromString('testing'),
-               params: [],
+               fields: [],
             });
          });
          const mockSource = new MockSTokenSource([]);
@@ -76,7 +75,7 @@ describe('textDeclaration (unit)', () => {
          expect(result).toEqual(
             new TextDeclarationPToken({
                open: SToken.fromString('testing'),
-               params: [],
+               fields: [],
             }),
          );
       });

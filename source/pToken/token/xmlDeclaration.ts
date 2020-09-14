@@ -4,10 +4,10 @@ import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import { InstructionStart } from '../bridge/instruction';
 import {
-   EntityInstructionParam,
-   parseEntityInstruction,
-   EntityInstruction,
-} from '../../token/common/entityInstruction';
+   InstructionField,
+   parseFieldedInstruction,
+   FieldedInstruction,
+} from '../common/fieldedInstruction';
 
 /**********************************************************************\
  The xmlDeclaration namespace contains the usual routines for parsing,
@@ -18,34 +18,41 @@ const XMLDECL_PTOKEN = 'XMLDECL_PTOKEN';
 
 const PARAM_NAMES = ['version', 'encoding', 'standalone'];
 
-class XmlDeclarationPToken {
-   public readonly type: typeof XMLDECL_PTOKEN = XMLDECL_PTOKEN;
-   public readonly open: SToken;
-   public readonly openSpace?: SToken;
-   public readonly target?: SToken;
-   public readonly targetSpace?: SToken;
-   public readonly params: readonly EntityInstructionParam[];
-   public readonly close?: SToken;
-
-   constructor(param: InstructionStart | XmlDeclarationPToken | EntityInstruction) {
-      this.open = param.open;
-      this.openSpace = param.openSpace;
-      this.target = param.target;
-      this.targetSpace = param.targetSpace;
-
-      if (isNotInstructionStart(param)) {
-         this.params = param.params || [];
-         this.close = param.close;
-      } else {
-         this.params = [];
-      }
-   }
+interface RawXmlDeclaration {
+   open?: SToken;
+   openSpace?: SToken;
+   target?: SToken;
+   targetSpace?: SToken;
+   fields?: ReadonlyArray<InstructionField>;
+   close?: SToken;
 }
 
-function isNotInstructionStart(
-   item: InstructionStart | XmlDeclarationPToken | EntityInstruction,
-): item is XmlDeclarationPToken | EntityInstruction {
-   return 'type' in item || 'params' in item;
+class XmlDeclarationPToken {
+   public readonly type: typeof XMLDECL_PTOKEN = XMLDECL_PTOKEN;
+
+   public readonly open: SToken;
+
+   public readonly openSpace?: SToken;
+
+   public readonly target?: SToken;
+
+   public readonly targetSpace?: SToken;
+
+   public readonly fields: ReadonlyArray<InstructionField>;
+
+   public readonly close?: SToken;
+
+   constructor(
+      base: InstructionStart | XmlDeclarationPToken | FieldedInstruction,
+      other: RawXmlDeclaration = {},
+   ) {
+      this.open = other.open ?? base.open;
+      this.openSpace = other.openSpace ?? base.openSpace;
+      this.target = other.target ?? base.target;
+      this.targetSpace = other.targetSpace ?? base.targetSpace;
+      this.fields = other.fields ?? ('fields' in base ? base.fields : []);
+      this.close = other.close ?? ('close' in base ? base.close : undefined);
+   }
 }
 
 /**********************************************************************\
@@ -64,16 +71,16 @@ function parseXmlDeclaration(
    source: STokenSource,
    instStart: InstructionStart,
    deliverPToken: (result: XmlDeclarationPToken) => void,
-) {
-   parseEntityInstruction(source, instStart, PARAM_NAMES, (protoToken) => {
+): void {
+   parseFieldedInstruction(source, instStart, PARAM_NAMES, (protoToken) => {
       deliverPToken(new XmlDeclarationPToken(protoToken));
    });
 }
 
 function xmlDeclIsStandalone(decl: XmlDeclarationPToken): boolean {
-   for (const param of decl.params) {
-      const name = strOrBlank(param.name);
-      const value = strOrBlank(param.value);
+   for (const field of decl.fields) {
+      const name = strOrBlank(field.name);
+      const value = strOrBlank(field.value);
 
       if (name.toLowerCase() === 'standalone') {
          return value.toLowerCase() === 'yes';

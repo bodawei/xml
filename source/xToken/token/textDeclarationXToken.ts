@@ -10,8 +10,11 @@ type XmlVersion = 1.0 | 1.1;
 
 class TextDeclarationXToken {
    public readonly type: typeof TEXTDECL_XTOKEN = TEXTDECL_XTOKEN;
+
    public readonly version: XmlVersion;
+
    public readonly encoding: string;
+
    public pToken?: TextDeclarationPToken;
 
    constructor(pToken: TextDeclarationPToken);
@@ -32,7 +35,7 @@ class TextDeclarationXToken {
 
       this.pToken = versionOrPToken;
 
-      for (const param of versionOrPToken.params) {
+      for (const param of versionOrPToken.fields) {
          const name = strOrBlank(param.name);
          const value = strOrBlank(param.value);
 

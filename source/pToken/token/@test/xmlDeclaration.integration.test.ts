@@ -26,7 +26,7 @@ describe('xmlDeclaration (integration)', () => {
          source.endText();
 
          parseXmlDeclaration(source, start, (parsing) => {
-            expect(parsing.params[0].name.str).toEqual('version');
+            expect(parsing.fields[0].name.str).toEqual('version');
             done();
          });
       });
@@ -37,7 +37,7 @@ describe('xmlDeclaration (integration)', () => {
          source.endText();
 
          parseXmlDeclaration(source, start, (parsing) => {
-            expect(parsing.params[1].value!.str).toEqual('ascii');
+            expect(parsing.fields[1].value!.str).toEqual('ascii');
             done();
          });
       });

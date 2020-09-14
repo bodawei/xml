@@ -2,7 +2,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { strOrBlank } from 'sToken';
 
 import { ProcessingInstructionPToken } from 'token';
 import {
@@ -17,7 +17,7 @@ function processingInstructionCheck(
    pToken: ProcessingInstructionPToken,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
-) {
+): void {
    const targetName = strOrBlank(pToken.target);
    const lcTarget = targetName.toLowerCase();
    const hasXml = lcTarget.indexOf('xml') !== -1;

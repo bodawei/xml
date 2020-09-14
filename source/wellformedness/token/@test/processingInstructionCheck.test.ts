@@ -11,7 +11,7 @@ import * as misc from '../../../token/common/misc';
 import { processingInstructionCheck } from '../processingInstructionCheck';
 import { ProcessingInstructionPToken } from 'token';
 
-describe('processingInstructionCheck (unit)', () => {
+describe('processingInstructionCheck() (unit)', () => {
    let piPToken: any;
    let mockErrorCollector: MockErrorCollector;
    let confVer: ConformanceVersion;

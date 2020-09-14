@@ -1,24 +1,20 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
-import { TextDeclarationPToken, XmlDeclarationPToken } from 'pToken';
-import { STokenSource, SToken } from 'sToken';
+import { ProcessingInstructionPToken, TextDeclarationPToken, XmlDeclarationPToken } from 'pToken';
+import { STokenSource, SToken, toSToken } from 'sToken';
 
 import { parseInstruction } from '../instruction';
-import { ProcessingInstructionPToken } from 'source/token/processingInstruction';
 
 describe('instruction (integration)', () => {
    describe('parseInstruction()', () => {
-      let ec: ErrorCollector;
       let source: STokenSource;
       let start: SToken;
 
       it('parses an xml declaration', () => {
          source = new STokenSource(defaultExtractors);
-         ec = new ErrorCollector(undefined as any, WellFormedError);
-         start = SToken.fromString('<?');
+         start = toSToken('<?');
       });
 
       it('parses an XML Declaration', (done) => {
@@ -30,31 +26,31 @@ describe('instruction (integration)', () => {
             expect(parsing).toEqualRangeless(
                new XmlDeclarationPToken({
                   open: start,
-                  target: SToken.fromString('xml'),
-                  targetSpace: SToken.fromString(' '),
-                  params: [
+                  target: toSToken('xml'),
+                  targetSpace: toSToken(' '),
+                  fields: [
                      {
-                        name: SToken.fromString('version'),
+                        name: toSToken('version'),
                         nameSpace: undefined,
-                        equal: SToken.fromString('='),
+                        equal: toSToken('='),
                         equalSpace: undefined,
-                        openQuote: SToken.fromString('"'),
-                        value: SToken.fromString('1.0'),
-                        closeQuote: SToken.fromString('"'),
-                        valueSpace: SToken.fromString(' '),
+                        openQuote: toSToken('"'),
+                        value: toSToken('1.0'),
+                        closeQuote: toSToken('"'),
+                        valueSpace: toSToken(' '),
                      },
                      {
-                        name: SToken.fromString('encoding'),
+                        name: toSToken('encoding'),
                         nameSpace: undefined,
-                        equal: SToken.fromString('='),
+                        equal: toSToken('='),
                         equalSpace: undefined,
-                        openQuote: SToken.fromString('"'),
-                        value: SToken.fromString('ascii'),
-                        closeQuote: SToken.fromString('"'),
+                        openQuote: toSToken('"'),
+                        value: toSToken('ascii'),
+                        closeQuote: toSToken('"'),
                         valueSpace: undefined,
                      },
                   ],
-                  close: SToken.fromString('?>'),
+                  close: toSToken('?>'),
                }),
             );
             done();
@@ -70,21 +66,21 @@ describe('instruction (integration)', () => {
             expect(parsing).toEqualRangeless(
                new TextDeclarationPToken({
                   open: start,
-                  target: SToken.fromString('xml'),
-                  targetSpace: SToken.fromString(' '),
-                  params: [
+                  target: toSToken('xml'),
+                  targetSpace: toSToken(' '),
+                  fields: [
                      {
-                        name: SToken.fromString('encoding'),
+                        name: toSToken('encoding'),
                         nameSpace: undefined,
-                        equal: SToken.fromString('='),
+                        equal: toSToken('='),
                         equalSpace: undefined,
-                        openQuote: SToken.fromString('"'),
-                        value: SToken.fromString('ascii'),
-                        closeQuote: SToken.fromString('"'),
+                        openQuote: toSToken('"'),
+                        value: toSToken('ascii'),
+                        closeQuote: toSToken('"'),
                         valueSpace: undefined,
                      },
                   ],
-                  close: SToken.fromString('?>'),
+                  close: toSToken('?>'),
                }),
             );
             done();
@@ -100,10 +96,10 @@ describe('instruction (integration)', () => {
             expect(parsing).toEqualRangeless(
                new ProcessingInstructionPToken({
                   open: start,
-                  target: SToken.fromString('foo'),
-                  targetSpace: SToken.fromString(' '),
-                  instruction: SToken.fromString('blah?blah'),
-                  close: SToken.fromString('?>'),
+                  target: toSToken('foo'),
+                  targetSpace: toSToken(' '),
+                  instruction: toSToken('blah?blah'),
+                  close: toSToken('?>'),
                }),
             );
             done();

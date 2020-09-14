@@ -24,7 +24,7 @@ describe('textDeclaration (unit)', () => {
          openSpace: undefined,
          target: SToken.fromString('xml'),
          targetSpace: SToken.fromString(' '),
-         params: [
+         fields: [
             {
                name: SToken.fromString('version'),
                nameSpace: undefined,
@@ -57,25 +57,25 @@ describe('textDeclaration (unit)', () => {
    });
 
    it('calls misc.checkCharWellFormed() on the version value', () => {
-      (textDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
+      (textDeclPToken.fields[0].value as any) = SToken.fromString('\u0001');
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
       expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         textDeclPToken.params[0].value,
+         textDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
       );
    });
 
    it('calls misc.checkCharWellFormed() on the encoding value', () => {
-      (textDeclPToken.params[0].name as any) = SToken.fromString('encoding');
-      (textDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
+      (textDeclPToken.fields[0].name as any) = SToken.fromString('encoding');
+      (textDeclPToken.fields[0].value as any) = SToken.fromString('\u0001');
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
       expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         textDeclPToken.params[0].value,
+         textDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
       );
@@ -123,7 +123,7 @@ describe('textDeclaration (unit)', () => {
          openSpace: undefined,
          target: SToken.fromString('xml'),
          targetSpace: SToken.fromString(' '),
-         params: [
+         fields: [
             {
                name: SToken.fromString('encoding'),
                nameSpace: SToken.fromString(' '),
@@ -146,7 +146,7 @@ describe('textDeclaration (unit)', () => {
          openSpace: undefined,
          target: SToken.fromString('xml'),
          targetSpace: SToken.fromString(' '),
-         params: [],
+         fields: [],
          close: SToken.fromString('?>'),
       });
 
@@ -161,7 +161,7 @@ describe('textDeclaration (unit)', () => {
          openSpace: SToken.fromString(' '),
          target: SToken.fromString('xml'),
          targetSpace: SToken.fromString(' '),
-         params: [
+         fields: [
             {
                name: SToken.fromString('VERSION'),
                nameSpace: SToken.fromString(' '),
@@ -178,7 +178,7 @@ describe('textDeclaration (unit)', () => {
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.TEXTDECL_PARAM_INVALID_CASE,
          params: ['version', 'VERSION'],
-         position: textDeclPToken.params[0].name,
+         position: textDeclPToken.fields[0].name,
       });
    });
 
@@ -201,7 +201,7 @@ describe('textDeclaration (unit)', () => {
             openSpace: SToken.fromString(' '),
             target: SToken.fromString('xml'),
             targetSpace: SToken.fromString(' '),
-            params: [
+            fields: [
                {
                   name: SToken.fromString('encoding'),
                   nameSpace: SToken.fromString(' '),
@@ -225,7 +225,7 @@ describe('textDeclaration (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_VERSION_INVALID_ORDER,
             params: undefined,
-            position: textDeclPToken.params[1].name,
+            position: textDeclPToken.fields[1].name,
          });
       });
 
@@ -235,7 +235,7 @@ describe('textDeclaration (unit)', () => {
             openSpace: SToken.fromString(' '),
             target: SToken.fromString('xml'),
             targetSpace: SToken.fromString(' '),
-            params: [
+            fields: [
                {
                   name: SToken.fromString('version'),
                   nameSpace: SToken.fromString(' '),
@@ -252,7 +252,7 @@ describe('textDeclaration (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_VERSION_INVALD,
             params: ['1.2'],
-            position: textDeclPToken.params[0].value,
+            position: textDeclPToken.fields[0].value,
          });
       });
 
@@ -263,7 +263,7 @@ describe('textDeclaration (unit)', () => {
                openSpace: SToken.fromString(' '),
                target: SToken.fromString('xml'),
                targetSpace: SToken.fromString(' '),
-               params: [
+               fields: [
                   {
                      name: SToken.fromString('version'),
                      nameSpace: SToken.fromString(' '),
@@ -287,7 +287,7 @@ describe('textDeclaration (unit)', () => {
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.TEXTDECL_ENCODING_INVALID,
                params: ['$$BAD_ENCODING$$'],
-               position: textDeclPToken.params[1].value,
+               position: textDeclPToken.fields[1].value,
             });
          });
       });

@@ -10,7 +10,7 @@ import { ProcessingInstructionPToken, parseProcessingInstruction } from 'token';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
-describe('processingInstruction (integration)', () => {
+describe('processingInstructionCheck() (integration)', () => {
    let piPToken: ProcessingInstructionPToken;
 
    beforeEach(() => {

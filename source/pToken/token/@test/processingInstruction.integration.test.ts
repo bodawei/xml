@@ -1,31 +1,17 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    parseProcessingInstruction,
-   ProcessingInstructionPToken,
- } from '../processingInstruction';
+} from '../processingInstruction';
 
 describe('processingInstruction (integration)', () => {
-   let piPToken: ProcessingInstructionPToken;
-
-   beforeEach(() => {
-      const proto = {
-         open: SToken.fromString('<?'),
-         openSpace: undefined,
-         target: SToken.fromString('targetName'),
-      };
-      piPToken = new ProcessingInstructionPToken(proto);
-   });
+   beforeEach(() => {});
 
    describe('parse()', () => {
-
       it('asks the instruction module to include a type in the PToken', (done) => {
          const source = new STokenSource(defaultExtractors);
          source.addText('blah blah?>');
@@ -36,7 +22,5 @@ describe('processingInstruction (integration)', () => {
             done();
          });
       });
-
    });
-
 });

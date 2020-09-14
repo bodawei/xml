@@ -1,34 +1,45 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import {  WellFormedError,  } from 'error';
-import {  SToken, STokenSource,  } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 
-import { InstructionStart } from '../pToken/bridge/instruction';
+import { InstructionStart } from '../bridge/instruction';
 
-const WFEID = WellFormedError.ID;
 const PROCESSING_INSTRUCTION_PTOKEN = 'PROCESSING_INSTRUCTION_PTOKEN';
 
 type DeliverPToken = (pToken: ProcessingInstructionPToken) => void;
 
+interface RawPI {
+   open?: SToken;
+   openSpace?: SToken;
+   target?: SToken;
+   targetSpace?: SToken;
+   instruction?: SToken;
+   close?: SToken;
+}
 
 class ProcessingInstructionPToken {
    public readonly type: typeof PROCESSING_INSTRUCTION_PTOKEN = PROCESSING_INSTRUCTION_PTOKEN;
+
    public readonly open: SToken;
+
    public readonly openSpace?: SToken;
+
    public readonly target?: SToken;
+
    public readonly targetSpace?: SToken;
+
    public readonly instruction?: SToken;
+
    public readonly close?: SToken;
 
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(param: {open: SToken} | ProcessingInstructionPToken) {
-      Object.assign(this, param);
-      this.open = param.open;
-      this.type = PROCESSING_INSTRUCTION_PTOKEN;
-
-      // Workaround until instruction redone
-      this.openSpace = (param as any).openSpace || (param as any).postOpenSpace;
-      this.targetSpace = (param as any).targetSpace;
+   constructor(param: InstructionStart | ProcessingInstructionPToken, other: RawPI = {}) {
+      this.open = other.open ?? param.open;
+      this.openSpace = other.openSpace ?? param.openSpace;
+      this.target = other.target ?? param.target;
+      this.targetSpace = other.targetSpace ?? param.targetSpace;
+      this.instruction =
+         other.instruction ?? ('instruction' in param ? param.instruction : undefined);
+      this.close = other.close ?? ('close' in param ? param.close : undefined);
    }
 }
 
@@ -52,19 +63,18 @@ class ProcessingInstructionPToken {
       [17] PITarget ::=  Name
 \**********************************************************************/
 
-function parseProcessingInstruction(source: STokenSource, instr: InstructionStart, deliverPToken: DeliverPToken) {
-   const raw: any = Object.assign({}, instr);
+function parseProcessingInstruction(
+   source: STokenSource,
+   instr: InstructionStart,
+   deliverPToken: DeliverPToken,
+): void {
+   const raw: RawPI = {};
 
-   source.extractToObject('all', [ '?>' ], raw, 'instruction');
+   source.extractToObject('all', ['?>'], raw, 'instruction');
    source.extract('match', '?>', (sToken) => {
       raw.close = sToken;
-      deliverPToken(new ProcessingInstructionPToken(raw));
+      deliverPToken(new ProcessingInstructionPToken(instr, raw));
    });
 }
 
-export {
-   PROCESSING_INSTRUCTION_PTOKEN,
-   ProcessingInstructionPToken,
-
-   parseProcessingInstruction,
-};
+export { PROCESSING_INSTRUCTION_PTOKEN, ProcessingInstructionPToken, parseProcessingInstruction };

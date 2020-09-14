@@ -10,9 +10,13 @@ const DEFAULT_ENCODING = 'utf-8';
 
 class XmlDeclarationXToken {
    public readonly type: typeof XMLDECL_XTOKEN = XMLDECL_XTOKEN;
+
    public readonly version: XmlVersion;
+
    public readonly encoding: string;
+
    public readonly standalone: boolean;
+
    public pToken?: XmlDeclarationPToken;
 
    constructor(pToken: XmlDeclarationPToken);
@@ -40,7 +44,7 @@ class XmlDeclarationXToken {
 
       this.pToken = versionOrPToken;
 
-      for (const param of versionOrPToken.params) {
+      for (const param of versionOrPToken.fields) {
          const name = strOrBlank(param.name);
          const value = strOrBlank(param.value);
 

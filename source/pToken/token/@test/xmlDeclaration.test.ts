@@ -1,12 +1,12 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { XmlDeclarationPToken, parseXmlDeclaration, xmlDeclIsStandalone } from '../xmlDeclaration';
 import { InstructionStart } from '../../bridge/instruction';
-import * as entityInstr from '../../../token/common/entityInstruction';
+import { XmlDeclarationPToken, parseXmlDeclaration, xmlDeclIsStandalone } from '../xmlDeclaration';
+
+import * as fieldedInstr from '../../common/fieldedInstruction';
 
 describe('xmlDeclaration (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
@@ -18,7 +18,7 @@ describe('xmlDeclaration (unit)', () => {
          openSpace: undefined,
          target: SToken.fromString('xml'),
          targetSpace: SToken.fromString(' '),
-         params: [
+         fields: [
             {
                name: SToken.fromString('version'),
                nameSpace: undefined,
@@ -43,10 +43,10 @@ describe('xmlDeclaration (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         entitySpy = spyOn(entityInstr, 'parseEntityInstruction');
+         entitySpy = spyOn(fieldedInstr, 'parseFieldedInstruction');
       });
 
-      it('calls parseEntityInstruction()', () => {
+      it('calls parseFieldedInstruction()', () => {
          const mockSource = new MockSTokenSource([]);
 
          parseXmlDeclaration(mockSource, start, callback);
@@ -63,7 +63,7 @@ describe('xmlDeclaration (unit)', () => {
          entitySpy.and.callFake((_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
             cb({
                open: SToken.fromString('testing'),
-               params: [],
+               fields: [],
             });
          });
          const mockSource = new MockSTokenSource([]);
@@ -75,7 +75,7 @@ describe('xmlDeclaration (unit)', () => {
          expect(result).toEqual(
             new XmlDeclarationPToken({
                open: SToken.fromString('testing'),
-               params: [],
+               fields: [],
             }),
          );
       });
@@ -89,7 +89,7 @@ describe('xmlDeclaration (unit)', () => {
       it('returns true if there is a standalone property set to yes', () => {
          xmlDeclPToken = new XmlDeclarationPToken({
             open: SToken.fromString('<?'),
-            params: [
+            fields: [
                {
                   name: SToken.fromString('standalone'),
                   nameSpace: undefined,
@@ -107,7 +107,7 @@ describe('xmlDeclaration (unit)', () => {
       it('returns false if there is a standalone property set to no', () => {
          xmlDeclPToken = new XmlDeclarationPToken({
             open: SToken.fromString('<?'),
-            params: [
+            fields: [
                {
                   name: SToken.fromString('standalone'),
                   nameSpace: undefined,
@@ -125,7 +125,7 @@ describe('xmlDeclaration (unit)', () => {
       it('returns true if there is a standalone property and value are all the wrong case', () => {
          xmlDeclPToken = new XmlDeclarationPToken({
             open: SToken.fromString('<?'),
-            params: [
+            fields: [
                {
                   name: SToken.fromString('StAndAlOne'),
                   nameSpace: undefined,

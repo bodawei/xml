@@ -3,10 +3,10 @@
 import { SToken } from 'sToken';
 import { XmlDeclarationPToken } from 'pToken';
 
-import { sTokensFromPToken } from '../../token/common/entityInstruction';
+import { fieldedInstructionToSTokens } from './common/fieldedInstructionToSTokens';
 
 function xmlDeclarationToSTokens(pToken: XmlDeclarationPToken): Array<SToken> {
-   return sTokensFromPToken(pToken);
+   return fieldedInstructionToSTokens(pToken);
 }
 
 export { xmlDeclarationToSTokens };

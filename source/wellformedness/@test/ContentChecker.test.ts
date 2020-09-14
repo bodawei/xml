@@ -22,7 +22,7 @@ import {
 } from 'token';
 
 import { ContentChecker } from '../ContentChecker';
-import { GeneralEntitiesInfo, CheckState, CHECKER_DONE } from '../checkUtils';
+import { CheckState, CHECKER_DONE } from '../checkUtils';
 
 describe('ContentChecker (unit)', () => {
    let ec: MockErrorCollector;
@@ -53,7 +53,7 @@ describe('ContentChecker (unit)', () => {
       ec = new MockErrorCollector();
    });
 
-   function makeChecker(state: CheckState = new CheckState(), hasAll = true) {
+   function makeChecker(state: CheckState = new CheckState()) {
       return new ContentChecker(state, []);
    }
 

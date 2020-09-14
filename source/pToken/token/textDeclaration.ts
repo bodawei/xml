@@ -4,10 +4,10 @@ import { SToken, STokenSource } from 'sToken';
 
 import { InstructionStart } from '../bridge/instruction';
 import {
-   EntityInstructionParam,
-   parseEntityInstruction,
-   EntityInstruction,
-} from '../../token/common/entityInstruction';
+   InstructionField,
+   parseFieldedInstruction,
+   FieldedInstruction,
+} from '../common/fieldedInstruction';
 
 const TEXTDECL_PTOKEN = 'TEXTDECL_PTOKEN';
 
@@ -18,7 +18,7 @@ interface RawTextDeclaration {
    openSpace?: SToken;
    target?: SToken;
    targetSpace?: SToken;
-   params?: ReadonlyArray<EntityInstructionParam>;
+   fields?: ReadonlyArray<InstructionField>;
    close?: SToken;
 }
 
@@ -33,34 +33,20 @@ class TextDeclarationPToken {
 
    public readonly targetSpace?: SToken;
 
-   public readonly params: ReadonlyArray<EntityInstructionParam> = [];
+   public readonly fields: ReadonlyArray<InstructionField> = [];
 
    public readonly close?: SToken;
 
    constructor(
-      param: TextDeclarationPToken | InstructionStart | EntityInstruction,
+      param: TextDeclarationPToken | InstructionStart | FieldedInstruction,
       other: RawTextDeclaration = {},
    ) {
       this.open = other?.open ?? param.open;
       this.openSpace = other?.openSpace ?? param.openSpace;
       this.target = other?.target ?? param.target;
       this.targetSpace = other?.targetSpace ?? param.targetSpace;
-
-      if (other.close) {
-         this.close = other.close;
-      } else if ('close' in param) {
-         this.close = param.close;
-      } else {
-         this.close = undefined;
-      }
-
-      if (other.params) {
-         this.params = other?.params || [];
-      } else if ('params' in param) {
-         this.params = param.params;
-      } else {
-         this.params = [];
-      }
+      this.fields = other.fields ?? ('fields' in param ? param.fields : []);
+      this.close = other.close ?? ('close' in param ? param.close : undefined);
    }
 }
 
@@ -81,7 +67,7 @@ function parseTextDeclaration(
    instStart: InstructionStart,
    deliverPToken: (result: TextDeclarationPToken) => void,
 ): void {
-   parseEntityInstruction(source, instStart, PARAM_NAMES, (protoToken) => {
+   parseFieldedInstruction(source, instStart, PARAM_NAMES, (protoToken) => {
       deliverPToken(new TextDeclarationPToken(protoToken));
    });
 }

@@ -1,12 +1,10 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import { InstructionStart } from '../../bridge/instruction';
-
-import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
+import { parseTextDeclaration } from '../textDeclaration';
 
 describe('textDeclaration (integration)', () => {
    let start: InstructionStart;
@@ -27,7 +25,7 @@ describe('textDeclaration (integration)', () => {
          source.endText();
 
          parseTextDeclaration(source, start, (parsing) => {
-            expect(parsing.params[0].name.str).toEqual('version');
+            expect(parsing.fields[0].name.str).toEqual('version');
             done();
          });
       });
@@ -38,7 +36,7 @@ describe('textDeclaration (integration)', () => {
          source.endText();
 
          parseTextDeclaration(source, start, (parsing) => {
-            expect(parsing.params[1].value!.str).toEqual('ascii');
+            expect(parsing.fields[1].value!.str).toEqual('ascii');
             done();
          });
       });

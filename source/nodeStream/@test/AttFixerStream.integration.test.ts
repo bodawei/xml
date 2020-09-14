@@ -30,7 +30,7 @@ describe('AttFixerStream (integration)', () => {
             open: toSToken('<?'),
             target: toSToken('xml'),
             targetSpace: toSToken(' '),
-            params: [{
+            fields: [{
                name: toSToken('version'),
                nameSpace: undefined,
                equal: toSToken('='),

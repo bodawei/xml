@@ -6,13 +6,13 @@ import { TextDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { checkCharWellFormed } from '../../token/common/misc';
-import { EntityInstructionParam } from '../../token/common/entityInstruction';
+import { InstructionField } from 'pToken';
 
 const WFEID = WellFormedError.ID;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 
-function checkParameters(
-   params: ReadonlyArray<EntityInstructionParam>,
+function checkFields(
+   params: ReadonlyArray<InstructionField>,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
 ): void {
@@ -81,7 +81,7 @@ function textDeclarationCheck(
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);
 
-   checkParameters(pToken.params, ec, confVer);
+   checkFields(pToken.fields, ec, confVer);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.TEXTDECL_NO_CLOSE);

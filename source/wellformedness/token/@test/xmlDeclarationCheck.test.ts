@@ -21,7 +21,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          openSpace: undefined,
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
-         params: [
+         fields: [
             {
                name: toSToken('version'),
                nameSpace: undefined,
@@ -61,38 +61,38 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('calls misc.checkCharWellFormed() on the version value', () => {
-         (xmlDeclPToken.params[0].value as any) = toSToken('\u0001');
+         (xmlDeclPToken.fields[0].value as any) = toSToken('\u0001');
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-            xmlDeclPToken.params[0].value,
+            xmlDeclPToken.fields[0].value,
             mockErrorCollector,
             confVer,
          );
       });
 
       it('calls misc.checkCharWellFormed() on the encoding value', () => {
-         (xmlDeclPToken.params[0].name as any) = toSToken('encoding');
-         (xmlDeclPToken.params[0].value as any) = toSToken('\u0001');
+         (xmlDeclPToken.fields[0].name as any) = toSToken('encoding');
+         (xmlDeclPToken.fields[0].value as any) = toSToken('\u0001');
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-            xmlDeclPToken.params[0].value,
+            xmlDeclPToken.fields[0].value,
             mockErrorCollector,
             confVer,
          );
       });
 
       it('calls misc.checkCharWellFormed() on the standalone value', () => {
-         (xmlDeclPToken.params[0].name as any) = toSToken('standalone');
-         (xmlDeclPToken.params[0].value as any) = toSToken('\u0001');
+         (xmlDeclPToken.fields[0].name as any) = toSToken('standalone');
+         (xmlDeclPToken.fields[0].value as any) = toSToken('\u0001');
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
          expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-            xmlDeclPToken.params[0].value,
+            xmlDeclPToken.fields[0].value,
             mockErrorCollector,
             confVer,
          );
@@ -152,7 +152,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             openSpace: undefined,
             target: toSToken('xml'),
             targetSpace: toSToken(' '),
-            params: [
+            fields: [
                {
                   name: toSToken('version'),
                   nameSpace: toSToken(' '),
@@ -175,7 +175,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             openSpace: undefined,
             target: toSToken('xml'),
             targetSpace: toSToken(' '),
-            params: [],
+            fields: [],
             close: toSToken('?>'),
          });
 
@@ -194,7 +194,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             openSpace: toSToken(' '),
             target: toSToken('xml'),
             targetSpace: toSToken(' '),
-            params: [
+            fields: [
                {
                   name: toSToken('VERSION'),
                   nameSpace: toSToken(' '),
@@ -211,7 +211,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_PARAM_INVALID_CASE,
             params: ['version', 'VERSION'],
-            position: xmlDeclPToken.params[0].name,
+            position: xmlDeclPToken.fields[0].name,
          });
       });
 
@@ -233,7 +233,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             openSpace: toSToken(' '),
             target: toSToken('xml'),
             targetSpace: toSToken(' '),
-            params: [
+            fields: [
                {
                   name: toSToken('version'),
                   nameSpace: toSToken(' '),
@@ -257,7 +257,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_SPACE_BETWEEN_PARAMS,
             params: ['standalone'],
-            position: xmlDeclPToken.params[1].name,
+            position: xmlDeclPToken.fields[1].name,
          });
       });
 
@@ -268,7 +268,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                openSpace: toSToken(' '),
                target: toSToken('xml'),
                targetSpace: toSToken(' '),
-               params: [
+               fields: [
                   {
                      name: toSToken('encoding'),
                      nameSpace: toSToken(' '),
@@ -292,7 +292,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
                params: undefined,
-               position: xmlDeclPToken.params[1].name,
+               position: xmlDeclPToken.fields[1].name,
             });
          });
 
@@ -302,7 +302,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                openSpace: toSToken(' '),
                target: toSToken('xml'),
                targetSpace: toSToken(' '),
-               params: [
+               fields: [
                   {
                      name: toSToken('version'),
                      nameSpace: toSToken(' '),
@@ -319,7 +319,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
                params: ['1.2'],
-               position: xmlDeclPToken.params[0].value,
+               position: xmlDeclPToken.fields[0].value,
             });
          });
 
@@ -329,7 +329,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                openSpace: toSToken(' '),
                target: toSToken('xml'),
                targetSpace: toSToken(' '),
-               params: [
+               fields: [
                   {
                      name: toSToken('version'),
                      nameSpace: toSToken(' '),
@@ -352,7 +352,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                openSpace: toSToken(' '),
                target: toSToken('xml'),
                targetSpace: toSToken(' '),
-               params: [
+               fields: [
                   {
                      name: toSToken('version'),
                      nameSpace: toSToken(' '),
@@ -375,7 +375,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                openSpace: toSToken(' '),
                target: toSToken('xml'),
                targetSpace: toSToken(' '),
-               params: [
+               fields: [
                   {
                      name: toSToken('version'),
                      nameSpace: toSToken(' '),
@@ -399,7 +399,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   openSpace: toSToken(' '),
                   target: toSToken('xml'),
                   targetSpace: toSToken(' '),
-                  params: [
+                  fields: [
                      {
                         name: toSToken('encoding'),
                         nameSpace: toSToken(' '),
@@ -423,7 +423,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
                   params: undefined,
-                  position: xmlDeclPToken.params[0].name,
+                  position: xmlDeclPToken.fields[0].name,
                });
             });
 
@@ -433,7 +433,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   openSpace: toSToken(' '),
                   target: toSToken('xml'),
                   targetSpace: toSToken(' '),
-                  params: [
+                  fields: [
                      {
                         name: toSToken('version'),
                         nameSpace: toSToken(' '),
@@ -457,7 +457,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
                   params: ['$$BAD_ENCODING$$'],
-                  position: xmlDeclPToken.params[1].value,
+                  position: xmlDeclPToken.fields[1].value,
                });
             });
          });
@@ -469,7 +469,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   openSpace: toSToken(' '),
                   target: toSToken('xml'),
                   targetSpace: toSToken(' '),
-                  params: [
+                  fields: [
                      {
                         name: toSToken('standalone'),
                         nameSpace: toSToken(' '),
@@ -493,7 +493,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
                   params: undefined,
-                  position: xmlDeclPToken.params[0].name,
+                  position: xmlDeclPToken.fields[0].name,
                });
             });
 
@@ -503,7 +503,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   openSpace: toSToken(' '),
                   target: toSToken('xml'),
                   targetSpace: toSToken(' '),
-                  params: [
+                  fields: [
                      {
                         name: toSToken('version'),
                         nameSpace: toSToken(' '),
@@ -527,7 +527,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
                   params: ['Maybe'],
-                  position: xmlDeclPToken.params[1].value,
+                  position: xmlDeclPToken.fields[1].value,
                });
             });
 
@@ -537,7 +537,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   openSpace: toSToken(' '),
                   target: toSToken('xml'),
                   targetSpace: toSToken(' '),
-                  params: [
+                  fields: [
                      {
                         name: toSToken('version'),
                         nameSpace: toSToken(' '),
@@ -561,7 +561,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
                   params: ['yes', 'YES'],
-                  position: xmlDeclPToken.params[1].value,
+                  position: xmlDeclPToken.fields[1].value,
                });
             });
          });
@@ -573,7 +573,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   openSpace: toSToken(' '),
                   target: toSToken('xml'),
                   targetSpace: toSToken(' '),
-                  params: [
+                  fields: [
                      {
                         name: toSToken('bogus'),
                         nameSpace: toSToken(' '),
@@ -590,7 +590,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,
                   params: ['bogus'],
-                  position: xmlDeclPToken.params[0].name,
+                  position: xmlDeclPToken.fields[0].name,
                });
             });
          });
