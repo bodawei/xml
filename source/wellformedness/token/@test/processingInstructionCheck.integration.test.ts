@@ -4,9 +4,8 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
+import { ProcessingInstructionPToken, parseProcessingInstruction } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
-
-import { ProcessingInstructionPToken, parseProcessingInstruction } from 'token';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
 

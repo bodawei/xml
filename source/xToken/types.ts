@@ -25,10 +25,9 @@ type XToken =
    | CharRefXToken
    | GeneralEntityReferenceXToken
    | ParameterEntityReferenceXToken
-   | ProcessingInstructionXToken
    | TextDeclarationXToken
    | XmlDeclarationXToken
-   // additions
+   // temp additions
    | CharDataXToken
    | CdataXToken
    | DocTypeEndXToken
@@ -37,6 +36,8 @@ type XToken =
    | ElementEndXToken
    | ElementStartXToken
    | NotationDeclarationXToken
-   | SpaceXToken;
+   | SpaceXToken
+   // Fully blessed
+   | ProcessingInstructionXToken;
 
 export { XToken };

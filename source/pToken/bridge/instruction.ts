@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import {
    TextDeclarationPToken,
@@ -14,9 +14,8 @@ import {
 } from '../token/processingInstruction';
 
 /**********************************************************************\
- The instruction namespace bridges input far enough to decide
- whether to do an XML or Text Declaration parsing, or parse a
- Processing Instruction.
+ instruction bridges input far enough to decide whether to do an
+ XML or Text Declaration parsing, or parse a Processing Instruction.
 \**********************************************************************/
 
 interface InstructionStart {
@@ -25,25 +24,27 @@ interface InstructionStart {
    target?: SToken;
    targetSpace?: SToken;
 }
+
 type DeliverInstruction = (
    section: ProcessingInstructionPToken | XmlDeclarationPToken | TextDeclarationPToken,
 ) => void;
 
 /**********************************************************************\
- parseInstruction() extracts a ProcessingInstructionPToken or
- an XmlDeclarationPToken, given a '<?' token. If 'name' isn't /xml/i
- then this assumes a processing instruction was intended.
+ parseInstruction() extracts a ProcessingInstructionPToken a
+ TextDeclarationPToken, or an XmlDeclarationPToken, given a '<?' token.
+ If 'name' isn't /xml/i then this assumes a processing instruction
+ was intended.
 
  PARAM
- source: A STokenSource to read from
- openSToken: the SToken for <?
- deliverPToken: Callback to deliver the PToken
+ openSToken: the SToken for the opening <?
+ inDocument: true if this is in the main document entity (used to
+   distinguish whether to parse a TextDecl or an XmlDecl)
 
  SYNTAX
    §2.6 & §2.8
       instruction ::= '<?' name S
    Lax
-      instruction ::= '<?' S? name? S?
+      instruction ::= '<?' S? (AnyNonSpaceChar*)? S?
 \**********************************************************************/
 
 function parseInstruction(
@@ -53,7 +54,6 @@ function parseInstruction(
    deliverPToken: DeliverInstruction,
 ): void {
    const start: InstructionStart = { open: openSToken };
-   start.open = openSToken;
 
    source.extractToObjectNoParams('space', start, 'openSpace');
    source.extractToObject('word', ['?>'], start, 'target');
@@ -62,14 +62,15 @@ function parseInstruction(
       start.targetSpace = sToken;
       const target = strOrBlank(start.target);
 
-      if (target.toLocaleLowerCase() === 'xml') {
-         if (inDocument) {
-            parseXmlDeclaration(source, start, deliverPToken);
-         } else {
-            parseTextDeclaration(source, start, deliverPToken);
-         }
-      } else {
+      if (target.toLowerCase() !== 'xml') {
          parseProcessingInstruction(source, start, deliverPToken);
+         return;
+      }
+
+      if (inDocument) {
+         parseXmlDeclaration(source, start, deliverPToken);
+      } else {
+         parseTextDeclaration(source, start, deliverPToken);
       }
    });
 }

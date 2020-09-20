@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
+import { ProcessingInstructionPToken } from 'pToken';
 import { SToken, STokenArrayBuilder } from 'sToken';
-import { ProcessingInstructionPToken } from 'token';
 
 function processingInstructionToStokens(pToken: ProcessingInstructionPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

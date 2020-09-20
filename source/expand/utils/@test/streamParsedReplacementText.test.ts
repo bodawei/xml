@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion, CONFORMANCE_VERSION } from 'basic';
+import { ENTITY_ID, ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -58,6 +58,7 @@ describe('streamParsedReplacementText() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
+            resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
@@ -160,7 +161,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          open: toSToken('<!'),
          name: toSToken('ge'),
       });
-      entityDetails.addEntity(geDecl, [textPToken]);
+      entityDetails.addEntity(geDecl, [textPToken], '');
       const geRef = new GeneralEntityReferencePToken({
          open: toSToken('&'),
          name: toSToken('ge'),
@@ -187,7 +188,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          open: toSToken('<!'),
          name: toSToken('ge'),
       });
-      entityDetails.addEntity(geDecl, [textPToken]);
+      entityDetails.addEntity(geDecl, [textPToken], '');
       const geRef = new GeneralEntityReferencePToken({
          open: toSToken('&'),
          name: toSToken('ge'),
@@ -226,11 +227,12 @@ describe('streamParsedReplacementText() (unit)', () => {
             type: EXTERNAL_ID,
          },
       });
-      entityDetails.addEntity(peDecl);
+      entityDetails.addEntity(peDecl, undefined, '');
       const peRef = new ParameterEntityReferencePToken({
          open: toSToken('&'),
          name: toSToken('pe'),
       });
+      const resolveSpy = spyOn(params.utils, 'resolveEntityId');
       const retrieveSpy = spyOn(params.utils, 'retrieveExternalEntity');
       retrieveSpy.and.returnValue({
          sTokenSource,
@@ -241,7 +243,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          cb();
       });
 
-      expect(retrieveSpy).toHaveBeenCalledWith(
+      expect(resolveSpy).toHaveBeenCalledWith(
          jasmine.objectContaining({ type: ENTITY_ID, systemId: '' }),
          jasmine.objectContaining({ type: ENTITY_ID, systemId: '', publicId: '' }),
       );
@@ -263,7 +265,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          open: toSToken('<!'),
          name: toSToken('pe'),
       });
-      entityDetails.addEntity(peDecl, [textPToken]);
+      entityDetails.addEntity(peDecl, [textPToken], '');
       const peRef = new ParameterEntityReferencePToken({
          open: toSToken('&'),
          name: toSToken('pe'),

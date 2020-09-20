@@ -6,7 +6,9 @@ const CHARREF_XTOKEN = 'CHARREF_XTOKEN';
 
 class CharRefXToken {
    public readonly type: typeof CHARREF_XTOKEN = CHARREF_XTOKEN;
+
    public readonly char: string;
+
    public readonly pToken?: CharRefPToken;
 
    constructor(character: string);

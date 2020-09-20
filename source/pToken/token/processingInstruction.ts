@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { SToken, STokenSource } from 'sToken';
 
@@ -45,21 +45,17 @@ class ProcessingInstructionPToken {
 
 /**********************************************************************\
  parseProcessingInstruction() extracts the SToken's that make up an
- entity reference.
+ processing instruction.
 
- This depends on being passed an instruction PToken (and with the
- corresponding text already processed).
-
- PARAM
- source: A STokenSource to read from
- deliverPToken: Callback to deliver the PTokens
+ This depends on being passed InstructionStart, which is to say that
+ open, and target must already have been read.
 
  SYNTAX
    §2.6.0
       [16] PI       ::=  '<?' PITarget (S (Char* - (Char* '?>' Char*)))? '?>'
       [17] PITarget ::=  Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
    Lax
-      [16] PI       ::=  '<?' S? PITarget (S (Char* - (Char* '?>' Char*)))? '?>'
+      [16] PI       ::=  '<?' S? PITarget (S (AnyChar* - (AnyChar* '?>' AnyChar*)))? '?>'
       [17] PITarget ::=  Name
 \**********************************************************************/
 

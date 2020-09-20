@@ -1,12 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { TEXTDECL_PTOKEN, XMLDECL_PTOKEN, ParseValue } from 'pToken';
+import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, XMLDECL_PTOKEN, ParseValue } from 'pToken';
 
 import {
    CHARREF_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   PROCESSING_INSTRUCTION_PTOKEN,
 } from 'token';
 
 import { CharRefXToken } from './token/CharRefXToken';

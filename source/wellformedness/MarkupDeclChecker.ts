@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import { TEXTDECL_PTOKEN, ParseValue } from 'pToken';
+import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
@@ -15,7 +15,6 @@ import {
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
-   PROCESSING_INSTRUCTION_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    SPACE_PTOKEN,

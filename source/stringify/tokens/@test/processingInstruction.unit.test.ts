@@ -3,7 +3,7 @@
 
 import { toSToken, SToken } from 'sToken';
 import { processingInstructionToStokens } from '../processingInstructionToStokens';
-import { ProcessingInstructionPToken } from 'token';
+import { ProcessingInstructionPToken } from 'pToken';
 
 describe('processingInstructionToStokens() (unit)', () => {
    it('returns all the STokens', () => {

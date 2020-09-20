@@ -17,13 +17,13 @@ import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 import { OpaqueEntityLoc } from '../types';
 
-type LoadingResult = {
+interface LoadingResult {
    details: PrivateGEDetails | PrivatePEDetails | void;
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
-};
+}
 type LoadingCallback = (result: LoadingResult) => void;
 
-type PrivateGEDetails = {
+interface PrivateGEDetails {
    token: GeneralEntityDeclarationPToken;
    isUnparsed: boolean;
    isInternal: boolean;
@@ -31,24 +31,24 @@ type PrivateGEDetails = {
    protoReplacementText?: EntityValuePToken;
    waiters: Array<LoadingCallback>;
    entityLoc?: OpaqueEntityLoc; // set only when isInternal is false.
-};
+}
 
-type PrivatePEDetails = {
+interface PrivatePEDetails {
    token: ParameterEntityDeclarationPToken;
    isInternal: boolean;
    isLoading: boolean;
    protoReplacementText?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
    waiters: Array<LoadingCallback>;
    entityLoc?: OpaqueEntityLoc; // set only when isInternal is false.
-};
+}
 
-type GeneralEntityMap = {
+interface GeneralEntityMap {
    [entityName: string]: PrivateGEDetails;
-};
+}
 
-type ParameterEntityMap = {
+interface ParameterEntityMap {
    [entityName: string]: PrivatePEDetails;
-};
+}
 
 // No reason for anyone externally to see the waiters property.
 type PEDetails = Readonly<Omit<PrivatePEDetails, 'waiters'>>;
@@ -65,8 +65,11 @@ type GEDetails = Readonly<Omit<PrivateGEDetails, 'waiters'>>;
  */
 class EntityDetails {
    private externalSubset?: ExternalDtdSubsetPseudoToken;
+
    private predefinedGeDetails: GeneralEntityMap;
+
    private geDetails: GeneralEntityMap;
+
    private peDetails: ParameterEntityMap;
 
    constructor() {
@@ -95,8 +98,8 @@ class EntityDetails {
 
    public addEntity(
       pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-      expandedInternalValue?: EntityValuePToken,
-      resolvedLocation?: OpaqueEntityLoc,
+      expandedInternalValue: EntityValuePToken | undefined,
+      resolvedLocation: OpaqueEntityLoc,
    ): void {
       const name = strOrBlank(pToken.name);
 

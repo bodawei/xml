@@ -1,13 +1,15 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
-import { GeneralEntityReferencePToken } from 'token';
+import { GeneralEntityReferencePToken } from '../../token/generalEntityReference';
 
 const GENERAL_ENTITY_REFERENCE_XTOKEN = 'GENERAL_ENTITY_REFERENCE_XTOKEN';
 
 class GeneralEntityReferenceXToken {
    public readonly type: typeof GENERAL_ENTITY_REFERENCE_XTOKEN = GENERAL_ENTITY_REFERENCE_XTOKEN;
+
    public readonly name: string;
+
    public pToken?: GeneralEntityReferencePToken;
 
    constructor(name: string);

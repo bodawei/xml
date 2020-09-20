@@ -1,9 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
-import { PToken, ParseValue, ContextType } from 'pToken';
+import { ParseValue, ContextType } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    CONDITIONAL_PTOKEN,
@@ -49,7 +48,7 @@ import { EntityExpander } from '../EntityExpander';
 import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
 import { EntityNameStack } from '../utils/EntityNameStack';
 
-describe('EntityExpander (unit)', () => {
+fdescribe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
    let assignAttListSpy: jasmine.Spy;
@@ -97,6 +96,7 @@ describe('EntityExpander (unit)', () => {
       const entityExpander = new EntityExpander(validate, results.push.bind(results), {
          parseBody: (): void => {},
          parseEntityValue: (): void => {},
+         resolveEntityId: () => '',
          retrieveExternalEntity,
          parseAttributeValue,
       });
@@ -384,6 +384,7 @@ describe('EntityExpander (unit)', () => {
             const entityExpander = new EntityExpander(false, results.push.bind(results), {
                parseBody: (): void => {},
                parseEntityValue: (): void => {},
+               resolveEntityId: () => '',
                retrieveExternalEntity,
                parseAttributeValue,
             });
@@ -580,7 +581,12 @@ describe('EntityExpander (unit)', () => {
          let index = 0;
 
          expandAttributeSpy.and.callFake(
-            (value: Array<object>, params: object, stack: EntityNameStack, cb: Function) => {
+            (
+               value: Array<Record<string, any>>,
+               params: Record<string, any>,
+               stack: EntityNameStack,
+               cb: (arg: any) => void,
+            ) => {
                const result = value.map(() => {
                   const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
                   index++;
@@ -688,7 +694,7 @@ describe('EntityExpander (unit)', () => {
          expandEntityValueSpy = spyOn(expandEntityValueModule, 'expandEntityValue');
          let index = 0;
 
-         expandEntityValueSpy.and.callFake((pToken, params, chain, cb: Function) => {
+         expandEntityValueSpy.and.callFake((pToken, params, chain, cb: (arg: any) => void) => {
             const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
                `${index}`,
             ]);
@@ -801,7 +807,7 @@ describe('EntityExpander (unit)', () => {
          expandEntityValueSpy.and.callFake((pToken, params, chain, cb) => {
             hasGeDecl = params.entityDetails.hasEntity(geDecl);
             afterCallParams = params;
-            cb({ newValue: [new TextPToken({ text: toSToken(`testValue`) })], byproducts: [] });
+            cb({ newValue: [new TextPToken({ text: toSToken('testValue') })], byproducts: [] });
          });
 
          doExpand([geDecl, geDecl], true, () => {
@@ -1052,6 +1058,7 @@ describe('EntityExpander (unit)', () => {
          const entityExpander = new EntityExpander(false, () => {}, {
             parseBody: (): void => {},
             parseEntityValue: (): void => {},
+            resolveEntityId: () => '',
             retrieveExternalEntity,
             parseAttributeValue,
          });
@@ -1084,6 +1091,7 @@ describe('EntityExpander (unit)', () => {
          const entityExpander = new EntityExpander(false, results.push.bind(results), {
             parseBody: (): void => {},
             parseEntityValue: (): void => {},
+            resolveEntityId: () => '',
             retrieveExternalEntity,
             parseAttributeValue,
          });
@@ -1118,7 +1126,12 @@ describe('EntityExpander (unit)', () => {
          });
 
          expandAttributeSpy.and.callFake(
-            (value: Array<object>, params: object, stack: EntityNameStack, cb: Function) => {
+            (
+               value: Array<Record<string, any>>,
+               params: Record<string, any>,
+               stack: EntityNameStack,
+               cb: (arg: any) => void,
+            ) => {
                const result = value.map(() => {
                   const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
                   index++;

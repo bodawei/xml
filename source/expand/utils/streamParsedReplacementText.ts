@@ -58,7 +58,7 @@ function streamParsedReplacementText(
    expandParams: ExpandParams,
    deliverToken: DeliverToken,
 ): void {
-   const { entityDetails, utils, entityId } = expandParams;
+   const { entityDetails, utils } = expandParams;
    let sTokenSource: STokenSource;
    let getErrors: () => Array<XmlError>;
    let context = ContextType.DOCUMENT;
@@ -73,10 +73,7 @@ function streamParsedReplacementText(
    }
 
    if (reference.type === EXTERNAL_DTD_PSEUDO_TOKEN) {
-      ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(
-         entityId,
-         externalIdToEntityId(reference.externalId),
-      ));
+      ({ sTokenSource, getErrors } = utils.retrieveExternalEntity('@@@@'));
       context = ContextType.EXTERNAL_SUBSET;
       start = new ExternalSubsetStartToken();
       end = new ExternalSubsetEndToken();
@@ -107,10 +104,7 @@ function streamParsedReplacementText(
          );
          getErrors = (): Array<XmlError> => [];
       } else {
-         ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(
-            entityId,
-            externalIdToEntityId(details.token.externalId),
-         ));
+         ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(details.entityLoc));
       }
    }
 

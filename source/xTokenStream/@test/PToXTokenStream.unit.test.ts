@@ -11,10 +11,8 @@ import {
 
    CdataPToken,
    CharDataPToken,
-   CharRefPToken,
    ConditionalClosePToken,
    ElementEndPToken,
-   ProcessingInstructionPToken,
    TextPToken,
    GeneralEntityReferencePToken,
    ParameterEntityEndPToken,

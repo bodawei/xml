@@ -2,9 +2,9 @@
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ProcessingInstructionPToken } from 'token';
 import {
    checkName,
    checkCharWellFormed,

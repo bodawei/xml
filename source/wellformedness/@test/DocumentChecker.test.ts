@@ -4,7 +4,12 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { TextDeclarationPToken, XmlDeclarationPToken, XMLDECL_PTOKEN } from 'pToken';
+import {
+   ProcessingInstructionPToken,
+   TextDeclarationPToken,
+   XmlDeclarationPToken,
+   XMLDECL_PTOKEN,
+} from 'pToken';
 import { toSToken } from 'sToken';
 import {
    CDATA_PTOKEN,
@@ -24,7 +29,6 @@ import {
    ExternalSubsetStartToken,
    InternalSubsetEndToken,
    InternalSubsetStartToken,
-   ProcessingInstructionPToken,
    SpacePToken,
    PToken,
 } from 'token';

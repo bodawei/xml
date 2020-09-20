@@ -2,11 +2,13 @@
 
 import { EntityId, ENTITY_ID } from 'basic';
 
-import { OpaqueEntityLoc } from '../types';
-
 // http://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative
 const RELATIVE_REGEX = new RegExp('^([a-z0-9]+:)?//', 'i');
 const PROTOCOL_RELATIVE_REGEX = /^\/\//;
+
+function isEntityId(item: any): item is EntityId {
+   return typeof item === 'object' && item.type === ENTITY_ID;
+}
 
 function getDirOf(path: string): string {
    if (path[path.length - 1] !== '/') {
@@ -54,11 +56,11 @@ function systemIsProtocolRelative(systemId: string): boolean {
  * In other words, it is the URI of the resource retrieved after all redirection
  * has occurred.
  */
-function resolveEntityId(baseId: EntityId | OpaqueEntityLoc, newEntity: EntityId): OpaqueEntityLoc {
+function resolveEntityId(baseId: EntityId | string, newEntity: EntityId): string {
    let base: string;
    let resolved = newEntity?.systemId || './missingSystemid.xml';
 
-   if (typeof baseId === 'object' && baseId.type === ENTITY_ID) {
+   if (isEntityId(baseId)) {
       base = baseId.systemId;
    } else {
       base = baseId;

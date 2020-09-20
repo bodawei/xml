@@ -2,12 +2,11 @@
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
-import { TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
+import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../token/parameterEntityReference'; // WTF?
 import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference'; // WTF?
 import { CHARREF_PTOKEN } from '../token/charRef'; // WTF?
-import { PROCESSING_INSTRUCTION_PTOKEN } from 'token';
 
 import { charRefCheck } from './token/charRefCheck';
 import { parameterEntityReferenceCheck } from './token/parameterEntityReferenceCheck';

@@ -31,12 +31,15 @@ interface EntityProcessors {
       sTokenSource: STokenSource,
       done: (results: EntityValuePToken | void) => void,
    ) => void;
-   retrieveExternalEntity: (baseEntity: EntityId, relativeEntity: EntityId) => RetrieveResults;
+   retrieveExternalEntity: (entityLoc: OpaqueEntityLoc) => RetrieveResults;
+   resolveEntityId: (
+      baseEntity: EntityId | OpaqueEntityLoc,
+      relativeEntity: EntityId,
+   ) => OpaqueEntityLoc;
    parseAttributeValue: (
       sTokenSource: STokenSource,
       done: (results: AttributeValueResults) => void,
    ) => void;
-   resolveEntityId?: (base: EntityId | OpaqueEntityLoc, child: EntityId) => OpaqueEntityLoc;
 }
 
 interface ExpandParams {

@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, Range, EntityId, ConformanceVersion } from 'basic';
+import { Token, Range, EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -23,9 +23,9 @@ import {
 
 import { EntityExpander } from '../EntityExpander';
 
-import { AttributeValueResults, ExpandToken, RetrieveResults } from '../types';
+import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../types';
 
-describe('EntityExpander (integration)', () => {
+fdescribe('EntityExpander (integration)', () => {
    const externalMap: { [publicName: string]: string } = {};
 
    function parseBody(
@@ -65,13 +65,20 @@ describe('EntityExpander (integration)', () => {
       });
    }
 
-   function retrieveExternalEntity(
-      baseEntity: EntityId,
+   function resolveEntityId(
+      baseEntity: EntityId | OpaqueEntityLoc,
       relativeEntity: EntityId,
-   ): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors, relativeEntity);
+   ): OpaqueEntityLoc {
+      return {
+         entityLoc: '',
+         relativeEntity,
+      };
+   }
 
-      const str = externalMap[relativeEntity.systemId];
+   function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
+      const sTokenSource = new STokenSource(defaultExtractors, entityLoc.relativeEntity);
+
+      const str = externalMap[entityLoc.relativeEntity.systemId];
       sTokenSource.addText(str);
       sTokenSource.endText();
 
@@ -117,6 +124,7 @@ describe('EntityExpander (integration)', () => {
       const entityExpander = new EntityExpander(validate, pushToken, {
          parseBody,
          parseEntityValue,
+         resolveEntityId,
          retrieveExternalEntity,
          parseAttributeValue,
       });

@@ -1,20 +1,85 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { parseProcessingInstruction, ProcessingInstructionPToken } from '../processingInstruction';
+import {
+   parseProcessingInstruction,
+   ProcessingInstructionPToken,
+   PROCESSING_INSTRUCTION_PTOKEN,
+} from '../processingInstruction';
 
-describe('processingInstructionPToken (unit)', () => {
-   let piPToken: any;
+describe('ProcessingInstructionPToken (unit)', () => {
+   describe('ProcessingInstructionPToken()', () => {
+      it('can be constructed with just an open token', () => {
+         const result = new ProcessingInstructionPToken({ open: toSToken('<?') });
 
-   beforeEach(() => {
-      const protoPToken = {
-         open: SToken.fromString('open'),
-         instruction: SToken.fromString('blah'),
-         close: SToken.fromString('?>'),
-      };
-      piPToken = new ProcessingInstructionPToken(protoPToken);
+         expect(result).toEqual(
+            jasmine.objectContaining({
+               type: PROCESSING_INSTRUCTION_PTOKEN,
+               open: toSToken('<?'),
+               target: undefined,
+               targetSpace: undefined,
+               instruction: undefined,
+               close: undefined,
+            }),
+         );
+      });
+
+      it('can be constructed with a full raw PToken', () => {
+         const result = new ProcessingInstructionPToken({
+            open: toSToken('<?'),
+            openSpace: toSToken(' '),
+            target: toSToken('xml'),
+            targetSpace: toSToken('\t'),
+            instruction: toSToken('blahblah'),
+            close: toSToken('?>'),
+         });
+
+         expect(result).toEqual(
+            jasmine.objectContaining({
+               type: PROCESSING_INSTRUCTION_PTOKEN,
+               open: toSToken('<?'),
+               openSpace: toSToken(' '),
+               target: toSToken('xml'),
+               targetSpace: toSToken('\t'),
+               instruction: toSToken('blahblah'),
+               close: toSToken('?>'),
+            }),
+         );
+      });
+
+      it('can be constructed with a full ProcessingInstructionPToken and a set of overriding values', () => {
+         const first = new ProcessingInstructionPToken({
+            open: toSToken('<?'),
+            openSpace: toSToken(' '),
+            target: toSToken('xml'),
+            targetSpace: toSToken('\t'),
+            instruction: toSToken('blahblah'),
+            close: toSToken('?>'),
+         });
+
+         const result = new ProcessingInstructionPToken(first, {
+            open: toSToken('<?'),
+            openSpace: toSToken('\n'),
+            target: toSToken('frog'),
+            targetSpace: toSToken(' '),
+            instruction: toSToken('no way'),
+            close: toSToken('?>'),
+         });
+
+         expect(result).toEqual(
+            jasmine.objectContaining({
+               type: PROCESSING_INSTRUCTION_PTOKEN,
+               open: toSToken('<?'),
+               openSpace: toSToken('\n'),
+               target: toSToken('frog'),
+               targetSpace: toSToken(' '),
+               instruction: toSToken('no way'),
+               close: toSToken('?>'),
+            }),
+         );
+      });
    });
 
    describe('parseProcessingInstruction()', () => {
@@ -30,23 +95,29 @@ describe('processingInstructionPToken (unit)', () => {
             ['?>', 'match', '?>'],
          ]);
 
-         parseProcessingInstruction(
-            mockSource,
-            { open: SToken.fromString('open') } as any,
-            callback,
-         );
+         parseProcessingInstruction(mockSource, { open: toSToken('<?') }, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(piPToken);
+         expect(callback).toEqualRangeless(
+            new ProcessingInstructionPToken({
+               open: toSToken('<?'),
+               instruction: toSToken('blah'),
+               close: toSToken('?>'),
+            }),
+         );
       });
 
       it('returns a value with no values if we are at end of input', () => {
          const mockSource = new MockSTokenSource([undefined, undefined]);
 
-         parseProcessingInstruction(mockSource, { open: SToken.fromString('') } as any, callback);
+         parseProcessingInstruction(mockSource, { open: toSToken('<?') }, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless({ open: SToken.fromString('') });
+         expect(callback).toEqualRangeless({
+            open: toSToken('<?'),
+            instruction: undefined,
+            close: undefined,
+         });
       });
    });
 });

@@ -69,6 +69,7 @@ class EntityNameStack {
          return this.nameStack.pop()?.replace('PE ', '');
       }
    }
+
    popGEName(name: string): string | void {
       if (this.nameStack[this.nameStack.length - 1] === `GE ${name}`) {
          return this.nameStack.pop()?.replace('GE ', '');

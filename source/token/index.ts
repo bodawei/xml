@@ -69,7 +69,6 @@ export * from './generalEntityReference';
 export * from './notationDeclaration';
 export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
-export * from '../pToken/token/processingInstruction';
 export * from './space';
 export * from './text';
 
@@ -117,23 +116,7 @@ type PToken =
    | TextPToken
    ;
 
-import { ParseValue } from 'pToken';
-
-function getFirstSToken(pToken: ParseValue): SToken {
-   let startContext;
-
-   if (pToken.type === DOCTYPE_END_PTOKEN) {
-      startContext = pToken.closeSubset; // eh?  And what if there is no close?
-   } else if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
-      startContext = pToken.referencePToken.open;
-   } else if (pToken.type === GENERAL_ENTITY_START_PTOKEN || pToken.type === GENERAL_ENTITY_END_PTOKEN) {
-      startContext = pToken.referencePToken.open;
-   } else {
-      startContext = (pToken as any).open || (pToken as any).text;
-   }
-
-   return startContext;
-}
+   export * from './getFirstSToken';
 
 export {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -171,6 +154,4 @@ export {
    ExternalId,
    PToken,
    XmlError,
-
-   getFirstSToken,
 };

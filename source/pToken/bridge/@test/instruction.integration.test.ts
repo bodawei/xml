@@ -7,103 +7,101 @@ import { STokenSource, SToken, toSToken } from 'sToken';
 
 import { parseInstruction } from '../instruction';
 
-describe('instruction (integration)', () => {
-   describe('parseInstruction()', () => {
-      let source: STokenSource;
-      let start: SToken;
+describe('parseInstruction (integration)', () => {
+   let source: STokenSource;
+   let start: SToken;
 
-      it('parses an xml declaration', () => {
-         source = new STokenSource(defaultExtractors);
-         start = toSToken('<?');
+   beforeEach(() => {
+      source = new STokenSource(defaultExtractors);
+      start = toSToken('<?');
+   });
+
+   it('parses an XML Declaration', (done) => {
+      source = new STokenSource(defaultExtractors);
+      source.addText('xml version="1.0" encoding="ascii"?>');
+      source.endText();
+
+      parseInstruction(source, start, true, (parsing) => {
+         expect(parsing).toEqualRangeless(
+            new XmlDeclarationPToken({
+               open: start,
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     nameSpace: undefined,
+                     equal: toSToken('='),
+                     equalSpace: undefined,
+                     openQuote: toSToken('"'),
+                     value: toSToken('1.0'),
+                     closeQuote: toSToken('"'),
+                     valueSpace: toSToken(' '),
+                  },
+                  {
+                     name: toSToken('encoding'),
+                     nameSpace: undefined,
+                     equal: toSToken('='),
+                     equalSpace: undefined,
+                     openQuote: toSToken('"'),
+                     value: toSToken('ascii'),
+                     closeQuote: toSToken('"'),
+                     valueSpace: undefined,
+                  },
+               ],
+               close: toSToken('?>'),
+            }),
+         );
+         done();
       });
+   });
 
-      it('parses an XML Declaration', (done) => {
-         source = new STokenSource(defaultExtractors);
-         source.addText('xml version="1.0" encoding="ascii"?>');
-         source.endText();
+   it('parses a Text Declaration', (done) => {
+      source = new STokenSource(defaultExtractors);
+      source.addText('xml encoding="ascii"?>');
+      source.endText();
 
-         parseInstruction(source, start, true, (parsing) => {
-            expect(parsing).toEqualRangeless(
-               new XmlDeclarationPToken({
-                  open: start,
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('version'),
-                        nameSpace: undefined,
-                        equal: toSToken('='),
-                        equalSpace: undefined,
-                        openQuote: toSToken('"'),
-                        value: toSToken('1.0'),
-                        closeQuote: toSToken('"'),
-                        valueSpace: toSToken(' '),
-                     },
-                     {
-                        name: toSToken('encoding'),
-                        nameSpace: undefined,
-                        equal: toSToken('='),
-                        equalSpace: undefined,
-                        openQuote: toSToken('"'),
-                        value: toSToken('ascii'),
-                        closeQuote: toSToken('"'),
-                        valueSpace: undefined,
-                     },
-                  ],
-                  close: toSToken('?>'),
-               }),
-            );
-            done();
-         });
+      parseInstruction(source, start, false, (parsing) => {
+         expect(parsing).toEqualRangeless(
+            new TextDeclarationPToken({
+               open: start,
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('encoding'),
+                     nameSpace: undefined,
+                     equal: toSToken('='),
+                     equalSpace: undefined,
+                     openQuote: toSToken('"'),
+                     value: toSToken('ascii'),
+                     closeQuote: toSToken('"'),
+                     valueSpace: undefined,
+                  },
+               ],
+               close: toSToken('?>'),
+            }),
+         );
+         done();
       });
+   });
 
-      it('parses a Text Declaration', (done) => {
-         source = new STokenSource(defaultExtractors);
-         source.addText('xml encoding="ascii"?>');
-         source.endText();
+   it('parses a ProcessingInstruction', (done) => {
+      source = new STokenSource(defaultExtractors);
+      source.addText('foo blah?blah?>');
+      source.endText();
 
-         parseInstruction(source, start, false, (parsing) => {
-            expect(parsing).toEqualRangeless(
-               new TextDeclarationPToken({
-                  open: start,
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('encoding'),
-                        nameSpace: undefined,
-                        equal: toSToken('='),
-                        equalSpace: undefined,
-                        openQuote: toSToken('"'),
-                        value: toSToken('ascii'),
-                        closeQuote: toSToken('"'),
-                        valueSpace: undefined,
-                     },
-                  ],
-                  close: toSToken('?>'),
-               }),
-            );
-            done();
-         });
-      });
-
-      it('parses a ProcessingInstruction', (done) => {
-         source = new STokenSource(defaultExtractors);
-         source.addText('foo blah?blah?>');
-         source.endText();
-
-         parseInstruction(source, start, false, (parsing) => {
-            expect(parsing).toEqualRangeless(
-               new ProcessingInstructionPToken({
-                  open: start,
-                  target: toSToken('foo'),
-                  targetSpace: toSToken(' '),
-                  instruction: toSToken('blah?blah'),
-                  close: toSToken('?>'),
-               }),
-            );
-            done();
-         });
+      parseInstruction(source, start, false, (parsing) => {
+         expect(parsing).toEqualRangeless(
+            new ProcessingInstructionPToken({
+               open: start,
+               target: toSToken('foo'),
+               targetSpace: toSToken(' '),
+               instruction: toSToken('blah?blah'),
+               close: toSToken('?>'),
+            }),
+         );
+         done();
       });
    });
 });

@@ -1,24 +1,27 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
-import { SToken, STokenSource } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    parseProcessingInstruction,
 } from '../processingInstruction';
 
-describe('processingInstruction (integration)', () => {
-   beforeEach(() => {});
-
-   describe('parse()', () => {
+describe('ProcessingInstructionPToken (integration)', () => {
+   describe('parseProcessingInstruction()', () => {
       it('asks the instruction module to include a type in the PToken', (done) => {
          const source = new STokenSource(defaultExtractors);
-         source.addText('blah blah?>');
+         source.addText('blah blahx?>');
          source.endText();
 
-         parseProcessingInstruction(source, { open: SToken.fromString('') } as any, (parsing) => {
-            expect(parsing.type).toEqual(PROCESSING_INSTRUCTION_PTOKEN);
+         parseProcessingInstruction(source, { open: toSToken('<?') }, (parsing) => {
+            expect(parsing).toEqualRangeless({
+               type: PROCESSING_INSTRUCTION_PTOKEN,
+               open: toSToken('<?'),
+               instruction: toSToken('blah blahx'),
+               close: toSToken('?>'),
+            });
             done();
          });
       });

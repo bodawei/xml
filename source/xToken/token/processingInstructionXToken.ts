@@ -1,14 +1,17 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
+import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { ProcessingInstructionPToken } from 'token';
 
 const PROCESSING_INSTRUCTION_XTOKEN = 'PROCESSING_INSTRUCTION_XTOKEN';
 
 class ProcessingInstructionXToken {
    public readonly type: typeof PROCESSING_INSTRUCTION_XTOKEN = PROCESSING_INSTRUCTION_XTOKEN;
+
    public readonly target: string;
+
    public readonly instruction: string;
+
    public readonly pToken?: ProcessingInstructionPToken;
 
    constructor(pToken: ProcessingInstructionPToken);

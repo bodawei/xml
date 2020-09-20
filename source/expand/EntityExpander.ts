@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
-import { ParseValue, ContextType } from 'pToken';
+import { ParseValue, ContextType, externalIdToEntityId } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -464,7 +464,13 @@ class EntityExpander {
       }
 
       if (pToken.externalId) {
-         this.expandParams.entityDetails.addEntity(pToken);
+         const entityId = externalIdToEntityId(pToken.externalId);
+         // @@@ REVISIT, as the root is BS.
+         const entityLoc = this.expandParams.utils.resolveEntityId(
+            this.expandParams.entityId,
+            entityId,
+         );
+         this.expandParams.entityDetails.addEntity(pToken, undefined, entityLoc);
          this.deliverToken(pToken);
          handled();
          return;
@@ -472,7 +478,12 @@ class EntityExpander {
 
       // REFACTOR/CLEANUP again types do not match correctly
       expandEntityValue(pToken.value as any, this.expandParams, chain, (result): void => {
-         this.expandParams.entityDetails.addEntity(pToken, result.newValue);
+         // @@@ REvisit, as the entityId is bs
+         this.expandParams.entityDetails.addEntity(
+            pToken,
+            result.newValue,
+            this.expandParams.entityId,
+         );
 
          this.deliverByproducts(result.byproducts);
          this.deliverToken(pToken);

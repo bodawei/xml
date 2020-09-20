@@ -51,8 +51,8 @@ describe('addProtoReplacementText() (unit)', () => {
          externalId: { type: EXTERNAL_ID },
       });
       entityDetails = new EntityDetails();
-      entityDetails.addEntity(peDecl);
-      entityDetails.addEntity(geDecl);
+      entityDetails.addEntity(peDecl, undefined, '');
+      entityDetails.addEntity(geDecl, undefined, '');
 
       params = {
          entityId: {
@@ -74,6 +74,7 @@ describe('addProtoReplacementText() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
+            resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
@@ -85,7 +86,7 @@ describe('addProtoReplacementText() (unit)', () => {
       };
 
       expandEntitValueSpy = spyOn(expandEntityValue, 'expandEntityValue').and.callFake(
-         (pToken: any, expandParams: any, chain: any, cb: Function) => {
+         (pToken: any, expandParams: any, chain: any, cb: (foo: any) => void) => {
             cb({ newValue: [textPToken], byproducts: [] });
          },
       );

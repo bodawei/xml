@@ -33,7 +33,7 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('foo'),
          });
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          const result = entityDetails.hasEntity(decl2);
 
@@ -49,7 +49,7 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('foo'),
          });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.hasEntity(decl2);
 
@@ -61,7 +61,7 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('bar'),
          });
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          const result = entityDetails.hasEntity(decl2);
 
@@ -71,7 +71,7 @@ describe('EntityDetails (unit)', () => {
       it('returns false if one tries to ask if an unnamed entity is in the details', () => {
          const decl1 = new GeneralEntityDeclarationPToken({ open: toSToken('<!') });
          const decl2 = new GeneralEntityDeclarationPToken({ open: toSToken('<!') });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.hasEntity(decl2);
 
@@ -81,7 +81,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('addEntity()', () => {
       it('creates a details entry for the provided general entity declaration', () => {
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          const result = entityDetails.getGEDetails('foo');
          expect((result as any).token).toEqual(geDecl1);
@@ -93,8 +93,8 @@ describe('EntityDetails (unit)', () => {
             name: toSToken('foo'),
          });
 
-         entityDetails.addEntity(geDecl1);
-         entityDetails.addEntity(decl2);
+         entityDetails.addEntity(geDecl1, undefined, '');
+         entityDetails.addEntity(decl2, undefined, '');
 
          const result = entityDetails.getGEDetails('foo');
          expect((result as any).token).toEqual(geDecl1);
@@ -105,13 +105,13 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
          });
 
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          expect(entityDetails.getGEDetails('')).toBeUndefined();
       });
 
       it('creates a general entity details entry with a protoReplacementText value', () => {
-         entityDetails.addEntity(geDecl1, [new TextPToken({ text: toSToken('wow') })]);
+         entityDetails.addEntity(geDecl1, [new TextPToken({ text: toSToken('wow') })], '');
 
          const result = entityDetails.getGEDetails('foo');
          expect((result as any).protoReplacementText).toEqual([
@@ -125,7 +125,7 @@ describe('EntityDetails (unit)', () => {
             name: toSToken('foo'),
          });
 
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.getPEDetails('foo');
          expect((result as any).token).toEqual(decl1);
@@ -137,7 +137,7 @@ describe('EntityDetails (unit)', () => {
             name: toSToken('foo'),
          });
 
-         entityDetails.addEntity(decl1, [new TextPToken({ text: toSToken('wow') })]);
+         entityDetails.addEntity(decl1, [new TextPToken({ text: toSToken('wow') })], '');
 
          const result = entityDetails.getPEDetails('foo');
          expect((result as any).protoReplacementText).toEqual([
@@ -148,7 +148,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('getGEDetails()', () => {
       it('retrieves a previously added general entity declaration', () => {
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          const result = entityDetails.getGEDetails('foo');
          expect(result as any).toEqual({
@@ -167,7 +167,7 @@ describe('EntityDetails (unit)', () => {
             name: toSToken('foo'),
             nData: toSToken('NDATA'),
          });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.getGEDetails('foo');
          expect((result as any).isUnparsed).toEqual(true);
@@ -181,7 +181,7 @@ describe('EntityDetails (unit)', () => {
                type: EXTERNAL_ID,
             },
          });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.getGEDetails('foo');
          expect((result as any).isInternal).toEqual(false);
@@ -193,7 +193,7 @@ describe('EntityDetails (unit)', () => {
       });
 
       it('retrieves undefined if an empty name is given', () => {
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          const result = entityDetails.getGEDetails('');
          expect(result).toBeUndefined();
@@ -206,7 +206,7 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('foo'),
          });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.getPEDetails('foo');
          expect(result as any).toEqual({
@@ -226,7 +226,7 @@ describe('EntityDetails (unit)', () => {
                type: EXTERNAL_ID,
             },
          });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.getGEDetails('foo');
          expect((result as any).isInternal).toEqual(false);
@@ -242,7 +242,7 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken(''),
          });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.getPEDetails('');
          expect(result).toBeUndefined();
@@ -302,7 +302,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('getReferencedDetails()', () => {
       it('retrieves a previously added general entity declaration', () => {
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          const result = entityDetails.getReferencedDetails(
             new GeneralEntityReferencePToken({
@@ -325,7 +325,7 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('foo'),
          });
-         entityDetails.addEntity(decl1);
+         entityDetails.addEntity(decl1, undefined, '');
 
          const result = entityDetails.getReferencedDetails(
             new ParameterEntityReferencePToken({
@@ -368,7 +368,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('loadingEntity()', () => {
       it('sets the loading flag on the entity', () => {
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          entityDetails.loadingEntity(geDecl1);
 
@@ -391,7 +391,7 @@ describe('EntityDetails (unit)', () => {
    describe('waitForLoading()', () => {
       it('calls back after a delay when the entity is not in the process of loading', (done) => {
          let hasBeenCalled = false;
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
          const details = entityDetails.getReferencedDetails(
             new GeneralEntityReferencePToken({
                open: toSToken('&'),
@@ -422,7 +422,7 @@ describe('EntityDetails (unit)', () => {
    describe('updateDeclaredValue()', () => {
       it('calls the pending callbacks in order with details and errors', (done) => {
          let callCount = 0;
-         entityDetails.addEntity(geDecl1);
+         entityDetails.addEntity(geDecl1, undefined, '');
 
          entityDetails.loadingEntity(geDecl1);
 

@@ -44,7 +44,7 @@ describe('expandUnassigned() (unit)', () => {
       });
       parseSpy = spyOn(unassigned.default, 'parseAllValues');
       addSpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
-      entityDetails.addEntity(peDecl, [textPToken]);
+      entityDetails.addEntity(peDecl, [textPToken], '');
       parseSpy.and.callFake((stoken: any, isElement: any, cb: any) => {
          cb([{ type: UnassignedType.WORD, token: text2PToken }]);
       });
@@ -66,6 +66,7 @@ describe('expandUnassigned() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
+            resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
@@ -108,7 +109,7 @@ describe('expandUnassigned() (unit)', () => {
          open: toSToken('%'),
          name: toSToken('peInProgress'),
       });
-      entityDetails.addEntity(peDecl, [textPToken]);
+      entityDetails.addEntity(peDecl, [textPToken], '');
       const nameStack = new EntityNameStack();
       nameStack.pushPEName('peInProgress');
       const unassignedValue: UnassignedArray = [
@@ -143,7 +144,7 @@ describe('expandUnassigned() (unit)', () => {
          open: toSToken('%'),
          name: toSToken('pe1'),
       });
-      entityDetails.addEntity(peDecl2, [textPToken]);
+      entityDetails.addEntity(peDecl2, [textPToken], '');
       const unassignedValue: UnassignedArray = [
          { type: UnassignedType.REFERENCE, token: peRef },
          { type: UnassignedType.REFERENCE, token: peRef2 },
@@ -165,7 +166,7 @@ describe('expandUnassigned() (unit)', () => {
    it('returns errors from the process of setting up references', (done) => {
       const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: peRef }];
-      entityDetails.addEntity(peDecl, [textPToken]);
+      entityDetails.addEntity(peDecl, [textPToken], '');
       addSpy.and.callFake((ref: any, expand: any, chain: any, cb: any) => {
          cb({ byproducts: [attrError] });
       });
@@ -186,7 +187,7 @@ describe('expandUnassigned() (unit)', () => {
          open: toSToken('%'),
          name: toSToken('pe2'),
       });
-      entityDetails.addEntity(peDecl2);
+      entityDetails.addEntity(peDecl2, undefined, '');
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: peRef2 }];
       addSpy.and.callFake((ref: any, expand: any, chain: any, cb: any) => {
          cb({ byproducts: [attrError] });

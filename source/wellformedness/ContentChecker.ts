@@ -12,13 +12,12 @@ import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
-   PROCESSING_INSTRUCTION_PTOKEN,
    ElementEmptyPToken,
    ElementStartPToken,
    GeneralEntityStartPToken,
    getFirstSToken,
 } from 'token';
-import { TEXTDECL_PTOKEN, ParseValue } from 'pToken';
+import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    CHECKER_DONE,

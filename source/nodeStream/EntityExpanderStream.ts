@@ -1,16 +1,16 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
 import fs from 'fs';
-import path from 'path';
+import { resolve } from 'path';
 import { Transform } from 'stream';
-import { EntityId, ConformanceVersion } from 'basic';
+import { EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { EntityExpander, resolveSystemId } from 'expand';
+import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token';
 
-import { AttributeValueResults, ExpandToken, RetrieveResults } from '../expand/types';
+import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../expand/types';
 import { ContextType } from 'pToken';
 
 function parseBody(sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken): void {
@@ -42,16 +42,22 @@ function parseEntityValue(
    });
 }
 
-function retrieveExternalEntity(
-   baseEntity: EntityId,
+function resolveEntityId(
+   baseEntity: EntityId | OpaqueEntityLoc,
    relativeEntity: EntityId,
+): OpaqueEntityLoc {
+   let pathname = defaultResolveEntityId(baseEntity, relativeEntity);
+   pathname = resolve(pathname);
+
+   return pathname;
+}
+
+function retrieveExternalEntity(
+   entityLoc: OpaqueEntityLoc,
 ): RetrieveResults {
    const sTokenSource = new STokenSource(defaultExtractors);
 
-   let pathx = resolveSystemId(baseEntity, relativeEntity);
-   pathx = path.resolve(pathx);
-
-   const data = fs.readFileSync(pathx, { encoding: 'utf8' });
+   const data = fs.readFileSync(entityLoc, { encoding: 'utf8' });
 
    sTokenSource.addText(data);
    sTokenSource.endText();
@@ -94,6 +100,7 @@ class EntityExpanderStream extends Transform {
       this.entityExpander = new EntityExpander(validating, this.push.bind(this), {
          parseBody,
          parseEntityValue,
+         resolveEntityId,
          retrieveExternalEntity,
          parseAttributeValue,
       });

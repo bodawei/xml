@@ -15,10 +15,10 @@ import { EntityDetails } from './EntityDetails';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityNameStack } from './EntityNameStack';
 
-type ExpandedResult = {
+interface ExpandedResult {
    newValue: EntityValuePToken;
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
-};
+}
 
 /*
  * Simply sweep through an EntityValuePToken and return any ParameterEntityInfo's

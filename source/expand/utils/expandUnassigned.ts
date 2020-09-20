@@ -16,16 +16,16 @@ import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityNameStack } from './EntityNameStack';
 
-type ExpandUnassignedResult = {
+interface ExpandUnassignedResult {
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
    newValue: UnassignedArray;
-};
+}
 type UnassignedExpanded = (result: ExpandUnassignedResult) => void;
 
-type ParseResults = {
+interface ParseResults {
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
    unassignedFragment: UnassignedArray | void;
-};
+}
 
 function expandPeRef(
    expandParams: ExpandParams,

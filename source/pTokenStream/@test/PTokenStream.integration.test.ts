@@ -3,6 +3,7 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { defaultExtractors } from 'extractor';
+import { PROCESSING_INSTRUCTION_PTOKEN } from 'pToken';
 import { STokenSource } from 'sToken';
 
 import PTokenStream from '../PTokenStream';
@@ -17,7 +18,6 @@ import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   PROCESSING_INSTRUCTION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
    SPACE_PTOKEN,

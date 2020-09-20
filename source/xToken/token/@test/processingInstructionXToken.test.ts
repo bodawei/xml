@@ -1,12 +1,14 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
+import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { ProcessingInstructionXToken } from '../processingInstructionXToken';
-import { ProcessingInstructionPToken } from 'token';
+import {
+   ProcessingInstructionXToken,
+   PROCESSING_INSTRUCTION_XTOKEN,
+} from '../processingInstructionXToken';
 
-describe('processingInstructionXToken() (unit)', () => {
-   it('produces an xToken from a pToken', () => {
+describe('ProcessingInstructionXToken() (unit)', () => {
+   it('accepts a PToken as input', () => {
       const piPToken = new ProcessingInstructionPToken({
          open: toSToken('open'),
          openSpace: toSToken(' '),
@@ -17,6 +19,7 @@ describe('processingInstructionXToken() (unit)', () => {
 
       expect(new ProcessingInstructionXToken(piPToken)).toEqual(
          jasmine.objectContaining({
+            type: PROCESSING_INSTRUCTION_XTOKEN,
             target: 'TheTarget',
             instruction: 'blah',
             pToken: piPToken,
@@ -24,7 +27,7 @@ describe('processingInstructionXToken() (unit)', () => {
       );
    });
 
-   it('produces an xToken from a pToken without a target or instructions', () => {
+   it('defaults target and instruction to empty strings if those are not in the PToken', () => {
       const piPToken = new ProcessingInstructionPToken({
          open: toSToken('open'),
          openSpace: toSToken(' '),
@@ -33,6 +36,7 @@ describe('processingInstructionXToken() (unit)', () => {
 
       expect(new ProcessingInstructionXToken(piPToken)).toEqual(
          jasmine.objectContaining({
+            type: PROCESSING_INSTRUCTION_XTOKEN,
             target: '',
             instruction: '',
             pToken: piPToken,
@@ -40,7 +44,7 @@ describe('processingInstructionXToken() (unit)', () => {
       );
    });
 
-   it('produces a pToken with the provided values', () => {
+   it('produces a pToken with the provided raw values', () => {
       const piXToken = new ProcessingInstructionXToken('TheTarget2', 'blah2');
 
       expect(piXToken).toEqual(

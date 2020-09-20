@@ -42,6 +42,7 @@ describe('expandAttributes() (unit)', () => {
             value: [text2PToken],
          }),
          [text2PToken],
+         '',
       );
 
       params = {
@@ -62,6 +63,7 @@ describe('expandAttributes() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
+            resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
@@ -154,6 +156,8 @@ describe('expandAttributes() (unit)', () => {
             name: toSToken('unparsed'),
             nData: toSToken('NDATA'),
          }),
+         undefined,
+         '',
       );
 
       expandAttributes(
@@ -219,6 +223,7 @@ describe('expandAttributes() (unit)', () => {
             value: [sourceToken],
          }),
          [sourceToken],
+         '',
       );
       params.utils.parseAttributeValue = (
          sTokenSource: STokenSource,
@@ -256,6 +261,7 @@ describe('expandAttributes() (unit)', () => {
             value: [sourceToken],
          }),
          [sourceToken],
+         '',
       );
 
       expandAttributes(
@@ -305,6 +311,8 @@ describe('expandAttributes() (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('unloadable'),
          }),
+         undefined,
+         '',
       );
       const addProtoReplacementTextSpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
       addProtoReplacementTextSpy.and.callFake(
@@ -410,6 +418,8 @@ describe('expandAttributes() (unit)', () => {
                name: toSToken('external'),
                externalId: {} as any,
             }),
+            undefined,
+            '',
          );
          const loadingError = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
          const addProtoReplacementTextSpy = spyOn(
@@ -461,7 +471,7 @@ describe('expandAttributes() (unit)', () => {
          name: toSToken('ge2'),
       });
       let ctr = 0;
-      entityDetails.addEntity(get2Decl);
+      entityDetails.addEntity(get2Decl, undefined, '');
       const addProtoReplacementTextSpy = spyOn(addProtoReplacementText, 'addProtoReplacementText');
       addProtoReplacementTextSpy.and.callFake(
          (

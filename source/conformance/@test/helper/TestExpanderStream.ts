@@ -19,6 +19,7 @@ import {
 
 import { TestCases } from './types';
 import { TestDetails } from './buildTestDetails';
+import { OpaqueEntityLoc } from 'source/expand/types';
 
 function parseBody(
    sTokenSource: STokenSource,
@@ -106,20 +107,26 @@ function findEntity(testDetails: TestDetails, entityName: string): string {
    return entityContent;
 }
 
-function retrieveExternalEntity(
+function resolveEntityId(
    testDetails: TestDetails,
-   baseEntity: EntityId,
+   baseEntity: EntityId | OpaqueEntityLoc,
    relativeEntity: EntityId,
-): RetrieveResults {
+): OpaqueEntityLoc {
    const entityName = relativeEntity.systemId;
 
+   return {
+      testDetails,
+      entityName,
+   };
+}
+function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
    // console.log('>>>', baseEntity, relativeEntity);
    // console.log('RETRIEVE IN TEST EXPANDER', entityName, baseEntity, relativeEntity);
-   const entityText = findEntity(testDetails, entityName);
+   const entityText = findEntity(entityLoc.testDetails, entityLoc.entityName);
    // console.log('entityText', entityText, '\n');
    // Throw an error if we can't find the entity?
 
-   const source = new STokenSource(defaultExtractors, relativeEntity);
+   const source = new STokenSource(defaultExtractors, entityLoc);
    source.addText(entityText);
    source.endText();
 
@@ -157,7 +164,8 @@ class TestExpanderStream extends Transform {
       this.entityExpander = new EntityExpander(validating, this.push.bind(this), {
          parseBody,
          parseEntityValue,
-         retrieveExternalEntity: retrieveExternalEntity.bind(undefined, testDetails),
+         resolveEntityId: resolveEntityId.bind(undefined, testDetails),
+         retrieveExternalEntity: retrieveExternalEntity,
          parseAttributeValue,
       });
    }

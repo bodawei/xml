@@ -40,9 +40,11 @@ describe('expandEntityValue() (unit)', () => {
          externalId: { type: EXTERNAL_ID },
       });
       entityDetails = new EntityDetails();
-      entityDetails.addEntity(peDecl);
+      entityDetails.addEntity(peDecl, undefined, '');
       entityDetails.addEntity(
          new GeneralEntityDeclarationPToken({ open: toSToken('<!'), name: toSToken('ge1') }),
+         undefined,
+         '',
       );
 
       params = {
@@ -61,6 +63,7 @@ describe('expandEntityValue() (unit)', () => {
             parseEntityValue: (sTokenSource, done): void => {
                done([textPToken]);
             },
+            resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
@@ -236,7 +239,7 @@ describe('expandEntityValue() (unit)', () => {
          name: toSToken('recur'),
          value: [second],
       });
-      entityDetails.addEntity(peDecl);
+      entityDetails.addEntity(peDecl, undefined, '');
       entityDetails.updateDeclaredValue(peDecl, [second], []);
       params.utils.parseEntityValue = (sTokenSource, done): void => {
          done([second]);

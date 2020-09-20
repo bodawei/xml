@@ -4,12 +4,12 @@
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { ProcessingInstructionPToken } from 'pToken';
 import { SToken } from 'sToken';
 
 import * as misc from '../../../token/common/misc';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
-import { ProcessingInstructionPToken } from 'token';
 
 describe('processingInstructionCheck() (unit)', () => {
    let piPToken: any;

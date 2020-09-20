@@ -18,18 +18,20 @@ import { GEDetails } from './EntityDetails';
 import { ExpandParams } from '../types';
 import { EntityNameStack } from './EntityNameStack';
 
-type AttrValueObj = { value: AttributeValuePToken };
+interface AttrValueObj {
+   value: AttributeValuePToken;
+}
 
-type ExpandAttrResult = {
+interface ExpandAttrResult {
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
    newValue: AttributeValuePToken;
-};
+}
 type AttrExpanded = (result: ExpandAttrResult) => void;
 
-type ParseResults = {
+interface ParseResults {
    expandedFragment: AttributeValuePToken | void;
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
-};
+}
 
 /*
  * Finally, given a definitely populated geInfo.valueCache, parse the resulting

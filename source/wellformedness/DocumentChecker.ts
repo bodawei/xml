@@ -10,11 +10,15 @@ import {
    ELEMENT_START_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
-   PROCESSING_INSTRUCTION_PTOKEN,
    SPACE_PTOKEN,
    getFirstSToken,
 } from 'token';
-import { XMLDECL_PTOKEN, ParseValue, xmlDeclIsStandalone } from 'pToken';
+import {
+   PROCESSING_INSTRUCTION_PTOKEN,
+   XMLDECL_PTOKEN,
+   ParseValue,
+   xmlDeclIsStandalone,
+} from 'pToken';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
