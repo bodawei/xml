@@ -46,7 +46,8 @@ import * as setupConditional from '../utils/setupConditional';
 import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
 import { EntityExpander } from '../EntityExpander';
 import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
-import { EntityNameStack } from '../utils/EntityNameStack';
+import { EntityContextStack } from '../utils/EntityContextStack';
+import { EntityId } from 'basic';
 
 fdescribe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
@@ -54,6 +55,7 @@ fdescribe('EntityExpander (unit)', () => {
    let assignAttListSpy: jasmine.Spy;
    let assignEntityDeclSpy: jasmine.Spy;
    let assignNotationDeclSpy: jasmine.Spy;
+   let resolveEntityId: (a: any, b: any) => any;
 
    beforeEach(() => {
       expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
@@ -61,6 +63,7 @@ fdescribe('EntityExpander (unit)', () => {
       assignAttListSpy = spyOn(assignAttListDeclaration, 'assignAttListDeclaration');
       assignNotationDeclSpy = spyOn(assignNotationDeclaration, 'assignNotationDeclaration');
       assignEntityDeclSpy = spyOn(assignEntityDeclaration, 'assignEntityDeclaration');
+      resolveEntityId = () => '';
    });
 
    function harvestTypes(results: Array<ParseValue>): Array<string> {
@@ -96,7 +99,7 @@ fdescribe('EntityExpander (unit)', () => {
       const entityExpander = new EntityExpander(validate, results.push.bind(results), {
          parseBody: (): void => {},
          parseEntityValue: (): void => {},
-         resolveEntityId: () => '',
+         resolveEntityId: resolveEntityId,
          retrieveExternalEntity,
          parseAttributeValue,
       });
@@ -125,6 +128,51 @@ fdescribe('EntityExpander (unit)', () => {
       it('passes the PToken through', (done) => {
          doExpand([textPToken], true, (results) => {
             expect(results).toEqual([textPToken]);
+            done();
+         });
+      });
+   });
+
+   describe('EntityId', () => {
+      let entityId: EntityId;
+
+      beforeEach(() => {
+         entityId = new EntityId('systemFoo', 'publicbar');
+      });
+
+      it('is passed straight through', (done) => {
+         doExpand([entityId], true, (results) => {
+            expect(results).toEqual([entityId]);
+            done();
+         });
+      });
+
+      it('adds the document entityId to the context stack', (done) => {
+         const docTypeStart = new DocTypeStartPToken({
+            open: toSToken('<!'),
+            name: toSToken('root'),
+            externalId: {
+               system: {
+                  value: [new TextPToken({ text: toSToken('systemFoo') })],
+               },
+            },
+         });
+         const docTypeEnd = new DocTypeEndPToken({
+            docTypeStartPToken: docTypeStart,
+            close: toSToken('>'),
+         });
+         const streamParsedReplacementTextSpy: jasmine.Spy = spyOn(
+            streamParsedReplacementText,
+            'streamParsedReplacementText',
+         );
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
+            callback(undefined, () => {});
+         });
+
+         doExpand([entityId, docTypeStart, docTypeEnd], true, () => {
+            const args = streamParsedReplacementTextSpy.calls.argsFor(0);
+            const stack = args[2] as EntityContextStack;
+            expect(stack.getCurrentEntityLoc()).toEqual(entityId);
             done();
          });
       });
@@ -204,7 +252,7 @@ fdescribe('EntityExpander (unit)', () => {
             streamParsedReplacementText,
             'streamParsedReplacementText',
          );
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
             callback(undefined, () => {});
          });
 
@@ -213,7 +261,7 @@ fdescribe('EntityExpander (unit)', () => {
 
             expect(args[0].type).toEqual(EXTERNAL_DTD_PSEUDO_TOKEN);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(Function);
+            expect(args[2]).toBeInstanceOf(EntityContextStack);
             done();
          });
       });
@@ -233,7 +281,7 @@ fdescribe('EntityExpander (unit)', () => {
             'streamParsedReplacementText',
          );
          const notation = new NotationDeclarationPToken({ open: toSToken('<!') });
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
             callback(notation, () => {
                callback(undefined, () => {});
             });
@@ -266,7 +314,7 @@ fdescribe('EntityExpander (unit)', () => {
             'streamParsedReplacementText',
          );
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
             callback(error, () => {
                callback(undefined, () => {});
             });
@@ -347,7 +395,7 @@ fdescribe('EntityExpander (unit)', () => {
                   },
                },
             });
-            streamParsedReplacementTextSpy.and.callFake((token, params, cb) => {
+            streamParsedReplacementTextSpy.and.callFake((token, params, stack, cb) => {
                cb(condStart, () => {});
                cb(condStart, () => {});
                cb(undefined, () => {});
@@ -458,7 +506,7 @@ fdescribe('EntityExpander (unit)', () => {
 
             expect(params[0]).toEqual([one]);
             expect(params[1].entityDetails).not.toBeUndefined();
-            expect(params[2]).toBeInstanceOf(EntityNameStack);
+            expect(params[2]).toBeInstanceOf(EntityContextStack);
             expect(params[3]).toEqual(false);
             expect(params[4]).toBeInstanceOf(Function);
             done();
@@ -584,7 +632,7 @@ fdescribe('EntityExpander (unit)', () => {
             (
                value: Array<Record<string, any>>,
                params: Record<string, any>,
-               stack: EntityNameStack,
+               stack: EntityContextStack,
                cb: (arg: any) => void,
             ) => {
                const result = value.map(() => {
@@ -657,7 +705,7 @@ fdescribe('EntityExpander (unit)', () => {
 
             expect(callArgs[0]).toEqual(attList.attDefs);
             expect(callArgs[1]).not.toBeUndefined();
-            expect(callArgs[2]).toBeInstanceOf(EntityNameStack);
+            expect(callArgs[2]).toBeInstanceOf(EntityContextStack);
             expect(callArgs[3]).toBeInstanceOf(Function);
             done();
          });
@@ -718,7 +766,7 @@ fdescribe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(EntityNameStack);
+            expect(args[2]).toBeInstanceOf(EntityContextStack);
             expect(args[3]).toBeInstanceOf(Function);
             done();
          });
@@ -736,7 +784,7 @@ fdescribe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2].hasPEName('student')).toEqual(true);
+            expect(args[2]).toBeInstanceOf(EntityContextStack);
             expect(args[3]).toBeInstanceOf(Function);
             done();
          });
@@ -813,6 +861,50 @@ fdescribe('EntityExpander (unit)', () => {
          doExpand([geDecl, geDecl], true, () => {
             expect(hasGeDecl).toEqual(false);
             expect(afterCallParams.entityDetails.hasEntity(geDecl)).toEqual(true);
+            done();
+         });
+      });
+
+      it('sets up the entity details with the current entity location when with an internal entity', (done) => {
+         let addEntitySpy: jasmine.Spy;
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            value: [new CharRefPToken({ open: toSToken('&#') })],
+         });
+         const entityId = new EntityId('doc_entity');
+
+         expandEntityValueSpy.and.callFake((pToken, params, chain, cb) => {
+            addEntitySpy = spyOn(params.entityDetails, 'addEntity');
+            cb({ newValue: [new TextPToken({ text: toSToken('testValue') })], byproducts: [] });
+         });
+
+         doExpand([entityId, geDecl], true, () => {
+            expect(addEntitySpy).toHaveBeenCalledWith(
+               geDecl,
+               [new TextPToken({ text: toSToken('testValue') })],
+               entityId,
+            );
+            done();
+         });
+      });
+
+      it('sets up the entity details with the current entity location when with an external entity', (done) => {
+         geDecl = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('student'),
+            externalId: {
+               type: EXTERNAL_ID,
+               system: {
+                  value: [new TextPToken({ text: toSToken('the system') })],
+               },
+            },
+         });
+         resolveEntityId = jasmine.createSpy();
+         const entityId = new EntityId('doc_entity');
+
+         doExpand([entityId, geDecl], true, () => {
+            expect(resolveEntityId).toHaveBeenCalledWith(entityId, new EntityId('the system', ''));
             done();
          });
       });
@@ -921,7 +1013,7 @@ fdescribe('EntityExpander (unit)', () => {
             const args = setupConditionalSpy.calls.argsFor(0);
             expect(args[0]).toEqual(peRef);
             expect(args[1].utils).not.toBeUndefined(); // inner awareness
-            expect(args[2]).toBeInstanceOf(EntityNameStack);
+            expect(args[2]).toBeInstanceOf(EntityContextStack);
             expect(args[3]).toEqual(ContextType.PARAMETER_ENTITY);
             expect(args[4]).toBeInstanceOf(Function);
             expect(args[5]).toBeInstanceOf(Function);
@@ -1129,7 +1221,7 @@ fdescribe('EntityExpander (unit)', () => {
             (
                value: Array<Record<string, any>>,
                params: Record<string, any>,
-               stack: EntityNameStack,
+               stack: EntityContextStack,
                cb: (arg: any) => void,
             ) => {
                const result = value.map(() => {
@@ -1217,7 +1309,7 @@ fdescribe('EntityExpander (unit)', () => {
 
             expect(callArgs[0]).toEqual(startElement.attributes);
             expect(callArgs[1].entityDetails).not.toBeUndefined();
-            expect(callArgs[2]).toBeInstanceOf(EntityNameStack);
+            expect(callArgs[2]).toBeInstanceOf(EntityContextStack);
             expect(callArgs[3]).toBeInstanceOf(Function);
             done();
          });
@@ -1261,7 +1353,7 @@ fdescribe('EntityExpander (unit)', () => {
       });
 
       it('calls the streamParsedReplacementText() function with the ref token, prams and a callback', (done) => {
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
             callback(undefined, () => {});
          });
 
@@ -1270,13 +1362,14 @@ fdescribe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual(geRef);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(Function);
+            expect(args[2]).toBeInstanceOf(EntityContextStack);
+            expect(args[3]).toBeInstanceOf(Function);
             done();
          });
       });
 
       it('returns the geRef if it is not expanded', (done) => {
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
             callback(undefined, () => {});
          });
 
@@ -1288,7 +1381,7 @@ fdescribe('EntityExpander (unit)', () => {
 
       it('returns any intermediate tokens rather than the GE Ref if there are any', (done) => {
          const text = new TextPToken({ text: toSToken('foo') });
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
             callback(text, () => {
                callback(undefined, () => {});
             });
@@ -1305,7 +1398,9 @@ fdescribe('EntityExpander (unit)', () => {
             open: toSToken('&'),
             name: toSToken('root'),
          });
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
+            stack.pushName(token, '');
+
             callback(geRef2, () => {
                callback(undefined, () => {});
             });
@@ -1327,10 +1422,14 @@ fdescribe('EntityExpander (unit)', () => {
             open: toSToken('%'),
             name: toSToken('root'),
          });
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
-            callback(peRef2, () => {
-               callback(undefined, () => {});
-            });
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
+            stack.pushName(token, '');
+
+            if (token === peRef1) {
+               callback(peRef2, () => {
+                  callback(undefined, () => {});
+               });
+            }
          });
 
          doExpand([peRef1], true, (results) => {
@@ -1347,7 +1446,9 @@ fdescribe('EntityExpander (unit)', () => {
             name: toSToken('root'),
          });
          const text = new TextPToken({ text: toSToken('foo') });
-         streamParsedReplacementTextSpy.and.callFake((token, params, callback) => {
+         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
+            stack.pushName(token, '');
+
             if (token === peRef1) {
                callback(geRef, () => {
                   callback(undefined, () => {});

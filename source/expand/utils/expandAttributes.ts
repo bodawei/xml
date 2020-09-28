@@ -16,7 +16,7 @@ import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { GEDetails } from './EntityDetails';
 import { ExpandParams } from '../types';
-import { EntityNameStack } from './EntityNameStack';
+import { EntityContextStack } from './EntityContextStack';
 
 interface AttrValueObj {
    value: AttributeValuePToken;
@@ -41,7 +41,7 @@ interface ParseResults {
 function parseEntityValueAsAttributeValue(
    geDetails: GEDetails,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>,
    callback: (result: ParseResults) => void,
 ): void {
@@ -70,7 +70,7 @@ function parseEntityValueAsAttributeValue(
        * general entity references in it that need to be expanded.
        */
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      expandOneAttribute(result.newValue, expandParams, nameStack, (recurResults) => {
+      expandOneAttribute(result.newValue, expandParams, entityContextStack, (recurResults) => {
          callback({
             expandedFragment: recurResults.newValue,
             byproducts: [...byproducts, ...result.errors, ...recurResults.byproducts],
@@ -85,7 +85,7 @@ function parseEntityValueAsAttributeValue(
  */
 function expandGeRef(
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    geRef: GeneralEntityReferencePToken,
    geRefExpanded: (result: ParseResults) => void,
 ): void {
@@ -112,19 +112,19 @@ function expandGeRef(
     *     to itself, either directly or indirectly.
     * §4.4.0 unparsed entities may not be referenced in content
     */
-   if (nameStack.hasGEName(entityName) || geDetails.isUnparsed) {
+   if (entityContextStack.hasName(geRef) || geDetails.isUnparsed) {
       geRefExpanded(result);
       return;
    }
 
-   const newRefChain = nameStack.cloneWithGEName(entityName);
+   const newRefChain = entityContextStack.cloneWithRef(geRef, geDetails.entityLoc);
 
    if (geDetails.protoReplacementText) {
       parseEntityValueAsAttributeValue(geDetails, expandParams, newRefChain, [], geRefExpanded);
       return;
    }
 
-   addProtoReplacementText(geRef, expandParams, nameStack, (addResult) => {
+   addProtoReplacementText(geRef, expandParams, entityContextStack, (addResult) => {
       if (!geDetails.protoReplacementText) {
          result.byproducts = addResult.byproducts;
          geRefExpanded(result);
@@ -151,7 +151,7 @@ function expandGeRef(
 function expandOneAttribute(
    attValue: AttributeValuePToken,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    expanded: AttrExpanded,
 ): void {
    const geRefs: Array<GeneralEntityReferencePToken> = [];
@@ -168,38 +168,42 @@ function expandOneAttribute(
       return;
    }
 
-   doAsyncLoop(geRefs, expandGeRef.bind(undefined, expandParams, nameStack), (expandedDetails) => {
-      const allByproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
-      const newValue: AttributeValuePToken = [];
-      let geRefIndex = 0;
+   doAsyncLoop(
+      geRefs,
+      expandGeRef.bind(undefined, expandParams, entityContextStack),
+      (expandedDetails) => {
+         const allByproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
+         const newValue: AttributeValuePToken = [];
+         let geRefIndex = 0;
 
-      // Go through the attribute value, replacing references with the expanded fragment.
-      for (const element of attValue) {
-         if (element.type !== GENERAL_ENTITY_REFERENCE_PTOKEN) {
-            newValue.push(element);
-            continue;
+         // Go through the attribute value, replacing references with the expanded fragment.
+         for (const element of attValue) {
+            if (element.type !== GENERAL_ENTITY_REFERENCE_PTOKEN) {
+               newValue.push(element);
+               continue;
+            }
+
+            const { expandedFragment, byproducts } = expandedDetails[geRefIndex];
+
+            geRefIndex++;
+            allByproducts.push(...byproducts);
+
+            if (!expandedFragment) {
+               // For some reason couldn't expand. Just put it in the array
+               newValue.push(element);
+            } else {
+               // expanded! wrap the expanded contents with a start and end
+               newValue.push(
+                  new GeneralEntityStartPToken(element),
+                  ...expandedFragment,
+                  new GeneralEntityEndPToken(element),
+               );
+            }
          }
 
-         const { expandedFragment, byproducts } = expandedDetails[geRefIndex];
-
-         geRefIndex++;
-         allByproducts.push(...byproducts);
-
-         if (!expandedFragment) {
-            // For some reason couldn't expand. Just put it in the array
-            newValue.push(element);
-         } else {
-            // expanded! wrap the expanded contents with a start and end
-            newValue.push(
-               new GeneralEntityStartPToken(element),
-               ...expandedFragment,
-               new GeneralEntityEndPToken(element),
-            );
-         }
-      }
-
-      expanded({ newValue, byproducts: allByproducts });
-   });
+         expanded({ newValue, byproducts: allByproducts });
+      },
+   );
 }
 
 /*
@@ -217,7 +221,7 @@ function expandOneAttribute(
 function expandAttributes(
    valueObjects: Array<AttrValueObj>,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    expanded: (results: Array<ExpandAttrResult>) => void,
 ): void {
    const attributeValues: Array<AttributeValuePToken> = [];
@@ -229,7 +233,7 @@ function expandAttributes(
    }
 
    function process(attributeValue: AttributeValuePToken, callback: AttrExpanded): void {
-      expandOneAttribute(attributeValue, expandParams, nameStack, callback);
+      expandOneAttribute(attributeValue, expandParams, entityContextStack, callback);
    }
 
    doAsyncLoop(attributeValues, process, expanded);

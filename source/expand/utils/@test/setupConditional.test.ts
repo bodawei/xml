@@ -15,12 +15,12 @@ import { ExpandParams } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { setupConditional } from '../setupConditional';
 import { EntityDetails } from '../EntityDetails';
-import { EntityNameStack } from '../EntityNameStack';
+import { EntityContextStack } from '../EntityContextStack';
 
 describe('setupConditional() (unit)', () => {
    let deliverSpy: jasmine.Spy;
    let addProtoReplacementTextSpy: jasmine.Spy;
-   let testStack: EntityNameStack;
+   let testStack: EntityContextStack;
    let params: ExpandParams;
    let testIgnore: TextPToken;
    let testInclude: TextPToken;
@@ -34,7 +34,7 @@ describe('setupConditional() (unit)', () => {
          name: toSToken('test'),
       });
       testRef = new ParameterEntityReferencePToken({ open: toSToken('%'), name: toSToken('test') });
-      testStack = new EntityNameStack();
+      testStack = new EntityContextStack();
       params = {
          entityDetails: new EntityDetails(),
          confVer: new ConformanceVersion(),
@@ -133,7 +133,7 @@ describe('setupConditional() (unit)', () => {
 
    it('returns an empty result when the reference is in the stack', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
-      testStack.pushPEName('test');
+      testStack.pushName(testRef, '');
 
       setupConditional(
          testRef,

@@ -14,7 +14,7 @@ import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
 import { ExpandParams } from '../types';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { addProtoReplacementText } from './addProtoReplacementText';
-import { EntityNameStack } from './EntityNameStack';
+import { EntityContextStack } from './EntityContextStack';
 
 interface ExpandUnassignedResult {
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
@@ -29,7 +29,7 @@ interface ParseResults {
 
 function expandPeRef(
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    isElementDecl: boolean,
    peRef: ParameterEntityReferencePToken,
    callback: (result: ParseResults) => void,
@@ -44,12 +44,12 @@ function expandPeRef(
    // §4.1.0: Well-formedness constraint: No Recursion
    //    A parsed entity must not contain a recursive reference to itself,
    //    either directly or indirectly.
-   if (!details || nameStack.hasPEName(entityName)) {
+   if (!details || entityContextStack.hasName(peRef)) {
       callback(result);
       return;
    }
 
-   addProtoReplacementText(peRef, expandParams, nameStack, (addResult) => {
+   addProtoReplacementText(peRef, expandParams, entityContextStack, (addResult) => {
       if (!details.protoReplacementText) {
          result.byproducts = addResult.byproducts;
          callback(result);
@@ -78,7 +78,7 @@ function expandPeRef(
 function expandUnassigned(
    value: UnassignedArray,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    isElementDecl: boolean,
    expanded: UnassignedExpanded,
 ): void {
@@ -95,7 +95,7 @@ function expandUnassigned(
       return;
    }
 
-   const expandRef = expandPeRef.bind(undefined, expandParams, nameStack, isElementDecl);
+   const expandRef = expandPeRef.bind(undefined, expandParams, entityContextStack, isElementDecl);
 
    // Process expand all the peRefs potentially very asynchronously.
    doAsyncLoop(peRefs, expandRef, (results) => {

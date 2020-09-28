@@ -17,7 +17,7 @@ import { ExpandParams, RetrieveResults, AttributeValueResults } from '../../type
 import { WellFormedError } from 'error';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
-import { EntityNameStack } from '../EntityNameStack';
+import { EntityContextStack } from '../EntityContextStack';
 
 describe('expandAttributes() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -76,7 +76,7 @@ describe('expandAttributes() (unit)', () => {
    });
 
    it('calls back with a copy of the set of attribute values when it contains no general entity references', (done) => {
-      expandAttributes([{ value: [textPToken] }], params, new EntityNameStack(), (result) => {
+      expandAttributes([{ value: [textPToken] }], params, new EntityContextStack(), (result) => {
          expect(result).toEqualShallowDifferent([{ newValue: [textPToken], byproducts: [] }]);
          done();
       });
@@ -91,7 +91,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, bogus] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([textPToken, bogus]);
             done();
@@ -108,7 +108,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, bogus] }, { value: [textPToken, bogus] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([textPToken, bogus]);
             expect(result[1].newValue).toEqual([textPToken, bogus]);
@@ -132,7 +132,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, ltRef] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([
                textPToken,
@@ -163,7 +163,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, unparsedRef] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([textPToken, unparsedRef]);
             done();
@@ -182,7 +182,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, geRefPToken] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([textPToken, geRefPToken]);
             done();
@@ -198,7 +198,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, namlessGERef] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([textPToken, namlessGERef]);
             done();
@@ -235,7 +235,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, firstGeRefPToken] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([
                textPToken,
@@ -267,7 +267,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, anotherGeRefPToken] }],
          params,
-         new EntityNameStack().cloneWithGEName('ge2'),
+         new EntityContextStack().cloneWithRef(anotherGeRefPToken, ''),
          (result) => {
             expect(result[0].newValue).toEqual([textPToken, anotherGeRefPToken]);
             done();
@@ -287,7 +287,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, geRefPToken] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([
                textPToken,
@@ -331,7 +331,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, unloadable] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result).toEqual([
                {
@@ -356,7 +356,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, geRefPToken] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result[0].newValue).toEqual([
                textPToken,
@@ -379,7 +379,7 @@ describe('expandAttributes() (unit)', () => {
          expandAttributes(
             [{ value: [textPToken, bogus] }],
             params,
-            new EntityNameStack(),
+            new EntityContextStack(),
             (results) => {
                expect(results[0].byproducts).toEqual([]);
                done();
@@ -399,7 +399,7 @@ describe('expandAttributes() (unit)', () => {
          expandAttributes(
             [{ value: [textPToken, geRefPToken] }],
             params,
-            new EntityNameStack(),
+            new EntityContextStack(),
             (result) => {
                expect(result[0].byproducts).toEqual([attrError]);
                done();
@@ -448,7 +448,7 @@ describe('expandAttributes() (unit)', () => {
          expandAttributes(
             [{ value: [textPToken, geExternalRefPToken] }],
             params,
-            new EntityNameStack(),
+            new EntityContextStack(),
             (results) => {
                expect(results[0].byproducts).toEqual([loadingError]);
                done();
@@ -501,7 +501,7 @@ describe('expandAttributes() (unit)', () => {
       expandAttributes(
          [{ value: [textPToken, geRefPToken] }],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (results) => {
             expect(results[0].byproducts).toEqual([attrError1, loadingError, attrError2]);
             done();

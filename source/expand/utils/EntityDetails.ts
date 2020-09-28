@@ -30,7 +30,7 @@ interface PrivateGEDetails {
    isLoading: boolean;
    protoReplacementText?: EntityValuePToken;
    waiters: Array<LoadingCallback>;
-   entityLoc?: OpaqueEntityLoc; // set only when isInternal is false.
+   entityLoc: OpaqueEntityLoc; // id of the entity that contains this entity's replacement text.
 }
 
 interface PrivatePEDetails {
@@ -39,7 +39,7 @@ interface PrivatePEDetails {
    isLoading: boolean;
    protoReplacementText?: EntityValuePToken; // This must be filled in if this is internal when the token is found. It must be filled in for external when asked
    waiters: Array<LoadingCallback>;
-   entityLoc?: OpaqueEntityLoc; // set only when isInternal is false.
+   entityLoc: OpaqueEntityLoc; // id of the entity that contains this entity's replacement text.
 }
 
 interface GeneralEntityMap {

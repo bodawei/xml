@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, Range, EntityId } from 'basic';
+import { Token, Range, EntityId, ENTITY_ID } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -19,13 +19,18 @@ import {
    TextPToken,
    PToken,
    XmlError,
+   EXTERNAL_ID,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
+   COMMENT_PTOKEN,
+   PARAMETER_ENTITY_END_PTOKEN,
 } from 'token';
 
 import { EntityExpander } from '../EntityExpander';
 
 import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../types';
 
-fdescribe('EntityExpander (integration)', () => {
+describe('EntityExpander (integration)', () => {
    const externalMap: { [publicName: string]: string } = {};
 
    function parseBody(
@@ -36,17 +41,25 @@ fdescribe('EntityExpander (integration)', () => {
       const pTokenStream = new PTokenStream(sTokenSource, {
          context,
       });
+      let ended = false;
+      let writing = false;
 
       pTokenStream.on('data', (token: PToken) => {
          pTokenStream.pause();
+         writing = true;
          writeToken(token, () => {
+            writing = false;
             pTokenStream.resume();
+            if (ended) {
+               writeToken(undefined, () => {});
+            }
          });
       });
       pTokenStream.on('end', () => {
-         writeToken(undefined, () => {
-            pTokenStream.resume();
-         });
+         ended = true;
+         if (!writing) {
+            writeToken(undefined, () => {});
+         }
       });
    }
 
@@ -69,16 +82,15 @@ fdescribe('EntityExpander (integration)', () => {
       baseEntity: EntityId | OpaqueEntityLoc,
       relativeEntity: EntityId,
    ): OpaqueEntityLoc {
-      return {
-         entityLoc: '',
-         relativeEntity,
-      };
+      const base = baseEntity.type === ENTITY_ID ? baseEntity.systemId : baseEntity;
+
+      return `${base}/${relativeEntity.systemId}`;
    }
 
    function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
       const sTokenSource = new STokenSource(defaultExtractors, entityLoc.relativeEntity);
 
-      const str = externalMap[entityLoc.relativeEntity.systemId];
+      const str = externalMap[entityLoc];
       sTokenSource.addText(str);
       sTokenSource.endText();
 
@@ -205,6 +217,41 @@ fdescribe('EntityExpander (integration)', () => {
 
       doExpand([decl0, decl1, start], true, (results) => {
          expect(results).toEqual([decl0, decl1, expanded]);
+         done();
+      });
+   });
+
+   it('expands an entity which references another which references another via relative refs', (done) => {
+      externalMap['./someOther/sub.xml'] = '<!ENTITY % two PUBLIC "xx" "./other.xml">%two;';
+      externalMap['./someOther/sub.xml/./other.xml'] = '<!-- Success -->';
+      const baseEntity = new EntityId('.');
+      const decl0 = new ParameterEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('first'),
+         externalId: {
+            type: EXTERNAL_ID,
+            system: {
+               value: [new TextPToken({ text: toSToken('someOther/sub.xml') })],
+            },
+         },
+      });
+      const ref0 = new ParameterEntityReferencePToken({
+         open: toSToken('%'),
+         name: toSToken('first'),
+      });
+
+      doExpand([baseEntity, decl0, ref0], true, (results) => {
+         const types = results.map((r) => r.type);
+         expect(types).toEqual([
+            ENTITY_ID,
+            PARAMETER_ENTITY_DECLARATION_PTOKEN,
+            PARAMETER_ENTITY_START_PTOKEN,
+            PARAMETER_ENTITY_DECLARATION_PTOKEN,
+            PARAMETER_ENTITY_START_PTOKEN,
+            COMMENT_PTOKEN,
+            PARAMETER_ENTITY_END_PTOKEN,
+            PARAMETER_ENTITY_END_PTOKEN,
+         ]);
          done();
       });
    });

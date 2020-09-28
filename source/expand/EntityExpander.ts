@@ -49,7 +49,7 @@ import { expandEntityValue } from './utils/expandEntityValue';
 import { expandUnassigned } from './utils/expandUnassigned';
 import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 import { EntityProcessors, ExpandParams } from './types';
-import { EntityNameStack } from './utils/EntityNameStack';
+import { EntityContextStack } from './utils/EntityContextStack';
 
 type DeclToken =
    | AttListPToken
@@ -94,7 +94,7 @@ class EntityExpander {
 
    private state = State.AT_START;
 
-   private entityNameStack: EntityNameStack = new EntityNameStack();
+   private entityContextStack: EntityContextStack = new EntityContextStack();
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = deliverPToken;
@@ -112,6 +112,7 @@ class EntityExpander {
       switch (pToken.type) {
          case ENTITY_ID:
             this.expandParams.entityId = pToken;
+            this.entityContextStack.pushDocumentEntity(pToken);
             this.deliverToken(pToken);
             expanded();
             break;
@@ -218,6 +219,7 @@ class EntityExpander {
          streamParsedReplacementText(
             externalSubsetToken,
             this.expandParams,
+            this.entityContextStack,
             (result, nextPTokenDone) => {
                if (result) {
                   this.expandPToken(result, nextPTokenDone);
@@ -271,7 +273,7 @@ class EntityExpander {
       setupConditional(
          startToken.peRef,
          this.expandParams,
-         this.entityNameStack,
+         this.entityContextStack,
          this.state === State.IN_CONTENT
             ? ContextType.GENERAL_ENTITY
             : ContextType.PARAMETER_ENTITY,
@@ -354,7 +356,7 @@ class EntityExpander {
       expandUnassigned(
          declarationPToken.unassigned,
          this.expandParams,
-         this.entityNameStack,
+         this.entityContextStack,
          isElementDeclaration,
          (results) => {
             // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
@@ -416,7 +418,7 @@ class EntityExpander {
       expandAttributes(
          pToken.attDefs as any,
          this.expandParams,
-         this.entityNameStack,
+         this.entityContextStack,
          (results) => {
             for (let index = 0; index < results.length; index++) {
                pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
@@ -452,10 +454,6 @@ class EntityExpander {
    ): void {
       const name = strOrBlank(pToken.name);
       const hasEntry = this.expandParams.entityDetails.hasEntity(pToken);
-      const chain =
-         pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN
-            ? this.entityNameStack.cloneWithPEName(name)
-            : this.entityNameStack.cloneWithGEName(name);
 
       if (name === '' || hasEntry) {
          this.deliverToken(pToken);
@@ -465,9 +463,8 @@ class EntityExpander {
 
       if (pToken.externalId) {
          const entityId = externalIdToEntityId(pToken.externalId);
-         // @@@ REVISIT, as the root is BS.
          const entityLoc = this.expandParams.utils.resolveEntityId(
-            this.expandParams.entityId,
+            this.entityContextStack.getCurrentEntityLoc(),
             entityId,
          );
          this.expandParams.entityDetails.addEntity(pToken, undefined, entityLoc);
@@ -476,19 +473,23 @@ class EntityExpander {
          return;
       }
 
-      // REFACTOR/CLEANUP again types do not match correctly
-      expandEntityValue(pToken.value as any, this.expandParams, chain, (result): void => {
-         // @@@ REvisit, as the entityId is bs
-         this.expandParams.entityDetails.addEntity(
-            pToken,
-            result.newValue,
-            this.expandParams.entityId,
-         );
+      // REFACTOR/CLEANUP again types do not match correctly`
+      expandEntityValue(
+         pToken.value as any,
+         this.expandParams,
+         this.entityContextStack,
+         (result): void => {
+            this.expandParams.entityDetails.addEntity(
+               pToken,
+               result.newValue,
+               this.entityContextStack.getCurrentEntityLoc(),
+            );
 
-         this.deliverByproducts(result.byproducts);
-         this.deliverToken(pToken);
-         handled();
-      });
+            this.deliverByproducts(result.byproducts);
+            this.deliverToken(pToken);
+            handled();
+         },
+      );
    }
 
    /*
@@ -510,7 +511,7 @@ class EntityExpander {
       expandAttributes(
          pToken.attributes as any,
          this.expandParams,
-         this.entityNameStack,
+         this.entityContextStack,
          (results) => {
             for (let index = 0; index < results.length; index++) {
                pToken.attributes[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
@@ -532,28 +533,31 @@ class EntityExpander {
       // §4.1.0: Well-formedness constraint: No Recursion
       //    A parsed entity must not contain a recursive reference to itself,
       //    either directly or indirectly.
-      if (this.entityNameStack.hasName(pToken)) {
+      if (this.entityContextStack.hasName(pToken)) {
          this.deliverToken(pToken);
          handled();
          return;
       }
 
-      this.entityNameStack.pushName(pToken);
+      streamParsedReplacementText(
+         pToken,
+         this.expandParams,
+         this.entityContextStack,
+         (result, done) => {
+            if (!result) {
+               // BUG 1
+               if (countSeen === 0) {
+                  this.deliverToken(pToken);
+               }
 
-      streamParsedReplacementText(pToken, this.expandParams, (result, done) => {
-         if (!result) {
-            // BUG 1
-            if (countSeen === 0) {
-               this.deliverToken(pToken);
+               done();
+               handled();
+            } else {
+               countSeen++;
+               this.expandPToken(result, done);
             }
-
-            this.entityNameStack.popName(pToken);
-            handled();
-         } else {
-            countSeen++;
-            this.expandPToken(result, done);
-         }
-      });
+         },
+      );
    }
 
    private deliverByproducts(byproducts: Array<XmlError | ElidedEntityDeclarationPToken>): void {
@@ -562,5 +566,4 @@ class EntityExpander {
       }
    }
 }
-
 export { EntityExpander };

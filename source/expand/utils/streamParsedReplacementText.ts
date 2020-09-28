@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { ContextType, externalIdToEntityId } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -21,21 +22,20 @@ import {
 } from './ExternalDtdSubsetPseudoToken';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { ExpandParams } from '../types';
-import { ContextType, externalIdToEntityId } from 'pToken';
+import { EntityContextStack } from './EntityContextStack';
 
 type DeliverToken = (result: PToken | void, handled: () => void) => void;
 
 function deliverMultipleTokens(
    allTokens: Array<PToken | void>,
    deliverToken: (result: PToken | void, callback: () => void) => void,
+   allDone: () => void,
 ): void {
    function process(): void {
       const next = allTokens.shift();
 
       if (next === undefined) {
-         deliverToken(next, (): void => {
-            /* do nothing */
-         });
+         deliverToken(next, allDone);
       } else {
          deliverToken(next, process);
       }
@@ -43,6 +43,8 @@ function deliverMultipleTokens(
 
    process();
 }
+
+function noop(): void {}
 
 /*
  * Given an entity reference, retrieve its value, and start parsing that
@@ -56,6 +58,7 @@ function streamParsedReplacementText(
       | GeneralEntityReferencePToken
       | ExternalDtdSubsetPseudoToken,
    expandParams: ExpandParams,
+   entityContextStack: EntityContextStack,
    deliverToken: DeliverToken,
 ): void {
    const { entityDetails, utils } = expandParams;
@@ -64,16 +67,22 @@ function streamParsedReplacementText(
    let context = ContextType.DOCUMENT;
    let start: PToken;
    let end: PToken;
+   let entityLoc = entityContextStack.getCurrentEntityLoc();
 
    if (!expandParams.loadExternalEntities) {
-      deliverToken(undefined, (): void => {
-         // do nothing
-      });
+      deliverToken(undefined, noop);
       return;
    }
 
    if (reference.type === EXTERNAL_DTD_PSEUDO_TOKEN) {
-      ({ sTokenSource, getErrors } = utils.retrieveExternalEntity('@@@@'));
+      // It may be strange to treat the reference the same as a declaration, but for the externalId
+      // the reference pseudo token also acts as a declaration of sorts.
+      const entityId = externalIdToEntityId(reference.externalId);
+      entityLoc = expandParams.utils.resolveEntityId(
+         entityContextStack.getCurrentEntityLoc(),
+         entityId,
+      );
+      ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(entityLoc));
       context = ContextType.EXTERNAL_SUBSET;
       start = new ExternalSubsetStartToken();
       end = new ExternalSubsetEndToken();
@@ -91,11 +100,11 @@ function streamParsedReplacementText(
       const details = entityDetails.getReferencedDetails(reference);
 
       if (!details) {
-         deliverToken(undefined, (): void => {
-            // do nothing
-         });
+         deliverToken(undefined, noop);
          return;
       }
+
+      entityLoc = details.entityLoc;
 
       if (details.protoReplacementText) {
          sTokenSource = entityValueToSTokenSource(
@@ -104,15 +113,17 @@ function streamParsedReplacementText(
          );
          getErrors = (): Array<XmlError> => [];
       } else {
-         ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(details.entityLoc));
+         ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(entityLoc));
       }
    }
 
+   entityContextStack.pushName(reference, entityLoc);
    deliverToken(start, () => {
       sTokenSource.setConfVer(expandParams.confVer);
       utils.parseBody(sTokenSource, context, (result, handled) => {
          if (!result) {
-            deliverMultipleTokens([...getErrors(), end, undefined], deliverToken);
+            entityContextStack.popName(reference);
+            deliverMultipleTokens([...getErrors(), end, undefined], deliverToken, handled);
             return;
          }
 

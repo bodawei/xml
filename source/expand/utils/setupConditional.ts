@@ -10,7 +10,7 @@ import {
 } from 'token';
 import { ConditionalInfo, ExpandParams } from '../types';
 import { addProtoReplacementText } from './addProtoReplacementText';
-import { EntityNameStack } from './EntityNameStack';
+import { EntityContextStack } from './EntityContextStack';
 
 type Done = (result: ConditionalInfo) => void;
 
@@ -31,16 +31,16 @@ function extractType(replacementText: EntityValuePToken): string {
 function setupConditional(
    ref: ParameterEntityReferencePToken,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    context: ContextType,
    deliverToken: (aToken: PToken, handled: () => void) => void,
    done: Done,
 ): void {
-   addProtoReplacementText(ref, expandParams, nameStack, () => {
+   addProtoReplacementText(ref, expandParams, entityContextStack, () => {
       const { utils } = expandParams;
       const entityName = strOrBlank(ref.name);
       const entityDetails = expandParams.entityDetails.getPEDetails(entityName);
-      const alreadyInEntity = nameStack.hasPEName(entityName);
+      const alreadyInEntity = entityContextStack.hasName(ref);
 
       if (!entityDetails || !entityDetails.protoReplacementText) {
          done({});

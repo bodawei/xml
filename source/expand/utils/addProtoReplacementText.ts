@@ -1,7 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import {
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ElidedEntityDeclarationPToken,
    EntityValuePToken,
    ParameterEntityReferencePToken,
@@ -12,8 +11,7 @@ import {
 
 import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
-import { strOrBlank } from 'sToken';
-import { EntityNameStack } from './EntityNameStack';
+import { EntityContextStack } from './EntityContextStack';
 import { externalIdToEntityId } from 'pToken';
 
 interface AddProtoReplacementTextResult {
@@ -37,12 +35,12 @@ type Done = (result: AddProtoReplacementTextResult) => void;
  * being to have the various "metadata" like pe ref start tokens removed, and
  * all the text values put together).
  *
- * NOTE: nameStack is where the reference is found, but does not include it.
+ * NOTE: entityContextStack is where the reference is found, but does not include it.
  */
 function addProtoReplacementText(
    reference: ParameterEntityReferencePToken | GeneralEntityReferencePToken,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    done: Done,
 ): void {
    const { entityDetails, utils } = expandParams;
@@ -79,10 +77,7 @@ function addProtoReplacementText(
    );
 
    utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken | void) => {
-      const newStack =
-         reference.type === PARAMETER_ENTITY_REFERENCE_PTOKEN
-            ? nameStack.cloneWithPEName(strOrBlank(reference.name))
-            : nameStack.cloneWithGEName(strOrBlank(reference.name));
+      const newStack = entityContextStack.cloneWithRef(reference, details.entityLoc);
 
       if (!entityValuePToken) {
          entityDetails.updateDeclaredValue(

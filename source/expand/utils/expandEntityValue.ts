@@ -13,7 +13,7 @@ import { ExpandParams } from '../types';
 import { EntityDetails } from './EntityDetails';
 
 import { addProtoReplacementText } from './addProtoReplacementText';
-import { EntityNameStack } from './EntityNameStack';
+import { EntityContextStack } from './EntityContextStack';
 
 interface ExpandedResult {
    newValue: EntityValuePToken;
@@ -55,7 +55,7 @@ function entitiesWithoutReplacementText(
 function expandValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>,
    expanded: (result: ExpandedResult) => void,
 ): void {
@@ -70,7 +70,7 @@ function expandValue(
             // §4.1.0: Well-formedness constraint: No Recursion
             //    A parsed entity must not contain a recursive reference to itself,
             //    either directly or indirectly.
-            if (nameStack.hasName(element)) {
+            if (entityContextStack.hasName(element)) {
                newValue.push(element);
             } else {
                newValue.push(
@@ -102,7 +102,7 @@ function expandValue(
 function expandEntityValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
-   nameStack: EntityNameStack,
+   entityContextStack: EntityContextStack,
    expanded: (result: ExpandedResult) => void,
 ): void {
    const byproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
@@ -110,18 +110,18 @@ function expandEntityValue(
    let remainingEntities = entitiesWithoutRT.length;
 
    if (remainingEntities === 0) {
-      expandValue(value, expandParams, nameStack, [], expanded);
+      expandValue(value, expandParams, entityContextStack, [], expanded);
       return;
    }
 
    for (const reference of entitiesWithoutRT) {
       // eslint-disable-next-line no-loop-func
-      addProtoReplacementText(reference, expandParams, nameStack, (addResult) => {
+      addProtoReplacementText(reference, expandParams, entityContextStack, (addResult) => {
          byproducts.push(...addResult.byproducts);
          remainingEntities--;
 
          if (remainingEntities === 0) {
-            expandValue(value, expandParams, nameStack, byproducts, expanded);
+            expandValue(value, expandParams, entityContextStack, byproducts, expanded);
          }
       });
    }

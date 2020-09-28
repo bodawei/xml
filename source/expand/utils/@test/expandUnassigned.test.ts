@@ -16,7 +16,7 @@ import { ExpandParams, RetrieveResults } from '../../types';
 import { WellFormedError } from 'error';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
-import { EntityNameStack } from '../EntityNameStack';
+import { EntityContextStack } from '../EntityContextStack';
 import { expandUnassigned } from '../expandUnassigned';
 
 describe('expandUnassigned() (unit)', () => {
@@ -81,7 +81,7 @@ describe('expandUnassigned() (unit)', () => {
    it('calls back with a copy of the unassigned value', (done) => {
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.WORD, token: textPToken }];
 
-      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityContextStack(), false, (result) => {
          expect(result.newValue).toEqualShallowDifferent(unassignedValue);
          done();
       });
@@ -94,7 +94,7 @@ describe('expandUnassigned() (unit)', () => {
       });
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: bogus }];
 
-      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityContextStack(), false, (result) => {
          expect(result.newValue).toEqualShallowDifferent(unassignedValue);
          done();
       });
@@ -110,8 +110,8 @@ describe('expandUnassigned() (unit)', () => {
          name: toSToken('peInProgress'),
       });
       entityDetails.addEntity(peDecl, [textPToken], '');
-      const nameStack = new EntityNameStack();
-      nameStack.pushPEName('peInProgress');
+      const nameStack = new EntityContextStack();
+      nameStack.pushName(peInProgress, '');
       const unassignedValue: UnassignedArray = [
          { type: UnassignedType.REFERENCE, token: peInProgress },
       ];
@@ -125,7 +125,7 @@ describe('expandUnassigned() (unit)', () => {
    it('passes the contents of the protoReplacementText to unassigned.parseAllValues()', (done) => {
       const unassignedValue: UnassignedArray = [{ type: UnassignedType.REFERENCE, token: peRef }];
 
-      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityContextStack(), false, (result) => {
          expect(result.newValue).toEqual([
             { type: UnassignedType.ENTITY_START, token: peRef },
             { type: UnassignedType.WORD, token: text2PToken },
@@ -150,7 +150,7 @@ describe('expandUnassigned() (unit)', () => {
          { type: UnassignedType.REFERENCE, token: peRef2 },
       ];
 
-      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityContextStack(), false, (result) => {
          expect(result.newValue).toEqual([
             { type: UnassignedType.ENTITY_START, token: peRef },
             { type: UnassignedType.WORD, token: text2PToken },
@@ -171,7 +171,7 @@ describe('expandUnassigned() (unit)', () => {
          cb({ byproducts: [attrError] });
       });
 
-      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityContextStack(), false, (result) => {
          expect(result.byproducts).toEqual([attrError]);
          done();
       });
@@ -193,7 +193,7 @@ describe('expandUnassigned() (unit)', () => {
          cb({ byproducts: [attrError] });
       });
 
-      expandUnassigned(unassignedValue, params, new EntityNameStack(), false, (result) => {
+      expandUnassigned(unassignedValue, params, new EntityContextStack(), false, (result) => {
          expect(result).toEqual({
             newValue: [{ type: UnassignedType.REFERENCE, token: peRef2 }],
             byproducts: [attrError],

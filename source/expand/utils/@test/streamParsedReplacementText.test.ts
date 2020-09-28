@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion } from 'basic';
+import { ENTITY_ID, ConformanceVersion, EntityId } from 'basic';
 import { WellFormedError } from 'error';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -25,6 +25,7 @@ import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { streamParsedReplacementText } from '../streamParsedReplacementText';
 import { ContextType } from 'pToken';
+import { EntityContextStack } from '../EntityContextStack';
 
 function noopFunction(): void {
    // do nothing
@@ -34,12 +35,17 @@ describe('streamParsedReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
    let params: ExpandParams;
    let textPToken: TextPToken;
+   let stack: EntityContextStack;
 
    beforeEach(() => {
       textPToken = new TextPToken({ text: toSToken('foo') });
+      stack = new EntityContextStack();
       entityDetails = new EntityDetails();
       entityDetails.addExternalSubset({
          type: EXTERNAL_ID,
+         system: {
+            value: [new TextPToken({ text: toSToken('theExternalID') })],
+         },
       });
 
       params = {
@@ -79,7 +85,7 @@ describe('streamParsedReplacementText() (unit)', () => {
    ): void {
       const allResults: Array<PToken> = [];
 
-      streamParsedReplacementText(token, params, (result, handled) => {
+      streamParsedReplacementText(token, params, stack, (result, handled) => {
          if (!result) {
             deliverResults(allResults);
          } else {
@@ -102,6 +108,21 @@ describe('streamParsedReplacementText() (unit)', () => {
             textPToken,
             new ExternalSubsetEndToken(),
          ]);
+         done();
+      });
+   });
+
+   it('uses the entityLoc of the external dtd to retrieve it', (done) => {
+      spyOn(params.utils, 'resolveEntityId').and.callFake((base: EntityId, entityId: EntityId) => {
+         return `[${entityId.systemId}]`;
+      });
+      const retrieveSpy = spyOn(params.utils, 'retrieveExternalEntity').and.callThrough();
+      params.utils.parseBody = (source, context, cb) => {
+         cb(undefined, () => {});
+      };
+
+      gatherResults(entityDetails.getExternalSubsetReference() as any, () => {
+         expect(retrieveSpy).toHaveBeenCalledWith('[theExternalID]');
          done();
       });
    });
@@ -155,6 +176,53 @@ describe('streamParsedReplacementText() (unit)', () => {
       });
    });
 
+   it('calls the retrieveExternalEntity utility with the location of the entity', (done) => {
+      const retrieveSpy = spyOn(params.utils, 'retrieveExternalEntity').and.callThrough();
+      params.utils.parseBody = (source, context, cb) => {
+         cb(undefined, noopFunction);
+      };
+      const geDecl = new GeneralEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('ge'),
+      });
+      entityDetails.addEntity(geDecl, undefined, 'the location');
+      const geRef = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('ge'),
+      });
+
+      gatherResults(geRef, () => {
+         expect(retrieveSpy).toHaveBeenCalledWith('the location');
+         done();
+      });
+   });
+
+   it('pushes the reference on the context stack and then pops it when done', (done) => {
+      let midstreamCount = 0;
+      const pushSpy = spyOn(stack, 'pushName').and.callThrough();
+      const popSpy = spyOn(stack, 'popName').and.callThrough();
+      params.utils.parseBody = (source, context, cb) => {
+         midstreamCount = popSpy.calls.count();
+         cb(undefined, noopFunction);
+      };
+      const geDecl = new GeneralEntityDeclarationPToken({
+         open: toSToken('<!'),
+         name: toSToken('ge'),
+      });
+      entityDetails.addEntity(geDecl, undefined, 'the location');
+      const geRef = new GeneralEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('ge'),
+      });
+
+      gatherResults(geRef, () => {
+         expect(pushSpy).toHaveBeenCalledWith(geRef, 'the location');
+         expect(midstreamCount).toEqual(0);
+         expect(popSpy).toHaveBeenCalledWith(geRef);
+         done();
+      });
+   });
+
    it('calls parseBody() with the content from the internal ge declaration and that it is in the content', () => {
       const parseBodySpy = spyOn(params.utils, 'parseBody');
       const geDecl = new GeneralEntityDeclarationPToken({
@@ -167,7 +235,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          name: toSToken('ge'),
       });
 
-      streamParsedReplacementText(geRef, params, (value, cb) => {
+      streamParsedReplacementText(geRef, params, stack, (value, cb) => {
          cb();
       });
 
@@ -239,14 +307,10 @@ describe('streamParsedReplacementText() (unit)', () => {
          getErrors: (): Array<XmlError> => [],
       });
 
-      streamParsedReplacementText(peRef, params, (value, cb) => {
+      streamParsedReplacementText(peRef, params, stack, (value, cb) => {
          cb();
       });
 
-      expect(resolveSpy).toHaveBeenCalledWith(
-         jasmine.objectContaining({ type: ENTITY_ID, systemId: '' }),
-         jasmine.objectContaining({ type: ENTITY_ID, systemId: '', publicId: '' }),
-      );
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);
       expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);

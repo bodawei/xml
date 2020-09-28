@@ -148,7 +148,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('getGEDetails()', () => {
       it('retrieves a previously added general entity declaration', () => {
-         entityDetails.addEntity(geDecl1, undefined, '');
+         entityDetails.addEntity(geDecl1, undefined, 'x');
 
          const result = entityDetails.getGEDetails('foo');
          expect(result as any).toEqual({
@@ -156,7 +156,7 @@ describe('EntityDetails (unit)', () => {
             isUnparsed: false,
             isInternal: true,
             isLoading: false,
-            entityLoc: undefined,
+            entityLoc: 'x',
             waiters: [],
          });
       });
@@ -206,14 +206,14 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('foo'),
          });
-         entityDetails.addEntity(decl1, undefined, '');
+         entityDetails.addEntity(decl1, undefined, 'w');
 
          const result = entityDetails.getPEDetails('foo');
          expect(result as any).toEqual({
             token: decl1,
             isInternal: true,
             isLoading: false,
-            entityLoc: undefined,
+            entityLoc: 'w',
             waiters: [],
          });
       });
@@ -302,7 +302,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('getReferencedDetails()', () => {
       it('retrieves a previously added general entity declaration', () => {
-         entityDetails.addEntity(geDecl1, undefined, '');
+         entityDetails.addEntity(geDecl1, undefined, 'zz');
 
          const result = entityDetails.getReferencedDetails(
             new GeneralEntityReferencePToken({
@@ -315,7 +315,7 @@ describe('EntityDetails (unit)', () => {
             isInternal: true,
             isLoading: false,
             isUnparsed: false,
-            entityLoc: undefined,
+            entityLoc: 'zz',
             waiters: [],
          });
       });
@@ -325,7 +325,7 @@ describe('EntityDetails (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('foo'),
          });
-         entityDetails.addEntity(decl1, undefined, '');
+         entityDetails.addEntity(decl1, undefined, 'gg');
 
          const result = entityDetails.getReferencedDetails(
             new ParameterEntityReferencePToken({
@@ -337,7 +337,7 @@ describe('EntityDetails (unit)', () => {
             token: decl1,
             isInternal: true,
             isLoading: false,
-            entityLoc: undefined,
+            entityLoc: 'gg',
             waiters: [],
          });
       });

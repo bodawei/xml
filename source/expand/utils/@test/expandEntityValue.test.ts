@@ -18,7 +18,7 @@ import {
 import { expandEntityValue } from '../expandEntityValue';
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
-import { EntityNameStack } from '../EntityNameStack';
+import { EntityContextStack } from '../EntityContextStack';
 
 describe('expandEntityValue() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -76,14 +76,14 @@ describe('expandEntityValue() (unit)', () => {
    });
 
    it('calls back with an shallow copied unchanged value when given an entity value with no references', (done) => {
-      expandEntityValue([textPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([textPToken], params, new EntityContextStack(), (result) => {
          expect(result.newValue).toEqualShallowDifferent([textPToken]);
          done();
       });
    });
 
    it('calls back with no errors when given an entity value with no references', (done) => {
-      expandEntityValue([textPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([textPToken], params, new EntityContextStack(), (result) => {
          expect(result.byproducts).toEqual([]);
          done();
       });
@@ -92,7 +92,7 @@ describe('expandEntityValue() (unit)', () => {
    it('calls back with an expanded entity value when the referenced entity is already present', (done) => {
       entityDetails.updateDeclaredValue(peDecl, [textPToken], []);
 
-      expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, new EntityContextStack(), (result) => {
          expect(result).toEqual({
             byproducts: [],
             newValue: [
@@ -110,7 +110,7 @@ describe('expandEntityValue() (unit)', () => {
       expandEntityValue(
          [peRefPToken, textPToken, peRefPToken],
          params,
-         new EntityNameStack(),
+         new EntityContextStack(),
          (result) => {
             expect(result).toEqual({
                byproducts: [new ElidedEntityDeclarationPToken(peDecl, [textPToken])],
@@ -140,7 +140,7 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, new EntityContextStack(), (result) => {
          expect(result).toEqual({
             byproducts: [new ElidedEntityDeclarationPToken(peDecl, [])],
             newValue: [
@@ -166,7 +166,7 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([textPToken, peRefPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([textPToken, peRefPToken], params, new EntityContextStack(), (result) => {
          expect(result.byproducts).toEqual([
             new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             new ElidedEntityDeclarationPToken(peDecl, []),
@@ -181,7 +181,7 @@ describe('expandEntityValue() (unit)', () => {
          name: toSToken('peBogus'),
       });
 
-      expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([peRefPToken, textPToken], params, new EntityContextStack(), (result) => {
          expect(result).toEqual({
             byproducts: [],
             newValue: [peRefPToken, textPToken],
@@ -196,7 +196,7 @@ describe('expandEntityValue() (unit)', () => {
          name: undefined,
       });
 
-      expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([peRefPToken, textPToken], params, new EntityContextStack(), (result) => {
          expect(result).toEqual({
             byproducts: [],
             newValue: [peRefPToken, textPToken],
@@ -214,7 +214,7 @@ describe('expandEntityValue() (unit)', () => {
       expandEntityValue(
          [peRefPToken, textPToken],
          params,
-         new EntityNameStack().cloneWithPEName('already'),
+         new EntityContextStack().cloneWithRef(peRefPToken, ''),
          (result) => {
             expect(result).toEqual({
                byproducts: [],
@@ -251,7 +251,7 @@ describe('expandEntityValue() (unit)', () => {
          };
       };
 
-      expandEntityValue([peRefPToken, textPToken], params, new EntityNameStack(), (result) => {
+      expandEntityValue([peRefPToken, textPToken], params, new EntityContextStack(), (result) => {
          expect(result).toEqual({
             byproducts: [],
             newValue: [
