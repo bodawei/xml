@@ -49,7 +49,7 @@ import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
 import { EntityContextStack } from '../utils/EntityContextStack';
 import { EntityId } from 'basic';
 
-fdescribe('EntityExpander (unit)', () => {
+describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
    let assignAttListSpy: jasmine.Spy;

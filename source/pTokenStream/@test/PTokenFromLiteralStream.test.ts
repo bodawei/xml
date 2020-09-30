@@ -5,9 +5,11 @@ import { Range, EntityId } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import * as tokenStuff from 'token';
 import { CharRefPToken, TextPToken } from 'token';
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
+
+import * as pTokenStuff from 'pToken';
+import * as tokenStuff from 'token';
 
 describe('PTokenFromLiteralStream (unit)', () => {
 
@@ -139,6 +141,37 @@ describe('PTokenFromLiteralStream (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(pushSpy.calls.argsFor(0)[0]).toEqual(new TextPToken({ text: sToken }));
+      });
+
+      it('returns a text token if we start off with a < but is not a text declaratoin', () => {
+         const mockSource = new MockSTokenSource([
+            [ '<', 'peekChar' ],
+            [ undefined, 'peekDecl'],
+            // now we hit parseText
+         ]);
+         const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
+         const parseSpy = spyOn(tokenStuff, 'parseText');
+
+         pTokenStream.read();
+         mockSource.respondInAsyncTime();
+
+         expect(parseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+      });
+
+      it('returns a text delaration token if we start off with a < that starts a text delcaration', () => {
+         const mockSource = new MockSTokenSource([
+            [ '<', 'peekChar' ],
+            [ '<?xml ?>', 'peekDecl'],
+            [ '<?', 'match', '<?' ],
+            // now we hit parseText
+         ]);
+         const parseSpy = spyOn(pTokenStuff, 'parseInstruction');
+         const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
+
+         pTokenStream.read();
+         mockSource.respondInAsyncTime();
+
+         expect(parseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
       });
 
    });
