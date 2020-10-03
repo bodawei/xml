@@ -122,7 +122,7 @@ class EntityExpander {
             expanded();
             break;
          case DOCTYPE_START_PTOKEN:
-            this.handleDocTypeStart(pToken as DocTypeStartPToken, expanded);
+            this.handleDocTypeStart(pToken, expanded);
             break;
          case DOCTYPE_END_PTOKEN:
             this.handleDocTypeEnd(pToken, expanded);

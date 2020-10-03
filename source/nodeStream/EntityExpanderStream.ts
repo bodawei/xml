@@ -46,7 +46,7 @@ function resolveEntityId(
    baseEntity: EntityId | OpaqueEntityLoc,
    relativeEntity: EntityId,
 ): OpaqueEntityLoc {
-   let pathname = defaultResolveEntityId(baseEntity, relativeEntity);
+   let pathname = defaultResolveEntityId(baseEntity, relativeEntity) as string;
    pathname = resolve(pathname);
 
    return pathname;
@@ -57,7 +57,7 @@ function retrieveExternalEntity(
 ): RetrieveResults {
    const sTokenSource = new STokenSource(defaultExtractors);
 
-   const data = fs.readFileSync(entityLoc, { encoding: 'utf8' });
+   const data = fs.readFileSync(entityLoc as string, { encoding: 'utf8' });
 
    sTokenSource.addText(data);
    sTokenSource.endText();

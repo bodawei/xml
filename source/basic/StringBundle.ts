@@ -139,11 +139,11 @@ class StringBundle {
 
       for (let index = 0; index < paramsArray.length; index++) {
          // jsperf says this is faster than just doing the two replaces
-         if (message.indexOf('{' + index + ':key}') !== -1) {
+         if (message.indexOf(`{${index}:key}`) !== -1) {
             const substitute = this.lookup(paramsArray[index], localNames);
-            message = message.replace('{' + index + ':key}', substitute);
+            message = message.replace(`{${index}:key}`, substitute);
          } else {
-            message = message.replace('{' + index + '}', paramsArray[index]);
+            message = message.replace(`{${index}}`, paramsArray[index]);
          }
       }
 

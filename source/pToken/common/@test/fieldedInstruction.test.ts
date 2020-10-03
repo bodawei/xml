@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { Range, EntityId } from 'basic';
-import { SToken, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { parseFieldedInstruction, FieldedInstruction } from '../fieldedInstruction';
@@ -27,6 +26,9 @@ describe('FieldedInstruction (unit)', () => {
          fields: [
             {
                name: toSToken('version'),
+               openQuote: undefined,
+               closeQuote: undefined,
+               valueSpace: undefined,
                nameSpace: undefined,
                equal: toSToken('='),
                equalSpace: undefined,
@@ -81,18 +83,7 @@ describe('FieldedInstruction (unit)', () => {
 
          const args = litParse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
-         expect(args[1]).toEqual({
-            pToken: {
-               name: new SToken(
-                  'version',
-                  'version',
-                  new Range(new EntityId(), 7, 0, 7, 14, 0, 14),
-               ),
-               nameSpace: undefined,
-               equal: new SToken('=', '=', new Range(new EntityId(), 14, 0, 14, 15, 0, 15)),
-               equalSpace: undefined,
-            },
-         });
+         expect(args[1]).toBeUndefined();
          expect(args[2]).toBeInstanceOf(Function);
       });
 
@@ -102,6 +93,8 @@ describe('FieldedInstruction (unit)', () => {
             fields: [
                {
                   name: toSToken('version'),
+                  openQuote: undefined,
+                  closeQuote: undefined,
                   nameSpace: undefined,
                   equal: toSToken('='),
                   equalSpace: undefined,
@@ -109,6 +102,9 @@ describe('FieldedInstruction (unit)', () => {
                },
                {
                   name: toSToken('encoding'),
+                  openQuote: undefined,
+                  closeQuote: undefined,
+                  valueSpace: undefined,
                   nameSpace: toSToken(' '),
                   equal: toSToken('='),
                   equalSpace: toSToken(' '),
@@ -167,6 +163,9 @@ describe('FieldedInstruction (unit)', () => {
             fields: [
                {
                   name: toSToken('version'),
+                  openQuote: undefined,
+                  closeQuote: undefined,
+                  valueSpace: undefined,
                   nameSpace: undefined,
                   equal: toSToken('='),
                   equalSpace: undefined,

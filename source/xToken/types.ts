@@ -20,6 +20,7 @@ import {
    NotationDeclarationXToken,
    SpaceXToken,
 } from 'token';
+import { ParseValue } from 'pToken';
 
 type XToken =
    | CharRefXToken
@@ -28,6 +29,7 @@ type XToken =
    | TextDeclarationXToken
    | XmlDeclarationXToken
    // temp additions
+   | ParseValue // EEEK.
    | CharDataXToken
    | CdataXToken
    | DocTypeEndXToken

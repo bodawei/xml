@@ -262,7 +262,7 @@ describe('EntityDetails (unit)', () => {
             isInternal: true,
             isLoading: false,
             waiters: [],
-            entityLoc: undefined,
+            entityLoc: 'predefined',
             protoReplacementText: value,
          } as any);
       });

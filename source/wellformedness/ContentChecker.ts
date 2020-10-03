@@ -267,6 +267,8 @@ class ContentChecker implements Checker {
                errorCollector,
             );
             break;
+         default:
+            break;
       }
 
       this.transition(pToken, errorCollector);

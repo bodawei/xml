@@ -202,7 +202,7 @@ function processDeclaration(
    };
 
    // Refactor/cleanup: we should be allowing starts in these values
-   for (const value of pToken.value as any) {
+   for (const value of pToken.value) {
       if (value.type === PARAMETER_ENTITY_START_PTOKEN) {
          tokens.push(value.referencePToken);
       } else if (value.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
@@ -472,6 +472,9 @@ class MarkupDeclChecker implements Checker {
             break;
          case ELIDED_ENTITY_DECLARATION_PTOKEN:
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
+            break;
+         default:
+            // do nothing
             break;
       }
 

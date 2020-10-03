@@ -3,6 +3,9 @@ import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import { ParseValue } from 'pToken';
 import {
+   TEXT_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   CHARREF_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
@@ -113,18 +116,18 @@ function checkGeneralEntity(
 ): void {
    const name = strOrBlank(pToken.name);
    const genEntityDecl = entityDecls[name];
-   const declarationExists = !!genEntityDecl;
+   const declarationExists = genEntityDecl !== undefined;
    const isPredefinedEntity = PROTECTED_ENTITIES.indexOf(name) !== -1;
    const mustHaveDeclaration =
       state.isStandalone || state.hasNoDTD || (!state.hasExternalDTD && state.peRefCount === 0); // @@@@ Test this
 
-   if (genEntityDecl) {
+   if (genEntityDecl !== undefined) {
       if (inAtt) {
          // §3.1.0: Well-Formedness Constraint: No External Entity References
          //    Attribute values must not contain direct or indirect entity
          //    references to external entities.
          ec.check(
-            genEntityDecl && genEntityDecl.token.externalId,
+            genEntityDecl !== undefined && genEntityDecl.token.externalId,
             WFID.ATTRIBUTE_INVALID_REFERENCE,
             [name],
             pToken.open,
@@ -174,7 +177,7 @@ function scanAttributeValues(
    const refNameStack: Array<string> = [];
 
    for (const att of attributes) {
-      if (!att.value) {
+      if (att.value === undefined) {
          continue;
       }
       for (const val of att.value) {
@@ -222,6 +225,11 @@ function scanAttributeValues(
                   );
                }
                break;
+            case TEXT_PTOKEN:
+            case CHARREF_PTOKEN:
+            case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+               // do nothing
+               break;
          }
       }
    }
@@ -243,7 +251,7 @@ function checkParameterEntity(
 ): void {
    const name = strOrBlank(pToken.name);
    const paramEntityDecl = entityDecls[name];
-   const declarationExists = !!paramEntityDecl;
+   const declarationExists = paramEntityDecl !== undefined;
    const mustHaveDeclaration =
       state.isStandalone || state.hasNoDTD || (!state.hasExternalDTD && state.peRefCount === 0); // @@@@ Test this
 
@@ -263,9 +271,9 @@ function isParamEntityExternal(
 ): boolean {
    const name = strOrBlank(pToken.name);
    const paramEntityDecl = entityDecls[name];
-   const declarationExists = !!paramEntityDecl;
+   const declarationExists = paramEntityDecl !== undefined;
 
-   return declarationExists && !!paramEntityDecl.externalId;
+   return declarationExists && paramEntityDecl.externalId !== undefined;
 }
 
 export {

@@ -31,7 +31,7 @@ function convertPTokenToXToken(pToken: ParseValue): XToken {
       case XMLDECL_PTOKEN:
          return new XmlDeclarationXToken(pToken);
       default:
-         return pToken as any;
+         return pToken;
    }
 }
 

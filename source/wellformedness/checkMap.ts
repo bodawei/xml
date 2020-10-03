@@ -2,7 +2,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
-import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
+import { ParseValue, PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../token/parameterEntityReference'; // WTF?
 import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference'; // WTF?

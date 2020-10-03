@@ -43,7 +43,7 @@ class XmlDeclarationPToken {
    public readonly close?: SToken;
 
    constructor(
-      base: InstructionStart | XmlDeclarationPToken | FieldedInstruction,
+      base: InstructionStart | FieldedInstruction | XmlDeclarationPToken,
       other: RawXmlDeclaration = {},
    ) {
       this.open = other.open ?? base.open;

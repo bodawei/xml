@@ -122,7 +122,7 @@ class DocumentChecker {
          return;
       } else if (pToken.type === ENTITY_ID) {
          return;
-      } else if ((pToken as any).type === ERROR_TYPE) {
+      } else if (pToken.type === ERROR_TYPE) {
          return;
       }
 
@@ -138,8 +138,8 @@ class DocumentChecker {
          checkConditionalStartWellFormed(pToken, errorCollector);
       } else if (checkMap[pToken.type]) {
          checkMap[pToken.type](pToken, errorCollector, this.checkState.confVer);
-      } else if ((pToken as any).checkWellFormed) {
-         (pToken as any).checkWellFormed(errorCollector, this.checkState.confVer);
+      } else if ('checkWellFormed' in pToken) {
+         pToken.checkWellFormed(errorCollector, this.checkState.confVer);
       }
 
       if (this.subChecker) {
@@ -202,6 +202,8 @@ class DocumentChecker {
                }
             }
             return;
+         default:
+            break;
       }
 
       this.transition(pToken, errorCollector);

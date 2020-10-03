@@ -109,8 +109,7 @@ function normalizeAttr(attributeValue: LiteralValuePToken, details: AttDetals): 
                newStr = newStr.replace(TRAILING_SPACE_REGEX, '');
                lastWasSpace = false;
             } else {
-               lastWasSpace =
-                  newStr.length === 0 ? lastWasSpace : newStr[newStr.length - 1] === ' ';
+               lastWasSpace = newStr.length === 0 ? lastWasSpace : newStr.endsWith(' ');
             }
 
             const lastText = new TextPToken({
@@ -214,6 +213,9 @@ class AttFixer {
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
             return this.processElementPToken(input);
+         default:
+            // ignore
+            break;
       }
 
       return input;

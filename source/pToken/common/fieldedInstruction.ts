@@ -58,70 +58,66 @@ class FieldedInstruction {
    public readonly close?: SToken;
 
    constructor(base: InstructionStart | FieldedInstruction, other: RawFieldedInstruction = {}) {
-      this.open = other.open || base.open;
-      this.openSpace = other.openSpace || base.openSpace;
-      this.target = other.target || base.target;
-      this.targetSpace = other.targetSpace || base.targetSpace;
-      this.fields = other.fields || ('fields' in base ? base.fields : []);
-      this.close = other.close || ('close' in base ? base.close : undefined);
+      this.open = other.open ?? base.open;
+      this.openSpace = other.openSpace ?? base.openSpace;
+      this.target = other.target ?? base.target;
+      this.targetSpace = other.targetSpace ?? base.targetSpace;
+      this.fields = other.fields ?? ('fields' in base ? base.fields : []);
+      this.close = other.close ?? ('close' in base ? base.close : undefined);
    }
 }
 
-type DeliverParams = (result?: Array<InstructionField>) => void;
+type DeliverField = (result?: Array<InstructionField>) => void;
+type DeliverInstruction = (result: FieldedInstruction) => void;
 
 function addField(
    source: STokenSource,
    attrs: Array<InstructionField>,
    name: SToken,
-   allowedFieldNames: Array<string>,
-   deliverPToken: DeliverParams,
+   allowedFieldNames: ReadonlyArray<string>,
+   deliverPToken: DeliverField,
 ): void {
-   const attr: RawInstructionField = {
-      name: name,
-   };
-   attrs.push(attr);
+   const field: RawInstructionField = { name };
+   attrs.push(field);
 
-   source.extractToObject('word', DECL_NAME_TERMINATORS, attr, 'name');
-   source.extractToObjectNoParams('space', attr, 'nameSpace');
-   source.extractToObject('match', '=', attr, 'equal');
-   source.extractToObjectNoParams('space', attr, 'equalSpace');
-   literal.parse(
-      source,
-      {
-         pToken: attr,
-      },
-      (modifiedAttr) => {
-         if (modifiedAttr) {
-            source.extractToObjectNoParams('space', attr, 'valueSpace');
+   source.extractToObject('word', DECL_NAME_TERMINATORS, field, 'name');
+   source.extractToObjectNoParams('space', field, 'nameSpace');
+   source.extractToObject('match', '=', field, 'equal');
+   source.extractToObjectNoParams('space', field, 'equalSpace');
+   literal.parse(source, undefined, (literal) => {
+      field.openQuote = literal?.openQuote;
+      field.closeQuote = literal?.closeQuote;
+      field.valueSpace = undefined;
+      const literalPToken = literal?.value[0];
 
-            // We'll only ever get (at most) one TextPToken from literal, since we pass in no reference types
-            const literalPToken = modifiedAttr.value[0];
+      if (literalPToken?.type === TEXT_PTOKEN) {
+         field.value = literalPToken.text;
+      }
 
-            if (literalPToken && literalPToken.type === TEXT_PTOKEN) {
-               attr.value = literalPToken.text;
-            }
-         }
+      if (literal) {
+         source.extractToObjectNoParams('space', field, 'valueSpace');
+      }
 
-         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-         getNextField(source, attrs, allowedFieldNames, deliverPToken);
-      },
-   );
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      getNextField(source, attrs, allowedFieldNames, deliverPToken);
+   });
 }
 
 function getNextField(
    source: STokenSource,
-   attrs: Array<InstructionField>,
-   allowedFieldNames: Array<string>,
-   deliverPToken: DeliverParams,
+   fields: Array<InstructionField>,
+   allowedFieldNames: ReadonlyArray<string>,
+   deliverFields: DeliverField,
 ) {
    source.extract('peekWord', DECL_NAME_TERMINATORS, (sToken) => {
       const word = strOrBlank(sToken).toLowerCase();
+
       if (!sToken || allowedFieldNames.indexOf(word) === -1) {
-         deliverPToken(attrs);
+         deliverFields(fields);
          return;
       }
 
-      addField(source, attrs, sToken, allowedFieldNames, deliverPToken);
+      addField(source, fields, sToken, allowedFieldNames, deliverFields);
    });
 }
 
@@ -173,16 +169,12 @@ function getNextField(
 function parseFieldedInstruction(
    source: STokenSource,
    instStart: InstructionStart,
-   allowedFieldNames: Array<string>,
-   deliverPToken: (result: FieldedInstruction) => void,
+   allowedFieldNames: ReadonlyArray<string>,
+   deliverPToken: DeliverInstruction,
 ): void {
-   const props: RawFieldedInstruction = {};
-
    getNextField(source, [], allowedFieldNames, (fields) => {
-      props.fields = fields;
-      source.extract('match', '?>', (sToken) => {
-         props.close = sToken;
-         deliverPToken(new FieldedInstruction(instStart, props));
+      source.extract('match', '?>', (close) => {
+         deliverPToken(new FieldedInstruction(instStart, { fields, close }));
       });
    });
 }

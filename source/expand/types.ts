@@ -23,7 +23,7 @@ interface AttributeValueResults {
    errors: Array<XmlError>;
 }
 
-type OpaqueEntityLoc = any;
+type OpaqueEntityLoc = string | EntityId | any;
 
 interface EntityProcessors {
    parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;

@@ -32,7 +32,7 @@ type ConditionalCore = ConditionalProps & {
 };
 
 function arrayOfPERefs(
-   candidate: Array<any> | undefined,
+   candidate: Array<ParameterEntityReferencePToken> | undefined,
 ): Array<ParameterEntityReferencePToken> | undefined {
    let isGoodArray = true;
 

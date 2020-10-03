@@ -17,8 +17,7 @@ class ConformanceVersion {
 
    readonly revision: XmlRevision;
 
-   constructor();
-   constructor(confVer: ConformanceVersion);
+   constructor(confVer?: ConformanceVersion);
    constructor(version: XmlVersion, revision?: XmlRevision);
    constructor(verOrConfVer?: XmlVersion | ConformanceVersion, revision?: XmlRevision) {
       if (typeof verOrConfVer === 'number' || typeof verOrConfVer === 'undefined') {

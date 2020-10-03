@@ -236,7 +236,7 @@ class EntityDetails {
                isInternal: true,
                isLoading: false,
                waiters: [],
-               entityLoc: undefined,
+               entityLoc: 'predefined',
                protoReplacementText: value,
             };
 

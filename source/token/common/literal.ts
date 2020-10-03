@@ -44,8 +44,8 @@ interface LiteralPToken {
    closeQuote: SToken|void
 \**********************************************************************/
 
-function parse(source: STokenSource, options: ParseOptions, done: DeliverPToken): void {
-   const pToken = options.pToken;
+function parse(source: STokenSource, options: ParseOptions | undefined, done: DeliverPToken): void {
+   const pToken = options?.pToken || {};
 
    source.extractNoParams('peekChar', (quoteSToken) => {
       if (!quoteSToken || (quoteSToken.str !== '"' && quoteSToken.str !== '\'')) {
@@ -57,15 +57,15 @@ function parse(source: STokenSource, options: ParseOptions, done: DeliverPToken)
 
       const terminators: LiteralValueTerminators = [ quoteSToken.str ];
 
-      if (options.peRef) {
+      if (options?.peRef) {
          terminators.push('%');
       }
 
-      if (options.geRef) {
+      if (options?.geRef) {
          terminators.push('&');
       }
 
-      if (options.charRef) {
+      if (options?.charRef) {
          terminators.push('&#');
       }
 
