@@ -5,6 +5,7 @@ import { ConformanceVersion, Range, EntityId } from 'basic';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { TextPToken, TextXToken } from 'token';
 
 import * as charRef from '../../charRef';
 import * as generalEntityReference from '../../generalEntityReference';
@@ -13,7 +14,6 @@ import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 
 import misc from '../misc';
 import literalValue, { LiteralValuePToken } from '../literalValue';
-import { TextPToken, TextXToken } from 'source/token/text';
 
 describe('literalValue (unit)', () => {
 

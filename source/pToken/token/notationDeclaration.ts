@@ -8,7 +8,7 @@ import { DeclarationStart } from '../../token/bridge/declaration';
 import { ExternalId, parseExternalId } from '../../token/common/externalId';
 import { UnexpandedDetails } from '../types';
 
-const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN2';
+const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';
 
 type DeliverPToken = (pToken: NotationDeclarationPToken) => void;
 
@@ -206,4 +206,10 @@ function resumeParseNotationDeclaration(
       resumeExternalParse(source, protoToken, notationDeclaration, deliverPToken);
    }
 }
-export { parseNotationDeclaration, resumeParseNotationDeclaration, NotationDeclarationPToken };
+
+export {
+   NOTATION_DECLARATION_PTOKEN,
+   parseNotationDeclaration,
+   resumeParseNotationDeclaration,
+   NotationDeclarationPToken,
+};

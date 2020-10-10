@@ -3,19 +3,19 @@
 import { Transform } from 'stream';
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
+import { defaultExtractors } from 'extractor';
+import { STokenSource } from 'sToken';
 import {
    COMMENT_XTOKEN,
    ELEMENT_START_XTOKEN,
    CHARDATA_XTOKEN,
    ELEMENT_END_XTOKEN
 } from 'token';
+import { XmlDeclarationXToken, XMLDECL_XTOKEN } from 'xToken';
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import CommentFixingStream from '../CommentFixingStream';
-import { XmlDeclarationXToken, XMLDECL_XTOKEN } from 'source/xToken/token/xmlDeclarationXToken';
-import { STokenSource } from 'sToken';
-import { defaultExtractors } from 'extractor';
 
 describe('CommentFixingStream (integration)', () => {
    let pTokenStream: PTokenStream;

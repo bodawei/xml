@@ -2,7 +2,6 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { TEXTDECL_PTOKEN, TextDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
@@ -20,6 +19,8 @@ import {
    NotationDeclarationPToken,
    CharDataPToken,
 } from 'token';
+
+import { TEXTDECL_PTOKEN, TextDeclarationPToken } from '../../pToken/token/textDeclaration';
 
 import { ContentChecker } from '../ContentChecker';
 import { CheckState, CHECKER_DONE } from '../checkUtils';

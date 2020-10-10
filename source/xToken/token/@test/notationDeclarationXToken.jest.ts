@@ -32,7 +32,7 @@ describe('NotationDeclarationXToken', () => {
       });
       const result = new NotationDeclarationXToken(notationPToken);
 
-      expect(result).toEqualRangeless({
+      expect(result).toEqual({
          type: NOTATION_DECLARATION_XTOKEN,
          name: 'notationName',
          externalId: new ExternalIdXToken('system.xml', '- // public'),
@@ -55,7 +55,7 @@ describe('NotationDeclarationXToken', () => {
       });
       const result = new NotationDeclarationXToken(notationPToken);
 
-      expect(result).toEqualRangeless({
+      expect(result).toEqual({
          type: NOTATION_DECLARATION_XTOKEN,
          name: '',
          externalId: undefined,
@@ -67,7 +67,7 @@ describe('NotationDeclarationXToken', () => {
       const externalId = new ExternalIdXToken('system.xml', '- // public');
       const result = new NotationDeclarationXToken('one', externalId);
 
-      expect(result).toEqualRangeless({
+      expect(result).toEqual({
          type: NOTATION_DECLARATION_XTOKEN,
          name: 'one',
          externalId,

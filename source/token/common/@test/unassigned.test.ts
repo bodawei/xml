@@ -6,6 +6,7 @@ import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
+import { TextPToken } from 'token';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import * as paramReference from '../../parameterEntityReference';
@@ -13,7 +14,6 @@ import literal from '../literal';
 import unassigned, { UnassignedType, UnassignedValue, UnassignedArray } from '../unassigned';
 
 import helper from '../../@test/helper';
-import { TextPToken } from 'source/token/text';
 
 describe('unassigned (unit)', () => {
 

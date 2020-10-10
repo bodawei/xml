@@ -5,12 +5,10 @@
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
+import * as checks from 'wellformedness';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../parameterEntityStart';
-
-import * as checks from 'source/wellformedness/token/parameterEntityReferenceCheck';
-
 
 describe('ParameterEntityStartPToken (unit)', () => {
    let confVer: ConformanceVersion;

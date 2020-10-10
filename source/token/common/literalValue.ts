@@ -3,6 +3,8 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { SToken, STokenSource } from 'sToken';
+import { generalEntityReferenceToSTokens } from 'stringify';
+import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken } from 'xToken';
 
 import { TextPToken, TextXToken, isTextPToken } from '../text';
 import misc from './misc';
@@ -11,8 +13,6 @@ import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETE
 import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
-import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken } from 'xToken';
-import { generalEntityReferenceToSTokens } from 'source/stringify/tokens/generalEntityReferenceToSTokens';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };

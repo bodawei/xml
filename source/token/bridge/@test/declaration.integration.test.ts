@@ -4,10 +4,9 @@
 import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
-import { GeneralEntityDeclarationPToken } from 'token';
+import { GeneralEntityDeclarationPToken, TextPToken } from 'token';
 
 import { parseDeclaration } from '../declaration';
-import { TextPToken } from 'source/token/text';
 
 describe('declaration (integration)', () => {
 

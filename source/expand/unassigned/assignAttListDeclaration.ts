@@ -12,7 +12,7 @@ import {
 
 import { assignToProps } from './assignToProps';
 import { assignWordList } from './assignWordList';
-import { LiteralPToken } from 'source/token/common/literal';
+import { LiteralPToken } from '../../token/common/literal';
 
 function adjustSpaces(attLiPToken: AttListPToken): void {
    const prevDef: AttDefPToken = attLiPToken.attDefs[0];

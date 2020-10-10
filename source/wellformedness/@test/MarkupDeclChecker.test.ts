@@ -7,6 +7,7 @@ import { TextDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
+   AttListPToken,
    CommentPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -23,8 +24,8 @@ import {
    ElidedEntityDeclarationPToken,
    NotationDeclarationPToken,
    ConditionalPToken,
+   UnassignedType,
 } from 'token';
-import { AttListPToken } from 'source/token/attListDeclaration';
 
 import { MarkupDeclChecker } from '../MarkupDeclChecker';
 import * as checkUtils from '../checkUtils';
@@ -48,7 +49,6 @@ import {
    makeNotationDeclaration,
    makeElementDeclaration,
 } from 'token-test';
-import { UnassignedType } from 'source/token/common/unassigned';
 
 describe('MarkupDeclChecker (unit)', () => {
    let ec: MockErrorCollector;

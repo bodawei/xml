@@ -80,17 +80,19 @@ module.exports = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-     basic: '<rootDir>/source/basic',
-     conformance: '<rootDir>/source/conformance',
-     error: '<rootDir>/source/error',
-     extractor: '<rootDir>/source/extractor',
-     sToken: '<rootDir>/source/sToken',
-     'sToken-test': '<rootDir>/source/sToken/@test/helper',
-     pToken: '<rootDir>/source/pToken',
-     'pToken-test': '<rootDir>/source/pToken/@test/helper',
-     'token': '<rootDir>/source/token',
-     'wellformedness': '<rootDir>/source/wellformedness',
-     'xToken': '<rootDir>/source/xToken',
+     '^basic$': '<rootDir>/source/basic',
+     '^conformance$': '<rootDir>/source/conformance',
+     '^error$': '<rootDir>/source/error',
+     '^error-test$': '<rootDir>/source/error/@test/helper',
+     '^extractor$': '<rootDir>/source/extractor',
+     '^pToken$': '<rootDir>/source/pToken',
+     '^pToken-test$': '<rootDir>/source/pToken/@test/helper',
+     '^sToken$': '<rootDir>/source/sToken',
+     '^sToken-test$': '<rootDir>/source/sToken/@test/helper',
+     '^stringify$': '<rootDir>/source/stringify',
+     '^token$': '<rootDir>/source/token',
+     '^wellformedness$': '<rootDir>/source/wellformedness',
+     '^xToken$': '<rootDir>/source/xToken',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -124,7 +126,7 @@ module.exports = {
   // restoreMocks: false,
 
   // The root directory that Jest should scan for tests and modules within
-  // rootDir: undefined,
+  rootDir: './',
 
   // A list of paths to directories that Jest should use to search for files in
 //   roots: [
@@ -157,7 +159,7 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-     "**/@test/**/*jest.ts?(x)",
+     "<rootDir>/**/@test/**/*jest.ts?(x)",
   //   "**/__tests__/**/*.[jt]s?(x)",
   //   "**/?(*.)+(spec|test).f[tj]s?(x)"
   ],

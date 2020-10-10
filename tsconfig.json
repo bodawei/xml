@@ -47,6 +47,9 @@
          "sToken-test": [
             "./source/sToken/@test/helper"
          ],
+         "stringify": [
+            "./source/stringify"
+         ],
          "token": [
             "./source/token"
          ],

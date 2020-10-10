@@ -3,11 +3,11 @@
 import { EntityId, Range } from 'basic';
 import { ErrorCollector } from 'error';
 import { SToken, STokenSource, strOrBlank } from 'sToken';
+import { parameterEntityReferenceToSTokens } from 'stringify';
 
 import { ParameterEntityReferencePToken, parseParameterEntityReference } from '../parameterEntityReference';
 import { TextPToken } from '../text';
 import literal, { LiteralPToken } from '../common/literal';
-import { parameterEntityReferenceToSTokens } from 'source/stringify/tokens/parameterEntityReferenceToSTokens';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
 const TERMINATORS_FOR_NAMELIST = [ '>', '"', '\'', '%', '(', ')', '|', ',', '+', '*', '?' ];

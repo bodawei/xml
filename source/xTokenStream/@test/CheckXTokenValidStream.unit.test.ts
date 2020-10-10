@@ -40,16 +40,16 @@ import {
    GeneralEntityReferencePToken,
    
    ParameterEntityReferencePToken,
+   TextXToken, TextPToken,
+   UnassignedType,
 } from 'token';
+import { makeDocTypeEnd } from 'token-test';
+import { CharRefXToken, ParameterEntityReferenceXToken,  GeneralEntityReferenceXToken,  ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
+
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
-import { TextXToken, TextPToken } from 'source/token/text';
-import { UnassignedType } from 'source/token/common/unassigned';
-import { CharRefXToken, ParameterEntityReferenceXToken,    ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
-import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
-import { makeDocTypeEnd } from 'token-test';
 
 
 describe('CheckXTokenValidStream (unit)', () => {

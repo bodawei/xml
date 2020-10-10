@@ -6,12 +6,12 @@ import { WellFormedError } from '../../../error/index';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { GeneralEntityReferencePToken } from 'token';
+import { GeneralEntityReferenceXToken } from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';
 import { TextPToken, TextXToken } from '../../text';
-import { GeneralEntityReferencePToken } from 'source/token/generalEntityReference';
-import { GeneralEntityReferenceXToken } from 'xToken';
 
 type LiteralValueCallback = (value: LiteralValuePToken) => void;
 

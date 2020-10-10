@@ -8,7 +8,11 @@ import { DeclarationStart } from '../../../token/bridge/declaration';
 import { EXTERNAL_ID } from '../../../token/common/externalId';
 import { UnassignedType, UnassignedArray } from '../../../token/common/unassigned';
 
-import { NotationDeclarationPToken, parseNotationDeclaration } from '../notationDeclaration';
+import {
+   NotationDeclarationPToken,
+   parseNotationDeclaration,
+   NOTATION_DECLARATION_PTOKEN,
+} from '../notationDeclaration';
 
 describe('notationDeclaration (integration)', () => {
    let declarationStart: DeclarationStart;
@@ -62,27 +66,15 @@ describe('notationDeclaration (integration)', () => {
          });
       });
 
-      xit('copes with a PERef in the externalId (check unsasigned calls)', (done) => {
+      it('copes with a PERef in the externalId (check unsasigned calls)', (done) => {
          const source = new STokenSource(defaultExtractors);
          source.addText('notationName %foo;>');
          source.endText();
-         const unassignedValue: UnassignedArray = [
-            {
-               type: UnassignedType.REFERENCE,
-               token: new ParameterEntityReferencePToken({
-                  open: toSToken('%'),
-                  openSpace: undefined,
-                  name: toSToken('foo'),
-                  nameSpace: undefined,
-                  close: toSToken(';'),
-               }),
-            },
-         ];
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
-                  type: 'NOTATION_DECLARATION_PTOKEN2',
+                  type: NOTATION_DECLARATION_PTOKEN,
                   open: toSToken('<!'),
                   name: toSToken('notationName'),
                   nameSpace: toSToken(' '),

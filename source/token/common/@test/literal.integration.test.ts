@@ -6,12 +6,12 @@ import { WellFormedError, ErrorCollector } from '../../../error/index';
 import { defaultExtractors } from '../../../extractor';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
+import { TextPToken, TextXToken } from 'token';
+import { GeneralEntityReferenceXToken } from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
-import { TextPToken, TextXToken } from 'source/token/text';
-import { GeneralEntityReferenceXToken } from 'xToken';
 
 describe('literal (integration)', () => {
    let confVer: ConformanceVersion;

@@ -12,8 +12,8 @@ import {
    CHARREF_PTOKEN,
 } from 'token';
 import { strOrBlank, toSToken, SToken } from 'sToken';
-import { LiteralValuePToken } from 'source/token/common/literal';
-import { AttributePToken } from 'source/token/common/attribute';
+import { LiteralValuePToken } from '../token/common/literal';
+import { AttributePToken } from '../token/common/attribute';
 
 interface AttDetals {
    name: SToken;

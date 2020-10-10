@@ -6,13 +6,12 @@ import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { SToken } from 'sToken';
+import { GeneralEntityReferencePToken, TextPToken } from 'token';
 
 import * as langAttribute from '../langAttribute';
 import attribute from '../attribute';
 import misc from '../misc';
 import literal from '../literal';
-import { GeneralEntityReferencePToken } from 'source/token/generalEntityReference';
-import { TextPToken } from 'source/token/text';
 
 describe('attribute (unit)', () => {
    let attributesPChunk: any;

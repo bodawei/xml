@@ -1,7 +1,8 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { CONFORMANCE_VERSION, ENTITY_ID, Range } from 'basic';
+import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, Range } from 'basic';
+import { defaultExtractors } from 'extractor';
 import { gatherPTokens } from 'pToken-test';
 import { SToken, STokenSource } from 'sToken';
 import { DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN, CHARDATA_PTOKEN, CharDataPToken } from 'token';
@@ -12,8 +13,6 @@ import * as tokenStuff from 'token';
 import PTokenStream from '../PTokenStream';
 import { ParseValue, PToken, ContextType } from 'pToken';
 import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
-import { EntityId } from 'source/basic/entityId';
-import { defaultExtractors } from 'extractor';
 
 type TokenArray = Array<ParseValue>;
 

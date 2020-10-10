@@ -14,7 +14,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'token';
-import { AttributePToken } from 'source/token/common/attribute';
+import { AttributePToken } from '../token/common/attribute';
 
 interface GeneralEntitiesInfo {
    [name: string]: {

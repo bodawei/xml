@@ -6,10 +6,10 @@ import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import literalValue from '../literalValue';
-import { GeneralEntityReferencePToken } from 'source/token/generalEntityReference';
-import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
-import { CharRefPToken } from 'source/token/charRef';
-import { TextXToken, TextPToken } from 'source/token/text';
+import { GeneralEntityReferencePToken } from '../../generalEntityReference';
+import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
+import { CharRefPToken } from '../../charRef';
+import { TextXToken, TextPToken } from '../../text';
 import { GeneralEntityReferenceXToken } from 'xToken';
 import { ConformanceVersion } from 'basic';
 

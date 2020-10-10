@@ -5,7 +5,7 @@ import { SToken, toSToken } from 'sToken';
 import { unexpandedToSTokens } from '../unexpandedToSTokens';
 
 import { ParameterEntityReferencePToken, TextPToken } from 'token'; // ick1
-import { UnexpandedDetails } from 'source/pToken/types'; // ick2
+import { UnexpandedDetails } from '../../../../pToken/types'; // ick2
 
 describe('unexpandedToSTokens()', () => {
    let unexpanded: UnexpandedDetails;

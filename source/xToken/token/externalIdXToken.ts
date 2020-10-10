@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ExternalId, TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
-import { LiteralValuePToken } from 'source/token/common/literal';
+import { LiteralValuePToken } from '../../token/common/literal';
 
 const EXTERNAL_ID_XTOKEN = 'EXTERNAL_ID_XTOKEN';
 

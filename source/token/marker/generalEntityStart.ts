@@ -3,9 +3,10 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
+import { generalEntityReferenceCheck } from 'wellformedness';
+
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
 import { EntityValuePToken } from '../entityDeclaration';
-import { generalEntityReferenceCheck } from 'source/wellformedness/token/generalEntityReferenceCheck';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.

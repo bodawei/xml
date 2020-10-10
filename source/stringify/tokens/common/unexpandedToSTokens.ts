@@ -5,7 +5,7 @@ import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'token';
 
 import { parameterEntityReferenceToSTokens } from '../parameterEntityReferenceToSTokens';
 
-import { UnexpandedDetails } from 'source/pToken/types';
+import { UnexpandedDetails } from '../../../pToken/types';
 
 const DEFAULT: UnexpandedDetails = { propName: '', tokens: [] };
 

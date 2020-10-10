@@ -29,10 +29,10 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    ConditionalPToken,
+   SpacePToken,
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
-import { SpacePToken } from 'source/token/space';
 
 import * as xTokenStuff from 'xToken';
 

@@ -2,7 +2,6 @@
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
-import { ParseValue, PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../token/parameterEntityReference'; // WTF?
 import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference'; // WTF?
@@ -14,6 +13,11 @@ import { generalEntityReferenceCheck } from './token/generalEntityReferenceCheck
 import { processingInstructionCheck } from './token/processingInstructionCheck';
 import { textDeclarationCheck } from './token/textDeclarationCheck';
 import { xmlDeclarationCheck } from './token/xmlDeclarationCheck';
+
+// we have a circular dependency somewhere.
+import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
+import { XMLDECL_PTOKEN } from '../pToken/token/xmlDeclaration';
+import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 
 interface CheckMap {
    [type: string]: (

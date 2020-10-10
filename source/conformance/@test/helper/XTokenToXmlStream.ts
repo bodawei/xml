@@ -1,8 +1,13 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { XToken, CHARREF_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,
-   XMLDECL_XTOKEN, ExternalIdXToken } from 'xToken';
+import {
+   XToken,
+   CHARREF_XTOKEN,
+   PROCESSING_INSTRUCTION_XTOKEN,
+   XMLDECL_XTOKEN,
+   ExternalIdXToken,
+} from 'xToken';
 import {
    SPACE_XTOKEN,
    DOCTYPE_START_XTOKEN,
@@ -16,7 +21,7 @@ import {
    TEXT_XTOKEN,
    DocTypeStartXToken,
 } from 'token';
-import { AttributeXToken } from 'source/token/common/attribute';
+import { AttributeXToken } from '../../../token/common/attribute';
 
 function formatExternalId(externalId?: ExternalIdXToken): string {
    if (!externalId) {
@@ -71,8 +76,11 @@ function formatAttrs(attrs?: ReadonlyArray<AttributeXToken>): string {
 
 class XTokenToXmlStream extends Transform {
    private doctypeStart?: DocTypeStartXToken;
+
    private notations: { [name: string]: string } = {};
+
    private inElement = false;
+
    private elementStack: Array<string> = [];
 
    constructor() {
@@ -109,7 +117,7 @@ class XTokenToXmlStream extends Transform {
                keys.forEach((key) => {
                   this.push(this.notations[key]);
                });
-               this.push(`]>\n`);
+               this.push(']>\n');
             }
             break;
          case PROCESSING_INSTRUCTION_XTOKEN:

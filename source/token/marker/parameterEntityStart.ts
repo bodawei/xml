@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
+import { ConformanceVersion } from 'basic';
+import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
+import { parameterEntityReferenceCheck } from 'wellformedness';
 
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
-import { ErrorCollector } from 'error';
-import { ConformanceVersion } from 'basic';
-import { parameterEntityReferenceCheck } from 'source/wellformedness/token/parameterEntityReferenceCheck';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.

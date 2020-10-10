@@ -1,43 +1,54 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, ParseValue } from 'pToken';
+import { ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
-import {
-   CONDITIONAL_PTOKEN,
-   CONDITIONAL_CLOSE_PTOKEN,
-   COMMENT_PTOKEN,
-   EXTERNAL_SUBSET_END_TOKEN,
-   EXTERNAL_SUBSET_START_TOKEN,
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
-   NOTATION_DECLARATION_PTOKEN,
-   PARAMETER_ENTITY_START_PTOKEN,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
-   PARAMETER_ENTITY_END_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   SPACE_PTOKEN,
-   ElidedEntityDeclarationPToken,
-   InternalSubsetStartToken,
-   ParameterEntityStartPToken,
-   GeneralEntityDeclarationPToken,
-   ExternalSubsetStartToken,
-   attListDeclaration,
-   ParameterEntityDeclarationPToken,
-   getFirstSToken,
-   ParameterEntityReferencePToken,
-   ELIDED_ENTITY_DECLARATION_PTOKEN,
-   NotationDeclarationPToken,
-   TEXT_PTOKEN,
-   ConditionalPToken,
-} from 'token';
 
-import attListDecl, { AttListPToken } from 'source/token/attListDeclaration';
+// circular dependency problem
 import {
-   ELEMENT_DECLARATION_PTOKEN,
-   ElementDeclarationPToken,
-} from 'source/token/elementDeclaration';
+   ELIDED_ENTITY_DECLARATION_PTOKEN,
+   ElidedEntityDeclarationPToken,
+} from '../token/ElidedEntityDeclarationPToken';
+import attListDeclaration from '../token/attListDeclaration';
+import { CONDITIONAL_PTOKEN, ConditionalPToken } from '../token/conditional';
+import { CONDITIONAL_CLOSE_PTOKEN } from '../token/conditionalClose';
+import { COMMENT_PTOKEN } from '../token/comment';
+import {
+   NOTATION_DECLARATION_PTOKEN,
+   NotationDeclarationPToken,
+} from '../token/notationDeclaration';
+import {
+   PARAMETER_ENTITY_START_PTOKEN,
+   ParameterEntityStartPToken,
+} from '../token/marker/parameterEntityStart';
+import { PARAMETER_ENTITY_END_PTOKEN } from '../token/marker/parameterEntityEnd';
+import {
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   ParameterEntityReferencePToken,
+} from '../token/parameterEntityReference';
+import {
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GeneralEntityDeclarationPToken,
+} from '../token/generalEntityDeclaration';
+import { ExternalSubsetStartToken } from '../token/marker/externalSubsetStart';
+import { EXTERNAL_SUBSET_END_TOKEN } from '../token/marker/externalSubsetEnd';
+import { InternalSubsetStartToken } from '../token/marker/internalSubsetStart';
+import { INTERNAL_SUBSET_END_TOKEN } from '../token/marker/internalSubsetEnd';
+import { getFirstSToken } from '../token/getFirstSToken';
+import {
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   ParameterEntityDeclarationPToken,
+} from '../token/parameterEntityDeclaration';
+import { TEXT_PTOKEN } from '../token/text';
+import { SPACE_PTOKEN } from '../token/space';
+import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
+import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
+
+import attListDecl, { AttListPToken } from '../token/attListDeclaration';
+import { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken } from '../token/elementDeclaration';
+import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
+import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
+
 import {
    CHECKER_DONE,
    CheckState,

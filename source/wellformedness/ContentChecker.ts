@@ -1,23 +1,7 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import {
-   CDATA_PTOKEN,
-   CHARDATA_PTOKEN,
-   CHARREF_PTOKEN,
-   COMMENT_PTOKEN,
-   ELEMENT_EMPTY_PTOKEN,
-   ELEMENT_END_PTOKEN,
-   ELEMENT_START_PTOKEN,
-   GENERAL_ENTITY_END_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
-   GENERAL_ENTITY_START_PTOKEN,
-   ElementEmptyPToken,
-   ElementStartPToken,
-   GeneralEntityStartPToken,
-   getFirstSToken,
-} from 'token';
-import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, ParseValue } from 'pToken';
+import { ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    CHECKER_DONE,
@@ -26,6 +10,28 @@ import {
    scanAttributeValues,
    checkGeneralEntity,
 } from './checkUtils';
+
+// circular dependency problem
+import { CDATA_PTOKEN } from '../token/cdata';
+import { CHARDATA_PTOKEN } from '../token/charData';
+import { COMMENT_PTOKEN } from '../token/comment';
+import { CHARREF_PTOKEN } from '../token/charRef';
+import {
+   ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   ElementEmptyPToken,
+   ElementStartPToken,
+} from '../token/elementStart';
+import { ELEMENT_END_PTOKEN } from '../token/elementEnd';
+import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference';
+import {
+   GENERAL_ENTITY_START_PTOKEN,
+   GeneralEntityStartPToken,
+} from '../token/marker/generalEntityStart';
+import { getFirstSToken } from '../token/getFirstSToken';
+import { GENERAL_ENTITY_END_PTOKEN } from '../token/marker/generalEntityEnd';
+import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
+import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 
 enum State {
    PRE = 'PRE',
@@ -297,6 +303,7 @@ class ContentChecker implements Checker {
          }
       } else {
          const transitions = transitionsByState[this.state];
+
          newState = transitions && transitions[pToken.type];
       }
 

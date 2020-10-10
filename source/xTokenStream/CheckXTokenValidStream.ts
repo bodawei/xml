@@ -42,15 +42,15 @@ import {
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
    TextXToken,
+   UnassignedType,
 } from 'token';
+import { CHARREF_XTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
+
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
-import { UnassignedType } from 'source/token/common/unassigned';
-import { CHARREF_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
-import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'source/xToken/token/generalEntityReferenceXToken';
 
 type XToken = {
    type: string;

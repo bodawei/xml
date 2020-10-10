@@ -2,7 +2,7 @@
 
 import { EntityId } from 'basic';
 import { ExternalId, TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
-import { LiteralValuePToken } from 'source/token/common/literal';
+import { LiteralValuePToken } from '../../token/common/literal';
 
 function valueToString(value: LiteralValuePToken = []): string {
    const pieces = [];

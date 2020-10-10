@@ -5,11 +5,11 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken } from 'sToken';
+import * as checks from 'wellformedness';
 
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../generalEntityStart';
 
-import * as checks from 'source/wellformedness/token/generalEntityReferenceCheck';
 
 describe('GeneralEntityStartPToken (unit)', () => {
    let checkSpy: jasmine.Spy;

@@ -3,8 +3,8 @@
 import { basename, dirname, relative, resolve } from 'path';
 import { Transform } from 'stream';
 
-import { EntityId, ConformanceVersion } from 'basic';
-import { EntityExpander, RetrieveResults, AttributeValueResults } from 'expand';
+import { EntityId } from 'basic';
+import { EntityExpander, OpaqueEntityLoc, RetrieveResults, AttributeValueResults } from 'expand';
 import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -19,7 +19,6 @@ import {
 
 import { TestCases } from './types';
 import { TestDetails } from './buildTestDetails';
-import { OpaqueEntityLoc } from 'source/expand/types';
 
 function parseBody(
    sTokenSource: STokenSource,

@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
+import * as foo from 'sToken-test';
 
 import { UnexpandedDetails } from '../../types';
 import { NotationDeclarationPToken, parseNotationDeclaration } from '../notationDeclaration';

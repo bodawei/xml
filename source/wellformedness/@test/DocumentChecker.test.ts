@@ -77,7 +77,7 @@ describe('DocumentChecker (unit)', () => {
    let externalSubsetStart: ExternalSubsetStartToken;
 
    class MockChecker implements Checker {
-      lastSeen?: any;
+      lastSeen?: PToken;
 
       constructor(checkState: CheckState) {
          subState = checkState;

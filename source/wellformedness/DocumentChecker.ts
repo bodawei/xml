@@ -2,23 +2,19 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { ERROR_TYPE, ErrorCollector, WellFormedError } from 'error';
-import {
-   COMMENT_PTOKEN,
-   DOCTYPE_END_PTOKEN,
-   DOCTYPE_START_PTOKEN,
-   ELEMENT_EMPTY_PTOKEN,
-   ELEMENT_START_PTOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
-   EXTERNAL_SUBSET_START_TOKEN,
-   SPACE_PTOKEN,
-   getFirstSToken,
-} from 'token';
-import {
-   PROCESSING_INSTRUCTION_PTOKEN,
-   XMLDECL_PTOKEN,
-   ParseValue,
-   xmlDeclIsStandalone,
-} from 'pToken';
+import { ParseValue } from 'pToken';
+
+// circular dependency problem
+import { DOCTYPE_START_PTOKEN } from '../token/docTypeStart';
+import { DOCTYPE_END_PTOKEN } from '../token/docTypeEnd';
+import { COMMENT_PTOKEN } from '../token/comment';
+import { SPACE_PTOKEN } from '../token/space';
+import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStart';
+import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
+import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
+import { getFirstSToken } from '../token/getFirstSToken';
+import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
+import { XMLDECL_PTOKEN, xmlDeclIsStandalone } from '../pToken/token/xmlDeclaration';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';

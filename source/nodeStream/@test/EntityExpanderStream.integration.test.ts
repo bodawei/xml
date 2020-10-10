@@ -2,9 +2,12 @@
 /* eslint-env jasmine */
 
 import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion,  } from 'basic';
-import { XMLDECL_PTOKEN } from 'pToken';
+import { defaultExtractors } from 'extractor';
+import { XMLDECL_PTOKEN, TEXTDECL_PTOKEN,ParseValue, ContextType } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
+import { STokenSource } from 'sToken';
 import {
+   ATTLISTDECL_PTOKEN_TYPE,
    CHARREF_PTOKEN,
    DOCTYPE_START_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
@@ -33,10 +36,6 @@ import {
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './beforeEach';
-import { ATTLISTDECL_PTOKEN_TYPE } from 'source/token/attListDeclaration';
-import { TEXTDECL_PTOKEN,ParseValue, ContextType } from 'pToken';
-import { STokenSource } from 'sToken';
-import { defaultExtractors } from 'extractor';
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;

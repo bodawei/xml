@@ -2,11 +2,10 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion, Range, EntityId, CONFORMANCE_VERSION } from 'basic';
-import { Extractor, Segment, ExtractorMap } from 'extractor';
+import { Extractor, Segment, ExtractorMap, SegmentInfo } from 'extractor';
 
 import SToken from '../SToken';
 import STokenSource from '../STokenSource';
-import { SegmentInfo } from 'source/extractor/Extractor';
 
 describe('STokenSource (unit)', () => {
    let sTokenSpy: jasmine.Spy;

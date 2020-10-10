@@ -28,8 +28,7 @@ import {
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import { ParameterEntityReferenceXToken,    ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
-import { GeneralEntityReferenceXToken } from 'source/xToken/token/generalEntityReferenceXToken';
-import { ExternalIdXToken } from 'source/xToken/token/externalIdXToken';
+import { ExternalIdXToken, GeneralEntityReferenceXToken } from 'xToken';
 import { defaultExtractors } from 'extractor';
 
 type Token = { type: string, pToken?: any };

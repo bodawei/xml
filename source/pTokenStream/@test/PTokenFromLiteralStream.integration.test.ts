@@ -2,11 +2,12 @@
 
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
+import { TEXTDECL_PTOKEN } from 'pToken';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'token';
+
 import * as xToken from 'token';
 
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'token';
-import { TEXTDECL_PTOKEN } from 'source/pToken/token/textDeclaration';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;

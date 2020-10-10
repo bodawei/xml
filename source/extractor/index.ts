@@ -4,6 +4,7 @@ import AllExtractor from './AllExtractor';
 import CharExtractor from './CharExtractor';
 export * from './defaultExtractors';
 import DigitExtractor from './DigitExtractor';
+import { SegmentInfo } from './Extractor';
 import Extractor from './Extractor';
 import MatchExtractor from './MatchExtractor';
 import MultiMatchExtractor from './MultiMatchExtractor';
@@ -23,4 +24,5 @@ export {
    Segment,
    SpaceExtractor,
    WordExtractor,
+   SegmentInfo,
 };
