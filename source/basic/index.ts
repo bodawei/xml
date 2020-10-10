@@ -11,5 +11,6 @@ export * from './conformanceVersion';
 export * from './entityId';
 export * from './chars';
 export * from './doAsyncLoop';
+export * from './doAsyncWhileLoop';
 export * from './extractSurrogatePair';
 export { XmlVersion, XmlRevision };
