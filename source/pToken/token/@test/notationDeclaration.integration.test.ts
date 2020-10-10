@@ -41,24 +41,22 @@ describe('notationDeclaration (integration)', () => {
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
             expect(result).toEqualRangeless(
-               new NotationDeclarationPToken(
-                  { open: toSToken('<!') },
-                  {
-                     unexpanded: {
-                        tokens: [
-                           new ParameterEntityReferencePToken({
-                              open: toSToken('%'),
-                              openSpace: undefined,
-                              name: toSToken('foo'),
-                              nameSpace: undefined,
-                              close: toSToken(';'),
-                           }),
-                        ],
-                        propName: 'name',
-                     },
-                     close: toSToken('>'),
+               new NotationDeclarationPToken({
+                  open: toSToken('<!'),
+                  unexpanded: {
+                     tokens: [
+                        new ParameterEntityReferencePToken({
+                           open: toSToken('%'),
+                           openSpace: undefined,
+                           name: toSToken('foo'),
+                           nameSpace: undefined,
+                           close: toSToken(';'),
+                        }),
+                     ],
+                     propName: 'name',
                   },
-               ),
+                  close: toSToken('>'),
+               }),
             );
             done();
          });

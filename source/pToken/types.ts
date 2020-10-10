@@ -5,11 +5,11 @@ import {
    TextPToken,
 } from 'token';
 
-type UnexpandedToken =
-   | TextPToken
-   | ParameterEntityReferencePToken
-   | ParameterEntityStartPToken
-   | ParameterEntityEndPToken;
+type UnexpandedToken = TextPToken | ParameterEntityReferencePToken;
+
+// Why would these ever be in an UNEXPANDED set?
+// | ParameterEntityStartPToken
+// | ParameterEntityEndPToken;
 
 interface UnexpandedDetails {
    tokens: Array<UnexpandedToken>;

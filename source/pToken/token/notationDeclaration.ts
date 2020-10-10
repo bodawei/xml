@@ -6,13 +6,13 @@ import { parseUnexpanded } from '../common/parseUnexpanded';
 
 import { DeclarationStart } from '../../token/bridge/declaration';
 import { ExternalId, parseExternalId } from '../../token/common/externalId';
-import { UnexpandedDetails, UnexpandedToken } from '../types';
+import { UnexpandedDetails } from '../types';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN2';
 
 type DeliverPToken = (pToken: NotationDeclarationPToken) => void;
 
-interface RawNotationDeclaration {
+interface NotationDeclarationProps {
    open?: SToken;
    openSpace?: SToken;
    declType?: SToken;
@@ -22,13 +22,26 @@ interface RawNotationDeclaration {
    externalId?: ExternalId;
    externalIdSpace?: SToken;
    unexpanded?: UnexpandedDetails | undefined;
+   extra?: SToken | false;
    close?: SToken;
 }
 
-function isNotationDeclaration(
-   token: NotationDeclarationPToken | DeclarationStart,
-): token is NotationDeclarationPToken {
-   return 'type' in token && token.type === NOTATION_DECLARATION_PTOKEN;
+type RawNotationDeclaration = NotationDeclarationProps & {
+   open: SToken;
+};
+
+function isNotDeclarationStart(
+   token: NotationDeclarationPToken | RawNotationDeclaration | DeclarationStart,
+): token is NotationDeclarationPToken | RawNotationDeclaration {
+   return (
+      'name' in token ||
+      'nameSpace' in token ||
+      'externalId' in token ||
+      'externalIdSpace' in token ||
+      'close' in token ||
+      'unexpanded' in token ||
+      'extra' in token
+   );
 }
 
 class NotationDeclarationPToken {
@@ -54,34 +67,42 @@ class NotationDeclarationPToken {
 
    public readonly unexpanded: UnexpandedDetails | undefined;
 
-   public readonly extra: Array<UnexpandedToken> | undefined;
+   public readonly extra: SToken | false | undefined;
 
    constructor(
-      props: NotationDeclarationPToken | DeclarationStart,
-      other?: RawNotationDeclaration,
+      props: NotationDeclarationPToken | RawNotationDeclaration | DeclarationStart,
+      other: NotationDeclarationProps = {},
    ) {
-      this.open = other?.open ?? props.open;
-      this.openSpace = other?.openSpace ?? props.openSpace;
-      this.declType = other?.declType ?? props.declType;
-      this.declTypeSpace = other?.declTypeSpace ?? props.declTypeSpace;
-      this.name = other?.name ?? (isNotationDeclaration(props) ? props.name : undefined);
-      this.nameSpace =
-         other?.nameSpace ?? (isNotationDeclaration(props) ? props.nameSpace : undefined);
-      this.externalId =
-         other?.externalId ?? (isNotationDeclaration(props) ? props.externalId : undefined);
+      this.open = other.open ?? props.open;
+      this.openSpace = 'openSpace' in other ? other.openSpace : props.openSpace;
+      this.declType = 'declType' in other ? other.declType : props.declType;
+      this.declTypeSpace = 'declTypeSpace' in other ? other.declTypeSpace : props.declTypeSpace;
+
+      if (isNotDeclarationStart(props)) {
+         this.name = props.name;
+         this.nameSpace = props.nameSpace;
+         this.externalId = props.externalId;
+         this.externalIdSpace = props.externalIdSpace;
+         this.unexpanded = props.unexpanded;
+         this.extra = props.extra;
+         this.close = props.close;
+      }
+
+      this.name = 'name' in other ? other.name : this.name;
+      this.nameSpace = 'nameSpace' in other ? other.nameSpace : this.nameSpace;
+      this.externalId = 'externalId' in other ? other.externalId : this.externalId;
       this.externalIdSpace =
-         other?.externalIdSpace ??
-         (isNotationDeclaration(props) ? props.externalIdSpace : undefined);
-      this.close = other?.close ?? (isNotationDeclaration(props) ? props.close : undefined);
-      this.unexpanded = undefined;
-      this.extra = undefined;
+         'externalIdSpace' in other ? other.externalIdSpace : this.externalIdSpace;
+      this.close = 'close' in other ? other.close : this.close;
+      this.unexpanded = 'unexpanded' in other ? other.unexpanded : this.unexpanded;
+      this.extra = 'extra' in other ? other.extra : this.extra;
    }
 }
 
 function parseClose(
    source: STokenSource,
    tokenStart: DeclarationStart,
-   protoToken: RawNotationDeclaration,
+   protoToken: NotationDeclarationProps,
    deliverPToken: DeliverPToken,
 ): void {
    source.extract('match', '>', (sToken) => {
@@ -93,7 +114,7 @@ function parseClose(
 
 function parseName(
    source: STokenSource,
-   protoToken: RawNotationDeclaration,
+   protoToken: NotationDeclarationProps,
    done: () => void,
 ): void {
    source.extractToObject('word', ['>'], protoToken, 'name');
@@ -126,7 +147,7 @@ function parseNotationDeclaration(
    declarationStart: DeclarationStart,
    deliverPToken: DeliverPToken,
 ): void {
-   const protoToken: RawNotationDeclaration = {};
+   const protoToken: NotationDeclarationProps = {};
 
    parseUnexpanded(source, 'name', (unexpanded) => {
       if (unexpanded) {
@@ -156,7 +177,7 @@ function parseNotationDeclaration(
 
 function resumeExternalParse(
    source: STokenSource,
-   protoToken: RawNotationDeclaration,
+   protoToken: NotationDeclarationProps,
    notationDeclaration: NotationDeclarationPToken,
    deliverPToken: DeliverPToken,
 ) {
@@ -164,6 +185,7 @@ function resumeExternalParse(
       protoToken.externalId = result.externalId;
       source.extractNoParams('space', (sToken) => {
          protoToken.externalIdSpace = sToken;
+         /// EXTRA!
          deliverPToken(new NotationDeclarationPToken(notationDeclaration, protoToken));
       });
    });
@@ -174,7 +196,7 @@ function resumeParseNotationDeclaration(
    notationDeclaration: NotationDeclarationPToken,
    deliverPToken: DeliverPToken,
 ): void {
-   const protoToken: RawNotationDeclaration = {};
+   const protoToken: NotationDeclarationProps = {};
 
    if (notationDeclaration.unexpanded?.propName === 'name') {
       parseName(source, protoToken, () => {

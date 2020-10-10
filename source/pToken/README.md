@@ -25,6 +25,18 @@ When presented with unexpected input (e.g. `<myElement <foo`), the parse routine
 * TextDeclarationPToken (§4.3.1)
 * XmlDeclarationPToken (§2.8)
 
+## Markup-internal parameter entity references
+Thare are four markup declarations that may have paramter entity references placed between their `<` and `>` characters:
+
+* Attribute list declarations
+* Element declarations
+* Entity declarations
+* Notation declarations
+
+During parsing, if a PE reference is encountered, this will extract all the text and parameter entity references up to the closing `>` and store the tokens in a property called `unexpanded`.
+
+When it comes to time to be expanded, it is assumed that this content will be expanded, parsed and then the PToken re-populated with the new data by calling (for example) `resumeParseNotationDeclaration()` with the expanded content. If there is any remaining content in the STokenSource passed to the `resumeParse...()` function, it will be stored as a single SToken in the `extra` property. If there is no content left, `extra` will be set to `false`. Importantly, the contents of the `unexpanded` property will not be altered during this process.
+
 ## Implementation notes
 
 ### Processing Instructions

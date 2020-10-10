@@ -28,7 +28,9 @@ function valueToString(value: LiteralValuePToken = []): string {
  */
 class ExternalIdXToken {
    readonly type: typeof EXTERNAL_ID_XTOKEN = EXTERNAL_ID_XTOKEN;
+
    readonly systemId: string;
+
    readonly publicId?: string;
 
    constructor(externalId: ExternalId | undefined);

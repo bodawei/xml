@@ -4,12 +4,14 @@ import { ConformanceVersion, EntityId } from 'basic';
 import { PToken as PTokenClassic } from 'token';
 
 import { InstructionStart } from './bridge/instruction';
+// import { NotationDeclarationPToken } from './token/notationDeclaration';
 import { ProcessingInstructionPToken } from './token/processingInstruction';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
 
 export * from './bridge/instruction';
 export * from './common/fieldedInstruction';
+export * from './token/notationDeclaration';
 export * from './token/processingInstruction';
 export * from './token/textDeclaration';
 export * from './token/xmlDeclaration';

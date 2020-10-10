@@ -27,6 +27,30 @@ describe('notationdeDeclaration (unit)', () => {
       });
    });
 
+   describe('construction', () => {
+      it('can overide properties with the second parameter', () => {
+         const newPToken = new NotationDeclarationPToken(notationPToken, {
+            open: toSToken('1'),
+            openSpace: toSToken('2'),
+            declType: undefined,
+            name: toSToken('3'),
+            nameSpace: undefined,
+         });
+
+         expect(newPToken).toEqual(
+            new NotationDeclarationPToken({
+               open: toSToken('1'),
+               openSpace: toSToken('2'),
+               declType: undefined,
+               declTypeSpace: toSToken(' '),
+               name: toSToken('3'),
+               nameSpace: undefined,
+               externalIdSpace: toSToken(' '),
+               close: toSToken('>'),
+            }),
+         );
+      });
+   });
    describe('parseNotationDeclaration()', () => {
       let callback: jasmine.Spy;
       let externalIDParseSpy: jasmine.Spy;
@@ -86,18 +110,16 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
-            new NotationDeclarationPToken(
-               { open: toSToken('<!') },
-               {
-                  name: toSToken('notationName'),
-                  nameSpace: undefined,
-                  externalId: {
-                     type: EXTERNAL_ID,
-                  },
-                  externalIdSpace: undefined,
-                  close: toSToken('>'),
+            new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('notationName'),
+               nameSpace: undefined,
+               externalId: {
+                  type: EXTERNAL_ID,
                },
-            ),
+               externalIdSpace: undefined,
+               close: toSToken('>'),
+            }),
          );
       });
 
@@ -130,20 +152,18 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
-            new NotationDeclarationPToken(
-               { open: toSToken('<!') },
-               {
-                  name: undefined,
-                  nameSpace: undefined,
-                  externalId: undefined,
-                  externalIdSpace: undefined,
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'fred',
-                  },
-                  close: toSToken('>'),
+            new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: undefined,
+               nameSpace: undefined,
+               externalId: undefined,
+               externalIdSpace: undefined,
+               unexpanded: {
+                  tokens: [],
+                  propName: 'fred',
                },
-            ),
+               close: toSToken('>'),
+            }),
          );
       });
 
@@ -189,20 +209,18 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
-            new NotationDeclarationPToken(
-               { open: toSToken('<!') },
-               {
-                  name: toSToken('theName'),
-                  nameSpace: toSToken('\t'),
-                  externalId: { type: EXTERNAL_ID },
-                  externalIdSpace: undefined,
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'fred',
-                  },
-                  close: toSToken('>'),
+            new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('theName'),
+               nameSpace: toSToken('\t'),
+               externalId: { type: EXTERNAL_ID },
+               externalIdSpace: undefined,
+               unexpanded: {
+                  tokens: [],
+                  propName: 'fred',
                },
-            ),
+               close: toSToken('>'),
+            }),
          );
       });
    });
