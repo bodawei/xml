@@ -1,5 +1,10 @@
+/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+
 import { CONFORMANCE_VERSION, ConformanceVersion } from 'basic';
 import { ParseValue } from 'pToken';
+import { strOrBlank, toSToken, SToken } from 'sToken';
+
+// ick
 import {
    ATTLISTDECL_PTOKEN_TYPE,
    AttListPToken,
@@ -11,7 +16,6 @@ import {
    TextPToken,
    CHARREF_PTOKEN,
 } from 'token';
-import { strOrBlank, toSToken, SToken } from 'sToken';
 import { LiteralValuePToken } from '../token/common/literal';
 import { AttributePToken } from '../token/common/attribute';
 

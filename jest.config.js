@@ -80,19 +80,26 @@ module.exports = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
+     '^attFixer$': '<rootDir>/source/attFixer',
      '^basic$': '<rootDir>/source/basic',
      '^conformance$': '<rootDir>/source/conformance',
      '^error$': '<rootDir>/source/error',
      '^error-test$': '<rootDir>/source/error/@test/helper',
+     '^expand$': '<rootDir>/source/expand',
      '^extractor$': '<rootDir>/source/extractor',
+     '^nodeStream$': '<rootDir>/source/nodeStream',
      '^pToken$': '<rootDir>/source/pToken',
+     '^pTokenStream$': '<rootDir>/source/pTokenStream',
      '^pToken-test$': '<rootDir>/source/pToken/@test/helper',
      '^sToken$': '<rootDir>/source/sToken',
      '^sToken-test$': '<rootDir>/source/sToken/@test/helper',
      '^stringify$': '<rootDir>/source/stringify',
      '^token$': '<rootDir>/source/token',
+     '^token-test$': '<rootDir>/source/token/@test/helper',
+     '^valid$': '<rootDir>/source/valid',
      '^wellformedness$': '<rootDir>/source/wellformedness',
      '^xToken$': '<rootDir>/source/xToken',
+     '^xTokenStream$': '<rootDir>/source/xTokenStream',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -137,10 +144,14 @@ module.exports = {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  // setupFiles: [],
+  setupFiles: [
+  ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  // setupFilesAfterEnv: [],
+  setupFilesAfterEnv: [
+     './source/error/@test/beforeJest.ts',
+     './source/token/@test/beforeEach.jest-start.ts',
+  ],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.
   // slowTestThreshold: 5,

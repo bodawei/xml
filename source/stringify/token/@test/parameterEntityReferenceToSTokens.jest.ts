@@ -1,5 +1,7 @@
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+
 import { ParameterEntityReferencePToken } from 'token';
-import { toSToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 
 import { parameterEntityReferenceToSTokens } from '../parameterEntityReferenceToSTokens';
 
@@ -14,11 +16,11 @@ describe('toSTokenArray()', () => {
       });
 
       expect(parameterEntityReferenceToSTokens(pePToken)).toEqual([
-         pePToken.open!,
-         pePToken.openSpace!,
-         pePToken.name!,
-         pePToken.nameSpace!,
-         pePToken.close!,
-      ]);
+         pePToken.open,
+         pePToken.openSpace,
+         pePToken.name,
+         pePToken.nameSpace,
+         pePToken.close,
+      ] as Array<SToken>);
    });
 });

@@ -1,11 +1,10 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { STokenArrayBuilder, SToken } from 'sToken';
+import { UnexpandedDetails } from 'pToken';
+// ick
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'token';
-
-import { parameterEntityReferenceToSTokens } from '../parameterEntityReferenceToSTokens';
-
-import { UnexpandedDetails } from '../../../pToken/types';
+import { parameterEntityReferenceToSTokens } from '../token/parameterEntityReferenceToSTokens';
 
 const DEFAULT: UnexpandedDetails = { propName: '', tokens: [] };
 

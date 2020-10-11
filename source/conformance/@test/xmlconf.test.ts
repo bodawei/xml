@@ -2,22 +2,21 @@
 
 import { Transform } from 'stream';
 import { ConformanceVersion, XmlRevision, XmlVersion } from 'basic';
-import { CheckWellFormed } from 'nodeStream';
+import { defaultExtractors } from 'extractor';
+import { AttFixerStream, CheckWellFormed } from 'nodeStream';
 import { gatherPTokens } from 'pToken-test';
+import { ContextType } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
+import { STokenSource } from 'sToken';
 import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
 
+import metadata from './data/xmlconf.json';
 import { TestDetails, buildTestDetails } from './helper/buildTestDetails';
 import { gatherStrings } from './helper/gatherStrings';
 import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
 import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
-import metadata from './data/xmlconf.json';
-import { AttFixerStream } from 'nodeStream';
-import { ContextType } from 'pToken';
-import { STokenSource } from 'sToken';
-import { defaultExtractors } from 'extractor';
 
 function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
    const sTokenSource = new STokenSource(defaultExtractors);

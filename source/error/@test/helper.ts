@@ -201,14 +201,15 @@ function makeCompareObject(util: any, ErrorClass: any) {
    };
 }
 
-beforeEach(() => {
-   jasmine.addMatchers({
-      toReportError,
-      toNotReportError,
-      toReportWarning,
+if (typeof jest === 'undefined') {
+   beforeEach(() => {
+      jasmine.addMatchers({
+         toReportError,
+         toNotReportError,
+         toReportWarning,
+      });
    });
-
-});
+}
 
 export {
    MockErrorCollector,

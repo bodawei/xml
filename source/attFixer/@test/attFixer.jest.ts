@@ -1,3 +1,15 @@
+/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+
+import { toSToken, SToken } from 'sToken';
+import {
+   makeAttListDeclaration,
+   makeElementStart,
+   makeElementStartWithAttrValue,
+   makeElementStartWithAttrValueFromString,
+   makeTextPToken,
+} from 'token-test';
+
+// ick
 import {
    AttListPToken,
    ElementStartPToken,
@@ -7,62 +19,9 @@ import {
    GeneralEntityEndPToken,
    CharRefPToken,
 } from 'token';
-import { toSToken, SToken } from 'sToken';
+import { AttrValue } from '../../token/common/attribute';
 
 import { AttFixer } from '../AttFixer';
-
-type AttrValue = Array<
-   GeneralEntityStartPToken | GeneralEntityEndPToken | TextPToken | CharRefPToken
->;
-
-function makeTextPToken(text: string, origText?: string): TextPToken {
-   return new TextPToken({
-      text: new SToken(text, origText || text, []),
-   });
-}
-
-function makeSimpleElementStart(): ElementStartPToken {
-   return new ElementStartPToken({
-      open: toSToken('<'),
-      name: toSToken('one'),
-      attributes: [],
-   });
-}
-function makeElementStartWithValue(value: AttrValue): ElementStartPToken {
-   return new ElementStartPToken({
-      open: toSToken('<'),
-      name: toSToken('one'),
-      nameSpace: undefined,
-      attributes: [
-         {
-            name: toSToken('a'),
-            value,
-         },
-      ],
-   });
-}
-
-function makeAttListPToken(type = 'CDATA'): AttListPToken {
-   return new AttListPToken({
-      open: toSToken('<!'),
-      elementName: toSToken('one'),
-      attDefs: [
-         {
-            name: toSToken('a'),
-            type: toSToken(type),
-            openQuote: toSToken('"'),
-            value: [new TextPToken({ text: toSToken('x') })],
-            closeQuote: toSToken('"'),
-         },
-      ],
-   });
-}
-
-function makeElementStart(value: string, origValue?: string): ElementStartPToken {
-   return makeElementStartWithValue([
-      new TextPToken({ text: new SToken(value, origValue || value, []) }),
-   ]);
-}
 
 describe('AttFixer', () => {
    let fixAttributes: AttFixer;
@@ -158,7 +117,7 @@ describe('AttFixer', () => {
    });
 
    it('returns an ATTLIST unchanged when passed one', () => {
-      const attList = makeAttListPToken('CDATA');
+      const attList = makeAttListDeclaration('CDATA');
 
       const result = fixAttributes.processPToken(attList);
 
@@ -167,64 +126,66 @@ describe('AttFixer', () => {
 
    describe('attribute normalization', () => {
       it('modifies a CDATA attribute to replace newlines with spaces', () => {
-         const attList = makeAttListPToken('CDATA');
-         const elementStart = makeElementStart('\n\nxyz');
+         const attList = makeAttListDeclaration('CDATA');
+         const elementStart = makeElementStartWithAttrValueFromString('\n\nxyz');
          fixAttributes.processPToken(attList);
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStart('  xyz', '\n\nxyz'));
+         expect(result).toEqual(makeElementStartWithAttrValueFromString('  xyz', '\n\nxyz'));
       });
 
       it('modifies a CDATA attribute to replace multiple sequential whitespace characters with spaces', () => {
-         const attList = makeAttListPToken('CDATA');
-         const elementStart = makeElementStart('x\n\r\n\t yz');
+         const attList = makeAttListDeclaration('CDATA');
+         const elementStart = makeElementStartWithAttrValueFromString('x\n\r\n\t yz');
          fixAttributes.processPToken(attList);
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStart('x     yz', 'x\n\r\n\t yz'));
+         expect(result).toEqual(
+            makeElementStartWithAttrValueFromString('x     yz', 'x\n\r\n\t yz'),
+         );
       });
 
       it('modifies a non-CDATA attribute to trim leading newlines', () => {
-         const attList = makeAttListPToken('NMTOKENS');
-         const elementStart = makeElementStart('\n\nxyz');
+         const attList = makeAttListDeclaration('NMTOKENS');
+         const elementStart = makeElementStartWithAttrValueFromString('\n\nxyz');
          fixAttributes.processPToken(attList);
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStart('xyz', '\n\nxyz'));
+         expect(result).toEqual(makeElementStartWithAttrValueFromString('xyz', '\n\nxyz'));
       });
 
       it('modifies a non-CDATA attribute to replace multiple sequential whitespace characters with space', () => {
-         const attList = makeAttListPToken('NMTOKENS');
-         const elementStart = makeElementStart('x\n\r\n\t yz');
+         const attList = makeAttListDeclaration('NMTOKENS');
+         const elementStart = makeElementStartWithAttrValueFromString('x\n\r\n\t yz');
          fixAttributes.processPToken(attList);
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStart('x yz', 'x\n\r\n\t yz'));
+         expect(result).toEqual(makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz'));
       });
 
       it('modifies a non-CDATA attribute to remove trailing space', () => {
-         const attList = makeAttListPToken('NMTOKENS');
-         const elementStart = makeElementStart('x\n\r\n\t yz   ');
+         const attList = makeAttListDeclaration('NMTOKENS');
+         const elementStart = makeElementStartWithAttrValueFromString('x\n\r\n\t yz   ');
          fixAttributes.processPToken(attList);
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStart('x yz', 'x\n\r\n\t yz   '));
+         expect(result).toEqual(makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz   '));
       });
 
       it('modifies a non-CDATA attribute remove space, but not space the spans a charref', () => {
-         const attList = makeAttListPToken('NMTOKENS');
+         const attList = makeAttListDeclaration('NMTOKENS');
          const elementStart = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: undefined,
             attributes: [
                {
-                  name: toSToken('a'),
+                  name: toSToken('att1'),
                   value: [
                      new TextPToken({ text: toSToken('   \na   ') }),
                      new CharRefPToken({ open: toSToken('&'), digits: toSToken('65') }),
@@ -247,10 +208,10 @@ describe('AttFixer', () => {
 
       it('modifies a non-CDATA attribute remove across general entity start and end', () => {
          const reference = new GeneralEntityReferencePToken({ open: toSToken('&') });
-         const attList = makeAttListPToken('NMTOKENS');
+         const attList = makeAttListDeclaration('NMTOKENS');
          const elementStart = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: undefined,
             attributes: [
                {
@@ -280,8 +241,8 @@ describe('AttFixer', () => {
       });
 
       it('modifies a CDATA attribute to replace various newlines with spaces', () => {
-         const attList = makeAttListPToken('CDATA');
-         const elementStart = makeElementStartWithValue([
+         const attList = makeAttListDeclaration('CDATA');
+         const elementStart = makeElementStartWithAttrValue([
             ...entityD,
             ...entityD,
             makeTextPToken('A'),
@@ -295,7 +256,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(
-            makeElementStartWithValue([
+            makeElementStartWithAttrValue([
                ...entityDSpace,
                ...entityDSpace,
                makeTextPToken('A'),
@@ -312,8 +273,8 @@ describe('AttFixer', () => {
       // <!ENTITY da "&#xD;&#xA;">
       // a="&d;&d;A&a;&#x20;&a;B&da;"
       it('modifies a non-CDATA attribute to replace various sequential newlines with individual spaces', () => {
-         const attList = makeAttListPToken('NMTOKENS');
-         const elementStart = makeElementStartWithValue([
+         const attList = makeAttListDeclaration('NMTOKENS');
+         const elementStart = makeElementStartWithAttrValue([
             ...entityD,
             ...entityD,
             makeTextPToken('A'),
@@ -327,7 +288,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(
-            makeElementStartWithValue([
+            makeElementStartWithAttrValue([
                ...entityDEmpty,
                ...entityDEmpty,
                makeTextPToken('A'),
@@ -340,8 +301,8 @@ describe('AttFixer', () => {
       });
 
       it('leaves char references in a CDATA attribute unchanged', () => {
-         const attList = makeAttListPToken('CDATA');
-         const elementStart = makeElementStartWithValue([
+         const attList = makeAttListDeclaration('CDATA');
+         const elementStart = makeElementStartWithAttrValue([
             charRefD,
             charRefD,
             makeTextPToken('A'),
@@ -356,7 +317,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(
-            makeElementStartWithValue([
+            makeElementStartWithAttrValue([
                charRefD,
                charRefD,
                makeTextPToken('A'),
@@ -370,8 +331,8 @@ describe('AttFixer', () => {
       });
 
       it('leaves char references in a non-CDATA attribute unchanged', () => {
-         const attList = makeAttListPToken('NMTOKENS');
-         const elementStart = makeElementStartWithValue([
+         const attList = makeAttListDeclaration('NMTOKENS');
+         const elementStart = makeElementStartWithAttrValue([
             charRefD,
             charRefD,
             makeTextPToken('A'),
@@ -386,7 +347,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(
-            makeElementStartWithValue([
+            makeElementStartWithAttrValue([
                charRefD,
                charRefD,
                makeTextPToken('A'),
@@ -402,8 +363,8 @@ describe('AttFixer', () => {
 
    describe('attribute default addition', () => {
       it('adds a default attribute if not in the element', () => {
-         const attList = makeAttListPToken();
-         const elementStart = makeSimpleElementStart();
+         const attList = makeAttListDeclaration();
+         const elementStart = makeElementStart();
          fixAttributes.processPToken(attList);
 
          const result = fixAttributes.processPToken(elementStart);
@@ -411,11 +372,11 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             new ElementStartPToken({
                open: toSToken('<'),
-               name: toSToken('one'),
+               name: toSToken('elStart'),
                nameSpace: toSToken(' '),
                attributes: [
                   {
-                     name: toSToken('a'),
+                     name: toSToken('att1'),
                      equal: toSToken('='),
                      openQuote: toSToken('"'),
                      value: [new TextPToken({ text: toSToken('x') })],
@@ -423,19 +384,20 @@ describe('AttFixer', () => {
                      trailingSpace: toSToken(' '),
                   },
                ],
+               close: toSToken('>'),
             }),
          );
       });
 
       it('does not add a default if the element start already has a value', () => {
-         const attList = makeAttListPToken();
+         const attList = makeAttListDeclaration();
          const element = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: toSToken(' '),
             attributes: [
                {
-                  name: toSToken('a'),
+                  name: toSToken('att1'),
                   equal: toSToken('='),
                   openQuote: toSToken('"'),
                   value: [new TextPToken({ text: toSToken('foo') })],
@@ -452,10 +414,10 @@ describe('AttFixer', () => {
       });
 
       it('does not add a nameSpace if it is already rpesent', () => {
-         const attList = makeAttListPToken();
+         const attList = makeAttListDeclaration();
          const element = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: toSToken('\t'),
             attributes: [],
          });
@@ -466,11 +428,11 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             new ElementStartPToken({
                open: toSToken('<'),
-               name: toSToken('one'),
+               name: toSToken('elStart'),
                nameSpace: toSToken('\t'),
                attributes: [
                   {
-                     name: toSToken('a'),
+                     name: toSToken('att1'),
                      equal: toSToken('='),
                      openQuote: toSToken('"'),
                      value: [new TextPToken({ text: toSToken('x') })],
@@ -483,10 +445,10 @@ describe('AttFixer', () => {
       });
 
       it('does not add a space to a previous attribute if already present', () => {
-         const attList = makeAttListPToken();
+         const attList = makeAttListDeclaration();
          const element = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: toSToken('\t'),
             attributes: [
                {
@@ -506,7 +468,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             new ElementStartPToken({
                open: toSToken('<'),
-               name: toSToken('one'),
+               name: toSToken('elStart'),
                nameSpace: toSToken('\t'),
                attributes: [
                   {
@@ -518,7 +480,7 @@ describe('AttFixer', () => {
                      trailingSpace: toSToken('\t'),
                   },
                   {
-                     name: toSToken('a'),
+                     name: toSToken('att1'),
                      equal: toSToken('='),
                      openQuote: toSToken('"'),
                      value: [new TextPToken({ text: toSToken('x') })],
@@ -531,10 +493,10 @@ describe('AttFixer', () => {
       });
 
       it('adds a space to a previous attribute if not present when adding a default', () => {
-         const attList = makeAttListPToken();
+         const attList = makeAttListDeclaration();
          const element = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: toSToken('\t'),
             attributes: [
                {
@@ -553,7 +515,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             new ElementStartPToken({
                open: toSToken('<'),
-               name: toSToken('one'),
+               name: toSToken('elStart'),
                nameSpace: toSToken('\t'),
                attributes: [
                   {
@@ -565,7 +527,7 @@ describe('AttFixer', () => {
                      trailingSpace: toSToken(' '),
                   },
                   {
-                     name: toSToken('a'),
+                     name: toSToken('att1'),
                      equal: toSToken('='),
                      openQuote: toSToken('"'),
                      value: [new TextPToken({ text: toSToken('x') })],
@@ -578,10 +540,10 @@ describe('AttFixer', () => {
       });
 
       it('uses the original name token when available', () => {
-         const attList = makeAttListPToken();
+         const attList = makeAttListDeclaration();
          const element = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: toSToken('\t'),
             attributes: [],
          });
@@ -593,10 +555,10 @@ describe('AttFixer', () => {
       });
 
       it('uses the original quote tokens when available', () => {
-         const attList = makeAttListPToken();
+         const attList = makeAttListDeclaration();
          const element = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: toSToken('\t'),
             attributes: [],
          });
@@ -611,10 +573,10 @@ describe('AttFixer', () => {
       it('manufactures quote tokens when not provided', () => {
          const attList = new AttListPToken({
             open: toSToken('<!'),
-            elementName: toSToken('one'),
+            elementName: toSToken('elStart'),
             attDefs: [
                {
-                  name: toSToken('a'),
+                  name: toSToken('att1'),
                   type: toSToken('CDATA'),
                   value: [new TextPToken({ text: toSToken('x') })],
                },
@@ -623,7 +585,7 @@ describe('AttFixer', () => {
 
          const element = new ElementStartPToken({
             open: toSToken('<'),
-            name: toSToken('one'),
+            name: toSToken('elStart'),
             nameSpace: toSToken('\t'),
             attributes: [],
          });

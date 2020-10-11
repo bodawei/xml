@@ -2,7 +2,7 @@
 
 import { EntityId, Range } from 'basic';
 import { ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 import {
    CdataPToken,
    CommentPToken,
@@ -33,6 +33,8 @@ import {
    CharRefPToken,
    ElementDeclarationPToken,
 } from 'token';
+import { AttrValue } from '../../token/common/attribute';
+import { AttListPToken } from '../attListDeclaration';
 
 const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
 const RANGE = new Range(new EntityId(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
@@ -41,20 +43,22 @@ function makeInsertedRange() {
    return RANGE.clone();
 };
 
-function makeAttListDeclaration(): any {
+function makeAttListDeclaration(type = 'CDATA'): AttListPToken {
    return new attListDeclaration.PToken({
       open: toSToken('<!'),
-      elementName: toSToken('elementName'),
+      elementName: toSToken('elStart'),
       postElementNameSpace: toSToken(' '),
       attDefs: [
          {
             name: toSToken('att1'),
             postNameSpace: toSToken(' '),
-            type: toSToken('CDATA'),
+            type: toSToken(type),
             postTypeSpace: toSToken(' '),
             defaultType: toSToken('#REQUIRED'),
             postDefaultTypeSpace: toSToken(' '),
-            value: [],
+            openQuote: toSToken('"'),
+            value: [new TextPToken({ text: toSToken('x') })],
+            closeQuote: toSToken('"'),
          },
       ],
       close: toSToken('>'),
@@ -147,6 +151,27 @@ function makeElementStart(): ElementStartPToken {
       name: toSToken('elStart'),
       close: toSToken('>'),
    });
+}
+
+
+function makeElementStartWithAttrValue(value: AttrValue): ElementStartPToken {
+   return new ElementStartPToken({
+      open: toSToken('<'),
+      name: toSToken('elStart'),
+      nameSpace: undefined,
+      attributes: [
+         {
+            name: toSToken('att1'),
+            value,
+         },
+      ],
+   });
+}
+
+function makeElementStartWithAttrValueFromString(value: string, origValue?: string): ElementStartPToken {
+   return makeElementStartWithAttrValue([
+      new TextPToken({ text: new SToken(value, origValue || value, []) }),
+   ]);
 }
 
 function makeElementDeclaration(): ElementDeclarationPToken {
@@ -266,6 +291,12 @@ function makeSpace(): SpacePToken {
    });
 }
 
+function makeTextPToken(text: string, origText?: string): TextPToken {
+   return new TextPToken({
+      text: new SToken(text, origText || text, []),
+   });
+}
+
 function makeTextDecl(): TextDeclarationPToken {
    return new TextDeclarationPToken({
       open: toSToken('<?'),
@@ -325,6 +356,8 @@ export {
    makeElementEmpty,
    makeElementEnd,
    makeElementStart,
+   makeElementStartWithAttrValue,
+   makeElementStartWithAttrValueFromString,
    makeExternalSubsetEnd,
    makeExternalSubsetStart,
    makeGeneralEntityDeclaration,
@@ -341,6 +374,7 @@ export {
    makeParameterEntityStart,
    makeProcessingInstruction,
    makeSpace,
+   makeTextPToken,
    makeTextDecl,
    makeXmlDecl,
 };

@@ -1,5 +1,8 @@
-import { strOrBlank } from 'sToken';
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+
 import { NotationDeclarationPToken } from 'pToken';
+import { strOrBlank } from 'sToken';
+
 import { ExternalIdXToken } from './externalIdXToken';
 
 const NOTATION_DECLARATION_XTOKEN = 'NOTATION_DECLARATION_XTOKEN';

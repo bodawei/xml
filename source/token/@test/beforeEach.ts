@@ -180,7 +180,6 @@ beforeEach(() => {
       toContainPTokenProps,
       toEqualRangeless,
    });
-
 });
 
 module.exports = {

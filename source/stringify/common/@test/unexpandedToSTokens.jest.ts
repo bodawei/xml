@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { UnexpandedDetails } from 'pToken';
 import { SToken, toSToken } from 'sToken';
+// ick1
+import { ParameterEntityReferencePToken, TextPToken } from 'token';
 
 import { unexpandedToSTokens } from '../unexpandedToSTokens';
-
-import { ParameterEntityReferencePToken, TextPToken } from 'token'; // ick1
-import { UnexpandedDetails } from '../../../../pToken/types'; // ick2
 
 describe('unexpandedToSTokens()', () => {
    let unexpanded: UnexpandedDetails;

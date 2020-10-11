@@ -1,2 +1,2 @@
-export * from './tokens/generalEntityReferenceToSTokens';
-export * from './tokens/parameterEntityReferenceToSTokens';
+export * from './token/generalEntityReferenceToSTokens';
+export * from './token/parameterEntityReferenceToSTokens';

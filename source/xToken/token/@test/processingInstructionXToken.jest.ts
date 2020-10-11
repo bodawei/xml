@@ -2,6 +2,7 @@
 
 import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
+
 import {
    ProcessingInstructionXToken,
    PROCESSING_INSTRUCTION_XTOKEN,

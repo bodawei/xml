@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+// ick
 import { ExternalId, TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
 import { LiteralValuePToken } from '../../token/common/literal';
 
@@ -16,6 +17,8 @@ function valueToString(value: LiteralValuePToken = []): string {
          case CHARREF_PTOKEN:
             pieces.push(piece.char);
             break;
+         default:
+         // do nothing
       }
    }
 

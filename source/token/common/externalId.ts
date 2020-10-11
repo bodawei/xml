@@ -23,7 +23,7 @@ const ALLOWED_TYPES = ['PUBLIC', 'SYSTEM'];
 const TYPE_TERMINATORS = ['"', "'"];
 const PUBID_CHARS = /^[- \n'()+,./:=?;!*#@$_%a-zA-Z0-9]*/;
 
-type ProtoExternalId = {
+interface ProtoExternalId {
    type: string;
    externalType?: SToken;
    externalTypeSpace?: SToken;
@@ -33,22 +33,22 @@ type ProtoExternalId = {
 
    peRefPlus: UnassignedArray;
    nextPropName?: string;
-};
+}
 
-type ExternalId = {
+interface ExternalId {
    type: string;
    externalType?: SToken;
    externalTypeSpace?: SToken;
    public?: LiteralPToken;
    publicSpace?: SToken;
    system?: LiteralPToken;
-};
+}
 
-type ParsedExternalId = {
+interface ParsedExternalId {
    externalId?: ExternalId;
    peRefPlus: UnassignedArray;
    nextPropName?: string;
-};
+}
 
 function protoToExternalId(peid: ProtoExternalId): ExternalId {
    return {

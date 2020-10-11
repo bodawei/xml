@@ -3,9 +3,8 @@
 import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
+import * as fieldedInstr from '../../common/fieldedInstructionToSTokens';
 import { xmlDeclarationToSTokens } from '../xmlDeclarationToSTokens';
-
-import * as fieldedInstr from '../common/fieldedInstructionToSTokens';
 
 describe('xmlDeclarationToSTokens (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;

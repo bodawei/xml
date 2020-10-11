@@ -1,6 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
+// ick
 import { GeneralEntityReferencePToken } from '../../token/generalEntityReference';
 
 const GENERAL_ENTITY_REFERENCE_XTOKEN = 'GENERAL_ENTITY_REFERENCE_XTOKEN';
@@ -12,8 +13,6 @@ class GeneralEntityReferenceXToken {
 
    public pToken?: GeneralEntityReferencePToken;
 
-   constructor(name: string);
-   constructor(pToken: GeneralEntityReferencePToken);
    constructor(nameOrToken: string | GeneralEntityReferencePToken) {
       if (typeof nameOrToken === 'string') {
          this.name = nameOrToken;

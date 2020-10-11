@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import { toSToken, SToken } from 'sToken';
-import { processingInstructionToStokens } from '../processingInstructionToStokens';
 import { ProcessingInstructionPToken } from 'pToken';
+import { toSToken, SToken } from 'sToken';
+
+import { processingInstructionToStokens } from '../processingInstructionToStokens';
 
 describe('processingInstructionToStokens() (unit)', () => {
    it('returns all the STokens', () => {

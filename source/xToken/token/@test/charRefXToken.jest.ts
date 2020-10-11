@@ -1,16 +1,18 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { CharRefXToken } from '../charRefXToken';
-import { CharRefPToken } from 'token';
 import { toSToken } from 'sToken';
 import { makeCharRef } from 'token-test';
+// ick
+import { CharRefPToken } from 'token';
+
+import { CharRefXToken } from '../charRefXToken';
 
 describe('CharRefXToken', () => {
    it('creates an XToken from a charRefPToken', () => {
       const charRefPToken = makeCharRef();
       const xToken = new CharRefXToken(charRefPToken);
 
-      expect(xToken).toEqualProps({
+      expect(xToken).toEqual({
          type: 'CHARREF_XTOKEN',
          char: String.fromCharCode(68),
          pToken: charRefPToken,
@@ -26,9 +28,7 @@ describe('CharRefXToken', () => {
          }),
       );
 
-      expect(xToken).toEqualProps({
-         char: '',
-      });
+      expect(xToken.char).toEqual('');
    });
 
    it('creates an XToken when the digits are hex', () => {
@@ -42,9 +42,7 @@ describe('CharRefXToken', () => {
          }),
       );
 
-      expect(xToken).toEqualProps({
-         char: 'A',
-      });
+      expect(xToken.char).toEqual('A');
    });
 
    it('creates an XToken from an astral plane character', () => {
@@ -58,8 +56,6 @@ describe('CharRefXToken', () => {
          }),
       );
 
-      expect(xToken).toEqualProps({
-         char: '🀦', // This is actually two entties in the utf8 array.
-      });
+      expect(xToken.char).toEqual('🀦'); // This is actually two entties in the utf8 array.
    });
 });

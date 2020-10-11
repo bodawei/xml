@@ -1,8 +1,10 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EXTERNAL_ID_XTOKEN, ExternalIdXToken } from '../externalIdXToken';
-import { EXTERNAL_ID, TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
 import { toSToken } from 'sToken';
+// ick
+import { EXTERNAL_ID, TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
+
+import { EXTERNAL_ID_XTOKEN, ExternalIdXToken } from '../externalIdXToken';
 
 describe('ExternalIdXToken', () => {
    it('exports a EXTERNAL_ID_XTOKEN constant', () => {

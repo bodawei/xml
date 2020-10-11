@@ -23,6 +23,10 @@ type ParseOptions = {
    terminators?: Array<string>;
 }
 
+type AttrValue = Array<
+   GeneralEntityStartPToken | GeneralEntityEndPToken | GeneralEntityReferencePToken | TextPToken | CharRefPToken
+>;
+
 interface AttributePToken extends LiteralPToken {
    name: SToken;
    postNameSpace?: SToken;
@@ -279,6 +283,7 @@ const attribute = {
 export default attribute;
 
 export {
+   AttrValue,
    AttributePToken,
    AttributeXToken,
    AttributeValuePToken,

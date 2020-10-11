@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { toSToken } from 'sToken';
 import { TextDeclarationPToken } from 'pToken';
+import { toSToken } from 'sToken';
 
 import { TextDeclarationXToken } from '../textDeclarationXToken';
 

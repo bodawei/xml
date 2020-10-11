@@ -10,12 +10,14 @@ import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
 
 export * from './bridge/instruction';
+export * from './common/externalId';
 export * from './common/fieldedInstruction';
 export * from './token/notationDeclaration';
 export * from './token/processingInstruction';
 export * from './token/textDeclaration';
 export * from './token/xmlDeclaration';
 export * from './util/externalIdToEntityId';
+export * from './types';
 
 type PToken = PTokenClassic;
 type ParseValue =

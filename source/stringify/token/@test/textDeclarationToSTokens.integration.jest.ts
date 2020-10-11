@@ -2,10 +2,8 @@
 /* eslint-env jasmine */
 
 import { defaultExtractors } from 'extractor';
-import { parseTextDeclaration } from 'pToken';
+import { InstructionStart, parseTextDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
-
-import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 import { textDeclarationToSTokens } from '../textDeclarationToSTokens';
 

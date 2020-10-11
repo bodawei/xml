@@ -3,7 +3,7 @@
 import { SToken } from 'sToken';
 import { TextDeclarationPToken } from 'pToken';
 
-import { fieldedInstructionToSTokens } from './common/fieldedInstructionToSTokens';
+import { fieldedInstructionToSTokens } from '../common/fieldedInstructionToSTokens';
 
 function textDeclarationToSTokens(pToken: TextDeclarationPToken): Array<SToken> {
    return fieldedInstructionToSTokens(pToken);

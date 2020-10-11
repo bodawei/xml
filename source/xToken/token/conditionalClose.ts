@@ -1,11 +1,13 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+//ick
 import { ConditionalClosePToken } from 'token';
 
 const CONDITIONAL_CLOSE_XTOKEN = 'CONDITIONAL_CLOSE_XTOKEN';
 
 class ConditionalCloseXToken {
    public readonly type: typeof CONDITIONAL_CLOSE_XTOKEN = CONDITIONAL_CLOSE_XTOKEN;
+
    public readonly pToken?: ConditionalClosePToken;
 
    constructor(pToken?: ConditionalClosePToken) {
@@ -13,7 +15,7 @@ class ConditionalCloseXToken {
    }
 }
 
-function conditionalClosePTokenToXToken(pToken: ConditionalClosePToken) {
+function conditionalClosePTokenToXToken(pToken: ConditionalClosePToken): ConditionalCloseXToken {
    const token = new ConditionalCloseXToken(pToken);
 
    return token;

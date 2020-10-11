@@ -3,9 +3,8 @@
 import { TextDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
 
+import * as fieldedInstr from '../../common/fieldedInstructionToSTokens';
 import { textDeclarationToSTokens } from '../textDeclarationToSTokens';
-
-import * as fieldedInstr from '../common/fieldedInstructionToSTokens';
 
 describe('textDeclarationToSTokens() (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;

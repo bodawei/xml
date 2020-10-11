@@ -567,7 +567,7 @@ describe('externalId (unit)', () => {
 
    describe('getSTokens()', () => {
       beforeEach(() => {
-         spyOn(literal, 'getSTokens');
+         spyOn(literal, 'getSTokens').and.returnValue([]);
       });
 
       it('calls literal.getSTokens() for the PUBLIC value', () => {

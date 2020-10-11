@@ -3,7 +3,7 @@
 import { SToken } from 'sToken';
 import { XmlDeclarationPToken } from 'pToken';
 
-import { fieldedInstructionToSTokens } from './common/fieldedInstructionToSTokens';
+import { fieldedInstructionToSTokens } from '../common/fieldedInstructionToSTokens';
 
 function xmlDeclarationToSTokens(pToken: XmlDeclarationPToken): Array<SToken> {
    return fieldedInstructionToSTokens(pToken);

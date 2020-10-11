@@ -1,6 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'sToken';
+// ick
 import { GeneralEntityReferencePToken } from 'token';
 
 import {
@@ -18,7 +19,7 @@ describe('ParameterEntityReferenceXToken()', () => {
          close: toSToken(';'),
       });
 
-      expect(new GeneralEntityReferenceXToken(pePToken)).toEqualProps({
+      expect(new GeneralEntityReferenceXToken(pePToken)).toEqual({
          type: GENERAL_ENTITY_REFERENCE_XTOKEN,
          name: 'entityName',
          pToken: pePToken,
@@ -26,7 +27,7 @@ describe('ParameterEntityReferenceXToken()', () => {
    });
 
    it('can pass just a name to the constructor function', () => {
-      expect(new GeneralEntityReferenceXToken('foo')).toEqualProps({
+      expect(new GeneralEntityReferenceXToken('foo')).toEqual({
          type: GENERAL_ENTITY_REFERENCE_XTOKEN,
          name: 'foo',
       });

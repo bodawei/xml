@@ -2,10 +2,10 @@
 
 import { NotationDeclarationPToken } from 'pToken';
 import { STokenArrayBuilder, SToken } from 'sToken';
+//ick
+import { getSTokens } from '../../token/common/externalId';
 
-import { unexpandedToSTokens } from './common/unexpandedToSTokens';
-
-import { getSTokens } from '../../token/common/externalId'; //ick
+import { unexpandedToSTokens } from '../common/unexpandedToSTokens';
 
 function notationDeclarationToSTokens(pToken: NotationDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
