@@ -6,7 +6,7 @@ import { parseUnexpanded } from '../common/parseUnexpanded';
 
 import { DeclarationStart } from '../../token/bridge/declaration';
 import { ExternalId, parseExternalId } from '../../token/common/externalId';
-import { UnexpandedDetails } from '../types';
+import { UnexpandedMarkupDetails } from '../types';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';
 
@@ -21,7 +21,7 @@ interface NotationDeclarationProps {
    nameSpace?: SToken;
    externalId?: ExternalId;
    externalIdSpace?: SToken;
-   unexpanded?: UnexpandedDetails | undefined;
+   unexpanded?: UnexpandedMarkupDetails | undefined;
    extra?: SToken | false;
    close?: SToken;
 }
@@ -65,7 +65,7 @@ class NotationDeclarationPToken {
 
    public readonly close: SToken | undefined;
 
-   public readonly unexpanded: UnexpandedDetails | undefined;
+   public readonly unexpanded: UnexpandedMarkupDetails | undefined;
 
    public readonly extra: SToken | false | undefined;
 
@@ -183,9 +183,12 @@ function resumeExternalParse(
 ) {
    parseExternalId(source, ['>'], true, (result) => {
       protoToken.externalId = result.externalId;
-      source.extractNoParams('space', (sToken) => {
-         protoToken.externalIdSpace = sToken;
-         /// EXTRA!
+      source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
+      source.extract('all', [], (sToken) => {
+         if (sToken) {
+            protoToken.extra = sToken;
+         }
+
          deliverPToken(new NotationDeclarationPToken(notationDeclaration, protoToken));
       });
    });

@@ -1,98 +1,92 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { doAsyncLoop } from 'basic';
+import { UnexpandedMarkupToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ElidedEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    XmlError,
-   unassigned,, NOTATION_DECLARATION_PTOKEN, ParameterEntityStartPToken, PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityEndPToken
+   ParameterEntityStartPToken,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   ParameterEntityEndPToken,
+   EntityValueElement,
 } from 'token';
 
-import { UnassignedArray, UnassignedType } from '../../token/common/unassigned';
-
 import { ExpandParams } from '../types';
-import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
 
-interface ExpandUnassignedResult {
+interface ExpandResults {
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
-   newValue: UnassignedArray;
-}
-type UnassignedExpanded = (result: ExpandUnassignedResult) => void;
-
-interface ParseResults {
-   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
-   unassignedFragment: UnassignedArray | void;
+   expandedTokens: Array<EntityValueElement> | undefined;
 }
 
 function expandPeRef(
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
-   isElementDecl: boolean,
    peRef: ParameterEntityReferencePToken,
-   callback: (result: ParseResults) => void,
+   callback: (result: ExpandResults) => void,
 ): void {
    const entityName = strOrBlank(peRef.name);
-   const details = expandParams.entityDetails.getPEDetails(entityName);
-   const result: ParseResults = {
-      unassignedFragment: undefined,
+   const entityDetails = expandParams.entityDetails.getPEDetails(entityName);
+   const result: ExpandResults = {
+      expandedTokens: undefined,
       byproducts: [],
    };
 
    // §4.1.0: Well-formedness constraint: No Recursion
    //    A parsed entity must not contain a recursive reference to itself,
    //    either directly or indirectly.
-   if (!details || entityContextStack.hasName(peRef)) {
+   if (!entityDetails || entityContextStack.hasName(peRef)) {
       callback(result);
       return;
    }
 
    addProtoReplacementText(peRef, expandParams, entityContextStack, (addResult) => {
-      if (!details.protoReplacementText) {
+      if (!entityDetails.protoReplacementText) {
          result.byproducts = addResult.byproducts;
          callback(result);
          return;
       }
 
       callback({
-         unassignedFragment: details.protoReplacementText,
+         expandedTokens: entityDetails.protoReplacementText,
          byproducts: addResult.byproducts,
       });
    });
 }
 
 /*
- * Given an unassigned array, locate all the parameter entity references in
- * it, and then replace each with the expanded contents.
+ * Given an array of unexpanded values (only found in the four declarations:
+ * AttList, Element, Entity, Notation), expand any PE Refs within it and
+ * produce an STokenStream with those contents
  */
-function expandUnassigned(
-   value: UnassignedArray,
+function expandMarkupUnexpanded(
+   value: Array<UnexpandedMarkupToken>,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
-   isElementDecl: boolean,
-   expanded: UnassignedExpanded,
+   expanded: (result: ExpandResults) => void,
 ): void {
    const peRefs: Array<ParameterEntityReferencePToken> = [];
 
    for (const element of value) {
       if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-         peRefs.push(element.token);
+         peRefs.push(element);
       }
    }
 
    if (peRefs.length === 0) {
-      expanded({ newValue: [...value], byproducts: [] });
+      expanded({ expandedTokens: [...value], byproducts: [] });
       return;
    }
 
-   const expandRef = expandPeRef.bind(undefined, expandParams, entityContextStack, isElementDecl);
+   const expandRef = expandPeRef.bind(undefined, expandParams, entityContextStack);
 
    // Process expand all the peRefs potentially very asynchronously.
    doAsyncLoop(peRefs, expandRef, (results) => {
       const allByproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
-      const newValue: UnassignedArray = [];
+      const newValue: Array<EntityValueElement> = [];
       let peRefIndex = 0;
 
       // Insert the expanded values in place of the references
@@ -102,26 +96,25 @@ function expandUnassigned(
             continue;
          }
 
-         const { unassignedFragment, byproducts } = results[peRefIndex];
+         const { expandedTokens, byproducts } = results[peRefIndex];
 
          peRefIndex++;
          allByproducts.push(...byproducts);
 
-         if (!unassignedFragment) {
+         if (!expandedTokens) {
             // For some reason couldn't expand. Just put it in the array
             newValue.push(element);
          } else {
             newValue.push(
                new ParameterEntityStartPToken(element),
-               ...unassignedFragment,
+               ...expandedTokens,
                new ParameterEntityEndPToken(element),
-
             );
          }
       }
 
-      expanded({ newValue, byproducts: allByproducts });
+      expanded({ expandedTokens: newValue, byproducts: allByproducts });
    });
 }
 
-export { expandUnassigned, UnassignedExpanded };
+export { expandMarkupUnexpanded, ExpandResults };

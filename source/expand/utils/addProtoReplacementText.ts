@@ -100,4 +100,4 @@ function addProtoReplacementText(
    });
 }
 
-export { addProtoReplacementText };
+export { addProtoReplacementText, AddProtoReplacementTextResult };

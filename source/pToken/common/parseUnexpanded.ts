@@ -4,13 +4,13 @@ import { doAsyncWhileLoop } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import { TextPToken, parseParameterEntityReference, parseText } from 'token';
 
-import { UnexpandedDetails, UnexpandedToken } from '../types';
+import { UnexpandedMarkupDetails, UnexpandedMarkupToken } from '../types';
 
 function getText(
    source: STokenSource,
-   callback: (textTokens: Array<UnexpandedToken> | undefined) => void,
+   callback: (textTokens: Array<UnexpandedMarkupToken> | undefined) => void,
 ): void {
-   doAsyncWhileLoop<Array<UnexpandedToken>>(
+   doAsyncWhileLoop<Array<UnexpandedMarkupToken>>(
       (callback) => {
          parseText(source, ["'", '"', '%', '>'], (textPToken) => {
             source.extractNoParams('peekChar', (next) => {
@@ -19,7 +19,7 @@ function getText(
                   return;
                }
 
-               const textTokens: Array<UnexpandedToken> = textPToken ? [textPToken] : [];
+               const textTokens: Array<UnexpandedMarkupToken> = textPToken ? [textPToken] : [];
                const container: { open?: SToken; text?: SToken } = {};
 
                source.extractToObject('match', [next.str], container, 'open');
@@ -43,7 +43,7 @@ function getText(
          });
       },
       (textResults) => {
-         const tokens: Array<UnexpandedToken> = [];
+         const tokens: Array<UnexpandedMarkupToken> = [];
 
          for (const result of textResults) {
             tokens.push(...result);
@@ -57,7 +57,7 @@ function getText(
 function parseUnexpanded(
    source: STokenSource,
    propName: string,
-   done: (value: UnexpandedDetails | undefined) => void,
+   done: (value: UnexpandedMarkupDetails | undefined) => void,
 ): void {
    source.extractNoParams('peekChar', (sToken) => {
       if (!sToken || sToken.str !== '%') {
@@ -65,8 +65,8 @@ function parseUnexpanded(
          return;
       }
 
-      function deliverResults(results: Array<Array<UnexpandedToken>>) {
-         const tokens: Array<UnexpandedToken> = [];
+      function deliverResults(results: Array<Array<UnexpandedMarkupToken>>) {
+         const tokens: Array<UnexpandedMarkupToken> = [];
 
          for (const result of results) {
             tokens.push(...result);
@@ -78,7 +78,7 @@ function parseUnexpanded(
          });
       }
 
-      doAsyncWhileLoop<Array<UnexpandedToken>>((callback) => {
+      doAsyncWhileLoop<Array<UnexpandedMarkupToken>>((callback) => {
          parseParameterEntityReference(source, (peRef) => {
             if (!peRef) {
                callback(undefined);
