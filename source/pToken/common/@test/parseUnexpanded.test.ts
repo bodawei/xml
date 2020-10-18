@@ -63,9 +63,9 @@ describe('parseUnexpanded (unit)', () => {
       const mockSource: MockSTokenSource = new MockSTokenSource([
          ['%', 'peekChar'],
          ['"', 'peekChar'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['hi', 'all'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['>', 'peekChar'],
       ]);
 
@@ -102,15 +102,15 @@ describe('parseUnexpanded (unit)', () => {
       const mockSource: MockSTokenSource = new MockSTokenSource([
          ['%', 'peekChar'],
          ['"', 'peekChar'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['hi', 'all'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['%', 'peekChar'],
          // outer loop
          ['"', 'peekChar'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['hi', 'all'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['>', 'peekChar'],
       ]);
 
@@ -152,14 +152,14 @@ describe('parseUnexpanded (unit)', () => {
       const mockSource: MockSTokenSource = new MockSTokenSource([
          ['%', 'peekChar'],
          ['"', 'peekChar'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['hi', 'all'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['x', 'peekChar'],
          ['"', 'peekChar'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['hi', 'all'],
-         ['"', 'match', ['"']],
+         ['"', 'match', '"'],
          ['>', 'peekChar'],
       ]);
 

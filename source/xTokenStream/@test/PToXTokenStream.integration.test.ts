@@ -2,7 +2,9 @@
 /* eslint-env jasmine */
 
 import { Range, EntityId } from 'basic';
+import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
+import { ParameterEntityReferenceXToken,    ProcessingInstructionXToken,   XmlDeclarationXToken, ExternalIdXToken, NotationDeclarationXToken,GeneralEntityReferenceXToken } from 'xToken';
 import {
    declaration,
 
@@ -17,9 +19,7 @@ import {
    ElementEndXToken,
    ElementStartXToken,
    ElementEmptyXToken,
-      GeneralEntityDeclarationXToken,
-   NotationDeclarationXToken,
-   
+   GeneralEntityDeclarationXToken,
    SpaceXToken,
    TextXToken,
    TextPToken,
@@ -27,9 +27,6 @@ import {
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
-import { ParameterEntityReferenceXToken,    ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
-import { ExternalIdXToken, GeneralEntityReferenceXToken } from 'xToken';
-import { defaultExtractors } from 'extractor';
 
 type Token = { type: string, pToken?: any };
 type TokenArray = Array<Token>;
@@ -163,7 +160,7 @@ describe('PToXTokenStream (integration)', () => {
       ], done);
    });
 
-   it('nokenizes a NOTATION declaration', (done) => {
+   it('tokenizes a NOTATION declaration', (done) => {
       expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
          new NotationDeclarationXToken('myNotation', new ExternalIdXToken('sys.xml', 'pub.xml')),
       ], done);

@@ -4,6 +4,7 @@ import { Transform } from 'stream';
 
 import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
+import { NotationDeclarationXToken } from 'xToken';
 import { SToken, strOrBlank } from 'sToken';
 import {
    isTextXToken,
@@ -39,7 +40,6 @@ import {
 
    SPACE_XTOKEN,
 
-   NotationDeclarationXToken,
    ParameterEntityReferencePToken,
    TextXToken,
    UnassignedType,

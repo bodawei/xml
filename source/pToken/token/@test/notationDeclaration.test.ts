@@ -3,9 +3,8 @@
 import { STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 // ick
-import { EXTERNAL_ID } from '../../../token/common/externalId';
 import * as parseUnexpanded from '../../common/parseUnexpanded';
-import * as externalId from '../../../token/common/externalId';
+import * as externalId from '../../common/externalId';
 
 import { UnexpandedMarkupDetails } from '../../types';
 import {
@@ -65,7 +64,7 @@ describe('notationdeDeclaration (unit)', () => {
          externalIDParseSpy = spyOn(externalId, 'parseExternalId');
          externalIDParseSpy.and.callFake(
             (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: { type: EXTERNAL_ID } });
+               cb({ externalId: {} });
             },
          );
 
@@ -118,9 +117,7 @@ describe('notationdeDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('notationName'),
                nameSpace: undefined,
-               externalId: {
-                  type: EXTERNAL_ID,
-               },
+               externalId: {},
                externalIdSpace: undefined,
                close: toSToken('>'),
             }),
@@ -190,7 +187,7 @@ describe('notationdeDeclaration (unit)', () => {
          );
          externalIDParseSpy.and.callFake(
             (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: { type: EXTERNAL_ID }, nextPropName: 'george' });
+               cb({ externalId: {}, nextPropName: 'george' });
             },
          );
          notationPToken = new NotationDeclarationPToken({
@@ -217,7 +214,7 @@ describe('notationdeDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('theName'),
                nameSpace: toSToken('\t'),
-               externalId: { type: EXTERNAL_ID },
+               externalId: {},
                externalIdSpace: undefined,
                unexpanded: {
                   tokens: [],
@@ -258,7 +255,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          externalIDParseSpy.and.callFake(
             (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: { type: EXTERNAL_ID } });
+               cb({ externalId: {} });
             },
          );
 
@@ -268,7 +265,7 @@ describe('notationdeDeclaration (unit)', () => {
                   open: toSToken('<!'),
                   name: toSToken('theName'),
                   nameSpace: toSToken('\t'),
-                  externalId: { type: EXTERNAL_ID },
+                  externalId: {},
                   externalIdSpace: toSToken('\n'),
                   unexpanded: {
                      tokens: [],
@@ -304,7 +301,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          externalIDParseSpy.and.callFake(
             (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: { type: EXTERNAL_ID } });
+               cb({ externalId: {} });
             },
          );
 
@@ -314,7 +311,7 @@ describe('notationdeDeclaration (unit)', () => {
                   open: toSToken('<!'),
                   name: toSToken('aName'),
                   nameSpace: toSToken(' '),
-                  externalId: { type: EXTERNAL_ID },
+                  externalId: {},
                   externalIdSpace: toSToken('\t\t'),
                   unexpanded: {
                      tokens: [],
@@ -350,7 +347,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          externalIDParseSpy.and.callFake(
             (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: { type: EXTERNAL_ID } });
+               cb({ externalId: {} });
             },
          );
 
@@ -360,7 +357,7 @@ describe('notationdeDeclaration (unit)', () => {
                   open: toSToken('<!'),
                   name: toSToken('aName'),
                   nameSpace: toSToken(' '),
-                  externalId: { type: EXTERNAL_ID },
+                  externalId: {},
                   externalIdSpace: toSToken('\t\t'),
                   unexpanded: {
                      tokens: [],

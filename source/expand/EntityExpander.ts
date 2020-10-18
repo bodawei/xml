@@ -1,7 +1,14 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
-import { ParseValue, ContextType, externalIdToEntityId } from 'pToken';
+import {
+   ParseValue,
+   ContextType,
+   externalIdToEntityId,
+   NOTATION_DECLARATION_PTOKEN,
+   NotationDeclarationPToken,
+   resumeParseNotationDeclaration,
+} from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ATTLISTDECL_PTOKEN_TYPE,
@@ -12,7 +19,6 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-   NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    AttListPToken,
@@ -25,7 +31,6 @@ import {
    GeneralEntityReferencePToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
-   NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    XmlError,
@@ -41,7 +46,6 @@ import {
 import { assignAttListDeclaration } from './unassigned/assignAttListDeclaration';
 import { assignElementDeclaration } from './unassigned/assignElementDeclaration';
 import { assignEntityDeclaration } from './unassigned/assignEntityDeclaration';
-import { assignNotationDeclaration } from './unassigned/assignNotationDeclaration';
 import { EntityDetails } from './utils/EntityDetails';
 import { setupConditional } from './utils/setupConditional';
 import { expandAttributes } from './utils/expandAttributes';
@@ -50,6 +54,8 @@ import { expandUnassigned } from './utils/expandUnassigned';
 import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 import { EntityProcessors, ExpandParams } from './types';
 import { EntityContextStack } from './utils/EntityContextStack';
+import { expandMarkupUnexpanded } from './utils/expandMarkupUnexpanded';
+import { entityValueToSTokenSource } from './utils/entityValueToSTokenSource';
 
 type DeclToken =
    | AttListPToken
@@ -345,6 +351,27 @@ class EntityExpander {
     * parameter entity before we can actually process the declaration.
     */
    private handleDeclaration(declarationPToken: DeclToken, handled: PTokenExpanded): void {
+      if (declarationPToken.type === NOTATION_DECLARATION_PTOKEN) {
+         expandMarkupUnexpanded(
+            declarationPToken.unexpanded ? declarationPToken.unexpanded.tokens : [], // eek
+            this.expandParams,
+            this.entityContextStack,
+            (results) => {
+               this.deliverByproducts(results.byproducts);
+               const source = entityValueToSTokenSource(
+                  results.expandedTokens || [],
+                  this.expandParams.entityId,
+               ); // THIS IS WRONG!!!!
+
+               resumeParseNotationDeclaration(source, declarationPToken, (innerResults) => {
+                  this.deliverToken(innerResults);
+                  handled();
+               });
+            },
+         );
+         return;
+      }
+
       // UNASSIGNED REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
       if (!declarationPToken.unassigned || declarationPToken.unassigned.length === 0) {
          this.processExpandedDeclaration(declarationPToken, handled);
@@ -364,8 +391,6 @@ class EntityExpander {
 
             if (declarationPToken.type === ELEMENT_DECLARATION_PTOKEN) {
                assignElementDeclaration(results.newValue, declarationPToken);
-            } else if (declarationPToken.type === NOTATION_DECLARATION_PTOKEN) {
-               assignNotationDeclaration(results.newValue, declarationPToken);
             } else if (declarationPToken.type === ATTLISTDECL_PTOKEN_TYPE) {
                assignAttListDeclaration(results.newValue, declarationPToken);
             } else {

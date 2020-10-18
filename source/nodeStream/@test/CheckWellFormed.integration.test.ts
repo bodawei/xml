@@ -3,6 +3,7 @@
 
 import { Offset, EntityId, } from 'basic';
 import { WellFormedError } from 'error';
+import { defaultExtractors } from 'extractor';
 import { PTokenStream } from 'pTokenStream';
 
 import CheckWellFormed from '../CheckWellFormed';
@@ -10,7 +11,6 @@ import CheckWellFormed from '../CheckWellFormed';
 import { expectError } from './utils';
 import { ELEMENT_START_PTOKEN, SPACE_PTOKEN } from 'token';
 import { STokenSource } from 'sToken';
-import { defaultExtractors } from 'extractor';
 
 describe('CheckWellFormed (integration)', () => {
    let pTokenStream: PTokenStream;

@@ -6,11 +6,10 @@ import { MockErrorCollector } from 'error-test';
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { EXTERNAL_ID } from '../../../token/common/externalId'; // ick
 import * as nameCheck from '../util/nameCheck'; // ick
-import * as externalId from '../../../token/common/externalId'; // ick
 import misc from '../../../token/common/misc'; // ick
 
+import * as externalId from '../../common/externalIdCheck';
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
 
 describe('notationdeDeclaration (unit)', () => {
@@ -33,7 +32,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-      spyOn(externalId, 'checkExternalIdWellFormed');
+      spyOn(externalId, 'externalIdCheck');
       spyOn(nameCheck, 'nameCheck');
       spyOn(misc, 'checkWellFormedNameRecommendation');
    });
@@ -41,7 +40,7 @@ describe('notationdeDeclaration (unit)', () => {
    it('asks the externalId module to look for well formed problems', () => {
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(externalId.checkExternalIdWellFormed).toHaveBeenCalledWith(
+      expect(externalId.externalIdCheck).toHaveBeenCalledWith(
          notationPToken.externalId,
          mockErrorCollector,
          confVer,
@@ -80,9 +79,7 @@ describe('notationdeDeclaration (unit)', () => {
          declTypeSpace: toSToken(' '),
          name: toSToken('notationName'),
          nameSpace: toSToken(' '),
-         externalId: {
-            type: EXTERNAL_ID,
-         },
+         externalId: {},
          externalIdSpace: toSToken(' '),
          close: toSToken('>'),
       });
@@ -183,9 +180,7 @@ describe('notationdeDeclaration (unit)', () => {
          declTypeSpace: toSToken(' '),
          name: toSToken('notationName'),
          nameSpace: toSToken(' '),
-         externalId: {
-            type: EXTERNAL_ID,
-         },
+         externalId: {},
          externalIdSpace: toSToken(' '),
          close: undefined,
       });
@@ -208,9 +203,7 @@ describe('notationdeDeclaration (unit)', () => {
          declTypeSpace: toSToken(' '),
          name: toSToken('notationName'),
          nameSpace: toSToken(' '),
-         externalId: {
-            type: EXTERNAL_ID,
-         },
+         externalId: {},
          externalIdSpace: toSToken(' '),
          close: toSToken('>'),
          extra: toSToken('foo'),

@@ -13,6 +13,8 @@ import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETE
 import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
+import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -22,7 +24,7 @@ import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/genera
 // </typeHack>
 
 type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
-type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
+type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>; // wy not? | ParameterEntityStartPToken|ParameterEntityEndPToken
 type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
 

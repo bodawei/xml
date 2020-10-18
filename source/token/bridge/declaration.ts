@@ -1,7 +1,6 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ParseValue } from 'pToken';
+import { ParseValue, parseNotationDeclaration, NotationDeclarationPToken } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    attListDeclaration,
@@ -9,12 +8,10 @@ import {
    parseDocTypeEnd,
    parseDocTypeStart,
    parseEntityDeclaration,
-   parseNotationDeclaration,
 
    DocTypeEndPToken,
    DocTypeStartPToken,
    GeneralEntityDeclarationPToken,
-   NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
 } from 'token';
 import { DeclarationPToken } from './baseDeclaration';

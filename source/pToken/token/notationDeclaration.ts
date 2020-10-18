@@ -5,7 +5,7 @@ import { SToken, STokenSource } from 'sToken';
 import { parseUnexpanded } from '../common/parseUnexpanded';
 
 import { DeclarationStart } from '../../token/bridge/declaration';
-import { ExternalId, parseExternalId } from '../../token/common/externalId';
+import { ExternalId, parseExternalId } from '../common/externalId';
 import { UnexpandedMarkupDetails } from '../types';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';
@@ -206,7 +206,11 @@ function resumeParseNotationDeclaration(
          resumeExternalParse(source, protoToken, notationDeclaration, deliverPToken);
       });
    } else {
-      resumeExternalParse(source, protoToken, notationDeclaration, deliverPToken);
+      if (notationDeclaration.unexpanded?.propName) {
+         resumeExternalParse(source, protoToken, notationDeclaration, deliverPToken);
+      } else {
+         deliverPToken(notationDeclaration);
+      }
    }
 }
 

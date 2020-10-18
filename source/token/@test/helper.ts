@@ -1,7 +1,7 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
-import { ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
+import {    NotationDeclarationPToken,   ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import {
    CdataPToken,
@@ -15,7 +15,6 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityReferencePToken,
    GeneralEntityStartPToken,
-   NotationDeclarationPToken,
    
    InternalSubsetStartToken,
    ExternalSubsetStartToken,
@@ -123,7 +122,7 @@ function makeNotationDeclaration(): NotationDeclarationPToken {
       declTypeSpace: toSToken(' '),
       name: toSToken('notationName'),
       nameSpace: toSToken(' '),
-      externalId: { type: 'EXTERNAL_ID' },
+      externalId: { },
       externalIdSpace: toSToken(' '),
       close: toSToken('>'),
    });

@@ -1,6 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, XMLDECL_PTOKEN, ParseValue } from 'pToken';
+// ick
+import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 
 import {
    CHARREF_PTOKEN,
@@ -10,6 +12,8 @@ import {
 
 import { CharRefXToken } from './token/CharRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
+// tsnode seems to load this file twice. here and in the index.  So, here we only load it once.  Unclear why it is doing this, though.
+import { NotationDeclarationXToken } from './index';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
@@ -22,6 +26,8 @@ function convertPTokenToXToken(pToken: ParseValue): XToken {
          return new CharRefXToken(pToken);
       case GENERAL_ENTITY_REFERENCE_PTOKEN:
          return new GeneralEntityReferenceXToken(pToken);
+      case NOTATION_DECLARATION_PTOKEN:
+         return new NotationDeclarationXToken(pToken);
       case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          return new ParameterEntityReferenceXToken(pToken);
       case PROCESSING_INSTRUCTION_PTOKEN:

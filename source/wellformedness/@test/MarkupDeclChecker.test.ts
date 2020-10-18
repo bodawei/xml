@@ -22,9 +22,7 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    ElidedEntityDeclarationPToken,
-   NotationDeclarationPToken,
    ConditionalPToken,
-   UnassignedType,
 } from 'token';
 
 import { MarkupDeclChecker } from '../MarkupDeclChecker';
@@ -254,27 +252,27 @@ describe('MarkupDeclChecker (unit)', () => {
          });
       });
 
-      it('reports an error if there is a parameter entity reference in a token in the internal subset', () => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            peRefPlus: [
-               {
-                  type: UnassignedType.REFERENCE,
-                  token: new ParameterEntityReferencePToken({
-                     open: toSToken('%'),
-                  }),
-               },
-            ],
-         });
+      // it('reports an error if there is a parameter entity reference in a token in the internal subset', () => {
+      //    const notationDeclaration = new NotationDeclarationPToken({
+      //       open: toSToken('<!'),
+      //       peRefPlus: [
+      //          {
+      //             type: UnassignedType.REFERENCE,
+      //             token: new ParameterEntityReferencePToken({
+      //                open: toSToken('%'),
+      //             }),
+      //          },
+      //       ],
+      //    });
 
-         checker.check(notationDeclaration, ec);
+      //    checker.check(notationDeclaration, ec);
 
-         expect(ec).toReportError({
-            id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
-            params: [],
-            position: notationDeclaration.open,
-         });
-      });
+      //    expect(ec).toReportError({
+      //       id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+      //       params: [],
+      //       position: notationDeclaration.open,
+      //    });
+      // });
 
       it('reports an error if there is a parameter entity reference in a parameter entity declaration in the internal subset', () => {
          const paramEntityDecl = new ParameterEntityDeclarationPToken({
@@ -481,27 +479,27 @@ describe('MarkupDeclChecker (unit)', () => {
          });
       });
 
-      it('does not report an error if there is a parameter entity reference in a token in the external subset', () => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            peRefPlus: [
-               {
-                  type: UnassignedType.REFERENCE,
-                  token: new ParameterEntityReferencePToken({
-                     open: toSToken('%'),
-                  }),
-               },
-            ],
-         });
+      // it('does not report an error if there is a parameter entity reference in a token in the external subset', () => {
+      //    const notationDeclaration = new NotationDeclarationPToken({
+      //       open: toSToken('<!'),
+      //       peRefPlus: [
+      //          {
+      //             type: UnassignedType.REFERENCE,
+      //             token: new ParameterEntityReferencePToken({
+      //                open: toSToken('%'),
+      //             }),
+      //          },
+      //       ],
+      //    });
 
-         checker.check(notationDeclaration, ec);
+      //    checker.check(notationDeclaration, ec);
 
-         expect(ec).not.toReportError({
-            id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
-            params: [],
-            position: notationDeclaration.open,
-         });
-      });
+      //    expect(ec).not.toReportError({
+      //       id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
+      //       params: [],
+      //       position: notationDeclaration.open,
+      //    });
+      // });
    });
 
    describe('ATTLIST', () => {

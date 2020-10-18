@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
+import { NotationDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
    declaration,
@@ -18,7 +19,6 @@ import {
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
-   NotationDeclarationPToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
    ExternalSubsetEndToken,
@@ -223,15 +223,15 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls notationDeclaration.pTokenToXToken()', () => {
-      const pToken = new NotationDeclarationPToken({ open: SToken.fromString('<') });
-      spyOn(pToken, 'toXToken');
+   // it('calls notationDeclaration.pTokenToXToken()', () => {
+   //    const pToken = new NotationDeclarationPToken({ open: SToken.fromString('<') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    // it('calls processingInstruction.toXToken()', () => {
    //    const pToken = new ProcessingInstructionPToken({ open: SToken.fromString('') });

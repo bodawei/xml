@@ -2,11 +2,11 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { NOTATION_DECLARATION_PTOKEN, NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
    GENERAL_ENTITY_END_PTOKEN,
-   NOTATION_DECLARATION_PTOKEN,
    CdataPToken,
    CommentPToken,
    ElementEndPToken,
@@ -16,7 +16,6 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    GeneralEntityReferencePToken,
-   NotationDeclarationPToken,
    CharDataPToken,
 } from 'token';
 

@@ -30,7 +30,6 @@ import { GeneralEntityReferencePToken } from './generalEntityReference';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
 import { GeneralEntityStartPToken, GENERAL_ENTITY_START_PTOKEN } from './marker/generalEntityStart';
 import { GeneralEntityEndPToken, GENERAL_ENTITY_END_PTOKEN } from './marker/generalEntityEnd';
-import { NotationDeclarationPToken } from './notationDeclaration';
 import { GeneralEntityDeclarationPToken } from './generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from './parameterEntityDeclaration';
 import { ParameterEntityStartPToken, PARAMETER_ENTITY_START_PTOKEN } from './marker/parameterEntityStart';
@@ -66,7 +65,6 @@ export * from './elementEnd';
 export * from './elementStart';
 export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
-export * from './notationDeclaration';
 export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
 export * from './space';
@@ -107,7 +105,6 @@ type PToken =
    | GeneralEntityStartPToken
    | InternalSubsetStartToken
    | InternalSubsetEndToken
-   | NotationDeclarationPToken
    | ParameterEntityDeclarationPToken
    | ParameterEntityEndPToken
    | ParameterEntityReferencePToken

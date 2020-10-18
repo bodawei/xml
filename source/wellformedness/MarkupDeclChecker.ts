@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import { ParseValue } from 'pToken';
+import { NotationDeclarationPToken, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 // circular dependency problem
@@ -13,10 +13,6 @@ import attListDeclaration from '../token/attListDeclaration';
 import { CONDITIONAL_PTOKEN, ConditionalPToken } from '../token/conditional';
 import { CONDITIONAL_CLOSE_PTOKEN } from '../token/conditionalClose';
 import { COMMENT_PTOKEN } from '../token/comment';
-import {
-   NOTATION_DECLARATION_PTOKEN,
-   NotationDeclarationPToken,
-} from '../token/notationDeclaration';
 import {
    PARAMETER_ENTITY_START_PTOKEN,
    ParameterEntityStartPToken,
@@ -47,6 +43,7 @@ import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart
 import attListDecl, { AttListPToken } from '../token/attListDeclaration';
 import { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken } from '../token/elementDeclaration';
 import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
+import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 
 import {
@@ -287,7 +284,9 @@ function checkDeclaration(
    //     occur in external parameter entities or to the external subset.)
    if (state === States.INTERNAL_SUBSET) {
       ec.check(
-         pToken.peRefPlus.length > 0,
+         pToken.type === NOTATION_DECLARATION_PTOKEN
+            ? pToken.unexpanded
+            : pToken.peRefPlus.length > 0,
          WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
          [],
          pToken.open,
@@ -303,7 +302,7 @@ function checkDeclaration(
             // Refactor/cleanup again getting bitten by the types in entity values
             if (
                item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN ||
-               (item.type as any) === PARAMETER_ENTITY_START_PTOKEN
+               (item.type as any) === PARAMETER_ENTITY_START_PTOKEN // TYPEHACK
             ) {
                hasPERef = true;
             }
@@ -394,6 +393,8 @@ class MarkupDeclChecker implements Checker {
             checkDeclaration(pToken as any, this.state, errorCollector);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
+            checkDeclaration(pToken, this.state, errorCollector);
+            break;
          case NOTATION_DECLARATION_PTOKEN:
             checkDeclaration(pToken, this.state, errorCollector);
             break;

@@ -32,13 +32,14 @@ class SpaceExtractor extends Extractor {
        * at the current index, anyway.
        */
       spaceRegexp.lastIndex = 0;
-      this.foundSpace = spaceRegexp.test(segment.text[segment.index]);
+      const foundSpace = spaceRegexp.test(segment.text[segment.index]);
 
-      if (!this.foundSpace) {
-         this.state = Extractor.STATE.FAILURE;
+      if (!foundSpace) {
+            this.state = this.foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
          return;
       }
 
+      this.foundSpace = foundSpace;
       spaceRegexp.lastIndex = segment.index;
       const result = spaceRegexp.exec(segment.text);
       const allSpace = result!; // typeHack Because above check garantues this is not null.

@@ -22,9 +22,9 @@ function getText(
                const textTokens: Array<UnexpandedMarkupToken> = textPToken ? [textPToken] : [];
                const container: { open?: SToken; text?: SToken } = {};
 
-               source.extractToObject('match', [next.str], container, 'open');
+               source.extractToObject('match', next.str, container, 'open');
                source.extractToObject('all', [next.str], container, 'text');
-               source.extract('match', [next.str], (close) => {
+               source.extract('match', next.str, (close) => {
                   if (container.open) {
                      textTokens.push(new TextPToken({ text: container.open }));
                   }

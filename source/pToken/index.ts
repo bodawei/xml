@@ -4,7 +4,7 @@ import { ConformanceVersion, EntityId } from 'basic';
 import { PToken as PTokenClassic } from 'token';
 
 import { InstructionStart } from './bridge/instruction';
-// import { NotationDeclarationPToken } from './token/notationDeclaration';
+import { NotationDeclarationPToken } from './token/notationDeclaration';
 import { ProcessingInstructionPToken } from './token/processingInstruction';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
@@ -24,6 +24,7 @@ type ParseValue =
    | PToken
    | ConformanceVersion
    | EntityId
+   | NotationDeclarationPToken
    | ProcessingInstructionPToken
    | TextDeclarationPToken
    | XmlDeclarationPToken;

@@ -7,7 +7,7 @@ import { strOrBlank } from 'sToken';
 
 import { nameCheck } from './util/nameCheck';
 
-import { checkExternalIdWellFormed } from '../../token/common/externalId'; // ick
+import { externalIdCheck } from '../common/externalIdCheck'; // ick
 import misc from '../../token/common/misc'; // ick
 
 const WARN = XmlWarning.ID;
@@ -45,7 +45,7 @@ function notationDeclarationCheck(
    ec.check(!pToken.nameSpace, WFEID.NOTATIONDECL_NAME_NO_SPACE, [nameText]);
 
    ec.check(!pToken.externalId, WFEID.NOTATIONDECL_NO_EXTERNALID);
-   checkExternalIdWellFormed(pToken.externalId, ec, confVer);
+   externalIdCheck(pToken.externalId, ec, confVer);
 
    ec.setPos(pToken.externalIdSpace);
 

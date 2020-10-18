@@ -1,7 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 // ick
-import { ExternalId, TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
+import { TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
+import { ExternalId } from 'pToken';
 import { LiteralValuePToken } from '../../token/common/literal';
 
 const EXTERNAL_ID_XTOKEN = 'EXTERNAL_ID_XTOKEN';

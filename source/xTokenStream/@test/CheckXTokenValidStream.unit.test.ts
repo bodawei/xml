@@ -33,7 +33,7 @@ import {
    InternalSubsetEndToken,
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
-   NotationDeclarationXToken,
+   
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    
@@ -44,7 +44,7 @@ import {
    UnassignedType,
 } from 'token';
 import { makeDocTypeEnd } from 'token-test';
-import { CharRefXToken, ParameterEntityReferenceXToken,  GeneralEntityReferenceXToken,  ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
+import { CharRefXToken, NotationDeclarationXToken,ParameterEntityReferenceXToken,  GeneralEntityReferenceXToken,  ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
 
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';

@@ -131,6 +131,29 @@ describe('SpaceExtractor', () => {
          });
       });
 
+      it('returns all spaces and ranges across multiple segments', () => {
+         extractor.process(new Segment(' ', segmentRange));
+         extractor.process(new Segment('"'));
+
+         expect(extractor.finish()).toEqual({
+            text: ' ',
+            original: ' ',
+            segments: [ {
+               chars: 1,
+               rows: 0,
+               columns: 1,
+               segment: {
+                  range: segmentRange,
+               },
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: new Segment('"'),
+            } ],
+         });
+      });
+
       it('returns all spaces and ranges across multiple segments and is terminated by non-space', () => {
          const segment = new Segment('\t\tstuff');
          extractor.process(new Segment('  ', segmentRange));

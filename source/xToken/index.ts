@@ -23,6 +23,10 @@ export { EXTERNAL_ID_XTOKEN, ExternalIdXToken } from './token/externalIdXToken';
 
 // Fully converted
 export {
+   NOTATION_DECLARATION_XTOKEN,
+   NotationDeclarationXToken,
+} from './token/notationdeclarationXToken';
+export {
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionXToken,
 } from './token/processingInstructionXToken';

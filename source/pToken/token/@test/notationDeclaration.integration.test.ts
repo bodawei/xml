@@ -5,7 +5,6 @@ import { STokenSource, toSToken } from 'sToken';
 import { ParameterEntityReferencePToken, TextPToken } from 'token';
 
 import { DeclarationStart } from '../../../token/bridge/declaration';
-import { EXTERNAL_ID } from '../../../token/common/externalId';
 
 import {
    NotationDeclarationPToken,
@@ -33,7 +32,7 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          parseNotationDeclaration(source, declarationStart, (parsing) => {
-            expect(parsing.externalId?.type).toEqual(EXTERNAL_ID);
+            expect(parsing.externalId?.externalType?.str).toEqual('SYSTEM');
             done();
          });
       });
@@ -78,13 +77,16 @@ describe('notationDeclaration (integration)', () => {
                   open: toSToken('<!'),
                   name: toSToken('notationName'),
                   nameSpace: toSToken(' '),
-                  externalId: {
-                     type: 'EXTERNAL_ID',
-                     externalType: undefined,
-                     externalTypeSpace: undefined,
-                     public: undefined,
-                     publicSpace: undefined,
-                     system: undefined,
+                  externalId: undefined,
+                  unexpanded: {
+                     propName: 'externalType',
+                     tokens: [
+                        new ParameterEntityReferencePToken({
+                           open: toSToken('%'),
+                           name: toSToken('foo'),
+                           close: toSToken(';'),
+                        }),
+                     ],
                   },
                   close: toSToken('>'),
                }),
@@ -120,7 +122,6 @@ describe('notationDeclaration (integration)', () => {
                   name: toSToken('foo'),
                   nameSpace: toSToken('   '),
                   externalId: {
-                     type: EXTERNAL_ID,
                      externalType: toSToken('PUBLIC'),
                      externalTypeSpace: toSToken(' '),
                      public: {

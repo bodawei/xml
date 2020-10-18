@@ -6,8 +6,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [
-   ],
+   includedIds: [],
    excludedIds: [
       // Introduced problem.  processing version and version in actual doc do not match
       'rmt-034', //XMLDECL_VERSION_INVALD
