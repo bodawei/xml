@@ -26,13 +26,13 @@ class ExternalId {
 
    public readonly system?: LiteralPToken;
 
-   constructor(source: ExternalId | RawExternalId, other: RawExternalId = {}) {
-      this.externalType = 'externalType' in other ? other.externalType : source.externalType;
+   constructor(base: ExternalId | RawExternalId, other: RawExternalId = {}) {
+      this.externalType = 'externalType' in other ? other.externalType : base.externalType;
       this.externalTypeSpace =
-         'externalTypeSpace' in other ? other.externalTypeSpace : source.externalTypeSpace;
-      this.public = 'public' in other ? other.public : source.public;
-      this.publicSpace = 'publicSpace' in other ? other.publicSpace : source.publicSpace;
-      this.system = 'system' in other ? other.system : source.system;
+         'externalTypeSpace' in other ? other.externalTypeSpace : base.externalTypeSpace;
+      this.public = 'public' in other ? other.public : base.public;
+      this.publicSpace = 'publicSpace' in other ? other.publicSpace : base.publicSpace;
+      this.system = 'system' in other ? other.system : base.system;
    }
 }
 
@@ -55,25 +55,25 @@ interface ParsedExternalId {
    [13] PubidChar     ::= #x20 | #xD | #xA | [a-zA-Z0-9] |
                            [-'()+,./:=?;!*#@$_%]
  PARAM
-   source: A STokenSource to read from
+   base: A STokenSource to read from
    terminators: An array of characters this should terminate parsing
       of the ID.
    deliverPTokenPart: Callback to deliver the PToken compatible version
 \**********************************************************************/
 
 function parseSystem(
-   source: STokenSource,
+   base: STokenSource,
    allTerminators: Array<string>,
    externalId: RawExternalId,
    deliverExtId: (result: ParsedExternalId) => void,
 ): void {
-   source.extract('peekChar', allTerminators, (sToken) => {
+   base.extract('peekChar', allTerminators, (sToken) => {
       if (strOrBlank(sToken) === '%') {
          deliverExtId({ nextPropName: 'system', externalId: new ExternalId(externalId) });
          return;
       }
 
-      literal.parse(source, undefined, (modifiedPToken) => {
+      literal.parse(base, undefined, (modifiedPToken) => {
          if (modifiedPToken) {
             externalId.system = modifiedPToken;
          }
@@ -84,33 +84,33 @@ function parseSystem(
 }
 
 function parsePublic(
-   source: STokenSource,
+   base: STokenSource,
    externalId: RawExternalId,
    allTerminators: Array<string>,
    deliverExtId: (result: ParsedExternalId) => void,
 ): void {
-   source.extract('peekChar', allTerminators, (sToken) => {
+   base.extract('peekChar', allTerminators, (sToken) => {
       if (strOrBlank(sToken) === '%') {
          deliverExtId({ nextPropName: 'public', externalId: new ExternalId(externalId) });
          return;
       }
 
-      literal.parse(source, undefined, (alternatePToken) => {
+      literal.parse(base, undefined, (alternatePToken) => {
          if (!alternatePToken) {
             deliverExtId({ externalId: new ExternalId(externalId) });
             return;
          }
 
          externalId.public = alternatePToken;
-         source.extractToObjectNoParams('space', externalId, 'publicSpace');
+         base.extractToObjectNoParams('space', externalId, 'publicSpace');
 
-         parseSystem(source, allTerminators, externalId, deliverExtId);
+         parseSystem(base, allTerminators, externalId, deliverExtId);
       });
    });
 }
 
 function parseExternalId(
-   source: STokenSource,
+   base: STokenSource,
    terminators: Array<string>,
    allowPERefs: boolean,
    deliverExtId: (result: ParsedExternalId) => void,
@@ -118,13 +118,13 @@ function parseExternalId(
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
    const extIdPToken: RawExternalId = {};
 
-   source.extract('peekChar', allTerminators, (sToken) => {
+   base.extract('peekChar', allTerminators, (sToken) => {
       if (strOrBlank(sToken) === '%') {
          deliverExtId({ nextPropName: 'externalType' });
          return;
       }
 
-      source.extract('peekWord', allTerminators, (sToken) => {
+      base.extract('peekWord', allTerminators, (sToken) => {
          const capitalType = sToken && sToken.str.toUpperCase();
 
          if (!capitalType || ALLOWED_TYPES.indexOf(capitalType) === -1) {
@@ -132,13 +132,13 @@ function parseExternalId(
             return;
          }
 
-         source.extractToObject('word', allTerminators, extIdPToken, 'externalType');
-         source.extractToObjectNoParams('space', extIdPToken, 'externalTypeSpace');
+         base.extractToObject('word', allTerminators, extIdPToken, 'externalType');
+         base.extractToObjectNoParams('space', extIdPToken, 'externalTypeSpace');
 
          if (capitalType === 'PUBLIC') {
-            parsePublic(source, extIdPToken, allTerminators, deliverExtId);
+            parsePublic(base, extIdPToken, allTerminators, deliverExtId);
          } else {
-            parseSystem(source, allTerminators, extIdPToken, deliverExtId);
+            parseSystem(base, allTerminators, extIdPToken, deliverExtId);
          }
       });
    });

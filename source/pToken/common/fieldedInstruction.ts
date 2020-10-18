@@ -44,6 +44,12 @@ interface InstructionField {
    readonly valueSpace?: SToken;
 }
 
+function isNotInstructionStart(
+   item: InstructionStart | FieldedInstruction,
+): item is FieldedInstruction {
+   return 'fields' in item || 'close' in item;
+}
+
 class FieldedInstruction {
    public readonly open: SToken;
 
@@ -59,11 +65,18 @@ class FieldedInstruction {
 
    constructor(base: InstructionStart | FieldedInstruction, other: RawFieldedInstruction = {}) {
       this.open = other.open ?? base.open;
-      this.openSpace = other.openSpace ?? base.openSpace;
-      this.target = other.target ?? base.target;
-      this.targetSpace = other.targetSpace ?? base.targetSpace;
-      this.fields = other.fields ?? ('fields' in base ? base.fields : []);
-      this.close = other.close ?? ('close' in base ? base.close : undefined);
+      this.openSpace = 'openSpace' in other ? other.openSpace : base.openSpace;
+      this.target = 'target' in other ? other.target : base.target;
+      this.targetSpace = 'targetSpace' in other ? other.targetSpace : base.targetSpace;
+      this.fields = [];
+
+      if (isNotInstructionStart(base)) {
+         this.fields = base.fields;
+         this.close = base.close;
+      }
+
+      this.fields = 'fields' in other ? other.fields || [] : this.fields;
+      this.close = 'close' in other ? other.close : this.close;
    }
 }
 

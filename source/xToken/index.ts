@@ -19,7 +19,7 @@ export {
    ConditionalXToken,
    conditionalSectionPTokenToXToken,
 } from './token/conditionalSection';
-export { EXTERNAL_ID_XTOKEN, ExternalIdXToken } from './token/externalIdXToken';
+export { ExternalIdXToken } from './common/externalIdXToken';
 
 // Fully converted
 export {

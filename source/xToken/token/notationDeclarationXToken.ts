@@ -3,7 +3,7 @@
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ExternalIdXToken } from './externalIdXToken';
+import { ExternalIdXToken } from '../common/externalIdXToken';
 
 const NOTATION_DECLARATION_XTOKEN = 'NOTATION_DECLARATION_XTOKEN';
 

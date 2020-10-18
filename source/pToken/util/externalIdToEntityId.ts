@@ -1,8 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { EntityId } from 'basic';
-import { ExternalId, TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
+//ick
+import { TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
 import { LiteralValuePToken } from '../../token/common/literal';
+
+import { ExternalId } from '../common/externalId';
 
 function valueToString(value: LiteralValuePToken = []): string {
    const pieces = [];
@@ -15,6 +18,8 @@ function valueToString(value: LiteralValuePToken = []): string {
          case CHARREF_PTOKEN:
             pieces.push(piece.char);
             break;
+         default:
+         // ignore the others
       }
    }
 

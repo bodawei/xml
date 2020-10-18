@@ -17,6 +17,12 @@ interface RawPI {
    close?: SToken;
 }
 
+function isNotInstructionStart(
+   item: InstructionStart | ProcessingInstructionPToken,
+): item is ProcessingInstructionPToken {
+   return 'instruction' in item || 'close' in item;
+}
+
 class ProcessingInstructionPToken {
    public readonly type: typeof PROCESSING_INSTRUCTION_PTOKEN = PROCESSING_INSTRUCTION_PTOKEN;
 
@@ -34,12 +40,17 @@ class ProcessingInstructionPToken {
 
    constructor(param: InstructionStart | ProcessingInstructionPToken, other: RawPI = {}) {
       this.open = other.open ?? param.open;
-      this.openSpace = other.openSpace ?? param.openSpace;
-      this.target = other.target ?? param.target;
-      this.targetSpace = other.targetSpace ?? param.targetSpace;
-      this.instruction =
-         other.instruction ?? ('instruction' in param ? param.instruction : undefined);
-      this.close = other.close ?? ('close' in param ? param.close : undefined);
+      this.openSpace = 'openSpace' in other ? other.openSpace : param.openSpace;
+      this.target = 'target' in other ? other.target : param.target;
+      this.targetSpace = 'targetSpace' in other ? other.targetSpace : param.targetSpace;
+
+      if (isNotInstructionStart(param)) {
+         this.instruction = param.instruction;
+         this.close = param.close;
+      }
+
+      this.instruction = 'instruction' in other ? other.instruction : this.instruction;
+      this.close = 'close' in other ? other.close : this.close;
    }
 }
 

@@ -3,9 +3,9 @@
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 // ick
-import { EXTERNAL_ID, TextPToken } from 'token';
+import { TextPToken } from 'token';
 
-import { ExternalIdXToken } from '../externalIdXToken';
+import { ExternalIdXToken } from '../../common/externalIdXToken';
 import {
    NOTATION_DECLARATION_XTOKEN,
    NotationDeclarationXToken,
@@ -21,7 +21,6 @@ describe('NotationDeclarationXToken', () => {
          name: toSToken('notationName'),
          nameSpace: toSToken(' '),
          externalId: {
-            type: EXTERNAL_ID,
             system: {
                value: [new TextPToken({ text: toSToken('system.xml') })],
             },
@@ -45,7 +44,6 @@ describe('NotationDeclarationXToken', () => {
    it('returns a notation declaration with a blank name if there is no name', () => {
       const notationPToken = new NotationDeclarationPToken({
          open: toSToken('<!'),
-
          openSpace: undefined,
          declType: toSToken('NOTATION'),
          declTypeSpace: toSToken(' '),

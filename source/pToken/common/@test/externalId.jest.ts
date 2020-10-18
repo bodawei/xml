@@ -9,7 +9,7 @@ import { parseExternalId } from '../externalId';
 
 jest.mock('../../../token/common/literal');
 
-fdescribe('parseExternalId()', () => {
+describe('parseExternalId()', () => {
    let mockSource: MockSTokenSource;
    let callback: jest.Mock;
    let literalParse: jest.Mock;

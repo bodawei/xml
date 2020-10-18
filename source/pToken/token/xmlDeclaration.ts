@@ -27,6 +27,12 @@ interface RawXmlDeclaration {
    close?: SToken;
 }
 
+function isNotInstructionStart(
+   item: InstructionStart | FieldedInstruction | XmlDeclarationPToken,
+): item is FieldedInstruction | XmlDeclarationPToken {
+   return 'fields' in item || 'close' in item;
+}
+
 class XmlDeclarationPToken {
    public readonly type: typeof XMLDECL_PTOKEN = XMLDECL_PTOKEN;
 
@@ -47,11 +53,18 @@ class XmlDeclarationPToken {
       other: RawXmlDeclaration = {},
    ) {
       this.open = other.open ?? base.open;
-      this.openSpace = other.openSpace ?? base.openSpace;
-      this.target = other.target ?? base.target;
-      this.targetSpace = other.targetSpace ?? base.targetSpace;
-      this.fields = other.fields ?? ('fields' in base ? base.fields : []);
-      this.close = other.close ?? ('close' in base ? base.close : undefined);
+      this.openSpace = 'openSpace' in other ? other.openSpace : base.openSpace;
+      this.target = 'target' in other ? other.target : base.target;
+      this.targetSpace = 'targetSpace' in other ? other.targetSpace : base.targetSpace;
+      this.fields = [];
+
+      if (isNotInstructionStart(base)) {
+         this.fields = base.fields;
+         this.close = base.close;
+      }
+
+      this.fields = 'fields' in other ? other.fields || [] : this.fields;
+      this.close = 'close' in other ? other.close : this.close;
    }
 }
 

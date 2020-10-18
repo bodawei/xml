@@ -22,6 +22,12 @@ interface RawTextDeclaration {
    close?: SToken;
 }
 
+function isNotInstructionStart(
+   item: InstructionStart | FieldedInstruction | TextDeclarationPToken,
+): item is FieldedInstruction | TextDeclarationPToken {
+   return 'fields' in item || 'close' in item;
+}
+
 class TextDeclarationPToken {
    public readonly type: typeof TEXTDECL_PTOKEN = TEXTDECL_PTOKEN;
 
@@ -38,15 +44,22 @@ class TextDeclarationPToken {
    public readonly close?: SToken;
 
    constructor(
-      param: TextDeclarationPToken | InstructionStart | FieldedInstruction,
+      base: TextDeclarationPToken | InstructionStart | FieldedInstruction,
       other: RawTextDeclaration = {},
    ) {
-      this.open = other?.open ?? param.open;
-      this.openSpace = other?.openSpace ?? param.openSpace;
-      this.target = other?.target ?? param.target;
-      this.targetSpace = other?.targetSpace ?? param.targetSpace;
-      this.fields = other.fields ?? ('fields' in param ? param.fields : []);
-      this.close = other.close ?? ('close' in param ? param.close : undefined);
+      this.open = other.open ?? base.open;
+      this.openSpace = 'openSpace' in other ? other.openSpace : base.openSpace;
+      this.target = 'target' in other ? other.target : base.target;
+      this.targetSpace = 'targetSpace' in other ? other.targetSpace : base.targetSpace;
+      this.fields = [];
+
+      if (isNotInstructionStart(base)) {
+         this.fields = base.fields;
+         this.close = base.close;
+      }
+
+      this.fields = 'fields' in other ? other.fields || [] : this.fields;
+      this.close = 'close' in other ? other.close : this.close;
    }
 }
 

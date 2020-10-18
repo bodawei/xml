@@ -2,11 +2,10 @@
 
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
+import { ExternalId } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
+//ik
 import { TEXT_PTOKEN } from 'token';
-
-import { ExternalId } from '../../pToken/common/externalId'; // ick
-
 import literal from '../../token/common/literal'; // ick
 
 /**********************************************************************\

@@ -2,18 +2,13 @@
 
 import { toSToken } from 'sToken';
 // ick
-import { EXTERNAL_ID, TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
+import { TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
 
-import { EXTERNAL_ID_XTOKEN, ExternalIdXToken } from '../externalIdXToken';
+import { ExternalIdXToken } from '../externalIdXToken';
 
 describe('ExternalIdXToken', () => {
-   it('exports a EXTERNAL_ID_XTOKEN constant', () => {
-      expect(EXTERNAL_ID_XTOKEN).toEqual('EXTERNAL_ID_XTOKEN');
-   });
-
    it('converts an ExternalId to an ExternalIdXToken', () => {
       const token = new ExternalIdXToken({
-         type: EXTERNAL_ID,
          externalType: toSToken('PUBLIC'),
          system: {
             value: [

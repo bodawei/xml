@@ -1,11 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { ExternalId } from 'pToken';
 // ick
 import { TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
-import { ExternalId } from 'pToken';
 import { LiteralValuePToken } from '../../token/common/literal';
-
-const EXTERNAL_ID_XTOKEN = 'EXTERNAL_ID_XTOKEN';
 
 function valueToString(value: LiteralValuePToken = []): string {
    const pieces = [];
@@ -31,8 +29,6 @@ function valueToString(value: LiteralValuePToken = []): string {
  * embedded in one of the relevant markup declaration tokens.
  */
 class ExternalIdXToken {
-   readonly type: typeof EXTERNAL_ID_XTOKEN = EXTERNAL_ID_XTOKEN;
-
    readonly systemId: string;
 
    readonly publicId?: string;
@@ -50,4 +46,4 @@ class ExternalIdXToken {
    }
 }
 
-export { EXTERNAL_ID_XTOKEN, ExternalIdXToken };
+export { ExternalIdXToken };

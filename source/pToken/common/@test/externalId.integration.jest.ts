@@ -6,7 +6,7 @@ import { TextPToken } from 'token';
 
 import { parseExternalId, ExternalId } from '../externalId';
 
-fdescribe('parseExternalId()', () => {
+describe('parseExternalId()', () => {
    let source: STokenSource;
 
    beforeEach(() => {
