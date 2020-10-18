@@ -93,9 +93,9 @@ class NotationDeclarationPToken {
       this.externalId = 'externalId' in other ? other.externalId : this.externalId;
       this.externalIdSpace =
          'externalIdSpace' in other ? other.externalIdSpace : this.externalIdSpace;
-      this.close = 'close' in other ? other.close : this.close;
       this.unexpanded = 'unexpanded' in other ? other.unexpanded : this.unexpanded;
       this.extra = 'extra' in other ? other.extra : this.extra;
+      this.close = 'close' in other ? other.close : this.close;
    }
 }
 

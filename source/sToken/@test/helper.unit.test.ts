@@ -143,7 +143,7 @@ describe('SToken test utils', () => {
          expect(() => {
             mock.extract('word', [], () => {});
             mock.respondInAsyncTime();
-         }).toThrowError('Type of call did not match expectation. Expected "all" but got "word".');
+         }).toThrowError('Type of call did not match expectation. Expected all (one, undefined) but got "word".');
       });
 
       it('throws an error if the operation param do not match', () => {

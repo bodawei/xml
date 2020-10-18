@@ -75,14 +75,14 @@ class RangeMaker {
   the asynchronous behavior of a STokenSource more tersely in tests.
 \**********************************************************************/
 
-type PeekValue = { type: typeof PEEK, peekedValue: string | void };
-type SimpleMockValue = void | string | PeekValue;
+type PeekValue = { type: typeof PEEK, peekedValue: string | undefined };
+type SimpleMockValue = undefined | string | PeekValue;
 type TupleMockValue = [SimpleMockValue, string, any] | [SimpleMockValue, string];
 type MockValues = Array<SimpleMockValue | TupleMockValue>;
 type PrepValue = {
    type: string,
-   token: SToken | void,
-   peekedValue?: string | void,
+   token: SToken | undefined,
+   peekedValue?: string | undefined,
    param?: any
 };
 type PreparedMockValues = Array<PrepValue>;
@@ -91,7 +91,7 @@ class MockSTokenSource extends STokenSource {
    public expectedValues: PreparedMockValues;
    public queuedCalls: Array<any>;
 
-   public static PEEK = (peekedValue: string | void): PeekValue => {
+   public static PEEK = (peekedValue: string | undefined): PeekValue => {
       return {
          type: PEEK,
          peekedValue,
@@ -258,7 +258,7 @@ class MockSTokenSource extends STokenSource {
 
       if (expected.type !== ANY && expected.type !== actualCall.type) {
          throw new Error('Type of call did not match expectation. ' +
-            `Expected "${expected.type}" but got "${actualCall.type}".`);
+            `Expected ${expected.type} (${expected.token?.str}, ${expected.param}) but got "${actualCall.type}".`);
       }
 
       if (expected.param) {
