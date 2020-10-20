@@ -8,7 +8,7 @@ import { DeclarationStart } from 'token';
 
 import { AttListDeclarationXToken } from '../attListDeclarationXToken';
 
-fdescribe('attListDeclarationXToken (integration)', () => {
+describe('attListDeclarationXToken (integration)', () => {
    let declarationStart: DeclarationStart;
 
    beforeEach(() => {

@@ -87,8 +87,12 @@ class AttListDeclarationPToken {
       base: AttListDeclarationPToken | RawAttListDeclaration | DeclarationStart,
       other: AttListDeclarationProps = {},
    ) {
-      this.open = other.open || base.open;
       let attDefs: Array<AttDefinitionProps> = [];
+
+      this.open = other.open || base.open;
+      this.openSpace = 'openSpace' in other ? other.openSpace : base.openSpace;
+      this.declType = 'declType' in other ? other.declType : base.declType;
+      this.declTypeSpace = 'declTypeSpace' in other ? other.declTypeSpace : base.declTypeSpace;
 
       if (isNotDeclarationStart(base)) {
          this.elementName = base.elementName;
@@ -356,4 +360,38 @@ function parseAttListDeclaration(
    });
 }
 
+/*
+
+reparse:
+   Get attributs
+   get lastAttribute
+
+   case 'elementName'
+      parseElementName(source, protoToken, (withName) => {
+         parseAttribute
+
+   // I think you can make this the backbone routine. It just calls itself with name.
+   case 'name'
+         parseAttribute(attributes)
+            // then type
+   case 'type'
+         parseAttributeType(attributes, attribute)
+            // then maybe enumeration
+            // then default
+   case 'defaultType'
+         parseAttDefaultType(source, attWithType, (withDefault) => {
+                     if (!withDefault.defaultType   || isFixed) {
+                        parseAttValue(source, withDefault, () => {
+                        return;
+                     }
+
+                     parseAttribute(source, protoToken, done);
+                  });
+
+   case 'value'
+         parseAttDefaultType(source, attWithType, (withDefault) => {
+                           parseAttribute(source, protoToken, done);
+
+-- capture extra
+                  */
 export { ATTLIST_DECLARATION_PTOKEN, AttListDeclarationPToken, parseAttListDeclaration };

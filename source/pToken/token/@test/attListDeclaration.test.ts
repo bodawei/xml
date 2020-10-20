@@ -79,7 +79,11 @@ describe('AttListDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -97,7 +101,7 @@ describe('AttListDeclaration (unit)', () => {
             [undefined, 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, callback);
+         parseAttListDeclaration(mockSource, { open: toSToken('<!') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toHaveBeenCalledWith(
@@ -125,7 +129,11 @@ describe('AttListDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, callback);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            callback,
+         );
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless(aldPToken);
@@ -151,7 +159,11 @@ describe('AttListDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -204,7 +216,11 @@ describe('AttListDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -259,7 +275,11 @@ describe('AttListDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(aldPToken);
@@ -283,7 +303,11 @@ describe('AttListDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -326,7 +350,11 @@ describe('AttListDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -372,7 +400,11 @@ describe('AttListDeclaration (unit)', () => {
             },
          );
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -412,7 +444,11 @@ describe('AttListDeclaration (unit)', () => {
             done();
          });
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, callback);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            callback,
+         );
          mockSource.respondInAsyncTime();
 
          const expectedArgs = parseSpy.calls.argsFor(0);
@@ -440,7 +476,11 @@ describe('AttListDeclaration (unit)', () => {
             done();
          });
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -479,7 +519,11 @@ describe('AttListDeclaration (unit)', () => {
             },
          );
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -517,7 +561,11 @@ describe('AttListDeclaration (unit)', () => {
             done();
          });
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, callback);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            callback,
+         );
          mockSource.respondInAsyncTime();
 
          const expectedArgs = parseSpy.calls.argsFor(0);
@@ -540,7 +588,11 @@ describe('AttListDeclaration (unit)', () => {
             [undefined, 'match', '>'],
          ]);
 
-         parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+         parseAttListDeclaration(
+            mockSource,
+            { open: toSToken('<!'), declType: toSToken('ATTLIST') },
+            parseCb,
+         );
          mockSource.respondInAsyncTime();
 
          expect(actual).toEqualRangeless(
@@ -566,7 +618,7 @@ describe('AttListDeclaration (unit)', () => {
             );
             const mockSource = new MockSTokenSource(['>']);
 
-            parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+            parseAttListDeclaration(mockSource, { open: toSToken('<!') }, parseCb);
             mockSource.respondInAsyncTime();
 
             expect(actual).toEqualRangeless(
@@ -598,7 +650,7 @@ describe('AttListDeclaration (unit)', () => {
                ['>', 'match', '>'],
             ]);
 
-            parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+            parseAttListDeclaration(mockSource, { open: toSToken('<!') }, parseCb);
             mockSource.respondInAsyncTime();
 
             expect(actual).toEqualRangeless(
@@ -634,7 +686,7 @@ describe('AttListDeclaration (unit)', () => {
                ['>', 'match', '>'],
             ]);
 
-            parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+            parseAttListDeclaration(mockSource, { open: toSToken('<!') }, parseCb);
             mockSource.respondInAsyncTime();
 
             expect(actual).toEqualRangeless(
@@ -679,7 +731,7 @@ describe('AttListDeclaration (unit)', () => {
                ['>', 'match', '>'],
             ]);
 
-            parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+            parseAttListDeclaration(mockSource, { open: toSToken('<!') }, parseCb);
             mockSource.respondInAsyncTime();
 
             expect(actual).toEqualRangeless(
@@ -729,7 +781,7 @@ describe('AttListDeclaration (unit)', () => {
                ['>', 'match', '>'],
             ]);
 
-            parseAttListDeclaration(mockSource, { open: SToken.fromString('<!') }, parseCb);
+            parseAttListDeclaration(mockSource, { open: toSToken('<!') }, parseCb);
             mockSource.respondInAsyncTime();
 
             expect(actual).toEqualRangeless(
