@@ -35,7 +35,7 @@ import {
    
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
-import { gatherStream } from './beforeEach';
+import { gatherStream } from './helpers';
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;

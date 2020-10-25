@@ -18,7 +18,18 @@ module.exports = {
   // collectCoverage: false,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  // collectCoverageFrom: undefined,
+  collectCoverageFrom: [
+     'source/attFixer/**/*.ts',
+     '!source/attFixer/**/@test/**/*.ts',
+     'source/pToken/**/*.ts',
+     '!source/pToken/**/@test/**/*.ts',
+     'source/stringify/**/*.ts',
+     '!source/stringify/**/@test/**/*.ts',
+     'source/wellformedness/**/*.ts',
+     '!source/wellformedness/**/@test/**/*.ts',
+     'source/xToken/**/*.ts',
+     '!source/xToken/**/@test/**/*.ts',
+  ],
 
   // The directory where Jest should output its coverage files
   coverageDirectory: "temp/coverage-jest",
@@ -29,7 +40,7 @@ module.exports = {
   // ],
 
   // Indicates which provider should be used to instrument code for coverage
-  coverageProvider: "v8",
+  coverageProvider: "babel", // v8 or babel
 
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [
@@ -149,8 +160,9 @@ module.exports = {
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
+     './build/beforeJest.ts',
      './source/error/@test/beforeJest.ts',
-     './source/token/@test/beforeEach.jest-start.ts',
+     './source/token/@test/beforeJest.ts',
   ],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.

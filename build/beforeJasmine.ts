@@ -2,9 +2,9 @@
 
 /* eslint-env jasmine */
 
-function toEqualShallowDifferent(util, customEqualityTesters) {
+function toEqualShallowDifferent(util: any, customEqualityTesters: any) {
    return {
-      compare: (actual, expected) => {
+      compare: (actual: any, expected: any) => {
          let pass = actual !== expected;
          let message;
 
@@ -25,14 +25,14 @@ function toEqualShallowDifferent(util, customEqualityTesters) {
    };
 }
 
-function toEqualProps(util, customEqualityTesters) {
+function toEqualProps(util: any, customEqualityTesters: any) {
    return {
-      compare: (actual, expected) => {
-         const mismatchedActual = {};
-         const mismatchedExpected = {};
-         const actualSubset = {};
+      compare: (actual: any, expected: any) => {
+         const mismatchedActual: Record<any, any> = {};
+         const mismatchedExpected: Record<any, any> = {};
+         const actualSubset: Record<any, any> = {};
          let pass = true;
-         let message;
+         let message: string;
 
          for (const propName in expected) {
             actualSubset[propName] = actual[propName];
@@ -60,13 +60,13 @@ function toEqualProps(util, customEqualityTesters) {
    };
 }
 
-function toEqualShape(util, customEqualityTesters) {
+function toEqualShape(util: any, customEqualityTesters: any) {
    return {
-      compare: (actual, expected) => {
+      compare: (actual: any, expected: any) => {
          let pass = true;
          let message = '';
-         const mismatch = {};
-         const extra = [];
+         const mismatch: Record<any, any> = {};
+         const extra: Array<any> = [];
 
          const actualKeys = Object.keys(actual);
          const expectedKeys = Object.keys(expected);
@@ -124,7 +124,7 @@ function toEqualShape(util, customEqualityTesters) {
 
 function toBeInstanceOf() {
    return {
-      compare: (actual, expected) => {
+      compare: (actual: any, expected: any) => {
          if (typeof expected !== 'function') {
             throw new Error('Must pass a function to the second argument of the .toBeInstanceOf() jasmine matcher.');
          }
@@ -150,42 +150,6 @@ function toBeInstanceOf() {
    };
 }
 
-console.json = function json() {
-   if (arguments.length === 1) {
-      console.debug(JSON.stringify(arguments[0], undefined, 3));
-      return;
-   }
-
-   for (let index = 0; index < arguments.length; index++) {
-      console.debug(`ARG ${index}: ${JSON.stringify(arguments[index], undefined, 3)}`);
-   }
-};
-
-// setup console reporter
-// const JasmineConsoleReporter = require('jasmine-console-reporter');
-// const reporter = new JasmineConsoleReporter({
-//     colors: 1,           // (0|false)|(1|true)|2
-//     cleanStack: 1,       // (0|false)|(1|true)|2|3
-//     verbosity: 4,        // (0|false)|1|2|(3|true)|4|Object
-//     listStyle: 'indent', // "flat"|"indent"
-//     timeUnit: 'ms',      // "ms"|"ns"|"s"
-//     timeThreshold: { ok: 500, warn: 1000, ouch: 3000 }, // Object|Number
-//     activity: true,
-//     emoji: true,         // boolean or emoji-map object
-//     beep: true
-// });
-
-// const SpecReporter = require('jasmine-spec-reporter').SpecReporter;
-
-// jasmine.getEnv().addReporter(new SpecReporter({
-//    spec: {
-//       displayPending: true,
-//     },
-//     summary: {
-//       displayDuration: true,
-//     }
-//   }));
-
 beforeEach(() => {
    jasmine.addMatchers({
       toEqualProps,
@@ -195,7 +159,18 @@ beforeEach(() => {
    });
 });
 
-module.exports = {
+declare global {
+   namespace jasmine {
+      interface Matchers<T> {
+         toEqualProps(anObject: Object): void;
+         toEqualShape(anObject: Object): void;
+         toBeInstanceOf(anObject: Object): void;
+         toEqualShallowDifferent(objectOrArray: Object | Array<any>): void;
+      }
+   }
+}
+
+export {
    toEqualProps,
    toEqualShape,
    toBeInstanceOf,

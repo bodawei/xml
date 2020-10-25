@@ -14,7 +14,7 @@ import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 import { GeneralEntityDeclarationPToken } from '../generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../parameterEntityDeclaration';
-import { checkDeclarationStart } from '../../wellformedness/token/bridge/checkDeclarationStart'
+import { checkDeclarationStart } from '../../wellformedness/bridge/checkDeclarationStart'
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for

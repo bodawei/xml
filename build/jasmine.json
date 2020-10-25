@@ -1,12 +1,20 @@
 {
-  "spec_dir": ".",
-  "spec_files": [
-    "source/**/*test.js",
-    "build/**/*test.js"
-  ],
-  "helpers": [
-    "helpers/**/*.js"
-  ],
-  "stopSpecOnExpectationFailure": false,
-  "random": false
-}
+   "spec_dir": ".",
+ 
+   "spec_files": [
+      "source/**/*test.ts"
+   ],
+ 
+   "helpers": [
+      "build/beforeJasmine.ts",
+      "source/conformance/@test/helper/beforeJasmine.ts",
+      "source/error/@test/beforeJasmine.ts",
+      "source/sToken/@test/beforeJasmine.ts",
+      "source/token/@test/beforeJasmine.ts",
+      "source/error/@test/helper.ts"
+   ],
+ 
+   "stopSpecOnExpectationFailure": false,
+ 
+   "random": false
+ }

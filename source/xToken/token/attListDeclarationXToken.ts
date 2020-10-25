@@ -31,8 +31,6 @@ class AttListDeclarationXToken {
 
    public readonly attDefs: ReadonlyArray<AttDefinitionXToken>;
 
-   public readonly defaultType?: string;
-
    public pToken?: AttListDeclarationPToken;
 
    constructor(pToken: AttListDeclarationPToken);

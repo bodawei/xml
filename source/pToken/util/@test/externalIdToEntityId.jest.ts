@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'sToken';
-import { externalIdToEntityId } from '../../util/externalIdToEntityId';
+import { externalIdToEntityId } from '../externalIdToEntityId';
 // ick
 import { TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
 

@@ -20,13 +20,37 @@ describe('attListDeclarationXToken', () => {
       });
    });
 
-   it('creates an XToken', () => {
+   it('creates an XToken from a PToken', () => {
       const xToken = new AttListDeclarationXToken(aldPToken);
 
       expect(xToken).toEqualRangeless({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
          pToken: aldPToken,
+      });
+   });
+
+   it('creates an XToken from a string and attribute definitions', () => {
+      const xToken = new AttListDeclarationXToken('theName', [
+         {
+            name: 'att1',
+            type: 'CDATA',
+            defaultType: '',
+            value: [],
+         },
+      ]);
+
+      expect(xToken).toEqualRangeless({
+         type: ATTLIST_DECLARATION_XTOKEN,
+         elementName: 'theName',
+         attDefs: [
+            {
+               name: 'att1',
+               type: 'CDATA',
+               defaultType: '',
+               value: [],
+            },
+         ],
       });
    });
 
@@ -112,7 +136,7 @@ describe('attListDeclarationXToken', () => {
 
       const xToken = new AttListDeclarationXToken(testToken);
 
-      expect(xToken).toEqualProps({
+      expect(xToken).toEqualRangeless({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
          attDefs: [
@@ -148,7 +172,7 @@ describe('attListDeclarationXToken', () => {
 
       const xToken = new AttListDeclarationXToken(testToken);
 
-      expect(xToken).toEqualProps({
+      expect(xToken).toEqualRangeless({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
          attDefs: [

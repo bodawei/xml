@@ -5,7 +5,7 @@ import { PassThrough } from 'stream';
 
 import { WellFormedError } from 'error';
 
-import { expectError } from './beforeEach';
+import { expectError } from './helpers';
 
 describe('utils (unit)', () => {
    describe('expectError()', () => {

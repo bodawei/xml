@@ -57,7 +57,7 @@ function toHaveErrors(): JestMatcher {
 
          const errorsExpected = expected.length > 0;
          const actualErrors: Array<XmlError> = actual.filter(
-            (token) => token.type === ERROR_TYPE && (token as XmlError).subtype !== 'WARNING',
+            (token) => token.type === ERROR_TYPE && token.subtype !== 'WARNING',
          ) as Array<XmlError>;
          const hasAllExpectedErrors = expected.reduce((foundAll, expectedId) => {
             if (!expectedId) {

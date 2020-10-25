@@ -3,7 +3,7 @@
 
 import { EntityId, Range } from 'basic';
 
-import { toEqualSTokenText, toEqualSTokenTexts, toEqualSTokenRange } from './beforeEach';
+import { toEqualSTokenText, toEqualSTokenTexts, toEqualSTokenRange } from './beforeJasmine';
 import SToken from '../SToken';
 
 describe('sToken beforeEach', () => {

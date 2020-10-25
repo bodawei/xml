@@ -146,14 +146,15 @@ beforeEach(() => {
       toEqualSTokenTexts,
       toEqualSTokenRange,
    });
-
 });
 
-declare namespace jasmine {
-   interface Matchers<SToken> {
-      toEqualSTokenText(expectedText: string): void;
-      toEqualSTokenTexts(expectedTexts: Array<string>): void;
-      toEqualSTokenRange(expectedRange: Range): void;
+declare global {
+   namespace jasmine {
+      interface Matchers<T> {
+         toEqualSTokenText(expectedText: any): void;
+         toEqualSTokenTexts(expectedTexts: Array<any>): void;
+         toEqualSTokenRange(expectedRange: Range): void;
+      }
    }
 }
 

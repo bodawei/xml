@@ -1,14 +1,14 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, isChar } from 'basic';
 import { MockErrorCollector } from 'error-test';
 import { WellFormedError } from 'error';
 import { toSToken } from 'sToken';
 import { CharRefPToken } from 'token';
 import { makeCharRef } from 'token-test';
 
-import * as basic from 'basic';
+jest.mock('basic');
 
 import { charRefCheck } from '../charRefCheck';
 
@@ -16,14 +16,15 @@ describe('charRefCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
    let confVer: ConformanceVersion;
    let charRefPToken: CharRefPToken;
-   let isCharSpy: jasmine.Spy;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
-      confVer = new ConformanceVersion();
+      confVer = {
+         type: 'CONFORMANCE_VERSION',
+         version: 1.0,
+         revision: 2,
+      };
       charRefPToken = makeCharRef();
-
-      isCharSpy = spyOn(basic, 'isChar');
    });
 
    it('calls the isChar() routine with the version and code it was given (WFC §4.1.0)', () => {
@@ -35,11 +36,11 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(isCharSpy).toHaveBeenCalledWith('\u0042', 1.0);
+      expect(isChar).toHaveBeenCalledWith('\u0042', 1.0);
    });
 
    it('reports an error if the character is not a valid Char (WFC §4.1.0)', () => {
-      isCharSpy.and.returnValue(false);
+      (isChar as jest.Mock).mockReturnValue(false);
       charRefPToken = new CharRefPToken({
          open: toSToken('&#'),
          digits: toSToken('65535'),

@@ -188,6 +188,16 @@ module.exports = {
    makeRangeless,
 };
 
+declare global {
+   namespace jasmine {
+      interface Matchers<T> {
+         toEqualRangeless(matcher: any): void;
+         toContainPTokenProps(matcher: any): void;
+         toBeInstanceOf(klazz: any):void;
+      }
+   }
+}
+
 export {
    toContainPTokenProps,
    toEqualRangeless,

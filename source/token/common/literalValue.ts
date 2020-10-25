@@ -113,7 +113,7 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
 
 function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, confVer: ConformanceVersion) {
    if (!checkMap) {
-      ({ checkMap } = require('source/wellformedness/checkMap'));
+      ({ checkMap } = require('../../wellformedness/checkMap'));
    }
 
    for (let index = 0; index < pToken.length; index++) {
