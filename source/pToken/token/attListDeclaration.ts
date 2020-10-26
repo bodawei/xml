@@ -308,6 +308,106 @@ function parseClose(
    });
 }
 
+function resumeParseAttDefName(
+   source: STokenSource,
+   done: (result: Array<AttDefinitionProps>) => void,
+): void {
+   parseAttName(source, (attDef) => {
+      if (!attDef) {
+         done([]);
+         return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      resumeParseAttDef(source, 'type', attDef, done);
+   });
+}
+
+function resumeParseAttDef(
+   source: STokenSource,
+   propName: string,
+   def: AttDefinitionProps,
+   done: (result: Array<AttDefinitionProps>) => void,
+): void {
+   switch (propName) {
+      case 'type':
+         parseAttType(source, def, (attWithType) => {
+            resumeParseAttDef(source, 'defaultType', attWithType, done);
+         });
+         break;
+      case 'defaultType':
+         parseAttDefaultType(source, def, (withDefault) => {
+            if (!withDefault.defaultType) {
+               resumeParseAttDef(source, 'value', def, done);
+               return;
+            }
+
+            if (withDefault.defaultType.str.toLowerCase() !== '#fixed') {
+               resumeParseAttDefName(source, (otherAttributes) => {
+                  done([def, ...otherAttributes]);
+               });
+               return;
+            }
+
+            resumeParseAttDef(source, 'value', def, done);
+         });
+         break;
+      case 'value':
+         parseAttValue(source, def, (parsedAttDef) => {
+            resumeParseAttDefName(source, (otherAttributes) => {
+               done([parsedAttDef, ...otherAttributes]);
+            });
+         });
+         break;
+   }
+}
+
+function resumeParseAttDeclaration(
+   source: STokenSource,
+   attListDeclaration: AttListDeclarationPToken,
+   deliverPToken: (result: AttListDeclarationPToken) => void,
+): void {
+   const propName = attListDeclaration.unexpanded?.propName || '';
+
+   switch (propName) {
+      case 'elementName':
+         parseElementName(source, attListDeclaration, (withName) => {
+            resumeParseAttDefName(source, (attDefs) => {
+               deliverPToken(
+                  new AttListDeclarationPToken(attListDeclaration, {
+                     ...withName,
+                     attDefs: [...attListDeclaration.attDefs, ...attDefs],
+                  }),
+               );
+            });
+         });
+         break;
+      case 'name':
+         resumeParseAttDefName(source, (attDefs) => {
+            deliverPToken(
+               new AttListDeclarationPToken(attListDeclaration, {
+                  attDefs: [...attListDeclaration.attDefs, ...attDefs],
+               }),
+            );
+         });
+         break;
+      default:
+         const trailingDef = attListDeclaration.attDefs[attListDeclaration.attDefs.length - 1];
+         const preceding = [...attListDeclaration.attDefs];
+
+         preceding.pop();
+
+         resumeParseAttDef(source, propName, trailingDef, (attDefs) => {
+            deliverPToken(
+               new AttListDeclarationPToken(attListDeclaration, {
+                  attDefs: [...preceding, ...attDefs],
+               }),
+            );
+         });
+         break;
+   }
+}
+
 /**********************************************************************\
  parse() extracts the STokens for a attribute list declaration
 
@@ -335,7 +435,7 @@ function parseClose(
 
    Note: Codi tries to stick closely to the syntax names, but she has
    "subdivided" DefaultDecl into defaultType (all the # values) and
-   attValue.
+   `attValue`.
 \**********************************************************************/
 
 function parseAttListDeclaration(
@@ -360,38 +460,9 @@ function parseAttListDeclaration(
    });
 }
 
-/*
-
-reparse:
-   Get attributs
-   get lastAttribute
-
-   case 'elementName'
-      parseElementName(source, protoToken, (withName) => {
-         parseAttribute
-
-   // I think you can make this the backbone routine. It just calls itself with name.
-   case 'name'
-         parseAttribute(attributes)
-            // then type
-   case 'type'
-         parseAttributeType(attributes, attribute)
-            // then maybe enumeration
-            // then default
-   case 'defaultType'
-         parseAttDefaultType(source, attWithType, (withDefault) => {
-                     if (!withDefault.defaultType   || isFixed) {
-                        parseAttValue(source, withDefault, () => {
-                        return;
-                     }
-
-                     parseAttribute(source, protoToken, done);
-                  });
-
-   case 'value'
-         parseAttDefaultType(source, attWithType, (withDefault) => {
-                           parseAttribute(source, protoToken, done);
-
--- capture extra
-                  */
-export { ATTLIST_DECLARATION_PTOKEN, AttListDeclarationPToken, parseAttListDeclaration };
+export {
+   ATTLIST_DECLARATION_PTOKEN,
+   AttListDeclarationPToken,
+   parseAttListDeclaration,
+   resumeParseAttDeclaration,
+};
