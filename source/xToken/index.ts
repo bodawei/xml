@@ -9,23 +9,20 @@ export {
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
    ParameterEntityReferenceXToken,
 } from './token/parameterEntityReferenceXToken';
-export {
-   CONDITIONAL_CLOSE_XTOKEN,
-   ConditionalCloseXToken,
-   conditionalClosePTokenToXToken,
-} from './token/conditionalClose';
-export {
-   CONDITIONAL_XTOKEN,
-   ConditionalXToken,
-   conditionalSectionPTokenToXToken,
-} from './token/conditionalSection';
+export { CONDITIONAL_CLOSE_XTOKEN, ConditionalCloseXToken } from './token/conditionalClose';
+export { CONDITIONAL_XTOKEN, ConditionalXToken } from './token/conditionalSection';
 export { ExternalIdXToken } from './common/externalIdXToken';
 
 // Fully converted
 export {
+   ATTLIST_DECLARATION_XTOKEN,
+   AttListDeclarationXToken,
+   AttDefinitionXToken,
+} from './token/attListDeclarationXToken';
+export {
    NOTATION_DECLARATION_XTOKEN,
    NotationDeclarationXToken,
-} from './token/notationdeclarationXToken';
+} from './token/notationDeclarationXToken';
 export {
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionXToken,

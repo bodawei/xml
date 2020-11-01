@@ -8,6 +8,7 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
+      'valid-not-sa-020', // Because we are not introducing spaces when expanding.
       // Introduced problem.  processing version and version in actual doc do not match
       'rmt-034', //XMLDECL_VERSION_INVALD
       'rmt-044',

@@ -8,10 +8,12 @@ import {
    NOTATION_DECLARATION_PTOKEN,
    NotationDeclarationPToken,
    resumeParseNotationDeclaration,
+   ATTLIST_DECLARATION_PTOKEN,
+   AttListDeclarationPToken,
+   resumeParseAttListDeclaration,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
-   ATTLISTDECL_PTOKEN_TYPE,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
@@ -21,7 +23,6 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   AttListPToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementDeclarationPToken,
@@ -43,7 +44,6 @@ import {
    TextPToken,
 } from 'token';
 
-import { assignAttListDeclaration } from './unassigned/assignAttListDeclaration';
 import { assignElementDeclaration } from './unassigned/assignElementDeclaration';
 import { assignEntityDeclaration } from './unassigned/assignEntityDeclaration';
 import { EntityDetails } from './utils/EntityDetails';
@@ -58,7 +58,7 @@ import { expandMarkupUnexpanded } from './utils/expandMarkupUnexpanded';
 import { entityValueToSTokenSource } from './utils/entityValueToSTokenSource';
 
 type DeclToken =
-   | AttListPToken
+   | AttListDeclarationPToken
    | ElementDeclarationPToken
    | GeneralEntityDeclarationPToken
    | NotationDeclarationPToken
@@ -139,7 +139,7 @@ class EntityExpander {
          case CONDITIONAL_CLOSE_PTOKEN:
             this.handleConditionalEnd(pToken, expanded);
             break;
-         case ATTLISTDECL_PTOKEN_TYPE:
+         case ATTLIST_DECLARATION_PTOKEN:
          case ELEMENT_DECLARATION_PTOKEN:
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
@@ -370,6 +370,29 @@ class EntityExpander {
             },
          );
          return;
+      } else if (declarationPToken.type === ATTLIST_DECLARATION_PTOKEN) {
+         if (!declarationPToken.unexpanded) {
+            this.handleAttListDeclaration(declarationPToken, handled);
+            return;
+         }
+
+         expandMarkupUnexpanded(
+            declarationPToken.unexpanded.tokens,
+            this.expandParams,
+            this.entityContextStack,
+            (results) => {
+               this.deliverByproducts(results.byproducts);
+               const source = entityValueToSTokenSource(
+                  results.expandedTokens || [],
+                  this.expandParams.entityId,
+               ); // THIS entityId IS WRONG!!!!
+
+               resumeParseAttListDeclaration(source, declarationPToken, (innerResults) => {
+                  this.handleAttListDeclaration(innerResults, handled);
+               });
+            },
+         );
+         return;
       }
 
       // UNASSIGNED REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
@@ -387,12 +410,10 @@ class EntityExpander {
          isElementDeclaration,
          (results) => {
             // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
-            (declarationPToken.unassigned as any) = results.newValue;
+            declarationPToken.unassigned = results.newValue;
 
             if (declarationPToken.type === ELEMENT_DECLARATION_PTOKEN) {
                assignElementDeclaration(results.newValue, declarationPToken);
-            } else if (declarationPToken.type === ATTLISTDECL_PTOKEN_TYPE) {
-               assignAttListDeclaration(results.newValue, declarationPToken);
             } else {
                assignEntityDeclaration(results.newValue, declarationPToken);
             }
@@ -413,13 +434,13 @@ class EntityExpander {
    ): void {
       switch (declarationPToken.type) {
          case ELEMENT_DECLARATION_PTOKEN:
-         case NOTATION_DECLARATION_PTOKEN:
+         case NOTATION_DECLARATION_PTOKEN: // can nuke this.
             // Nothing more needs to be done for these
             this.deliverToken(declarationPToken);
             expanded();
             break;
-         case ATTLISTDECL_PTOKEN_TYPE:
-            this.handleAttListDeclaration(declarationPToken, expanded);
+         case ATTLIST_DECLARATION_PTOKEN:
+            // can nuke this
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
@@ -438,22 +459,29 @@ class EntityExpander {
     *
     * The default handling is declared in §2.3 [10] and §3.3.2 [60]
     */
-   private handleAttListDeclaration(pToken: AttListPToken, handled: PTokenExpanded): void {
+   private handleAttListDeclaration(
+      pToken: AttListDeclarationPToken,
+      handled: PTokenExpanded,
+   ): void {
       // REFACTOR/CLEANUP: default type is wrong.
-      expandAttributes(
-         pToken.attDefs as any,
-         this.expandParams,
-         this.entityContextStack,
-         (results) => {
-            for (let index = 0; index < results.length; index++) {
-               pToken.attDefs[index].value = results[index].newValue; // REFACTOR/CLEANUP: We probably can't actually modify the object directly
-               this.deliverByproducts(results[index].byproducts);
-            }
+      expandAttributes(pToken.attDefs, this.expandParams, this.entityContextStack, (results) => {
+         const attDefs = [];
 
-            this.deliverToken(pToken);
-            handled();
-         },
-      );
+         for (let index = 0; index < results.length; index++) {
+            attDefs[index] = {
+               ...pToken.attDefs[index],
+               value: results[index].newValue, // REFACTOR/CLEANUP: We probably can't actually modify the object directly
+            };
+            this.deliverByproducts(results[index].byproducts);
+         }
+
+         this.deliverToken(
+            new AttListDeclarationPToken(pToken, {
+               attDefs,
+            }),
+         );
+         handled();
+      });
    }
 
    /*
@@ -488,6 +516,7 @@ class EntityExpander {
 
       if (pToken.externalId) {
          const entityId = externalIdToEntityId(pToken.externalId);
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
          const entityLoc = this.expandParams.utils.resolveEntityId(
             this.entityContextStack.getCurrentEntityLoc(),
             entityId,

@@ -15,10 +15,4 @@ class ConditionalCloseXToken {
    }
 }
 
-function conditionalClosePTokenToXToken(pToken: ConditionalClosePToken): ConditionalCloseXToken {
-   const token = new ConditionalCloseXToken(pToken);
-
-   return token;
-}
-
-export { CONDITIONAL_CLOSE_XTOKEN, ConditionalCloseXToken, conditionalClosePTokenToXToken };
+export { CONDITIONAL_CLOSE_XTOKEN, ConditionalCloseXToken };

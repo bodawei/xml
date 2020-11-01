@@ -8,6 +8,7 @@ import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference
 import { CHARREF_PTOKEN } from '../token/charRef'; // WTF?
 
 import { charRefCheck } from './token/charRefCheck';
+import { attListDeclarationCheck } from './token/attListDeclarationCheck';
 import { notationDeclarationCheck } from './token/notationDeclarationCheck';
 import { parameterEntityReferenceCheck } from './token/parameterEntityReferenceCheck';
 import { generalEntityReferenceCheck } from './token/generalEntityReferenceCheck';
@@ -16,6 +17,7 @@ import { textDeclarationCheck } from './token/textDeclarationCheck';
 import { xmlDeclarationCheck } from './token/xmlDeclarationCheck';
 
 // we have a circular dependency somewhere.
+import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
 import { XMLDECL_PTOKEN } from '../pToken/token/xmlDeclaration';
@@ -30,6 +32,7 @@ interface CheckMap {
 }
 
 const checkMap: CheckMap = {
+   [ATTLIST_DECLARATION_PTOKEN]: attListDeclarationCheck,
    [CHARREF_PTOKEN]: charRefCheck,
    [GENERAL_ENTITY_REFERENCE_PTOKEN]: generalEntityReferenceCheck,
    [NOTATION_DECLARATION_PTOKEN]: notationDeclarationCheck,

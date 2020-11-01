@@ -26,4 +26,21 @@ describe('ExternalIdXToken', () => {
 
       expect(token).toEqual(new ExternalIdXToken('sysFoo', 'a'));
    });
+
+   it('converts an ExternalId with no public value to an ExternalIdXToken with an undefined public value', () => {
+      const token = new ExternalIdXToken({
+         externalType: toSToken('SYSTEM'),
+         system: {
+            value: [
+               new TextPToken({ text: toSToken('sys') }),
+               new GeneralEntityReferencePToken({
+                  open: toSToken('&'),
+               }),
+               new TextPToken({ text: toSToken('Foo') }),
+            ],
+         },
+      });
+
+      expect(token).toEqual(new ExternalIdXToken('sysFoo', undefined));
+   });
 });

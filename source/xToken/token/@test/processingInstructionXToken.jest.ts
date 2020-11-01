@@ -45,13 +45,24 @@ describe('ProcessingInstructionXToken() (unit)', () => {
       );
    });
 
-   it('produces a pToken with the provided raw values', () => {
+   it('produces an xToken with the provided raw values', () => {
       const piXToken = new ProcessingInstructionXToken('TheTarget2', 'blah2');
 
       expect(piXToken).toEqual(
          jasmine.objectContaining({
             target: 'TheTarget2',
             instruction: 'blah2',
+         }),
+      );
+   });
+
+   it('produces an xToken with a blank instruction if none provided as a direct parameter', () => {
+      const piXToken = new ProcessingInstructionXToken('TheTarget2');
+
+      expect(piXToken).toEqual(
+         jasmine.objectContaining({
+            target: 'TheTarget2',
+            instruction: '',
          }),
       );
    });

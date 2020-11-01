@@ -15,7 +15,7 @@ class ProcessingInstructionXToken {
    public readonly pToken?: ProcessingInstructionPToken;
 
    constructor(pToken: ProcessingInstructionPToken);
-   constructor(target: string, instruction: string);
+   constructor(target: string, instruction?: string);
    constructor(targetOrPToken: string | ProcessingInstructionPToken, instruction?: string) {
       if (typeof targetOrPToken === 'string') {
          this.target = targetOrPToken;

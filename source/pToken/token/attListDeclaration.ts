@@ -7,7 +7,8 @@ import { UnexpandedMarkupDetails } from '../types';
 
 // ick
 import { DeclarationStart } from '../../token/bridge/declaration';
-import literal, { LiteralValuePToken } from '../../token/common/literal';
+import { AttributeValuePToken } from '../../token/common/attribute';
+import literal from '../../token/common/literal';
 import { parseWordList, WordListType, WordListPToken } from '../../token/common/wordList';
 
 interface AttListDeclarationProps {
@@ -32,7 +33,7 @@ interface AttDefinitionProps {
    defaultType?: SToken;
    defaultTypeSpace?: SToken;
    openQuote?: SToken;
-   value: LiteralValuePToken;
+   value: AttributeValuePToken;
    closeQuote?: SToken;
    valueSpace?: SToken;
 }
@@ -204,11 +205,12 @@ function parseAttDefaultType(
             attDef.defaultTypeSpace = defaultTypeSpace;
             done(attDef);
          });
-
-         return;
+      } else {
+         source.extractNoParams('space', (defaultTypeSpace) => {
+            attDef.defaultTypeSpace = defaultTypeSpace;
+            done(attDef);
+         });
       }
-
-      done(attDef);
    });
 }
 
@@ -362,7 +364,7 @@ function resumeParseAttDef(
    }
 }
 
-function resumeParseAttDeclaration(
+function resumeParseAttListDeclaration(
    source: STokenSource,
    attListDeclaration: AttListDeclarationPToken,
    deliverPToken: (result: AttListDeclarationPToken) => void,
@@ -464,5 +466,5 @@ export {
    ATTLIST_DECLARATION_PTOKEN,
    AttListDeclarationPToken,
    parseAttListDeclaration,
-   resumeParseAttDeclaration,
+   resumeParseAttListDeclaration,
 };

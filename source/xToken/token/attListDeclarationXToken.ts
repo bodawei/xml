@@ -78,4 +78,4 @@ class AttListDeclarationXToken {
    }
 }
 
-export { ATTLIST_DECLARATION_XTOKEN, AttListDeclarationXToken };
+export { ATTLIST_DECLARATION_XTOKEN, AttListDeclarationXToken, AttDefinitionXToken };

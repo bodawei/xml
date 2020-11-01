@@ -6,7 +6,9 @@ import {
    ParseValue,
    ContextType,
    NOTATION_DECLARATION_PTOKEN,
+   AttListDeclarationPToken,
    NotationDeclarationPToken,
+   resumeParseNotationDeclaration,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -31,14 +33,12 @@ import {
    ParameterEntityDeclarationPToken,
    TextPToken,
    XmlError,
-   AttListPToken,
    ParameterEntityReferencePToken,
    EXTERNAL_ID,
    unassigned,
 } from 'token';
 
 import * as pToken from 'pToken';
-import * as assignAttListDeclaration from '../unassigned/assignAttListDeclaration';
 import * as assignEntityDeclaration from '../unassigned/assignEntityDeclaration';
 import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
@@ -56,7 +56,6 @@ import { EntityId } from 'basic';
 describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
-   let assignAttListSpy: jasmine.Spy;
    let assignEntityDeclSpy: jasmine.Spy;
    let expandMarkupUnexpandedSpy: jasmine.Spy;
    let resumeParseNotationDeclarationSpy: jasmine.Spy;
@@ -65,7 +64,6 @@ describe('EntityExpander (unit)', () => {
    beforeEach(() => {
       expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
       setupConditionalSpy = spyOn(setupConditional, 'setupConditional');
-      assignAttListSpy = spyOn(assignAttListDeclaration, 'assignAttListDeclaration');
       assignEntityDeclSpy = spyOn(assignEntityDeclaration, 'assignEntityDeclaration');
       resolveEntityId = () => '';
    });
@@ -318,11 +316,18 @@ describe('EntityExpander (unit)', () => {
             'streamParsedReplacementText',
          );
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
-         streamParsedReplacementTextSpy.and.callFake((token, params, stack, callback) => {
-            callback(error, () => {
-               callback(undefined, () => {});
-            });
-         });
+         streamParsedReplacementTextSpy.and.callFake(
+            (
+               token,
+               params,
+               stack,
+               callback: (result: WellFormedError | undefined, cb2: () => void) => void,
+            ) => {
+               callback(error, () => {
+                  callback(undefined, () => {});
+               });
+            },
+         );
 
          doExpand([docTypeStart, notation, docTypeEnd], true, (results) => {
             expect(harvestTypes(results)).toEqual([
@@ -399,11 +404,18 @@ describe('EntityExpander (unit)', () => {
                   },
                },
             });
-            streamParsedReplacementTextSpy.and.callFake((token, params, stack, cb) => {
-               cb(condStart, () => {});
-               cb(condStart, () => {});
-               cb(undefined, () => {});
-            });
+            streamParsedReplacementTextSpy.and.callFake(
+               (
+                  token,
+                  params,
+                  stack,
+                  cb: (token: ConditionalPToken | undefined, innerCb: () => void) => void,
+               ) => {
+                  cb(condStart, () => {});
+                  cb(condStart, () => {});
+                  cb(undefined, () => {});
+               },
+            );
 
             doExpand([docTypeStart, docTypeEnd], true, (results) => {
                expect(harvestTypes(results)).toEqual([
@@ -468,82 +480,13 @@ describe('EntityExpander (unit)', () => {
       });
    });
 
-   describe('declarations', () => {
-      let notation: NotationDeclarationPToken;
-
-      beforeEach(() => {
-         notation = new NotationDeclarationPToken({
-            type: 'NOTATION_DECLARATION_PTOKEN',
-            open: toSToken('<!'),
-            name: toSToken('test'),
-            externalId: {},
-         });
-      });
-
-      // it('passes a declaration with unassigned values through', (done) => {
-      //    notation = new NotationDeclarationPToken(notation, {
-      //       unexpanded: {
-      //          propName: 'name',
-      //          tokens: [new TextPToken({ text: toSToken('1') })],
-      //       },
-      //    });
-
-      //    expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-      //       callback({ newValue: [two], byproducts: [] });
-      //    });
-
-      //    doExpand([notation], true, (results) => {
-      //       expect(results).toEqual([notation]);
-      //       done();
-      //    });
-      // });
-
-      //    it('passes a declaration with unassigned values to the expandUnassigned() utility', (done) => {
-      //       const one = unassigned.wordFromSToken(toSToken('1'));
-      //       notation.unassigned = [one];
-
-      //       expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-      //          callback({ newValue: [], byproducts: [] });
-      //       });
-
-      //       doExpand([notation], true, () => {
-      //          const params = expandUnassignedSpy.calls.argsFor(0);
-
-      //          expect(params[0]).toEqual([one]);
-      //          expect(params[1].entityDetails).not.toBeUndefined();
-      //          expect(params[2]).toBeInstanceOf(EntityContextStack);
-      //          expect(params[3]).toEqual(false);
-      //          expect(params[4]).toBeInstanceOf(Function);
-      //          done();
-      //       });
-      //    });
-
-      //    it('delivers any errors encountered while expanding the unassigned', (done) => {
-      //       const one = unassigned.wordFromSToken(toSToken('1'));
-      //       const two = unassigned.wordFromSToken(toSToken('2'));
-      //       notation.unassigned = [one];
-      //       const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
-
-      //       expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-      //          callback({ newValue: [two], byproducts: [error] });
-      //       });
-
-      //       doExpand([notation], true, (results) => {
-      //          expect(harvestTypes(results)).toEqual([ERROR_TYPE, NOTATION_DECLARATION_PTOKEN]);
-      //          done();
-      //       });
-      //    });
-   });
-
    describe('NOTATION declaration', () => {
       let notation: NotationDeclarationPToken;
 
       beforeEach(() => {
          notation = new NotationDeclarationPToken({
-            type: 'NOTATION_DECLARATION_PTOKEN',
             open: toSToken('<!'),
             name: toSToken('test'),
-            externalId: {},
          });
       });
 
@@ -554,64 +497,56 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      // it('asks the notation to assign any newly unassigned values to itself', (done) => {
-      //    expandMarkupUnexpandedSpy = spyOn(pToken, 'resumeParseNotationDeclaration');
-      //    resumeParseNotationDeclarationSpy = spyOn(
-      //       expandMarkupUnexpanded,
-      //       'expandMarkupUnexpanded',
-      //    );
-      //    notation = new NotationDeclarationPToken({
-      //       type: 'NOTATION_DECLARATION_PTOKEN',
-      //       open: toSToken('<!'),
-      //       name: toSToken('test'),
-      //       externalId: {},
-      //       unexpanded: {
-      //          propName: 'externalType',
-      //          tokens: [new TextPToken({ text: toSToken('SYSTEM') })],
-      //       },
-      //    });
+      it('asks resumeParseAttListDeclaration) to finish parsing any unexpanded values', (done) => {
+         expandMarkupUnexpandedSpy = spyOn(expandMarkupUnexpanded, 'expandMarkupUnexpanded');
+         resumeParseNotationDeclarationSpy = spyOn(pToken, 'resumeParseNotationDeclaration');
+         notation = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('test'),
+            externalId: {},
+            unexpanded: {
+               propName: 'externalType',
+               tokens: [new TextPToken({ text: toSToken('SYSTEM') })],
+            },
+         });
 
-      //    expandMarkupUnexpandedSpy.and.callFake((unexpanded, params, chain, callback) => {
-      //       callback({
-      //          expandedTokens: [new TextPToken({ text: toSToken('PUBLIC') })],
-      //          byproducts: [],
-      //       });
-      //    });
-      //    resumeParseNotationDeclarationSpy.and.callFake((source, declaration, cb) => {
-      //       cb(
-      //          new NotationDeclarationPToken({
-      //             type: 'NOTATION_DECLARATION_PTOKEN',
-      //             open: toSToken('<!'),
-      //             name: toSToken('test'),
-      //             externalId: {
-      //                externalType: toSToken('PUBLIC'),
-      //             },
-      //             unexpanded: {
-      //                propName: 'externalType',
-      //                tokens: [new TextPToken({ text: toSToken('SYSTEM') })],
-      //             },
-      //          }),
-      //       );
-      //    });
+         expandMarkupUnexpandedSpy.and.callFake(
+            (unexpanded, params, chain, callback: (result: any) => void) => {
+               callback({
+                  expandedTokens: [new TextPToken({ text: toSToken('PUBLIC') })],
+                  byproducts: [],
+               });
+            },
+         );
+         resumeParseNotationDeclarationSpy.and.callFake(
+            (source, declaration, cb: (result: NotationDeclarationPToken) => void) => {
+               cb(
+                  new NotationDeclarationPToken(notation, {
+                     externalId: {
+                        externalType: toSToken('PUBLIC'),
+                     },
+                  }),
+               );
+            },
+         );
 
-      //    doExpand([notation], true, (results) => {
-      //       expect(results[0]).toEqual(
-      //          new NotationDeclarationPToken({
-      //             type: 'NOTATION_DECLARATION_PTOKEN',
-      //             open: toSToken('<!'),
-      //             name: toSToken('test'),
-      //             externalId: {
-      //                externalType: toSToken('PUBLIC'),
-      //             },
-      //             unexpanded: {
-      //                propName: 'externalType',
-      //                tokens: [new TextPToken({ text: toSToken('SYSTEM') })],
-      //             },
-      //          }),
-      //       );
-      //       done();
-      //    });
-      // });
+         doExpand([notation], true, (results) => {
+            expect(results[0]).toEqual(
+               new NotationDeclarationPToken({
+                  open: toSToken('<!'),
+                  name: toSToken('test'),
+                  externalId: {
+                     externalType: toSToken('PUBLIC'),
+                  },
+                  unexpanded: {
+                     propName: 'externalType',
+                     tokens: [new TextPToken({ text: toSToken('SYSTEM') })],
+                  },
+               }),
+            );
+            done();
+         });
+      });
    });
 
    describe('ELEMENT declaration', () => {
@@ -697,7 +632,7 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('processes the default attribute values of the ATTLIST PToken', (done) => {
-         const attList = new AttListPToken({
+         const attList = new AttListDeclarationPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
             attDefs: [
@@ -713,7 +648,7 @@ describe('EntityExpander (unit)', () => {
          });
          const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['1']);
          const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['2']);
-         const expanded = new AttListPToken({
+         const expanded = new AttListDeclarationPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
             attDefs: [
@@ -735,7 +670,7 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('calls the expandAttributes() routine with the attDefs, expand params and a callback', (done) => {
-         const attList = new AttListPToken({
+         const attList = new AttListDeclarationPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
             attDefs: [
@@ -757,23 +692,53 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('asks the AttListPToken to assign any newly unassigned values to itself', (done) => {
-         const one = unassigned.wordFromSToken(toSToken('1'));
-         const two = unassigned.wordFromSToken(toSToken('2'));
-         const attList = new AttListPToken({
+      it('asks the AttListDeclarationPToken to assign any newly unassigned values to itself', (done) => {
+         expandMarkupUnexpandedSpy = spyOn(expandMarkupUnexpanded, 'expandMarkupUnexpanded');
+         const resumeParseAttListDeclarationSpy = spyOn(pToken, 'resumeParseAttListDeclaration');
+         const attList = new AttListDeclarationPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
             attDefs: [],
-            unassigned: [one],
+            unexpanded: {
+               propName: 'name',
+               tokens: [new TextPToken({ text: toSToken('SYSTEM') })],
+            },
          });
 
-         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [two], byproducts: [] });
-         });
+         expandMarkupUnexpandedSpy.and.callFake(
+            (unexpanded, params, chain, callback: (result: any) => void) => {
+               callback({
+                  expandedTokens: [new TextPToken({ text: toSToken('PUBLIC') })],
+                  byproducts: [],
+               });
+            },
+         );
+         resumeParseAttListDeclarationSpy.and.callFake(
+            (source, declaration, cb: (result: AttListDeclarationPToken) => void) => {
+               cb(
+                  new AttListDeclarationPToken(attList, {
+                     attDefs: [
+                        {
+                           name: toSToken('resumed'),
+                           value: [],
+                        },
+                     ],
+                  }),
+               );
+            },
+         );
 
-         doExpand([attList], true, () => {
-            expect(assignAttListSpy).toHaveBeenCalled();
-            expect(attList.unassigned).toEqual([two]);
+         doExpand([attList], true, (result) => {
+            expect(result[1]).toEqual(
+               new AttListDeclarationPToken(attList, {
+                  attDefs: [
+                     {
+                        name: toSToken('resumed'),
+                        value: [new TextPToken({ text: toSToken('testValue #1') })],
+                     },
+                  ],
+               }),
+            );
             done();
          });
       });

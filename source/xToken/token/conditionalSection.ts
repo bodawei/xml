@@ -15,10 +15,4 @@ class ConditionalXToken {
    }
 }
 
-function conditionalSectionPTokenToXToken(pToken: ConditionalPToken): ConditionalXToken {
-   const token = new ConditionalXToken(pToken);
-
-   return token;
-}
-
-export { CONDITIONAL_XTOKEN, ConditionalXToken, conditionalSectionPTokenToXToken };
+export { CONDITIONAL_XTOKEN, ConditionalXToken };

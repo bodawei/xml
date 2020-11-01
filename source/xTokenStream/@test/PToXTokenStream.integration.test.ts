@@ -4,11 +4,18 @@
 import { Range, EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
-import { ParameterEntityReferenceXToken,    ProcessingInstructionXToken,   XmlDeclarationXToken, ExternalIdXToken, NotationDeclarationXToken,GeneralEntityReferenceXToken } from 'xToken';
+import {
+   AttListDeclarationXToken,
+   ParameterEntityReferenceXToken,
+   ProcessingInstructionXToken,
+   XmlDeclarationXToken,
+   ExternalIdXToken,
+   NotationDeclarationXToken,
+   GeneralEntityReferenceXToken
+} from 'xToken';
 import {
    declaration,
 
-   attListDeclaration,
    elementDeclaration,
 
    CdataXToken,
@@ -73,7 +80,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes an ATTLIST declaration', (done) => {
       expectInputToProduce('<!ATTLIST elementName atOne IDREF atTwo ENTITY>', [
-         new attListDeclaration.XToken('elementName', [{
+         new AttListDeclarationXToken('elementName', [{
             name: 'atOne',
             type: 'IDREF',
             defaultType: '',
@@ -83,7 +90,7 @@ describe('PToXTokenStream (integration)', () => {
             type: 'ENTITY',
             defaultType: '',
             value: [],
-         }], new attListDeclaration.PToken({ open: SToken.fromString('<!') })),
+         }]),
       ], done);
    });
 

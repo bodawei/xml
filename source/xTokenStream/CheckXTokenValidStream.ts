@@ -4,13 +4,14 @@ import { Transform } from 'stream';
 
 import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
-import { NotationDeclarationXToken } from 'xToken';
-import { SToken, strOrBlank } from 'sToken';
+import { AttListDeclarationPToken } from 'pToken';
+import { SToken } from 'sToken';
+import { CHARREF_XTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN, AttListDeclarationXToken, AttDefinitionXToken, NotationDeclarationXToken } from 'xToken';
+
 import {
    isTextXToken,
 
    elementDeclaration,
-   attListDeclaration,
    DocTypeEndXToken,
    DocTypeStartXToken,
    ElementEmptyXToken,
@@ -44,9 +45,7 @@ import {
    TextXToken,
    UnassignedType,
 } from 'token';
-import { CHARREF_XTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 
-import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import nameList, { XName } from '../token/contentspec/nameList';
@@ -64,12 +63,12 @@ type ElementAttributes = {
 };
 
 type AttInfo = {
-   def: AttDefXToken;
+   def: AttDefinitionXToken;
    externallyDeclared: boolean; // §2.9
 }
 
 type AttDefinitions = {
-   tokens: Array<AttListXToken>;
+   tokens: Array<AttListDeclarationXToken>;
    attributes: {
       [attrName: string]: AttInfo;
    };
@@ -118,7 +117,7 @@ type IDMap = {
    };
 };
 
-type AttributeMap = { [name: string]: AttributeXToken };
+type AttributeMap = { [name: string]: AttDefinitionXToken };
 
 type EntityInfo = {
    token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken;
@@ -203,7 +202,7 @@ class CheckXTokenValidStream extends Transform {
     * This should be done whether or not we are validating.
     */
    normalizeAttributeValue(attribute: any, attInfo: AttInfo | void, elName: string, pToken: any): any { // typeHack
-      const attrDef: AttDefXToken | void = attInfo ? attInfo.def : undefined;
+      const attrDef: AttDefinitionXToken | void = attInfo ? attInfo.def : undefined;
       const externallyDeclared = attInfo ? attInfo.externallyDeclared : false;
       const isCData = !attrDef || attrDef.type === 'CDATA';
       let prevHadTrailingSpace = true; // consider the start to already be space terminated
@@ -619,7 +618,7 @@ class CheckXTokenValidStream extends Transform {
 
       if (xToken instanceof NotationDeclarationXToken) {
          this.validateNotationDeclaration(xToken);
-      } else if (xToken instanceof attListDeclaration.XToken) {
+      } else if (xToken instanceof AttListDeclarationXToken) {
          this.validateAttListDecl(xToken);
       } else if (xToken instanceof GeneralEntityDeclarationXToken || xToken instanceof ParameterEntityDeclarationXToken) {
          this.entityInfo[xToken.name] = {
@@ -742,7 +741,7 @@ class CheckXTokenValidStream extends Transform {
       this.notations[notationDecl.name] = notationDecl;
    }
 
-   private validateAttListDecl(attListDecl: AttListXToken) {
+   private validateAttListDecl(attListDecl: AttListDeclarationXToken) {
       const openSToken = attListDecl.pToken && attListDecl.pToken.open;
       const elName = attListDecl.elementName;
       let attrDefs = this.attrDefsByElementName[elName];
@@ -800,10 +799,10 @@ class CheckXTokenValidStream extends Transform {
       }
    }
 
-   private validateAttrDef(attList: AttListXToken, attDef: AttDefXToken): void {
+   private validateAttrDef(attList: AttListDeclarationXToken, attDef: AttDefinitionXToken): void {
       const type = attDef.type.toUpperCase();
       const defaultType = attDef.defaultType.toUpperCase();
-      const pToken = attList.pToken || {} as AttListPToken; // typeHack
+      const pToken = attList.pToken || {} as AttListDeclarationPToken; // typeHack
       const oneDotZeroRev3OrHigher = this.confVer.version === 1.1 || (this.confVer.version === 1 && this.confVer.revision > 2);
       const defaultText = getAttributeValueText(attDef);
       const hasDefault = attDef.value.length > 0;
@@ -1332,7 +1331,7 @@ class CheckXTokenValidStream extends Transform {
          attributes[index].value = this.normalizeAttributeValue(attributes[index], attrInfo,
             elName, pTokenOpen);
 
-         attributesByName[attrName] = attributes[index];
+         attributesByName[attrName] = attributes[index] as any; // typehack
       }
 
       if (elemAttrDef) { // This must be required somewhere...
@@ -1360,6 +1359,8 @@ class CheckXTokenValidStream extends Transform {
                   newAttribute = {
                      name: attDefName,
                      value: attDef.value,
+                     type: '',
+                     defaultType: '',
                   };
 
                   //
@@ -1382,7 +1383,7 @@ class CheckXTokenValidStream extends Transform {
                   attributesByName[attDefName] = newAttribute;
                   (attributes as any).push(newAttribute); //typeHack
                } else if (!attribute.value || attribute.value.length === 0) {
-                  attribute.value = attDef.value;
+                  (attribute as any).value = attDef.value; // ick typehack
                }
             }
          }

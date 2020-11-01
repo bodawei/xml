@@ -1,13 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { CONFORMANCE_VERSION, ConformanceVersion } from 'basic';
-import { ParseValue } from 'pToken';
+import { AttListDeclarationPToken, ATTLIST_DECLARATION_PTOKEN, ParseValue } from 'pToken';
 import { strOrBlank, toSToken, SToken } from 'sToken';
 
 // ick
 import {
-   ATTLISTDECL_PTOKEN_TYPE,
-   AttListPToken,
    ELEMENT_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
    ElementStartPToken,
@@ -211,7 +209,7 @@ class AttFixer {
          case CONFORMANCE_VERSION:
             this.confVer = this.confVer ?? input;
             break;
-         case ATTLISTDECL_PTOKEN_TYPE:
+         case ATTLIST_DECLARATION_PTOKEN:
             this.captureAttributeDetails(input);
             break;
          case ELEMENT_START_PTOKEN:
@@ -229,7 +227,7 @@ class AttFixer {
     * Extract information we need fro ATTLIST declaration, and
     * store for later use.
     */
-   private captureAttributeDetails(attList: AttListPToken): void {
+   private captureAttributeDetails(attList: AttListDeclarationPToken): void {
       const elementName = strOrBlank(attList.elementName);
 
       if (elementName === '') {

@@ -3,11 +3,10 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { TextDeclarationPToken } from 'pToken';
+import { AttListDeclarationPToken, TextDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
-   AttListPToken,
    CommentPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -52,7 +51,7 @@ describe('MarkupDeclChecker (unit)', () => {
    let ec: MockErrorCollector;
    let checker: MarkupDeclChecker;
    let checkState: CheckState;
-   let attributeListDeclaration: AttListPToken;
+   let attributeListDeclaration: AttListDeclarationPToken;
    let comment: CommentPToken;
    let generalEntityDeclaration: GeneralEntityDeclarationPToken;
    let generalEntityReference: GeneralEntityReferencePToken;
@@ -522,7 +521,7 @@ describe('MarkupDeclChecker (unit)', () => {
       describe('attribute content', () => {
          xit('reports an error in the case of unbalanced entity starts and ends', () => {
             const generalEntityStartTwo = new GeneralEntityStartPToken(generalEntityReference);
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {
@@ -546,7 +545,7 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports no errors when entity start and ends are properly blanced', () => {
             const generalEntityStartTwo = new GeneralEntityStartPToken(generalEntityReference);
             const generalEntityEndTwo = new GeneralEntityEndPToken(generalEntityReference);
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {
@@ -569,7 +568,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no error if a declared reference is found (§4.1.0)', () => {
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {
@@ -594,7 +593,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports an error if an undeclared reference is found (§4.1.0)', () => {
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {
@@ -617,7 +616,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no error if an undeclared reference is found but there is an external subset (logically wrong, but matches the spec) (§4.1.0)', () => {
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {
@@ -637,7 +636,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no error if an undeclared reference is found, no external subset, but there are perefs before the attlist (§4.1.0)', () => {
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {
@@ -657,7 +656,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports an error if an entity references an external entiy (§3.1.0)', () => {
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {
@@ -687,7 +686,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports an error when unparsed entity referenced from attr value (§4.1.0)', () => {
-            const attList = new AttListPToken({
+            const attList = new AttListDeclarationPToken({
                open: toSToken('<'),
                attDefs: [
                   {

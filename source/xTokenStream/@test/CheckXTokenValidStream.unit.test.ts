@@ -9,7 +9,6 @@ import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from 'sToken';
 import nameList from '../../token/contentspec/nameList';
 import {
-   attListDeclaration,
    elementDeclaration,
 
    SPACE_XTOKEN,
@@ -44,9 +43,8 @@ import {
    UnassignedType,
 } from 'token';
 import { makeDocTypeEnd } from 'token-test';
-import { CharRefXToken, NotationDeclarationXToken,ParameterEntityReferenceXToken,  GeneralEntityReferenceXToken,  ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
+import { AttListDeclarationXToken, CharRefXToken, NotationDeclarationXToken,ParameterEntityReferenceXToken,  GeneralEntityReferenceXToken,  ProcessingInstructionXToken,   XmlDeclarationXToken } from 'xToken';
 
-import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
@@ -169,10 +167,10 @@ describe('CheckXTokenValidStream (unit)', () => {
    describe('write()', () => {
 
       describe('ElementStart tokens', () => {
-         let attListDecl: AttListXToken;
+         let attListDecl: AttListDeclarationXToken;
 
          beforeEach(() => {
-            attListDecl = new attListDeclaration.XToken('one', [{
+            attListDecl = new AttListDeclarationXToken('one', [{
                name: 'first',
                type: 'CDATA',
                value: [],
@@ -263,7 +261,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports an error if a required attribute was not included on the attribute', (done) => {
             const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined);
-            attListDecl.attDefs.push({
+            (attListDecl.attDefs as any).push({
                name: 'needed',
                type: 'CDATA',
                value: [],
@@ -286,12 +284,13 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports no error if a required attribute was specified', (done) => {
             const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined);
-            attListDecl.attDefs.push({
+            attListDecl = new AttListDeclarationXToken(attListDecl.elementName, [...attListDecl.attDefs, 
+            {
                name: 'needed',
                type: 'CDATA',
                value: [],
                defaultType: '#REQUIRED',
-            });
+            }]);
             const startToken = new ElementStartXToken('one', [{
                name: 'needed',
                value: []
@@ -324,7 +323,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('replaces non-space white characters with spaces in CDATA', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [],
@@ -351,7 +350,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('replaces non-space white characters with spaces in a non-CDATA attribute', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'idRefs',
                   type: 'IDREFS',
                   value: [],
@@ -386,7 +385,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
                validator.write(new ExternalSubsetStartToken());
                validator.write(new elementDeclaration.XToken('testEl', 'ANY', undefined));
-               validator.write(new attListDeclaration.XToken('testEl', [{
+               validator.write(new AttListDeclarationXToken('testEl', [{
                   name: 'idRefs',
                   type: 'IDREFS',
                   value: [],
@@ -413,7 +412,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, false));
                validator.write(new ExternalSubsetStartToken());
                validator.write(new elementDeclaration.XToken('testEl', 'ANY', undefined));
-               validator.write(new attListDeclaration.XToken('testEl', [{
+               validator.write(new AttListDeclarationXToken('testEl', [{
                   name: 'idRefs',
                   type: 'IDREFS',
                   value: [],
@@ -435,7 +434,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('treats an unknown attribute as CDATA', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'idRefs',
                   type: 'IDREFS',
                   value: [],
@@ -486,7 +485,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('adds an attribute with a default value if no attribute was on the original start token', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('the default value')],
@@ -508,7 +507,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('adds a default value to an attribute if, somehow, it has no value but the attr is still defined', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('the default value')],
@@ -533,7 +532,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('adds a default value to an attribute if, somehow, it has an empty value but the attr is still defined', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('the default value')],
@@ -558,7 +557,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('does not add the default value if an attribute already has a value', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('the default value')],
@@ -583,7 +582,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if a #FIXED attribute does not match the declared default', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('oneTwo')],
@@ -606,7 +605,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error if a #FIXED attribute matches the declared default', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('oneTwo')],
@@ -627,7 +626,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error if a #FIXED attribute is not specified on the start attribute', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('oneTwo')],
@@ -645,7 +644,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an attribute default must be added, and the declration was external (§2.9)', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('the default value')],
@@ -668,7 +667,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error if an attribute default must be added, and the declration was not external (§2.9)', (done) => {
                const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
                   value: [new TextXToken('the default value')],
@@ -692,7 +691,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an ID value is not a name', (done) => {
                const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('one', [{
+               const attListDecl1 = new AttListDeclarationXToken('one', [{
                   name: 'idAttr',
                   type: 'ID',
                   value: [],
@@ -718,7 +717,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('it calls isName() with the entity meta data', (done) => {
                const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('one', [{
+               const attListDecl1 = new AttListDeclarationXToken('one', [{
                   name: 'idAttr',
                   type: 'ID',
                   value: [],
@@ -746,14 +745,14 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an ID value is used twice', (done) => {
                const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('one', [{
+               const attListDecl1 = new AttListDeclarationXToken('one', [{
                   name: 'idAttr',
                   type: 'ID',
                   value: [],
                   defaultType: '#REQUIRED',
                }]);
                const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined);
-               const attListDecl2 = new attListDeclaration.XToken('two', [{
+               const attListDecl2 = new AttListDeclarationXToken('two', [{
                   name: 'id',
                   type: 'ID',
                   value: [],
@@ -787,14 +786,14 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an ID value built from an entity reference is used twice', (done) => {
                const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined);
-               const attListDecl1 = new attListDeclaration.XToken('one', [{
+               const attListDecl1 = new AttListDeclarationXToken('one', [{
                   name: 'idAttr',
                   type: 'ID',
                   value: [],
                   defaultType: '#REQUIRED',
                }]);
                const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined);
-               const attListDecl2 = new attListDeclaration.XToken('two', [{
+               const attListDecl2 = new AttListDeclarationXToken('two', [{
                   name: 'id',
                   type: 'ID',
                   value: [],
@@ -832,12 +831,12 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('IDREF attribute', () => {
             let elDecl: ElementDeclaration;
             let endElName: any;
-            let attListDecl: AttListXToken;
+            let attListDecl: AttListDeclarationXToken;
             let startToken: ElementStartXToken;
 
             beforeEach(() => {
                elDecl = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-               attListDecl = new attListDeclaration.XToken('testEl', [{
+               attListDecl = new AttListDeclarationXToken('testEl', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   value: [],
@@ -895,7 +894,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an IDREFS values are not all names', (done) => {
-               attListDecl = new attListDeclaration.XToken('elName', [{
+               attListDecl = new AttListDeclarationXToken('elName', [{
                   name: 'idRefsAttr',
                   type: 'IDREFS',
                   value: [],
@@ -919,7 +918,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if an IDREF references an ID named before the IDREF is found', (done) => {
-               attListDecl = new attListDeclaration.XToken('testEl', [{
+               attListDecl = new AttListDeclarationXToken('testEl', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   value: [],
@@ -949,7 +948,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if an IDREF references an ID named after the IDREF is found', (done) => {
-               attListDecl = new attListDeclaration.XToken('testEl', [{
+               attListDecl = new AttListDeclarationXToken('testEl', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   value: [],
@@ -979,7 +978,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an IDREF references an ID that is never found', (done) => {
-               attListDecl = new attListDeclaration.XToken('testEl', [{
+               attListDecl = new AttListDeclarationXToken('testEl', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   value: [],
@@ -1011,7 +1010,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports an error if an IDREFS references an ID that is never found', (done) => {
                const elDecl2 = new elementDeclaration.XToken('testEl2', 'ANY', undefined);
                const openSToken = SToken.fromString('<');
-               const attListDecl2 = new attListDeclaration.XToken('testEl2', [{
+               const attListDecl2 = new AttListDeclarationXToken('testEl2', [{
                   name: 'idRefsAttr',
                   type: 'IDREFS',
                   value: [],
@@ -1045,12 +1044,12 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('ENTITY attribute', () => {
             let elDecl: ElementDeclaration;
-            let attListDecl: AttListXToken;
+            let attListDecl: AttListDeclarationXToken;
             let startToken: ElementStartXToken;
 
             beforeEach(() => {
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined);
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'entityAttr',
                   type: 'ENTITY',
                   value: [],
@@ -1109,7 +1108,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an ENTITIES values are not all names', (done) => {
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
                   value: [],
@@ -1156,7 +1155,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if one or more ENTITIES names are unknown entities', (done) => {
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
                   value: [],
@@ -1181,7 +1180,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an ENTITIES value names a parsed entity', (done) => {
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
                   value: [],
@@ -1211,12 +1210,12 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('NMTOKEN attribute', () => {
             let elDecl: ElementDeclaration;
-            let attListDecl: AttListXToken;
+            let attListDecl: AttListDeclarationXToken;
             let startToken: ElementStartXToken;
 
             beforeEach(() => {
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined);
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'nmTokenAttr',
                   type: 'NMTOKEN',
                   value: [],
@@ -1273,7 +1272,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an NMTOKENS attribute has values that are not all Nmtokens', (done) => {
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'nmTokenAttr',
                   type: 'NMTOKENS',
                   value: [],
@@ -1302,14 +1301,14 @@ describe('CheckXTokenValidStream (unit)', () => {
             let n1: NotationDeclarationXToken;
             let n2: NotationDeclarationXToken;
             let elDecl: ElementDeclaration;
-            let attListDecl: AttListXToken;
+            let attListDecl: AttListDeclarationXToken;
             let startToken: ElementStartXToken;
 
             beforeEach(() => {
                n1 = new NotationDeclarationXToken('first');
                n2 = new NotationDeclarationXToken('second');
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined);
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'notationAttr',
                   type: 'NOTATION',
                   enumeration: ['first', 'second'],
@@ -1336,7 +1335,12 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error when the enumeration is empty so any notation value is illegal', (done) => {
-               delete attListDecl.attDefs[0].enumeration;
+               attListDecl = new AttListDeclarationXToken(attListDecl.elementName, [{
+                  name: 'notationAttr',
+                  type: 'NOTATION',
+                  value: [],
+                  defaultType: '#REQUIRED',
+               }]);
 
                validator.write(n1);
                validator.write(n2);
@@ -1374,12 +1378,12 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('ENUMERATION attribute', () => {
             let elDecl: ElementDeclaration;
-            let attListDecl: AttListXToken;
+            let attListDecl: AttListDeclarationXToken;
             let startToken: ElementStartXToken;
 
             beforeEach(() => {
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined);
-               attListDecl = new attListDeclaration.XToken('testElement', [{
+               attListDecl = new AttListDeclarationXToken('testElement', [{
                   name: 'enumerationAttr',
                   type: 'ENUMERATION',
                   enumeration: ['first', 'second'],
@@ -1404,7 +1408,12 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error when an the enumeration is empty', (done) => {
-               delete attListDecl.attDefs[0].enumeration;
+               attListDecl = new AttListDeclarationXToken(attListDecl.elementName, [{
+                  name: 'enumerationAttr',
+                  type: 'ENUMERATION',
+                  value: [],
+                  defaultType: '#REQUIRED',
+               }]);
 
                validator.write(elDecl);
                validator.write(attListDecl);
@@ -1439,11 +1448,11 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
 
       describe('EmptyElement tokens', () => {
-         let attlist: AttListXToken;
+         let attlist: AttListDeclarationXToken;
          let element;
 
          beforeEach(() => {
-            attlist = new attListDeclaration.XToken('one', [{
+            attlist = new AttListDeclarationXToken('one', [{
                name: 'first',
                type: 'CDATA',
                value: [],
@@ -1496,22 +1505,20 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('adds an error if the ATTLIST name shows up more than once', (done) => {
             const openSToken = SToken.fromString('<!');
-            const aOne = new attListDeclaration.XToken('one', []);
-            const aTwo = new attListDeclaration.XToken('one', [], new AttListPToken({
-               open: openSToken,
-            }));
+            const aOne = new AttListDeclarationXToken('one', []);
+            const aTwo = new AttListDeclarationXToken('one', []);
 
             validator.write(aOne);
             validator.write(aTwo);
             validator.end();
 
-            const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, ['one'], openSToken, openSToken);
+            const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, ['one']);
             expectStream(validator, expected, done);
          });
 
          it('does not blow up if the ATTLIST has no pToken', (done) => {
-            const aOne = new attListDeclaration.XToken('one', []);
-            const aTwo = new attListDeclaration.XToken('one', []);
+            const aOne = new AttListDeclarationXToken('one', []);
+            const aTwo = new AttListDeclarationXToken('one', []);
 
             validator.write(aOne);
             validator.write(aTwo);
@@ -1523,7 +1530,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports no warnings if the related ELEMENT declaration is already present', (done) => {
             const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
-            const attDecl = new attListDeclaration.XToken('elementType', []);
+            const attDecl = new AttListDeclarationXToken('elementType', []);
 
             validator.write(elDecl);
             validator.write(attDecl);
@@ -1533,7 +1540,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('reports a warning if the related ELEMENT declaration is not present', (done) => {
-            const attListDecl = new attListDeclaration.XToken('elementType', []);
+            const attListDecl = new AttListDeclarationXToken('elementType', []);
 
             validator.write(attListDecl);
             validator.end();
@@ -1545,7 +1552,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('has no problems if the PToken is not provided', (done) => {
             const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
-            const attListDecl = new attListDeclaration.XToken('elementType', [{
+            const attListDecl = new AttListDeclarationXToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
                value: [],
@@ -1561,7 +1568,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports no errors if an ID attribute is well defined', (done) => {
             const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
-            const attListDecl = new attListDeclaration.XToken('elementType', [{
+            const attListDecl = new AttListDeclarationXToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
                value: [],
@@ -1576,7 +1583,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('reports an error if an attribute is of type ID but does not have value #IMPLIED or #REQUIRED', (done) => {
-            const attListDecl = new attListDeclaration.XToken('elementType', [{
+            const attListDecl = new AttListDeclarationXToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
                value: [],
@@ -1593,7 +1600,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports an error if an ATTLIST for an element type has more than one attribute of type ID', (done) => {
             const endOfDocType = new DocTypeEndXToken();
-            const attListDecl = new attListDeclaration.XToken('elementType', [{
+            const attListDecl = new AttListDeclarationXToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
                value: [],
@@ -1623,7 +1630,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error on an enumeration declaration with preserve and default as values ', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'xml:space',
                   type: 'ENUMERATION',
                   enumeration: ['preserve', 'default'],
@@ -1640,7 +1647,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no error on an enumeration declaration with just preserve', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'xml:space',
                   type: 'ENUMERATION',
                   enumeration: ['preserve'],
@@ -1657,7 +1664,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error the xml:space type is not an enumeration', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'xml:space',
                   type: 'ID',
                   defaultType: '#REQUIRED',
@@ -1675,7 +1682,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error the xml:space type is an enumeration but the enumeration array is not present', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'xml:space',
                   type: 'ENUMERATION',
                   defaultType: '#REQUIRED',
@@ -1693,7 +1700,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error the xml:space name is not lower case', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'XML:SPACE',
                   type: 'ENUMERATION',
                   enumeration: ['default'],
@@ -1712,7 +1719,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error the xml:space type has no enumerated values specified', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'xml:space',
                   type: 'ENUMERATION',
                   enumeration: [],
@@ -1731,7 +1738,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error the xml:space type has a value in the wrong case', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'xml:space',
                   type: 'ENUMERATION',
                   enumeration: ['PRESERVE', 'default'],
@@ -1750,7 +1757,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error the xml:space type has an illegal value', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'xml:space',
                   type: 'ENUMERATION',
                   enumeration: ['bogus', 'default'],
@@ -1774,7 +1781,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('calls isName() to validate name', (done) => {
                spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idAttr',
                   type: 'ID',
                   defaultType: '#REQUIRED',
@@ -1795,7 +1802,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if the default value for an ID attribute is not a name', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idAttr',
                   type: 'ID',
                   defaultType: '#REQUIRED',
@@ -1820,7 +1827,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('calls isName() to validate name', (done) => {
                spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   defaultType: '#REQUIRED',
@@ -1841,7 +1848,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if the default value for an IDREF attribute is not a name', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   defaultType: '#REQUIRED',
@@ -1866,7 +1873,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('calls isName() to validate name', (done) => {
                spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idRefsAttr',
                   type: 'IDREFS',
                   defaultType: '#REQUIRED',
@@ -1887,7 +1894,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if the default value for an IDREFS attribute has a non-name', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idRefsAttr',
                   type: 'IDREFS',
                   defaultType: '#REQUIRED',
@@ -1912,7 +1919,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('calls isName() to validate name', (done) => {
                spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'entityAttr',
                   type: 'ENTITY',
                   defaultType: '#REQUIRED',
@@ -1933,7 +1940,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if the default value for an IDREF attribute is not a name', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'entityAttr',
                   type: 'ENTITY',
                   defaultType: '#REQUIRED',
@@ -1958,7 +1965,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('calls isName() to validate name', (done) => {
                spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
                   defaultType: '#REQUIRED',
@@ -1979,7 +1986,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if the default value for an ENTITIES attribute has a non-name', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
                   defaultType: '#REQUIRED',
@@ -1999,7 +2006,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no errors if the default value for an ENTITIES attribute are all good', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'entitiesAttr',
                   type: 'ENTITIES',
                   defaultType: '#REQUIRED',
@@ -2023,7 +2030,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('calls util.isNmToken() to validate name', (done) => {
                spyOn(basic, 'isNmToken').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'nmTokenAttr',
                   type: 'NMTOKEN',
                   defaultType: '#REQUIRED',
@@ -2043,7 +2050,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
             it('reports an error if the default value for an NMTOKEN attribute is not a name', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'nmTokenAttr',
                   type: 'NMTOKEN',
                   defaultType: '#REQUIRED',
@@ -2068,7 +2075,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('calls util.isNmToken() to validate name', (done) => {
                spyOn(basic, 'isNmToken').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'nmTokenAttr',
                   type: 'NMTOKENS',
                   defaultType: '#REQUIRED',
@@ -2088,7 +2095,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
             it('reports an error if the default value for an NMTOKENS attribute is not a name', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'nmTokensAttr',
                   type: 'NMTOKENS',
                   defaultType: '#REQUIRED',
@@ -2108,7 +2115,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no errors if the default value for an NMTOKENS attribute are all good', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'nmTokensAttr',
                   type: 'NMTOKENS',
                   defaultType: '#REQUIRED',
@@ -2131,7 +2138,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             function setup(ver: ConformanceVersion) {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
                   enumeration: [],
@@ -2160,7 +2167,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             function setupEmptyElement(ver: ConformanceVersion) {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
                   enumeration: [],
@@ -2186,7 +2193,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const notation1 = new NotationDeclarationXToken('first', undefined);
                const notation2 = new NotationDeclarationXToken('second', undefined);
                const notation3 = new NotationDeclarationXToken('third', undefined);
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'notationAttr',
                   type: 'NOTATION',
                   enumeration: ['first', 'second', 'first', 'third', 'third', 'first'],
@@ -2207,7 +2214,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports an error if a notation value used in an ATTLIST has not been declared by end of DTD', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
                const notation = new NotationDeclarationXToken('first', undefined);
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
                   enumeration: ['first', 'second'],
@@ -2297,7 +2304,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const notation1 = new NotationDeclarationXToken('first');
                const notation2 = new NotationDeclarationXToken('second');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'noteAttr',
                   type: 'NOTATION',
                   enumeration: ['first', 'second'],
@@ -2325,7 +2332,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             function setupDuplicateEnumerationValues(ver: ConformanceVersion) {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'enumerationAttr',
                   type: 'ENUMERATION',
                   enumeration: ['first', 'second', 'first', 'third', 'third', 'first'],
@@ -2365,7 +2372,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports no error if a 1.0/3 ATTLISTs ENUMERATION declaration has no duplicate nmTokens', (done) => {
                const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'enumerationAttr',
                   type: 'ENUMERATION',
                   enumeration: ['first', 'second'],
@@ -2384,7 +2391,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if the default value for a enumeration attribute does not match one of the defined values', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const attListDecl = new attListDeclaration.XToken('elementType', [{
+               const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'noteAttr',
                   type: 'ENUMERATION',
                   enumeration: ['first', 'second'],
@@ -2407,7 +2414,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('ignores attribute declarations after the first encountered', (done) => {
             const endOfDocType = new DocTypeEndXToken();
-            const attListDecl1 = new attListDeclaration.XToken('elementType', [{
+            const attListDecl1 = new AttListDeclarationXToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
                value: [],
@@ -2418,7 +2425,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                value: [],
                defaultType: '#REQUIRED',
             }]);
-            const attListDecl2 = new attListDeclaration.XToken('elementType', [{
+            const attListDecl2 = new AttListDeclarationXToken('elementType', [{
                name: 'anAttribute',
                type: 'ID', // This would cause us to have two ID's, if this were honored
                value: [],
@@ -2440,7 +2447,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports a warning if more than one attribute definition is provided for an attribute', (done) => {
             const endOfDocType = new DocTypeEndXToken();
-            const attListDecl1 = new attListDeclaration.XToken('elementType', [{
+            const attListDecl1 = new AttListDeclarationXToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
                value: [],
@@ -2451,7 +2458,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                value: [],
                defaultType: '#REQUIRED',
             }]);
-            const attListDecl2 = new attListDeclaration.XToken('elementType', [{
+            const attListDecl2 = new AttListDeclarationXToken('elementType', [{
                name: 'anAttribute',
                type: 'ID', // This would cause us to have two ID's, if this were honored
                value: [],
@@ -2470,7 +2477,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports an error if an attribute default has no declaration for a reference (§4.1)', (done) => {
             const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
-            const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+            const attListDecl1 = new AttListDeclarationXToken('testEl', [{
                name: 'textAttr',
                type: 'CDATA',
                value: [new GeneralEntityReferenceXToken('foo')],
@@ -3216,7 +3223,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if used as an ENTITY attribute value and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ElementDeclaration('testEl', 'ANY'));
-            validator.write(new attListDeclaration.XToken('testEl', [{
+            validator.write(new AttListDeclarationXToken('testEl', [{
                name: 'entityAttr',
                type: 'ENTITY',
                value: [],
@@ -3246,7 +3253,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new ParameterEntityEndXToken('someEntity'));
             validator.write(new InternalSubsetStartToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
-            validator.write(new attListDeclaration.XToken('testEl', [{
+            validator.write(new AttListDeclarationXToken('testEl', [{
                name: 'cdataAttr',
                type: 'CDATA',
                value: [
@@ -3270,7 +3277,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new ParameterEntityEndXToken('someEntity'));
             validator.write(new GeneralEntityDeclarationXToken('intDeclEntity', []));
             validator.write(new ElementDeclaration('testEl', 'ANY'));
-            validator.write(new attListDeclaration.XToken('testEl', [{
+            validator.write(new AttListDeclarationXToken('testEl', [{
                name: 'cdataAttr',
                type: 'CDATA',
                value: [
@@ -3314,7 +3321,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
-            validator.write(new attListDeclaration.XToken('testEl', [{
+            validator.write(new AttListDeclarationXToken('testEl', [{
                name: 'entityAttr',
                type: 'ENTITY',
                value: [
@@ -3335,7 +3342,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
-            validator.write(new attListDeclaration.XToken('testEl', [{
+            validator.write(new AttListDeclarationXToken('testEl', [{
                name: 'entityAttr',
                type: 'ENTITIES',
                value: [

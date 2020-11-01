@@ -1273,7 +1273,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
    'ibm-not-wf-P43-ibm43n05.xml': {
       id: 'CONTENT_INVALID_TOKEN',
-      message: /ATTLISTDECL_PTOKEN_TYPE/,
+      message: /ATTLIST_DECLARATION_PTOKEN/,
    },
 
    // §3.1 EmptyElemTag

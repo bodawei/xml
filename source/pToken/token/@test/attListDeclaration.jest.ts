@@ -7,7 +7,7 @@ import { MockSTokenSource } from 'sToken-test';
 import {
    AttListDeclarationPToken,
    parseAttListDeclaration,
-   resumeParseAttDeclaration,
+   resumeParseAttListDeclaration,
 } from '../attListDeclaration';
 import { parseUnexpanded } from '../../common/parseUnexpanded';
 
@@ -833,7 +833,7 @@ describe('AttListDeclaration (unit)', () => {
       });
    });
 
-   describe('resumeParseAttDeclaration()', () => {
+   describe('resumeParseAttListDeclaration()', () => {
       beforeEach(() => {
          (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) =>
             done(),
@@ -863,7 +863,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   elementName: toSToken('elName'),
@@ -907,7 +907,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -954,7 +954,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1011,7 +1011,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1069,7 +1069,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(parseWordList).toHaveBeenCalledWith(
                mockSource,
                WordListType.NOTATION,
@@ -1118,7 +1118,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(parseWordList).toHaveBeenCalledWith(
                mockSource,
                WordListType.ENUMERATION,
@@ -1167,7 +1167,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1208,7 +1208,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1247,7 +1247,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1288,7 +1288,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1326,7 +1326,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1366,7 +1366,7 @@ describe('AttListDeclaration (unit)', () => {
             },
          });
 
-         resumeParseAttDeclaration(mockSource, pToken, (result) => {
+         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [

@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import { NotationDeclarationPToken, ParseValue } from 'pToken';
+import { AttListDeclarationPToken, NotationDeclarationPToken, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 // circular dependency problem
@@ -9,7 +9,6 @@ import {
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    ElidedEntityDeclarationPToken,
 } from '../token/ElidedEntityDeclarationPToken';
-import attListDeclaration from '../token/attListDeclaration';
 import { CONDITIONAL_PTOKEN, ConditionalPToken } from '../token/conditional';
 import { CONDITIONAL_CLOSE_PTOKEN } from '../token/conditionalClose';
 import { COMMENT_PTOKEN } from '../token/comment';
@@ -40,11 +39,11 @@ import { SPACE_PTOKEN } from '../token/space';
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
 
-import attListDecl, { AttListPToken } from '../token/attListDeclaration';
 import { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken } from '../token/elementDeclaration';
 import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
+import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
 
 import {
    CHECKER_DONE,
@@ -85,7 +84,7 @@ const transitionsByState: StateTable = {
       // §2.8.0 [30]
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
-      [attListDecl.PTYPE]: States.EXTERNAL_SUBSET,
+      [ATTLIST_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
@@ -103,7 +102,7 @@ const transitionsByState: StateTable = {
       [CONDITIONAL_PTOKEN]: States.EXTERNAL_SUBSET,
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
-      [attListDecl.PTYPE]: States.EXTERNAL_SUBSET,
+      [ATTLIST_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
@@ -119,7 +118,7 @@ const transitionsByState: StateTable = {
       // §2.8.0 [30]
       [TEXTDECL_PTOKEN]: States.INTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
-      [attListDecl.PTYPE]: States.INTERNAL_SUBSET,
+      [ATTLIST_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
@@ -136,7 +135,7 @@ const transitionsByState: StateTable = {
       [CONDITIONAL_PTOKEN]: NO_CHANGE,
       [CONDITIONAL_CLOSE_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
-      [attListDecl.PTYPE]: NO_CHANGE,
+      [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
@@ -151,7 +150,7 @@ const transitionsByState: StateTable = {
       // §2.8.0 [30], [31]
       [CONDITIONAL_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
-      [attListDecl.PTYPE]: NO_CHANGE,
+      [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
@@ -167,7 +166,7 @@ const transitionsByState: StateTable = {
    [States.INTERNAL_SUBSET]: {
       // §2.8.0 [28a], [28b], [29]
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
-      [attListDecl.PTYPE]: NO_CHANGE,
+      [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
@@ -269,7 +268,7 @@ function checkForRecursionInValue(
 
 function checkDeclaration(
    pToken:
-      | AttListPToken
+      | AttListDeclarationPToken
       | ElementDeclarationPToken
       | NotationDeclarationPToken
       | GeneralEntityDeclarationPToken
@@ -284,7 +283,7 @@ function checkDeclaration(
    //     occur in external parameter entities or to the external subset.)
    if (state === States.INTERNAL_SUBSET) {
       ec.check(
-         pToken.type === NOTATION_DECLARATION_PTOKEN
+         pToken.type === NOTATION_DECLARATION_PTOKEN || pToken.type === ATTLIST_DECLARATION_PTOKEN
             ? pToken.unexpanded
             : pToken.peRefPlus.length > 0,
          WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
@@ -382,15 +381,15 @@ class MarkupDeclChecker implements Checker {
       }
 
       switch (pToken.type) {
-         case attListDeclaration.PTYPE:
+         case ATTLIST_DECLARATION_PTOKEN:
             scanAttributeValues(
-               (pToken as AttListPToken).attDefs,
+               pToken.attDefs,
                this.checkState.generalDecls,
                this.checkState,
                [], // not possible to have general entity context here
                errorCollector,
             );
-            checkDeclaration(pToken as any, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, errorCollector);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             checkDeclaration(pToken, this.state, errorCollector);

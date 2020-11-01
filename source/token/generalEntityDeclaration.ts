@@ -65,7 +65,7 @@ class GeneralEntityDeclarationPToken {
    public readonly nDataNameSpace?: SToken;
    public readonly close?: SToken;
    public readonly peRefPlus: UnassignedArray;
-   public readonly unassigned?: UnassignedArray;
+   public unassigned?: UnassignedArray;
    public readonly extra?: UnassignedArray;
    public readonly nextPropName?: string;
 

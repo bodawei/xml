@@ -7,7 +7,6 @@ import { SToken } from 'sToken';
 import {
    declaration,
 
-   attListDeclaration,
    elementDeclaration,
 
    CdataPToken,
@@ -53,15 +52,15 @@ describe('PToXTokenStream (unit)', () => {
       expect(declaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
-   it('calls attListDeclaration.pTokenToXToken()', () => {
-      spyOn(attListDeclaration, 'pTokenToXToken');
-      const pToken: any = { type: attListDeclaration.PTYPE };
+   // it('calls attListDeclaration.pTokenToXToken()', () => {
+   //    spyOn(attListDeclaration, 'pTokenToXToken');
+   //    const pToken: any = { type: attListDeclaration.PTYPE };
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(attListDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
-   });
+   //    expect(attListDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
+   // });
 
    it('calls cdata.pTokenToXToken()', () => {
       const pToken = new CdataPToken({ open: SToken.fromString('<![') });
@@ -103,25 +102,25 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls conditional.toXToken()', () => {
-      const pToken = new ConditionalPToken({ open: SToken.fromString('<[') });
-      const convertSpy = spyOn(xTokenStuff, 'conditionalSectionPTokenToXToken');
+   // it('calls conditional.toXToken()', () => {
+   //    const pToken = new ConditionalPToken({ open: SToken.fromString('<[') });
+   //    const convertSpy = spyOn(xTokenStuff, 'conditionalSectionPTokenToXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(convertSpy).toHaveBeenCalledWith(pToken);
-   });
+   //    expect(convertSpy).toHaveBeenCalledWith(pToken);
+   // });
 
-   it('calls conditionalClose.toXToken()', () => {
-      const pToken = new ConditionalClosePToken({ open: SToken.fromString(']]>') });
-      const convertSpy = spyOn(xTokenStuff, 'conditionalClosePTokenToXToken');
+   // it('calls conditionalClose.toXToken()', () => {
+   //    const pToken = new ConditionalClosePToken({ open: SToken.fromString(']]>') });
+   //    const convertSpy = spyOn(xTokenStuff, 'conditionalClosePTokenToXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(convertSpy).toHaveBeenCalledWith(pToken);
-   });
+   //    expect(convertSpy).toHaveBeenCalledWith(pToken);
+   // });
 
    it('calls ElementStartPToken.toXToken()', () => {
       const pToken = new ElementStartPToken({ open: SToken.fromString('<') });

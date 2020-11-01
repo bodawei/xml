@@ -1,7 +1,7 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
-import {    NotationDeclarationPToken,   ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
+import {    AttListDeclarationPToken, NotationDeclarationPToken,   ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import {
    CdataPToken,
@@ -26,14 +26,12 @@ import {
    SpacePToken,
    TextPToken,
    ParameterEntityDeclarationPToken,
-   attListDeclaration,
    elementDeclaration,
    CharDataPToken,
    CharRefPToken,
    ElementDeclarationPToken,
 } from 'token';
 import { AttrValue } from '../../token/common/attribute';
-import { AttListPToken } from '../attListDeclaration';
 
 const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
 const RANGE = new Range(new EntityId(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
@@ -42,19 +40,19 @@ function makeInsertedRange() {
    return RANGE.clone();
 };
 
-function makeAttListDeclaration(type = 'CDATA'): AttListPToken {
-   return new attListDeclaration.PToken({
+function makeAttListDeclaration(type = 'CDATA'): AttListDeclarationPToken {
+   return new AttListDeclarationPToken({
       open: toSToken('<!'),
       elementName: toSToken('elStart'),
-      postElementNameSpace: toSToken(' '),
+      elementNameSpace: toSToken(' '),
       attDefs: [
          {
             name: toSToken('att1'),
-            postNameSpace: toSToken(' '),
+            nameSpace: toSToken(' '),
             type: toSToken(type),
-            postTypeSpace: toSToken(' '),
+            typeSpace: toSToken(' '),
             defaultType: toSToken('#REQUIRED'),
-            postDefaultTypeSpace: toSToken(' '),
+            defaultTypeSpace: toSToken(' '),
             openQuote: toSToken('"'),
             value: [new TextPToken({ text: toSToken('x') })],
             closeQuote: toSToken('"'),

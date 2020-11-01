@@ -2,9 +2,11 @@
 /* eslint-env jasmine */
 
 import * as tokenNs from 'token';
+import { AttListDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
+import { AttListDeclarationXToken } from 'xToken';
+
 import { CommentXToken } from 'token';
-import attListDecl, { AttListPToken } from '../../token/attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../../token/elementDeclaration';
 
 import FixingStream from '../FixingStream';
@@ -15,12 +17,12 @@ type XToken = {
 
 describe('FixingStream (unit)', () => {
    let fs: FixingStream;
-   let dummyPToken: AttListPToken;
+   let dummyPToken: AttListDeclarationPToken;
    let dummyElPToken: ElementDeclarationPToken;
 
    beforeEach(() => {
       fs = new FixingStream();
-      dummyPToken = new attListDecl.PToken({ open: SToken.fromString('<!') });
+      dummyPToken = new AttListDeclarationPToken({ open: SToken.fromString('<!') });
       dummyElPToken = new elementDeclaration.PToken();
    });
 
@@ -50,12 +52,12 @@ describe('FixingStream (unit)', () => {
    describe('ATTLIST', () => {
 
       it('capitalizes a type if it is not capitalized', (done) => {
-         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+         const before = new AttListDeclarationXToken('elName', [{
             name: 'one',
             type: 'id',
             defaultType: '#IMPLIED',
             value: [],
-         }], dummyPToken);
+         }]);
 
          fs.write(before);
          fs.end();
@@ -67,12 +69,12 @@ describe('FixingStream (unit)', () => {
       });
 
       it('replaces an unknown type with CDATA', (done) => {
-         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+         const before = new AttListDeclarationXToken('elName', [{
             name: 'one',
             type: 'BOGUS',
             defaultType: '#IMPLIED',
             value: [],
-         }], dummyPToken);
+         }]);
 
          fs.write(before);
          fs.end();
@@ -91,7 +93,7 @@ describe('FixingStream (unit)', () => {
             value: [],
          };
          delete (value as any).type;
-         const before = new tokenNs.attListDeclaration.XToken('elName', [value], dummyPToken);
+         const before = new AttListDeclarationXToken('elName', [value]);
 
          fs.write(before);
          fs.end();
@@ -103,12 +105,12 @@ describe('FixingStream (unit)', () => {
       });
 
       it('capitalizes a default type if it is not capitalized', (done) => {
-         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+         const before = new AttListDeclarationXToken('elName', [{
             name: 'one',
             defaultType: '#required',
             type: 'ID',
             value: [],
-         }], dummyPToken);
+         }]);
 
          fs.write(before);
          fs.end();
@@ -120,12 +122,12 @@ describe('FixingStream (unit)', () => {
       });
 
       it('replaces an unknown type with #IMPLIED', (done) => {
-         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+         const before = new AttListDeclarationXToken('elName', [{
             name: 'one',
             defaultType: 'BOGUS',
             type: 'ID',
             value: [],
-         }], dummyPToken);
+         }]);
 
          fs.write(before);
          fs.end();

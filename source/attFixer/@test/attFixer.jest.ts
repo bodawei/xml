@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { AttListDeclarationPToken } from 'pToken';
 import { toSToken, SToken } from 'sToken';
 import {
    makeAttListDeclaration,
@@ -11,7 +12,6 @@ import {
 
 // ick
 import {
-   AttListPToken,
    ElementStartPToken,
    TextPToken,
    GeneralEntityReferencePToken,
@@ -571,7 +571,7 @@ describe('AttFixer', () => {
       });
 
       it('manufactures quote tokens when not provided', () => {
-         const attList = new AttListPToken({
+         const attList = new AttListDeclarationPToken({
             open: toSToken('<!'),
             elementName: toSToken('elStart'),
             attDefs: [

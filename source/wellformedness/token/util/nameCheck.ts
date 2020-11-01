@@ -10,7 +10,7 @@ import { SToken } from 'sToken';
 \**********************************************************************/
 
 function nameCheck(
-   nameSToken: SToken | void,
+   nameSToken: SToken | undefined,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
    errorCode: string,

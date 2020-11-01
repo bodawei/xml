@@ -8,7 +8,7 @@ import { CharRefPToken } from 'token';
 import { CharRefXToken } from '../charRefXToken';
 
 describe('CharRefXToken', () => {
-   it('creates an XToken from a charRefPToken', () => {
+   it('creates an XToken from a string', () => {
       const charRefPToken = makeCharRef();
       const xToken = new CharRefXToken(charRefPToken);
 
@@ -16,6 +16,15 @@ describe('CharRefXToken', () => {
          type: 'CHARREF_XTOKEN',
          char: String.fromCharCode(68),
          pToken: charRefPToken,
+      });
+   });
+
+   it('creates an XToken from a charRefPToken', () => {
+      const xToken = new CharRefXToken('a');
+
+      expect(xToken).toEqual({
+         type: 'CHARREF_XTOKEN',
+         char: 'a',
       });
    });
 

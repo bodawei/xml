@@ -3,11 +3,10 @@
 
 import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion,  } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { XMLDECL_PTOKEN, TEXTDECL_PTOKEN,ParseValue, ContextType } from 'pToken';
+import { XMLDECL_PTOKEN, TEXTDECL_PTOKEN,ParseValue, ContextType, ATTLIST_DECLARATION_PTOKEN } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import {
-   ATTLISTDECL_PTOKEN_TYPE,
    CHARREF_PTOKEN,
    DOCTYPE_START_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
@@ -242,7 +241,7 @@ describe('EntityExpanderStream (integration)', () => {
          gatherStream(
             entityExpander,
             (results) => {
-               const index = getIndex(results, ATTLISTDECL_PTOKEN_TYPE);
+               const index = getIndex(results, ATTLIST_DECLARATION_PTOKEN);
 
                const types = (results[index] as any).attDefs[0].value.map(
                   (token: any) => token.type,

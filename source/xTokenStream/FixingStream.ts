@@ -2,6 +2,7 @@
 
 import { Transform } from 'stream';
 
+import { AttListDeclarationXToken } from 'xToken';
 import * as tokenNs from 'token';
 import { ElementDeclaration, isXName } from '../token/elementDeclaration';
 import nameList, { XName, XNameList } from '../token/contentspec/nameList';
@@ -31,7 +32,7 @@ class FixingStream extends Transform {
    }
 
    _transform(token: any, encoding: string, callback: () => void) {
-      if (token instanceof tokenNs.attListDeclaration.XToken) {
+      if (token instanceof AttListDeclarationXToken) {
          adjustAttListDeclaration(token);
       } else if (token instanceof tokenNs.elementDeclaration.XToken) {
          adjustElementDeclaration(token);

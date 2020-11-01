@@ -2,7 +2,6 @@
 
 import declaration from './bridge/baseDeclaration';
 
-import attListDeclaration, { AttDefPToken, AttListPToken, ATTLISTDECL_PTOKEN_TYPE, parseAttListDeclaration } from './attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN } from './elementDeclaration';
 
 import { AttributeValuePToken, AttributeValueElement } from './common/attribute';
@@ -83,7 +82,6 @@ type XmlError = {
 
 type PToken =
 | XmlError
-   | AttListPToken
    | CommentPToken
    | CdataPToken
    | CharDataPToken
@@ -116,12 +114,9 @@ type PToken =
    export * from './getFirstSToken';
 
 export {
-   ATTLISTDECL_PTOKEN_TYPE,
    ELEMENT_DECLARATION_PTOKEN,
    ERROR_TYPE,
 
-   AttListPToken,
-   AttDefPToken,
    AttributeValueElement,
    ElementDeclarationPToken,
    ContentParticlePToken,
@@ -136,12 +131,10 @@ export {
    wordFromSToken,
    parseExternalId,
    parseAllUnassignedValues,
-   parseAttListDeclaration,
    parseWordList,
 
    declaration,
 
-   attListDeclaration,
    elementDeclaration,
 
    unassigned,

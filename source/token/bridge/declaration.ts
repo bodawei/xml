@@ -1,9 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ParseValue, parseNotationDeclaration, NotationDeclarationPToken } from 'pToken';
+import { ParseValue, parseAttListDeclaration, parseNotationDeclaration, AttListDeclarationPToken, NotationDeclarationPToken } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
-   attListDeclaration,
    elementDeclaration,
    parseDocTypeEnd,
    parseDocTypeStart,
@@ -23,7 +22,7 @@ type DeclarationStart = {
    declTypeSpace?: SToken,
 };
 
-type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseValue>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken) => void;
+type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseValue>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken| AttListDeclarationPToken) => void;
 
 /**********************************************************************\
  parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or
@@ -59,7 +58,7 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
             parseNotationDeclaration(source, start, deliverPToken);
             return;
          case 'ATTLIST':
-            attListDeclaration.parse(source, start, deliverPToken);
+            parseAttListDeclaration(source, start, deliverPToken);
             return;
          // When you finish this, need to do checkWellFormed on unknown types
       }
