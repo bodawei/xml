@@ -2,6 +2,19 @@
 
 import { EntityId, Range } from 'basic';
 
+function canFuseRanges(range1: Range, range2: Range): boolean {
+   const locationsSame = range1.entityId === range2.entityId;
+   const locationsEqual =
+      range1.entityId.systemId === range2.entityId.systemId &&
+      range1.entityId.publicId === range2.entityId.publicId;
+
+   if (locationsSame || locationsEqual) {
+      return range1.getEndOffset().equals(range2.getStartOffset());
+   }
+
+   return false;
+}
+
 /**********************************************************************\
  A SToken (String token) represents a unit of text. The originalText
  property contains the text exactly as it came from the source,
@@ -30,20 +43,22 @@ import { EntityId, Range } from 'basic';
 
 class SToken {
    public str: string;
+
    public originalStr: string;
+
    public ranges: Array<Range>;
 
-   static fromString(str: string) {
+   static fromString(str: string): SToken {
       return new SToken(str, str, new Range(new EntityId()));
    }
 
    constructor(str: string, originalStr: string, range: Range | Array<Range>) {
       this.str = str;
       this.originalStr = originalStr;
-      this.ranges = Array.isArray(range) ? range : [ range ];
+      this.ranges = Array.isArray(range) ? range : [range];
    }
 
-   clone() {
+   clone(): SToken {
       const clonedRanges = [];
       for (let index = 0; index < this.ranges.length; index++) {
          clonedRanges.push(this.ranges[index].clone());
@@ -51,11 +66,11 @@ class SToken {
       return new SToken(this.str, this.originalStr, clonedRanges);
    }
 
-   get firstRange() {
+   get firstRange(): Range | undefined {
       return this.ranges.length > 0 ? this.ranges[0] : undefined;
    }
 
-   get lastRange() {
+   get lastRange(): Range | undefined {
       const lastIndex = this.ranges.length - 1;
       return lastIndex >= 0 ? this.ranges[lastIndex] : undefined;
    }
@@ -72,7 +87,7 @@ class SToken {
     * range in this and the first in the other are the same),
     * the two ranges will be combined.
     */
-   merge(other: SToken) {
+   merge(other: SToken): SToken {
       const otherRanges = other.ranges;
 
       this.str += other.str;
@@ -88,9 +103,15 @@ class SToken {
             otherRanges.shift();
 
             // Create a new one which is the union of the two
-            const newLastRange = new Range(lastRange.entityId,
-               lastRange.startIndex, lastRange.startRow, lastRange.startColumn,
-               firstRange.endIndex, firstRange.endRow, firstRange.endColumn);
+            const newLastRange = new Range(
+               lastRange.entityId,
+               lastRange.startIndex,
+               lastRange.startRow,
+               lastRange.startColumn,
+               firstRange.endIndex,
+               firstRange.endRow,
+               firstRange.endColumn,
+            );
 
             // insert it in place of one of the originals.
             otherRanges.unshift(newLastRange);
@@ -101,17 +122,6 @@ class SToken {
 
       return this;
    }
-}
-
-function canFuseRanges(range1: Range, range2: Range) {
-   const locationsSame = range1.entityId === range2.entityId;
-   const locationsEqual = range1.entityId.systemId === range2.entityId.systemId && range1.entityId.publicId === range2.entityId.publicId;
-
-   if (locationsSame || locationsEqual) {
-      return range1.getEndOffset().equals(range2.getStartOffset());
-   }
-
-   return false;
 }
 
 export default SToken;

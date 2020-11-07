@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, Range, EntityId, CONFORMANCE_VERSION } from 'basic';
+import { Range, EntityId, CONFORMANCE_VERSION } from 'basic';
 import { Extractor, Segment, ExtractorMap, SegmentInfo } from 'extractor';
 
 import SToken from '../SToken';
@@ -10,8 +10,6 @@ import STokenSource from '../STokenSource';
 describe('STokenSource (unit)', () => {
    let sTokenSpy: jasmine.Spy;
    let source: STokenSource;
-   let confVer1dot0: ConformanceVersion;
-   let confVer1dot1: ConformanceVersion;
    let testExtractors: ExtractorMap;
 
    class AllExtractor extends Extractor {
@@ -122,8 +120,6 @@ describe('STokenSource (unit)', () => {
    }
 
    beforeEach(() => {
-      confVer1dot0 = new ConformanceVersion(1.0, 5);
-      confVer1dot1 = new ConformanceVersion(1.1, 2);
       testExtractors = {
          foo: Extractor,
          all: AllExtractor,
@@ -135,7 +131,6 @@ describe('STokenSource (unit)', () => {
    });
 
    describe('extractor definitions', () => {
-
       it('calls an extractor with a pre-defined parameter', () => {
          const testExtractors = {
             toy: {
@@ -167,22 +162,23 @@ describe('STokenSource (unit)', () => {
             expect(sToken!.str).toEqual('the lora');
          });
       });
-
    });
 
    describe('communication with extractors', () => {
-
       it('passes a version to the extractors', () => {
          let version: number;
          testExtractors = {
             test: class testExtractor extends Extractor {
                public _infos: Array<any>;
-               constructor (constructedVersion: number) {
+
+               constructor(constructedVersion: number) {
                   super(constructedVersion);
                   this._infos = [];
                   version = constructedVersion;
                   this.state = Extractor.STATE.SUCCESS;
-                  this.process = (segment) => { this._infos.push({ segment }); };
+                  this.process = (segment) => {
+                     this._infos.push({ segment });
+                  };
                   this.finish = () => {
                      return {
                         segments: this._infos,
@@ -212,7 +208,10 @@ describe('STokenSource (unit)', () => {
                this.state = Extractor.STATE.SUCCESS;
             }
 
-            process(segment: Segment) { this._infos.push({ segment }); }
+            process(segment: Segment) {
+               this._infos.push({ segment });
+            }
+
             finish() {
                return {
                   segments: this._infos,
@@ -243,16 +242,14 @@ describe('STokenSource (unit)', () => {
 
          source = new STokenSource(testExtractors);
          source.addText('1');
-         source.extract('peek', [ 'toXParam' ], () => {});
+         source.extract('peek', ['toXParam'], () => {});
 
          expect(version!).toEqual(1.0);
-         expect(params!).toEqual([ 'toXParam' ]);
+         expect(params!).toEqual(['toXParam']);
       });
-
    });
 
    describe('addText()', () => {
-
       it('accepts multiple calls without any extractors invoked', () => {
          source.addText('1');
          source.addText('22');
@@ -296,21 +293,31 @@ describe('STokenSource (unit)', () => {
 
          expect(source._segments[1].range).toEqual(testRange2);
       });
+   });
 
+   describe('addTokenBoundary()', () => {
+      it('adds a special marker segment to the list of segments (whitebox)', () => {
+         source.addText('1');
+         source.addTokenBoundary();
+         source.addText('333');
+
+         expect(source._segments).toEqual([
+            new Segment('1'),
+            new Segment('MARKER FOR DISCONTINUITY IN PROCESSING'),
+            new Segment('333'),
+         ]);
+      });
    });
 
    describe('endText()', () => {
-
       it('can be invoked when no segments have been added', () => {
          source.endText();
 
          // it does not hang!
       });
-
    });
 
    describe('extractToObject()', () => {
-
       it('extracts an SToken to the property of the provided object', (done) => {
          const obj: { [propName: string]: any } = {};
          source.addText('1');
@@ -334,11 +341,9 @@ describe('STokenSource (unit)', () => {
             done();
          });
       });
-
    });
 
    describe('extract()', () => {
-
       it('throws an error if type is not known', () => {
          expect(() => {
             source.extractNoParams('bogus', () => {});
@@ -361,6 +366,7 @@ describe('STokenSource (unit)', () => {
       it('enqueues the specified extractors (whitebox)', () => {
          class FooExtractor extends Extractor {
             public params: any;
+
             constructor(version: number, params: any) {
                super(version);
                this.params = params;
@@ -377,9 +383,9 @@ describe('STokenSource (unit)', () => {
 
       it('can be called multiple times before any text added', (done) => {
          let first: SToken | void;
-         source.extractNoParams('tox', (sToken) => first = sToken)
+         source.extractNoParams('tox', (sToken) => (first = sToken));
          source.extractNoParams('all', (sToken) => {
-            expect([(first as any).str, sToken!.str ]).toEqual([ ' 123', 'xTest' ]); // EXPECT
+            expect([(first as any).str, sToken!.str]).toEqual([' 123', 'xTest']); // EXPECT
             done();
          });
 
@@ -392,26 +398,53 @@ describe('STokenSource (unit)', () => {
          source.addText(' 456xTest');
          source.endText();
 
-         source.extractNoParams('tox', (sToken) => first = sToken)
+         source.extractNoParams('tox', (sToken) => (first = sToken));
          source.extractNoParams('all', (sToken) => {
-            expect([(first as any).str, sToken!.str ]).toEqual([ ' 456', 'xTest' ]); // EXPECT
+            expect([(first as any).str, sToken!.str]).toEqual([' 456', 'xTest']); // EXPECT
             done();
          });
       });
-
    });
 
    describe('SToken generation system', () => {
-
       it('returns a SToken with text from all the segments', (done) => {
          source.addText('1');
          source.addText('22');
          source.addText('333');
          source.endText();
          source.extractNoParams('all', (sToken) => {
-            expect(sToken).toEqual(new SToken('122333', '122333',
-               new Range(new EntityId(), 0, 0, 0, 6, 0, 6)));
+            expect(sToken).toEqual(
+               new SToken('122333', '122333', new Range(new EntityId(), 0, 0, 0, 6, 0, 6)),
+            );
             done();
+         });
+      });
+
+      it('returns all text up to a token boundary', (done) => {
+         source.addText('1');
+         source.addTokenBoundary();
+         source.addText('333');
+         source.endText();
+         source.extractNoParams('all', (sToken) => {
+            expect(sToken).toEqual(
+               new SToken('1', '1', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+            );
+            done();
+         });
+      });
+
+      it('can continue parsing immediately after the token boundary', (done) => {
+         source.addText('122');
+         source.addTokenBoundary();
+         source.addText('333');
+         source.endText();
+         source.extractNoParams('all', () => {
+            source.extractNoParams('all', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('333', '333', new Range(new EntityId(), 3, 0, 3, 6, 0, 6)),
+               );
+               done();
+            });
          });
       });
 
@@ -421,7 +454,6 @@ describe('STokenSource (unit)', () => {
             expect(sToken).toBeUndefined();
             done();
          });
-
       });
 
       it('returns no STokens when the finish criteria for the specified extractor has not been met', () => {
@@ -437,7 +469,6 @@ describe('STokenSource (unit)', () => {
       });
 
       describe('ranges', () => {
-
          it('delivers a default range across multiple segments', (done) => {
             source.addText('1');
             source.addText('22');
@@ -445,9 +476,7 @@ describe('STokenSource (unit)', () => {
             source.endText();
 
             source.extractNoParams('all', (sToken) => {
-               expect(sToken!.ranges).toEqual([
-                  new Range(new EntityId(), 0, 0, 0, 6, 0, 6),
-               ]);
+               expect(sToken!.ranges).toEqual([new Range(new EntityId(), 0, 0, 0, 6, 0, 6)]);
                done();
             });
          });
@@ -488,7 +517,7 @@ describe('STokenSource (unit)', () => {
          });
 
          it('treats equal locations, that are different instances, as the same', (done) => {
-            const loc2 = new EntityId();  // same location as the new EntityId()
+            const loc2 = new EntityId(); // same location as the new EntityId()
 
             source.addText('9', new Range(new EntityId(), 3, 2, 1, 4, 2, 2));
             source.addText('88', new Range(loc2, 4, 2, 2, 6, 2, 4));
@@ -496,7 +525,7 @@ describe('STokenSource (unit)', () => {
             source.endText();
 
             source.extractNoParams('all', (sToken) => {
-               expect(sToken!.ranges).toEqual([ new Range(new EntityId(), 3, 2, 1, 11, 2, 9) ]);
+               expect(sToken!.ranges).toEqual([new Range(new EntityId(), 3, 2, 1, 11, 2, 9)]);
                done();
             });
          });
@@ -507,14 +536,13 @@ describe('STokenSource (unit)', () => {
 
             source.extract('tox', ']', sTokenSpy);
             source.extract('tox', 'b', (sToken) => {
-               expect(sTokenSpy.calls.argsFor(0)[0].firstRange).toEqual(new Range(new EntityId(), 3, 2, 1, 4, 2, 2));
+               expect(sTokenSpy.calls.argsFor(0)[0].firstRange).toEqual(
+                  new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
+               );
                expect(sToken!.firstRange).toEqual(new Range(new EntityId(), 4, 2, 2, 5, 2, 3));
                done();
             });
          });
-
       });
-
    });
-
 });

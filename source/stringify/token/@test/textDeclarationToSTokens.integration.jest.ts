@@ -3,7 +3,7 @@
 
 import { defaultExtractors } from 'extractor';
 import { InstructionStart, parseTextDeclaration } from 'pToken';
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, SToken, toSToken } from 'sToken';
 
 import { textDeclarationToSTokens } from '../textDeclarationToSTokens';
 
@@ -12,10 +12,10 @@ describe('textDeclarationToSTokens() (integration)', () => {
 
    beforeEach(() => {
       start = {
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
       };
    });
 
@@ -27,7 +27,7 @@ describe('textDeclarationToSTokens() (integration)', () => {
       parseTextDeclaration(source, start, (parsing) => {
          const result = textDeclarationToSTokens(parsing);
 
-         expect(result[0]).toEqual(SToken.fromString('<?'));
+         expect(result[0]).toEqual(toSToken('<?'));
          done();
       });
    });

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
@@ -14,19 +14,19 @@ describe('xmlDeclaration (unit)', () => {
 
    beforeEach(() => {
       xmlDeclPToken = new XmlDeclarationPToken({
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
          fields: [
             {
-               name: SToken.fromString('version'),
+               name: toSToken('version'),
                nameSpace: undefined,
-               equal: SToken.fromString('='),
+               equal: toSToken('='),
                equalSpace: undefined,
             },
          ],
-         close: SToken.fromString('?>'),
+         close: toSToken('?>'),
       });
 
       start = {
@@ -62,7 +62,7 @@ describe('xmlDeclaration (unit)', () => {
       it('returns an XmlDeclaration', () => {
          entitySpy.and.callFake((_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
             cb({
-               open: SToken.fromString('testing'),
+               open: toSToken('testing'),
                fields: [],
             });
          });
@@ -74,7 +74,7 @@ describe('xmlDeclaration (unit)', () => {
          const result = callback.calls.argsFor(0)[0];
          expect(result).toEqual(
             new XmlDeclarationPToken({
-               open: SToken.fromString('testing'),
+               open: toSToken('testing'),
                fields: [],
             }),
          );
@@ -88,17 +88,17 @@ describe('xmlDeclaration (unit)', () => {
 
       it('returns true if there is a standalone property set to yes', () => {
          xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
+            open: toSToken('<?'),
             fields: [
                {
-                  name: SToken.fromString('standalone'),
+                  name: toSToken('standalone'),
                   nameSpace: undefined,
-                  equal: SToken.fromString('='),
+                  equal: toSToken('='),
                   equalSpace: undefined,
-                  value: SToken.fromString('yes'),
+                  value: toSToken('yes'),
                },
             ],
-            close: SToken.fromString('?>'),
+            close: toSToken('?>'),
          });
 
          expect(xmlDeclIsStandalone(xmlDeclPToken)).toEqual(true);
@@ -106,17 +106,17 @@ describe('xmlDeclaration (unit)', () => {
 
       it('returns false if there is a standalone property set to no', () => {
          xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
+            open: toSToken('<?'),
             fields: [
                {
-                  name: SToken.fromString('standalone'),
+                  name: toSToken('standalone'),
                   nameSpace: undefined,
-                  equal: SToken.fromString('='),
+                  equal: toSToken('='),
                   equalSpace: undefined,
-                  value: SToken.fromString('no'),
+                  value: toSToken('no'),
                },
             ],
-            close: SToken.fromString('?>'),
+            close: toSToken('?>'),
          });
 
          expect(xmlDeclIsStandalone(xmlDeclPToken)).toEqual(false);
@@ -124,17 +124,17 @@ describe('xmlDeclaration (unit)', () => {
 
       it('returns true if there is a standalone property and value are all the wrong case', () => {
          xmlDeclPToken = new XmlDeclarationPToken({
-            open: SToken.fromString('<?'),
+            open: toSToken('<?'),
             fields: [
                {
-                  name: SToken.fromString('StAndAlOne'),
+                  name: toSToken('StAndAlOne'),
                   nameSpace: undefined,
-                  equal: SToken.fromString('='),
+                  equal: toSToken('='),
                   equalSpace: undefined,
-                  value: SToken.fromString('YeS'),
+                  value: toSToken('YeS'),
                },
             ],
-            close: SToken.fromString('?>'),
+            close: toSToken('?>'),
          });
 
          expect(xmlDeclIsStandalone(xmlDeclPToken)).toEqual(true);

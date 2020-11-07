@@ -152,6 +152,7 @@ module.exports = {
             './source/expand/**/*.ts',
             './source/conformance/**/*.ts',
             './source/pToken/**/*.ts',
+            './source/sToken/**/*.ts',
             './source/stringify/**/*.ts',
             './source/wellformedness/**/*.ts',
             './source/xToken/**/*.ts',
@@ -888,6 +889,7 @@ module.exports = {
             rules: {
                '@typescript-eslint/no-non-null-assertion': [ 'off' ],
                '@typescript-eslint/no-empty-function': [ 'off' ],
+               '@typescript-eslint/no-explit-any': [ 'off' ],
             },
             env: {
                jasmine: true,
