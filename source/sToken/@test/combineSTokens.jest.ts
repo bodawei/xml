@@ -6,6 +6,22 @@ import SToken from '../SToken';
 import { combineSTokens } from '../combineSTokens';
 
 describe('combineSTokens()', () => {
+   it('returns the first if the second is undefined', () => {
+      const sToken1 = new SToken(' \n', ' \r\n', []);
+
+      const result = combineSTokens(sToken1, undefined);
+
+      expect(result).toBe(sToken1);
+   });
+
+   it('returns the second if the first is undefined', () => {
+      const sToken1 = new SToken(' \n', ' \r\n', []);
+
+      const result = combineSTokens(undefined, sToken1);
+
+      expect(result).toBe(sToken1);
+   });
+
    it('merges a second Stoken with the first', () => {
       const sToken1 = new SToken(' \n', ' \r\n', []);
       const sToken2 = new SToken('two', 'two', []);

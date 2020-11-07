@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource } from 'sToken';
+import { combineSTokens, SToken, STokenSource } from 'sToken';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
 import { UnexpandedMarkupDetails } from '../types';
@@ -206,10 +206,7 @@ function parseAttDefaultType(
             done(attDef);
          });
       } else {
-         source.extractNoParams('space', (defaultTypeSpace) => {
-            attDef.defaultTypeSpace = defaultTypeSpace;
-            done(attDef);
-         });
+         done(attDef);
       }
    });
 }
@@ -321,42 +318,52 @@ function resumeParseAttDefName(
       }
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      resumeParseAttDef(source, 'type', attDef, done);
+      resumeParseAttDef(source, 'type', attDef, undefined, done);
    });
 }
 
+// For efficiency purposes, this may mutate the provided def (and of course it mutates the source :-)
 function resumeParseAttDef(
    source: STokenSource,
    propName: string,
    def: AttDefinitionProps,
+   extraSpace: SToken | undefined,
    done: (result: Array<AttDefinitionProps>) => void,
 ): void {
    switch (propName) {
       case 'type':
          parseAttType(source, def, (attWithType) => {
-            resumeParseAttDef(source, 'defaultType', attWithType, done);
+            attWithType.nameSpace = combineSTokens(attWithType.nameSpace, extraSpace);
+            resumeParseAttDef(source, 'defaultType', attWithType, undefined, done);
          });
          break;
       case 'defaultType':
          parseAttDefaultType(source, def, (withDefault) => {
+            withDefault.typeSpace = combineSTokens(withDefault.typeSpace, extraSpace);
+
             if (!withDefault.defaultType) {
-               resumeParseAttDef(source, 'value', def, done);
+               resumeParseAttDef(source, 'value', withDefault, undefined, done);
                return;
             }
 
             if (withDefault.defaultType.str.toLowerCase() !== '#fixed') {
+               // space goes on typeSpace
                resumeParseAttDefName(source, (otherAttributes) => {
-                  done([def, ...otherAttributes]);
+                  done([withDefault, ...otherAttributes]);
                });
                return;
             }
 
-            resumeParseAttDef(source, 'value', def, done);
+            resumeParseAttDef(source, 'value', withDefault, undefined, done);
          });
          break;
       case 'value':
          parseAttValue(source, def, (parsedAttDef) => {
             resumeParseAttDefName(source, (otherAttributes) => {
+               parsedAttDef.defaultTypeSpace = combineSTokens(
+                  parsedAttDef.defaultTypeSpace,
+                  extraSpace,
+               );
                done([parsedAttDef, ...otherAttributes]);
             });
          });
@@ -369,45 +376,64 @@ function resumeParseAttListDeclaration(
    attListDeclaration: AttListDeclarationPToken,
    deliverPToken: (result: AttListDeclarationPToken) => void,
 ): void {
-   const propName = attListDeclaration.unexpanded?.propName || '';
+   source.extractNoParams('space', (preSpace) => {
+      const propName = attListDeclaration.unexpanded?.propName || '';
 
-   switch (propName) {
-      case 'elementName':
-         parseElementName(source, attListDeclaration, (withName) => {
+      switch (propName) {
+         case 'elementName':
+            parseElementName(source, attListDeclaration, (withName) => {
+               resumeParseAttDefName(source, (attDefs) => {
+                  deliverPToken(
+                     new AttListDeclarationPToken(attListDeclaration, {
+                        ...withName,
+                        declTypeSpace: combineSTokens(attListDeclaration.declTypeSpace, preSpace),
+                        attDefs: [...attListDeclaration.attDefs, ...attDefs],
+                     }),
+                  );
+               });
+            });
+            break;
+         case 'name':
             resumeParseAttDefName(source, (attDefs) => {
+               const props: AttListDeclarationProps = {};
+
+               if (attListDeclaration.attDefs.length === 0) {
+                  props.elementNameSpace = combineSTokens(
+                     attListDeclaration.elementNameSpace,
+                     preSpace,
+                  );
+                  props.attDefs = attDefs;
+               } else {
+                  const last = attListDeclaration.attDefs[attListDeclaration.attDefs.length - 1];
+                  const butLast = [...attListDeclaration.attDefs];
+                  butLast.pop();
+                  const newLast = {
+                     ...last,
+                     valueSpace: combineSTokens(last.valueSpace, preSpace),
+                  };
+
+                  props.attDefs = [...butLast, newLast, ...attDefs];
+               }
+
+               deliverPToken(new AttListDeclarationPToken(attListDeclaration, props));
+            });
+            break;
+         default:
+            const trailingDef = attListDeclaration.attDefs[attListDeclaration.attDefs.length - 1];
+            const preceding = [...attListDeclaration.attDefs];
+
+            preceding.pop();
+
+            resumeParseAttDef(source, propName, trailingDef, preSpace, (attDefs) => {
                deliverPToken(
                   new AttListDeclarationPToken(attListDeclaration, {
-                     ...withName,
-                     attDefs: [...attListDeclaration.attDefs, ...attDefs],
+                     attDefs: [...preceding, ...attDefs],
                   }),
                );
             });
-         });
-         break;
-      case 'name':
-         resumeParseAttDefName(source, (attDefs) => {
-            deliverPToken(
-               new AttListDeclarationPToken(attListDeclaration, {
-                  attDefs: [...attListDeclaration.attDefs, ...attDefs],
-               }),
-            );
-         });
-         break;
-      default:
-         const trailingDef = attListDeclaration.attDefs[attListDeclaration.attDefs.length - 1];
-         const preceding = [...attListDeclaration.attDefs];
-
-         preceding.pop();
-
-         resumeParseAttDef(source, propName, trailingDef, (attDefs) => {
-            deliverPToken(
-               new AttListDeclarationPToken(attListDeclaration, {
-                  attDefs: [...preceding, ...attDefs],
-               }),
-            );
-         });
-         break;
-   }
+            break;
+      }
+   });
 }
 
 /**********************************************************************\

@@ -3,7 +3,11 @@
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
-import { AttListDeclarationPToken, parseAttListDeclaration } from '../attListDeclaration';
+import {
+   AttListDeclarationPToken,
+   parseAttListDeclaration,
+   resumeParseAttListDeclaration,
+} from '../attListDeclaration';
 
 // ick
 import { WordListPToken, WordListType } from '../../../token/common/wordList';
@@ -399,6 +403,83 @@ describe('attListDeclaration (integration)', () => {
             });
 
             expect(result).toEqualRangeless(expected);
+            done();
+         });
+      });
+   });
+
+   describe('resumeParseAttListDeclaration()', () => {
+      it('inserts the remainder of one attdef, and adds a second', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText("\tCDATA #IMPLICIT two IDREFS #FIXED ''");
+         source.endText();
+         const attListDecl = new AttListDeclarationPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('elName'),
+            elementNameSpace: toSToken(' '),
+            attDefs: [
+               {
+                  name: toSToken('one'),
+                  nameSpace: toSToken(' '),
+                  type: undefined,
+                  typeSpace: undefined,
+                  enumeration: undefined,
+                  defaultType: undefined,
+                  defaultTypeSpace: undefined,
+                  openQuote: undefined,
+                  value: [],
+                  closeQuote: undefined,
+                  valueSpace: undefined,
+               },
+            ],
+            unexpanded: {
+               tokens: [],
+               propName: 'type',
+            },
+            close: toSToken('>'),
+         });
+
+         resumeParseAttListDeclaration(source, attListDecl, (result) => {
+            expect(result).toEqualRangeless(
+               new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  elementName: toSToken('elName'),
+                  elementNameSpace: toSToken(' '),
+                  attDefs: [
+                     {
+                        name: toSToken('one'),
+                        nameSpace: toSToken(' \t'),
+                        type: toSToken('CDATA'),
+                        typeSpace: toSToken(' '),
+                        enumeration: undefined,
+                        defaultType: toSToken('#IMPLICIT'),
+                        defaultTypeSpace: toSToken(' '),
+                        openQuote: undefined,
+                        value: [],
+                        closeQuote: undefined,
+                        valueSpace: undefined,
+                     },
+                     {
+                        name: toSToken('two'),
+                        nameSpace: toSToken(' '),
+                        type: toSToken('IDREFS'),
+                        typeSpace: toSToken(' '),
+                        defaultType: toSToken('#FIXED'),
+                        enumeration: undefined,
+                        defaultTypeSpace: toSToken(' '),
+                        openQuote: toSToken("'"),
+                        value: [],
+                        closeQuote: toSToken("'"),
+                        valueSpace: undefined,
+                     },
+                  ],
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'type',
+                  },
+                  close: toSToken('>'),
+               }),
+            );
             done();
          });
       });

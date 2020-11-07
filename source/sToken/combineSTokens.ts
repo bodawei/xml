@@ -16,7 +16,13 @@ function canFuseRanges(range1: Range, range2: Range) {
    return false;
 }
 
-function combineSTokens(first: SToken, other: SToken): SToken {
+function combineSTokens(first: SToken | undefined, other: SToken | undefined): SToken | undefined {
+   if (!first) {
+      return other;
+   } else if (!other) {
+      return first;
+   }
+
    const str = first.str + other.str;
    const originalStr = first.originalStr + other.originalStr;
    const firstRanges = [...first.ranges];

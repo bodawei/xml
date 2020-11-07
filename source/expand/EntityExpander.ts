@@ -361,6 +361,7 @@ class EntityExpander {
                const source = entityValueToSTokenSource(
                   results.expandedTokens || [],
                   this.expandParams.entityId,
+                  true,
                ); // THIS entityId IS WRONG!!!!
 
                resumeParseNotationDeclaration(source, declarationPToken, (innerResults) => {
@@ -385,6 +386,7 @@ class EntityExpander {
                const source = entityValueToSTokenSource(
                   results.expandedTokens || [],
                   this.expandParams.entityId,
+                  true,
                ); // THIS entityId IS WRONG!!!!
 
                resumeParseAttListDeclaration(source, declarationPToken, (innerResults) => {

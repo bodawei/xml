@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityId, ConformanceVersion } from 'basic';
+import { EntityId } from 'basic';
 import { toSToken } from 'sToken';
 import {
    CharRefPToken,
