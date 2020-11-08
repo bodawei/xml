@@ -3,7 +3,7 @@
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { ExternalId, parseExternalId, resumeParseExternalId } from '../externalId';
+import { ExternalIdP, parseExternalId, resumeParseExternalId } from '../externalId';
 
 import literal, { LiteralPToken } from '../../../token/common/literal'; // ick
 import { TextPToken } from 'token';
@@ -23,10 +23,10 @@ describe('ExternalId (unit)', () => {
    });
 
    describe('ExternalId()', () => {
-      let source: ExternalId;
+      let source: ExternalIdP;
 
       beforeEach(() => {
-         source = new ExternalId({
+         source = new ExternalIdP({
             externalType: toSToken('PUBLIC'),
             externalTypeSpace: toSToken(' '),
             public: {
@@ -40,14 +40,14 @@ describe('ExternalId (unit)', () => {
       });
 
       it('copies the provided external ID', () => {
-         const extId = new ExternalId(source);
+         const extId = new ExternalIdP(source);
 
          expect(extId).toEqual(source);
          expect(extId).not.toBe(source);
       });
 
       it('overrides the values with those from other', () => {
-         const extId = new ExternalId(source, {
+         const extId = new ExternalIdP(source, {
             externalType: toSToken('FROG'),
             externalTypeSpace: toSToken('\n\n'),
             public: {
@@ -74,14 +74,12 @@ describe('ExternalId (unit)', () => {
 
       it('makes a copy of the public value', () => {
          const publicValue: LiteralPToken = { value: [] };
-         const extId = new ExternalId({
+         const extId = new ExternalIdP({
             externalType: toSToken('PUBLIC'),
             externalTypeSpace: toSToken(' '),
             public: publicValue,
             publicSpace: toSToken(' '),
-            system: {
-               value: [],
-            },
+            system: undefined,
          });
 
          expect(extId.public?.value).toEqual(publicValue.value);
@@ -90,7 +88,7 @@ describe('ExternalId (unit)', () => {
 
       it('makes a copy of the system value', () => {
          const systemValue: LiteralPToken = { value: [] };
-         const extId = new ExternalId({
+         const extId = new ExternalIdP({
             externalType: toSToken('PUBLIC'),
             externalTypeSpace: toSToken(' '),
             public: undefined,
@@ -466,7 +464,7 @@ describe('ExternalId (unit)', () => {
             resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                expect(result).toEqualRangeless({
                   preSpace: sourceStr,
-                  externalId: new ExternalId({
+                  externalId: new ExternalIdP({
                      externalType: toSToken('PUBLIC'),
                      externalTypeSpace: toSToken(' '),
                      public: undefined,
@@ -493,7 +491,7 @@ describe('ExternalId (unit)', () => {
             resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                expect(result).toEqualRangeless({
                   preSpace: sourceStr,
-                  externalId: new ExternalId({
+                  externalId: new ExternalIdP({
                      externalType: toSToken('SYSTEM'),
                      externalTypeSpace: toSToken(' '),
                      public: undefined,
@@ -526,7 +524,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   expect(result).toEqualRangeless({
-                     externalId: new ExternalId({
+                     externalId: new ExternalIdP({
                         externalType: toSToken('PUBLIC'),
                         externalTypeSpace: destStr,
                         public: {
@@ -559,7 +557,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   expect(result).toEqualRangeless({
-                     externalId: new ExternalId({
+                     externalId: new ExternalIdP({
                         externalType: toSToken('PUBLIC'),
                         externalTypeSpace: destStr,
                         public: undefined,
@@ -587,7 +585,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   expect(result).toEqualRangeless({
-                     externalId: new ExternalId({
+                     externalId: new ExternalIdP({
                         externalType: toSToken('PUBLIC'),
                         public: undefined,
                         publicSpace: destStr,
@@ -614,7 +612,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   expect(result).toEqualRangeless({
-                     externalId: new ExternalId({
+                     externalId: new ExternalIdP({
                         externalType: toSToken('SYSTEM'),
                         externalTypeSpace: destStr,
                      }),

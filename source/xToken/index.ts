@@ -9,9 +9,15 @@ export {
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
    ParameterEntityReferenceXToken,
 } from './token/parameterEntityReferenceXToken';
-export { CONDITIONAL_CLOSE_XTOKEN, ConditionalCloseXToken } from './token/conditionalClose';
-export { CONDITIONAL_XTOKEN, ConditionalXToken } from './token/conditionalSection';
-export { ExternalIdXToken } from './common/externalIdXToken';
+export {
+   CONDITIONAL_SECTION_END_XTOKEN,
+   ConditionalSectionEndXToken,
+} from './token/conditionalSectionEndXToken';
+export {
+   CONDITIONAL_SECTION_START_XTOKEN,
+   ConditionalSectionStartXToken,
+} from './token/conditionalSectionStartXToken';
+export { ExternalIdX } from './common/externalIdX';
 
 // Fully converted
 export {

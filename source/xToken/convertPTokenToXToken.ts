@@ -23,8 +23,8 @@ import { CharRefXToken } from './token/CharRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 // tsnode seems to load this file twice. here and in the index.  So, here we only load it once.  Unclear why it is doing this, though.
 import { NotationDeclarationXToken } from './index';
-import { ConditionalCloseXToken } from './token/conditionalClose';
-import { ConditionalXToken } from './token/conditionalSection';
+import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
+import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
@@ -36,9 +36,9 @@ function convertPTokenToXToken(pToken: ParseValue): XToken {
       case ATTLIST_DECLARATION_PTOKEN:
          return new AttListDeclarationXToken(pToken);
       case CONDITIONAL_PTOKEN:
-         return new ConditionalXToken(pToken);
+         return new ConditionalSectionStartXToken(pToken);
       case CONDITIONAL_CLOSE_PTOKEN:
-         return new ConditionalCloseXToken(pToken);
+         return new ConditionalSectionEndXToken(pToken);
       case CHARREF_PTOKEN:
          return new CharRefXToken(pToken);
       case GENERAL_ENTITY_REFERENCE_PTOKEN:

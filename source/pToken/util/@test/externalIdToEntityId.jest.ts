@@ -31,4 +31,22 @@ describe('externalIdToEntityId', () => {
          }),
       );
    });
+
+   it('converts empty values to an EntityId with empty values', () => {
+      const token = externalIdToEntityId({
+         externalType: toSToken('PUBLIC'),
+         system: {
+            value: [],
+         },
+         public: undefined,
+      });
+
+      expect(token).toEqual(
+         jasmine.objectContaining({
+            type: 'ENTITY_ID',
+            systemId: '',
+            publicId: '',
+         }),
+      );
+   });
 });

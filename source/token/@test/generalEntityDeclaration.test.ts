@@ -8,7 +8,7 @@ import * as externalId from '../common/externalId';
 import { EXTERNAL_ID } from '../common/externalId';
 import literal from '../common/literal';
 import { TextPToken } from '../text';
-import { ExternalIdXToken } from 'xToken';
+import { ExternalIdX } from 'xToken';
 
 describe('generalEntityDeclaration (unit)', () => {
    let pToken: GeneralEntityDeclarationPToken;
@@ -51,7 +51,7 @@ describe('generalEntityDeclaration (unit)', () => {
          expect(xToken).toEqual(new GeneralEntityDeclarationXToken('entityName', [], undefined, '', pToken));
       });
 
-      it('returns a entity declaration with an ExternalIdXToken', () => {
+      it('returns a entity declaration with an ExternalIdX', () => {
          pToken = new GeneralEntityDeclarationPToken({
             name: SToken.fromString('entityName'),
             nameSpace: SToken.fromString(' '),
@@ -68,7 +68,7 @@ describe('generalEntityDeclaration (unit)', () => {
    
          const xToken = pToken.toXToken();
 
-         expect(xToken).toEqual(new GeneralEntityDeclarationXToken('entityName', [], new ExternalIdXToken('system.xml'), '', pToken));
+         expect(xToken).toEqual(new GeneralEntityDeclarationXToken('entityName', [], new ExternalIdX('system.xml'), '', pToken));
       });
 
    });

@@ -2,25 +2,27 @@
 
 import { toSToken } from 'sToken';
 
-import { ConditionalXToken } from '../conditionalSection';
+import { ConditionalSectionStartXToken } from '../conditionalSectionStartXToken';
 
 // ick
 import { ConditionalPToken } from 'token';
 
 describe('ConditionalSection', () => {
    it('creates an XToken from no ptoken', () => {
-      const xToken = new ConditionalXToken();
+      const xToken = new ConditionalSectionStartXToken();
 
       expect(xToken).toEqual({
-         type: 'CONDITIONAL_XTOKEN',
+         type: 'CONDITIONAL_SECTION_START_XTOKEN',
       });
    });
 
    it('creates an XToken from a pToken', () => {
-      const xToken = new ConditionalXToken(new ConditionalPToken({ open: toSToken('<![') }));
+      const xToken = new ConditionalSectionStartXToken(
+         new ConditionalPToken({ open: toSToken('<![') }),
+      );
 
       expect(xToken).toEqual({
-         type: 'CONDITIONAL_XTOKEN',
+         type: 'CONDITIONAL_SECTION_START_XTOKEN',
          pToken: new ConditionalPToken({ open: toSToken('<![') }),
       });
    });

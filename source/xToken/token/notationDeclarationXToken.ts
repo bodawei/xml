@@ -3,7 +3,7 @@
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ExternalIdXToken } from '../common/externalIdXToken';
+import { ExternalIdX } from '../common/externalIdX';
 
 const NOTATION_DECLARATION_XTOKEN = 'NOTATION_DECLARATION_XTOKEN';
 
@@ -12,20 +12,20 @@ class NotationDeclarationXToken {
 
    public readonly name: string;
 
-   public readonly externalId?: ExternalIdXToken;
+   public readonly externalId?: ExternalIdX;
 
    public pToken?: NotationDeclarationPToken;
 
    constructor(pToken: NotationDeclarationPToken);
-   constructor(name: string, externalId?: ExternalIdXToken);
-   constructor(nameOrPToken: string | NotationDeclarationPToken, externalId?: ExternalIdXToken) {
+   constructor(name: string, externalId?: ExternalIdX);
+   constructor(nameOrPToken: string | NotationDeclarationPToken, externalId?: ExternalIdX) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
          this.externalId = externalId;
       } else {
          this.name = strOrBlank(nameOrPToken.name);
          this.externalId = nameOrPToken.externalId
-            ? new ExternalIdXToken(nameOrPToken.externalId)
+            ? new ExternalIdX(nameOrPToken.externalId)
             : undefined;
          this.pToken = nameOrPToken;
       }

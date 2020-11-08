@@ -6,7 +6,7 @@ import { SToken, toSToken } from 'sToken';
 import { ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken } from '../parameterEntityDeclaration';
 import * as externalId from '../common/externalId';
 import literal from '../common/literal';
-import { ExternalIdXToken } from 'xToken';
+import { ExternalIdX } from 'xToken';
 import { TextPToken } from '../text';
 
 describe('ParameterEntityDeclaration (unit)', () => {
@@ -66,7 +66,7 @@ describe('ParameterEntityDeclaration (unit)', () => {
 
          const token = pToken.toXToken();
 
-         expect(token.externalId).toEqual(new ExternalIdXToken('system.xml', '- // public'));
+         expect(token.externalId).toEqual(new ExternalIdX('system.xml', '- // public'));
       });
    });
 

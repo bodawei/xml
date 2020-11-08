@@ -13,7 +13,7 @@ import { DocTypeStartPToken, parseDocTypeStart, DOCTYPE_START_XTOKEN } from '../
 import { EXTERNAL_ID } from '../common/externalId';
 import * as externalId from '../common/externalId';
 import misc from '../common/misc';
-import { ExternalIdXToken } from 'xToken';
+import { ExternalIdX } from 'xToken';
 import { TextPToken } from '../text';
 
 describe('docTypeStart (unit)', () => {
@@ -161,7 +161,7 @@ describe('docTypeStart (unit)', () => {
 
          const token = docTypeStartPToken.toXToken();
 
-         expect(token.externalId).toEqual(new ExternalIdXToken('system.xml', '- // public'));
+         expect(token.externalId).toEqual(new ExternalIdX('system.xml', '- // public'));
       });
 
    });

@@ -6,7 +6,7 @@ import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import { ExternalIdXToken } from 'xToken';
+import { ExternalIdX } from 'xToken';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
@@ -118,7 +118,7 @@ describe('docTypeStart (integration)', () => {
             const token = pToken.toXToken();
 
             expect(token.name).toEqual('rootElement');
-            expect(token.externalId).toEqual(new ExternalIdXToken('sys.dtd'));
+            expect(token.externalId).toEqual(new ExternalIdX('sys.dtd'));
             expect(token.pToken!.declType).toEqual(declaration.declType);
             done();
          });

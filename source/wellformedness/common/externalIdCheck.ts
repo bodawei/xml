@@ -2,10 +2,10 @@
 
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
-import { ExternalId } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
+import { ExternalIdP } from 'pToken';
+import { strOrBlank } from 'sToken';
 //ik
-import { TEXT_PTOKEN } from 'token';
+import { TextPToken } from 'token';
 import literal from '../../token/common/literal'; // ick
 
 /**********************************************************************\
@@ -21,7 +21,7 @@ const ALLOWED_TYPES = ['PUBLIC', 'SYSTEM'];
 const PUBID_CHARS = /^[- \n'()+,./:=?;!*#@$_%a-zA-Z0-9]*/;
 
 function externalIdCheck(
-   externalId: ExternalId | undefined,
+   externalId: ExternalIdP | undefined,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
 ): void {
@@ -44,21 +44,16 @@ function externalIdCheck(
          if (!externalId.public || !externalId.public.value) {
             return;
          }
-         let sToken: SToken | undefined;
 
-         // we are so confused
+         // we overprotective because because literal is too general for what we have
          if (externalId.public.value.length > 0) {
-            if (externalId.public.value[0].type === TEXT_PTOKEN) {
-               sToken = externalId.public.value[0].text;
-               // } else {
-               //    sToken = externalId.public.value[0].str;
-            }
+            const pubLiteral = strOrBlank((externalId.public.value[0] as TextPToken).text); // We know it has to be a string.
 
-            const match = PUBID_CHARS.exec(sToken?.str || '');
+            const match = PUBID_CHARS.exec(pubLiteral);
 
             const str: string = (match && match[0]) || '';
-            ec.check(!match || match[0] !== sToken?.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS, [
-               (sToken?.str || '')[str.length],
+            ec.check(!match || match[0] !== pubLiteral, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS, [
+               pubLiteral[str.length],
             ]);
          }
       });

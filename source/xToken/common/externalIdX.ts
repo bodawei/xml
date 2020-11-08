@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ExternalId } from 'pToken';
+import { ExternalIdP } from 'pToken';
 // ick
 import { TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
 import { LiteralValuePToken } from '../../token/common/literal';
@@ -28,14 +28,14 @@ function valueToString(value: LiteralValuePToken = []): string {
  * Converts an ExternaId PToken into an XToken.  This is always
  * embedded in one of the relevant markup declaration tokens.
  */
-class ExternalIdXToken {
+class ExternalIdX {
    readonly systemId: string;
 
    readonly publicId?: string;
 
-   constructor(externalId: ExternalId | undefined);
+   constructor(externalId: ExternalIdP | undefined);
    constructor(systemId: string, publicId?: string);
-   constructor(externalIdOrSystemId: ExternalId | string | undefined, publicId?: string) {
+   constructor(externalIdOrSystemId: ExternalIdP | string | undefined, publicId?: string) {
       if (typeof externalIdOrSystemId === 'string') {
          this.systemId = externalIdOrSystemId;
          this.publicId = publicId;
@@ -46,4 +46,4 @@ class ExternalIdXToken {
    }
 }
 
-export { ExternalIdXToken };
+export { ExternalIdX };

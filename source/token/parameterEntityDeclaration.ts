@@ -13,7 +13,7 @@ import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
 import { checkWellFormed } from './common/entity';
-import { ExternalIdXToken } from 'xToken';
+import { ExternalIdX } from 'xToken';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -30,11 +30,11 @@ class ParameterEntityDeclarationXToken {
    public readonly type: typeof PARAMETER_ENTITY_DECLARATION_XTOKEN = PARAMETER_ENTITY_DECLARATION_XTOKEN;
    public readonly name: string;
    public readonly isParameter: boolean;
-   public readonly externalId: ExternalIdXToken | undefined;
+   public readonly externalId: ExternalIdX | undefined;
    public readonly value: ExpandedLiteralValuePToken;
    public pToken?: ParameterEntityDeclarationPToken;
 
-   constructor(name: string, value: ExpandedLiteralValuePToken, externalId?: ExternalIdXToken | undefined, pToken?: ParameterEntityDeclarationPToken) {
+   constructor(name: string, value: ExpandedLiteralValuePToken, externalId?: ExternalIdX | undefined, pToken?: ParameterEntityDeclarationPToken) {
       this.name = name;
       this.isParameter = true;
       this.value = value;
@@ -101,7 +101,7 @@ class ParameterEntityDeclarationPToken {
 function pTokenToXToken(pToken: ParameterEntityDeclarationPToken) {
    return new ParameterEntityDeclarationXToken(strOrBlank(pToken.name),
    pToken.value as any,
-   pToken.externalId ? new ExternalIdXToken(pToken.externalId) : undefined,
+   pToken.externalId ? new ExternalIdX(pToken.externalId) : undefined,
    pToken as any);
 }
 

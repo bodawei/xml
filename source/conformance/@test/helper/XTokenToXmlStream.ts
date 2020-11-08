@@ -7,7 +7,7 @@ import {
    NOTATION_DECLARATION_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    XMLDECL_XTOKEN,
-   ExternalIdXToken,
+   ExternalIdX,
 } from 'xToken';
 import {
    SPACE_XTOKEN,
@@ -23,7 +23,7 @@ import {
 } from 'token';
 import { AttributeXToken } from '../../../token/common/attribute';
 
-function formatExternalId(externalId?: ExternalIdXToken): string {
+function formatExternalId(externalId?: ExternalIdX): string {
    if (!externalId) {
       return '';
    }

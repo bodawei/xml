@@ -5,7 +5,7 @@ import { combineSTokens, SToken, STokenSource } from 'sToken';
 import { parseUnexpanded } from '../common/parseUnexpanded';
 
 import { DeclarationStart } from '../../token/bridge/declaration';
-import { ExternalId, parseExternalId, resumeParseExternalId } from '../common/externalId';
+import { ExternalIdP, parseExternalId, resumeParseExternalId } from '../common/externalId';
 import { UnexpandedMarkupDetails } from '../types';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';
@@ -19,7 +19,7 @@ interface NotationDeclarationProps {
    declTypeSpace?: SToken;
    name?: SToken;
    nameSpace?: SToken;
-   externalId?: ExternalId;
+   externalId?: ExternalIdP;
    externalIdSpace?: SToken;
    unexpanded?: UnexpandedMarkupDetails | undefined;
    extra?: SToken | false;
@@ -59,7 +59,7 @@ class NotationDeclarationPToken {
 
    public readonly nameSpace: SToken | undefined;
 
-   public readonly externalId: ExternalId | undefined;
+   public readonly externalId: ExternalIdP | undefined;
 
    public readonly externalIdSpace: SToken | undefined;
 

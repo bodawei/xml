@@ -13,7 +13,7 @@ import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
 import { checkWellFormed } from './common/entity';
-import { ExternalIdXToken } from 'xToken';
+import { ExternalIdX } from 'xToken';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -29,13 +29,13 @@ type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToke
 class GeneralEntityDeclarationXToken {
    public readonly type: typeof GENERAL_ENTITY_DECLARATION_XTOKEN = GENERAL_ENTITY_DECLARATION_XTOKEN;
    public readonly name: string;
-   public readonly externalId: ExternalIdXToken | undefined;
+   public readonly externalId: ExternalIdX | undefined;
    public readonly notationDataName: string | undefined;
    public readonly isParameter: boolean;
    public readonly value: ExpandedLiteralValuePToken;
    public pToken?: GeneralEntityDeclarationPToken;
 
-   constructor(name: string, value: ExpandedLiteralValuePToken, externalId?: ExternalIdXToken | undefined, notationDataName?: string | undefined, pToken?: GeneralEntityDeclarationPToken) {
+   constructor(name: string, value: ExpandedLiteralValuePToken, externalId?: ExternalIdX | undefined, notationDataName?: string | undefined, pToken?: GeneralEntityDeclarationPToken) {
       this.name = name;
       this.value = value;
       this.externalId = externalId;
@@ -107,7 +107,7 @@ class GeneralEntityDeclarationPToken {
 function pTokenToXToken(pToken: GeneralEntityDeclarationPToken) {
    return new GeneralEntityDeclarationXToken(strOrBlank(pToken.name),
       pToken.value as any,
-      pToken.externalId ? new ExternalIdXToken(pToken.externalId) : undefined,
+      pToken.externalId ? new ExternalIdX(pToken.externalId) : undefined,
       strOrBlank(pToken.nDataName),
       pToken);
 }

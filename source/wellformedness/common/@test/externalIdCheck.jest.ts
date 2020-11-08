@@ -9,7 +9,7 @@ import { TextPToken } from 'token';
 
 import literal from '../../../token/common/literal';
 
-import { ExternalId } from '../../../pToken/common/externalId';
+import { ExternalIdP } from '../../../pToken/common/externalId';
 import { externalIdCheck } from '../externalIdCheck';
 import { toSToken } from 'sToken';
 
@@ -17,7 +17,7 @@ jest.mock('../../../token/common/literal');
 
 describe('externalIdCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
-   let externalId: ExternalId;
+   let externalId: ExternalIdP;
    let litWell: jest.Mock;
 
    beforeEach(() => {
@@ -67,7 +67,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports an error if the PUBLIC value has illegal characters', () => {
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          public: {
             value: [new TextPToken({ text: toSToken('bad&chars') })],
          },
@@ -91,27 +91,13 @@ describe('externalIdCheck()', () => {
       expect(mockErrorCollector.errors.length).toEqual(0);
    });
 
-   it('reports no errors if the public value is undefined (this can not happen naturally)', () => {
-      litWell.mockImplementation((_1: any, _2: any, _3: any, _4: any, callback: () => void) => {
-         if (callback) {
-            callback();
-         }
-      });
-      externalId = new ExternalId(externalId, {
-         public: {} as any, // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-      });
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
-
-      expect(mockErrorCollector.errors.length).toEqual(0);
-   });
-
    it('reports an error if the public value contains invalid characters', () => {
       litWell.mockImplementation((_1: any, _2: any, _3: any, _4: any, callback: () => void) => {
          if (callback) {
             callback();
          }
       });
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          public: {
             value: [new TextPToken({ text: toSToken('{}{}{}{}') })],
          },
@@ -126,8 +112,29 @@ describe('externalIdCheck()', () => {
       });
    });
 
+   it('does not blow up if the public value has no text when we are checking for invalid characters', () => {
+      litWell.mockImplementation((_1: any, _2: any, _3: any, _4: any, callback: () => void) => {
+         if (callback) {
+            callback();
+         }
+      });
+      externalId = new ExternalIdP(externalId, {
+         public: {
+            value: [],
+         },
+      });
+
+      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+
+      expect(mockErrorCollector).not.toReportError({
+         id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+         params: ['{'],
+         position: externalId.externalTypeSpace, // wrong due to mocking
+      });
+   });
+
    it('reports an error if type is neither PUBLIC or SYSTEM', () => {
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          externalType: toSToken('Bogus'),
       });
 
@@ -141,7 +148,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports an error if type is the wrong case', () => {
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          externalType: toSToken('public'),
       });
 
@@ -155,7 +162,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports an error if there is no space after the id type', () => {
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          externalTypeSpace: undefined,
       });
 
@@ -169,7 +176,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports an error if there is no space after a PUBLIC part', () => {
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          publicSpace: undefined,
       });
 
@@ -183,7 +190,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports no error if there is no system part', () => {
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          system: undefined,
       });
 
@@ -200,7 +207,7 @@ describe('externalIdCheck()', () => {
             }
          },
       );
-      externalId = new ExternalId(externalId, {
+      externalId = new ExternalIdP(externalId, {
          public: undefined,
       });
 

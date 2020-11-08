@@ -1,8 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
-import { ConditionalCloseXToken } from './token/conditionalClose';
-import { ConditionalXToken } from './token/conditionalSection';
+import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
+import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
@@ -33,8 +33,8 @@ type XToken =
    | XmlDeclarationXToken
    // temp additions
    | ParseValue // EEEK.
-   | ConditionalCloseXToken
-   | ConditionalXToken
+   | ConditionalSectionEndXToken
+   | ConditionalSectionStartXToken
    | CharDataXToken
    | CdataXToken
    | DocTypeEndXToken

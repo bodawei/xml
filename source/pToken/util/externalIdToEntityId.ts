@@ -5,7 +5,7 @@ import { EntityId } from 'basic';
 import { TEXT_PTOKEN, CHARREF_PTOKEN } from 'token';
 import { LiteralValuePToken } from '../../token/common/literal';
 
-import { ExternalId } from '../common/externalId';
+import { ExternalIdP } from '../common/externalId';
 
 function valueToString(value: LiteralValuePToken = []): string {
    const pieces = [];
@@ -26,7 +26,7 @@ function valueToString(value: LiteralValuePToken = []): string {
    return pieces.join('');
 }
 
-function externalIdToEntityId(externalId: ExternalId | undefined): EntityId {
+function externalIdToEntityId(externalId: ExternalIdP | undefined): EntityId {
    return new EntityId(
       valueToString(externalId?.system?.value),
       valueToString(externalId?.public?.value),

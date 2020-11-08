@@ -15,11 +15,11 @@ interface RawExternalId {
 }
 
 interface ResumeInternalResult {
-   externalId: ExternalId | undefined;
+   externalId: ExternalIdP | undefined;
    preSpace?: SToken | undefined;
 }
 
-class ExternalId {
+class ExternalIdP {
    public readonly externalType?: SToken;
 
    public readonly externalTypeSpace?: SToken;
@@ -30,7 +30,7 @@ class ExternalId {
 
    public readonly system?: LiteralPToken;
 
-   constructor(base: ExternalId | RawExternalId, other: RawExternalId = {}) {
+   constructor(base: ExternalIdP | RawExternalId, other: RawExternalId = {}) {
       this.externalType = 'externalType' in other ? other.externalType : base.externalType;
       this.externalTypeSpace =
          'externalTypeSpace' in other ? other.externalTypeSpace : base.externalTypeSpace;
@@ -57,15 +57,15 @@ class ExternalId {
 }
 
 interface ParsedExternalId {
-   externalId?: ExternalId;
+   externalId?: ExternalIdP;
    nextPropName?: string;
 }
 
 function parseExternalType(
    base: STokenSource,
    terminators: Array<string>,
-   externalId: ExternalId,
-   deliverExternalType: (externalId?: ExternalId, externalType?: 'PUBLIC' | 'SYSTEM') => void,
+   externalId: ExternalIdP,
+   deliverExternalType: (externalId?: ExternalIdP, externalType?: 'PUBLIC' | 'SYSTEM') => void,
 ): void {
    const newExtId = { ...externalId };
    base.extract('peekWord', terminators, (sToken) => {
@@ -86,7 +86,7 @@ function parseExternalType(
 
 function parsePublic(
    base: STokenSource,
-   externalId: ExternalId,
+   externalId: ExternalIdP,
    deliverPublic: (result: RawExternalId) => void,
 ): void {
    literal.parse(base, undefined, (publicValue) => {
@@ -106,7 +106,7 @@ function parsePublic(
 
 function parseSystem(
    base: STokenSource,
-   externalId: ExternalId,
+   externalId: ExternalIdP,
    deliverSystem: (result: RawExternalId) => void,
 ): void {
    literal.parse(base, undefined, (system) => {
@@ -118,7 +118,7 @@ function resumeParse(
    base: STokenSource,
    propName: string,
    preSpace: SToken | undefined,
-   externalId: ExternalId,
+   externalId: ExternalIdP,
    isSystemType: boolean,
    deliverExtId: (result: ResumeInternalResult) => void,
 ): void {
@@ -258,17 +258,17 @@ function resumeParseExternalId(
    base: STokenSource,
    propName: string,
    preSpace: SToken | undefined,
-   externalId: ExternalId = {},
+   externalId: ExternalIdP = {},
    deliverExtId: (result: ResumeInternalResult) => void,
 ): void {
    const isSystemType = strOrBlank(externalId.externalType).toUpperCase() === 'SYSTEM';
 
    resumeParse(base, propName, preSpace, externalId, isSystemType, (parsed) => {
       deliverExtId({
-         externalId: parsed.externalId ? new ExternalId(parsed.externalId) : undefined,
+         externalId: parsed.externalId ? new ExternalIdP(parsed.externalId) : undefined,
          preSpace: parsed.preSpace,
       });
    });
 }
 
-export { ExternalId, parseExternalId, resumeParseExternalId };
+export { ExternalIdP, parseExternalId, resumeParseExternalId };

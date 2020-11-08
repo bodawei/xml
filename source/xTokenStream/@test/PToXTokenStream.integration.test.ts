@@ -9,7 +9,7 @@ import {
    ParameterEntityReferenceXToken,
    ProcessingInstructionXToken,
    XmlDeclarationXToken,
-   ExternalIdXToken,
+   ExternalIdX,
    NotationDeclarationXToken,
    GeneralEntityReferenceXToken
 } from 'xToken';
@@ -169,7 +169,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes a NOTATION declaration', (done) => {
       expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
-         new NotationDeclarationXToken('myNotation', new ExternalIdXToken('sys.xml', 'pub.xml')),
+         new NotationDeclarationXToken('myNotation', new ExternalIdX('sys.xml', 'pub.xml')),
       ], done);
    });
 

@@ -4,11 +4,11 @@ import { toSToken } from 'sToken';
 // ick
 import { TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
 
-import { ExternalIdXToken } from '../externalIdXToken';
+import { ExternalIdX } from '../externalIdX';
 
-describe('ExternalIdXToken', () => {
-   it('converts an ExternalId to an ExternalIdXToken', () => {
-      const token = new ExternalIdXToken({
+describe('ExternalIdX', () => {
+   it('converts an ExternalId to an ExternalIdX', () => {
+      const token = new ExternalIdX({
          externalType: toSToken('PUBLIC'),
          system: {
             value: [
@@ -24,11 +24,11 @@ describe('ExternalIdXToken', () => {
          },
       });
 
-      expect(token).toEqual(new ExternalIdXToken('sysFoo', 'a'));
+      expect(token).toEqual(new ExternalIdX('sysFoo', 'a'));
    });
 
-   it('converts an ExternalId with no public value to an ExternalIdXToken with an undefined public value', () => {
-      const token = new ExternalIdXToken({
+   it('converts an ExternalId with no public value to an ExternalIdX with an undefined public value', () => {
+      const token = new ExternalIdX({
          externalType: toSToken('SYSTEM'),
          system: {
             value: [
@@ -41,6 +41,6 @@ describe('ExternalIdXToken', () => {
          },
       });
 
-      expect(token).toEqual(new ExternalIdXToken('sysFoo', undefined));
+      expect(token).toEqual(new ExternalIdX('sysFoo', undefined));
    });
 });

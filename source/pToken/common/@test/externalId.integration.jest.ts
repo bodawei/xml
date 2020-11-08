@@ -4,7 +4,7 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import { TextPToken } from 'token';
 
-import { parseExternalId, ExternalId } from '../externalId';
+import { parseExternalId, ExternalIdP } from '../externalId';
 
 describe('parseExternalId()', () => {
    let source: STokenSource;
@@ -42,7 +42,7 @@ describe('parseExternalId()', () => {
       source.addText('PUBLIC "pub.xml"%foo;>');
 
       parseExternalId(source, [], (result) => {
-         const externalId: ExternalId = {
+         const externalId: ExternalIdP = {
             externalType: toSToken('PUBLIC'),
             externalTypeSpace: toSToken(' '),
             public: {

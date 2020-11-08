@@ -17,8 +17,8 @@ import { ATTLIST_DECLARATION_XTOKEN, TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xTo
 
 import { convertPTokenToXToken } from '../convertPTokenToXToken';
 import { CHARREF_XTOKEN } from '../token/charRefXToken';
-import { CONDITIONAL_CLOSE_XTOKEN } from '../token/conditionalClose';
-import { CONDITIONAL_XTOKEN } from '../token/conditionalSection';
+import { CONDITIONAL_SECTION_END_XTOKEN } from '../token/conditionalSectionEndXToken';
+import { CONDITIONAL_SECTION_START_XTOKEN } from '../token/conditionalSectionStartXToken';
 import { GENERAL_ENTITY_REFERENCE_XTOKEN } from '../token/generalEntityReferenceXToken';
 import { NOTATION_DECLARATION_XTOKEN } from '../token/notationDeclarationXToken';
 import { PARAMETER_ENTITY_REFERENCE_XTOKEN } from '../token/parameterEntityReferenceXToken';
@@ -44,13 +44,13 @@ describe('convertPTokenToXToken() (integration)', () => {
    it('converts an ConditionalClose token', () => {
       const result = convertPTokenToXToken(new ConditionalClosePToken({ open: toSToken('<![') }));
 
-      expect(result.type).toEqual(CONDITIONAL_CLOSE_XTOKEN);
+      expect(result.type).toEqual(CONDITIONAL_SECTION_END_XTOKEN);
    });
 
    it('converts an ConditionalSection token', () => {
       const result = convertPTokenToXToken(new ConditionalPToken({ open: toSToken('<![') }));
 
-      expect(result.type).toEqual(CONDITIONAL_XTOKEN);
+      expect(result.type).toEqual(CONDITIONAL_SECTION_START_XTOKEN);
    });
 
    it('converts an General entity reference token', () => {

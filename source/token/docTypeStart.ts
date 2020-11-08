@@ -7,7 +7,7 @@ import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
 import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import misc from './common/misc';
-import { ExternalIdXToken } from 'xToken';
+import { ExternalIdX } from 'xToken';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
@@ -35,11 +35,11 @@ type PreToken = { open: SToken; [ other: string ]: any };
 class DocTypeStartXToken {
    public readonly type: typeof DOCTYPE_START_XTOKEN = DOCTYPE_START_XTOKEN;
    public readonly name: string;
-   public readonly externalId: ExternalIdXToken | undefined;
+   public readonly externalId: ExternalIdX | undefined;
    public readonly hasInternalSubset: boolean;
    public pToken?: DocTypeStartPToken;
 
-   constructor(name: string, externalId: ExternalIdXToken | undefined, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
+   constructor(name: string, externalId: ExternalIdX | undefined, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
       this.name = name;
       this.externalId = externalId;
       this.hasInternalSubset = hasInternalSubset;
@@ -137,7 +137,7 @@ function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, confVer
 
 function pTokenToXToken(pToken: DocTypeStartPToken) {
    return new DocTypeStartXToken(strOrBlank(pToken.name),
-      pToken.externalId ? new ExternalIdXToken(pToken.externalId) : undefined,
+      pToken.externalId ? new ExternalIdX(pToken.externalId) : undefined,
       !!pToken.openSubset,
       pToken);
 }

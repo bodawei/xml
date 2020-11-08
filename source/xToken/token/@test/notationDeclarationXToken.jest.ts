@@ -5,7 +5,7 @@ import { toSToken } from 'sToken';
 // ick
 import { TextPToken } from 'token';
 
-import { ExternalIdXToken } from '../../common/externalIdXToken';
+import { ExternalIdX } from '../../common/externalIdX';
 import {
    NOTATION_DECLARATION_XTOKEN,
    NotationDeclarationXToken,
@@ -36,7 +36,7 @@ describe('NotationDeclarationXToken', () => {
       expect(result).toEqual({
          type: NOTATION_DECLARATION_XTOKEN,
          name: 'notationName',
-         externalId: new ExternalIdXToken('system.xml', '- // public'),
+         externalId: new ExternalIdX('system.xml', '- // public'),
          pToken: notationPToken,
       });
    });
@@ -64,7 +64,7 @@ describe('NotationDeclarationXToken', () => {
    });
 
    it('returns a notation declaration when provided with specific parameters', () => {
-      const externalId = new ExternalIdXToken('system.xml', '- // public');
+      const externalId = new ExternalIdX('system.xml', '- // public');
       const result = new NotationDeclarationXToken('one', externalId);
 
       expect(result).toEqual({
