@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource } from 'sToken';
+import { combineSTokens, SToken, STokenSource } from 'sToken';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
 
 import { DeclarationStart } from '../../token/bridge/declaration';
-import { ExternalId, parseExternalId } from '../common/externalId';
+import { ExternalId, parseExternalId, resumeParseExternalId } from '../common/externalId';
 import { UnexpandedMarkupDetails } from '../types';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';
@@ -157,7 +157,7 @@ function parseNotationDeclaration(
       }
 
       parseName(source, protoToken, () => {
-         parseExternalId(source, ['>'], true, (args) => {
+         parseExternalId(source, ['>'], (args) => {
             const { externalId, nextPropName } = args;
             protoToken.externalId = externalId;
 
@@ -177,11 +177,13 @@ function parseNotationDeclaration(
 
 function resumeExternalParse(
    source: STokenSource,
+   preSpace: SToken | undefined,
+   propName: string,
    protoToken: NotationDeclarationProps,
    notationDeclaration: NotationDeclarationPToken,
    deliverPToken: DeliverPToken,
 ) {
-   parseExternalId(source, ['>'], true, (result) => {
+   resumeParseExternalId(source, propName, preSpace, notationDeclaration.externalId, (result) => {
       protoToken.externalId = result.externalId;
       source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
       source.extract('all', [], (sToken) => {
@@ -196,22 +198,26 @@ function resumeExternalParse(
 
 function resumeParseNotationDeclaration(
    source: STokenSource,
-   notationDeclaration: NotationDeclarationPToken,
+   decl: NotationDeclarationPToken,
    deliverPToken: DeliverPToken,
 ): void {
-   const protoToken: NotationDeclarationProps = {};
+   const protoToken: NotationDeclarationProps = { ...decl };
 
-   if (notationDeclaration.unexpanded?.propName === 'name') {
-      parseName(source, protoToken, () => {
-         resumeExternalParse(source, protoToken, notationDeclaration, deliverPToken);
-      });
-   } else {
-      if (notationDeclaration.unexpanded?.propName) {
-         resumeExternalParse(source, protoToken, notationDeclaration, deliverPToken);
+   source.extractNoParams('space', (preSpace) => {
+      const propName = decl.unexpanded?.propName || '';
+
+      if (propName === 'name') {
+         parseName(source, protoToken, () => {
+            protoToken.declTypeSpace = combineSTokens(protoToken.declTypeSpace, preSpace);
+
+            resumeExternalParse(source, undefined, 'externalType', protoToken, decl, deliverPToken);
+         });
+      } else if (propName !== '') {
+         resumeExternalParse(source, preSpace, propName, protoToken, decl, deliverPToken);
       } else {
-         deliverPToken(notationDeclaration);
+         deliverPToken(decl);
       }
-   }
+   });
 }
 
 export {

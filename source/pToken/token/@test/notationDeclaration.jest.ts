@@ -62,11 +62,9 @@ describe('notationdeDeclaration (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          externalIDParseSpy = spyOn(externalId, 'parseExternalId');
-         externalIDParseSpy.and.callFake(
-            (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: {} });
-            },
-         );
+         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
+            cb({ externalId: {} });
+         });
 
          parseUnexpSpy = spyOn(parseUnexpanded, 'parseUnexpanded');
 
@@ -90,8 +88,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          expect(externalIDParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
          expect(externalIDParseSpy.calls.argsFor(0)[1]).toEqual(['>']);
-         expect(externalIDParseSpy.calls.argsFor(0)[2]).toEqual(true);
-         expect(externalIDParseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(externalIDParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
       });
 
       it('does a simple parse', () => {
@@ -185,11 +182,9 @@ describe('notationdeDeclaration (unit)', () => {
                cb(results.shift());
             },
          );
-         externalIDParseSpy.and.callFake(
-            (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: {}, nextPropName: 'george' });
-            },
-         );
+         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
+            cb({ externalId: {}, nextPropName: 'george' });
+         });
          notationPToken = new NotationDeclarationPToken({
             open: toSToken('<!'),
             close: toSToken('>'),
@@ -227,10 +222,16 @@ describe('notationdeDeclaration (unit)', () => {
    });
 
    describe('resumeParseNotationDeclaration()', () => {
-      let externalIDParseSpy: jasmine.Spy;
+      let resumeParseSpy: jasmine.Spy;
 
       beforeEach(() => {
-         externalIDParseSpy = spyOn(externalId, 'parseExternalId');
+         resumeParseSpy = spyOn(externalId, 'resumeParseExternalId');
+
+         resumeParseSpy.and.callFake(
+            (_1: any, _2: any, _3: any, _4: any, cb: (arg: any) => void) => {
+               cb({ externalId: {} });
+            },
+         );
       });
 
       it('restores everything at and after the name', (done) => {
@@ -247,22 +248,61 @@ describe('notationdeDeclaration (unit)', () => {
             close: toSToken('>'),
          });
          const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
             ['theName', 'word', ['>']],
             ['\t', 'space'],
             ['\n', 'space'],
             [undefined, 'all'],
          ]);
 
-         externalIDParseSpy.and.callFake(
-            (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: {} });
+         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+            expect(result).toEqualRangeless(
+               new NotationDeclarationPToken({
+                  open: toSToken('<!'),
+                  name: toSToken('theName'),
+                  nameSpace: toSToken('\t'),
+                  externalId: {},
+                  externalIdSpace: toSToken('\n'),
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'name',
+                  },
+                  close: toSToken('>'),
+               }),
+            );
+
+            done();
+         });
+
+         mockSource.respondInAsyncTime();
+      });
+
+      it('restores everything at and after the name with a leading space', (done) => {
+         const notationDeclaration = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            name: undefined,
+            nameSpace: undefined,
+            externalId: undefined,
+            externalIdSpace: undefined,
+            unexpanded: {
+               tokens: [],
+               propName: 'name',
             },
-         );
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['theName', 'word', ['>']],
+            ['\t', 'space'],
+            ['\n', 'space'],
+            [undefined, 'all'],
+         ]);
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
+                  declTypeSpace: toSToken('\n'),
                   name: toSToken('theName'),
                   nameSpace: toSToken('\t'),
                   externalId: {},
@@ -295,15 +335,10 @@ describe('notationdeDeclaration (unit)', () => {
             close: toSToken('>'),
          });
          const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
             ['\t\t', 'space'],
             [undefined, 'all'],
          ]);
-
-         externalIDParseSpy.and.callFake(
-            (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: {} });
-            },
-         );
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             expect(result).toEqualRangeless(
@@ -341,15 +376,10 @@ describe('notationdeDeclaration (unit)', () => {
             close: toSToken('>'),
          });
          const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
             ['\t\t', 'space'],
             ['blah', 'all'],
          ]);
-
-         externalIDParseSpy.and.callFake(
-            (_1: any, _2: any, allowPERefs: boolean, cb: (arg: any) => void) => {
-               cb({ externalId: {} });
-            },
-         );
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             expect(result).toEqualRangeless(
@@ -367,6 +397,27 @@ describe('notationdeDeclaration (unit)', () => {
                   close: toSToken('>'),
                }),
             );
+
+            done();
+         });
+
+         mockSource.respondInAsyncTime();
+      });
+
+      it('does no harm when there is nothing in the unexpanded', (done) => {
+         const notationDeclaration = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('aName'),
+            nameSpace: toSToken(' '),
+            externalId: undefined,
+            externalIdSpace: undefined,
+            unexpanded: undefined,
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([[undefined, 'space']]);
+
+         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+            expect(result).toEqualRangeless(notationDeclaration);
 
             done();
          });

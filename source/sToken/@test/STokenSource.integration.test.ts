@@ -121,25 +121,6 @@ describe('STokenSource (integration)', () => {
          });
       });
 
-      it('delivers the digits up to a token boundary and then stops', (done) => {
-         source.addText('123', new Range(new EntityId()));
-         source.addTokenBoundary();
-         source.addText('456', new Range(new EntityId()));
-         source.endText();
-
-         source.extractNoParams('digit', (sToken1) => {
-            source.extractNoParams('digit', (sToken2) => {
-               expect(sToken1).toEqual(
-                  new SToken('123', '123', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
-               );
-               expect(sToken2).toEqual(
-                  new SToken('456', '456', new Range(new EntityId(), 3, 0, 3, 6, 0, 6)),
-               );
-               done();
-            });
-         });
-      });
-
       it('delivers no SToken if there are no digits', (done) => {
          source.extractNoParams('digit', (sToken) => {
             expect(sToken).toBeUndefined();
@@ -252,16 +233,6 @@ describe('STokenSource (integration)', () => {
       it('delivers no SToken if there is no match', (done) => {
          source.addText('frogs and toads', new Range(new EntityId()));
          source.extract('match', 'gorilla', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-      });
-
-      it('delivers no SToken if there could be a match but a token boundary is in the way', (done) => {
-         source.addText('fr', new Range(new EntityId()));
-         source.addTokenBoundary();
-         source.addText('ogs and toads', new Range(new EntityId()));
-         source.extract('match', 'fro', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });

@@ -295,20 +295,6 @@ describe('STokenSource (unit)', () => {
       });
    });
 
-   describe('addTokenBoundary()', () => {
-      it('adds a special marker segment to the list of segments (whitebox)', () => {
-         source.addText('1');
-         source.addTokenBoundary();
-         source.addText('333');
-
-         expect(source._segments).toEqual([
-            new Segment('1'),
-            new Segment('MARKER FOR DISCONTINUITY IN PROCESSING'),
-            new Segment('333'),
-         ]);
-      });
-   });
-
    describe('endText()', () => {
       it('can be invoked when no segments have been added', () => {
          source.endText();
@@ -417,34 +403,6 @@ describe('STokenSource (unit)', () => {
                new SToken('122333', '122333', new Range(new EntityId(), 0, 0, 0, 6, 0, 6)),
             );
             done();
-         });
-      });
-
-      it('returns all text up to a token boundary', (done) => {
-         source.addText('1');
-         source.addTokenBoundary();
-         source.addText('333');
-         source.endText();
-         source.extractNoParams('all', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('1', '1', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
-            );
-            done();
-         });
-      });
-
-      it('can continue parsing immediately after the token boundary', (done) => {
-         source.addText('122');
-         source.addTokenBoundary();
-         source.addText('333');
-         source.endText();
-         source.extractNoParams('all', () => {
-            source.extractNoParams('all', (sToken) => {
-               expect(sToken).toEqual(
-                  new SToken('333', '333', new Range(new EntityId(), 3, 0, 3, 6, 0, 6)),
-               );
-               done();
-            });
          });
       });
 

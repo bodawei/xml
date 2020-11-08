@@ -97,7 +97,7 @@ describe('notationDeclaration (integration)', () => {
    });
 
    describe('resumeParseNotationDeclaration()', () => {
-      it('populates a partiall build nottion declaratoin', (done) => {
+      it('populates a partial build nottion declaratoin', (done) => {
          const nd = new NotationDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('aName'),
@@ -112,14 +112,14 @@ describe('notationDeclaration (integration)', () => {
          });
 
          const source = new STokenSource(defaultExtractors);
-         source.addText('foo   PUBLIC "blah - " "sys.dtd"\tjunk');
+         source.addText('elName   PUBLIC "blah - " "sys.dtd"\tjunk');
          source.endText();
 
          resumeParseNotationDeclaration(source, nd, (parsed) => {
             expect(parsed).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
-                  name: toSToken('foo'),
+                  name: toSToken('elName'),
                   nameSpace: toSToken('   '),
                   externalId: {
                      externalType: toSToken('PUBLIC'),
@@ -142,6 +142,64 @@ describe('notationDeclaration (integration)', () => {
                      propName: 'name',
                   },
                   extra: toSToken('junk'),
+                  close: toSToken('>'),
+               }),
+            );
+            done();
+         });
+      });
+
+      it('populates an expanded externalId', (done) => {
+         const nd = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('aName'),
+            nameSpace: toSToken(' '),
+            externalId: {
+               externalType: toSToken('PUBLIC'),
+               externalTypeSpace: toSToken(' '),
+               public: undefined,
+               publicSpace: undefined,
+               system: undefined,
+            },
+            externalIdSpace: undefined,
+            unexpanded: {
+               tokens: [],
+               propName: 'public',
+            },
+            close: toSToken('>'),
+         });
+
+         const source = new STokenSource(defaultExtractors);
+         source.addText(' "blah - " "sys.dtd"\t');
+         source.endText();
+
+         resumeParseNotationDeclaration(source, nd, (parsed) => {
+            expect(parsed).toEqualRangeless(
+               new NotationDeclarationPToken({
+                  open: toSToken('<!'),
+                  name: toSToken('aName'),
+                  nameSpace: toSToken(' '),
+                  externalId: {
+                     externalType: toSToken('PUBLIC'),
+                     externalTypeSpace: toSToken('  '),
+                     public: {
+                        value: [new TextPToken({ text: toSToken('blah - ') })],
+                        openQuote: toSToken('"'),
+                        closeQuote: toSToken('"'),
+                     },
+                     publicSpace: toSToken(' '),
+                     system: {
+                        value: [new TextPToken({ text: toSToken('sys.dtd') })],
+                        openQuote: toSToken('"'),
+                        closeQuote: toSToken('"'),
+                     },
+                  },
+                  externalIdSpace: toSToken('\t'),
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'public',
+                  },
+                  extra: undefined,
                   close: toSToken('>'),
                }),
             );

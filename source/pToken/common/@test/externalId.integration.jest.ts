@@ -16,7 +16,7 @@ describe('parseExternalId()', () => {
    it('parses the public and system value (check literal.parse())', (done) => {
       source.addText('PUBLIC "pub.xml"\t"sys.xml">');
 
-      parseExternalId(source, [], false, (result) => {
+      parseExternalId(source, [], (result) => {
          expect(result).toEqualRangeless({
             externalId: {
                externalType: toSToken('PUBLIC'),
@@ -41,7 +41,7 @@ describe('parseExternalId()', () => {
    it('parses a PERef (check unsasigned calls)', (done) => {
       source.addText('PUBLIC "pub.xml"%foo;>');
 
-      parseExternalId(source, [], true, (result) => {
+      parseExternalId(source, [], (result) => {
          const externalId: ExternalId = {
             externalType: toSToken('PUBLIC'),
             externalTypeSpace: toSToken(' '),

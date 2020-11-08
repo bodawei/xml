@@ -1,10 +1,9 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { STokenSource, SToken, strOrBlank } from 'sToken';
+import { STokenSource, SToken, strOrBlank, combineSTokens } from 'sToken';
 
 import literal, { LiteralPToken } from '../../token/common/literal';
 
-const ALLOWED_TYPES = ['PUBLIC', 'SYSTEM'];
 const TYPE_TERMINATORS = ['"', "'"];
 
 interface RawExternalId {
@@ -13,6 +12,11 @@ interface RawExternalId {
    public?: LiteralPToken;
    publicSpace?: SToken;
    system?: LiteralPToken;
+}
+
+interface ResumeInternalResult {
+   externalId: ExternalId | undefined;
+   preSpace?: SToken | undefined;
 }
 
 class ExternalId {
@@ -33,12 +37,146 @@ class ExternalId {
       this.public = 'public' in other ? other.public : base.public;
       this.publicSpace = 'publicSpace' in other ? other.publicSpace : base.publicSpace;
       this.system = 'system' in other ? other.system : base.system;
+
+      this.public = !this.public
+         ? undefined
+         : {
+              closeQuote: this.public.closeQuote,
+              openQuote: this.public.openQuote,
+              value: [...this.public.value],
+           };
+
+      this.system = !this.system
+         ? undefined
+         : {
+              closeQuote: this.system.closeQuote,
+              openQuote: this.system.openQuote,
+              value: [...this.system.value],
+           };
    }
 }
 
 interface ParsedExternalId {
    externalId?: ExternalId;
    nextPropName?: string;
+}
+
+function parseExternalType(
+   base: STokenSource,
+   terminators: Array<string>,
+   externalId: ExternalId,
+   deliverExternalType: (externalId?: ExternalId, externalType?: 'PUBLIC' | 'SYSTEM') => void,
+): void {
+   const newExtId = { ...externalId };
+   base.extract('peekWord', terminators, (sToken) => {
+      const capitalType = strOrBlank(sToken).toUpperCase();
+
+      if (!capitalType || (capitalType !== 'PUBLIC' && capitalType !== 'SYSTEM')) {
+         deliverExternalType();
+         return;
+      }
+
+      base.extractToObject('word', terminators, newExtId, 'externalType');
+      base.extractNoParams('space', (externalTypeSpace) => {
+         newExtId.externalTypeSpace = externalTypeSpace;
+         deliverExternalType(newExtId, capitalType);
+      });
+   });
+}
+
+function parsePublic(
+   base: STokenSource,
+   externalId: ExternalId,
+   deliverPublic: (result: RawExternalId) => void,
+): void {
+   literal.parse(base, undefined, (publicValue) => {
+      const result = { ...externalId, public: publicValue };
+
+      if (!publicValue) {
+         deliverPublic(result);
+         return;
+      }
+
+      base.extractNoParams('space', (space) => {
+         result.publicSpace = space;
+         deliverPublic(result);
+      });
+   });
+}
+
+function parseSystem(
+   base: STokenSource,
+   externalId: ExternalId,
+   deliverSystem: (result: RawExternalId) => void,
+): void {
+   literal.parse(base, undefined, (system) => {
+      deliverSystem({ ...externalId, system });
+   });
+}
+
+function resumeParse(
+   base: STokenSource,
+   propName: string,
+   preSpace: SToken | undefined,
+   externalId: ExternalId,
+   isSystemType: boolean,
+   deliverExtId: (result: ResumeInternalResult) => void,
+): void {
+   switch (propName) {
+      case 'externalType':
+         parseExternalType(base, TYPE_TERMINATORS, externalId, (withExtType, extType) => {
+            if (!withExtType) {
+               deliverExtId({
+                  externalId: undefined,
+                  preSpace,
+               });
+               return;
+            }
+
+            if (extType === 'PUBLIC') {
+               resumeParse(base, 'public', undefined, withExtType, false, (withPublic) => {
+                  deliverExtId({
+                     externalId: withPublic.externalId,
+                     preSpace,
+                  });
+               });
+               return;
+            }
+
+            resumeParse(base, 'system', undefined, withExtType, true, (withSystem) => {
+               deliverExtId({
+                  externalId: withSystem.externalId,
+                  preSpace,
+               });
+            });
+         });
+         break;
+      case 'public':
+         parsePublic(base, externalId, (withPublic) => {
+            withPublic.externalTypeSpace = combineSTokens(withPublic.externalTypeSpace, preSpace);
+
+            if (!withPublic.public) {
+               deliverExtId({
+                  externalId: withPublic,
+               });
+               return;
+            }
+
+            resumeParse(base, 'system', undefined, withPublic, false, deliverExtId);
+         });
+         break;
+      case 'system':
+         parseSystem(base, externalId, (withSys) => {
+            if (isSystemType) {
+               withSys.externalTypeSpace = combineSTokens(withSys.externalTypeSpace, preSpace);
+            } else {
+               withSys.publicSpace = combineSTokens(externalId.publicSpace, preSpace);
+            }
+
+            deliverExtId({ externalId: withSys });
+         });
+         break;
+   }
 }
 
 /**********************************************************************\
@@ -61,58 +199,9 @@ interface ParsedExternalId {
    deliverPTokenPart: Callback to deliver the PToken compatible version
 \**********************************************************************/
 
-function parseSystem(
-   base: STokenSource,
-   allTerminators: Array<string>,
-   externalId: RawExternalId,
-   deliverExtId: (result: ParsedExternalId) => void,
-): void {
-   base.extract('peekChar', allTerminators, (sToken) => {
-      if (strOrBlank(sToken) === '%') {
-         deliverExtId({ nextPropName: 'system', externalId: new ExternalId(externalId) });
-         return;
-      }
-
-      literal.parse(base, undefined, (modifiedPToken) => {
-         if (modifiedPToken) {
-            externalId.system = modifiedPToken;
-         }
-
-         deliverExtId({ externalId: new ExternalId(externalId) });
-      });
-   });
-}
-
-function parsePublic(
-   base: STokenSource,
-   externalId: RawExternalId,
-   allTerminators: Array<string>,
-   deliverExtId: (result: ParsedExternalId) => void,
-): void {
-   base.extract('peekChar', allTerminators, (sToken) => {
-      if (strOrBlank(sToken) === '%') {
-         deliverExtId({ nextPropName: 'public', externalId: new ExternalId(externalId) });
-         return;
-      }
-
-      literal.parse(base, undefined, (alternatePToken) => {
-         if (!alternatePToken) {
-            deliverExtId({ externalId: new ExternalId(externalId) });
-            return;
-         }
-
-         externalId.public = alternatePToken;
-         base.extractToObjectNoParams('space', externalId, 'publicSpace');
-
-         parseSystem(base, allTerminators, externalId, deliverExtId);
-      });
-   });
-}
-
 function parseExternalId(
    base: STokenSource,
    terminators: Array<string>,
-   allowPERefs: boolean,
    deliverExtId: (result: ParsedExternalId) => void,
 ): void {
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
@@ -124,24 +213,62 @@ function parseExternalId(
          return;
       }
 
-      base.extract('peekWord', allTerminators, (sToken) => {
-         const capitalType = sToken && sToken.str.toUpperCase();
-
-         if (!capitalType || ALLOWED_TYPES.indexOf(capitalType) === -1) {
-            deliverExtId({});
+      parseExternalType(base, TYPE_TERMINATORS, extIdPToken, (withExtType, extType) => {
+         if (!withExtType) {
+            deliverExtId({ externalId: undefined, nextPropName: undefined });
             return;
          }
 
-         base.extractToObject('word', allTerminators, extIdPToken, 'externalType');
-         base.extractToObjectNoParams('space', extIdPToken, 'externalTypeSpace');
+         base.extract('peekChar', allTerminators, (sToken) => {
+            if (strOrBlank(sToken) === '%') {
+               deliverExtId({ nextPropName: extType?.toLowerCase(), externalId: withExtType });
+               return;
+            }
 
-         if (capitalType === 'PUBLIC') {
-            parsePublic(base, extIdPToken, allTerminators, deliverExtId);
-         } else {
-            parseSystem(base, allTerminators, extIdPToken, deliverExtId);
-         }
+            if (extType === 'SYSTEM') {
+               parseSystem(base, withExtType, (withSystem) => {
+                  deliverExtId({ externalId: withSystem });
+               });
+               return;
+            }
+
+            parsePublic(base, withExtType, (withPublic) => {
+               if (!withPublic.public) {
+                  deliverExtId({ externalId: withPublic });
+                  return;
+               }
+
+               base.extract('peekChar', allTerminators, (sToken) => {
+                  if (strOrBlank(sToken) === '%') {
+                     deliverExtId({ nextPropName: 'system', externalId: withPublic });
+                     return;
+                  }
+
+                  parseSystem(base, withPublic, (withSystem) => {
+                     deliverExtId({ externalId: withSystem });
+                  });
+               });
+            });
+         });
       });
    });
 }
 
-export { ExternalId, parseExternalId };
+function resumeParseExternalId(
+   base: STokenSource,
+   propName: string,
+   preSpace: SToken | undefined,
+   externalId: ExternalId = {},
+   deliverExtId: (result: ResumeInternalResult) => void,
+): void {
+   const isSystemType = strOrBlank(externalId.externalType).toUpperCase() === 'SYSTEM';
+
+   resumeParse(base, propName, preSpace, externalId, isSystemType, (parsed) => {
+      deliverExtId({
+         externalId: parsed.externalId ? new ExternalId(parsed.externalId) : undefined,
+         preSpace: parsed.preSpace,
+      });
+   });
+}
+
+export { ExternalId, parseExternalId, resumeParseExternalId };
