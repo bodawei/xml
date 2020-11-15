@@ -178,7 +178,7 @@ describe('ExternalId (unit)', () => {
          parseExternalId(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({});
+         expect(callback).toHaveBeenCalledWith();
       });
 
       it('returns nothing if the first word is not SYSTEM or PUBLIC', () => {
@@ -190,7 +190,7 @@ describe('ExternalId (unit)', () => {
          parseExternalId(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({});
+         expect(callback).toHaveBeenCalledWith();
       });
 
       it('does not mind if public is in the wrong case', () => {

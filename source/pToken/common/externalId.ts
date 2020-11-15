@@ -202,7 +202,7 @@ function resumeParse(
 function parseExternalId(
    base: STokenSource,
    terminators: Array<string>,
-   deliverExtId: (result: ParsedExternalId) => void,
+   deliverExtId: (result?: ParsedExternalId) => void,
 ): void {
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
    const extIdPToken: RawExternalId = {};
@@ -215,7 +215,7 @@ function parseExternalId(
 
       parseExternalType(base, TYPE_TERMINATORS, extIdPToken, (withExtType, extType) => {
          if (!withExtType) {
-            deliverExtId({ externalId: undefined, nextPropName: undefined });
+            deliverExtId();
             return;
          }
 
@@ -271,4 +271,4 @@ function resumeParseExternalId(
    });
 }
 
-export { ExternalIdP, parseExternalId, resumeParseExternalId };
+export { ParsedExternalId, ExternalIdP, parseExternalId, resumeParseExternalId };

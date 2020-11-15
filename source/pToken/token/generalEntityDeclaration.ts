@@ -19,7 +19,9 @@ interface GeneralEntityDeclarationProps {
    nameSpace?: SToken;
    externalId?: ExternalIdP;
    externalIdSpace?: SToken;
+   openQuote?: SToken;
    value?: LiteralValuePToken;
+   closeQuote?: SToken;
    valueSpace?: SToken;
    nData?: SToken;
    nDataSpace?: SToken;
@@ -42,7 +44,9 @@ function isNotDeclarationStart(
       'nameSpace' in token ||
       'externalId' in token ||
       'externalIdSpace' in token ||
+      'openQuote' in token ||
       'value' in token ||
+      'closeQuote' in token ||
       'valueSpace' in token ||
       'nData' in token ||
       'nDataSpace' in token ||
@@ -73,7 +77,11 @@ class GeneralEntityDeclarationPToken {
 
    public readonly externalIdSpace?: SToken;
 
+   public readonly openQuote?: SToken;
+
    public readonly value: LiteralValuePToken;
+
+   public readonly closeQuote?: SToken;
 
    public readonly valueSpace?: SToken;
 
@@ -106,7 +114,9 @@ class GeneralEntityDeclarationPToken {
          this.nameSpace = props.nameSpace;
          this.externalId = props.externalId;
          this.externalIdSpace = props.externalIdSpace;
+         this.openQuote = props.openQuote;
          this.value = props.value || this.value;
+         this.closeQuote = props.closeQuote;
          this.valueSpace = props.valueSpace;
          this.nData = props.nData;
          this.nDataSpace = props.nDataSpace;
@@ -122,7 +132,9 @@ class GeneralEntityDeclarationPToken {
       this.externalId = 'externalId' in other ? other.externalId : this.externalId;
       this.externalIdSpace =
          'externalIdSpace' in other ? other.externalIdSpace : this.externalIdSpace;
+      this.openQuote = 'openQuote' in other ? other.openQuote : this.openQuote;
       this.value = 'value' in other ? (other.value ? [...other.value] : []) : this.value;
+      this.closeQuote = 'closeQuote' in other ? other.closeQuote : this.closeQuote;
       this.valueSpace = 'valueSpace' in other ? other.valueSpace : this.valueSpace;
       this.nData = 'nData' in other ? other.nData : this.nData;
       this.nDataSpace = 'nDataSpace' in other ? other.nDataSpace : this.nDataSpace;
@@ -134,4 +146,8 @@ class GeneralEntityDeclarationPToken {
    }
 }
 
-export { GENERAL_ENTITY_DECLARATION_PTOKEN, GeneralEntityDeclarationPToken };
+export {
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GeneralEntityDeclarationProps,
+   GeneralEntityDeclarationPToken,
+};

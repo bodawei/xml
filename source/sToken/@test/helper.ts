@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range, EntityId,  } from 'basic';
+import { Range, EntityId } from 'basic';
 
 import STokenSource from '../STokenSource';
 import SToken from '../SToken';
@@ -45,8 +45,11 @@ function makeSTokenMaker(entityId = new EntityId(), index = 0, row = 0, column =
 
 class RangeMaker {
    public entityId: EntityId;
+
    public index: number;
+
    public column: number;
+
    public row: number;
 
    constructor(entityId = new EntityId(), index = 0, row = 0, column = 0) {
@@ -64,7 +67,15 @@ class RangeMaker {
       this.index += text.length;
       this.column += text.length;
 
-      return new Range(this.entityId, oldIndex, oldRow, oldColumn, this.index, this.row, this.column);
+      return new Range(
+         this.entityId,
+         oldIndex,
+         oldRow,
+         oldColumn,
+         this.index,
+         this.row,
+         this.column,
+      );
    }
 }
 
@@ -75,20 +86,24 @@ class RangeMaker {
   the asynchronous behavior of a STokenSource more tersely in tests.
 \**********************************************************************/
 
-type PeekValue = { type: typeof PEEK, peekedValue: string | undefined };
+interface PeekValue {
+   type: typeof PEEK;
+   peekedValue: string | undefined;
+}
 type SimpleMockValue = undefined | string | PeekValue;
 type TupleMockValue = [SimpleMockValue, string, any] | [SimpleMockValue, string];
 type MockValues = Array<SimpleMockValue | TupleMockValue>;
-type PrepValue = {
-   type: string,
-   token: SToken | undefined,
-   peekedValue?: string | undefined,
-   param?: any
-};
+interface PrepValue {
+   type: string;
+   token: SToken | undefined;
+   peekedValue?: string | undefined;
+   param?: any;
+}
 type PreparedMockValues = Array<PrepValue>;
 
 class MockSTokenSource extends STokenSource {
    public expectedValues: PreparedMockValues;
+
    public queuedCalls: Array<any>;
 
    public static PEEK = (peekedValue: string | undefined): PeekValue => {
@@ -168,31 +183,40 @@ class MockSTokenSource extends STokenSource {
 
             if (peekString === undefined) {
                token = undefined;
-            } else
-            if (next && next.token) {
-               token = new SToken(peekString, peekString, new Range(new EntityId(),
-                  next.token.ranges[0].startIndex,
-                  next.token.ranges[0].startRow,
-                  next.token.ranges[0].startColumn,
-                  next.token.ranges[0].startIndex + peekString.length,
-                  next.token.ranges[0].startRow,
-                  next.token.ranges[0].startColumn + peekString.length));
+            } else if (next && next.token) {
+               token = new SToken(
+                  peekString,
+                  peekString,
+                  new Range(
+                     new EntityId(),
+                     next.token.ranges[0].startIndex,
+                     next.token.ranges[0].startRow,
+                     next.token.ranges[0].startColumn,
+                     next.token.ranges[0].startIndex + peekString.length,
+                     next.token.ranges[0].startRow,
+                     next.token.ranges[0].startColumn + peekString.length,
+                  ),
+               );
             } else if (prev && prev.token && prev.type !== PEEK) {
-               token = new SToken(peekString, peekString, new Range(new EntityId(),
-                  prev.token.ranges[0].endIndex,
-                  prev.token.ranges[0].endRow,
-                  prev.token.ranges[0].endColumn,
-                  prev.token.ranges[0].endIndex + peekString.length,
-                  prev.token.ranges[0].endRow,
-                  prev.token.ranges[0].endColumn + peekString.length));
+               token = new SToken(
+                  peekString,
+                  peekString,
+                  new Range(
+                     new EntityId(),
+                     prev.token.ranges[0].endIndex,
+                     prev.token.ranges[0].endRow,
+                     prev.token.ranges[0].endColumn,
+                     prev.token.ranges[0].endIndex + peekString.length,
+                     prev.token.ranges[0].endRow,
+                     prev.token.ranges[0].endColumn + peekString.length,
+                  ),
+               );
             } else {
-               token = new SToken(peekString, peekString, new Range(new EntityId(),
-                  0,
-                  0,
-                  0,
-                  peekString.length,
-                  0,
-                  peekString.length));
+               token = new SToken(
+                  peekString,
+                  peekString,
+                  new Range(new EntityId(), 0, 0, 0, peekString.length, 0, peekString.length),
+               );
             }
 
             this.expectedValues[index].type = ANY;
@@ -244,7 +268,9 @@ class MockSTokenSource extends STokenSource {
                qc.obj[qc.name] = this._getAdjustedValue(qc);
             } else {
                if (this.expectedValues.length === 0) {
-                  throw new Error(`NO value provided for extraction type "${qc.type}" in MockSTokenSource.`);
+                  throw new Error(
+                     `NO value provided for extraction type "${qc.type}" in MockSTokenSource.`,
+                  );
                }
 
                qc.callback(this._getAdjustedValue(qc));
@@ -257,27 +283,35 @@ class MockSTokenSource extends STokenSource {
       const expected = this.expectedValues.shift()!; // never undefined
 
       if (expected.type !== ANY && expected.type !== actualCall.type) {
-         throw new Error('Type of call did not match expectation. ' +
-            `Expected ${expected.type} (${expected.token?.str}, ${expected.param}) but got "${actualCall.type}".`);
+         throw new Error(
+            'Type of call did not match expectation. ' +
+               `Mock setup hed ${expected.type} (${expected.token?.str}, ${expected.param}) but got "${actualCall.type}"  (${actualCall.token?.str}, ${actualCall.param}).`,
+         );
       }
 
       if (expected.param) {
          if (Array.isArray(expected.param)) {
             if (expected.param.length !== actualCall.params.length) {
-               throw new Error('Parameters passed to STokenSource did not match expectation. ' +
-               `Expected "['${expected.param.join('\', \'')}']" but got ` +
-               `"['${actualCall.params.join('\', \'')}']".`);
+               throw new Error(
+                  'Parameters passed to STokenSource did not match expectation. ' +
+                     `Expected "['${expected.param.join("', '")}']" but got ` +
+                     `"['${actualCall.params.join("', '")}']".`,
+               );
             }
 
             for (let paramIndex = 0; paramIndex < expected.param.length; paramIndex++) {
                if (expected.param[paramIndex] !== actualCall.params[paramIndex]) {
-                  throw new Error('Parameters passed to STokenSource did not match expectation. ' +
-                     `Expected "${expected.param[paramIndex]}" but got "${actualCall.params[paramIndex]}".`);
+                  throw new Error(
+                     'Parameters passed to STokenSource did not match expectation. ' +
+                        `Expected "${expected.param[paramIndex]}" but got "${actualCall.params[paramIndex]}".`,
+                  );
                }
             }
          } else if (expected.param !== actualCall.params) {
-            throw new Error('Parameters passed to STokenSource did not match expectation. ' +
-               `Expected "${expected.param}" but got "${actualCall.params}".`);
+            throw new Error(
+               'Parameters passed to STokenSource did not match expectation. ' +
+                  `Expected "${expected.param}" but got "${actualCall.params}".`,
+            );
          }
       }
 
@@ -285,10 +319,4 @@ class MockSTokenSource extends STokenSource {
    }
 }
 
-export {
-   MockSTokenSource,
-   RangeMaker,
-   makeSToken,
-   makeSTokenMaker,
-   STokenMaker,
-};
+export { MockSTokenSource, RangeMaker, makeSToken, makeSTokenMaker, STokenMaker };

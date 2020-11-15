@@ -162,6 +162,7 @@ module.exports = {
   setupFilesAfterEnv: [
      './build/beforeJest.ts',
      './source/error/@test/beforeJest.ts',
+   //   './source/sToken/@test/beforeJest.ts',
      './source/token/@test/beforeJest.ts',
   ],
 

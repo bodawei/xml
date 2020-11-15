@@ -21,7 +21,9 @@ interface ParameterEntityDeclarationProps {
    nameSpace?: SToken;
    externalId?: ExternalIdP;
    externalIdSpace?: SToken;
+   openQuote?: SToken;
    value?: LiteralValuePToken;
+   closeQuote?: SToken;
    valueSpace?: SToken;
    unexpanded?: UnexpandedMarkupDetails | undefined;
    extra?: SToken | false;
@@ -42,7 +44,9 @@ function isNotDeclarationStart(
       'nameSpace' in token ||
       'externalId' in token ||
       'externalIdSpace' in token ||
+      'openQuote' in token ||
       'value' in token ||
+      'closeQuote' in token ||
       'valueSpace' in token ||
       'close' in token ||
       'unexpanded' in token ||
@@ -73,7 +77,11 @@ class ParameterEntityDeclarationPToken {
 
    public readonly externalIdSpace?: SToken;
 
+   public readonly openQuote?: SToken;
+
    public readonly value: LiteralValuePToken;
+
+   public readonly closeQuote?: SToken;
 
    public readonly valueSpace?: SToken;
 
@@ -100,7 +108,9 @@ class ParameterEntityDeclarationPToken {
          this.nameSpace = props.nameSpace;
          this.externalId = props.externalId;
          this.externalIdSpace = props.externalIdSpace;
+         this.openQuote = props.openQuote;
          this.value = props.value || this.value;
+         this.closeQuote = props.closeQuote;
          this.valueSpace = props.valueSpace;
          this.unexpanded = props.unexpanded;
          this.extra = props.extra;
@@ -114,7 +124,9 @@ class ParameterEntityDeclarationPToken {
       this.externalId = 'externalId' in other ? other.externalId : this.externalId;
       this.externalIdSpace =
          'externalIdSpace' in other ? other.externalIdSpace : this.externalIdSpace;
+      this.openQuote = 'openQuote' in other ? other.openQuote : this.openQuote;
       this.value = 'value' in other ? (other.value ? [...other.value] : []) : this.value;
+      this.closeQuote = 'closeQuote' in other ? other.closeQuote : this.closeQuote;
       this.valueSpace = 'valueSpace' in other ? other.valueSpace : this.valueSpace;
       this.unexpanded = 'unexpanded' in other ? other.unexpanded : this.unexpanded;
       this.extra = 'extra' in other ? other.extra : this.extra;
@@ -122,4 +134,8 @@ class ParameterEntityDeclarationPToken {
    }
 }
 
-export { PARAMETER_ENTITY_DECLARATION_PTOKEN, ParameterEntityDeclarationPToken };
+export {
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   ParameterEntityDeclarationProps,
+   ParameterEntityDeclarationPToken,
+};

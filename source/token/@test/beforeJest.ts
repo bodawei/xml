@@ -2,18 +2,18 @@ import { SToken } from 'sToken';
 
 type Props =  { [name: string]: any, calls?: any };
 
-function makeRangeless(item: void | Props): Props | void | null {
+function makeRangeless(item: undefined | Props): Props | undefined | null {
    const result: Props = {};
 
    if (item === null || item === undefined) {
       return item;
    }
 
-   let props = item;
-
-   if (typeof props !== 'object') {
-      return props;
+   if (typeof item !== 'object') {
+      return item;
    }
+
+   let props = item;
 
    if (props instanceof SToken) {
       return new SToken(props.str, props.originalStr, []);
@@ -108,6 +108,7 @@ expect.extend({
                `   EXPECTED: ${JSON.stringify(fixUndef(exp), undefined, 2)}\n`;
          }
       });
+
 
       return {
          pass,

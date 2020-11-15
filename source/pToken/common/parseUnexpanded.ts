@@ -6,6 +6,7 @@ import { TextPToken, parseParameterEntityReference, parseText } from 'token';
 
 import { UnexpandedMarkupDetails, UnexpandedMarkupToken } from '../types';
 
+// This returns an array of textPTokens, some of which are quotes, others are runs of text.
 function getText(
    source: STokenSource,
    callback: (textTokens: Array<UnexpandedMarkupToken> | undefined) => void,
@@ -92,4 +93,26 @@ function parseUnexpanded(
    });
 }
 
-export { parseUnexpanded };
+function parseUnexpandedAfterPeRef(
+   source: STokenSource,
+   propName: string,
+   done: (value: UnexpandedMarkupDetails | undefined) => void,
+): void {
+   getText(source, (textTokens) => {
+      parseUnexpanded(source, propName, (rest) => {
+         if (!textTokens && !rest) {
+            done(undefined);
+            return;
+         }
+
+         const restTokens = rest ? rest.tokens : [];
+
+         done({
+            propName,
+            tokens: textTokens ? [...textTokens, ...restTokens] : restTokens,
+         });
+      });
+   });
+}
+
+export { UnexpandedMarkupDetails, parseUnexpanded, parseUnexpandedAfterPeRef };
