@@ -2,10 +2,10 @@
 
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
-// ick
-import { EXTERNAL_ID, TextPToken } from 'token';
-
 import { notationDeclarationToSTokens } from '../notationDeclarationToSTokens';
+
+// ick
+import { TextPToken } from 'token';
 
 describe('notationDeclarationToSTokens() (unit)', () => {
    it('returns all the STokens', () => {
@@ -17,7 +17,6 @@ describe('notationDeclarationToSTokens() (unit)', () => {
          name: toSToken('notationName'),
          nameSpace: toSToken(' '),
          externalId: {
-            type: EXTERNAL_ID,
             system: {
                value: [new TextPToken({ text: toSToken('system.xml') })],
             },
@@ -36,6 +35,81 @@ describe('notationDeclarationToSTokens() (unit)', () => {
          toSToken(' '),
          toSToken('notationName'),
          toSToken(' '),
+         toSToken('- // public'),
+         toSToken('system.xml'),
+         toSToken(' '),
+         toSToken('>'),
+      ]);
+   });
+
+   it('returns all the STokens, including extra if it is an SToken', () => {
+      const notationPToken = new NotationDeclarationPToken({
+         open: toSToken('<!'),
+         openSpace: toSToken('\t'),
+         declType: toSToken('NOTATION'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('notationName'),
+         nameSpace: toSToken(' '),
+         externalId: {
+            externalType: toSToken('pubLic'),
+            system: {
+               value: [new TextPToken({ text: toSToken('system.xml') })],
+            },
+            public: {
+               value: [new TextPToken({ text: toSToken('- // public') })],
+            },
+         },
+         extra: toSToken('zoiks'),
+         externalIdSpace: toSToken(' '),
+         close: toSToken('>'),
+      });
+
+      expect(notationDeclarationToSTokens(notationPToken)).toEqual([
+         toSToken('<!'),
+         toSToken('\t'),
+         toSToken('NOTATION'),
+         toSToken(' '),
+         toSToken('notationName'),
+         toSToken(' '),
+         toSToken('pubLic'),
+         toSToken('- // public'),
+         toSToken('system.xml'),
+         toSToken(' '),
+         toSToken('zoiks'),
+         toSToken('>'),
+      ]);
+   });
+
+   it('returns all the STokens, excluding extra if it false', () => {
+      const notationPToken = new NotationDeclarationPToken({
+         open: toSToken('<!'),
+         openSpace: toSToken('\t'),
+         declType: toSToken('NOTATION'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('notationName'),
+         nameSpace: toSToken(' '),
+         externalId: {
+            externalType: toSToken('pubLic'),
+            system: {
+               value: [new TextPToken({ text: toSToken('system.xml') })],
+            },
+            public: {
+               value: [new TextPToken({ text: toSToken('- // public') })],
+            },
+         },
+         extra: false,
+         externalIdSpace: toSToken(' '),
+         close: toSToken('>'),
+      });
+
+      expect(notationDeclarationToSTokens(notationPToken)).toEqual([
+         toSToken('<!'),
+         toSToken('\t'),
+         toSToken('NOTATION'),
+         toSToken(' '),
+         toSToken('notationName'),
+         toSToken(' '),
+         toSToken('pubLic'),
          toSToken('- // public'),
          toSToken('system.xml'),
          toSToken(' '),

@@ -2,9 +2,8 @@
 
 import { NotationDeclarationPToken } from 'pToken';
 import { STokenArrayBuilder, SToken } from 'sToken';
-//ick
-import { getSTokens } from '../../token/common/externalId';
 
+import { externalIdToSTokens } from '../common/externalIdToSTokens';
 import { unexpandedToSTokens } from '../common/unexpandedToSTokens';
 
 function notationDeclarationToSTokens(pToken: NotationDeclarationPToken): Array<SToken> {
@@ -18,7 +17,7 @@ function notationDeclarationToSTokens(pToken: NotationDeclarationPToken): Array<
       pToken.declTypeSpace,
       pToken.name,
       pToken.nameSpace,
-      getSTokens(pToken.externalId),
+      externalIdToSTokens(pToken.externalId),
       pToken.externalIdSpace,
    );
 

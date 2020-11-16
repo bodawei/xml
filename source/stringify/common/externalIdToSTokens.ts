@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { SToken, STokenArrayBuilder } from 'sToken';
-import { ExternalId } from 'pToken';
+import { ExternalIdP } from 'pToken';
 // ick
 import literal from '../../token/common/literal';
 
-function externalIdToSTokens(externalId: ExternalId | undefined): Array<SToken> {
+function externalIdToSTokens(externalId: ExternalIdP | undefined): Array<SToken> {
    if (!externalId) {
       return [];
    }
