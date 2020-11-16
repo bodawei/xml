@@ -6,8 +6,8 @@ import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { nameCheck } from './util/nameCheck';
+import { externalIdCheck } from '../common/externalIdCheck';
 
-import { externalIdCheck } from '../common/externalIdCheck'; // ick
 import misc from '../../token/common/misc'; // ick
 
 const WARN = XmlWarning.ID;

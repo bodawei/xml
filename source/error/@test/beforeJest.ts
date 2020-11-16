@@ -115,7 +115,7 @@ function makeMatcher(ErrorClass: any) {
 
       return {
          pass,
-         message,
+         message: () => message,
       };
    };
 }

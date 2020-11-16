@@ -5,7 +5,9 @@ import { PToken as PTokenClassic } from 'token';
 
 import { InstructionStart } from './bridge/instruction';
 import { AttListDeclarationPToken } from './token/attListDeclaration';
+import { GeneralEntityDeclarationPToken } from './token/generalEntityDeclaration';
 import { NotationDeclarationPToken } from './token/notationDeclaration';
+export { ParameterEntityDeclarationPToken } from './token/parameterEntityDeclaration';
 import { ProcessingInstructionPToken } from './token/processingInstruction';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
@@ -14,7 +16,9 @@ export * from './bridge/instruction';
 export * from './common/externalId';
 export * from './common/fieldedInstruction';
 export * from './token/attListDeclaration';
+export * from './token/generalEntityDeclaration';
 export * from './token/notationDeclaration';
+export * from './token/parameterEntityDeclaration';
 export * from './token/processingInstruction';
 export * from './token/textDeclaration';
 export * from './token/xmlDeclaration';
@@ -27,6 +31,7 @@ type ParseValue =
    | ConformanceVersion
    | EntityId
    | AttListDeclarationPToken
+   | GeneralEntityDeclarationPToken
    | NotationDeclarationPToken
    | ProcessingInstructionPToken
    | TextDeclarationPToken
