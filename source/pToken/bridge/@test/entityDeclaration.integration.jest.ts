@@ -1,7 +1,10 @@
-import { parseEntityDeclaration } from '../entityDeclaration';
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
+
+import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
+
 import { DeclarationStart, ParameterEntityReferencePToken, TextPToken } from 'token';
 import { GeneralEntityDeclarationPToken } from '../../token/generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDeclaration';
@@ -61,7 +64,7 @@ describe('parseEntityDeclaration (unit)', () => {
                name: toSToken('aName'),
                nameSpace: toSToken(' '),
                unexpanded: {
-                  propName: 'externalIdOrLiteral',
+                  propName: 'externalIdOrValue',
                   tokens: [
                      new ParameterEntityReferencePToken({
                         open: toSToken('%'),
@@ -158,6 +161,65 @@ describe('parseEntityDeclaration (unit)', () => {
                close: toSToken('>'),
             }),
          );
+         done();
+      });
+   });
+
+   it('resumeParses a general entity declaration', (done) => {
+      source.addText('% foo ;>');
+      source.endText();
+
+      parseEntityDeclaration(source, declarationStart, (pToken) => {
+         const tokensExpanded = new STokenSource(defaultExtractors);
+
+         tokensExpanded.addText('aName PUBLIC "http://somewhere" "-whatever" NDATA frog bogus');
+         tokensExpanded.endText();
+
+         resumeParseEntityDeclaration(tokensExpanded, pToken, (finishedToken) => {
+            expect(finishedToken).toEqualRangeless(
+               new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
+                  declType: toSToken('ENTITY'),
+                  declTypeSpace: toSToken('\t'),
+                  name: toSToken('aName'),
+                  nameSpace: toSToken(' '),
+                  externalId: {
+                     externalType: toSToken('PUBLIC'),
+                     externalTypeSpace: toSToken(' '),
+                     public: {
+                        openQuote: toSToken('"'),
+                        value: [new TextPToken({ text: toSToken('http://somewhere') })],
+                        closeQuote: toSToken('"'),
+                     },
+                     publicSpace: toSToken(' '),
+                     system: {
+                        openQuote: toSToken('"'),
+                        value: [new TextPToken({ text: toSToken('-whatever') })],
+                        closeQuote: toSToken('"'),
+                     },
+                  },
+                  externalIdSpace: toSToken(' '),
+                  nData: toSToken('NDATA'),
+                  nDataSpace: toSToken(' '),
+                  nDataName: toSToken('frog'),
+                  nDataNameSpace: toSToken(' '),
+                  extra: toSToken('bogus'),
+                  unexpanded: {
+                     propName: 'parameter',
+                     tokens: [
+                        new ParameterEntityReferencePToken({
+                           open: toSToken('%'),
+                           openSpace: toSToken(' '),
+                           name: toSToken('foo'),
+                           nameSpace: toSToken(' '),
+                           close: toSToken(';'),
+                        }),
+                     ],
+                  },
+                  close: toSToken('>'),
+               }),
+            );
+         });
          done();
       });
    });

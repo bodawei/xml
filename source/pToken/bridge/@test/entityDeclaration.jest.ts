@@ -10,7 +10,7 @@ import { ParameterEntityReferencePToken } from '../../../token/parameterEntityRe
 import { GeneralEntityDeclarationPToken } from '../../token/generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDeclaration';
 
-import { parseEntityDeclaration } from '../entityDeclaration';
+import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 
 import { DeclarationStart, TextPToken } from 'token';
 import literal, { LiteralPToken } from '../../../token/common/literal';
@@ -628,7 +628,7 @@ describe('entityDeclaration (unit)', () => {
                name: toSToken('entityName'),
                nameSpace: toSToken(' '),
                unexpanded: {
-                  propName: 'externalIdOrLiteral',
+                  propName: 'externalIdOrValue',
                   tokens: [],
                },
                close: toSToken('>'),
@@ -782,6 +782,621 @@ describe('entityDeclaration (unit)', () => {
                close: toSToken('>'),
             });
          });
+      });
+   });
+
+   describe('resumeParseEntityDeclaration()', () => {
+      let result: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken | undefined;
+
+      function getResult(value: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken) {
+         result = value;
+      }
+
+      it('returns the original token if there is no unexpanded value', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toBe(geRef);
+      });
+
+      it('returns a separate but equal token when given a bogus prop name', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'bogus',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqual(geRef);
+         expect(result).not.toBe(geRef);
+      });
+
+      it('adds an nDataName when the prop is nDataName', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'nDataName',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['NData!', 'word', ['>']],
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               close: toSToken('>'),
+               nDataSpace: toSToken('\n'),
+               nDataName: toSToken('NData!'),
+               nDataNameSpace: toSToken('\t'),
+               unexpanded: {
+                  propName: 'nDataName',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds extra when there is text after all the rest', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'nDataName',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['NData!', 'word', ['>']],
+            ['\t', 'space'],
+            ['zowie', 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               close: toSToken('>'),
+               nDataSpace: toSToken('\n'),
+               nDataName: toSToken('NData!'),
+               nDataNameSpace: toSToken('\t'),
+               extra: toSToken('zowie'),
+               unexpanded: {
+                  propName: 'nDataName',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds an nData when the prop is nData', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'nData',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['ndata', 'peekWord'],
+            ['ndata', 'word'],
+            ['\r', 'space'],
+            ['NData!', 'word', ['>']],
+            [undefined, 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               close: toSToken('>'),
+               externalIdSpace: toSToken('\n'),
+               nData: toSToken('ndata'),
+               nDataSpace: toSToken('\r'),
+               nDataName: toSToken('NData!'),
+               nDataNameSpace: undefined,
+               unexpanded: {
+                  propName: 'nData',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('does not add an nData when the prop is nData but the next value is not some form of "ndata"', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'nData',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['nope', 'peekWord'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               close: toSToken('>'),
+               externalIdSpace: toSToken('\n'),
+               unexpanded: {
+                  propName: 'nData',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds an externalId if nextPRop is externalIdOrValue and we can find an external ID', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'nData',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['nope', 'peekWord'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               close: toSToken('>'),
+               externalIdSpace: toSToken('\n'),
+               unexpanded: {
+                  propName: 'nData',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds an externalId if nextProp is externalIdOrValue and we can find an external ID', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'externalIdOrValue',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['\t', 'space'],
+            ['ndata', 'peekWord'],
+            ['ndata', 'word'],
+            ['\r', 'space'],
+            ['NData!', 'word', ['>']],
+            [undefined, 'space'],
+            [undefined, 'all'],
+         ]);
+         parseExternalId.mockImplementation(
+            (
+               sTokenSource: STokenSource,
+               terminators: TermArray,
+               cb: (result?: ParsedExternalId) => void,
+            ) => {
+               cb({
+                  externalId: {},
+               });
+            },
+         );
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' \n'),
+               close: toSToken('>'),
+               externalId: {},
+               externalIdSpace: toSToken('\t'),
+               nData: toSToken('ndata'),
+               nDataSpace: toSToken('\r'),
+               nDataName: toSToken('NData!'),
+               nDataNameSpace: undefined,
+               unexpanded: {
+                  propName: 'externalIdOrValue',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('does not try to add an ndata if this is a parameter entity', () => {
+         const peRef = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            parameter: toSToken('%'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'externalIdOrValue',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
+         parseExternalId.mockImplementation(
+            (
+               sTokenSource: STokenSource,
+               terminators: TermArray,
+               cb: (result?: ParsedExternalId) => void,
+            ) => {
+               cb({
+                  externalId: {},
+               });
+            },
+         );
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               parameter: toSToken('%'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' \n'),
+               close: toSToken('>'),
+               externalId: {},
+               externalIdSpace: toSToken('\t'),
+               unexpanded: {
+                  propName: 'externalIdOrValue',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds a value if the propName is value', () => {
+         const peRef = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            parameter: toSToken('%'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'value',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
+         literalParse.mockImplementation(
+            (
+               _1: STokenSource,
+               stuff: LitParams | undefined,
+               callback: (result?: LiteralPToken) => void,
+            ) => {
+               callback({
+                  ...stuff?.pToken,
+                  openQuote: toSToken('"'),
+                  value: [],
+                  closeQuote: toSToken('"'),
+               });
+            },
+         );
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               parameter: toSToken('%'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' \n'),
+               close: toSToken('>'),
+               openQuote: toSToken('"'),
+               value: [],
+               closeQuote: toSToken('"'),
+               valueSpace: toSToken('\t'),
+               unexpanded: {
+                  propName: 'value',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds a value if the propName is entityIdOrLiteral and there is no entity id', () => {
+         const peRef = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            parameter: toSToken('%'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'externalIdOrValue',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
+         literalParse.mockImplementation(
+            (
+               _1: STokenSource,
+               stuff: LitParams | undefined,
+               callback: (result?: LiteralPToken) => void,
+            ) => {
+               callback({
+                  ...stuff?.pToken,
+                  openQuote: toSToken('"'),
+                  value: [],
+                  closeQuote: toSToken('"'),
+               });
+            },
+         );
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               parameter: toSToken('%'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' \n'),
+               close: toSToken('>'),
+               openQuote: toSToken('"'),
+               value: [],
+               closeQuote: toSToken('"'),
+               valueSpace: toSToken('\t'),
+               unexpanded: {
+                  propName: 'externalIdOrValue',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds a name if the value is name and sets up leading space after parameter', () => {
+         const peRef = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            parameter: toSToken('%'),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'name',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['theName', 'word'],
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               parameter: toSToken('%'),
+               parameterSpace: toSToken('\n'),
+               name: toSToken('theName'),
+               nameSpace: toSToken('\t'),
+               close: toSToken('>'),
+               unexpanded: {
+                  propName: 'name',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds a name if the value is name and sets up leading space after declaration if this is not a parameter entity', () => {
+         const peRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'name',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['theName', 'word'],
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               declTypeSpace: toSToken('\n'),
+               name: toSToken('theName'),
+               nameSpace: toSToken('\t'),
+               close: toSToken('>'),
+               unexpanded: {
+                  propName: 'name',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds a parameter when propName is parameter, in the process changing the token type', () => {
+         const peRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'parameter',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['%', 'match'],
+            ['\r\n', 'space'],
+            ['theName', 'word'],
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               declTypeSpace: toSToken('\n'),
+               parameter: toSToken('%'),
+               parameterSpace: toSToken('\r\n'),
+               name: toSToken('theName'),
+               nameSpace: toSToken('\t'),
+               close: toSToken('>'),
+               unexpanded: {
+                  propName: 'parameter',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('can produce an entire parameter entity token from "nothing"', () => {
+         const peRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'parameter',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            ['%', 'match'],
+            ['\r\n', 'space'],
+            ['theName', 'word'],
+            ['\t', 'space'],
+            ['\t\t', 'space'],
+            ['stuff', 'all'],
+         ]);
+         literalParse.mockImplementation(
+            (
+               _1: STokenSource,
+               stuff: LitParams | undefined,
+               callback: (result?: LiteralPToken) => void,
+            ) => {
+               callback({
+                  ...stuff?.pToken,
+                  openQuote: toSToken('"'),
+                  value: [],
+                  closeQuote: toSToken('"'),
+               });
+            },
+         );
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               declTypeSpace: toSToken('\n'),
+               parameter: toSToken('%'),
+               parameterSpace: toSToken('\r\n'),
+               name: toSToken('theName'),
+               nameSpace: toSToken('\t'),
+               openQuote: toSToken('"'),
+               value: [],
+               closeQuote: toSToken('"'),
+               valueSpace: toSToken('\t\t'),
+               extra: toSToken('stuff'),
+               close: toSToken('>'),
+               unexpanded: {
+                  propName: 'parameter',
+                  tokens: [],
+               },
+            }),
+         );
       });
    });
 });

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { STokenSource, strOrBlank } from 'sToken';
+import { combineSTokens, SToken, STokenSource, strOrBlank } from 'sToken';
 import { ParameterEntityReferencePToken } from 'token';
 import literal from '../../token/common/literal';
 import { DeclarationStart } from '../../token/bridge/declaration';
@@ -125,7 +125,7 @@ function parseValue(
    isGeDecl: boolean,
    done: (pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken) => void,
 ): void {
-   parseUnexpanded(source, 'externalIdOrLiteral', (unexp1) => {
+   parseUnexpanded(source, 'externalIdOrValue', (unexp1) => {
       if (unexp1) {
          props.unexpanded = unexp1;
          parseClose(source, declarationStart, props, done);
@@ -273,4 +273,101 @@ function parseEntityDeclaration(
    });
 }
 
-export { parseEntityDeclaration };
+function resumeParseParts(
+   source: STokenSource,
+   props: AnyEntityDeclaration,
+   propName: string,
+   preSpace: SToken | undefined,
+   deliverProps: (props: AnyEntityDeclaration) => void,
+): void {
+   switch (propName) {
+      case 'parameter':
+         parseParameter(source, props, (withParam) => {
+            withParam.declTypeSpace = combineSTokens(withParam.declTypeSpace, preSpace);
+            resumeParseParts(source, withParam, 'name', undefined, deliverProps);
+         });
+         break;
+      case 'name':
+         parseName(source, props, (withName) => {
+            if (props.parameter) {
+               withName.parameterSpace = combineSTokens(withName.parameterSpace, preSpace);
+            } else {
+               withName.declTypeSpace = combineSTokens(withName.declTypeSpace, preSpace);
+            }
+            resumeParseParts(source, withName, 'externalIdOrValue', undefined, deliverProps);
+         });
+         break;
+      case 'externalIdOrValue':
+         parseExternalId(source, ['>'], (parsedExtId) => {
+            if (!parsedExtId) {
+               resumeParseParts(source, props, 'value', preSpace, deliverProps);
+            } else {
+               props.externalId = parsedExtId.externalId;
+               props.nameSpace = combineSTokens(props.nameSpace, preSpace);
+               source.extractNoParams('space', (externalIdSpace) => {
+                  props.externalIdSpace = externalIdSpace;
+                  if (!props.parameter) {
+                     resumeParseParts(source, props, 'nData', undefined, deliverProps);
+                  } else {
+                     deliverProps(props);
+                  }
+               });
+            }
+         });
+         break;
+      case 'value':
+         props.nameSpace = combineSTokens(props.nameSpace, preSpace);
+         parseLiteralValue(source, props, deliverProps);
+         break;
+      case 'nData':
+         parseNData(source, props, (withNData) => {
+            withNData.externalIdSpace = combineSTokens(withNData.externalIdSpace, preSpace);
+
+            if (!withNData.nData) {
+               deliverProps(props);
+               return;
+            }
+            resumeParseParts(source, props, 'nDataName', undefined, deliverProps);
+         });
+         break;
+      case 'nDataName':
+         props.nDataSpace = combineSTokens(props.nDataSpace, preSpace);
+         parseNDataName(source, props, deliverProps);
+         break;
+      default:
+         deliverProps(props);
+   }
+}
+
+function resumeParseEntityDeclaration(
+   source: STokenSource,
+   existing: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+   deliverPToken: (
+      pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+   ) => void,
+): void {
+   if (!existing.unexpanded) {
+      deliverPToken(existing);
+      return;
+   }
+
+   const dup: AnyEntityDeclaration = { ...existing };
+
+   source.extractNoParams('space', (preSpace) => {
+      const propName = existing.unexpanded!.propName; // eslint-disable-line @typescript-eslint/no-non-null-assertion
+
+      resumeParseParts(source, dup, propName, preSpace, (props) => {
+         source.extract('all', [], (sToken) => {
+            props.extra = sToken;
+
+            if (dup.parameter || props.parameter) {
+               deliverPToken(new ParameterEntityDeclarationPToken(existing, props));
+            } else {
+               deliverPToken(new GeneralEntityDeclarationPToken(existing, props));
+            }
+         });
+      });
+   });
+}
+
+export { parseEntityDeclaration, resumeParseEntityDeclaration };
