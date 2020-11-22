@@ -4,9 +4,16 @@ import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
-import { XmlDeclarationPToken, parseXmlDeclaration, xmlDeclIsStandalone } from '../xmlDeclaration';
+import {
+   XmlDeclarationPToken,
+   parseXmlDeclaration,
+   xmlDeclIsStandalone,
+   XMLDECL_PTOKEN,
+} from '../xmlDeclaration';
 
 import * as fieldedInstr from '../../common/fieldedInstruction';
+
+jest.mock('../../common/fieldedInstruction');
 
 describe('xmlDeclaration (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
@@ -37,13 +44,101 @@ describe('xmlDeclaration (unit)', () => {
       };
    });
 
+   describe('construction', () => {
+      it('copies the base', () => {
+         const source = new XmlDeclarationPToken({
+            open: toSToken('<?'),
+            fields: [
+               {
+                  name: toSToken('standalone'),
+                  nameSpace: undefined,
+                  equal: toSToken('='),
+                  equalSpace: undefined,
+                  value: toSToken('yes'),
+               },
+            ],
+            close: toSToken('?>'),
+         });
+
+         const result = new XmlDeclarationPToken(source);
+
+         expect(result).toEqual(source);
+      });
+
+      it('copies an instruction start', () => {
+         const result = new XmlDeclarationPToken({
+            open: toSToken('<?'),
+         });
+
+         expect(result).toEqual({
+            type: XMLDECL_PTOKEN,
+            open: toSToken('<?'),
+            fields: [],
+            close: undefined,
+         });
+      });
+
+      it('copies a  degenratefielded instruction', () => {
+         const result = new XmlDeclarationPToken({
+            open: toSToken('<?'),
+            fields: undefined,
+            close: toSToken('?>'),
+         });
+
+         expect(result).toEqual({
+            type: XMLDECL_PTOKEN,
+            open: toSToken('<?'),
+            fields: [],
+            close: toSToken('?>'),
+         });
+      });
+
+      it('overrides base with other', () => {
+         const source = new XmlDeclarationPToken({
+            open: toSToken('<?'),
+            fields: [
+               {
+                  name: toSToken('standalone'),
+                  nameSpace: undefined,
+                  equal: toSToken('='),
+                  equalSpace: undefined,
+                  value: toSToken('yes'),
+               },
+            ],
+            close: toSToken('?>'),
+         });
+
+         const result = new XmlDeclarationPToken(source, {
+            open: toSToken('1'),
+            openSpace: toSToken('2'),
+            target: toSToken('3'),
+            targetSpace: toSToken('4'),
+            fields: undefined,
+            close: toSToken('6'),
+         });
+
+         expect(result).toEqual(
+            new XmlDeclarationPToken({
+               open: toSToken('1'),
+               openSpace: toSToken('2'),
+               target: toSToken('3'),
+               targetSpace: toSToken('4'),
+               fields: [],
+               close: toSToken('6'),
+            }),
+         );
+      });
+   });
+
    describe('parseXmlDeclaration()', () => {
-      let callback: jasmine.Spy;
-      let entitySpy: jasmine.Spy;
+      let callback: jest.MockedFunction<(result: XmlDeclarationPToken) => void>;
+      let fieldedSpy: jest.MockedFunction<typeof fieldedInstr.parseFieldedInstruction>;
 
       beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
-         entitySpy = spyOn(fieldedInstr, 'parseFieldedInstruction');
+         callback = jest.fn();
+         fieldedSpy = jest.spyOn(fieldedInstr, 'parseFieldedInstruction') as jest.MockedFunction<
+            typeof fieldedInstr.parseFieldedInstruction
+         >;
       });
 
       it('calls parseFieldedInstruction()', () => {
@@ -52,7 +147,7 @@ describe('xmlDeclaration (unit)', () => {
          parseXmlDeclaration(mockSource, start, callback);
          mockSource.respondInAsyncTime();
 
-         const args = entitySpy.calls.argsFor(0);
+         const args = fieldedSpy.mock.calls[0];
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual(start);
          expect(args[2]).toEqual(['version', 'encoding', 'standalone']);
@@ -60,18 +155,20 @@ describe('xmlDeclaration (unit)', () => {
       });
 
       it('returns an XmlDeclaration', () => {
-         entitySpy.and.callFake((_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
-            cb({
-               open: toSToken('testing'),
-               fields: [],
-            });
-         });
+         fieldedSpy.mockImplementation(
+            (_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
+               cb({
+                  open: toSToken('testing'),
+                  fields: [],
+               });
+            },
+         );
          const mockSource = new MockSTokenSource([]);
 
          parseXmlDeclaration(mockSource, start, callback);
          mockSource.respondInAsyncTime();
 
-         const result = callback.calls.argsFor(0)[0];
+         const result = callback.mock.calls[0][0];
          expect(result).toEqual(
             new XmlDeclarationPToken({
                open: toSToken('testing'),

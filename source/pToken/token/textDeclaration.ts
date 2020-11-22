@@ -54,7 +54,7 @@ class TextDeclarationPToken {
       this.fields = [];
 
       if (isNotInstructionStart(base)) {
-         this.fields = base.fields;
+         this.fields = base.fields || [];
          this.close = base.close;
       }
 

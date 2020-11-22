@@ -1,12 +1,14 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
-import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
+import { TEXTDECL_PTOKEN, parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
 
 import * as fieldedInstr from '../../common/fieldedInstruction';
+
+jest.mock('../../common/fieldedInstruction');
 
 describe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;
@@ -37,13 +39,101 @@ describe('textDeclaration (unit)', () => {
       };
    });
 
+   describe('construction', () => {
+      it('copies the base', () => {
+         const source = new TextDeclarationPToken({
+            open: toSToken('<?'),
+            fields: [
+               {
+                  name: toSToken('standalone'),
+                  nameSpace: undefined,
+                  equal: toSToken('='),
+                  equalSpace: undefined,
+                  value: toSToken('yes'),
+               },
+            ],
+            close: toSToken('?>'),
+         });
+
+         const result = new TextDeclarationPToken(source);
+
+         expect(result).toEqual(source);
+      });
+
+      it('copies an instruction start', () => {
+         const result = new TextDeclarationPToken({
+            open: toSToken('<?'),
+         });
+
+         expect(result).toEqual({
+            type: TEXTDECL_PTOKEN,
+            open: toSToken('<?'),
+            fields: [],
+            close: undefined,
+         });
+      });
+
+      it('copies a  degenratefielded instruction', () => {
+         const result = new TextDeclarationPToken({
+            open: toSToken('<?'),
+            fields: undefined,
+            close: toSToken('?>'),
+         });
+
+         expect(result).toEqual({
+            type: TEXTDECL_PTOKEN,
+            open: toSToken('<?'),
+            fields: [],
+            close: toSToken('?>'),
+         });
+      });
+
+      it('overrides base with other', () => {
+         const source = new TextDeclarationPToken({
+            open: toSToken('<?'),
+            fields: [
+               {
+                  name: toSToken('standalone'),
+                  nameSpace: undefined,
+                  equal: toSToken('='),
+                  equalSpace: undefined,
+                  value: toSToken('yes'),
+               },
+            ],
+            close: toSToken('?>'),
+         });
+
+         const result = new TextDeclarationPToken(source, {
+            open: toSToken('1'),
+            openSpace: toSToken('2'),
+            target: toSToken('3'),
+            targetSpace: toSToken('4'),
+            fields: undefined,
+            close: toSToken('6'),
+         });
+
+         expect(result).toEqual(
+            new TextDeclarationPToken({
+               open: toSToken('1'),
+               openSpace: toSToken('2'),
+               target: toSToken('3'),
+               targetSpace: toSToken('4'),
+               fields: [],
+               close: toSToken('6'),
+            }),
+         );
+      });
+   });
+
    describe('parseTextDeclaration()', () => {
-      let callback: jasmine.Spy;
-      let entitySpy: jasmine.Spy;
+      let callback: jest.MockedFunction<(result: TextDeclarationPToken) => void>;
+      let fieldedSpy: jest.MockedFunction<typeof fieldedInstr.parseFieldedInstruction>;
 
       beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
-         entitySpy = spyOn(fieldedInstr, 'parseFieldedInstruction');
+         callback = jest.fn();
+         fieldedSpy = jest.spyOn(fieldedInstr, 'parseFieldedInstruction') as jest.MockedFunction<
+            typeof fieldedInstr.parseFieldedInstruction
+         >;
       });
 
       it('calls parseInstructionCommon()', () => {
@@ -52,7 +142,7 @@ describe('textDeclaration (unit)', () => {
          parseTextDeclaration(mockSource, start, callback);
          mockSource.respondInAsyncTime();
 
-         const args = entitySpy.calls.argsFor(0);
+         const args = fieldedSpy.mock.calls[0];
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual(start);
          expect(args[2]).toEqual(['version', 'encoding']);
@@ -60,18 +150,20 @@ describe('textDeclaration (unit)', () => {
       });
 
       it('returns an XmlDeclaration', () => {
-         entitySpy.and.callFake((_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
-            cb({
-               open: SToken.fromString('testing'),
-               fields: [],
-            });
-         });
+         fieldedSpy.mockImplementation(
+            (_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
+               cb({
+                  open: SToken.fromString('testing'),
+                  fields: [],
+               });
+            },
+         );
          const mockSource = new MockSTokenSource([]);
 
          parseTextDeclaration(mockSource, start, callback);
          mockSource.respondInAsyncTime();
 
-         const result = callback.calls.argsFor(0)[0];
+         const result = callback.mock.calls[0][0];
          expect(result).toEqual(
             new TextDeclarationPToken({
                open: SToken.fromString('testing'),

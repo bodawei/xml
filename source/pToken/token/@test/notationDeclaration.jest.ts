@@ -165,6 +165,42 @@ describe('notationdeDeclaration (unit)', () => {
          );
       });
 
+      it('parses a close if no external ID', () => {
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([
+            ['notationName', 'word', ['>']],
+            [undefined, 'space'],
+            // externalId parsing here
+            [undefined, 'space'],
+            ['>', 'match', '>'],
+         ]);
+         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
+            cb(undefined);
+         });
+
+         parseNotationDeclaration(
+            mockSource,
+            {
+               open: toSToken('<!'),
+            },
+            callback,
+         );
+         mockSource.respondInAsyncTime();
+
+         expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
+            new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('notationName'),
+               nameSpace: undefined,
+               externalId: undefined,
+               externalIdSpace: undefined,
+               close: toSToken('>'),
+            }),
+         );
+      });
       it('parses a parameter entity reference after the externalId', () => {
          const results = [
             undefined,
