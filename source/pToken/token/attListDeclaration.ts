@@ -376,20 +376,32 @@ function resumeParseAttListDeclaration(
    attListDeclaration: AttListDeclarationPToken,
    deliverPToken: (result: AttListDeclarationPToken) => void,
 ): void {
+   if (!attListDeclaration.unexpanded) {
+      deliverPToken(attListDeclaration);
+      return;
+   }
+
    source.extractNoParams('space', (preSpace) => {
-      const propName = attListDeclaration.unexpanded?.propName || '';
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const propName = attListDeclaration.unexpanded!.propName;
 
       switch (propName) {
          case 'elementName':
             parseElementName(source, attListDeclaration, (withName) => {
                resumeParseAttDefName(source, (attDefs) => {
-                  deliverPToken(
-                     new AttListDeclarationPToken(attListDeclaration, {
-                        ...withName,
-                        declTypeSpace: combineSTokens(attListDeclaration.declTypeSpace, preSpace),
-                        attDefs: [...attListDeclaration.attDefs, ...attDefs],
-                     }),
-                  );
+                  source.extractNoParams('all', (extra) => {
+                     deliverPToken(
+                        new AttListDeclarationPToken(attListDeclaration, {
+                           ...withName,
+                           declTypeSpace: combineSTokens(
+                              attListDeclaration.declTypeSpace,
+                              preSpace,
+                           ),
+                           attDefs: [...attListDeclaration.attDefs, ...attDefs],
+                           extra,
+                        }),
+                     );
+                  });
                });
             });
             break;
@@ -415,7 +427,14 @@ function resumeParseAttListDeclaration(
                   props.attDefs = [...butLast, newLast, ...attDefs];
                }
 
-               deliverPToken(new AttListDeclarationPToken(attListDeclaration, props));
+               source.extractNoParams('all', (extra) => {
+                  deliverPToken(
+                     new AttListDeclarationPToken(attListDeclaration, {
+                        ...props,
+                        extra,
+                     }),
+                  );
+               });
             });
             break;
          default:
@@ -425,11 +444,14 @@ function resumeParseAttListDeclaration(
             preceding.pop();
 
             resumeParseAttDef(source, propName, trailingDef, preSpace, (attDefs) => {
-               deliverPToken(
-                  new AttListDeclarationPToken(attListDeclaration, {
-                     attDefs: [...preceding, ...attDefs],
-                  }),
-               );
+               source.extractNoParams('all', (extra) => {
+                  deliverPToken(
+                     new AttListDeclarationPToken(attListDeclaration, {
+                        attDefs: [...preceding, ...attDefs],
+                        extra,
+                     }),
+                  );
+               });
             });
             break;
       }
