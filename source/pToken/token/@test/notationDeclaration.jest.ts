@@ -453,7 +453,7 @@ describe('notationdeDeclaration (unit)', () => {
          const mockSource = new MockSTokenSource([[undefined, 'space']]);
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
-            expect(result).toEqualRangeless(notationDeclaration);
+            expect(result).toBe(notationDeclaration);
 
             done();
          });

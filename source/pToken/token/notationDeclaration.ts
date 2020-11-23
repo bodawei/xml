@@ -202,9 +202,14 @@ function resumeParseNotationDeclaration(
    deliverPToken: DeliverPToken,
 ): void {
    const protoToken: NotationDeclarationProps = { ...decl };
+   if (!decl.unexpanded) {
+      deliverPToken(decl);
+      return;
+   }
 
    source.extractNoParams('space', (preSpace) => {
-      const propName = decl.unexpanded?.propName || '';
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const propName = decl.unexpanded!.propName;
 
       if (propName === 'name') {
          parseName(source, protoToken, () => {
@@ -212,10 +217,8 @@ function resumeParseNotationDeclaration(
 
             resumeExternalParse(source, undefined, 'externalType', protoToken, decl, deliverPToken);
          });
-      } else if (propName !== '') {
-         resumeExternalParse(source, preSpace, propName, protoToken, decl, deliverPToken);
       } else {
-         deliverPToken(decl);
+         resumeExternalParse(source, preSpace, propName, protoToken, decl, deliverPToken);
       }
    });
 }
