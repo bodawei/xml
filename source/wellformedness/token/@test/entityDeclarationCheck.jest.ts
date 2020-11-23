@@ -197,22 +197,6 @@ describe('entityDeclarationCheck (unit)', () => {
       expect(miscWellFormedSpy).toHaveBeenCalledWith(pToken.nDataName, mockErrorCollector, confVer);
    });
 
-   it('reports an error if there is no EnitytValue or ExternalID', () => {
-      const pToken = new GeneralEntityDeclarationPToken(genEntityDeclarationPToken, {
-         externalId: undefined,
-         externalIdSpace: undefined,
-         value: undefined,
-      });
-
-      entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
-
-      expect(mockErrorCollector).toReportError({
-         id: WellFormedError.ID.ENTITYDECL_NO_VALUE,
-         params: ['anEntity'],
-         lastPosition: pToken.nameSpace,
-      });
-   });
-
    it('reports an error if there was no closing', () => {
       const pToken = new GeneralEntityDeclarationPToken(genEntityDeclarationPToken, {
          close: undefined,

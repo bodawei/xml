@@ -26,9 +26,17 @@ export {
    AttDefinitionXToken,
 } from './token/attListDeclarationXToken';
 export {
+   GENERAL_ENTITY_DECLARATION_XTOKEN,
+   GeneralEntityDeclarationXToken,
+} from './token/generalEntityDeclarationXToken';
+export {
    NOTATION_DECLARATION_XTOKEN,
    NotationDeclarationXToken,
 } from './token/notationDeclarationXToken';
+export {
+   PARAMETER_ENTITY_DECLARATION_XTOKEN,
+   ParameterEntityDeclarationXToken,
+} from './token/parameterEntityDeclarationXToken';
 export {
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionXToken,

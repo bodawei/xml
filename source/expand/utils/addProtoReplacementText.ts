@@ -6,13 +6,12 @@ import {
    ParameterEntityReferencePToken,
    GeneralEntityReferencePToken,
    XmlError,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
 
 import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
 import { EntityContextStack } from './EntityContextStack';
-import { externalIdToEntityId } from 'pToken';
+import { PARAMETER_ENTITY_DECLARATION_PTOKEN, externalIdToEntityId } from 'pToken';
 
 interface AddProtoReplacementTextResult {
    byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;

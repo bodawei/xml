@@ -1,12 +1,10 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
+import { ParameterEntityDeclarationPToken } from 'pToken';
 import { ExternalIdX } from 'xToken';
 
 import { ExntityValueX, makeEntityValueX } from '../util/makeEntityValueX';
-
-// ick
-import { ParameterEntityDeclarationPToken } from 'token';
 
 const PARAMETER_ENTITY_DECLARATION_XTOKEN = 'PARAMETER_ENTITY_DECLARATION_XTOKEN';
 

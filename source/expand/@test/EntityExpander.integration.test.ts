@@ -3,24 +3,25 @@
 
 import { Token, Range, EntityId, ENTITY_ID } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { ContextType } from 'pToken';
+import {
+   ContextType,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+} from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import {
    AttributeValuePToken,
    ElementStartPToken,
    EntityValuePToken,
-   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
    PToken,
    XmlError,
-   EXTERNAL_ID,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    COMMENT_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
@@ -229,7 +230,6 @@ describe('EntityExpander (integration)', () => {
          open: toSToken('<!'),
          name: toSToken('first'),
          externalId: {
-            type: EXTERNAL_ID,
             system: {
                value: [new TextPToken({ text: toSToken('someOther/sub.xml') })],
             },

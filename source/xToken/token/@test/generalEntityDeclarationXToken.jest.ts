@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ExternalIdP } from 'pToken';
+import { ExternalIdP, GeneralEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
@@ -11,7 +11,6 @@ import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToke
 
 import {
    CharRefPToken,
-   GeneralEntityDeclarationPToken,
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
@@ -27,6 +26,7 @@ describe('GeneralEntityDeclarationXToken()', () => {
          name: toSToken('Ref0'),
       });
       pToken = new GeneralEntityDeclarationPToken({
+         open: toSToken('&'),
          name: toSToken('entityName'),
          nameSpace: toSToken(' '),
          externalIdSpace: toSToken(' '),
@@ -96,6 +96,7 @@ describe('GeneralEntityDeclarationXToken()', () => {
 
    it('returns a entity declaration with blank values when none are provided in the pToken', () => {
       pToken = new GeneralEntityDeclarationPToken({
+         open: toSToken('&'),
          name: undefined,
          nameSpace: undefined,
          externalIdSpace: undefined,
@@ -117,6 +118,7 @@ describe('GeneralEntityDeclarationXToken()', () => {
 
    it('returns a entity declaration with an ExternalIdX', () => {
       pToken = new GeneralEntityDeclarationPToken({
+         open: toSToken('&'),
          name: toSToken('entityName'),
          nameSpace: toSToken(' '),
          externalId: new ExternalIdP({

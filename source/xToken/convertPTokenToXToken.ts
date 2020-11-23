@@ -7,8 +7,11 @@ import {
    ParseValue,
    ATTLIST_DECLARATION_PTOKEN,
 } from 'pToken';
+
 // ick
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
+import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/generalEntityDeclaration';
+import { PARAMETER_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/parameterEntityDeclaration';
 
 import {
    CHARREF_PTOKEN,
@@ -25,6 +28,8 @@ import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXTok
 import { NotationDeclarationXToken } from './index';
 import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
 import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
+import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
+import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
@@ -41,10 +46,14 @@ function convertPTokenToXToken(pToken: ParseValue): XToken {
          return new ConditionalSectionEndXToken(pToken);
       case CHARREF_PTOKEN:
          return new CharRefXToken(pToken);
+      case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         return new GeneralEntityDeclarationXToken(pToken);
       case GENERAL_ENTITY_REFERENCE_PTOKEN:
          return new GeneralEntityReferenceXToken(pToken);
       case NOTATION_DECLARATION_PTOKEN:
          return new NotationDeclarationXToken(pToken);
+      case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+         return new ParameterEntityDeclarationXToken(pToken);
       case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          return new ParameterEntityReferenceXToken(pToken);
       case PROCESSING_INSTRUCTION_PTOKEN:

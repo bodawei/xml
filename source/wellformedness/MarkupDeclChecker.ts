@@ -1,7 +1,13 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, WellFormedError } from 'error';
-import { AttListDeclarationPToken, NotationDeclarationPToken, ParseValue } from 'pToken';
+import {
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   AttListDeclarationPToken,
+   NotationDeclarationPToken,
+   ParseValue,
+} from 'pToken';
 import { strOrBlank } from 'sToken';
 
 // circular dependency problem
@@ -21,29 +27,26 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityReferencePToken,
 } from '../token/parameterEntityReference';
-import {
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
-   GeneralEntityDeclarationPToken,
-} from '../token/generalEntityDeclaration';
 import { ExternalSubsetStartToken } from '../token/marker/externalSubsetStart';
 import { EXTERNAL_SUBSET_END_TOKEN } from '../token/marker/externalSubsetEnd';
 import { InternalSubsetStartToken } from '../token/marker/internalSubsetStart';
 import { INTERNAL_SUBSET_END_TOKEN } from '../token/marker/internalSubsetEnd';
 import { getFirstSToken } from '../token/getFirstSToken';
-import {
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
-   ParameterEntityDeclarationPToken,
-} from '../token/parameterEntityDeclaration';
 import { TEXT_PTOKEN } from '../token/text';
 import { SPACE_PTOKEN } from '../token/space';
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
 
-import { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken } from '../token/elementDeclaration';
+import { ElementDeclarationPToken } from '../token/elementDeclaration';
 import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
+import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/generalEntityDeclaration';
+import { PARAMETER_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/parameterEntityDeclaration';
+
+// WTFFFF!!
+const ELEMENT_DECLARATION_PTOKEN = 'ELEMENTDECL';
 
 import {
    CHECKER_DONE,
@@ -283,7 +286,10 @@ function checkDeclaration(
    //     occur in external parameter entities or to the external subset.)
    if (state === States.INTERNAL_SUBSET) {
       ec.check(
-         pToken.type === NOTATION_DECLARATION_PTOKEN || pToken.type === ATTLIST_DECLARATION_PTOKEN
+         pToken.type === NOTATION_DECLARATION_PTOKEN ||
+            pToken.type === ATTLIST_DECLARATION_PTOKEN ||
+            pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ||
+            pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN
             ? pToken.unexpanded
             : pToken.peRefPlus.length > 0,
          WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
@@ -391,8 +397,8 @@ class MarkupDeclChecker implements Checker {
             );
             checkDeclaration(pToken, this.state, errorCollector);
             break;
-         case ELEMENT_DECLARATION_PTOKEN:
-            checkDeclaration(pToken, this.state, errorCollector);
+         case ELEMENT_DECLARATION_PTOKEN as any:
+            checkDeclaration(pToken as any, this.state, errorCollector);
             break;
          case NOTATION_DECLARATION_PTOKEN:
             checkDeclaration(pToken, this.state, errorCollector);

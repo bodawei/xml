@@ -29,15 +29,12 @@ import { GeneralEntityReferencePToken } from './generalEntityReference';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
 import { GeneralEntityStartPToken, GENERAL_ENTITY_START_PTOKEN } from './marker/generalEntityStart';
 import { GeneralEntityEndPToken, GENERAL_ENTITY_END_PTOKEN } from './marker/generalEntityEnd';
-import { GeneralEntityDeclarationPToken } from './generalEntityDeclaration';
-import { ParameterEntityDeclarationPToken } from './parameterEntityDeclaration';
 import { ParameterEntityStartPToken, PARAMETER_ENTITY_START_PTOKEN } from './marker/parameterEntityStart';
 import { SpacePToken } from './space';
 import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
 import { ElementEndPToken } from './elementEnd';
-import { SToken } from 'sToken';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
-export * from './entityDeclaration';
+export { EntityValueElement, EntityValuePToken } from './EntityValuePToken';
 
 export * from './bridge/declaration';
 export * from './bridge/section';
@@ -62,9 +59,7 @@ export * from './docTypeEnd';
 export * from './docTypeStart';
 export * from './elementEnd';
 export * from './elementStart';
-export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
-export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
 export * from './space';
 export * from './text';
@@ -97,13 +92,11 @@ type PToken =
    | ElidedEntityDeclarationPToken
    | ExternalSubsetStartToken
    | ExternalSubsetEndToken
-   | GeneralEntityDeclarationPToken
    | GeneralEntityEndPToken
    | GeneralEntityReferencePToken
    | GeneralEntityStartPToken
    | InternalSubsetStartToken
    | InternalSubsetEndToken
-   | ParameterEntityDeclarationPToken
    | ParameterEntityEndPToken
    | ParameterEntityReferencePToken
    | ParameterEntityStartPToken

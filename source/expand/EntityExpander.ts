@@ -2,15 +2,20 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
 import {
-   ParseValue,
-   ContextType,
-   externalIdToEntityId,
-   NOTATION_DECLARATION_PTOKEN,
-   NotationDeclarationPToken,
-   resumeParseNotationDeclaration,
    ATTLIST_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
    AttListDeclarationPToken,
+   ContextType,
+   GeneralEntityDeclarationPToken,
+   NotationDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   ParseValue,
+   externalIdToEntityId,
    resumeParseAttListDeclaration,
+   resumeParseNotationDeclaration,
+   resumeParseEntityDeclaration,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
@@ -19,20 +24,16 @@ import {
    ELEMENT_DECLARATION_PTOKEN,
    ELEMENT_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementDeclarationPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    XmlError,
    ElidedEntityDeclarationPToken,
@@ -45,7 +46,6 @@ import {
 } from 'token';
 
 import { assignElementDeclaration } from './unassigned/assignElementDeclaration';
-import { assignEntityDeclaration } from './unassigned/assignEntityDeclaration';
 import { EntityDetails } from './utils/EntityDetails';
 import { setupConditional } from './utils/setupConditional';
 import { expandAttributes } from './utils/expandAttributes';
@@ -395,59 +395,54 @@ class EntityExpander {
             },
          );
          return;
-      }
+      } else if (
+         declarationPToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ||
+         declarationPToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN
+      ) {
+         expandMarkupUnexpanded(
+            declarationPToken.unexpanded ? declarationPToken.unexpanded.tokens : [],
+            this.expandParams,
+            this.entityContextStack,
+            (results) => {
+               this.deliverByproducts(results.byproducts);
+               const source = entityValueToSTokenSource(
+                  results.expandedTokens || [],
+                  this.expandParams.entityId,
+                  true,
+               ); // THIS entityId IS WRONG!!!!
 
-      // UNASSIGNED REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
-      if (!declarationPToken.unassigned || declarationPToken.unassigned.length === 0) {
-         this.processExpandedDeclaration(declarationPToken, handled);
+               resumeParseEntityDeclaration(source, declarationPToken, (innerResults) => {
+                  this.handleEntityDeclaration(innerResults, handled);
+               });
+            },
+         );
          return;
-      }
-
-      const isElementDeclaration = declarationPToken.type === ELEMENT_DECLARATION_PTOKEN;
-
-      expandUnassigned(
-         declarationPToken.unassigned,
-         this.expandParams,
-         this.entityContextStack,
-         isElementDeclaration,
-         (results) => {
-            // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
-            declarationPToken.unassigned = results.newValue;
-
-            if (declarationPToken.type === ELEMENT_DECLARATION_PTOKEN) {
-               assignElementDeclaration(results.newValue, declarationPToken);
-            } else {
-               assignEntityDeclaration(results.newValue, declarationPToken);
-            }
-
-            this.deliverByproducts(results.byproducts);
-            this.processExpandedDeclaration(declarationPToken, handled);
-         },
-      );
-   }
-
-   /*
-    * With any unassigned values in the declaration expanded, we can now proceed with
-    * doing any further expansion of parameter entities in the declarations.
-    */
-   private processExpandedDeclaration(
-      declarationPToken: DeclToken,
-      expanded: PTokenExpanded,
-   ): void {
-      switch (declarationPToken.type) {
-         case ELEMENT_DECLARATION_PTOKEN:
-         case NOTATION_DECLARATION_PTOKEN: // can nuke this.
-            // Nothing more needs to be done for these
+      } else {
+         // UNASSIGNED REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
+         if (!declarationPToken.unassigned || declarationPToken.unassigned.length === 0) {
             this.deliverToken(declarationPToken);
-            expanded();
-            break;
-         case ATTLIST_DECLARATION_PTOKEN:
-            // can nuke this
-            break;
-         case GENERAL_ENTITY_DECLARATION_PTOKEN:
-         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-            this.handleEntityDeclaration(declarationPToken, expanded);
-            break;
+            handled();
+            return;
+         }
+
+         expandUnassigned(
+            declarationPToken.unassigned,
+            this.expandParams,
+            this.entityContextStack,
+            true,
+            (results) => {
+               // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
+               declarationPToken.unassigned = results.newValue;
+
+               if (declarationPToken.type === ELEMENT_DECLARATION_PTOKEN) {
+                  assignElementDeclaration(results.newValue, declarationPToken);
+               }
+
+               this.deliverByproducts(results.byproducts);
+               this.deliverToken(declarationPToken);
+               handled();
+            },
+         );
       }
    }
 

@@ -6,6 +6,7 @@ import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 import {
    AttListDeclarationXToken,
+   GeneralEntityDeclarationXToken,
    ParameterEntityReferenceXToken,
    ProcessingInstructionXToken,
    XmlDeclarationXToken,
@@ -26,7 +27,6 @@ import {
    ElementEndXToken,
    ElementStartXToken,
    ElementEmptyXToken,
-   GeneralEntityDeclarationXToken,
    SpaceXToken,
    TextXToken,
    TextPToken,
@@ -148,10 +148,8 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes an ENTITY declaration', (done) => {
-      const pToken = new TextPToken({ text: new SToken('value', 'value', new Range(new EntityId(), 21, 0, 21, 26, 0, 26)) });
-
       expectInputToProduce('<!ENTITY entityName "value">', [
-         new GeneralEntityDeclarationXToken('entityName', [ pToken ], undefined, ''),
+         new GeneralEntityDeclarationXToken('entityName', [ 'value' ], undefined, ''),
       ], done);
    });
 

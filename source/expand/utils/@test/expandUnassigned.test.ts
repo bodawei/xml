@@ -1,13 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion } from 'basic';
+import { ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import {
-   ParameterEntityReferencePToken,
-   TextPToken,
-   XmlError,
-   ParameterEntityDeclarationPToken,
-} from 'token';
+import { ParameterEntityReferencePToken, TextPToken, XmlError } from 'token';
 
 import * as unassigned from '../../../token/common/unassigned';
 import { UnassignedArray, UnassignedType } from '../../../token/common/unassigned';

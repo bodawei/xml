@@ -1,7 +1,11 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
-import { ParseValue } from 'pToken';
+import {
+   ParseValue,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+} from 'pToken';
 import {
    TEXT_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
@@ -10,8 +14,6 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
    GeneralEntityReferencePToken,
-   GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';

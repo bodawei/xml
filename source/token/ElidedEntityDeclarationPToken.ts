@@ -1,8 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { EntityValuePToken } from './entityDeclaration';
-import { SToken, strOrBlank } from 'sToken';
-import { ParameterEntityDeclarationPToken, PARAMETER_ENTITY_DECLARATION_PTOKEN } from './parameterEntityDeclaration';
+import { ParameterEntityDeclarationPToken, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'pToken';
+import { SToken } from 'sToken';
+
+import { EntityValuePToken } from './EntityValuePToken';
 
 const ELIDED_ENTITY_DECLARATION_PTOKEN = 'ELIDED_ENTITY_DECLARATION_PTOKEN';
 

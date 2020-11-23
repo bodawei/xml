@@ -8,7 +8,8 @@ import {
    NOTATION_DECLARATION_PTOKEN,
    AttListDeclarationPToken,
    NotationDeclarationPToken,
-   resumeParseNotationDeclaration,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -28,18 +29,14 @@ import {
    ElementDeclarationPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
-   ParameterEntityDeclarationPToken,
    TextPToken,
    XmlError,
    ParameterEntityReferencePToken,
-   EXTERNAL_ID,
    unassigned,
 } from 'token';
 
 import * as pToken from 'pToken';
-import * as assignEntityDeclaration from '../unassigned/assignEntityDeclaration';
 import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
 import * as expandEntityValueModule from '../utils/expandEntityValue';
@@ -56,7 +53,6 @@ import { EntityId } from 'basic';
 describe('EntityExpander (unit)', () => {
    let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
-   let assignEntityDeclSpy: jasmine.Spy;
    let expandMarkupUnexpandedSpy: jasmine.Spy;
    let resumeParseNotationDeclarationSpy: jasmine.Spy;
    let resolveEntityId: (a: any, b: any) => any;
@@ -64,7 +60,6 @@ describe('EntityExpander (unit)', () => {
    beforeEach(() => {
       expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
       setupConditionalSpy = spyOn(setupConditional, 'setupConditional');
-      assignEntityDeclSpy = spyOn(assignEntityDeclaration, 'assignEntityDeclaration');
       resolveEntityId = () => '';
    });
 
@@ -748,11 +743,16 @@ describe('EntityExpander (unit)', () => {
       let geDecl: GeneralEntityDeclarationPToken;
       let peDecl: ParameterEntityDeclarationPToken;
       let expandEntityValueSpy: jasmine.Spy;
+      let resumeParseEntityDeclarationSpy: jasmine.Spy;
 
       beforeEach(() => {
+         resumeParseEntityDeclarationSpy = spyOn(pToken, 'resumeParseEntityDeclaration');
          expandEntityValueSpy = spyOn(expandEntityValueModule, 'expandEntityValue');
          let index = 0;
 
+         resumeParseEntityDeclarationSpy.and.callFake((source, pToken, cb: (arg: any) => void) => {
+            cb(pToken);
+         });
          expandEntityValueSpy.and.callFake((pToken, params, chain, cb: (arg: any) => void) => {
             const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
                `${index}`,
@@ -905,7 +905,6 @@ describe('EntityExpander (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('student'),
             externalId: {
-               type: EXTERNAL_ID,
                system: {
                   value: [new TextPToken({ text: toSToken('the system') })],
                },
@@ -921,22 +920,22 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('asks the entity declaration to assign any newly unassigned values to itself', (done) => {
-         const one = unassigned.wordFromSToken(toSToken('1'));
-         const two = unassigned.wordFromSToken(toSToken('2'));
          geDecl = new GeneralEntityDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('student'),
             value: [new CharRefPToken({ open: toSToken('&#') })],
-            unassigned: [one],
+            unexpanded: {
+               propName: 'name',
+               tokens: [],
+            },
          });
 
-         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [two], byproducts: [] });
+         resumeParseEntityDeclarationSpy.and.callFake((source, existing, callback) => {
+            callback(existing);
          });
 
          doExpand([geDecl], true, () => {
-            expect(assignEntityDeclSpy).toHaveBeenCalled();
-            expect(geDecl.unassigned).toEqual([two]);
+            expect(resumeParseEntityDeclarationSpy).toHaveBeenCalled();
             done();
          });
       });

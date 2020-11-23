@@ -3,7 +3,7 @@
 
 import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion,  } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { XMLDECL_PTOKEN, TEXTDECL_PTOKEN,ParseValue, ContextType, ATTLIST_DECLARATION_PTOKEN } from 'pToken';
+import { PARAMETER_ENTITY_DECLARATION_PTOKEN, GENERAL_ENTITY_DECLARATION_PTOKEN, XMLDECL_PTOKEN, TEXTDECL_PTOKEN,ParseValue, ContextType, ATTLIST_DECLARATION_PTOKEN } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import {
@@ -23,15 +23,12 @@ import {
    GENERAL_ENTITY_START_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
    TEXT_PTOKEN,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
    CharDataPToken,
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-   
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './helpers';

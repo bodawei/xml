@@ -3,12 +3,16 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { AttListDeclarationPToken, TextDeclarationPToken } from 'pToken';
+import {
+   AttListDeclarationPToken,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   TextDeclarationPToken,
+} from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
    CommentPToken,
-   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    InternalSubsetStartToken,
    ExternalSubsetStartToken,
@@ -17,7 +21,6 @@ import {
    ParameterEntityStartPToken,
    ParameterEntityReferencePToken,
    ParameterEntityEndPToken,
-   ParameterEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    ElidedEntityDeclarationPToken,

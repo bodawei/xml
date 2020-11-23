@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.209.2",
+   "version": "0.209.3",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -11,6 +11,7 @@
       "lint": "eslint --fix --config ./.eslintrc.json source/**/*.ts",
       "jest:all": "jest --config ./jest.config.js --coverage",
       "jest": "jest --config ./jest.config.js --watch --coverage",
+      "locale": "node ./build/tool/doDerive.js",
       "test": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' ",
       "build:xmlconf": "ts-node -r tsconfig-paths/register ./build/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json",
       "old:build:watch": "babel --no-babelrc --config-file ./build/babelrc-new.json5 --extensions '.ts' --watch 'source/**/*.ts' --out-dir ./temp/build/",

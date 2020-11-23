@@ -3,8 +3,9 @@
 
 import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { STokenSource, SToken } from 'sToken';
-import { GeneralEntityDeclarationPToken, TextPToken } from 'token';
+import { GeneralEntityDeclarationPToken } from 'pToken';
+import { STokenSource, SToken, toSToken } from 'sToken';
+import { TextPToken } from 'token';
 
 import { parseDeclaration } from '../declaration';
 
@@ -18,7 +19,7 @@ describe('declaration (integration)', () => {
       beforeEach(() => {
          confVer = new ConformanceVersion();
          source = new STokenSource(defaultExtractors);
-         start = SToken.fromString('<!');
+         start = toSToken('<!');
       });
 
       it('parses an Entity declaration', (done) => {
@@ -29,11 +30,14 @@ describe('declaration (integration)', () => {
          parseDeclaration(source, start, (parsing) => {
             expect(parsing).toEqualRangeless(new GeneralEntityDeclarationPToken({
                open: start,
-               declType: SToken.fromString('ENTITY'),
-               declTypeSpace: SToken.fromString(' '),
-               name: SToken.fromString('foo'),
-               value: [ new TextPToken({ text: SToken.fromString('theValue') }) ],
-               close: SToken.fromString('>'),
+               declType: toSToken('ENTITY'),
+               declTypeSpace: toSToken(' '),
+               name: toSToken('foo'),
+               nameSpace: toSToken(' '),
+               openQuote: toSToken('"'),
+               value: [ new TextPToken({ text: toSToken('theValue') }) ],
+               closeQuote: toSToken('"'),
+               close: toSToken('>'),
             }));
 
             done();

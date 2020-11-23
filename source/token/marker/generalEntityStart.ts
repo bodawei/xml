@@ -6,7 +6,7 @@ import { strOrBlank } from 'sToken';
 import { generalEntityReferenceCheck } from 'wellformedness';
 
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
-import { EntityValuePToken } from '../entityDeclaration';
+import { EntityValuePToken } from '../EntityValuePToken';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.

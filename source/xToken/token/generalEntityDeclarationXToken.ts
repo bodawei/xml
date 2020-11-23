@@ -1,12 +1,10 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
+import { GeneralEntityDeclarationPToken } from 'pToken';
 import { ExternalIdX } from 'xToken';
 
 import { ExntityValueX, makeEntityValueX } from '../util/makeEntityValueX';
-
-// ick
-import { GeneralEntityDeclarationPToken } from 'token';
 
 const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
 

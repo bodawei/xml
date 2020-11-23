@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
-import { EntityValuePToken } from '../entityDeclaration';
+import { EntityValuePToken } from '../EntityValuePToken';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
 
 /**********************************************************************\

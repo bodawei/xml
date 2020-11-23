@@ -13,8 +13,8 @@ import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETE
 import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
-import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
+import { PARAMETER_ENTITY_END_PTOKEN, ParameterEntityEndPToken, ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
+import { PARAMETER_ENTITY_START_PTOKEN, ParameterEntityStartPToken, ParameterEntityStartXToken } from '../marker/parameterEntityStart';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -24,8 +24,8 @@ import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 // </typeHack>
 
 type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
-type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>; // wy not? | ParameterEntityStartPToken|ParameterEntityEndPToken
-type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken>;
+type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
 
 let checkMap: { [typeName: string]: (item: any, ec: ErrorCollector, confVer: ConformanceVersion) => void };
@@ -145,6 +145,10 @@ function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
          value.push(new CharRefXToken(item));
       } else if (item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
          value.push(new ParameterEntityReferenceXToken(item));
+      } else if (item.type === PARAMETER_ENTITY_START_PTOKEN) {
+         value.push(new ParameterEntityStartXToken(item.referencePToken.name?.str || '',  item));
+      } else if (item.type === PARAMETER_ENTITY_END_PTOKEN) {
+         value.push(new ParameterEntityEndXToken(item.referencePToken.name?.str || '', item));
       } else if (item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
          value.push(new GeneralEntityReferenceXToken(item));
       } else {

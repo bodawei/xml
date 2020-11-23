@@ -4,7 +4,7 @@
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import * as token from '../../index';
+import * as pToken from '../../../pToken';
 import { parseDeclaration } from '../declaration';
 
 describe('declaration (unit)', () => {
@@ -24,7 +24,7 @@ describe('declaration (unit)', () => {
       describe('ENTITY', () => {
 
          it('seeks to parse an entity when the decl type is ENTITY', () => {
-            const parse = spyOn(token, 'parseEntityDeclaration');
+            const parse = spyOn(pToken, 'parseEntityDeclaration');
             const mockSource = new MockSTokenSource([
                [ undefined, 'space' ],
                [ 'ENTITY', 'word', [ '>', '%' ] ],
@@ -46,7 +46,7 @@ describe('declaration (unit)', () => {
          });
 
          it('seeks to parse an entity when the decl type is Entity (wrong case)', () => {
-            const parse = spyOn(token, 'parseEntityDeclaration');
+            const parse = spyOn(pToken, 'parseEntityDeclaration');
             const mockSource = new MockSTokenSource([
                [ ' ', 'space' ],
                [ 'eNtiTy', 'word', [ '>', '%' ] ],

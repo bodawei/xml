@@ -6,8 +6,10 @@ import { ConditionalClosePToken, ConditionalPToken } from 'token';
 import {
    makeAttListDeclaration,
    makeCharRef,
+   makeGeneralEntityDeclaration,
    makeGeneralEntityReference,
    makeNotationDeclaration,
+   makeParameterEntityDeclaration,
    makeParameterEntityReference,
    makeProcessingInstruction,
    makeTextDecl,
@@ -19,8 +21,10 @@ import { convertPTokenToXToken } from '../convertPTokenToXToken';
 import { CHARREF_XTOKEN } from '../token/charRefXToken';
 import { CONDITIONAL_SECTION_END_XTOKEN } from '../token/conditionalSectionEndXToken';
 import { CONDITIONAL_SECTION_START_XTOKEN } from '../token/conditionalSectionStartXToken';
+import { GENERAL_ENTITY_DECLARATION_XTOKEN } from '../token/generalEntityDeclarationXToken';
 import { GENERAL_ENTITY_REFERENCE_XTOKEN } from '../token/generalEntityReferenceXToken';
 import { NOTATION_DECLARATION_XTOKEN } from '../token/notationDeclarationXToken';
+import { PARAMETER_ENTITY_DECLARATION_XTOKEN } from '../token/parameterEntityDeclarationXToken';
 import { PARAMETER_ENTITY_REFERENCE_XTOKEN } from '../token/parameterEntityReferenceXToken';
 import { PROCESSING_INSTRUCTION_XTOKEN } from '../token/processingInstructionXToken';
 
@@ -69,7 +73,23 @@ describe('convertPTokenToXToken() (integration)', () => {
       expect(result.type).toEqual(NOTATION_DECLARATION_XTOKEN);
    });
 
-   it('converts an prameter entity reference token', () => {
+   it('converts an general entity declaration token', () => {
+      const pToken = makeGeneralEntityDeclaration();
+
+      const result = convertPTokenToXToken(pToken);
+
+      expect(result.type).toEqual(GENERAL_ENTITY_DECLARATION_XTOKEN);
+   });
+
+   it('converts an parameter entity declaration token', () => {
+      const pToken = makeParameterEntityDeclaration();
+
+      const result = convertPTokenToXToken(pToken);
+
+      expect(result.type).toEqual(PARAMETER_ENTITY_DECLARATION_XTOKEN);
+   });
+
+   it('converts an parameter entity reference token', () => {
       const pToken = makeParameterEntityReference();
 
       const result = convertPTokenToXToken(pToken);

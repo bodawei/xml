@@ -2,13 +2,12 @@
 
 import { ENTITY_ID, ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
-import { UnexpandedMarkupToken } from 'pToken';
+import { ParameterEntityDeclarationPToken, UnexpandedMarkupToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    ParameterEntityReferencePToken,
    TextPToken,
    XmlError,
-   ParameterEntityDeclarationPToken,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
 } from 'token';

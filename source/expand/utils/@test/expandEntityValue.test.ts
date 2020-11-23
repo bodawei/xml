@@ -2,17 +2,15 @@
 
 import { ENTITY_ID, ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
+import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    ElidedEntityDeclarationPToken,
-   GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
    TextPToken,
    XmlError,
-   EXTERNAL_ID,
 } from 'token';
 
 import { expandEntityValue } from '../expandEntityValue';
@@ -37,7 +35,7 @@ describe('expandEntityValue() (unit)', () => {
       peDecl = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('pe1'),
-         externalId: { type: EXTERNAL_ID },
+         externalId: {},
       });
       entityDetails = new EntityDetails();
       entityDetails.addEntity(peDecl, undefined, '');

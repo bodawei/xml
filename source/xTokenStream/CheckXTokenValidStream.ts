@@ -6,7 +6,13 @@ import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } f
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
-import { CHARREF_XTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN, AttListDeclarationXToken, AttDefinitionXToken, NotationDeclarationXToken } from 'xToken';
+import { CHARREF_XTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN,
+   AttListDeclarationXToken,
+   AttDefinitionXToken,
+   GeneralEntityDeclarationXToken,
+   NotationDeclarationXToken,
+   ParameterEntityDeclarationXToken,
+ } from 'xToken';
 
 import {
    isTextXToken,
@@ -18,8 +24,6 @@ import {
    ElementEndXToken,
    ElementStartXToken,
    SpaceXToken,
-   GeneralEntityDeclarationXToken,
-   ParameterEntityDeclarationXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    ParameterEntityEndXToken,

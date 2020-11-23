@@ -544,7 +544,7 @@ const expectedNotWfCodes: IdToErrorMap = {
       id: 'TOKEN_INVALID_CONTEXT',
       message: 'PARAMETER_ENTITY_START_PTOKEN',
    },
-   'not-wf-sa-165': 'DECL_TYPE_NO_SPACE_AFTER', // OK - Parameter entity declarations must have a space before the '%'.
+   'not-wf-sa-165': 'ENTITYDECL_DECLTYPE_NO_SPACE_AFTER', // OK - Parameter entity declarations must have a space before the '%'.
    'not-wf-sa-166': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
    'not-wf-sa-167': 'CHARDATA_INVALID_CHAR', // good - Character FFFE is not legal anywhere in an XML document.
    'not-wf-sa-168': 'error', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
@@ -912,9 +912,9 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p70fail1': 'ENTITYDECL_NAME_INVALID', // ok This is neither
    'o-p71fail1': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // great S is required before EntityDef
    'o-p71fail2': 'ENTITYDECL_NAME_INVALID', // ok Entity name is a Name, not an NMToken
-   'o-p71fail3': 'DECL_OPEN_XTRA_SPACE_AFTER', // no S after "!"
+   'o-p71fail3': 'ENTITYDECL_OPEN_XTRA_SPACE_AFTER', // no S after "!"
    'o-p71fail4': 'MARKUPDECL_INVALID_TOKEN', // ok S is required after "!ENTITY"
-   'o-p72fail1': 'DECL_TYPE_NO_SPACE_AFTER', // great
+   'o-p72fail1': 'ENTITYDECL_DECLTYPE_NO_SPACE_AFTER', // great
    'o-p72fail2': 'ENTITYDECL_PERCENT_NO_TRAILING_SPACE', // great S is required after '%'
    'o-p72fail3': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // great S is required after name
    'o-p72fail4': 'ENTITYDECL_NAME_INVALID', // great Entity name is a name, not an NMToken
@@ -1531,7 +1531,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
 
    // §4.2.0 PEDecl
-   'ibm-not-wf-P72-ibm72n01.xml': 'DECL_TYPE_NO_SPACE_AFTER', // great
+   'ibm-not-wf-P72-ibm72n01.xml': 'ENTITYDECL_DECLTYPE_NO_SPACE_AFTER', // great
    'ibm-not-wf-P72-ibm72n02.xml': 'ENTITYDECL_NO_NAME', // great
    'ibm-not-wf-P72-ibm72n03.xml': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // great
    'ibm-not-wf-P72-ibm72n04.xml': 'ENTITYDECL_NAME_NO_TRAILING_SPACE', // ok. better state no value

@@ -435,7 +435,7 @@ describe('externalId (unit)', () => {
          expect(litWell.calls.argsFor(0)[0]).toEqual(pTokenPart.public);
          expect(litWell.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
          expect(litWell.calls.argsFor(0)[2]).toEqual(confVer);
-         expect(litWell.calls.argsFor(0)[3]).toEqual(undefined);
+         expect(litWell.calls.argsFor(0)[3]).toEqual(WellFormedError.ID.NOUN_EXTERNALID_PUBLIC);
          expect(litWell.calls.argsFor(0)[4] instanceof Function).toEqual(true);
       });
 

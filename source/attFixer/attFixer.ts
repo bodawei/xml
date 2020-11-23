@@ -1,6 +1,5 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { CONFORMANCE_VERSION, ConformanceVersion } from 'basic';
 import { AttListDeclarationPToken, ATTLIST_DECLARATION_PTOKEN, ParseValue } from 'pToken';
 import { strOrBlank, toSToken, SToken } from 'sToken';
 
@@ -202,13 +201,8 @@ function gatherDefaults(
 class AttFixer {
    private attDetails: AttDetailsMap = {};
 
-   private confVer?: ConformanceVersion;
-
    processPToken(input: ParseValue): ParseValue {
       switch (input.type) {
-         case CONFORMANCE_VERSION:
-            this.confVer = this.confVer ?? input;
-            break;
          case ATTLIST_DECLARATION_PTOKEN:
             this.captureAttributeDetails(input);
             break;
@@ -270,6 +264,11 @@ class AttFixer {
       pToken: ElementStartPToken | ElementEmptyPToken,
    ): ElementStartPToken | ElementEmptyPToken {
       const elementName = strOrBlank(pToken.name);
+
+      if (elementName === '') {
+         return pToken;
+      }
+
       const attrDefs = this.attDetails[elementName] ?? {};
 
       const defaultAttrs = gatherDefaults(pToken, attrDefs);

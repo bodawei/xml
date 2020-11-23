@@ -1,17 +1,17 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ParseValue, parseAttListDeclaration, parseNotationDeclaration, AttListDeclarationPToken, NotationDeclarationPToken } from 'pToken';
+import { ParseValue, parseAttListDeclaration, parseNotationDeclaration,    parseEntityDeclaration,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+AttListDeclarationPToken, NotationDeclarationPToken } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    elementDeclaration,
    parseDocTypeEnd,
    parseDocTypeStart,
-   parseEntityDeclaration,
 
    DocTypeEndPToken,
    DocTypeStartPToken,
-   GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken,
 } from 'token';
 import { DeclarationPToken } from './baseDeclaration';
 

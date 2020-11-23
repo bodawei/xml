@@ -7,12 +7,13 @@ import { InstructionStart } from './bridge/instruction';
 import { AttListDeclarationPToken } from './token/attListDeclaration';
 import { GeneralEntityDeclarationPToken } from './token/generalEntityDeclaration';
 import { NotationDeclarationPToken } from './token/notationDeclaration';
-export { ParameterEntityDeclarationPToken } from './token/parameterEntityDeclaration';
+import { ParameterEntityDeclarationPToken } from './token/parameterEntityDeclaration';
 import { ProcessingInstructionPToken } from './token/processingInstruction';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
 
 export * from './bridge/instruction';
+export * from './bridge/entityDeclaration';
 export * from './common/externalId';
 export * from './common/fieldedInstruction';
 export * from './token/attListDeclaration';
@@ -33,6 +34,7 @@ type ParseValue =
    | AttListDeclarationPToken
    | GeneralEntityDeclarationPToken
    | NotationDeclarationPToken
+   | ParameterEntityDeclarationPToken
    | ProcessingInstructionPToken
    | TextDeclarationPToken
    | XmlDeclarationPToken;

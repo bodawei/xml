@@ -2,12 +2,10 @@
 
 import { ENTITY_ID, ConformanceVersion, EntityId } from 'basic';
 import { WellFormedError } from 'error';
+import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
-   EXTERNAL_ID,
-   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    PToken,
    TextPToken,
@@ -42,7 +40,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       stack = new EntityContextStack();
       entityDetails = new EntityDetails();
       entityDetails.addExternalSubset({
-         type: EXTERNAL_ID,
+         type: 'EXTERNAL_ID',
          system: {
             value: [new TextPToken({ text: toSToken('theExternalID') })],
          },
@@ -291,9 +289,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       const peDecl = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('pe'),
-         externalId: {
-            type: EXTERNAL_ID,
-         },
+         externalId: {},
       });
       entityDetails.addEntity(peDecl, undefined, '');
       const peRef = new ParameterEntityReferencePToken({

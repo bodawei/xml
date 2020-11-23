@@ -7,7 +7,9 @@ import {
    makeElementStart,
    makeElementStartWithAttrValue,
    makeElementStartWithAttrValueFromString,
+   makeElementEmptyWithAttrValueFromString,
    makeTextPToken,
+   makeXmlDecl,
 } from 'token-test';
 
 // ick
@@ -124,6 +126,14 @@ describe('AttFixer', () => {
       expect(result).toEqual(attList);
    });
 
+   it('returns other tokens unchanged', () => {
+      const xmlDecl = makeXmlDecl();
+
+      const result = fixAttributes.processPToken(xmlDecl);
+
+      expect(result).toBe(xmlDecl);
+   });
+
    describe('attribute normalization', () => {
       it('modifies a CDATA attribute to replace newlines with spaces', () => {
          const attList = makeAttListDeclaration('CDATA');
@@ -133,6 +143,45 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(makeElementStartWithAttrValueFromString('  xyz', '\n\nxyz'));
+      });
+
+      it('does only default normalization of attributes when there is no ATTLIST declaration for it', () => {
+         const elementStart = makeElementStartWithAttrValueFromString('\n\nxyz');
+
+         const result = fixAttributes.processPToken(elementStart);
+
+         expect(result).toEqual(makeElementStartWithAttrValueFromString('xyz', '\n\nxyz'));
+      });
+
+      it('modifies a CDATA attribute to replace newlines with spaces in an empty element', () => {
+         const attList = makeAttListDeclaration('CDATA');
+         const elementStart = makeElementEmptyWithAttrValueFromString('\n\nxyz');
+         fixAttributes.processPToken(attList);
+
+         const result = fixAttributes.processPToken(elementStart);
+
+         expect(result).toEqual(makeElementEmptyWithAttrValueFromString('  xyz', '\n\nxyz'));
+      });
+
+      it('has no effect if the attribute list has no element name', () => {
+         const attList = makeAttListDeclaration('CDATA');
+         const nameless = new AttListDeclarationPToken(attList, { elementName: undefined });
+         const elementStart = new ElementStartPToken({
+            open: toSToken('<'),
+            name: undefined,
+            nameSpace: undefined,
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: toSToken('\n\nxyz'),
+               },
+            ],
+         });
+         fixAttributes.processPToken(nameless);
+
+         const result = fixAttributes.processPToken(elementStart);
+
+         expect(result).toEqual(elementStart);
       });
 
       it('modifies a CDATA attribute to replace multiple sequential whitespace characters with spaces', () => {
@@ -145,6 +194,45 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             makeElementStartWithAttrValueFromString('x     yz', 'x\n\r\n\t yz'),
          );
+      });
+
+      it('ignores redeclarations of the same attribute', () => {
+         const attList = new AttListDeclarationPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('elStart'),
+            elementNameSpace: toSToken(' '),
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  nameSpace: toSToken(' '),
+                  type: toSToken('NMTOKENS'),
+                  typeSpace: toSToken(' '),
+                  defaultType: toSToken('#REQUIRED'),
+                  defaultTypeSpace: toSToken(' '),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken({ text: toSToken('x') })],
+                  closeQuote: toSToken('"'),
+               },
+               {
+                  name: toSToken('att1'),
+                  nameSpace: toSToken(' '),
+                  type: toSToken('CDATA'),
+                  typeSpace: toSToken(' '),
+                  defaultType: toSToken('#REQUIRED'),
+                  defaultTypeSpace: toSToken(' '),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken({ text: toSToken('x') })],
+                  closeQuote: toSToken('"'),
+               },
+            ],
+            close: toSToken('>'),
+         });
+         const elementStart = makeElementStartWithAttrValueFromString('x\n\r\n\t yz');
+         fixAttributes.processPToken(attList);
+
+         const result = fixAttributes.processPToken(elementStart);
+
+         expect(result).toEqual(makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz'));
       });
 
       it('modifies a non-CDATA attribute to trim leading newlines', () => {
@@ -413,7 +501,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(element);
       });
 
-      it('does not add a nameSpace if it is already rpesent', () => {
+      it('does not add a nameSpace if it is already present', () => {
          const attList = makeAttListDeclaration();
          const element = new ElementStartPToken({
             open: toSToken('<'),
@@ -552,6 +640,37 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(element) as ElementStartPToken;
 
          expect(result.attributes[0].name).toBe(attList.attDefs[0].name);
+      });
+
+      it('adds no attribute if no default values provided', () => {
+         const attList = new AttListDeclarationPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('elStart'),
+            elementNameSpace: toSToken(' '),
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  nameSpace: toSToken(' '),
+                  type: toSToken('CDATA'),
+                  typeSpace: toSToken(' '),
+                  defaultType: toSToken('#REQUIRED'),
+                  defaultTypeSpace: toSToken(' '),
+                  value: [],
+               },
+            ],
+            close: toSToken('>'),
+         });
+         const element = new ElementStartPToken({
+            open: toSToken('<'),
+            name: toSToken('elStart'),
+            nameSpace: toSToken('\t'),
+            attributes: [],
+         });
+         fixAttributes.processPToken(attList);
+
+         const result = fixAttributes.processPToken(element) as ElementStartPToken;
+
+         expect(result.attributes).toEqual([]);
       });
 
       it('uses the original quote tokens when available', () => {

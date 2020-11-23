@@ -1,18 +1,13 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'sToken';
-import {
-   EXTERNAL_ID,
-   GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken,
-   GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
-   TextPToken,
-} from 'token';
+import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'token';
 
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
+import { EntityId } from 'basic';
 
 describe('EntityDetails (unit)', () => {
    let entityDetails: EntityDetails;
@@ -177,9 +172,7 @@ describe('EntityDetails (unit)', () => {
          const decl1 = new GeneralEntityDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('foo'),
-            externalId: {
-               type: EXTERNAL_ID,
-            },
+            externalId: {},
          });
          entityDetails.addEntity(decl1, undefined, '');
 
@@ -222,9 +215,7 @@ describe('EntityDetails (unit)', () => {
          const decl1 = new GeneralEntityDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('foo'),
-            externalId: {
-               type: EXTERNAL_ID,
-            },
+            externalId: {},
          });
          entityDetails.addEntity(decl1, undefined, '');
 
@@ -255,6 +246,7 @@ describe('EntityDetails (unit)', () => {
 
          expect(result).toEqual({
             token: new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
                name: toSToken('lt'),
                value: value,
             }),
@@ -345,9 +337,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('addExternalSubset()', () => {
       it('adds an external subset token to this', () => {
-         entityDetails.addExternalSubset({
-            type: EXTERNAL_ID,
-         });
+         entityDetails.addExternalSubset(new EntityId());
 
          const result = entityDetails.getExternalSubsetReference();
          expect(result).toBeInstanceOf(ExternalDtdSubsetPseudoToken);
@@ -356,9 +346,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('getExternalSubsetReference()', () => {
       it('adds an external subset token to this', () => {
-         entityDetails.addExternalSubset({
-            type: EXTERNAL_ID,
-         });
+         entityDetails.addExternalSubset(new EntityId());
 
          const result = entityDetails.getExternalSubsetReference();
 

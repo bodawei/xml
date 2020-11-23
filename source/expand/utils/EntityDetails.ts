@@ -3,11 +3,13 @@
 import { strOrBlank, toSToken } from 'sToken';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+} from 'pToken';
+import {
    EntityValuePToken,
    ExternalId,
-   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    XmlError,
    ElidedEntityDeclarationPToken,
@@ -229,6 +231,7 @@ class EntityDetails {
          if (value) {
             result = {
                token: new GeneralEntityDeclarationPToken({
+                  open: toSToken('<!'),
                   name: toSToken(name),
                   value,
                }),

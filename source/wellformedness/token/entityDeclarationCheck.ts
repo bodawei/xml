@@ -3,7 +3,10 @@
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
-import { GeneralEntityDeclarationPToken } from '../../pToken/token/GeneralEntityDeclaration';
+import {
+   GeneralEntityDeclarationPToken,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+} from '../../pToken/token/GeneralEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../pToken/token/parameterEntityDeclaration';
 
 import { nameCheck } from './util/nameCheck';
@@ -38,6 +41,9 @@ function entityDeclarationCheck(
    ec.setPos(pToken.declType);
    ec.check(declType !== 'ENTITY', WFEID.ENTITYDECL_DECLTYPE_INVALID, [declType]);
 
+   ec.setPos(pToken.declTypeSpace);
+   ec.check(!pToken.declTypeSpace, WFEID.ENTITYDECL_DECLTYPE_NO_SPACE_AFTER, [declType]);
+
    if (isParameterEntityDeclaration(pToken)) {
       ec.setPos(pToken.parameter);
       ec.setPos(pToken.parameterSpace);
@@ -61,7 +67,7 @@ function entityDeclarationCheck(
    if (pToken.externalId) {
       externalIdCheck(pToken.externalId, ec, confVer);
 
-      if (pToken instanceof GeneralEntityDeclarationPToken && pToken.nData) {
+      if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN && pToken.nData) {
          ec.setPos(pToken.externalIdSpace);
          ec.check(!pToken.externalIdSpace, WFEID.ENTITYDECL_EXTERNALID_NO_SPACE, [enNameText]);
 
@@ -74,11 +80,8 @@ function entityDeclarationCheck(
          ec.check(!pToken.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [enNameText]);
          misc.checkCharWellFormed(pToken.nDataName, ec, confVer);
       }
-   } else if (pToken.value.length !== 0) {
-      literal.checkWellFormed(pToken, ec, confVer, WFEID.NOUN_ENTITYVALUE);
    } else {
-      ec.setPos(undefined);
-      ec.report(WFEID.ENTITYDECL_NO_VALUE, [enNameText]);
+      literal.checkWellFormed(pToken, ec, confVer, WFEID.NOUN_ENTITYVALUE);
    }
 
    if (pToken.extra) {

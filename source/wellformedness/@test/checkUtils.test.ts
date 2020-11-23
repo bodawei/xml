@@ -3,17 +3,15 @@
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import {
    ElementStartPToken,
    ElementEmptyPToken,
-   GeneralEntityDeclarationPToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
-   ParameterEntityDeclarationPToken,
-   EXTERNAL_ID,
 } from 'token';
 
 import {

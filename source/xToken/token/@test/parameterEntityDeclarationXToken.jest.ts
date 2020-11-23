@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ExternalIdP } from 'pToken';
+import { ExternalIdP, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
@@ -11,7 +11,6 @@ import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToke
 
 import {
    CharRefPToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
@@ -27,6 +26,7 @@ describe('ParameterEntityDeclarationXToken()', () => {
          name: toSToken('Ref0'),
       });
       pToken = new ParameterEntityDeclarationPToken({
+         open: toSToken('&'),
          name: toSToken('entityName'),
          nameSpace: toSToken(' '),
          externalIdSpace: toSToken(' '),
@@ -93,10 +93,10 @@ describe('ParameterEntityDeclarationXToken()', () => {
 
    it('returns a entity declaration with blank values when none are provided in the pToken', () => {
       pToken = new ParameterEntityDeclarationPToken({
+         open: toSToken('&'),
          name: undefined,
          nameSpace: undefined,
          externalIdSpace: undefined,
-         nDataName: undefined,
          value: [],
          close: undefined,
       });
@@ -113,6 +113,7 @@ describe('ParameterEntityDeclarationXToken()', () => {
 
    it('returns a entity declaration with an ExternalIdX', () => {
       pToken = new ParameterEntityDeclarationPToken({
+         open: toSToken('&'),
          name: toSToken('entityName'),
          nameSpace: toSToken(' '),
          externalId: new ExternalIdP({

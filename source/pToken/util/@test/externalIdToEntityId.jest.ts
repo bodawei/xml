@@ -2,6 +2,7 @@
 
 import { toSToken } from 'sToken';
 import { externalIdToEntityId } from '../externalIdToEntityId';
+
 // ick
 import { TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
 

@@ -2,13 +2,12 @@
 
 import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
 import { WellFormedError } from 'error';
+import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    ElidedEntityDeclarationPToken,
    EntityValuePToken,
-   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
-   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
    XmlError,
@@ -43,12 +42,12 @@ describe('addProtoReplacementText() (unit)', () => {
       peDecl = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('pe1'),
-         externalId: { type: EXTERNAL_ID },
+         externalId: {},
       });
       const geDecl = new GeneralEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('ge1'),
-         externalId: { type: EXTERNAL_ID },
+         externalId: {},
       });
       entityDetails = new EntityDetails();
       entityDetails.addEntity(peDecl, undefined, 'pe loc');

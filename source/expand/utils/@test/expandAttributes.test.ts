@@ -1,9 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
+import { GeneralEntityDeclarationPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
-   GeneralEntityDeclarationPToken,
    GeneralEntityEndPToken,
    GeneralEntityReferencePToken,
    GeneralEntityStartPToken,

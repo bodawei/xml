@@ -1,7 +1,8 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
-import {    AttListDeclarationPToken, NotationDeclarationPToken,   ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
+import {    AttListDeclarationPToken,    GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken, NotationDeclarationPToken,   ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import {
    CdataPToken,
@@ -11,7 +12,6 @@ import {
    ElementEmptyPToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
-   GeneralEntityDeclarationPToken,
    GeneralEntityEndPToken,
    GeneralEntityReferencePToken,
    GeneralEntityStartPToken,
@@ -25,7 +25,6 @@ import {
    ParameterEntityStartPToken,
    SpacePToken,
    TextPToken,
-   ParameterEntityDeclarationPToken,
    elementDeclaration,
    CharDataPToken,
    CharRefPToken,
@@ -165,6 +164,26 @@ function makeElementStartWithAttrValue(value: AttrValue): ElementStartPToken {
    });
 }
 
+function makeElementEmptyWithAttrValue(value: AttrValue): ElementEmptyPToken {
+   return new ElementEmptyPToken({
+      open: toSToken('<'),
+      name: toSToken('elStart'),
+      nameSpace: undefined,
+      attributes: [
+         {
+            name: toSToken('att1'),
+            value,
+         },
+      ],
+   });
+}
+function makeElementEmptyWithAttrValueFromString(value: string, origValue?: string): ElementEmptyPToken {
+   return makeElementEmptyWithAttrValue([
+      new TextPToken({ text: new SToken(value, origValue || value, []) }),
+   ]);
+}
+
+
 function makeElementStartWithAttrValueFromString(value: string, origValue?: string): ElementStartPToken {
    return makeElementStartWithAttrValue([
       new TextPToken({ text: new SToken(value, origValue || value, []) }),
@@ -224,12 +243,13 @@ function makeInternalSubsetStart(): InternalSubsetStartToken {
 
 function makeParameterEntityDeclaration(): ParameterEntityDeclarationPToken {
    return new ParameterEntityDeclarationPToken({
+      open: toSToken('<!'),
       parameter: toSToken('%'),
       parameterSpace: toSToken(' '),
       name: toSToken('entityName'),
       nameSpace: toSToken(' '),
       openQuote: toSToken('"'),
-      value: [toSToken('value')],
+      value: [new TextPToken({ text: toSToken('value') })],
       closeQuote: toSToken('"'),
       close: toSToken('>'),
    });
@@ -237,13 +257,12 @@ function makeParameterEntityDeclaration(): ParameterEntityDeclarationPToken {
 
 function makeParameterExternalEntityDeclaration(): ParameterEntityDeclarationPToken {
    return new ParameterEntityDeclarationPToken({
+      open: toSToken('<!'),
       parameter: toSToken('%'),
       parameterSpace: toSToken(' '),
       name: toSToken('entityName'),
       nameSpace: toSToken(' '),
       externalId: {
-         type: 'EXTERNAL_ID',
-         peRefPlus: [],
          externalType: toSToken('PUBLIC'),
          externalTypeSpace: toSToken(' '),
          public: {
@@ -351,6 +370,8 @@ export {
    makeDocTypeStart,
    makeElementDeclaration,
    makeElementEmpty,
+   makeElementEmptyWithAttrValue,
+   makeElementEmptyWithAttrValueFromString,
    makeElementEnd,
    makeElementStart,
    makeElementStartWithAttrValue,

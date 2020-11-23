@@ -8,6 +8,7 @@ import { ConformanceVersion } from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from 'sToken';
 import nameList from '../../token/contentspec/nameList';
+import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken, } from 'xToken';
 import {
    elementDeclaration,
 
@@ -32,10 +33,7 @@ import {
    InternalSubsetEndToken,
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
-   
-   GeneralEntityDeclarationXToken,
-   ParameterEntityDeclarationXToken,
-   
+     
    GeneralEntityReferencePToken,
    
    ParameterEntityReferencePToken,
