@@ -3,50 +3,55 @@
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
-import { ElementDeclarationPToken, parseElementDeclaration } from '../elementDeclaration';
+import {
+   ElementDeclarationPToken,
+   parseElementDeclaration,
+   resumeParseElementDeclaration,
+} from '../elementDeclaration';
 
 import { ParameterEntityReferencePToken } from 'token';
 
-describe('parseElementDeclaration()', () => {
-   it('parses a PERef (check unsasigned calls)', (done) => {
-      const source = new STokenSource(defaultExtractors);
-      source.addText('%foo;>');
-      source.endText();
+describe('elementDeclaration', () => {
+   describe('parseElementDeclaration()', () => {
+      it('parses a PERef (check unsasigned calls)', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('%foo;>');
+         source.endText();
 
-      parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-         const expected = new ElementDeclarationPToken({
-            open: toSToken('<!'),
-            unexpanded: {
-               tokens: [
-                  new ParameterEntityReferencePToken({
-                     open: toSToken('%'),
-                     openSpace: undefined,
-                     name: toSToken('foo'),
-                     nameSpace: undefined,
-                     close: toSToken(';'),
-                  }),
-               ],
-               propName: 'name',
-            },
-            close: toSToken('>'),
+         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+            const expected = new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               unexpanded: {
+                  tokens: [
+                     new ParameterEntityReferencePToken({
+                        open: toSToken('%'),
+                        openSpace: undefined,
+                        name: toSToken('foo'),
+                        nameSpace: undefined,
+                        close: toSToken(';'),
+                     }),
+                  ],
+                  propName: 'name',
+               },
+               close: toSToken('>'),
+            });
+
+            expect(result).toEqualRangeless(expected);
+            done();
          });
-
-         expect(result).toEqualRangeless(expected);
-         done();
       });
-   });
 
-   it('parses a complex content spec', (done) => {
-      const source = new STokenSource(defaultExtractors);
-      source.addText(
-         'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? >',
-      );
-      source.endText();
+      it('parses a complex content spec', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText(
+            'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? >',
+         );
+         source.endText();
 
-      parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-         // @ts-expect-error it is still matching jasmine
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toMatchInlineSnapshot(`
+         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error it is still matching jasmine
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            expect(result).toMatchInlineSnapshot(`
             ElementDeclarationPToken {
               "children": NameListPToken {
                 "close": SToken {
@@ -1008,7 +1013,44 @@ describe('parseElementDeclaration()', () => {
               "unexpanded": undefined,
             }
          `);
-         done();
+            done();
+         });
+      });
+   });
+
+   describe('resumeParseElementDeclaration()', () => {
+      it('resumes an entity declaration from the start', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('foobar ANY>');
+         source.endText();
+
+         resumeParseElementDeclaration(
+            source,
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               unexpanded: {
+                  tokens: [],
+                  propName: 'name',
+               },
+               close: toSToken('>'),
+            }),
+            (result) => {
+               const expected = new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  name: toSToken('foobar'),
+                  nameSpace: toSToken(' '),
+                  contentSpec: toSToken('ANY'),
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'name',
+                  },
+                  close: toSToken('>'),
+               });
+
+               expect(result).toEqualRangeless(expected);
+               done();
+            },
+         );
       });
    });
 });

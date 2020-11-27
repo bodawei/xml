@@ -162,6 +162,63 @@ function parseClose(
    });
 }
 
+function resumeParseProperties(
+   source: STokenSource,
+   propName: string,
+   props: RawElementDeclaration,
+   deliverPToken: DeliverCB,
+): void {
+   switch (propName) {
+      case 'name':
+         parseName(source, props, (withName) => {
+            resumeParseProperties(source, 'contentSpec', withName, deliverPToken);
+         });
+         break;
+      case 'contentSpec':
+         parseSimpleContentSpec(source, props, (withContentSpec) => {
+            if (withContentSpec) {
+               deliverPToken(new ElementDeclarationPToken(withContentSpec));
+               return;
+            } else {
+               parseComplexContentSpec(source, props, (withComplexContentSpec) => {
+                  deliverPToken(new ElementDeclarationPToken(withComplexContentSpec));
+               });
+            }
+         });
+         break;
+      case 'midSpec':
+         // parseSimpleContentSpec(source, props, (withContentSpec) => {
+         //    if (withContentSpec) {
+         //       parseClose(source, props, deliverPToken);
+         //       return;
+         //    } else {
+         //       parseComplexContentSpec(source, props, (withComplexContentSpec) => {
+         //          parseClose(source, withComplexContentSpec, deliverPToken);
+         //       });
+         //    }
+         // });
+         break;
+   }
+}
+
+function resumeParseElementDeclaration(
+   source: STokenSource,
+   elementDeclaration: ElementDeclarationPToken,
+   deliverPToken: DeliverCB,
+): void {
+   if (!elementDeclaration.unexpanded) {
+      deliverPToken(elementDeclaration);
+      return;
+   }
+
+   resumeParseProperties(
+      source,
+      elementDeclaration.unexpanded.propName,
+      { ...elementDeclaration },
+      deliverPToken,
+   );
+}
+
 /**********************************************************************\
  parse() extracts an element declaration.
 
@@ -225,4 +282,9 @@ function parseElementDeclaration(
    });
 }
 
-export { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken, parseElementDeclaration };
+export {
+   ELEMENT_DECLARATION_PTOKEN,
+   ElementDeclarationPToken,
+   parseElementDeclaration,
+   resumeParseElementDeclaration,
+};

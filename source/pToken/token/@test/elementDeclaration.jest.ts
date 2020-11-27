@@ -9,7 +9,11 @@ import * as parseUnexpanded from '../../common/parseUnexpanded';
 import { DeclarationStart, NameListPToken } from 'token';
 import nameList from '../../../token/contentspec/nameList';
 
-import { ElementDeclarationPToken, parseElementDeclaration } from '../elementDeclaration';
+import {
+   ElementDeclarationPToken,
+   parseElementDeclaration,
+   resumeParseElementDeclaration,
+} from '../elementDeclaration';
 
 jest.mock('../../../token/contentspec/nameList');
 
@@ -361,6 +365,160 @@ describe('elementDeclaration (unit)', () => {
                children: dummyNL,
                unexpanded: {
                   propName: 'midSpec',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            }),
+         );
+      });
+   });
+
+   describe('resumeParseElementDeclaration()', () => {
+      let declarationStart: DeclarationStart;
+      let result: ElementDeclarationPToken | undefined;
+      let parseUnexpandedSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
+
+      beforeEach(() => {
+         declarationStart = {
+            open: toSToken('<!'),
+         };
+         result = undefined;
+         parseUnexpandedSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
+            typeof parseUnexpanded.parseUnexpanded
+         >;
+
+         parseUnexpandedSpy.mockImplementation(
+            (
+               source: STokenSource,
+               propName: string,
+               cb: (result: UnexpandedMarkupDetails | undefined) => void,
+            ) => {
+               cb(undefined);
+            },
+         );
+      });
+
+      function getResult(item: ElementDeclarationPToken) {
+         result = item;
+      }
+
+      it('returns the original token if there are no unexpanded values', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('elementName'),
+            nameSpace: toSToken(' '),
+            contentSpec: toSToken('ANY'),
+            contentSpecSpace: toSToken(' '),
+            children: undefined,
+            unexpanded: undefined,
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([]);
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toBe(elementDecl);
+      });
+
+      it('returns an element declaration with a non-list content spec', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('elementName'),
+            nameSpace: toSToken(' '),
+            unexpanded: {
+               propName: 'contentSpec',
+               tokens: [],
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([
+            ['A', 'peekChar'],
+            ['ANY', 'word', ['>']],
+            [' ', 'space'],
+         ]);
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('elementName'),
+               nameSpace: toSToken(' '),
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               children: undefined,
+               unexpanded: {
+                  propName: 'contentSpec',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            }),
+         );
+      });
+
+      it('returns an element declaration with a list content spec', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('elementName'),
+            nameSpace: toSToken(' '),
+            unexpanded: {
+               propName: 'contentSpec',
+               tokens: [],
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([['(', 'peekChar']]);
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('elementName'),
+               nameSpace: toSToken(' '),
+               children: dummyNL,
+               unexpanded: {
+                  propName: 'contentSpec',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            }),
+         );
+      });
+
+      it('returns an element declaration when unassigned starts at the name', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            unexpanded: {
+               propName: 'name',
+               tokens: [],
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([
+            ['foo', 'word'],
+            [' ', 'space'],
+            ['A', 'peekChar'],
+            ['ANY', 'word', ['>']],
+            [' ', 'space'],
+         ]);
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('foo'),
+               nameSpace: toSToken(' '),
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               children: undefined,
+               unexpanded: {
+                  propName: 'name',
                   tokens: [],
                },
                close: toSToken('>'),
