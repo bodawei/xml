@@ -9,7 +9,7 @@ import * as parseUnexpanded from '../../common/parseUnexpanded';
 import { DeclarationStart, NameListPToken } from 'token';
 import nameList from '../../../token/contentspec/nameList';
 
-import { ElementDeclarationPToken, parseEntityDeclaration } from '../elementDeclaration';
+import { ElementDeclarationPToken, parseElementDeclaration } from '../elementDeclaration';
 
 jest.mock('../../../token/contentspec/nameList');
 
@@ -24,7 +24,7 @@ describe('elementDeclaration (unit)', () => {
          openSpace: undefined,
          declType: toSToken('ELEMENT'),
          declTypeSpace: toSToken(' '),
-         name: toSToken('notationName'),
+         name: toSToken('elementName'),
          nameSpace: toSToken(' '),
          close: toSToken('>'),
       });
@@ -124,7 +124,7 @@ describe('elementDeclaration (unit)', () => {
       });
    });
 
-   describe('parseEntityDeclaration()', () => {
+   describe('parseElementDeclaration()', () => {
       let declarationStart: DeclarationStart;
       let result: ElementDeclarationPToken | undefined;
       let parseUnexpandedSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
@@ -163,7 +163,7 @@ describe('elementDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseEntityDeclaration(mockSource, declarationStart, getResult);
+         parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(
@@ -188,7 +188,7 @@ describe('elementDeclaration (unit)', () => {
             [undefined, 'match', '>'],
          ]);
 
-         parseEntityDeclaration(mockSource, declarationStart, getResult);
+         parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(
@@ -213,7 +213,7 @@ describe('elementDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseEntityDeclaration(mockSource, declarationStart, getResult);
+         parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
          expect(nameListParseMock.mock.calls[0][0]).toEqual(mockSource);
@@ -228,7 +228,7 @@ describe('elementDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseEntityDeclaration(mockSource, declarationStart, getResult);
+         parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(
@@ -260,7 +260,7 @@ describe('elementDeclaration (unit)', () => {
          );
          const mockSource = new MockSTokenSource([['>', 'match', '>']]);
 
-         parseEntityDeclaration(mockSource, declarationStart, getResult);
+         parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(
@@ -303,7 +303,7 @@ describe('elementDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseEntityDeclaration(mockSource, declarationStart, getResult);
+         parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(
@@ -348,7 +348,7 @@ describe('elementDeclaration (unit)', () => {
             ['>', 'match', '>'],
          ]);
 
-         parseEntityDeclaration(mockSource, declarationStart, getResult);
+         parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(

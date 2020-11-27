@@ -3,17 +3,17 @@
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
-import { ElementDeclarationPToken, parseEntityDeclaration } from '../elementDeclaration';
+import { ElementDeclarationPToken, parseElementDeclaration } from '../elementDeclaration';
 
 import { ParameterEntityReferencePToken } from 'token';
 
-describe('parseEntityDeclaration()', () => {
+describe('parseElementDeclaration()', () => {
    it('parses a PERef (check unsasigned calls)', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('%foo;>');
       source.endText();
 
-      parseEntityDeclaration(source, { open: toSToken('<!') }, (result) => {
+      parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
          const expected = new ElementDeclarationPToken({
             open: toSToken('<!'),
             unexpanded: {
@@ -43,7 +43,7 @@ describe('parseEntityDeclaration()', () => {
       );
       source.endText();
 
-      parseEntityDeclaration(source, { open: toSToken('<!') }, (result) => {
+      parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
          // @ts-expect-error it is still matching jasmine
          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toMatchInlineSnapshot(`

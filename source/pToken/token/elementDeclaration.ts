@@ -180,7 +180,7 @@ function parseClose(
    Note that Mixed and children are handled by nameList
 \**********************************************************************/
 
-function parseEntityDeclaration(
+function parseElementDeclaration(
    source: STokenSource,
    declarationPToken: DeclarationStart,
    deliverPToken: DeliverCB,
@@ -225,4 +225,4 @@ function parseEntityDeclaration(
    });
 }
 
-export { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken, parseEntityDeclaration };
+export { ELEMENT_DECLARATION_PTOKEN, ElementDeclarationPToken, parseElementDeclaration };
