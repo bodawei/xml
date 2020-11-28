@@ -51,6 +51,16 @@ From an implementation standpoint, the XML Declaration and Text Declaration are 
 
 That is, there is a "bridge" processor called "instruction" which is given a `<?` and then determines whether it is parsing a PI or a declaration.  It considers the Text and XML Declarations to be "FieldedInstructions".  This is an "artificial" type of token (meaning, it is never seen outside of this PToken system, and has no reality in the XML Specification), which is handy as a way of capturing commonalities between the Text and XML Declrations.
 
+### Naming
+#### Element declaration content specification
+* contentSpec refers to identifying what kind of content is allowed (ANY, EMPTY or other)
+* contentModel is a slight abuse of the word in the specification. There "content model" seems to be used only for element content, but this uses it for both element and mixed content.
+   * a contentModel contains zero or more contentParticles
+   * contentParticles contain either a contentModel or a contentName
+
+
 ### Coding conventions
 - Files are named as camelCase nouns that describe the kind of entity they work with.
 - Only named exports are used
+- The suffix "PToken" is used for a "top-level" data structue that has a `type` property.
+- The suffix "P" is used for "sub-level" data structures (e.g. ExternalID or ContentModels) that share the same characteristics (collections of STokens), but have no  `type` property.

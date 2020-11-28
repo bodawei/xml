@@ -2,6 +2,7 @@
 
 import { STokenArrayBuilder, SToken } from 'sToken';
 import { ElementDeclarationPToken } from '../../pToken/token/elementDeclaration';
+import { contentModelToSTokens } from '../common/contentModelToSTokens';
 
 function elementDeclarationToSTokens(token: ElementDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
@@ -13,12 +14,12 @@ function elementDeclarationToSTokens(token: ElementDeclarationPToken): Array<STo
       token.declTypeSpace,
       token.name,
       token.nameSpace,
-      token.contentKeyword,
-      token.contentKeywordSpace,
+      token.contentSpec,
+      token.contentSpecSpace,
    );
 
-   if (token.contentSpec) {
-      // builder.add(...token.contentSpec.getSTokenArray());
+   if (token.contentModel) {
+      builder.add(...contentModelToSTokens(token.contentModel));
    }
 
    if (token.extra) {

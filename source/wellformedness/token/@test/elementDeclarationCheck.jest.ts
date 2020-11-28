@@ -140,8 +140,8 @@ describe('elementDeclarationCheck()', () => {
 
    it('reports an error if there was no content spec at all', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-         contentKeyword: undefined,
          contentSpec: undefined,
+         contentModel: undefined,
       });
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
@@ -156,7 +156,7 @@ describe('elementDeclarationCheck()', () => {
 
    it('reports an error if the content spec was an invalid value', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-         contentKeyword: toSToken('XYZ'),
+         contentSpec: toSToken('XYZ'),
       });
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
@@ -164,13 +164,13 @@ describe('elementDeclarationCheck()', () => {
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ELEMENTDECL_SPEC_UNKNOWN,
          params: ['elementName', 'XYZ'],
-         position: elementDeclaration.contentKeyword,
+         position: elementDeclaration.contentSpec,
       });
    });
 
    it('reports an error if the content spec was cased wrong', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-         contentKeyword: toSToken('any'),
+         contentSpec: toSToken('any'),
       });
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
@@ -178,7 +178,7 @@ describe('elementDeclarationCheck()', () => {
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
          params: ['elementName', 'ANY', 'any'],
-         position: elementDeclaration.contentKeyword,
+         position: elementDeclaration.contentSpec,
       });
    });
 
@@ -197,15 +197,15 @@ describe('elementDeclarationCheck()', () => {
       });
    });
 
-   // it('calls nameList.checkWellFormed() if there are contentSpec', () => {
+   // it('calls nameList.checkWellFormed() if there are contentModel', () => {
    //    elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-   //       contentSpec: new NameListPToken(),
+   //       contentModel: new NameListPToken(),
    //    });
 
    //    elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
    //    expect(nameList.checkWellFormed).toHaveBeenCalledWith(
-   //       elementDeclaration.contentSpec,
+   //       elementDeclaration.contentModel,
    //       mockErrorCollector,
    //       confVer,
    //    );

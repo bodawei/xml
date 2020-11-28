@@ -48,26 +48,22 @@ function elementDeclarationCheck(
    ec.setPos(pToken.nameSpace);
    ec.check(!pToken.nameSpace, WFEID.ELEMENTDECL_NAME_NO_SPACE, [nameText]);
 
-   if (pToken.contentSpec) {
-      // nameList.checkWellFormed(pToken.contentSpec, ec, confVer);
+   if (pToken.contentModel) {
+      // nameList.checkWellFormed(pToken.contentModel, ec, confVer);
    } else {
-      const contentKeyword: string = strOrBlank(pToken.contentKeyword);
-      const upperContentSpec = contentKeyword.toLocaleUpperCase();
-      ec.setPos(pToken.contentKeyword);
+      const contentSpec: string = strOrBlank(pToken.contentSpec);
+      const upperContentSpec = contentSpec.toLocaleUpperCase();
+      ec.setPos(pToken.contentSpec);
 
-      if (!pToken.contentKeyword) {
+      if (!pToken.contentSpec) {
          ec.report(WFEID.ELEMENTDECL_NO_SPEC, [nameText]);
       } else if (ALLOWED_CONTENT_SPEC.indexOf(upperContentSpec) === -1) {
-         ec.report(WFEID.ELEMENTDECL_SPEC_UNKNOWN, [nameText, contentKeyword]);
-      } else if (contentKeyword !== upperContentSpec) {
-         ec.report(WFEID.ELEMENTDECL_SPEC_INVALID_CASE, [
-            nameText,
-            upperContentSpec,
-            contentKeyword,
-         ]);
+         ec.report(WFEID.ELEMENTDECL_SPEC_UNKNOWN, [nameText, contentSpec]);
+      } else if (contentSpec !== upperContentSpec) {
+         ec.report(WFEID.ELEMENTDECL_SPEC_INVALID_CASE, [nameText, upperContentSpec, contentSpec]);
       }
 
-      ec.setPos(pToken.contentKeywordSpace);
+      ec.setPos(pToken.contentSpecSpace);
    }
 
    if (pToken.extra) {

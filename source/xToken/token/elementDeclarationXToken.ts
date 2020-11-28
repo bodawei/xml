@@ -13,35 +13,35 @@ class ElementDeclarationXToken {
 
    public readonly name: string;
 
-   public readonly contentSpecType: string;
+   public readonly contentSpec: string;
 
-   public readonly children?: XNameList;
+   public readonly contentModel?: XNameList;
 
    public pToken?: ElementDeclarationPToken;
 
    constructor(pToken: ElementDeclarationPToken);
-   constructor(name: string, contentSpecType?: string, children?: XNameList);
+   constructor(name: string, contentSpec?: string, contentModel?: XNameList);
    constructor(
       nameOrPToken: string | ElementDeclarationPToken,
-      contentSpecType?: string,
-      children?: XNameList,
+      contentSpec?: string,
+      contentModel?: XNameList,
    ) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
-         this.contentSpecType = contentSpecType || '';
-         this.children = children;
+         this.contentSpec = contentSpec || '';
+         this.contentModel = contentModel;
       } else {
-         let contentSpecType: string = strOrBlank(nameOrPToken.contentKeyword);
-         let children;
+         let contentSpec: string = strOrBlank(nameOrPToken.contentSpec);
+         let contentModel;
 
-         if (nameOrPToken.contentSpec) {
-            contentSpecType = 'CHILDREN';
-            // children = nameList.makeXTokenCompatible(nameOrPToken.children);
+         if (nameOrPToken.contentModel) {
+            contentSpec = 'CHILDREN';
+            // contentModel = nameList.makeXTokenCompatible(nameOrPToken.contentModel);
          }
 
          this.name = strOrBlank(nameOrPToken.name);
-         this.contentSpecType = contentSpecType;
-         this.children = children;
+         this.contentSpec = contentSpec;
+         this.contentModel = contentModel;
          this.pToken = nameOrPToken;
       }
    }

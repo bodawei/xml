@@ -3,16 +3,16 @@
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
-import { ContentSpecP, parseContentSpec } from '../contentSpec';
+import { ContentModelP, parseContentModel } from '../contentModel';
 
 describe('nameList (integration)', () => {
-   let contentSpec: ContentSpecP;
+   let contentSpec: ContentModelP;
 
    beforeEach(() => {
-      contentSpec = new ContentSpecP({
+      contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         names: [
+         particles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -41,13 +41,13 @@ describe('nameList (integration)', () => {
       });
    });
 
-   describe('parseContentSpec()', () => {
+   describe('parseContentModel()', () => {
       it('parses a basic content spec', (done) => {
          const source = new STokenSource(defaultExtractors);
          source.addText('( one+ | two)* ');
          source.endText();
 
-         parseContentSpec(source, (result) => {
+         parseContentModel(source, (result) => {
             expect(result).toEqualRangeless(contentSpec);
             done();
          });
@@ -58,12 +58,12 @@ describe('nameList (integration)', () => {
          source.addText('( one+ | %fred;');
          source.endText();
 
-         parseContentSpec(source, (result) => {
+         parseContentModel(source, (result) => {
             expect(result).toEqualRangeless(
-               new ContentSpecP({
+               new ContentModelP({
                   open: toSToken('('),
                   openSpace: toSToken(' '),
-                  names: [
+                  particles: [
                      {
                         particle: {
                            name: toSToken('one'),
@@ -90,11 +90,11 @@ describe('nameList (integration)', () => {
          source.addText('( one+ | ( ( two | three)+ , four)? | five)');
          source.endText();
 
-         parseContentSpec(source, (result) => {
+         parseContentModel(source, (result) => {
             // @ts-expect-error jasmine overlow
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toMatchInlineSnapshot(`
-               ContentSpecP {
+               ContentModelP {
                  "close": SToken {
                    "originalStr": ")",
                    "ranges": Array [
@@ -115,7 +115,45 @@ describe('nameList (integration)', () => {
                    "str": ")",
                  },
                  "closeSpace": undefined,
-                 "names": Array [
+                 "open": SToken {
+                   "originalStr": "(",
+                   "ranges": Array [
+                     Range {
+                       "endColumn": 1,
+                       "endIndex": 1,
+                       "endRow": 0,
+                       "entityId": EntityId {
+                         "publicId": undefined,
+                         "systemId": "",
+                         "type": "ENTITY_ID",
+                       },
+                       "startColumn": 0,
+                       "startIndex": 0,
+                       "startRow": 0,
+                     },
+                   ],
+                   "str": "(",
+                 },
+                 "openSpace": SToken {
+                   "originalStr": " ",
+                   "ranges": Array [
+                     Range {
+                       "endColumn": 2,
+                       "endIndex": 2,
+                       "endRow": 0,
+                       "entityId": EntityId {
+                         "publicId": undefined,
+                         "systemId": "",
+                         "type": "ENTITY_ID",
+                       },
+                       "startColumn": 1,
+                       "startIndex": 1,
+                       "startRow": 0,
+                     },
+                   ],
+                   "str": " ",
+                 },
+                 "particles": Array [
                    Object {
                      "delimiter": SToken {
                        "originalStr": "|",
@@ -255,7 +293,7 @@ describe('nameList (integration)', () => {
                        ],
                        "str": " ",
                      },
-                     "particle": ContentSpecP {
+                     "particle": ContentModelP {
                        "close": SToken {
                          "originalStr": ")",
                          "ranges": Array [
@@ -276,7 +314,45 @@ describe('nameList (integration)', () => {
                          "str": ")",
                        },
                        "closeSpace": undefined,
-                       "names": Array [
+                       "open": SToken {
+                         "originalStr": "(",
+                         "ranges": Array [
+                           Range {
+                             "endColumn": 10,
+                             "endIndex": 10,
+                             "endRow": 0,
+                             "entityId": EntityId {
+                               "publicId": undefined,
+                               "systemId": "",
+                               "type": "ENTITY_ID",
+                             },
+                             "startColumn": 9,
+                             "startIndex": 9,
+                             "startRow": 0,
+                           },
+                         ],
+                         "str": "(",
+                       },
+                       "openSpace": SToken {
+                         "originalStr": " ",
+                         "ranges": Array [
+                           Range {
+                             "endColumn": 11,
+                             "endIndex": 11,
+                             "endRow": 0,
+                             "entityId": EntityId {
+                               "publicId": undefined,
+                               "systemId": "",
+                               "type": "ENTITY_ID",
+                             },
+                             "startColumn": 10,
+                             "startIndex": 10,
+                             "startRow": 0,
+                           },
+                         ],
+                         "str": " ",
+                       },
+                       "particles": Array [
                          Object {
                            "delimiter": SToken {
                              "originalStr": ",",
@@ -316,7 +392,7 @@ describe('nameList (integration)', () => {
                              ],
                              "str": " ",
                            },
-                           "particle": ContentSpecP {
+                           "particle": ContentModelP {
                              "close": SToken {
                                "originalStr": ")",
                                "ranges": Array [
@@ -337,7 +413,45 @@ describe('nameList (integration)', () => {
                                "str": ")",
                              },
                              "closeSpace": undefined,
-                             "names": Array [
+                             "open": SToken {
+                               "originalStr": "(",
+                               "ranges": Array [
+                                 Range {
+                                   "endColumn": 12,
+                                   "endIndex": 12,
+                                   "endRow": 0,
+                                   "entityId": EntityId {
+                                     "publicId": undefined,
+                                     "systemId": "",
+                                     "type": "ENTITY_ID",
+                                   },
+                                   "startColumn": 11,
+                                   "startIndex": 11,
+                                   "startRow": 0,
+                                 },
+                               ],
+                               "str": "(",
+                             },
+                             "openSpace": SToken {
+                               "originalStr": " ",
+                               "ranges": Array [
+                                 Range {
+                                   "endColumn": 13,
+                                   "endIndex": 13,
+                                   "endRow": 0,
+                                   "entityId": EntityId {
+                                     "publicId": undefined,
+                                     "systemId": "",
+                                     "type": "ENTITY_ID",
+                                   },
+                                   "startColumn": 12,
+                                   "startIndex": 12,
+                                   "startRow": 0,
+                                 },
+                               ],
+                               "str": " ",
+                             },
+                             "particles": Array [
                                Object {
                                  "delimiter": SToken {
                                    "originalStr": "|",
@@ -449,44 +563,6 @@ describe('nameList (integration)', () => {
                                  },
                                },
                              ],
-                             "open": SToken {
-                               "originalStr": "(",
-                               "ranges": Array [
-                                 Range {
-                                   "endColumn": 12,
-                                   "endIndex": 12,
-                                   "endRow": 0,
-                                   "entityId": EntityId {
-                                     "publicId": undefined,
-                                     "systemId": "",
-                                     "type": "ENTITY_ID",
-                                   },
-                                   "startColumn": 11,
-                                   "startIndex": 11,
-                                   "startRow": 0,
-                                 },
-                               ],
-                               "str": "(",
-                             },
-                             "openSpace": SToken {
-                               "originalStr": " ",
-                               "ranges": Array [
-                                 Range {
-                                   "endColumn": 13,
-                                   "endIndex": 13,
-                                   "endRow": 0,
-                                   "entityId": EntityId {
-                                     "publicId": undefined,
-                                     "systemId": "",
-                                     "type": "ENTITY_ID",
-                                   },
-                                   "startColumn": 12,
-                                   "startIndex": 12,
-                                   "startRow": 0,
-                                 },
-                               ],
-                               "str": " ",
-                             },
                              "repeat": SToken {
                                "originalStr": "+",
                                "ranges": Array [
@@ -556,44 +632,6 @@ describe('nameList (integration)', () => {
                            },
                          },
                        ],
-                       "open": SToken {
-                         "originalStr": "(",
-                         "ranges": Array [
-                           Range {
-                             "endColumn": 10,
-                             "endIndex": 10,
-                             "endRow": 0,
-                             "entityId": EntityId {
-                               "publicId": undefined,
-                               "systemId": "",
-                               "type": "ENTITY_ID",
-                             },
-                             "startColumn": 9,
-                             "startIndex": 9,
-                             "startRow": 0,
-                           },
-                         ],
-                         "str": "(",
-                       },
-                       "openSpace": SToken {
-                         "originalStr": " ",
-                         "ranges": Array [
-                           Range {
-                             "endColumn": 11,
-                             "endIndex": 11,
-                             "endRow": 0,
-                             "entityId": EntityId {
-                               "publicId": undefined,
-                               "systemId": "",
-                               "type": "ENTITY_ID",
-                             },
-                             "startColumn": 10,
-                             "startIndex": 10,
-                             "startRow": 0,
-                           },
-                         ],
-                         "str": " ",
-                       },
                        "repeat": SToken {
                          "originalStr": "?",
                          "ranges": Array [
@@ -663,44 +701,6 @@ describe('nameList (integration)', () => {
                      },
                    },
                  ],
-                 "open": SToken {
-                   "originalStr": "(",
-                   "ranges": Array [
-                     Range {
-                       "endColumn": 1,
-                       "endIndex": 1,
-                       "endRow": 0,
-                       "entityId": EntityId {
-                         "publicId": undefined,
-                         "systemId": "",
-                         "type": "ENTITY_ID",
-                       },
-                       "startColumn": 0,
-                       "startIndex": 0,
-                       "startRow": 0,
-                     },
-                   ],
-                   "str": "(",
-                 },
-                 "openSpace": SToken {
-                   "originalStr": " ",
-                   "ranges": Array [
-                     Range {
-                       "endColumn": 2,
-                       "endIndex": 2,
-                       "endRow": 0,
-                       "entityId": EntityId {
-                         "publicId": undefined,
-                         "systemId": "",
-                         "type": "ENTITY_ID",
-                       },
-                       "startColumn": 1,
-                       "startIndex": 1,
-                       "startRow": 0,
-                     },
-                   ],
-                   "str": " ",
-                 },
                  "repeat": undefined,
                  "repeatSpace": undefined,
                }

@@ -3,16 +3,16 @@
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { ContentSpecP, parseContentSpec } from '../contentSpec';
+import { ContentModelP, parseContentModel } from '../contentModel';
 
 describe('nameList (unit)', () => {
-   let contentSpec: ContentSpecP;
+   let contentSpec: ContentModelP;
 
    beforeEach(() => {
-      contentSpec = new ContentSpecP({
+      contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         names: [
+         particles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -43,11 +43,11 @@ describe('nameList (unit)', () => {
 
    describe('construction', () => {
       it('can override all properties with the second parameter', () => {
-         const result = new ContentSpecP(
+         const result = new ContentModelP(
             {
                open: toSToken('('),
                openSpace: toSToken(' '),
-               names: [
+               particles: [
                   {
                      particle: {
                         name: toSToken('one'),
@@ -67,7 +67,7 @@ describe('nameList (unit)', () => {
             {
                open: toSToken('1'),
                openSpace: toSToken('2'),
-               names: [
+               particles: [
                   {
                      particle: {
                         name: toSToken('3'),
@@ -89,7 +89,7 @@ describe('nameList (unit)', () => {
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
-            names: [
+            particles: [
                {
                   particle: {
                      name: toSToken('3'),
@@ -108,12 +108,12 @@ describe('nameList (unit)', () => {
          });
       });
 
-      it('can override the names with an undefined', () => {
-         const result = new ContentSpecP(
+      it('can override the particles with an undefined', () => {
+         const result = new ContentModelP(
             {
                open: toSToken('('),
                openSpace: toSToken(' '),
-               names: [
+               particles: [
                   {
                      particle: {
                         name: toSToken('one'),
@@ -133,7 +133,7 @@ describe('nameList (unit)', () => {
             {
                open: toSToken('1'),
                openSpace: toSToken('2'),
-               names: undefined,
+               particles: undefined,
                close: toSToken('8'),
                closeSpace: toSToken('9'),
                repeat: toSToken('10'),
@@ -144,7 +144,7 @@ describe('nameList (unit)', () => {
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
-            names: [],
+            particles: [],
             close: toSToken('8'),
             closeSpace: toSToken('9'),
             repeat: toSToken('10'),
@@ -153,10 +153,10 @@ describe('nameList (unit)', () => {
       });
    });
 
-   describe('parseContentSpec()', () => {
-      let result: ContentSpecP | undefined;
+   describe('parseContentModel()', () => {
+      let result: ContentModelP | undefined;
 
-      function getResult(item?: ContentSpecP) {
+      function getResult(item?: ContentModelP) {
          result = item;
       }
 
@@ -185,7 +185,7 @@ describe('nameList (unit)', () => {
             [undefined, 'space'],
          ]);
 
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(contentSpec);
@@ -215,13 +215,13 @@ describe('nameList (unit)', () => {
             ['+', 'multi', ['?', '*', '+']],
             [' ', 'space'],
          ]);
-         const expected = new ContentSpecP(contentSpec, {
+         const expected = new ContentModelP(contentSpec, {
             closeSpace: toSToken(' '),
             repeat: toSToken('+'),
             repeatSpace: toSToken(' '),
          });
 
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
@@ -251,8 +251,8 @@ describe('nameList (unit)', () => {
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
-         const expected = new ContentSpecP(contentSpec, {
-            names: [
+         const expected = new ContentModelP(contentSpec, {
+            particles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -276,7 +276,7 @@ describe('nameList (unit)', () => {
             ],
          });
 
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
@@ -307,7 +307,7 @@ describe('nameList (unit)', () => {
             [undefined, 'space'],
          ]);
 
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(contentSpec);
@@ -337,8 +337,8 @@ describe('nameList (unit)', () => {
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
-         const expected = new ContentSpecP(contentSpec, {
-            names: [
+         const expected = new ContentModelP(contentSpec, {
+            particles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -361,7 +361,7 @@ describe('nameList (unit)', () => {
                },
             ],
          });
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
@@ -391,8 +391,8 @@ describe('nameList (unit)', () => {
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
-         const expected = new ContentSpecP(contentSpec, {
-            names: [
+         const expected = new ContentModelP(contentSpec, {
+            particles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -415,13 +415,13 @@ describe('nameList (unit)', () => {
                },
             ],
          });
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
       });
 
-      it('parses a content spec with two names and no "|"s', () => {
+      it('parses a content spec with two particles and no "|"s', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
@@ -445,8 +445,8 @@ describe('nameList (unit)', () => {
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
-         const expected = new ContentSpecP(contentSpec, {
-            names: [
+         const expected = new ContentModelP(contentSpec, {
+            particles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -469,7 +469,7 @@ describe('nameList (unit)', () => {
                },
             ],
          });
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
@@ -478,7 +478,7 @@ describe('nameList (unit)', () => {
       it('parses nothing if it finds end of file', () => {
          const mockSource = new MockSTokenSource([undefined]);
 
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toBeUndefined();
@@ -487,7 +487,7 @@ describe('nameList (unit)', () => {
       it('parses nothing if it finds a "%"', () => {
          const mockSource = new MockSTokenSource([undefined]);
 
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toBeUndefined();
@@ -510,8 +510,8 @@ describe('nameList (unit)', () => {
             undefined,
             undefined,
          ]);
-         const expected = new ContentSpecP(contentSpec, {
-            names: [
+         const expected = new ContentModelP(contentSpec, {
+            particles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -525,7 +525,7 @@ describe('nameList (unit)', () => {
             ],
             close: undefined,
          });
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
@@ -541,11 +541,11 @@ describe('nameList (unit)', () => {
             undefined,
             undefined,
          ]);
-         const expected = new ContentSpecP(contentSpec, {
-            names: [],
+         const expected = new ContentModelP(contentSpec, {
+            particles: [],
             close: undefined,
          });
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
@@ -568,8 +568,8 @@ describe('nameList (unit)', () => {
             undefined,
             undefined,
          ]);
-         const expected = new ContentSpecP(contentSpec, {
-            names: [
+         const expected = new ContentModelP(contentSpec, {
+            particles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -583,7 +583,7 @@ describe('nameList (unit)', () => {
             ],
             close: undefined,
          });
-         parseContentSpec(mockSource, getResult);
+         parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
          expect(result).toEqualRangeless(expected);
@@ -638,8 +638,8 @@ describe('nameList (unit)', () => {
                undefined,
                undefined,
             ]);
-            const expected = new ContentSpecP(contentSpec, {
-               names: [
+            const expected = new ContentModelP(contentSpec, {
+               particles: [
                   {
                      particle: {
                         name: toSToken('one'),
@@ -654,7 +654,7 @@ describe('nameList (unit)', () => {
                      particle: {
                         open: toSToken('('),
                         openSpace: toSToken(' '),
-                        names: [
+                        particles: [
                            {
                               particle: {
                                  name: toSToken('two'),
@@ -695,7 +695,7 @@ describe('nameList (unit)', () => {
                close: toSToken(')'),
             });
 
-            parseContentSpec(mockSource, getResult);
+            parseContentModel(mockSource, getResult);
             mockSource.respondInAsyncTime();
 
             expect(result).toEqualRangeless(expected);

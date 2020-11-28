@@ -5,9 +5,6 @@ import { toSToken } from 'sToken';
 
 import { ELEMENT_DECLARATION_XTOKEN, ElementDeclarationXToken } from '../elementDeclarationXToken';
 
-// ick
-import { NameListPToken } from 'token';
-
 describe('ElementDeclarationXToken', () => {
    it('returns an element declaration token built from a PToken', () => {
       const elementDeclaration = new ElementDeclarationPToken({
@@ -17,7 +14,7 @@ describe('ElementDeclarationXToken', () => {
          declTypeSpace: toSToken(' '),
          name: toSToken('elementName'),
          nameSpace: toSToken(' '),
-         contentKeyword: toSToken('ANY'),
+         contentSpec: toSToken('ANY'),
          close: toSToken('>'),
       });
       const result = new ElementDeclarationXToken(elementDeclaration);
@@ -25,8 +22,8 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'elementName',
-         contentSpecType: 'ANY',
-         children: undefined,
+         contentSpec: 'ANY',
+         contentModel: undefined,
          pToken: elementDeclaration,
       });
    });
@@ -41,13 +38,13 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: '',
-         contentSpecType: '',
-         children: undefined,
+         contentSpec: '',
+         contentModel: undefined,
          pToken: elementDeclaration,
       });
    });
 
-   // it('returns an element declaration token with children if there is a namelist', () => {
+   // it('returns an element declaration token with contentModel if there is a namelist', () => {
    //    const elementDeclaration = new ElementDeclarationPToken({
    //       open: toSToken('<!'),
    //       openSpace: undefined,
@@ -55,7 +52,7 @@ describe('ElementDeclarationXToken', () => {
    //       declTypeSpace: toSToken(' '),
    //       name: toSToken('elementName'),
    //       nameSpace: toSToken(' '),
-   //       contentSpec: new NameListPToken({ open: toSToken('('), repeat: toSToken('*') }),
+   //       contentModel: new NameListPToken({ open: toSToken('('), repeat: toSToken('*') }),
    //       close: toSToken('>'),
    //    });
    //    const result = new ElementDeclarationXToken(elementDeclaration);
@@ -63,8 +60,8 @@ describe('ElementDeclarationXToken', () => {
    //    expect(result).toEqual({
    //       type: ELEMENT_DECLARATION_XTOKEN,
    //       name: 'elementName',
-   //       contentSpecType: 'CHILDREN',
-   //       children: {
+   //       contentSpec: 'CHILDREN',
+   //       contentModel: {
    //          listType: 'CHOICE',
    //          names: [],
    //          repeat: 'ZEROPLUS',
@@ -83,8 +80,8 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'one',
-         contentSpecType: 'FOO',
-         children: {
+         contentSpec: 'FOO',
+         contentModel: {
             listType: 'CHOICE',
             names: [],
             repeat: 'ZEROPLUS',
@@ -98,8 +95,8 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'one',
-         contentSpecType: '',
-         children: undefined,
+         contentSpec: '',
+         contentModel: undefined,
       });
    });
 });

@@ -2,22 +2,22 @@
 
 import { SToken, STokenSource, strOrBlank } from 'sToken';
 
-type DeliverContentSpec = (pToken?: ContentSpecP) => void;
-type InnerDeliverContentSpec = (pToken: ContentSpecProps) => void;
+type DeliverContentSpec = (pToken?: ContentModelP) => void;
+type InnerDeliverContentSpec = (pToken: ContentModelProps) => void;
 
 type DelimiterType = 'ANY' | 'CHOICE' | 'SEQUENCE';
 
-interface ContentSpecProps {
+interface ContentModelProps {
    open?: SToken;
    openSpace?: SToken;
-   names?: Array<ContentParticleProps>;
+   particles?: Array<ContentParticleProps>;
    close?: SToken;
    closeSpace?: SToken;
    repeat?: SToken;
    repeatSpace?: SToken;
 }
 
-interface NameProps {
+interface ContentNameProps {
    name?: SToken;
    nameSpace?: SToken;
    repeat?: SToken;
@@ -25,25 +25,25 @@ interface NameProps {
 }
 
 interface ContentParticleProps {
-   particle?: NameProps | ContentSpecProps;
+   particle?: ContentNameProps | ContentModelProps;
    delimiter?: SToken;
    delimiterSpace?: SToken;
 }
 
 interface ContentParticleP {
-   readonly particle?: NameP | ContentSpecP;
+   readonly particle?: ContentNameP | ContentModelP;
    readonly delimiter?: SToken;
    readonly delimiterSpace?: SToken;
 }
 
-type NameP = Readonly<NameProps>;
+type ContentNameP = Readonly<ContentNameProps>;
 
-class ContentSpecP {
+class ContentModelP {
    public readonly open?: SToken;
 
    public readonly openSpace?: SToken;
 
-   public readonly names: Array<ContentParticleP>;
+   public readonly particles: Array<ContentParticleP>;
 
    public readonly close?: SToken;
 
@@ -53,10 +53,10 @@ class ContentSpecP {
 
    public readonly repeatSpace?: SToken;
 
-   constructor(props: ContentSpecP | ContentSpecProps, other?: ContentSpecProps) {
+   constructor(props: ContentModelP | ContentModelProps, other?: ContentModelProps) {
       this.open = props.open;
       this.openSpace = props.openSpace;
-      this.names = props.names || [];
+      this.particles = props.particles || [];
       this.close = props.close;
       this.closeSpace = props.closeSpace;
       this.repeat = props.repeat;
@@ -65,7 +65,7 @@ class ContentSpecP {
       if (other) {
          this.open = 'open' in other ? other.open : this.open;
          this.openSpace = 'openSpace' in other ? other.openSpace : this.openSpace;
-         this.names = 'names' in other ? other.names || [] : this.names;
+         this.particles = 'particles' in other ? other.particles || [] : this.particles;
          this.close = 'close' in other ? other.close : this.close;
          this.closeSpace = 'closeSpace' in other ? other.closeSpace : this.closeSpace;
          this.repeat = 'repeat' in other ? other.repeat : this.repeat;
@@ -74,9 +74,27 @@ class ContentSpecP {
    }
 }
 
+function isContentModelP(item: ContentModelP | ContentNameP): item is ContentModelP {
+   if ('name' in item || 'nameSpace' in item) {
+      return false;
+   }
+
+   if (
+      'open' in item ||
+      'openSpace' in item ||
+      'particles' in item ||
+      'close' in item ||
+      'closeSpace' in item
+   ) {
+      return true;
+   }
+
+   return false;
+}
+
 function parseDelimiter(
    source: STokenSource,
-   token: ContentSpecProps,
+   token: ContentModelProps,
    particle: ContentParticleProps,
    delimiterType: DelimiterType,
    deliverContentSpec: InnerDeliverContentSpec,
@@ -113,9 +131,9 @@ function parseDelimiter(
 function parseName(
    source: STokenSource,
    wordDelims: Array<string>,
-   deliverName: (name: NameP) => void,
+   deliverName: (name: ContentNameProps) => void,
 ) {
-   const name: NameProps = {};
+   const name: ContentNameProps = {};
 
    source.extractToObject('word', wordDelims, name, 'name');
    source.extractToObjectNoParams('space', name, 'nameSpace');
@@ -128,7 +146,7 @@ function parseName(
 
 function parseNames(
    source: STokenSource,
-   props: ContentSpecProps,
+   props: ContentModelProps,
    delimterType: DelimiterType,
    deliverContentSpec: InnerDeliverContentSpec,
 ): void {
@@ -145,12 +163,12 @@ function parseNames(
 
       const particle: ContentParticleProps = {};
 
-      props.names = props.names || [];
-      props.names.push(particle);
+      props.particles = props.particles || [];
+      props.particles.push(particle);
 
       if (charSToken.str === '(') {
          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-         parseContentSpec(source, (listPToken) => {
+         parseContentModel(source, (listPToken) => {
             particle.particle = listPToken;
             parseDelimiter(source, props, particle, delimterType, deliverContentSpec);
          });
@@ -179,7 +197,7 @@ function parseNames(
 }
 
 /**********************************************************************\
- parseContentSpec() extracts the STokens for a () enclosed series of word.
+ parseContentModel() extracts the STokens for a () enclosed series of word.
  This is used in the various syntax constructions listed below.
  It will stop any time it encounters a % character.
 
@@ -198,8 +216,8 @@ function parseNames(
                            | '(' S? '#PCDATA' S? ')'
 \**********************************************************************/
 
-function parseContentSpec(source: STokenSource, deliverContentSpec: DeliverContentSpec): void {
-   const props: ContentSpecProps = {};
+function parseContentModel(source: STokenSource, deliverContentSpec: DeliverContentSpec): void {
+   const props: ContentModelProps = {};
 
    source.extract('match', '(', (charSToken) => {
       if (!charSToken) {
@@ -217,10 +235,10 @@ function parseContentSpec(source: STokenSource, deliverContentSpec: DeliverConte
          source.extractNoParams('space', (spaceSToken?) => {
             withNames.repeatSpace = spaceSToken;
 
-            deliverContentSpec(new ContentSpecP(withNames));
+            deliverContentSpec(new ContentModelP(withNames));
          });
       });
    });
 }
 
-export { ContentSpecP, parseContentSpec };
+export { ContentModelP, isContentModelP, parseContentModel };

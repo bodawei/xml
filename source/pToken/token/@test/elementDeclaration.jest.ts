@@ -4,8 +4,8 @@ import { STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { UnexpandedMarkupDetails } from '../../types';
-import { ContentSpecP } from '../../common/contentSpec';
-import * as contentSpec from '../../common/contentSpec';
+import { ContentModelP } from '../../common/contentModel';
+import * as contentModel from '../../common/contentModel';
 import * as parseUnexpanded from '../../common/parseUnexpanded';
 
 import { DeclarationStart } from 'token';
@@ -18,8 +18,8 @@ import {
 
 describe('elementDeclaration (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
-   let dummyCS: ContentSpecP;
-   let parseContentSpecMock: jest.MockedFunction<typeof contentSpec.parseContentSpec>;
+   let dummyCM: ContentModelP;
+   let parseContentModelMock: jest.MockedFunction<typeof contentModel.parseContentModel>;
 
    beforeEach(() => {
       elementDeclaration = new ElementDeclarationPToken({
@@ -31,14 +31,14 @@ describe('elementDeclaration (unit)', () => {
          nameSpace: toSToken(' '),
          close: toSToken('>'),
       });
-      dummyCS = new ContentSpecP({});
+      dummyCM = new ContentModelP({});
 
-      parseContentSpecMock = jest.spyOn(contentSpec, 'parseContentSpec') as jest.MockedFunction<
-         typeof contentSpec.parseContentSpec
+      parseContentModelMock = jest.spyOn(contentModel, 'parseContentModel') as jest.MockedFunction<
+         typeof contentModel.parseContentModel
       >;
-      parseContentSpecMock.mockImplementation(
-         (source: STokenSource, cb: (spec: ContentSpecP | undefined) => void) => {
-            cb(dummyCS);
+      parseContentModelMock.mockImplementation(
+         (source: STokenSource, cb: (spec: ContentModelP | undefined) => void) => {
+            cb(dummyCM);
          },
       );
    });
@@ -52,13 +52,13 @@ describe('elementDeclaration (unit)', () => {
             declTypeSpace: undefined,
             name: toSToken('3'),
             nameSpace: undefined,
-            contentKeyword: toSToken('4'),
-            contentKeywordSpace: toSToken('5'),
-            contentSpec: dummyCS,
+            contentSpec: toSToken('4'),
+            contentSpecSpace: toSToken('5'),
+            contentModel: dummyCM,
             extra: toSToken('6'),
             unexpanded: {
                tokens: [],
-               propName: 'contentSpec',
+               propName: 'contentModel',
             },
             close: toSToken('>'),
          });
@@ -71,13 +71,13 @@ describe('elementDeclaration (unit)', () => {
                declTypeSpace: undefined,
                name: toSToken('3'),
                nameSpace: undefined,
-               contentKeyword: toSToken('4'),
-               contentKeywordSpace: toSToken('5'),
-               contentSpec: dummyCS,
+               contentSpec: toSToken('4'),
+               contentSpecSpace: toSToken('5'),
+               contentModel: dummyCM,
                extra: toSToken('6'),
                unexpanded: {
                   tokens: [],
-                  propName: 'contentSpec',
+                  propName: 'contentModel',
                },
                close: toSToken('>'),
             }),
@@ -95,13 +95,13 @@ describe('elementDeclaration (unit)', () => {
             {
                name: toSToken('3'),
                nameSpace: undefined,
-               contentKeyword: toSToken('4'),
-               contentKeywordSpace: toSToken('5'),
-               contentSpec: dummyCS,
+               contentSpec: toSToken('4'),
+               contentSpecSpace: toSToken('5'),
+               contentModel: dummyCM,
                extra: toSToken('6'),
                unexpanded: {
                   tokens: [],
-                  propName: 'contentKeyword',
+                  propName: 'contentSpec',
                },
                close: toSToken('>'),
             },
@@ -115,13 +115,13 @@ describe('elementDeclaration (unit)', () => {
                declTypeSpace: undefined,
                name: toSToken('3'),
                nameSpace: undefined,
-               contentKeyword: toSToken('4'),
-               contentKeywordSpace: toSToken('5'),
-               contentSpec: dummyCS,
+               contentSpec: toSToken('4'),
+               contentSpecSpace: toSToken('5'),
+               contentModel: dummyCM,
                extra: toSToken('6'),
                unexpanded: {
                   tokens: [],
-                  propName: 'contentKeyword',
+                  propName: 'contentSpec',
                },
                close: toSToken('>'),
             }),
@@ -176,9 +176,9 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('elementName'),
                nameSpace: toSToken(' '),
-               contentKeyword: toSToken('ANY'),
-               contentKeywordSpace: toSToken(' '),
-               contentSpec: undefined,
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               contentModel: undefined,
                unexpanded: undefined,
                close: toSToken('>'),
             }),
@@ -192,8 +192,8 @@ describe('elementDeclaration (unit)', () => {
             [undefined, 'peekChar'],
             [undefined, 'match', '>'],
          ]);
-         parseContentSpecMock.mockImplementation(
-            (source: STokenSource, cb: (spec: ContentSpecP | undefined) => void) => {
+         parseContentModelMock.mockImplementation(
+            (source: STokenSource, cb: (spec: ContentModelP | undefined) => void) => {
                cb(undefined);
             },
          );
@@ -206,16 +206,16 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('elementName'),
                nameSpace: toSToken(' '),
-               contentKeyword: undefined,
-               contentKeywordSpace: undefined,
                contentSpec: undefined,
+               contentSpecSpace: undefined,
+               contentModel: undefined,
                unexpanded: undefined,
                close: undefined,
             }),
          );
       });
 
-      it('hands off parsing of the contentSpec to contentSpec()', () => {
+      it('hands off parsing of the contentModel to contentModel()', () => {
          const mockSource = new MockSTokenSource([
             ['elementName', 'word', ['>', '(']],
             [' ', 'space'],
@@ -226,11 +226,11 @@ describe('elementDeclaration (unit)', () => {
          parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
-         expect(parseContentSpecMock.mock.calls[0][0]).toEqual(mockSource);
-         expect(parseContentSpecMock.mock.calls[0][1]).toBeInstanceOf(Function);
+         expect(parseContentModelMock.mock.calls[0][0]).toEqual(mockSource);
+         expect(parseContentModelMock.mock.calls[0][1]).toBeInstanceOf(Function);
       });
 
-      it('delivers contentSpec and end of list', () => {
+      it('delivers contentModel and end of list', () => {
          const mockSource = new MockSTokenSource([
             ['elementName', 'word', ['>', '(']],
             [' ', 'space'],
@@ -246,9 +246,9 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('elementName'),
                nameSpace: toSToken(' '),
-               contentKeyword: undefined,
-               contentKeywordSpace: undefined,
-               contentSpec: dummyCS,
+               contentSpec: undefined,
+               contentSpecSpace: undefined,
+               contentModel: dummyCM,
                unexpanded: undefined,
                close: toSToken('>'),
             }),
@@ -278,9 +278,9 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: undefined,
                nameSpace: undefined,
-               contentKeyword: undefined,
-               contentKeywordSpace: undefined,
                contentSpec: undefined,
+               contentSpecSpace: undefined,
+               contentModel: undefined,
                unexpanded: {
                   propName: 'name',
                   tokens: [],
@@ -290,11 +290,11 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
-      it('sets up to let unassigned handle checking for a PE Reference instead of the contentKeyword', () => {
+      it('sets up to let unassigned handle checking for a PE Reference instead of the contentSpec', () => {
          const calls = [
             undefined,
             {
-               propName: 'contentKeyword',
+               propName: 'contentSpec',
                tokens: [],
             },
          ];
@@ -321,11 +321,11 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('elementName'),
                nameSpace: toSToken(' '),
-               contentKeyword: undefined,
-               contentKeywordSpace: undefined,
                contentSpec: undefined,
+               contentSpecSpace: undefined,
+               contentModel: undefined,
                unexpanded: {
-                  propName: 'contentKeyword',
+                  propName: 'contentSpec',
                   tokens: [],
                },
                close: toSToken('>'),
@@ -366,9 +366,9 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('elementName'),
                nameSpace: toSToken(' '),
-               contentKeyword: undefined,
-               contentKeywordSpace: undefined,
-               contentSpec: dummyCS,
+               contentSpec: undefined,
+               contentSpecSpace: undefined,
+               contentModel: dummyCM,
                unexpanded: {
                   propName: 'midSpec',
                   tokens: [],
@@ -409,9 +409,9 @@ describe('elementDeclaration (unit)', () => {
             open: toSToken('<!'),
             name: toSToken('elementName'),
             nameSpace: toSToken(' '),
-            contentKeyword: toSToken('ANY'),
-            contentKeywordSpace: toSToken(' '),
-            contentSpec: undefined,
+            contentSpec: toSToken('ANY'),
+            contentSpecSpace: toSToken(' '),
+            contentModel: undefined,
             unexpanded: undefined,
             close: toSToken('>'),
          });
@@ -429,7 +429,7 @@ describe('elementDeclaration (unit)', () => {
             name: toSToken('elementName'),
             nameSpace: toSToken(' '),
             unexpanded: {
-               propName: 'contentKeyword',
+               propName: 'contentSpec',
                tokens: [],
             },
             close: toSToken('>'),
@@ -448,11 +448,11 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('elementName'),
                nameSpace: toSToken(' '),
-               contentKeyword: toSToken('ANY'),
-               contentKeywordSpace: toSToken(' '),
-               contentSpec: undefined,
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               contentModel: undefined,
                unexpanded: {
-                  propName: 'contentKeyword',
+                  propName: 'contentSpec',
                   tokens: [],
                },
                close: toSToken('>'),
@@ -466,7 +466,7 @@ describe('elementDeclaration (unit)', () => {
             name: toSToken('elementName'),
             nameSpace: toSToken(' '),
             unexpanded: {
-               propName: 'contentKeyword',
+               propName: 'contentSpec',
                tokens: [],
             },
             close: toSToken('>'),
@@ -481,9 +481,9 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('elementName'),
                nameSpace: toSToken(' '),
-               contentSpec: dummyCS,
+               contentModel: dummyCM,
                unexpanded: {
-                  propName: 'contentKeyword',
+                  propName: 'contentSpec',
                   tokens: [],
                },
                close: toSToken('>'),
@@ -516,9 +516,9 @@ describe('elementDeclaration (unit)', () => {
                open: toSToken('<!'),
                name: toSToken('foo'),
                nameSpace: toSToken(' '),
-               contentKeyword: toSToken('ANY'),
-               contentKeywordSpace: toSToken(' '),
-               contentSpec: undefined,
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               contentModel: undefined,
                unexpanded: {
                   propName: 'name',
                   tokens: [],
