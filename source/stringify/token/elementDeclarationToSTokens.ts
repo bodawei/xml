@@ -13,12 +13,12 @@ function elementDeclarationToSTokens(token: ElementDeclarationPToken): Array<STo
       token.declTypeSpace,
       token.name,
       token.nameSpace,
-      token.contentSpec,
-      token.contentSpecSpace,
+      token.contentKeyword,
+      token.contentKeywordSpace,
    );
 
-   if (token.children) {
-      builder.add(...token.children.getSTokenArray());
+   if (token.contentSpec) {
+      // builder.add(...token.contentSpec.getSTokenArray());
    }
 
    if (token.extra) {

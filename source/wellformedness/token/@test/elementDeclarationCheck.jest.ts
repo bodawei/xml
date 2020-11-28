@@ -12,11 +12,9 @@ import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
 // ick
 import misc from '../../../token/common/misc';
-import nameList, { NameListPToken } from '../../../token/contentspec/nameList';
 
 jest.mock('../util/nameCheck');
 jest.mock('../../../token/common/misc');
-jest.mock('../../../token/contentspec/nameList');
 
 describe('elementDeclarationCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -142,8 +140,8 @@ describe('elementDeclarationCheck()', () => {
 
    it('reports an error if there was no content spec at all', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentKeyword: undefined,
          contentSpec: undefined,
-         children: undefined,
       });
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
@@ -158,7 +156,7 @@ describe('elementDeclarationCheck()', () => {
 
    it('reports an error if the content spec was an invalid value', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-         contentSpec: toSToken('XYZ'),
+         contentKeyword: toSToken('XYZ'),
       });
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
@@ -166,13 +164,13 @@ describe('elementDeclarationCheck()', () => {
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ELEMENTDECL_SPEC_UNKNOWN,
          params: ['elementName', 'XYZ'],
-         position: elementDeclaration.contentSpec,
+         position: elementDeclaration.contentKeyword,
       });
    });
 
    it('reports an error if the content spec was cased wrong', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-         contentSpec: toSToken('any'),
+         contentKeyword: toSToken('any'),
       });
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
@@ -180,7 +178,7 @@ describe('elementDeclarationCheck()', () => {
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
          params: ['elementName', 'ANY', 'any'],
-         position: elementDeclaration.contentSpec,
+         position: elementDeclaration.contentKeyword,
       });
    });
 
@@ -199,19 +197,19 @@ describe('elementDeclarationCheck()', () => {
       });
    });
 
-   it('calls nameList.checkWellFormed() if there are children', () => {
-      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-         children: new NameListPToken(),
-      });
+   // it('calls nameList.checkWellFormed() if there are contentSpec', () => {
+   //    elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+   //       contentSpec: new NameListPToken(),
+   //    });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+   //    elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(nameList.checkWellFormed).toHaveBeenCalledWith(
-         elementDeclaration.children,
-         mockErrorCollector,
-         confVer,
-      );
-   });
+   //    expect(nameList.checkWellFormed).toHaveBeenCalledWith(
+   //       elementDeclaration.contentSpec,
+   //       mockErrorCollector,
+   //       confVer,
+   //    );
+   // });
 
    it('reports an error if there is extra', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {

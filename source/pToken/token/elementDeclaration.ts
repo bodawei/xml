@@ -1,10 +1,10 @@
 import { SToken, STokenSource } from 'sToken';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
+import { ContentSpecP, parseContentSpec } from '../common/contentSpec';
 import { UnexpandedMarkupDetails } from '../types';
 
-import { DeclarationStart, NameListPToken } from 'token';
-import nameList from '../../token/contentspec/nameList';
+import { DeclarationStart } from 'token';
 
 type DeliverCB = (ptoken: ElementDeclarationPToken) => void;
 
@@ -17,9 +17,9 @@ interface ElementDeclarationProps {
    declTypeSpace?: SToken;
    name?: SToken;
    nameSpace?: SToken;
-   contentSpec?: SToken;
-   contentSpecSpace?: SToken;
-   children?: NameListPToken;
+   contentKeyword?: SToken;
+   contentKeywordSpace?: SToken;
+   contentSpec?: ContentSpecP;
    unexpanded?: UnexpandedMarkupDetails;
    extra?: SToken | false;
    close?: SToken;
@@ -35,9 +35,9 @@ function isNotDeclarationStart(
    return (
       'name' in token ||
       'nameSpace' in token ||
+      'contentKeyword' in token ||
+      'contentKeywordSpace' in token ||
       'contentSpec' in token ||
-      'contentSpecSpace' in token ||
-      'children' in token ||
       'close' in token ||
       'unexpanded' in token ||
       'extra' in token
@@ -59,11 +59,11 @@ class ElementDeclarationPToken {
 
    public readonly nameSpace?: SToken;
 
-   public readonly contentSpec?: SToken;
+   public readonly contentKeyword?: SToken;
 
-   public readonly contentSpecSpace?: SToken;
+   public readonly contentKeywordSpace?: SToken;
 
-   public readonly children?: NameListPToken;
+   public readonly contentSpec?: ContentSpecP;
 
    public readonly unexpanded: UnexpandedMarkupDetails | undefined;
 
@@ -83,9 +83,9 @@ class ElementDeclarationPToken {
       if (isNotDeclarationStart(props)) {
          this.name = props.name;
          this.nameSpace = props.nameSpace;
+         this.contentKeyword = props.contentKeyword;
+         this.contentKeywordSpace = props.contentKeywordSpace;
          this.contentSpec = props.contentSpec;
-         this.contentSpecSpace = props.contentSpecSpace;
-         this.children = props.children;
          this.unexpanded = props.unexpanded;
          this.extra = props.extra;
          this.close = props.close;
@@ -93,10 +93,10 @@ class ElementDeclarationPToken {
 
       this.name = 'name' in other ? other.name : this.name;
       this.nameSpace = 'nameSpace' in other ? other.nameSpace : this.nameSpace;
+      this.contentKeyword = 'contentKeyword' in other ? other.contentKeyword : this.contentKeyword;
+      this.contentKeywordSpace =
+         'contentKeywordSpace' in other ? other.contentKeywordSpace : this.contentKeywordSpace;
       this.contentSpec = 'contentSpec' in other ? other.contentSpec : this.contentSpec;
-      this.contentSpecSpace =
-         'contentSpecSpace' in other ? other.contentSpecSpace : this.contentSpecSpace;
-      this.children = 'children' in other ? other.children : this.children;
       this.unexpanded = 'unexpanded' in other ? other.unexpanded : this.unexpanded;
       this.extra = 'extra' in other ? other.extra : this.extra;
       this.close = 'close' in other ? other.close : this.close;
@@ -128,9 +128,9 @@ function parseSimpleContentSpec(
       }
 
       if (charSToken.str !== '(') {
-         source.extractToObject('word', ['>'], tokens, 'contentSpec');
-         source.extractNoParams('space', (contentSpecSpace) => {
-            tokens.contentSpecSpace = contentSpecSpace;
+         source.extractToObject('word', ['>'], tokens, 'contentKeyword');
+         source.extractNoParams('space', (contentKeywordSpace) => {
+            tokens.contentKeywordSpace = contentKeywordSpace;
             deliver(tokens);
          });
       } else {
@@ -144,8 +144,8 @@ function parseComplexContentSpec(
    tokens: RawElementDeclaration,
    deliver: (result: RawElementDeclaration) => void,
 ): void {
-   nameList.parse(source, (nameList?: NameListPToken) => {
-      tokens.children = nameList;
+   parseContentSpec(source, (contentSpec) => {
+      tokens.contentSpec = contentSpec;
       deliver(tokens);
    });
 }
@@ -171,10 +171,10 @@ function resumeParseProperties(
    switch (propName) {
       case 'name':
          parseName(source, props, (withName) => {
-            resumeParseProperties(source, 'contentSpec', withName, deliverPToken);
+            resumeParseProperties(source, 'contentKeyword', withName, deliverPToken);
          });
          break;
-      case 'contentSpec':
+      case 'contentKeyword':
          parseSimpleContentSpec(source, props, (withContentSpec) => {
             if (withContentSpec) {
                deliverPToken(new ElementDeclarationPToken(withContentSpec));
@@ -233,8 +233,8 @@ function resumeParseElementDeclaration(
  SYNTAX
    §3.2.0
    [45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'
-   [46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | children
-   Note that Mixed and children are handled by nameList
+   [46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | contentSpec
+   Note that Mixed and contentSpec are handled by nameList
 \**********************************************************************/
 
 function parseElementDeclaration(

@@ -4,7 +4,7 @@ import { ElementDeclarationPToken } from '../../pToken/token/elementDeclaration'
 import { strOrBlank } from 'sToken';
 
 // ick
-import nameList, { XNameList } from '../../token/contentspec/nameList';
+import { XNameList } from '../../token/contentspec/nameList';
 
 const ELEMENT_DECLARATION_XTOKEN = 'ELEMENT_DECLARATION_XTOKEN';
 
@@ -31,16 +31,16 @@ class ElementDeclarationXToken {
          this.contentSpecType = contentSpecType || '';
          this.children = children;
       } else {
-         let contentSpec: string = strOrBlank(nameOrPToken.contentSpec);
+         let contentSpecType: string = strOrBlank(nameOrPToken.contentKeyword);
          let children;
 
-         if (nameOrPToken.children) {
-            contentSpec = 'CHILDREN';
-            children = nameList.makeXTokenCompatible(nameOrPToken.children);
+         if (nameOrPToken.contentSpec) {
+            contentSpecType = 'CHILDREN';
+            // children = nameList.makeXTokenCompatible(nameOrPToken.children);
          }
 
          this.name = strOrBlank(nameOrPToken.name);
-         this.contentSpecType = contentSpec;
+         this.contentSpecType = contentSpecType;
          this.children = children;
          this.pToken = nameOrPToken;
       }

@@ -7,8 +7,8 @@ import { ElementDeclarationPToken } from '../../pToken/token/ElementDeclaration'
 
 import { nameCheck } from './util/nameCheck';
 
+// ick
 import misc from '../../token/common/misc';
-import nameList from '../../token/contentspec/nameList';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
@@ -48,22 +48,26 @@ function elementDeclarationCheck(
    ec.setPos(pToken.nameSpace);
    ec.check(!pToken.nameSpace, WFEID.ELEMENTDECL_NAME_NO_SPACE, [nameText]);
 
-   if (pToken.children) {
-      nameList.checkWellFormed(pToken.children, ec, confVer);
+   if (pToken.contentSpec) {
+      // nameList.checkWellFormed(pToken.contentSpec, ec, confVer);
    } else {
-      const contentSpec: string = strOrBlank(pToken.contentSpec);
-      const upperContentSpec = contentSpec.toLocaleUpperCase();
-      ec.setPos(pToken.contentSpec);
+      const contentKeyword: string = strOrBlank(pToken.contentKeyword);
+      const upperContentSpec = contentKeyword.toLocaleUpperCase();
+      ec.setPos(pToken.contentKeyword);
 
-      if (!pToken.contentSpec) {
+      if (!pToken.contentKeyword) {
          ec.report(WFEID.ELEMENTDECL_NO_SPEC, [nameText]);
       } else if (ALLOWED_CONTENT_SPEC.indexOf(upperContentSpec) === -1) {
-         ec.report(WFEID.ELEMENTDECL_SPEC_UNKNOWN, [nameText, contentSpec]);
-      } else if (contentSpec !== upperContentSpec) {
-         ec.report(WFEID.ELEMENTDECL_SPEC_INVALID_CASE, [nameText, upperContentSpec, contentSpec]);
+         ec.report(WFEID.ELEMENTDECL_SPEC_UNKNOWN, [nameText, contentKeyword]);
+      } else if (contentKeyword !== upperContentSpec) {
+         ec.report(WFEID.ELEMENTDECL_SPEC_INVALID_CASE, [
+            nameText,
+            upperContentSpec,
+            contentKeyword,
+         ]);
       }
 
-      ec.setPos(pToken.contentSpecSpace);
+      ec.setPos(pToken.contentKeywordSpace);
    }
 
    if (pToken.extra) {
