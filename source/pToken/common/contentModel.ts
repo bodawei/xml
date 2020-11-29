@@ -241,4 +241,4 @@ function parseContentModel(source: STokenSource, deliverContentSpec: DeliverCont
    });
 }
 
-export { ContentModelP, isContentModelP, parseContentModel };
+export { ContentModelP, ContentNameP, isContentModelP, parseContentModel };

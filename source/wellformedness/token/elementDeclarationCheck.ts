@@ -6,6 +6,7 @@ import { strOrBlank } from 'sToken';
 import { ElementDeclarationPToken } from '../../pToken/token/ElementDeclaration';
 
 import { nameCheck } from './util/nameCheck';
+import { contentModelCheck } from '../common/contentModelCheck';
 
 // ick
 import misc from '../../token/common/misc';
@@ -49,7 +50,7 @@ function elementDeclarationCheck(
    ec.check(!pToken.nameSpace, WFEID.ELEMENTDECL_NAME_NO_SPACE, [nameText]);
 
    if (pToken.contentModel) {
-      // nameList.checkWellFormed(pToken.contentModel, ec, confVer);
+      contentModelCheck(pToken.contentModel, ec, confVer);
    } else {
       const contentSpec: string = strOrBlank(pToken.contentSpec);
       const upperContentSpec = contentSpec.toLocaleUpperCase();

@@ -9,12 +9,15 @@ import { toSToken } from 'sToken';
 import { nameCheck } from '../util/nameCheck';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
+import { contentModelCheck } from '../../common/contentModelCheck';
 
 // ick
 import misc from '../../../token/common/misc';
+import { ContentModelP } from 'pToken';
 
-jest.mock('../util/nameCheck');
 jest.mock('../../../token/common/misc');
+jest.mock('../../common/contentModelCheck');
+jest.mock('../util/nameCheck');
 
 describe('elementDeclarationCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -197,19 +200,19 @@ describe('elementDeclarationCheck()', () => {
       });
    });
 
-   // it('calls nameList.checkWellFormed() if there are contentModel', () => {
-   //    elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-   //       contentModel: new NameListPToken(),
-   //    });
+   it('calls nameList.checkWellFormed() if there are contentModel', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: new ContentModelP({}),
+      });
 
-   //    elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-   //    expect(nameList.checkWellFormed).toHaveBeenCalledWith(
-   //       elementDeclaration.contentModel,
-   //       mockErrorCollector,
-   //       confVer,
-   //    );
-   // });
+      expect(contentModelCheck).toHaveBeenCalledWith(
+         new ContentModelP({}),
+         mockErrorCollector,
+         confVer,
+      );
+   });
 
    it('reports an error if there is extra', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
