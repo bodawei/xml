@@ -26,6 +26,10 @@ export {
    AttDefinitionXToken,
 } from './token/attListDeclarationXToken';
 export {
+   ELEMENT_DECLARATION_XTOKEN,
+   ElementDeclarationXToken,
+} from './token/elementDeclarationXToken';
+export {
    GENERAL_ENTITY_DECLARATION_XTOKEN,
    GeneralEntityDeclarationXToken,
 } from './token/generalEntityDeclarationXToken';
@@ -41,6 +45,8 @@ export {
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionXToken,
 } from './token/processingInstructionXToken';
+export { ContentModelX, ContentNameX } from './common/contentModelX';
+
 export { TEXTDECL_XTOKEN, TextDeclarationXToken } from './token/textDeclarationXToken';
 export { XMLDECL_XTOKEN, XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 export { XToken } from './types';

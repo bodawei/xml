@@ -64,4 +64,4 @@ class ContentModelX {
    }
 }
 
-export { ContentModelX, CpRepeat, CpType };
+export { ContentModelX, ContentNameX, CpRepeat, CpType };
