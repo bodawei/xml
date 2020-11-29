@@ -1,10 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ElementDeclarationPToken } from '../../pToken/token/elementDeclaration';
+import { ElementDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-
-// ick
-import { XNameList } from '../../token/contentspec/nameList';
+import { ContentModelX } from '../common/contentModelX';
 
 const ELEMENT_DECLARATION_XTOKEN = 'ELEMENT_DECLARATION_XTOKEN';
 
@@ -15,16 +13,16 @@ class ElementDeclarationXToken {
 
    public readonly contentSpec: string;
 
-   public readonly contentModel?: XNameList;
+   public readonly contentModel?: ContentModelX;
 
    public pToken?: ElementDeclarationPToken;
 
    constructor(pToken: ElementDeclarationPToken);
-   constructor(name: string, contentSpec?: string, contentModel?: XNameList);
+   constructor(name: string, contentSpec?: string, contentModel?: ContentModelX);
    constructor(
       nameOrPToken: string | ElementDeclarationPToken,
       contentSpec?: string,
-      contentModel?: XNameList,
+      contentModel?: ContentModelX,
    ) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
@@ -36,7 +34,7 @@ class ElementDeclarationXToken {
 
          if (nameOrPToken.contentModel) {
             contentSpec = 'CHILDREN';
-            // contentModel = nameList.makeXTokenCompatible(nameOrPToken.contentModel);
+            contentModel = new ContentModelX(nameOrPToken.contentModel);
          }
 
          this.name = strOrBlank(nameOrPToken.name);

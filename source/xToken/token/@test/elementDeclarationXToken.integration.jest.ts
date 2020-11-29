@@ -4,6 +4,8 @@ import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclarati
 import { toSToken } from 'sToken';
 
 import { ELEMENT_DECLARATION_XTOKEN, ElementDeclarationXToken } from '../elementDeclarationXToken';
+import { CpRepeat, CpType } from '../../common/contentModelX';
+import { ContentModelP } from 'pToken';
 
 describe('ElementDeclarationXToken', () => {
    it('returns an element declaration token built from a PToken', () => {
@@ -44,37 +46,37 @@ describe('ElementDeclarationXToken', () => {
       });
    });
 
-   // it('returns an element declaration token with contentModel if there is a namelist', () => {
-   //    const elementDeclaration = new ElementDeclarationPToken({
-   //       open: toSToken('<!'),
-   //       openSpace: undefined,
-   //       declType: toSToken('ELEMENT'),
-   //       declTypeSpace: toSToken(' '),
-   //       name: toSToken('elementName'),
-   //       nameSpace: toSToken(' '),
-   //       contentModel: new NameListPToken({ open: toSToken('('), repeat: toSToken('*') }),
-   //       close: toSToken('>'),
-   //    });
-   //    const result = new ElementDeclarationXToken(elementDeclaration);
+   it('returns an element declaration token with contentModel if there is a namelist', () => {
+      const elementDeclaration = new ElementDeclarationPToken({
+         open: toSToken('<!'),
+         openSpace: undefined,
+         declType: toSToken('ELEMENT'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('elementName'),
+         nameSpace: toSToken(' '),
+         contentModel: new ContentModelP({ open: toSToken('('), repeat: toSToken('+') }),
+         close: toSToken('>'),
+      });
+      const result = new ElementDeclarationXToken(elementDeclaration);
 
-   //    expect(result).toEqual({
-   //       type: ELEMENT_DECLARATION_XTOKEN,
-   //       name: 'elementName',
-   //       contentSpec: 'CHILDREN',
-   //       contentModel: {
-   //          listType: 'CHOICE',
-   //          names: [],
-   //          repeat: 'ZEROPLUS',
-   //       },
-   //       pToken: elementDeclaration,
-   //    });
-   // });
+      expect(result).toEqual({
+         type: ELEMENT_DECLARATION_XTOKEN,
+         name: 'elementName',
+         contentSpec: 'CHILDREN',
+         contentModel: {
+            listType: CpType.CHOICE,
+            particles: [],
+            repeat: CpRepeat.ONEPLUS,
+         },
+         pToken: elementDeclaration,
+      });
+   });
 
    it('returns a notation declaration when provided with specific parameters', () => {
       const result = new ElementDeclarationXToken('one', 'FOO', {
-         listType: 'CHOICE',
-         names: [],
-         repeat: 'ZEROPLUS',
+         listType: CpType.CHOICE,
+         particles: [],
+         repeat: CpRepeat.ZEROPLUS,
       });
 
       expect(result).toEqual({
@@ -82,9 +84,9 @@ describe('ElementDeclarationXToken', () => {
          name: 'one',
          contentSpec: 'FOO',
          contentModel: {
-            listType: 'CHOICE',
-            names: [],
-            repeat: 'ZEROPLUS',
+            listType: CpType.CHOICE,
+            particles: [],
+            repeat: CpRepeat.ZEROPLUS,
          },
       });
    });
