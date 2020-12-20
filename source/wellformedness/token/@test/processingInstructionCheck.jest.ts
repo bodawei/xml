@@ -1,29 +1,28 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { ProcessingInstructionPToken } from 'pToken';
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 
 import * as misc from '../../../token/common/misc';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
 describe('processingInstructionCheck() (unit)', () => {
-   let piPToken: any;
+   let piPToken: ProcessingInstructionPToken;
    let mockErrorCollector: MockErrorCollector;
    let confVer: ConformanceVersion;
 
    beforeEach(() => {
       const protoPToken = {
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('target'),
-         targetSpace: SToken.fromString(' '),
-         instruction: SToken.fromString('blah'),
-         close: SToken.fromString('?>'),
+         target: toSToken('target'),
+         targetSpace: toSToken(' '),
+         instruction: toSToken('blah'),
+         close: toSToken('?>'),
       };
       piPToken = new ProcessingInstructionPToken(protoPToken);
 
@@ -31,12 +30,12 @@ describe('processingInstructionCheck() (unit)', () => {
       confVer = new ConformanceVersion();
       piPToken = new ProcessingInstructionPToken(protoPToken);
 
-      spyOn(misc, 'checkCharWellFormed');
-      spyOn(misc, 'checkWellFormedNameRecommendation');
+      jest.spyOn(misc, 'checkCharWellFormed');
+      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
    });
 
    it('calls misc.checkName() on the target', () => {
-      spyOn(misc, 'checkName');
+      jest.spyOn(misc, 'checkName');
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
       expect(misc.checkName).toHaveBeenCalledWith(
@@ -71,7 +70,9 @@ describe('processingInstructionCheck() (unit)', () => {
    });
 
    it('reports an error if there is a space after the "<?"', () => {
-      piPToken.openSpace = SToken.fromString(' ');
+      piPToken = new ProcessingInstructionPToken(piPToken, {
+         openSpace: toSToken(' '),
+      });
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
@@ -83,7 +84,9 @@ describe('processingInstructionCheck() (unit)', () => {
    });
 
    it('reports an error if there is no target', () => {
-      delete piPToken.target;
+      piPToken = new ProcessingInstructionPToken(piPToken, {
+         target: undefined,
+      });
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
@@ -95,7 +98,9 @@ describe('processingInstructionCheck() (unit)', () => {
    });
 
    it('reports an error if xml in any form shows up in the name', () => {
-      piPToken.target = SToken.fromString('fofoXmLTarget');
+      piPToken = new ProcessingInstructionPToken(piPToken, {
+         target: toSToken('fofoXmLTarget'),
+      });
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
@@ -107,7 +112,9 @@ describe('processingInstructionCheck() (unit)', () => {
    });
 
    it('reports an error if there is no space after the target', () => {
-      delete piPToken.targetSpace;
+      piPToken = new ProcessingInstructionPToken(piPToken, {
+         targetSpace: undefined,
+      });
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
@@ -118,8 +125,25 @@ describe('processingInstructionCheck() (unit)', () => {
       });
    });
 
+   it('reports no error if there is no space after the target but there is no instruction', () => {
+      piPToken = new ProcessingInstructionPToken(piPToken, {
+         targetSpace: undefined,
+         instruction: undefined,
+      });
+
+      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+
+      expect(mockErrorCollector).not.toReportError({
+         id: WellFormedError.ID.PI_NO_SPACE_AFTER_TARGET,
+         params: ['target'],
+         lastPosition: piPToken.target,
+      });
+   });
+
    it('reports an error if there is no close', () => {
-      delete piPToken.close;
+      piPToken = new ProcessingInstructionPToken(piPToken, {
+         close: undefined,
+      });
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 

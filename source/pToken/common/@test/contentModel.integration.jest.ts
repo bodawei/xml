@@ -5,14 +5,14 @@ import { STokenSource, toSToken } from 'sToken';
 
 import { ContentModelP, parseContentModel } from '../contentModel';
 
-describe('nameList (integration)', () => {
+describe('ContentModel (integration)', () => {
    let contentSpec: ContentModelP;
 
    beforeEach(() => {
       contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         particles: [
+         delimitedParticles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -63,7 +63,7 @@ describe('nameList (integration)', () => {
                new ContentModelP({
                   open: toSToken('('),
                   openSpace: toSToken(' '),
-                  particles: [
+                  delimitedParticles: [
                      {
                         particle: {
                            name: toSToken('one'),
@@ -115,45 +115,7 @@ describe('nameList (integration)', () => {
                    "str": ")",
                  },
                  "closeSpace": undefined,
-                 "open": SToken {
-                   "originalStr": "(",
-                   "ranges": Array [
-                     Range {
-                       "endColumn": 1,
-                       "endIndex": 1,
-                       "endRow": 0,
-                       "entityId": EntityId {
-                         "publicId": undefined,
-                         "systemId": "",
-                         "type": "ENTITY_ID",
-                       },
-                       "startColumn": 0,
-                       "startIndex": 0,
-                       "startRow": 0,
-                     },
-                   ],
-                   "str": "(",
-                 },
-                 "openSpace": SToken {
-                   "originalStr": " ",
-                   "ranges": Array [
-                     Range {
-                       "endColumn": 2,
-                       "endIndex": 2,
-                       "endRow": 0,
-                       "entityId": EntityId {
-                         "publicId": undefined,
-                         "systemId": "",
-                         "type": "ENTITY_ID",
-                       },
-                       "startColumn": 1,
-                       "startIndex": 1,
-                       "startRow": 0,
-                     },
-                   ],
-                   "str": " ",
-                 },
-                 "particles": Array [
+                 "delimitedParticles": Array [
                    Object {
                      "delimiter": SToken {
                        "originalStr": "|",
@@ -314,45 +276,7 @@ describe('nameList (integration)', () => {
                          "str": ")",
                        },
                        "closeSpace": undefined,
-                       "open": SToken {
-                         "originalStr": "(",
-                         "ranges": Array [
-                           Range {
-                             "endColumn": 10,
-                             "endIndex": 10,
-                             "endRow": 0,
-                             "entityId": EntityId {
-                               "publicId": undefined,
-                               "systemId": "",
-                               "type": "ENTITY_ID",
-                             },
-                             "startColumn": 9,
-                             "startIndex": 9,
-                             "startRow": 0,
-                           },
-                         ],
-                         "str": "(",
-                       },
-                       "openSpace": SToken {
-                         "originalStr": " ",
-                         "ranges": Array [
-                           Range {
-                             "endColumn": 11,
-                             "endIndex": 11,
-                             "endRow": 0,
-                             "entityId": EntityId {
-                               "publicId": undefined,
-                               "systemId": "",
-                               "type": "ENTITY_ID",
-                             },
-                             "startColumn": 10,
-                             "startIndex": 10,
-                             "startRow": 0,
-                           },
-                         ],
-                         "str": " ",
-                       },
-                       "particles": Array [
+                       "delimitedParticles": Array [
                          Object {
                            "delimiter": SToken {
                              "originalStr": ",",
@@ -413,45 +337,7 @@ describe('nameList (integration)', () => {
                                "str": ")",
                              },
                              "closeSpace": undefined,
-                             "open": SToken {
-                               "originalStr": "(",
-                               "ranges": Array [
-                                 Range {
-                                   "endColumn": 12,
-                                   "endIndex": 12,
-                                   "endRow": 0,
-                                   "entityId": EntityId {
-                                     "publicId": undefined,
-                                     "systemId": "",
-                                     "type": "ENTITY_ID",
-                                   },
-                                   "startColumn": 11,
-                                   "startIndex": 11,
-                                   "startRow": 0,
-                                 },
-                               ],
-                               "str": "(",
-                             },
-                             "openSpace": SToken {
-                               "originalStr": " ",
-                               "ranges": Array [
-                                 Range {
-                                   "endColumn": 13,
-                                   "endIndex": 13,
-                                   "endRow": 0,
-                                   "entityId": EntityId {
-                                     "publicId": undefined,
-                                     "systemId": "",
-                                     "type": "ENTITY_ID",
-                                   },
-                                   "startColumn": 12,
-                                   "startIndex": 12,
-                                   "startRow": 0,
-                                 },
-                               ],
-                               "str": " ",
-                             },
-                             "particles": Array [
+                             "delimitedParticles": Array [
                                Object {
                                  "delimiter": SToken {
                                    "originalStr": "|",
@@ -563,6 +449,44 @@ describe('nameList (integration)', () => {
                                  },
                                },
                              ],
+                             "open": SToken {
+                               "originalStr": "(",
+                               "ranges": Array [
+                                 Range {
+                                   "endColumn": 12,
+                                   "endIndex": 12,
+                                   "endRow": 0,
+                                   "entityId": EntityId {
+                                     "publicId": undefined,
+                                     "systemId": "",
+                                     "type": "ENTITY_ID",
+                                   },
+                                   "startColumn": 11,
+                                   "startIndex": 11,
+                                   "startRow": 0,
+                                 },
+                               ],
+                               "str": "(",
+                             },
+                             "openSpace": SToken {
+                               "originalStr": " ",
+                               "ranges": Array [
+                                 Range {
+                                   "endColumn": 13,
+                                   "endIndex": 13,
+                                   "endRow": 0,
+                                   "entityId": EntityId {
+                                     "publicId": undefined,
+                                     "systemId": "",
+                                     "type": "ENTITY_ID",
+                                   },
+                                   "startColumn": 12,
+                                   "startIndex": 12,
+                                   "startRow": 0,
+                                 },
+                               ],
+                               "str": " ",
+                             },
                              "repeat": SToken {
                                "originalStr": "+",
                                "ranges": Array [
@@ -632,6 +556,44 @@ describe('nameList (integration)', () => {
                            },
                          },
                        ],
+                       "open": SToken {
+                         "originalStr": "(",
+                         "ranges": Array [
+                           Range {
+                             "endColumn": 10,
+                             "endIndex": 10,
+                             "endRow": 0,
+                             "entityId": EntityId {
+                               "publicId": undefined,
+                               "systemId": "",
+                               "type": "ENTITY_ID",
+                             },
+                             "startColumn": 9,
+                             "startIndex": 9,
+                             "startRow": 0,
+                           },
+                         ],
+                         "str": "(",
+                       },
+                       "openSpace": SToken {
+                         "originalStr": " ",
+                         "ranges": Array [
+                           Range {
+                             "endColumn": 11,
+                             "endIndex": 11,
+                             "endRow": 0,
+                             "entityId": EntityId {
+                               "publicId": undefined,
+                               "systemId": "",
+                               "type": "ENTITY_ID",
+                             },
+                             "startColumn": 10,
+                             "startIndex": 10,
+                             "startRow": 0,
+                           },
+                         ],
+                         "str": " ",
+                       },
                        "repeat": SToken {
                          "originalStr": "?",
                          "ranges": Array [
@@ -701,6 +663,44 @@ describe('nameList (integration)', () => {
                      },
                    },
                  ],
+                 "open": SToken {
+                   "originalStr": "(",
+                   "ranges": Array [
+                     Range {
+                       "endColumn": 1,
+                       "endIndex": 1,
+                       "endRow": 0,
+                       "entityId": EntityId {
+                         "publicId": undefined,
+                         "systemId": "",
+                         "type": "ENTITY_ID",
+                       },
+                       "startColumn": 0,
+                       "startIndex": 0,
+                       "startRow": 0,
+                     },
+                   ],
+                   "str": "(",
+                 },
+                 "openSpace": SToken {
+                   "originalStr": " ",
+                   "ranges": Array [
+                     Range {
+                       "endColumn": 2,
+                       "endIndex": 2,
+                       "endRow": 0,
+                       "entityId": EntityId {
+                         "publicId": undefined,
+                         "systemId": "",
+                         "type": "ENTITY_ID",
+                       },
+                       "startColumn": 1,
+                       "startIndex": 1,
+                       "startRow": 0,
+                     },
+                   ],
+                   "str": " ",
+                 },
                  "repeat": undefined,
                  "repeatSpace": undefined,
                }

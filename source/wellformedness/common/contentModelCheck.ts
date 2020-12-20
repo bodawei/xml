@@ -25,14 +25,14 @@ function contentModelCheck(
 
    ec.setPos(cmToken.openSpace);
 
-   if (cmToken.particles.length <= 0) {
+   if (cmToken.delimitedParticles.length <= 0) {
       ec.setPos(undefined);
       ec.report(WFEID.CONTENTMODEL_NO_NAMES);
    }
 
-   for (let index = 0; index < cmToken.particles.length; index++) {
-      const isLast = index === cmToken.particles.length - 1;
-      const particle = cmToken.particles[index];
+   for (let index = 0; index < cmToken.delimitedParticles.length; index++) {
+      const isLast = index === cmToken.delimitedParticles.length - 1;
+      const particle = cmToken.delimitedParticles[index];
       const indexStr = index.toString();
 
       if (particle.particle) {
@@ -116,7 +116,7 @@ function contentModelCheck(
 
    ec.setPos(cmToken.repeat);
    const repeatStr = strOrBlank(cmToken.repeat);
-   if (isMixedType && cmToken.particles.length > 1 && repeatStr !== '*') {
+   if (isMixedType && cmToken.delimitedParticles.length > 1 && repeatStr !== '*') {
       ec.report(WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT, [repeatStr]);
    }
    ec.setPos(cmToken.repeatSpace);

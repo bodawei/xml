@@ -93,45 +93,7 @@ describe('elementDeclaration', () => {
                      "str": ")",
                    },
                    "closeSpace": undefined,
-                   "open": SToken {
-                     "originalStr": "(",
-                     "ranges": Array [
-                       Range {
-                         "endColumn": 11,
-                         "endIndex": 11,
-                         "endRow": 0,
-                         "entityId": EntityId {
-                           "publicId": undefined,
-                           "systemId": "",
-                           "type": "ENTITY_ID",
-                         },
-                         "startColumn": 10,
-                         "startIndex": 10,
-                         "startRow": 0,
-                       },
-                     ],
-                     "str": "(",
-                   },
-                   "openSpace": SToken {
-                     "originalStr": " ",
-                     "ranges": Array [
-                       Range {
-                         "endColumn": 12,
-                         "endIndex": 12,
-                         "endRow": 0,
-                         "entityId": EntityId {
-                           "publicId": undefined,
-                           "systemId": "",
-                           "type": "ENTITY_ID",
-                         },
-                         "startColumn": 11,
-                         "startIndex": 11,
-                         "startRow": 0,
-                       },
-                     ],
-                     "str": " ",
-                   },
-                   "particles": Array [
+                   "delimitedParticles": Array [
                      Object {
                        "delimiter": SToken {
                          "originalStr": "|",
@@ -374,27 +336,7 @@ describe('elementDeclaration', () => {
                            "str": ")",
                          },
                          "closeSpace": undefined,
-                         "open": SToken {
-                           "originalStr": "(",
-                           "ranges": Array [
-                             Range {
-                               "endColumn": 26,
-                               "endIndex": 26,
-                               "endRow": 0,
-                               "entityId": EntityId {
-                                 "publicId": undefined,
-                                 "systemId": "",
-                                 "type": "ENTITY_ID",
-                               },
-                               "startColumn": 25,
-                               "startIndex": 25,
-                               "startRow": 0,
-                             },
-                           ],
-                           "str": "(",
-                         },
-                         "openSpace": undefined,
-                         "particles": Array [
+                         "delimitedParticles": Array [
                            Object {
                              "delimiter": SToken {
                                "originalStr": ",",
@@ -488,6 +430,26 @@ describe('elementDeclaration', () => {
                              },
                            },
                          ],
+                         "open": SToken {
+                           "originalStr": "(",
+                           "ranges": Array [
+                             Range {
+                               "endColumn": 26,
+                               "endIndex": 26,
+                               "endRow": 0,
+                               "entityId": EntityId {
+                                 "publicId": undefined,
+                                 "systemId": "",
+                                 "type": "ENTITY_ID",
+                               },
+                               "startColumn": 25,
+                               "startIndex": 25,
+                               "startRow": 0,
+                             },
+                           ],
+                           "str": "(",
+                         },
+                         "openSpace": undefined,
                          "repeat": SToken {
                            "originalStr": "+",
                            "ranges": Array [
@@ -552,45 +514,7 @@ describe('elementDeclaration', () => {
                            "str": ")",
                          },
                          "closeSpace": undefined,
-                         "open": SToken {
-                           "originalStr": "(",
-                           "ranges": Array [
-                             Range {
-                               "endColumn": 46,
-                               "endIndex": 46,
-                               "endRow": 0,
-                               "entityId": EntityId {
-                                 "publicId": undefined,
-                                 "systemId": "",
-                                 "type": "ENTITY_ID",
-                               },
-                               "startColumn": 45,
-                               "startIndex": 45,
-                               "startRow": 0,
-                             },
-                           ],
-                           "str": "(",
-                         },
-                         "openSpace": SToken {
-                           "originalStr": " ",
-                           "ranges": Array [
-                             Range {
-                               "endColumn": 47,
-                               "endIndex": 47,
-                               "endRow": 0,
-                               "entityId": EntityId {
-                                 "publicId": undefined,
-                                 "systemId": "",
-                                 "type": "ENTITY_ID",
-                               },
-                               "startColumn": 46,
-                               "startIndex": 46,
-                               "startRow": 0,
-                             },
-                           ],
-                           "str": " ",
-                         },
-                         "particles": Array [
+                         "delimitedParticles": Array [
                            Object {
                              "delimiter": SToken {
                                "originalStr": ",",
@@ -715,27 +639,7 @@ describe('elementDeclaration', () => {
                                  "str": ")",
                                },
                                "closeSpace": undefined,
-                               "open": SToken {
-                                 "originalStr": "(",
-                                 "ranges": Array [
-                                   Range {
-                                     "endColumn": 55,
-                                     "endIndex": 55,
-                                     "endRow": 0,
-                                     "entityId": EntityId {
-                                       "publicId": undefined,
-                                       "systemId": "",
-                                       "type": "ENTITY_ID",
-                                     },
-                                     "startColumn": 54,
-                                     "startIndex": 54,
-                                     "startRow": 0,
-                                   },
-                                 ],
-                                 "str": "(",
-                               },
-                               "openSpace": undefined,
-                               "particles": Array [
+                               "delimitedParticles": Array [
                                  Object {
                                    "delimiter": SToken {
                                      "originalStr": "|",
@@ -847,6 +751,26 @@ describe('elementDeclaration', () => {
                                    },
                                  },
                                ],
+                               "open": SToken {
+                                 "originalStr": "(",
+                                 "ranges": Array [
+                                   Range {
+                                     "endColumn": 55,
+                                     "endIndex": 55,
+                                     "endRow": 0,
+                                     "entityId": EntityId {
+                                       "publicId": undefined,
+                                       "systemId": "",
+                                       "type": "ENTITY_ID",
+                                     },
+                                     "startColumn": 54,
+                                     "startIndex": 54,
+                                     "startRow": 0,
+                                   },
+                                 ],
+                                 "str": "(",
+                               },
+                               "openSpace": undefined,
                                "repeat": SToken {
                                  "originalStr": "*",
                                  "ranges": Array [
@@ -898,11 +822,87 @@ describe('elementDeclaration', () => {
                              },
                            },
                          ],
+                         "open": SToken {
+                           "originalStr": "(",
+                           "ranges": Array [
+                             Range {
+                               "endColumn": 46,
+                               "endIndex": 46,
+                               "endRow": 0,
+                               "entityId": EntityId {
+                                 "publicId": undefined,
+                                 "systemId": "",
+                                 "type": "ENTITY_ID",
+                               },
+                               "startColumn": 45,
+                               "startIndex": 45,
+                               "startRow": 0,
+                             },
+                           ],
+                           "str": "(",
+                         },
+                         "openSpace": SToken {
+                           "originalStr": " ",
+                           "ranges": Array [
+                             Range {
+                               "endColumn": 47,
+                               "endIndex": 47,
+                               "endRow": 0,
+                               "entityId": EntityId {
+                                 "publicId": undefined,
+                                 "systemId": "",
+                                 "type": "ENTITY_ID",
+                               },
+                               "startColumn": 46,
+                               "startIndex": 46,
+                               "startRow": 0,
+                             },
+                           ],
+                           "str": " ",
+                         },
                          "repeat": undefined,
                          "repeatSpace": undefined,
                        },
                      },
                    ],
+                   "open": SToken {
+                     "originalStr": "(",
+                     "ranges": Array [
+                       Range {
+                         "endColumn": 11,
+                         "endIndex": 11,
+                         "endRow": 0,
+                         "entityId": EntityId {
+                           "publicId": undefined,
+                           "systemId": "",
+                           "type": "ENTITY_ID",
+                         },
+                         "startColumn": 10,
+                         "startIndex": 10,
+                         "startRow": 0,
+                       },
+                     ],
+                     "str": "(",
+                   },
+                   "openSpace": SToken {
+                     "originalStr": " ",
+                     "ranges": Array [
+                       Range {
+                         "endColumn": 12,
+                         "endIndex": 12,
+                         "endRow": 0,
+                         "entityId": EntityId {
+                           "publicId": undefined,
+                           "systemId": "",
+                           "type": "ENTITY_ID",
+                         },
+                         "startColumn": 11,
+                         "startIndex": 11,
+                         "startRow": 0,
+                       },
+                     ],
+                     "str": " ",
+                   },
                    "repeat": SToken {
                      "originalStr": "?",
                      "ranges": Array [
@@ -1017,7 +1017,7 @@ describe('elementDeclaration', () => {
    describe('resumeParseElementDeclaration()', () => {
       it('resumes an entity declaration from the start', (done) => {
          const source = new STokenSource(defaultExtractors);
-         source.addText('foobar ANY>');
+         source.addText('foobar ANY');
          source.endText();
 
          resumeParseElementDeclaration(
@@ -1039,6 +1039,89 @@ describe('elementDeclaration', () => {
                   unexpanded: {
                      tokens: [],
                      propName: 'name',
+                  },
+                  close: toSToken('>'),
+               });
+
+               expect(result).toEqualRangeless(expected);
+               done();
+            },
+         );
+      });
+
+      it('resumes an entity declaration from the start', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('\ta | ( c, d ))');
+         source.endText();
+
+         resumeParseElementDeclaration(
+            source,
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               contentModel: {
+                  open: toSToken('('),
+                  delimitedParticles: [],
+               },
+               unexpanded: {
+                  tokens: [],
+                  propName: 'midSpec',
+               },
+               close: toSToken('>'),
+            }),
+            (result) => {
+               const expected = new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  contentModel: {
+                     open: toSToken('('),
+                     openSpace: toSToken('\t'),
+                     delimitedParticles: [{
+                        particle: {
+                           name: toSToken('a'),
+                           nameSpace: toSToken(' '),
+                           repeat: undefined,
+                           repeatSpace: undefined
+                        },
+                        delimiter: toSToken('|'),
+                        delimiterSpace: toSToken(' '),
+                     }, {
+                        particle: {
+                           open: toSToken('('),
+                           openSpace: toSToken(' '),
+                           delimitedParticles: [{
+                              particle: {
+                                 name: toSToken('c'),
+                                 nameSpace: undefined,
+                                 repeat: undefined,
+                                 repeatSpace: undefined
+                              },
+                              delimiter: toSToken(','),
+                              delimiterSpace: toSToken(' '),
+                           }, {
+                              particle: {
+                                 name: toSToken('d'),
+                                 nameSpace: toSToken(' '),
+                                 repeat: undefined,
+                                 repeatSpace: undefined
+                              },
+                              delimiter: undefined,
+                              delimiterSpace: undefined,
+                           }],
+                           close: toSToken(')'),
+                           closeSpace: undefined,
+                           repeat: undefined,
+                           repeatSpace: undefined,
+                        },
+                        delimiter: undefined,
+                        delimiterSpace: undefined,
+                     }],
+                     close: toSToken(')'),
+                     closeSpace: undefined,
+                     repeat: undefined,
+                     repeatSpace: undefined,
+                  },
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'midSpec',
                   },
                   close: toSToken('>'),
                });

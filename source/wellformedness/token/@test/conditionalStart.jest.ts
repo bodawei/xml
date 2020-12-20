@@ -1,25 +1,28 @@
 import { MockErrorCollector } from 'error-test';
 import { ConditionalPToken } from 'token';
 import { toSToken } from 'sToken';
-import { ConformanceVersion } from 'basic';
 
 import checkConditionalStartWellFormed from '../conditionalStart';
 import { WellFormedError } from 'error';
 
 describe('checkWellFormed()', () => {
    let mockErrorCollector: MockErrorCollector;
-   let confVer: ConformanceVersion;
    let conditionalPToken: ConditionalPToken;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
-      confVer = new ConformanceVersion();
 
       conditionalPToken = new ConditionalPToken({
          open: toSToken('<!['),
          sectionType: toSToken('IGNORE'),
          bracket: toSToken('['),
       });
+   });
+
+   it('reports no errors if no pToken is provided', () => {
+      checkConditionalStartWellFormed(undefined, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 
    it('reports an error if an unknown type is provided', () => {

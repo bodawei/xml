@@ -35,15 +35,14 @@ function charRefCheck(
     *    Characters referred to using character references must match the production for Char.
     */
    if (pToken.digits) {
-      const charNumber = pToken.charCode;
-      let char;
+      const char = pToken.char;
 
-      if (charNumber > 0xffff) {
-         const chars = extractSurrogatePair(charNumber);
-         char = String.fromCharCode(chars[0]) + String.fromCharCode(chars[1]);
-      } else {
-         char = String.fromCharCode(charNumber);
-      }
+      // if (charNumber > 0xffff) {
+      //    const chars = extractSurrogatePair(charNumber);
+      //    char = String.fromCharCode(chars[0]) + String.fromCharCode(chars[1]);
+      // } else {
+      //    char = String.fromCharCode(charNumber);
+      // }
 
       ec.check(!isChar(char, confVer.version), WFEID.CHARREF_INVALID_CHAR, [
          strOrBlank(pToken.digits),

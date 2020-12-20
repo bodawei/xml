@@ -5,11 +5,11 @@ import { SToken, STokenArrayBuilder } from 'sToken';
 
 function contentModelToSTokens(contentSpec: ContentModelP): Array<SToken> {
    const builder = new STokenArrayBuilder();
-   const particles = contentSpec.particles || [];
+   const delimitedParticles = contentSpec.delimitedParticles || [];
 
    builder.add(contentSpec.open, contentSpec.openSpace);
 
-   for (const cp of particles) {
+   for (const cp of delimitedParticles) {
       if (!cp.particle) {
          // do nothing
       } else if (isContentModelP(cp.particle)) {

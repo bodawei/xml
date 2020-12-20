@@ -16,7 +16,7 @@ describe('contentModelToSTokens()', () => {
       const contentModel = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         particles: [{}, emptyCP],
+         delimitedParticles: [{}, emptyCP],
          close: toSToken(')'),
          closeSpace: toSToken(' '),
          repeat: toSToken('*'),
@@ -36,7 +36,7 @@ describe('contentModelToSTokens()', () => {
       const contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         particles: [
+         delimitedParticles: [
             nameParticle,
             {
                particle: contentModel,

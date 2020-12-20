@@ -3,16 +3,17 @@
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { ContentModelP, parseContentModel } from '../contentModel';
+import { ContentModelP, parseContentModel, resumeParseContentModel } from '../contentModel';
 
-describe('nameList (unit)', () => {
+describe('ContentModel (unit)', () => {
    let contentSpec: ContentModelP;
+   let result: ContentModelP | undefined;
 
    beforeEach(() => {
       contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         particles: [
+         delimitedParticles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -41,13 +42,17 @@ describe('nameList (unit)', () => {
       });
    });
 
+   function getResult(item?: ContentModelP) {
+      result = item;
+   }
+
    describe('construction', () => {
       it('can override all properties with the second parameter', () => {
          const result = new ContentModelP(
             {
                open: toSToken('('),
                openSpace: toSToken(' '),
-               particles: [
+               delimitedParticles: [
                   {
                      particle: {
                         name: toSToken('one'),
@@ -67,7 +72,7 @@ describe('nameList (unit)', () => {
             {
                open: toSToken('1'),
                openSpace: toSToken('2'),
-               particles: [
+               delimitedParticles: [
                   {
                      particle: {
                         name: toSToken('3'),
@@ -89,7 +94,7 @@ describe('nameList (unit)', () => {
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('3'),
@@ -108,12 +113,12 @@ describe('nameList (unit)', () => {
          });
       });
 
-      it('can override the particles with an undefined', () => {
+      it('can override the delimitedParticles with an undefined', () => {
          const result = new ContentModelP(
             {
                open: toSToken('('),
                openSpace: toSToken(' '),
-               particles: [
+               delimitedParticles: [
                   {
                      particle: {
                         name: toSToken('one'),
@@ -133,7 +138,7 @@ describe('nameList (unit)', () => {
             {
                open: toSToken('1'),
                openSpace: toSToken('2'),
-               particles: undefined,
+               delimitedParticles: undefined,
                close: toSToken('8'),
                closeSpace: toSToken('9'),
                repeat: toSToken('10'),
@@ -144,7 +149,7 @@ describe('nameList (unit)', () => {
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
-            particles: [],
+            delimitedParticles: [],
             close: toSToken('8'),
             closeSpace: toSToken('9'),
             repeat: toSToken('10'),
@@ -154,31 +159,26 @@ describe('nameList (unit)', () => {
    });
 
    describe('parseContentModel()', () => {
-      let result: ContentModelP | undefined;
-
-      function getResult(item?: ContentModelP) {
-         result = item;
-      }
 
       it('parses a two name content spec', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
-            MockSTokenSource.PEEK('t'),
+            ['t', 'peekChar'],
             ['two', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
-            MockSTokenSource.PEEK(')'),
+            [')', 'peekChar'],
             [')', 'match', ')'],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
@@ -195,21 +195,21 @@ describe('nameList (unit)', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
-            MockSTokenSource.PEEK('t'),
+            ['t', 'peekChar'],
             ['two', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
-            MockSTokenSource.PEEK(')'),
+            [')', 'peekChar'],
             [')', 'match', ')'],
             [' ', 'space'],
             ['+', 'multi', ['?', '*', '+']],
@@ -231,28 +231,28 @@ describe('nameList (unit)', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             [',', 'multi', ['|', ',']],
             [' ', 'space'],
-            MockSTokenSource.PEEK('t'),
+            ['t', 'peekChar'],
             ['two', 'word', [',', ')', '%', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
-            MockSTokenSource.PEEK(')'),
+            [')', 'peekChar'],
             [')', 'match', ')'],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
          const expected = new ContentModelP(contentSpec, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -286,21 +286,21 @@ describe('nameList (unit)', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
-            MockSTokenSource.PEEK('t'),
+            ['t', 'peekChar'],
             ['two', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
-            MockSTokenSource.PEEK(')'),
+            [')', 'peekChar'],
             [')', 'match', ')'],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
@@ -317,28 +317,28 @@ describe('nameList (unit)', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             [',', 'multi', ['|', ',']],
             [' ', 'space'],
-            MockSTokenSource.PEEK('t'),
+            ['t', 'peekChar'],
             ['two', 'word', [',', ')', '%', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
-            MockSTokenSource.PEEK(')'),
+            [')', 'peekChar'],
             [')', 'match', ')'],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
          const expected = new ContentModelP(contentSpec, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -371,28 +371,28 @@ describe('nameList (unit)', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
-            MockSTokenSource.PEEK('|'),
+            ['|', 'peekChar'],
             [undefined, 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
             ['|', 'multi', ['|']],
             [undefined, 'space'],
-            MockSTokenSource.PEEK(')'),
+            [')', 'peekChar'],
             [')', 'match', ')'],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
          const expected = new ContentModelP(contentSpec, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -421,32 +421,32 @@ describe('nameList (unit)', () => {
          expect(result).toEqualRangeless(expected);
       });
 
-      it('parses a content spec with two particles and no "|"s', () => {
+      it('parses a content spec with two delimitedParticles and no "|"s', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
-            MockSTokenSource.PEEK('t'),
+            ['t', 'peekChar'],
             ['two', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
-            MockSTokenSource.PEEK(')'),
+            [')', 'peekChar'],
             [')', 'match', ')'],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
          ]);
          const expected = new ContentModelP(contentSpec, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -497,7 +497,7 @@ describe('nameList (unit)', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
@@ -511,7 +511,7 @@ describe('nameList (unit)', () => {
             undefined,
          ]);
          const expected = new ContentModelP(contentSpec, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -542,7 +542,7 @@ describe('nameList (unit)', () => {
             undefined,
          ]);
          const expected = new ContentModelP(contentSpec, {
-            particles: [],
+            delimitedParticles: [],
             close: undefined,
          });
          parseContentModel(mockSource, getResult);
@@ -555,21 +555,21 @@ describe('nameList (unit)', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
             [' ', 'space'],
-            MockSTokenSource.PEEK('o'),
+            ['o', 'peekChar'],
             ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
-            MockSTokenSource.PEEK('>'),
+            ['>', 'peekChar'],
             undefined,
             undefined,
             undefined,
             undefined,
          ]);
          const expected = new ContentModelP(contentSpec, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -594,52 +594,52 @@ describe('nameList (unit)', () => {
             const mockSource = new MockSTokenSource([
                ['(', 'match', '('],
                [' ', 'space'],
-               MockSTokenSource.PEEK('o'),
+               ['o', 'peekChar'],
                ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
                [' ', 'space'],
                ['?', 'multi', ['?', '*', '+']],
                [' ', 'space'],
                [',', 'multi', ['|', ',']],
                [' ', 'space'],
-               MockSTokenSource.PEEK('('),
+               ['(', 'peekChar'],
                ['(', 'match', '('],
                [' ', 'space'],
-               MockSTokenSource.PEEK('t'),
+               ['t', 'peekChar'],
                ['two', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
                [' ', 'space'],
                ['+', 'multi', ['?', '*', '+']],
                [' ', 'space'],
                ['|', 'multi', ['|', ',']],
                [' ', 'space'],
-               MockSTokenSource.PEEK('t'),
+               ['t', 'peekChar'],
                ['three', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
                [' ', 'space'],
                ['*', 'multi', ['?', '*', '+']],
                [' ', 'space'],
                ['|', 'multi', ['|']],
                [' ', 'space'],
-               MockSTokenSource.PEEK(')'),
+               [')', 'peekChar'],
                [')', 'match', ')'],
                undefined,
                undefined,
                undefined,
                [',', 'multi', [',']],
                [' ', 'space'],
-               MockSTokenSource.PEEK('f'),
+               ['f', 'peekChar'],
                ['four', 'word', [',', ')', '%', '>', '?', '*', '+', '(']],
                [undefined, 'space'],
                [undefined, 'multi', ['?', '*', '+']],
                [undefined, 'space'],
                [undefined, 'multi'],
                [undefined, 'space'],
-               MockSTokenSource.PEEK(')'),
+               [')', 'peekChar'],
                [')', 'match', ')'],
                undefined,
                undefined,
                undefined,
             ]);
             const expected = new ContentModelP(contentSpec, {
-               particles: [
+               delimitedParticles: [
                   {
                      particle: {
                         name: toSToken('one'),
@@ -654,7 +654,7 @@ describe('nameList (unit)', () => {
                      particle: {
                         open: toSToken('('),
                         openSpace: toSToken(' '),
-                        particles: [
+                        delimitedParticles: [
                            {
                               particle: {
                                  name: toSToken('two'),
@@ -702,7 +702,361 @@ describe('nameList (unit)', () => {
          });
       });
    });
-});
 
-// remove peeks
-// need to check constructio
+   describe('resumeParseContentModel()', () => {
+
+      it('resumes a parse after a topmost close', () => {
+         const mockSource = new MockSTokenSource([
+            ['+', 'multi', ['?', '*', '+']],
+            [' ', 'space'],
+         ]);
+         contentSpec = new ContentModelP({
+            open: toSToken('('),
+            openSpace: toSToken(' '),
+            delimitedParticles: [
+            ],
+            close: toSToken(')'),
+            closeSpace: toSToken(' '),
+            repeat: undefined,
+            repeatSpace: undefined,
+         });
+         const expected = new ContentModelP(contentSpec, {
+            closeSpace: toSToken(' \t'),
+            repeat: toSToken('+'),
+            repeatSpace: toSToken(' '),
+         });
+
+         resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(expected);
+      });
+
+      it('resumes a parse after a topmost content model is already done', () => {
+         const mockSource = new MockSTokenSource([
+         ]);
+         contentSpec = new ContentModelP({
+            open: toSToken('('),
+            openSpace: toSToken(' '),
+            delimitedParticles: [
+            ],
+            close: toSToken(')'),
+            closeSpace: toSToken(' '),
+            repeat: toSToken('+'),
+            repeatSpace: toSToken(' '),
+         });
+
+         resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+            repeatSpace: toSToken(' \t'),
+         }));
+      });
+
+      it('resumes parse with empty delimited particles', () => {
+         const mockSource = new MockSTokenSource([
+            ['p', 'peekChar', ],
+            ['p', 'word', ],
+            [' ', 'space'],
+            ['*', 'multi', ['?', '*', '+']],
+            [' ', 'space'],
+            [undefined, 'multi'],
+            [' ', 'space'],
+            [ undefined, 'peekChar'],
+            [')', 'match', ')'],
+            ['\n', 'space'],
+            [undefined, 'multi', ['?', '*', '+']],
+            [undefined, 'space'],
+         ]);
+         contentSpec = new ContentModelP({
+            open: toSToken('('),
+            openSpace: toSToken(' '),
+            delimitedParticles: [],
+         });
+
+         resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+            openSpace: toSToken(' \t'),
+            delimitedParticles: [{
+               particle: {
+                  name: toSToken('p'),
+                  nameSpace: toSToken(' '),
+                  repeat: toSToken('*'),
+                  repeatSpace: toSToken(' '),
+               },
+               delimiter: undefined,
+               delimiterSpace: toSToken(' '),
+            }],
+            close: toSToken(')'),
+            closeSpace: toSToken('\n'),
+            repeat: undefined,
+            repeatSpace: undefined,
+         }));
+      });
+
+      it('resumes parse with an empty delimited particle', () => {
+         const mockSource = new MockSTokenSource([
+            [')', 'peekChar', ],
+            [')', 'match', ')'],
+            ['\n', 'space'],
+            [undefined, 'multi', ['?', '*', '+']],
+            [undefined, 'space'],
+         ]);
+         contentSpec = new ContentModelP({
+            open: toSToken('('),
+            openSpace: toSToken(' '),
+            delimitedParticles: [{}], // This can't happen for real
+         });
+
+         resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+            openSpace: toSToken(' \t'),
+            delimitedParticles: [{}],
+            close: toSToken(')'),
+            closeSpace: toSToken('\n'),
+            repeat: undefined,
+            repeatSpace: undefined,
+         }));
+      });
+
+      it('resumes a parse after a mid-content name particle', () => {
+         const mockSource = new MockSTokenSource([
+            ['*', 'multi', ['?', '*', '+']],
+            [' ', 'space'],
+            [undefined, 'multi'],
+            [' ', 'space'],
+            [ undefined, 'peekChar'],
+            [')', 'match', ')'],
+            ['\n', 'space'],
+            ['+', 'multi', ['?', '*', '+']],
+            [' ', 'space'],
+         ]);
+         contentSpec = new ContentModelP({
+            open: toSToken('('),
+            openSpace: toSToken(' '),
+            delimitedParticles: [{
+               particle: {
+                  name: toSToken('a'),
+                  nameSpace: toSToken(' '),
+               },
+            }],
+         });
+
+         resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+            delimitedParticles: [{
+               particle: {
+                  name: toSToken('a'),
+                  nameSpace: toSToken(' \t'),
+                  repeat: toSToken('*'),
+                  repeatSpace: toSToken(' '),
+               },
+               delimiter: undefined,
+               delimiterSpace: toSToken(' '),
+            }],
+            close: toSToken(')'),
+            closeSpace: toSToken('\n'),
+            repeat: toSToken('+'),
+            repeatSpace: toSToken(' '),
+         }));
+      });
+   });
+
+   it('resumes a parse after a particle boundary', () => {
+      const mockSource = new MockSTokenSource([
+         ['b', 'peekChar'],
+         ['b', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
+         [' ', 'space'],
+         ['+', 'multi', ['?', '*', '+']],
+         [' ', 'space'],
+         [undefined, 'multi'],
+         [undefined, 'space'],
+         [undefined, 'peekChar'],
+         [')', 'match', ')'],
+         ['\n', 'space'],
+         ['+', 'multi', ['?', '*', '+']],
+         [' ', 'space'],
+      ]);
+      contentSpec = new ContentModelP({
+         open: toSToken('('),
+         openSpace: toSToken(' '),
+         delimitedParticles: [{
+            particle: {
+               name: toSToken('a'),
+               nameSpace: toSToken(' '),
+            },
+            delimiter: toSToken('|'),
+         }],
+      });
+
+      resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+      mockSource.respondInAsyncTime();
+
+      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+         delimitedParticles: [{
+            particle: {
+               name: toSToken('a'),
+               nameSpace: toSToken(' '),
+            },
+            delimiter: toSToken('|'),
+            delimiterSpace: toSToken('\t'),
+         }, {
+            particle: {
+               name: toSToken('b'),
+               nameSpace: toSToken(' '),
+               repeat: toSToken('+'),
+               repeatSpace: toSToken(' '),
+            },
+         }],
+         close: toSToken(')'),
+         closeSpace: toSToken('\n'),
+         repeat: toSToken('+'),
+         repeatSpace: toSToken(' '),
+      }));
+   });
+
+   it('resumes a parse with a second partial token', () => {
+      const mockSource = new MockSTokenSource([
+         ['+', 'multi', ['?', '*', '+']],
+         [' ', 'space'],
+         [undefined, 'multi'],
+         [undefined, 'space'],
+         [undefined, 'peekChar'],
+         [')', 'match', ')'],
+         ['\n', 'space'],
+         ['+', 'multi', ['?', '*', '+']],
+         [' ', 'space'],
+      ]);
+      contentSpec = new ContentModelP({
+         open: toSToken('('),
+         openSpace: toSToken(' '),
+         delimitedParticles: [{
+            particle: {
+               name: toSToken('a'),
+               nameSpace: toSToken(' '),
+            },
+            delimiter: toSToken('|'),
+         }, {
+            particle: {
+               name: toSToken('b'),
+            },
+         }],
+      });
+
+      resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+      mockSource.respondInAsyncTime();
+
+      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+         delimitedParticles: [{
+            particle: {
+               name: toSToken('a'),
+               nameSpace: toSToken(' '),
+            },
+            delimiter: toSToken('|'),
+         }, {
+            particle: {
+               name: toSToken('b'),
+               nameSpace: toSToken('\t'),
+               repeat: toSToken('+'),
+               repeatSpace: toSToken(' '),
+            },
+         }],
+         close: toSToken(')'),
+         closeSpace: toSToken('\n'),
+         repeat: toSToken('+'),
+         repeatSpace: toSToken(' '),
+      }));
+   });
+
+   it('resumes a parse with a partial content model', () => {
+      const mockSource = new MockSTokenSource([
+         [undefined, 'peekChar'],
+         [')', 'match', ')'],
+         ['\n', 'space'],
+         ['+', 'multi', ['?', '*', '+']],
+         [' ', 'space'],
+         [undefined, 'multi'], // delimiter
+         [undefined, 'space'],
+         [undefined, 'peekChar'],
+         [')', 'match', ')'],
+         [undefined, 'space'],
+         ['?', 'multi', ['?', '*', '+']],
+         [undefined, 'space'],
+      ]);
+      contentSpec = new ContentModelP({
+         open: toSToken('('),
+         openSpace: toSToken(' '),
+         delimitedParticles: [{
+            particle: {
+               open: toSToken('('),
+               openSpace: toSToken(' '),
+            },
+         }],
+      });
+
+      resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+      mockSource.respondInAsyncTime();
+
+      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+         delimitedParticles: [{
+            particle: {
+               open: toSToken('('),
+               openSpace: toSToken(' \t'),
+               delimitedParticles: [],
+               close: toSToken(')'),
+               closeSpace: toSToken('\n'),
+               repeat: toSToken('+'),
+               repeatSpace: toSToken(' '),
+            },
+         }],
+         close: toSToken(')'),
+         repeat: toSToken('?'),
+      }));
+   });
+
+   it('resumes a parse with a complete content model', () => {
+      const mockSource = new MockSTokenSource([
+         [')', 'peekChar'],
+         [')', 'match', ')'],
+         [undefined, 'space'],
+         ['?', 'multi', ['?', '*', '+']],
+         [undefined, 'space'],
+      ]);
+      contentSpec = new ContentModelP({
+         open: toSToken('('),
+         openSpace: toSToken(' '),
+         delimitedParticles: [{
+            particle: {
+               open: toSToken('('),
+               openSpace: toSToken(' '),
+               close: toSToken(')'),
+               repeat: toSToken('+'),
+            },
+         }],
+      });
+
+      resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
+      mockSource.respondInAsyncTime();
+
+      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
+         delimitedParticles: [{
+            particle: {
+               open: toSToken('('),
+               openSpace: toSToken(' '),
+               close: toSToken(')'),
+               repeat: toSToken('+'),
+            },
+            delimiterSpace: toSToken('\t'),
+         }],
+         close: toSToken(')'),
+         repeat: toSToken('?'),
+      }));
+   });
+});

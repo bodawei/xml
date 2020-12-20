@@ -20,6 +20,7 @@ describe('elementDeclaration (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let dummyCM: ContentModelP;
    let parseContentModelMock: jest.MockedFunction<typeof contentModel.parseContentModel>;
+   let resumeParseContentModelMock: jest.MockedFunction<typeof contentModel.resumeParseContentModel>;
 
    beforeEach(() => {
       elementDeclaration = new ElementDeclarationPToken({
@@ -33,6 +34,9 @@ describe('elementDeclaration (unit)', () => {
       });
       dummyCM = new ContentModelP({});
 
+      resumeParseContentModelMock = jest.spyOn(contentModel, 'resumeParseContentModel') as jest.MockedFunction<
+         typeof contentModel.resumeParseContentModel
+      >;
       parseContentModelMock = jest.spyOn(contentModel, 'parseContentModel') as jest.MockedFunction<
          typeof contentModel.parseContentModel
       >;
@@ -435,6 +439,7 @@ describe('elementDeclaration (unit)', () => {
             close: toSToken('>'),
          });
          const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
             ['A', 'peekChar'],
             ['ANY', 'word', ['>']],
             [' ', 'space'],
@@ -471,7 +476,7 @@ describe('elementDeclaration (unit)', () => {
             },
             close: toSToken('>'),
          });
-         const mockSource = new MockSTokenSource([['(', 'peekChar']]);
+         const mockSource = new MockSTokenSource([[undefined, 'space'], ['(', 'peekChar']]);
 
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
@@ -491,6 +496,64 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
+      it('calls resumeParseContentModel when resuming in mid-spec', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('elementName'),
+            nameSpace: toSToken(' '),
+            contentModel: { delimitedParticles: [] },
+            unexpanded: {
+               propName: 'midSpec',
+               tokens: [],
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([[undefined, 'space']]);
+         resumeParseContentModelMock.mockImplementation((source, props, pre, cb) => {
+            cb({ delimitedParticles: [], repeat: toSToken('|') });
+         });
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         // @ts-expect-error
+         expect(resumeParseContentModelMock).toHaveBeenCalledWith(mockSource, { delimitedParticles: []}, undefined, expect.any(Function));
+      });
+
+      it('returns an element declaration with a content model interrupted in the middle', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('elementName'),
+            nameSpace: toSToken(' '),
+            unexpanded: {
+               propName: 'midSpec',
+               tokens: [],
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([[undefined, 'space']]);
+         resumeParseContentModelMock.mockImplementation((source, props, pre, cb) => {
+            cb({ delimitedParticles: [], repeat: toSToken('|') });
+         });
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('elementName'),
+               nameSpace: toSToken(' '),
+               contentModel: { delimitedParticles: [], repeat: toSToken('|') },
+               unexpanded: {
+                  propName: 'midSpec',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            }),
+         );
+      });
+
       it('returns an element declaration when unassigned starts at the name', () => {
          const elementDecl = new ElementDeclarationPToken({
             open: toSToken('<!'),
@@ -501,6 +564,7 @@ describe('elementDeclaration (unit)', () => {
             close: toSToken('>'),
          });
          const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
             ['foo', 'word'],
             [' ', 'space'],
             ['A', 'peekChar'],

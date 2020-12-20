@@ -36,7 +36,7 @@ class ContentModelX {
       let listType: CpType | undefined;
       const protoParticle: Array<ContentNameX | ContentModelX> = [];
 
-      for (const aParticle of contentModel.particles) {
+      for (const aParticle of contentModel.delimitedParticles) {
          const { particle, delimiter } = aParticle;
          const delimiterStr = strOrBlank(delimiter);
 

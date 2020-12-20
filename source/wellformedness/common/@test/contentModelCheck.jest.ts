@@ -24,7 +24,7 @@ describe('contentModelCheck()', () => {
       cmToken = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         particles: [
+         delimitedParticles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -70,8 +70,8 @@ describe('contentModelCheck()', () => {
          });
       });
 
-      it('reports an error if no particles are present', () => {
-         cmToken = new ContentModelP(cmToken, { particles: [] });
+      it('reports an error if no delimitedParticles are present', () => {
+         cmToken = new ContentModelP(cmToken, { delimitedParticles: [] });
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
@@ -85,7 +85,7 @@ describe('contentModelCheck()', () => {
 
       it('reports an error if a name in an entry is not present', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -108,13 +108,13 @@ describe('contentModelCheck()', () => {
             id: WellFormedError.ID.CONTENTMODEL_NO_NAME,
             params: ['1'],
             position: undefined,
-            lastPosition: cmToken.particles[0].delimiterSpace,
+            lastPosition: cmToken.delimitedParticles[0].delimiterSpace,
          });
       });
 
       it('reports an error if a delimiter in an entry is not present', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -136,13 +136,13 @@ describe('contentModelCheck()', () => {
             id: WellFormedError.ID.CONTENTMODEL_NO_DELIM,
             params: ['0'],
             position: undefined,
-            lastPosition: cmToken.particles[0].particle!.repeatSpace,
+            lastPosition: cmToken.delimitedParticles[0].particle!.repeatSpace,
          });
       });
 
       it('reports an error if a delimiter is present in the last entry', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -169,7 +169,7 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_EXTRA_DELIM,
             params: ['1'],
-            position: cmToken.particles[1].delimiter,
+            position: cmToken.delimitedParticles[1].delimiter,
          });
       });
 
@@ -177,7 +177,7 @@ describe('contentModelCheck()', () => {
          cmToken = new ContentModelP(cmToken, {
             close: undefined,
          });
-         const particle: ContentNameP = cmToken.particles[1].particle as ContentNameP;
+         const particle: ContentNameP = cmToken.delimitedParticles[1].particle as ContentNameP;
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
@@ -192,7 +192,7 @@ describe('contentModelCheck()', () => {
    describe('non-mixed children', () => {
       it('checks if the name is valid', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
-         const particle: ContentNameP = cmToken.particles[0].particle as ContentNameP;
+         const particle: ContentNameP = cmToken.delimitedParticles[0].particle as ContentNameP;
 
          expect(nameCheck).toHaveBeenCalledWith(
             particle.name,
@@ -204,7 +204,7 @@ describe('contentModelCheck()', () => {
 
       it('reports an error if the second separator does not match the first "|"', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -231,13 +231,13 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_CHOICE,
             params: ['1', ','],
-            position: cmToken.particles[1].delimiter,
+            position: cmToken.delimitedParticles[1].delimiter,
          });
       });
 
       it('reports an error if the second separator does not match the first ","', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -264,12 +264,12 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_SEQUENCE,
             params: ['1', '|'],
-            position: cmToken.particles[1].delimiter,
+            position: cmToken.delimitedParticles[1].delimiter,
          });
       });
 
       it('reports an error if there is an extra space between the name and the repeat marker', () => {
-         const particle: ContentNameP = cmToken.particles[0].particle as ContentNameP;
+         const particle: ContentNameP = cmToken.delimitedParticles[0].particle as ContentNameP;
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
@@ -297,11 +297,11 @@ describe('contentModelCheck()', () => {
 
       it('reports an error if a sublist has an error', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: new ContentModelP({
                      open: toSToken('('),
-                     particles: [
+                     delimitedParticles: [
                         {
                            particle: {
                               name: toSToken('three'),
@@ -311,7 +311,7 @@ describe('contentModelCheck()', () => {
                         {
                            particle: new ContentModelP({
                               open: toSToken('('),
-                              particles: [
+                              delimitedParticles: [
                                  {
                                     particle: {
                                        name: toSToken('four'),
@@ -339,8 +339,8 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_CLOSE_EXTRA_SPACE,
             params: undefined,
-            position: ((cmToken.particles[0].particle as ContentModelP).particles[1]
-               .particle as ContentModelP).closeSpace,
+            position: ((cmToken.delimitedParticles[0].particle as ContentModelP)
+               .delimitedParticles[1].particle as ContentModelP).closeSpace,
          });
       });
    });
@@ -348,7 +348,7 @@ describe('contentModelCheck()', () => {
    describe('mixed', () => {
       it('reports an error if #PCDATA is the wrong case', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#pcData'),
@@ -362,13 +362,13 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_PCDATA_INVALID_CASE,
             params: ['#pcData'],
-            position: (cmToken.particles[0].particle as ContentNameP).name,
+            position: (cmToken.delimitedParticles[0].particle as ContentNameP).name,
          });
       });
 
       it('assumes a choice type if it finds #PCDATA', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),
@@ -383,13 +383,13 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_CHOICE,
             params: ['0', ','],
-            position: cmToken.particles[0].delimiter,
+            position: cmToken.delimitedParticles[0].delimiter,
          });
       });
 
       it('reports an error if a Mixed contains a sublist', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),
@@ -399,7 +399,7 @@ describe('contentModelCheck()', () => {
                {
                   particle: new ContentModelP({
                      open: toSToken('('),
-                     particles: [
+                     delimitedParticles: [
                         {
                            particle: {
                               name: toSToken('one'),
@@ -421,13 +421,13 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_SUBPARTICLE,
             params: ['1'],
-            position: (cmToken.particles[1].particle as ContentModelP).open,
+            position: (cmToken.delimitedParticles[1].particle as ContentModelP).open,
          });
       });
 
       it('reports an error if there is a repeat indicator after a name', () => {
          cmToken = new ContentModelP(cmToken, {
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),
@@ -447,7 +447,7 @@ describe('contentModelCheck()', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_NAME_EXTRA_REPEAT,
             params: ['1', '*'],
-            position: (cmToken.particles[1].particle as ContentModelP).repeat,
+            position: (cmToken.delimitedParticles[1].particle as ContentModelP).repeat,
          });
       });
 
@@ -455,7 +455,7 @@ describe('contentModelCheck()', () => {
          cmToken = new ContentModelP({
             open: toSToken('('),
             openSpace: undefined,
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),
@@ -482,7 +482,7 @@ describe('contentModelCheck()', () => {
          cmToken = new ContentModelP({
             open: toSToken('('),
             openSpace: undefined,
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),
@@ -514,7 +514,7 @@ describe('contentModelCheck()', () => {
          cmToken = new ContentModelP({
             open: toSToken('('),
             openSpace: undefined,
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),
@@ -546,7 +546,7 @@ describe('contentModelCheck()', () => {
          cmToken = new ContentModelP({
             open: toSToken('('),
             openSpace: undefined,
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),
@@ -568,7 +568,7 @@ describe('contentModelCheck()', () => {
          cmToken = new ContentModelP({
             open: toSToken('('),
             openSpace: undefined,
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('#PCDATA'),

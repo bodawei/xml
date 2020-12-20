@@ -10,7 +10,7 @@ describe('ContentModelX()', () => {
       contentModelP = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         particles: [
+         delimitedParticles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -60,7 +60,7 @@ describe('ContentModelX()', () => {
 
    it('returns a result if no entries', () => {
       contentModelP = new ContentModelP({
-         particles: [],
+         delimitedParticles: [],
       });
       const contentModel = new ContentModelX(contentModelP);
 
@@ -73,7 +73,7 @@ describe('ContentModelX()', () => {
 
    it('adds an entry with a blank name if no name', () => {
       contentModelP = new ContentModelP({
-         particles: [
+         delimitedParticles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -112,7 +112,7 @@ describe('ContentModelX()', () => {
 
    it('silently ignores entries without particles', () => {
       contentModelP = new ContentModelP({
-         particles: [
+         delimitedParticles: [
             {
                particle: {
                   name: toSToken('one'),
@@ -165,7 +165,7 @@ describe('ContentModelX()', () => {
    describe('listType', () => {
       it('sets a SEQUENCE list type using the first delimiter', () => {
          contentModelP = new ContentModelP({
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -204,7 +204,7 @@ describe('ContentModelX()', () => {
 
       it('sets a CHOICE list type using the first delimiter', () => {
          contentModelP = new ContentModelP({
-            particles: [
+            delimitedParticles: [
                {
                   particle: {
                      name: toSToken('one'),
@@ -360,11 +360,11 @@ describe('ContentModelX()', () => {
          contentModelP = new ContentModelP({
             open: toSToken('('),
             openSpace: toSToken(' '),
-            particles: [
+            delimitedParticles: [
                {
                   particle: new ContentModelP({
                      open: toSToken('('),
-                     particles: [
+                     delimitedParticles: [
                         {
                            particle: {
                               name: toSToken('one'),
@@ -375,7 +375,7 @@ describe('ContentModelX()', () => {
                         {
                            particle: new ContentModelP({
                               open: toSToken('('),
-                              particles: [
+                              delimitedParticles: [
                                  {
                                     particle: {
                                        name: toSToken('three'),

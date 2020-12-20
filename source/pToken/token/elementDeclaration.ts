@@ -1,7 +1,7 @@
-import { SToken, STokenSource } from 'sToken';
+import { combineSTokens, SToken, STokenSource } from 'sToken';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
-import { ContentModelP, parseContentModel } from '../common/contentModel';
+import { ContentModelP, parseContentModel, resumeParseContentModel } from '../common/contentModel';
 import { UnexpandedMarkupDetails } from '../types';
 
 import { DeclarationStart } from 'token';
@@ -166,19 +166,21 @@ function resumeParseProperties(
    source: STokenSource,
    propName: string,
    props: RawElementDeclaration,
+   preSpace: SToken | undefined,
    deliverPToken: DeliverCB,
 ): void {
    switch (propName) {
       case 'name':
          parseName(source, props, (withName) => {
-            resumeParseProperties(source, 'contentSpec', withName, deliverPToken);
+            withName.declTypeSpace = combineSTokens(withName.declTypeSpace, preSpace);
+            resumeParseProperties(source, 'contentSpec', withName, undefined, deliverPToken);
          });
          break;
       case 'contentSpec':
-         parseSimpleContentSpec(source, props, (withContentSpec) => {
-            if (withContentSpec) {
-               deliverPToken(new ElementDeclarationPToken(withContentSpec));
-               return;
+         props.nameSpace = combineSTokens(props.nameSpace, preSpace);
+         parseSimpleContentSpec(source, props, (withContentSimpleSpec) => {
+            if (withContentSimpleSpec) {
+               deliverPToken(new ElementDeclarationPToken(withContentSimpleSpec));
             } else {
                parseComplexContentSpec(source, props, (withComplexContentSpec) => {
                   deliverPToken(new ElementDeclarationPToken(withComplexContentSpec));
@@ -187,16 +189,19 @@ function resumeParseProperties(
          });
          break;
       case 'midSpec':
-         // parseSimpleContentSpec(source, props, (withContentSpec) => {
-         //    if (withContentSpec) {
-         //       parseClose(source, props, deliverPToken);
-         //       return;
-         //    } else {
-         //       parseComplexContentSpec(source, props, (withComplexContentSpec) => {
-         //          parseClose(source, withComplexContentSpec, deliverPToken);
-         //       });
-         //    }
-         // });
+         resumeParseContentModel(
+            source,
+            props.contentModel || { delimitedParticles: [] },
+            preSpace,
+            (contentModel) => {
+               deliverPToken(
+                  new ElementDeclarationPToken({
+                     ...props,
+                     contentModel,
+                  }),
+               );
+            },
+         );
          break;
    }
 }
@@ -210,13 +215,11 @@ function resumeParseElementDeclaration(
       deliverPToken(elementDeclaration);
       return;
    }
+   const propName = elementDeclaration.unexpanded.propName;
 
-   resumeParseProperties(
-      source,
-      elementDeclaration.unexpanded.propName,
-      { ...elementDeclaration },
-      deliverPToken,
-   );
+   source.extractNoParams('space', (preSpace) => {
+      resumeParseProperties(source, propName, { ...elementDeclaration }, preSpace, deliverPToken);
+   });
 }
 
 /**********************************************************************\
@@ -259,9 +262,9 @@ function parseElementDeclaration(
                return;
             }
 
-            parseSimpleContentSpec(source, withName, (withContentSpec) => {
-               if (withContentSpec) {
-                  parseClose(source, withContentSpec, deliverPToken);
+            parseSimpleContentSpec(source, withName, (withContentSimpleSpec) => {
+               if (withContentSimpleSpec) {
+                  parseClose(source, withContentSimpleSpec, deliverPToken);
                   return;
                }
 
