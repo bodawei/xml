@@ -1,5 +1,6 @@
 import { ErrorCollector, ValidityError, XmlWarning } from 'error';
-import { PToken, GENERAL_ENTITY_DECLARATION_PTOKEN, PARAMETER_ENTITY_DECLARATION_PTOKEN, GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken, ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
+import {  GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken, ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
+import { GENERAL_ENTITY_DECLARATION_PTOKEN, PARAMETER_ENTITY_DECLARATION_PTOKEN, ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 /*
@@ -87,7 +88,7 @@ class ValidityChecker {
       this.peDecls = {};
    }
 
-   checkPToken(token: PToken, ec: ErrorCollector): void {
+   checkPToken(token: ParseValue, ec: ErrorCollector): void {
       switch (token.type) {
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
             const geDeclName = strOrBlank(token.name);

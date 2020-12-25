@@ -453,7 +453,7 @@ describe('attListDeclarationCheck()', () => {
       });
    });
 
-   it('calls nameList.checkWellFormed() if this is an enumerated type', () => {
+   it('calls enumeration.checkWellFormed() if this is an enumerated type', () => {
       const cwfSpy = jasmine.createSpy();
       const enumeration = new WordListPToken(WordListType.ENUMERATION, {
          open: toSToken(' '),
@@ -532,7 +532,7 @@ describe('attListDeclarationCheck()', () => {
       });
    });
 
-   it('calls nameList.checkWellFormed() if this is an NOTATION type', () => {
+   it('calls enumeration.checkWellFormed() if this is an NOTATION type', () => {
       const cwfSpy = jasmine.createSpy();
       const enumeration = new WordListPToken(WordListType.NOTATION, {
          open: toSToken(' '),

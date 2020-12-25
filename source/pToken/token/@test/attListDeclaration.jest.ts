@@ -519,7 +519,7 @@ describe('AttListDeclaration (unit)', () => {
             [' ', 'space'],
             ['NOTATION', 'word', ['>', '%', '(', '#', '"', "'"]],
             [' ', 'space'],
-            // namelist parsing
+            // wordList parsing
             ['"', 'peekChar'],
             [undefined, 'space'],
             [undefined, 'word', ['>', '%']],
@@ -588,7 +588,7 @@ describe('AttListDeclaration (unit)', () => {
          );
       });
 
-      it('parses a nameList for an ENUMERATION type', () => {
+      it('parses a wordList for an ENUMERATION type', () => {
          const mockSource = new MockSTokenSource([
             ['elementName', 'word', ['>', '%']],
             [' ', 'space'],

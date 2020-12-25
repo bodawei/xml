@@ -1,24 +1,20 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
 import { parseContentModel } from 'pToken';
 import { STokenSource } from 'sToken';
-import { ContentModelX } from 'xToken';
 
-import { Graph } from '../nameListGraphTypes';
-import nameListToGraph from '../nameListToGraph';
-import collapseAutoTrans from '../collapseAutoTrans';
+import { CmGraph } from '../cmGraphTypes';
+import { cmToCmGraph } from '../cmToCmGraph';
+import { collapseAutoTrans } from '../collapseAutoTrans';
 
 describe('collapseAutoTrans()', () => {
-
-   function prepForDeAuto(input: string, cb: (graph: Graph) => void) {
+   function prepForDeAuto(input: string, cb: (graph: CmGraph) => void) {
       const source = new STokenSource(defaultExtractors);
       source.addText(input);
       source.endText();
       parseContentModel(source, (result) => {
-         const tokenList = new ContentModelX(result || { particles: [] });
-         let graph = nameListToGraph(tokenList);
+         const graph = cmToCmGraph(result!);
          cb(graph);
       });
    }
@@ -26,7 +22,7 @@ describe('collapseAutoTrans()', () => {
    it('converts a list of zero plus items', () => {
       // (first, (first)*, last)
 
-      const foo: Graph = {
+      const foo: CmGraph = {
          startId: 0,
          endId: 1,
          states: {
@@ -36,9 +32,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/1',
-                     stateId: 2
-                  }
-               }
+                     stateId: 2,
+                  },
+               },
             },
             1: {
                id: 1,
@@ -52,9 +48,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
-                  }
-               }
+                     stateId: 4,
+                  },
+               },
             },
             3: {
                id: 3,
@@ -62,16 +58,16 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   last: {
                      ref: '/3',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
             4: {
                id: 4,
                autoTrans: [2, 3],
-               trans: {}
+               trans: {},
             },
-         }
+         },
       };
 
       collapseAutoTrans(foo);
@@ -86,74 +82,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/1',
-                     stateId: 2
-                  }
-               }
-            },
-            1: {
-               id: 1,
-               autoTrans: [],
-               trans: {},
-               done: true,
-            },
-            2: {
-               id: 2,
-               autoTrans: [],
-               trans: {
-                  first: {
-                     ref: '/2/1',
-                     stateId: 4
+                     stateId: 2,
                   },
-                  last: {
-                     ref: '/3',
-                     stateId: 1
-                  }
-               }
-            },
-            3: {
-               id: 3,
-               autoTrans: [],
-               trans: {
-                  last: {
-                     ref: '/3',
-                     stateId: 1
-                  }
-               }
-            },
-            4: {
-               id: 4,
-               autoTrans: [],
-               trans: {
-                  first: {
-                     ref: '/2/1',
-                     stateId: 4
-                  },
-                  last: {
-                     ref: '/3',
-                     stateId: 1
-                  }
-               }
-            },
-         }
-      });
-   });
-
-   it('converts a list of one plus items', () => {
-      // (first, (first)+, last)
-
-      const foo: Graph = {
-         startId: 0,
-         endId: 1,
-         states: {
-            0: {
-               id: 0,
-               autoTrans: [],
-               trans: {
-                  first: {
-                     ref: '/1',
-                     stateId: 2
-                  }
-               }
+               },
             },
             1: {
                id: 1,
@@ -168,8 +99,12 @@ describe('collapseAutoTrans()', () => {
                   first: {
                      ref: '/2/1',
                      stateId: 4,
-                  }
-               }
+                  },
+                  last: {
+                     ref: '/3',
+                     stateId: 1,
+                  },
+               },
             },
             3: {
                id: 3,
@@ -177,16 +112,77 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   last: {
                      ref: '/3',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
+            },
+            4: {
+               id: 4,
+               autoTrans: [],
+               trans: {
+                  first: {
+                     ref: '/2/1',
+                     stateId: 4,
+                  },
+                  last: {
+                     ref: '/3',
+                     stateId: 1,
+                  },
+               },
+            },
+         },
+      });
+   });
+
+   it('converts a list of one plus items', () => {
+      // (first, (first)+, last)
+
+      const foo: CmGraph = {
+         startId: 0,
+         endId: 1,
+         states: {
+            0: {
+               id: 0,
+               autoTrans: [],
+               trans: {
+                  first: {
+                     ref: '/1',
+                     stateId: 2,
+                  },
+               },
+            },
+            1: {
+               id: 1,
+               autoTrans: [],
+               trans: {},
+               done: true,
+            },
+            2: {
+               id: 2,
+               autoTrans: [],
+               trans: {
+                  first: {
+                     ref: '/2/1',
+                     stateId: 4,
+                  },
+               },
+            },
+            3: {
+               id: 3,
+               autoTrans: [],
+               trans: {
+                  last: {
+                     ref: '/3',
+                     stateId: 1,
+                  },
+               },
             },
             4: {
                id: 4,
                autoTrans: [2, 3],
-               trans: {}
+               trans: {},
             },
-         }
+         },
       };
 
       collapseAutoTrans(foo);
@@ -201,9 +197,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/1',
-                     stateId: 2
-                  }
-               }
+                     stateId: 2,
+                  },
+               },
             },
             1: {
                id: 1,
@@ -217,9 +213,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
+                     stateId: 4,
                   },
-               }
+               },
             },
             3: {
                id: 3,
@@ -227,9 +223,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   last: {
                      ref: '/3',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
             4: {
                id: 4,
@@ -237,22 +233,22 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
+                     stateId: 4,
                   },
                   last: {
                      ref: '/3',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
-         }
+         },
       });
    });
 
    it('combines ambiguous transitions (by hand)', () => {
       // (first, (first)+, first, last)
 
-      const foo: Graph = {
+      const foo: CmGraph = {
          startId: 0,
          endId: 1,
          states: {
@@ -262,9 +258,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/1',
-                     stateId: 2
-                  }
-               }
+                     stateId: 2,
+                  },
+               },
             },
             1: {
                id: 1,
@@ -279,8 +275,8 @@ describe('collapseAutoTrans()', () => {
                   first: {
                      ref: '/2/1',
                      stateId: 5,
-                  }
-               }
+                  },
+               },
             },
             3: {
                id: 3,
@@ -288,9 +284,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   last: {
                      ref: '/4',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
             4: {
                id: 4,
@@ -299,15 +295,15 @@ describe('collapseAutoTrans()', () => {
                   first: {
                      ref: '/3',
                      stateId: 3,
-                  }
-               }
+                  },
+               },
             },
             5: {
                id: 5,
                autoTrans: [2, 4],
-               trans: {}
+               trans: {},
             },
-         }
+         },
       };
 
       collapseAutoTrans(foo);
@@ -322,9 +318,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/1',
-                     stateId: 2
-                  }
-               }
+                     stateId: 2,
+                  },
+               },
             },
             1: {
                id: 1,
@@ -338,9 +334,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 5
+                     stateId: 5,
                   },
-               }
+               },
             },
             3: {
                id: 3,
@@ -348,9 +344,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   last: {
                      ref: '/4',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
             4: {
                id: 4,
@@ -358,9 +354,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/3',
-                     stateId: 3
-                  }
-               }
+                     stateId: 3,
+                  },
+               },
             },
             5: {
                id: 5,
@@ -370,7 +366,7 @@ describe('collapseAutoTrans()', () => {
                      ref: '/2/1,/3',
                      stateId: 6,
                   },
-               }
+               },
             },
             6: {
                id: 6,
@@ -382,11 +378,11 @@ describe('collapseAutoTrans()', () => {
                   },
                   last: {
                      ref: '/4',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
-         }
+         },
       });
    });
 
@@ -404,9 +400,9 @@ describe('collapseAutoTrans()', () => {
                   trans: {
                      first: {
                         ref: '/1',
-                        stateId: 2
-                     }
-                  }
+                        stateId: 2,
+                     },
+                  },
                },
                1: {
                   id: 1,
@@ -420,9 +416,9 @@ describe('collapseAutoTrans()', () => {
                   trans: {
                      first: {
                         ref: '/2/1',
-                        stateId: 4
+                        stateId: 4,
                      },
-                  }
+                  },
                },
                3: {
                   id: 3,
@@ -430,9 +426,9 @@ describe('collapseAutoTrans()', () => {
                   trans: {
                      first: {
                         ref: '/3',
-                        stateId: 5
-                     }
-                  }
+                        stateId: 5,
+                     },
+                  },
                },
                5: {
                   id: 5,
@@ -440,9 +436,9 @@ describe('collapseAutoTrans()', () => {
                   trans: {
                      last: {
                         ref: '/4',
-                        stateId: 1
-                     }
-                  }
+                        stateId: 1,
+                     },
+                  },
                },
                4: {
                   id: 4,
@@ -452,7 +448,7 @@ describe('collapseAutoTrans()', () => {
                         ref: '/2/1,/3',
                         stateId: 6,
                      },
-                  }
+                  },
                },
                6: {
                   id: 6,
@@ -464,11 +460,11 @@ describe('collapseAutoTrans()', () => {
                      },
                      last: {
                         ref: '/4',
-                        stateId: 1
-                     }
-                  }
+                        stateId: 1,
+                     },
+                  },
                },
-            }
+            },
          });
 
          done();
@@ -489,14 +485,14 @@ describe('collapseAutoTrans()', () => {
                   trans: {
                      first: {
                         ref: '/1',
-                        stateId: 2
+                        stateId: 2,
                      },
                      last: {
                         ref: '/2',
-                        stateId: 1
+                        stateId: 1,
                      },
                   },
-                  done: true
+                  done: true,
                },
                1: {
                   id: 1,
@@ -510,12 +506,12 @@ describe('collapseAutoTrans()', () => {
                   trans: {
                      last: {
                         ref: '/2',
-                        stateId: 1
+                        stateId: 1,
                      },
                   },
-                  done: true
+                  done: true,
                },
-            }
+            },
          });
 
          done();
@@ -535,63 +531,63 @@ describe('collapseAutoTrans()', () => {
                   autoTrans: [],
                   trans: {
                      a: {
-                          ref: '/1',
-                          stateId: 1
+                        ref: '/1',
+                        stateId: 1,
                      },
                      b: {
-                          ref: '/2',
-                          stateId: 1
+                        ref: '/2',
+                        stateId: 1,
                      },
                      c: {
                         ref: '/3/1',
-                        stateId: 4
+                        stateId: 4,
                      },
                      d: {
                         ref: '/3/2',
-                        stateId: 3
-                     }
+                        stateId: 3,
+                     },
                   },
-                  done: true
-                 },
+                  done: true,
+               },
                1: {
                   id: 1,
                   autoTrans: [],
                   trans: {},
-                  done: true
+                  done: true,
                },
                2: {
                   id: 2,
                   autoTrans: [],
                   trans: {
-                      c: {
-                          ref: '/3/1',
-                          stateId: 4
-                         },
-                      d: {
-                          ref: '/3/2',
-                          stateId: 3
-                         }
+                     c: {
+                        ref: '/3/1',
+                        stateId: 4,
                      },
-                  done: true
+                     d: {
+                        ref: '/3/2',
+                        stateId: 3,
+                     },
+                  },
+                  done: true,
                },
                3: {
                   id: 3,
                   autoTrans: [],
                   trans: {},
-                  done: true
-                 },
+                  done: true,
+               },
                4: {
                   id: 4,
                   autoTrans: [],
                   trans: {
-                      d: {
-                          ref: '/3/2',
-                          stateId: 3
-                         }
+                     d: {
+                        ref: '/3/2',
+                        stateId: 3,
                      },
-                  done: true
-               }
-             }
+                  },
+                  done: true,
+               },
+            },
          });
 
          done();
@@ -611,25 +607,25 @@ describe('collapseAutoTrans()', () => {
                   autoTrans: [],
                   trans: {
                      a: {
-                          ref: '/1',
-                          stateId: 1
+                        ref: '/1',
+                        stateId: 1,
                      },
                      b: {
-                          ref: '/2',
-                          stateId: 1
+                        ref: '/2',
+                        stateId: 1,
                      },
                      c: {
                         ref: '/3/1',
-                        stateId: 4
+                        stateId: 4,
                      },
                   },
-                  done: true
-                 },
+                  done: true,
+               },
                1: {
                   id: 1,
                   autoTrans: [],
                   trans: {},
-                  done: true
+                  done: true,
                },
                2: {
                   id: 2,
@@ -637,28 +633,28 @@ describe('collapseAutoTrans()', () => {
                   trans: {
                      c: {
                         ref: '/3/1',
-                        stateId: 4
+                        stateId: 4,
                      },
                   },
-                  done: true
+                  done: true,
                },
                3: {
                   id: 3,
                   autoTrans: [],
                   trans: {},
-                  done: true
-                 },
+                  done: true,
+               },
                4: {
                   id: 4,
                   autoTrans: [],
                   trans: {
-                      d: {
-                          ref: '/3/2',
-                          stateId: 3
-                     }
+                     d: {
+                        ref: '/3/2',
+                        stateId: 3,
+                     },
                   },
-               }
-             }
+               },
+            },
          });
 
          done();
@@ -670,87 +666,87 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            'startId': 0,
-            'endId': 1,
-            'states': {
+            startId: 0,
+            endId: 1,
+            states: {
                '0': {
-                  'id': 0,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
-                        'ref': '/1',
-                        'stateId': 1
+                  id: 0,
+                  autoTrans: [],
+                  trans: {
+                     a: {
+                        ref: '/1',
+                        stateId: 1,
                      },
-                     'b': {
-                        'ref': '/2',
-                        'stateId': 1
+                     b: {
+                        ref: '/2',
+                        stateId: 1,
                      },
-                     'c': {
-                        'ref': '/3/1',
-                        'stateId': 4
-                     }
+                     c: {
+                        ref: '/3/1',
+                        stateId: 4,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '1': {
-                  'id': 1,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
-                        'ref': '/1',
-                        'stateId': 1
+                  id: 1,
+                  autoTrans: [],
+                  trans: {
+                     a: {
+                        ref: '/1',
+                        stateId: 1,
                      },
-                     'b': {
-                        'ref': '/2',
-                        'stateId': 1
+                     b: {
+                        ref: '/2',
+                        stateId: 1,
                      },
-                     'c': {
-                        'ref': '/3/1',
-                        'stateId': 4
-                     }
+                     c: {
+                        ref: '/3/1',
+                        stateId: 4,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '2': {
-                  'id': 2,
-                  'autoTrans': [],
-                  'trans': {
-                     'c': {
-                        'ref': '/3/1',
-                        'stateId': 4
-                     }
-                  }
+                  id: 2,
+                  autoTrans: [],
+                  trans: {
+                     c: {
+                        ref: '/3/1',
+                        stateId: 4,
+                     },
+                  },
                },
                '3': {
-                  'id': 3,
-                  'autoTrans': [],
-                  'trans': {
-                     'c': {
-                        'ref': '/3/1',
-                        'stateId': 4
+                  id: 3,
+                  autoTrans: [],
+                  trans: {
+                     c: {
+                        ref: '/3/1',
+                        stateId: 4,
                      },
-                     'a': {
-                        'ref': '/1',
-                        'stateId': 1
+                     a: {
+                        ref: '/1',
+                        stateId: 1,
                      },
-                     'b': {
-                        'ref': '/2',
-                        'stateId': 1
-                     }
+                     b: {
+                        ref: '/2',
+                        stateId: 1,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '4': {
-                  'id': 4,
-                  'autoTrans': [],
-                  'trans': {
-                     'd': {
-                        'ref': '/3/2',
-                        'stateId': 3
-                     }
-                  }
-               }
-            }
+                  id: 4,
+                  autoTrans: [],
+                  trans: {
+                     d: {
+                        ref: '/3/2',
+                        stateId: 3,
+                     },
+                  },
+               },
+            },
          });
 
          done();
@@ -762,154 +758,154 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            'startId': 0,
-            'endId': 1,
-            'states': {
+            startId: 0,
+            endId: 1,
+            states: {
                '0': {
-                  'id': 0,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
+                  id: 0,
+                  autoTrans: [],
+                  trans: {
+                     a: {
                         ref: '/1,/3/1',
-                        'stateId': 7
+                        stateId: 7,
                      },
-                     'b': {
-                        'ref': '/2,/3/2/1',
-                        'stateId': 8
+                     b: {
+                        ref: '/2,/3/2/1',
+                        stateId: 8,
                      },
-                     'c': {
-                        'ref': '/3/2/2',
-                        'stateId': 6
-                     }
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '1': {
-                  'id': 1,
-                  'autoTrans': [],
-                  'trans': {},
-                  'done': true
+                  id: 1,
+                  autoTrans: [],
+                  trans: {},
+                  done: true,
                },
                '2': {
-                  'id': 2,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
-                        'ref': '/1',
-                        'stateId': 2
-                     }
+                  id: 2,
+                  autoTrans: [],
+                  trans: {
+                     a: {
+                        ref: '/1',
+                        stateId: 2,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '3': {
-                  'id': 3,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
-                        'ref': '/3/1',
-                        'stateId': 5
+                  id: 3,
+                  autoTrans: [],
+                  trans: {
+                     a: {
+                        ref: '/3/1',
+                        stateId: 5,
                      },
-                     'b': {
-                        'ref': '/3/2/1',
-                        'stateId': 6
+                     b: {
+                        ref: '/3/2/1',
+                        stateId: 6,
                      },
-                     'c': {
-                        'ref': '/3/2/2',
-                        'stateId': 6
-                     }
-                  }
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
+                     },
+                  },
                },
                '4': {
-                  'id': 4,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
-                        'ref': '/3/1',
-                        'stateId': 5
+                  id: 4,
+                  autoTrans: [],
+                  trans: {
+                     a: {
+                        ref: '/3/1',
+                        stateId: 5,
                      },
-                     'b': {
-                        'ref': '/3/2/1',
-                        'stateId': 6
+                     b: {
+                        ref: '/3/2/1',
+                        stateId: 6,
                      },
-                     'c': {
-                        'ref': '/3/2/2',
-                        'stateId': 6
-                     }
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '5': {
-                  'id': 5,
-                  'autoTrans': [],
-                  'trans': {
-                     'b': {
-                        'ref': '/3/2/1',
-                        'stateId': 6
+                  id: 5,
+                  autoTrans: [],
+                  trans: {
+                     b: {
+                        ref: '/3/2/1',
+                        stateId: 6,
                      },
-                     'c': {
-                        'ref': '/3/2/2',
-                        'stateId': 6
-                     }
-                  }
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
+                     },
+                  },
                },
                '6': {
-                  'id': 6,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
-                        'ref': '/3/1',
-                        'stateId': 5
+                  id: 6,
+                  autoTrans: [],
+                  trans: {
+                     a: {
+                        ref: '/3/1',
+                        stateId: 5,
                      },
-                     'b': {
-                        'ref': '/3/2/1',
-                        'stateId': 6
+                     b: {
+                        ref: '/3/2/1',
+                        stateId: 6,
                      },
-                     'c': {
-                        'ref': '/3/2/2',
-                        'stateId': 6
-                     }
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '7': {
-                  'id': 7,
-                  'autoTrans': [],
-                  'trans': {
-                     'b': {
-                        'ref': '/3/2/1',
-                        'stateId': 6
+                  id: 7,
+                  autoTrans: [],
+                  trans: {
+                     b: {
+                        ref: '/3/2/1',
+                        stateId: 6,
                      },
-                     'c': {
-                        'ref': '/3/2/2',
-                        'stateId': 6
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
                      },
-                     'a': {
-                        'ref': '/1',
-                        'stateId': 2
-                     }
+                     a: {
+                        ref: '/1',
+                        stateId: 2,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
                '8': {
-                  'id': 8,
-                  'autoTrans': [],
-                  'trans': {
-                     'a': {
-                        'ref': '/3/1',
-                        'stateId': 5
+                  id: 8,
+                  autoTrans: [],
+                  trans: {
+                     a: {
+                        ref: '/3/1',
+                        stateId: 5,
                      },
-                     'b': {
-                        'ref': '/3/2/1',
-                        'stateId': 6
+                     b: {
+                        ref: '/3/2/1',
+                        stateId: 6,
                      },
-                     'c': {
-                        'ref': '/3/2/2',
-                        'stateId': 6
-                     }
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
+                     },
                   },
-                  'done': true
+                  done: true,
                },
-            }
+            },
          });
 
          done();
@@ -919,7 +915,7 @@ describe('collapseAutoTrans()', () => {
    it('fnctions if there is no autoTrans', () => {
       // (first, (first)*, last)
 
-      const foo: Graph = {
+      const foo: CmGraph = {
          startId: 0,
          endId: 1,
          states: {
@@ -929,9 +925,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/1',
-                     stateId: 2
-                  }
-               }
+                     stateId: 2,
+                  },
+               },
             },
             1: {
                id: 1,
@@ -945,29 +941,29 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
-                  }
-               }
+                     stateId: 4,
+                  },
+               },
             },
             3: {
                id: 3,
                trans: {
                   first: {
                      ref: '/3',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
             4: {
                id: 4,
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
-                  }
-               }
+                     stateId: 4,
+                  },
+               },
             },
-         }
+         },
       };
 
       collapseAutoTrans(foo);
@@ -982,9 +978,9 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/1,/2/1',
-                     stateId: 5
-                  }
-               }
+                     stateId: 5,
+                  },
+               },
             },
             1: {
                id: 1,
@@ -998,27 +994,27 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1,/3',
-                     stateId: 6
+                     stateId: 6,
                   },
-               }
+               },
             },
             3: {
                id: 3,
                trans: {
                   first: {
                      ref: '/3',
-                     stateId: 1
-                  }
-               }
+                     stateId: 1,
+                  },
+               },
             },
             4: {
                id: 4,
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
+                     stateId: 4,
                   },
-               }
+               },
             },
             5: {
                id: 5,
@@ -1026,7 +1022,7 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1,/2/1,/3',
-                     stateId: 7
+                     stateId: 7,
                   },
                },
             },
@@ -1036,10 +1032,10 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
+                     stateId: 4,
                   },
                },
-               done: true
+               done: true,
             },
             7: {
                id: 7,
@@ -1047,13 +1043,12 @@ describe('collapseAutoTrans()', () => {
                trans: {
                   first: {
                      ref: '/2/1',
-                     stateId: 4
+                     stateId: 4,
                   },
                },
-               done: true
+               done: true,
             },
-         }
+         },
       });
    });
-
 });

@@ -17,7 +17,6 @@ import { CHARREF_XTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN, PARAMETER_ENTITY_REFER
 import {
    isTextXToken,
 
-   elementDeclaration,
    DocTypeEndXToken,
    DocTypeStartXToken,
    ElementEmptyXToken,
@@ -653,7 +652,7 @@ class CheckXTokenValidStream extends Transform {
                this.externalDeclarations = false;
             }
          }
-      } else if (xToken instanceof elementDeclaration.XToken) {
+      } else if (xToken instanceof ElementDeclaration) {
          this.validateElementDecl(xToken);
       } else if (xToken instanceof DocTypeStartXToken) {
          this.docType = xToken;

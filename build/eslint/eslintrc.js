@@ -154,6 +154,7 @@ module.exports = {
             './source/pToken/**/*.ts',
             './source/sToken/**/*.ts',
             './source/stringify/**/*.ts',
+            './source/valid/**/*.ts',
             './source/wellformedness/**/*.ts',
             './source/xToken/**/*.ts',
 

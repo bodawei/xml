@@ -25,6 +25,8 @@ module.exports = {
      '!source/pToken/**/@test/**/*.ts',
      'source/stringify/**/*.ts',
      '!source/stringify/**/@test/**/*.ts',
+     'source/valid/**/*.ts',
+     '!source/valid/**/@test/**/*.ts',
      'source/wellformedness/**/*.ts',
      '!source/wellformedness/**/@test/**/*.ts',
      'source/xToken/**/*.ts',
