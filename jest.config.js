@@ -166,6 +166,7 @@ module.exports = {
      './source/error/@test/beforeJest.ts',
    //   './source/sToken/@test/beforeJest.ts',
      './source/token/@test/beforeJest.ts',
+     './source/valid/@test/beforeJest.ts',
   ],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.

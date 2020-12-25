@@ -153,7 +153,7 @@ function replaceAutoTrans(
  * Note that we change the refs, in the case of one of these conflicts, to be
  * a comma separated list of the refs that were there before.
  */
-function collapseAutoTrans(graph: CmGraph) {
+function collapseAutoTrans(graph: CmGraph): void {
    const todo: Array<CmStateId> = [];
    const queued: VisitedMap = {};
 

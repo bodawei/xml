@@ -10,9 +10,7 @@ import { pruneCmGraph } from './pruneCmGraph';
 function makeCmGraph(contentModel: ContentModelP): CmGraph {
    const graph = cmToCmGraph(contentModel);
    collapseAutoTrans(graph);
-   pruneCmGraph(graph);
-
-   return graph;
+   return pruneCmGraph(graph);
 }
 
 export { makeCmGraph };

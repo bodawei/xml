@@ -6,7 +6,7 @@ import { SToken } from 'sToken';
 import { Position } from '../BaseError';
 import { WellFormedError } from '../WellFormedError';
 import ErrorCollector  from '../ErrorCollector';
-
+import { makeErrorMatcher } from './beforeJest';
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace
@@ -89,4 +89,5 @@ class MockErrorCollector extends ErrorCollector {
 export {
    MockErrorCollector,
    ErrorInfo,
+   makeErrorMatcher,
 };

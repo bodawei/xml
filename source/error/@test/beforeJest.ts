@@ -54,7 +54,7 @@ function toNotReportError(mockErrorCollector: MockErrorCollector, expectedId: st
 }
 
 
-function makeMatcher(ErrorClass: any) {
+function makeMatcher(ErrorClass: any, messages: any) {
    return function (mockErrorCollector: MockErrorCollector, expectedError: ErrorInfo) {
       if (!mockErrorCollector) {
          throw new Error('Did not get a mock error collector as expected.');
@@ -123,6 +123,10 @@ function makeMatcher(ErrorClass: any) {
 
 expect.extend({
    toNotReportError,
-   toReportWarning: makeMatcher(XmlWarning),
-   toReportError: makeMatcher(WellFormedError),
+   toReportWarning: makeMatcher(XmlWarning, messages),
+   toReportError: makeMatcher(WellFormedError, messages),
 });
+
+const makeErrorMatcher = makeMatcher;
+
+export { makeErrorMatcher }

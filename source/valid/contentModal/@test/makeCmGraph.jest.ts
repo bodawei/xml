@@ -48,6 +48,7 @@ describe('nameList (unit)', () => {
             },
          };
          cmToCmGraph.mockReturnValue(graph);
+         pruneCmGraph.mockImplementation((x) => x);
 
          const result = makeCmGraph(model);
 
