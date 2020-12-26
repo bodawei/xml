@@ -1,20 +1,50 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { ConformanceVersion } from 'basic';
+import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { ElementDeclarationPToken } from 'pToken';
+import { ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
 import { ValidityError } from '../../error/ValidityError';
-import { ElDeclType, ValidateState } from '../../validateState';
+import { DeclarationDetails, ElDeclType, ValidateState } from '../../validateState';
+import {
+   CharRefPToken,
+   ELIDED_ENTITY_DECLARATION_PTOKEN,
+   ParameterEntityEndPToken,
+   ParameterEntityReferencePToken,
+   ParameterEntityStartPToken,
+   TextPToken,
+} from 'token';
 
-describe('elementDeclarationValidate (unit)', () => {
+fdescribe('elementDeclarationValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
    let state: ValidateState;
+   let version: ConformanceVersion;
+   let peDecl: ParameterEntityDeclarationPToken;
+   let peRefEmpty: ParameterEntityReferencePToken;
+   let peRefX: ParameterEntityReferencePToken;
+   let peRefDelimiter: ParameterEntityReferencePToken;
+   let textClose: TextPToken;
+   let childrenDetails: DeclarationDetails;
 
    beforeEach(() => {
+      peDecl = new ParameterEntityDeclarationPToken({ open: toSToken('<!') });
+      peRefEmpty = new ParameterEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('empty'),
+      });
+      peRefX = new ParameterEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('x'),
+      });
+      peRefDelimiter = new ParameterEntityReferencePToken({
+         open: toSToken('&'),
+         name: toSToken('delimiter'),
+      });
+      textClose = new TextPToken({ text: toSToken(')') });
       mockErrorCollector = new MockErrorCollector();
       elementDeclaration = new ElementDeclarationPToken({
          open: toSToken('<!'),
@@ -25,11 +55,46 @@ describe('elementDeclarationValidate (unit)', () => {
          nameSpace: toSToken(' '),
          close: toSToken('>'),
       });
+      childrenDetails = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+      version = new ConformanceVersion();
       state = {
          elementDeclarations: {
             elementName: {
                type: ElDeclType.ANY,
                token: elementDeclaration,
+            },
+         },
+         parameterEntities: {
+            delimiter: {
+               token: peDecl,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('|') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
+            },
+            empty: {
+               token: peDecl,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
+            },
+            close: {
+               token: peDecl,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken(')') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
       };
@@ -46,7 +111,7 @@ describe('elementDeclarationValidate (unit)', () => {
          }),
       };
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
@@ -59,12 +124,12 @@ describe('elementDeclarationValidate (unit)', () => {
    it('reports no errors if there is no entry in the state', () => {
       delete state.elementDeclarations.elementName;
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an warning if there is a name in the mixed content model that has no declaration', () => {
+   it('reports a warning if there is a name in the mixed content model that has no declaration (§3.2.0)', () => {
       elementDeclaration = new ElementDeclarationPToken({
          open: toSToken('<!'),
          declType: toSToken('ELEMENT'),
@@ -87,7 +152,7 @@ describe('elementDeclarationValidate (unit)', () => {
          close: toSToken('>'),
       });
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
@@ -97,7 +162,7 @@ describe('elementDeclarationValidate (unit)', () => {
       });
    });
 
-   it('reports an warning if there is a name in the children content model that has no declaration', () => {
+   it('reports an warning if there is a name in the children content model that has no declaration (§3.2.0)', () => {
       elementDeclaration = new ElementDeclarationPToken({
          open: toSToken('<!'),
          declType: toSToken('ELEMENT'),
@@ -131,13 +196,9 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          close: toSToken('>'),
       });
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         graph: { startId: 0, endId: 0, states: {} },
-         token: elementDeclaration,
-      };
+      state.elementDeclarations.elementName = childrenDetails;
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
@@ -161,7 +222,7 @@ describe('elementDeclarationValidate (unit)', () => {
          token: elementDeclaration,
       };
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector.errors).toEqual([]);
    });
@@ -184,12 +245,12 @@ describe('elementDeclarationValidate (unit)', () => {
          token: elementDeclaration,
       };
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error if this is a mixed declaration and there are duplicate names', () => {
+   it('reports an error if this is a mixed declaration and there are duplicate names (§3.2.2)', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
          contentModel: {
             open: toSToken('('),
@@ -203,7 +264,7 @@ describe('elementDeclarationValidate (unit)', () => {
          duplicateNames: ['foo', 'bar'],
       };
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
@@ -285,7 +346,7 @@ describe('elementDeclarationValidate (unit)', () => {
          token: elementDeclaration,
       };
 
-      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector);
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
@@ -293,5 +354,536 @@ describe('elementDeclarationValidate (unit)', () => {
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
       });
+   });
+
+   it('report an error if in a children, the parentheses in the replacement text of an entity are not balanced (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('(') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = childrenDetails;
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector).toReportValidityError({
+         id: ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+         params: ['elementName', 'x'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
+   it('report no errors if in a children, the parentheses in the replacement text of an entity are balanced (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('( foo | bar | ( baz | ginger))') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('report an error if in a mixed, the parentheses in the replacement text of an entity are not balanced (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('( foo | ( bar )') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.MIXED,
+         token: elementDeclaration,
+         names: [],
+         duplicateNames: [],
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector).toReportValidityError({
+         id: ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+         params: ['elementName', 'x'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
+   it('report an error if in a children, the replacement text of a parameter entity ends with a | (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, textClose],
+            propName: 'midSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [
+                  new CharRefPToken({ open: toSToken('&#'), digits: toSToken('65') }),
+                  new TextPToken({ text: toSToken('|') }),
+               ],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector).toReportWarning({
+         id: XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+         params: ['elementName', 'x'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
+   it('report an error if in a children, the replacement text of a parameter entity is only whitespace (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, textClose],
+            propName: 'midSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('   ') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = childrenDetails;
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector).toReportWarning({
+         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         params: ['elementName', 'x'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
+   it('report not an error if in a 1.0/1 document, the replacement text of a PE is whiespace (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, textClose],
+            propName: 'midSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('   ') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = childrenDetails;
+
+      elementDeclarationValidate(
+         elementDeclaration,
+         state,
+         mockErrorCollector,
+         new ConformanceVersion(1, 1),
+      );
+
+      expect(mockErrorCollector).not.toReportWarning({
+         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         params: ['elementName', 'x'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
+   it('report an error if in a 1.0/1 document, the replacement text of a PE has no characters (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefEmpty, textClose],
+            propName: 'midSpec',
+         },
+      });
+      state.elementDeclarations.elementName = childrenDetails;
+
+      elementDeclarationValidate(
+         elementDeclaration,
+         state,
+         mockErrorCollector,
+         new ConformanceVersion(1, 1),
+      );
+
+      expect(mockErrorCollector).toReportWarning({
+         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         params: ['elementName', 'empty'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
+   it('ignores perefs, as well as pe start and end in the replacement text', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, textClose],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [
+                  new ParameterEntityReferencePToken({
+                     open: toSToken('&'),
+                  }),
+                  new ParameterEntityStartPToken(peRefX), // just a dummy peRef to make it happy
+                  new TextPToken({ text: toSToken('()') }),
+                  new ParameterEntityEndPToken(peRefX), // just a dummy peRef to make it happy
+               ],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('ignores non-perefs in the unexpanded value', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [new TextPToken({ text: toSToken('(') }), peRefX],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('()') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('ignores perefs that have no details', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, textClose],
+            propName: 'contentSpec',
+         },
+      });
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('ignores empty entities before the start of the content model', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, new TextPToken({ text: toSToken('(') }), textClose],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('  ') })], // note this would be an error if in the content model
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('ignores even closing parenthesis if we have not yet seen an open', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, new TextPToken({ text: toSToken('(') }), textClose],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken(')') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('ignores an open paren in the text in the middle of a content model', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [new TextPToken({ text: toSToken('(') }), peRefX, textClose],
+            propName: 'midSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('foo') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('considers a parenthesis within the unexpanded text tokens to count as the start of the content model', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [new TextPToken({ text: toSToken('(') }), peRefX, textClose],
+            propName: 'contentSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('  ') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = childrenDetails;
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector).toReportWarning({
+         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         params: ['elementName', 'x'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
+   it('does not report errors about empty PE or trailing delimiters if they come after the last parenthesis (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefX, peRefDelimiter],
+            propName: 'midSpec',
+         },
+      });
+      state.parameterEntities = {
+         x: {
+            token: peDecl,
+            replacementText: {
+               value: [new TextPToken({ text: toSToken('  ') })],
+               isPE: true,
+               token: peDecl,
+               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+            },
+         },
+      };
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('does not report errors about empty PE or trailing delimiters if they come before the content model (§3.2.1)', () => {
+      elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [],
+         },
+         unexpanded: {
+            tokens: [peRefEmpty, new TextPToken({ text: toSToken('(x)bar') })],
+            propName: 'name',
+         },
+      });
+      state.elementDeclarations.elementName = {
+         type: ElDeclType.CHILDREN,
+         token: elementDeclaration,
+         graph: { startId: 0, endId: 0, states: {} },
+      };
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

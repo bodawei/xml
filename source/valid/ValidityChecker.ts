@@ -1,6 +1,15 @@
 import { ErrorCollector, ValidityError, XmlWarning } from 'error';
-import {  GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken, ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
-import { GENERAL_ENTITY_DECLARATION_PTOKEN, PARAMETER_ENTITY_DECLARATION_PTOKEN, ParseValue } from 'pToken';
+import {
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+} from 'token';
+import {
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   ParseValue,
+} from 'pToken';
 import { strOrBlank } from 'sToken';
 
 /*
@@ -74,13 +83,13 @@ interface PeDeclInfo {
    isInternal: boolean;
 }
 
-const PREDEFINED = [ 'lt', 'gt', 'quot', 'apos', 'amp' ];
+const PREDEFINED = ['lt', 'gt', 'quot', 'apos', 'amp'];
 const VEID = ValidityError.ID;
 const WARNID = XmlWarning.ID;
 
 class ValidityChecker {
-
    private geDecls: Record<string, GeDeclInfo>;
+
    private peDecls: Record<string, PeDeclInfo>;
 
    constructor() {
@@ -114,6 +123,8 @@ class ValidityChecker {
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             this.checkPERef(token, ec);
             break;
+         default:
+            break;
       }
    }
 
@@ -132,16 +143,15 @@ class ValidityChecker {
        *    in an entity declaration. ...
        */
       if (!PREDEFINED.includes(geDeclName)) {
-         ec.report(VEID.GEREF_UNDEFINED, [ geDeclName ], token.open);
+         ec.report(VEID.GEREF_UNDEFINED, [geDeclName], token.open);
       } else {
          /*
           * §4.1.0: Validity Constraint: Entity Declared
           *    For interoperability, valid documents should declare the entities
           *    amp, lt, gt, apos, quot, in the form specified in 4.6 Predefined Entities.
           */
-         ec.reportError(WARNID.PREDEFINED_NOT_DECLARED, XmlWarning, [ geDeclName ], token.open);
+         ec.reportError(WARNID.PREDEFINED_NOT_DECLARED, XmlWarning, [geDeclName], token.open);
       }
-
    }
 
    private checkPERef(token: ParameterEntityReferencePToken, ec: ErrorCollector): void {
@@ -154,13 +164,11 @@ class ValidityChecker {
        *    in an entity declaration. ... The declaration of a parameter entity must
        *    precede any reference to it...
        */
-      ec.check(!this.peDecls[peDeclName], VEID.PEREF_UNDEFINED, [ peDeclName ], token.open);
+      ec.check(!this.peDecls[peDeclName], VEID.PEREF_UNDEFINED, [peDeclName], token.open);
    }
 }
 
-export {
-   ValidityChecker,
-};
+export { ValidityChecker };
 
 /*
 **Well-Formedness Constraint: Entity Declared**

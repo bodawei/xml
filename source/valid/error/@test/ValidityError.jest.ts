@@ -1,5 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ValidityError } from '../ValidityError';
 

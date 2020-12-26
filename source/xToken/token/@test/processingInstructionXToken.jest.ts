@@ -19,7 +19,7 @@ describe('ProcessingInstructionXToken() (unit)', () => {
       });
 
       expect(new ProcessingInstructionXToken(piPToken)).toEqual(
-         jasmine.objectContaining({
+         expect.objectContaining({
             type: PROCESSING_INSTRUCTION_XTOKEN,
             target: 'TheTarget',
             instruction: 'blah',
@@ -36,7 +36,7 @@ describe('ProcessingInstructionXToken() (unit)', () => {
       });
 
       expect(new ProcessingInstructionXToken(piPToken)).toEqual(
-         jasmine.objectContaining({
+         expect.objectContaining({
             type: PROCESSING_INSTRUCTION_XTOKEN,
             target: '',
             instruction: '',
@@ -49,7 +49,7 @@ describe('ProcessingInstructionXToken() (unit)', () => {
       const piXToken = new ProcessingInstructionXToken('TheTarget2', 'blah2');
 
       expect(piXToken).toEqual(
-         jasmine.objectContaining({
+         expect.objectContaining({
             target: 'TheTarget2',
             instruction: 'blah2',
          }),
@@ -60,7 +60,7 @@ describe('ProcessingInstructionXToken() (unit)', () => {
       const piXToken = new ProcessingInstructionXToken('TheTarget2');
 
       expect(piXToken).toEqual(
-         jasmine.objectContaining({
+         expect.objectContaining({
             target: 'TheTarget2',
             instruction: '',
          }),

@@ -33,7 +33,7 @@ describe('attListDeclarationXToken (integration)', () => {
          const token = new AttListDeclarationXToken(pToken);
 
          expect(token).toEqual(
-            jasmine.objectContaining({
+            expect.objectContaining({
                elementName: 'foo',
                attDefs: [],
             }),
@@ -51,7 +51,7 @@ describe('attListDeclarationXToken (integration)', () => {
          const token = new AttListDeclarationXToken(pToken);
 
          expect(token).toEqual(
-            jasmine.objectContaining({
+            expect.objectContaining({
                elementName: 'elName',
                attDefs: [
                   {
@@ -78,7 +78,7 @@ describe('attListDeclarationXToken (integration)', () => {
          const token = new AttListDeclarationXToken(pToken);
 
          expect(token).toEqual(
-            jasmine.objectContaining({
+            expect.objectContaining({
                elementName: 'elName',
                attDefs: [
                   {
