@@ -28,7 +28,7 @@ describe('xmlDeclarationToSTokens (unit)', () => {
    });
 
    it('calls fieldedInstructionToSTokens()', () => {
-      const entitySpy = spyOn(fieldedInstr, 'fieldedInstructionToSTokens');
+      const entitySpy = jest.spyOn(fieldedInstr, 'fieldedInstructionToSTokens');
 
       xmlDeclarationToSTokens(xmlDeclPToken);
 

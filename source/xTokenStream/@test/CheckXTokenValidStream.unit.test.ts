@@ -2589,60 +2589,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectNoErrorsOrWarnings(validator, done);
             });
 
-            it('reports a warning if the parameter entity expansion is empty', (done) => {
-               const pToken = new ElementDeclarationPToken({
-                  open: SToken.fromString('<!'),
-                  name: SToken.fromString('test'),
-                  children: {
-                     open: SToken.fromString('('),
-                     names: [],
-                  },
-                  peRefPlus: [{
-                     type: UnassignedType.ENTITY_START,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }, {
-                     type: UnassignedType.ENTITY_END,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }],
-               });
-               const declToken = elementDeclaration.pTokenToXToken(pToken);
-               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  ['test', 'testPE'], (pToken as any).peRefPlus[0].token.open, pToken.open); // typeHack
-
-               validator.write(declToken);
-               validator.end();
-
-               expectStream(validator, expected, done);
-            });
-
-            it('reports a warning if the parameter entity expansion is only white space', (done) => {
-               const pToken = new ElementDeclarationPToken({
-                  open: SToken.fromString('<!'),
-                  name: SToken.fromString('test'),
-                  children: {
-                     open: SToken.fromString('('),
-                     names: [],
-                  },
-                  peRefPlus: [{
-                     type: UnassignedType.ENTITY_START,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }, {
-                     type: 'space',
-                     token: new TextPToken({ text: SToken.fromString(' ') }),
-                  }, {
-                     type: UnassignedType.ENTITY_END,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }],
-               });
-               const declToken = elementDeclaration.pTokenToXToken(pToken);
-               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  ['test', 'testPE'], (pToken as any).peRefPlus[0].token.open, pToken.open);
-
-               validator.write(declToken);
-               validator.end();
-
-               expectStream(validator, expected, done);
-            });
 
             it('reports no error when there is a literal and whitespace in the peRefPlus', (done) => {
                const pToken = new ElementDeclarationPToken({
@@ -2672,68 +2618,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                expectNoErrorsOrWarnings(validator, done);
-            });
-
-            it('reports a warning if the parameter entity expansion ends with a |', (done) => {
-               const pToken = new ElementDeclarationPToken({
-                  open: SToken.fromString('<!'),
-                  name: SToken.fromString('test'),
-                  children: {
-                     open: SToken.fromString('('),
-                     names: [],
-                  },
-                  peRefPlus: [{
-                     type: UnassignedType.ENTITY_START,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }, {
-                     type: 'word',
-                     token: new TextPToken({ text: SToken.fromString('|') }),
-                  }, {
-                     type: 'space',
-                     token: new TextPToken({ text: SToken.fromString(' ') }),
-                  }, {
-                     type: UnassignedType.ENTITY_END,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }],
-               });
-               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  ['test', 'testPE'], (pToken as any).peRefPlus[0].token.open, pToken.open);
-
-               validator.write(elementDeclaration.pTokenToXToken(pToken));
-               validator.end();
-
-               expectStream(validator, expected, done);
-            });
-
-            it('reports a warning if the parameter entity expansion ends with a ,', (done) => {
-               const pToken = new ElementDeclarationPToken({
-                  open: SToken.fromString('<!'),
-                  name: SToken.fromString('test'),
-                  children: {
-                     open: SToken.fromString('('),
-                     names: [],
-                  },
-                  peRefPlus: [{
-                     type: UnassignedType.ENTITY_START,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }, {
-                     type: 'word',
-                     token: new TextPToken({ text: SToken.fromString(',') }),
-                  }, {
-                     type: 'space',
-                     token: new TextPToken({ text: SToken.fromString(' ') }),
-                  }, {
-                     type: UnassignedType.ENTITY_END,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }],
-               });
-               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  ['test', 'testPE'], (pToken as any).peRefPlus[0].token.open, pToken.open);
-
-               validator.write(elementDeclaration.pTokenToXToken(pToken));
-               validator.end();
-
-               expectStream(validator, expected, done);
             });
 
             it('reports no validation error if parentheses are not balanced in sub-entities', (done) => {
@@ -2775,37 +2659,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                expectNoErrorsOrWarnings(validator, done);
-            });
-
-            it('reports a validation error if parentheses are not balanced in the top entity', (done) => {
-               const pToken = new ElementDeclarationPToken({
-                  open: SToken.fromString('<!'),
-                  name: SToken.fromString('test'),
-                  children: {
-                     open: SToken.fromString('('),
-                     names: [],
-                  },
-                  peRefPlus: [{
-                     type: UnassignedType.ENTITY_START,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }, {
-                     type: 'word',
-                     token: new TextPToken({ text: SToken.fromString('(') }),
-                  }, {
-                     type: 'space',
-                     token: new TextPToken({ text: SToken.fromString(' ') }),
-                  }, {
-                     type: UnassignedType.ENTITY_END,
-                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
-                  }],
-               });
-               const expected = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-                  ['test', 'testPE'], (pToken as any).peRefPlus[0].token.open, pToken.open);  //typeHack
-
-               validator.write(elementDeclaration.pTokenToXToken(pToken));
-               validator.end();
-
-               expectStream(validator, expected, done);
             });
 
             it('reports no validation nerror when parentheses are balanced at the top entity level', (done) => {
@@ -3338,20 +3191,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
             });
 
-            it('reports an error if an element is used that was not declared (§3.0.0)', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'ANY');
-               const startToken = new ElementStartXToken('one', []);
-               const undeclaredToken = new ElementStartXToken('two', []);
-
-               validator.write(elementDecl);
-               validator.write(startToken);
-               validator.write(undeclaredToken);
-               validator.end();
-
-               const errorToken = new ValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT, ['one', 'two']);
-               expectStream(validator, errorToken, done);
-            });
-
             it('reports an error if a completely unsupported bit of markup shows up (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const startToken = new ElementStartXToken('one', []);
@@ -3494,62 +3333,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          describe('MIXED content', () => {
-
-            it('reports an error if any element start appears in a PCDATA-only element', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }],
-                  repeat: 'ONE',
-                  listType: 'CHOICE'
-               });
-               const elStart = new ElementStartXToken('one', []);
-               const child = new ElementStartXToken('sub', []);
-
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(child);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, ['one', 'sub']);
-               expectStream(validator, expected, done);
-            });
-
-
-            it('reports an error if one child element does not match any of the defined ones', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }, {
-                     name: 'one',
-                     repeat: 'ONE'
-                  }, {
-                     name: 'two',
-                     repeat: 'ONE'
-                  }],
-                  repeat: 'ONE',
-                  listType: 'CHOICE'
-               });
-               const elStart = new ElementStartXToken('one', []);
-               const elEnd = new ElementEndXToken('one');
-               const child = new ElementStartXToken('two', []);
-               const childEnd = new ElementEndXToken('two');
-               const thirdStart = new ElementStartXToken('three', []);
-
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(elStart);
-               validator.write(elEnd);
-               validator.write(child);
-               validator.write(childEnd);
-               validator.write(thirdStart);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, ['one', 'three']);
-               expectStream(validator, expected, done);
-            });
 
             it('reports no error if there is a comment found in mixed content  in 1.0/1 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
@@ -4093,65 +3876,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
             });
 
-            it('reports an error if an element declaration is of type CHILDREN but has no content spec', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined);
-               const elStart = new ElementStartXToken('one', []);
-               const child = new ElementStartXToken('sub', []);
-
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(child);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, ['one', 'sub']);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports an error if an end is encountered but the graph is not done', (done) => {
-               const nameListGraph = spyOn(nameList, 'graphFromNameList');
-               nameListGraph.and.returnValue({
-                  startId: 0,
-                  endId: 9,
-                  states: {
-                     0: {
-                        id: 0,
-                        trans: {
-                           two: {
-                              ref: 'x1',
-                              stateId: 1
-                           },
-                           three: {
-                              ref: 'x2',
-                              stateId: 1
-                           },
-                        },
-                        done: false,
-                     },
-                     1: {
-                        id: 1,
-                        trans: {
-                        },
-                        done: true,
-                     },
-                  }
-               });
-               const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [],
-                  repeat: 'ONE',
-                  listType: 'CHOICE',
-               });
-               const elStart = new ElementStartXToken('one', []);
-               const elEnd = new ElementEndXToken('one');
-
-               validator.write(elementDecl1);
-               validator.write(elStart);
-               validator.write(elEnd);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, ['one', 'two, three']);
-               expectStream(validator, expected, done);
-            });
-
             it('reports no error if an end is encountered when done transitioning through the graph', (done) => {
                const nameListGraph = spyOn(nameList, 'graphFromNameList');
                nameListGraph.and.returnValue({
@@ -4198,55 +3922,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                expectNoErrorsOrWarnings(validator, done);
-            });
-
-            it('reports an error if one tries to make an illegal transition in the graph', (done) => {
-               const nameListGraph = spyOn(nameList, 'graphFromNameList');
-               nameListGraph.and.returnValue({
-                  startId: 0,
-                  endId: 9,
-                  states: {
-                     0: {
-                        id: 0,
-                        trans: {
-                           two: {
-                              ref: 'x1',
-                              stateId: 1
-                           },
-                           three: {
-                              ref: 'x2',
-                              stateId: 1
-                           },
-                        },
-                        done: false,
-                     },
-                     1: {
-                        id: 1,
-                        trans: {
-                        },
-                        done: true,
-                     },
-                  }
-               });
-               const elementDecl2 = new elementDeclaration.XToken('four', 'EMPTY', undefined);
-               const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [],
-                  repeat: 'ONE',
-                  listType: 'CHOICE',
-               });
-               const elStart = new ElementStartXToken('one', []);
-               const elMiddle = new ElementEmptyXToken('four', []);
-               const elEnd = new ElementEndXToken('one');
-
-               validator.write(elementDecl2);
-               validator.write(elementDecl1);
-               validator.write(elStart);
-               validator.write(elMiddle);
-               validator.write(elEnd);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, ['one', 'four']);
-               expectStream(validator, expected, done);
             });
 
             it('reports an error if an element with element content is externally declared and standalone=yes (§2.9)', (done) => {

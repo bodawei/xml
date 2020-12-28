@@ -44,12 +44,10 @@ import {
 
    SPACE_XTOKEN,
 
-   ParameterEntityReferencePToken,
    TextXToken,
-   UnassignedType,
 } from 'token';
 
-import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
+import { AttributeValueXToken } from '../token/common/attribute';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
@@ -353,10 +351,7 @@ class CheckXTokenValidStream extends Transform {
                break;
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
-               if (!this.elementDeclarations[xToken.name]) {
-                  this.pushValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT,
-                     [ declInfo.token.name, xToken.name ], sToken);
-               }
+               // dead
                break;
             case ELEMENT_END_XTOKEN:
                // always ok
@@ -412,10 +407,7 @@ class CheckXTokenValidStream extends Transform {
          switch (xToken.type) {
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
-               if (!declInfo.children[xToken.name]) {
-                  this.pushValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-                     [ declInfo.token.name, xToken.name ], sToken);
-               }
+               // dead
                break;
             case CHARREF_XTOKEN:
             case CHARDATA_XTOKEN:
@@ -497,19 +489,11 @@ class CheckXTokenValidStream extends Transform {
             case ELEMENT_EMPTY_XTOKEN:
                const destState = currentState.trans[xToken.name];
 
-               if (!destState) {
-                  this.pushValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT,
-                     [ declInfo.token.name, xToken.name ], sToken);
-               } else {
+               if (destState) {
                   context.stateId = destState.stateId;
                }
                break;
             case ELEMENT_END_XTOKEN:
-               if (currentState.done !== true) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [ declInfo.token.name,
-                     Object.keys(currentState.trans).join(', ') ], sToken);
-               }
-
                if (isNoSpaceAtEndsVersion && context.lastElementContentValue === SPACE_XTOKEN) {
                   this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
                }
@@ -652,6 +636,8 @@ class CheckXTokenValidStream extends Transform {
                this.externalDeclarations = false;
             }
          }
+      } else if (xToken instanceof ElementDeclaration) {
+         this.validateElementDecl(xToken);
       } else if (xToken instanceof DocTypeStartXToken) {
          this.docType = xToken;
       } else if (xToken instanceof ElementStartXToken || xToken instanceof ElementEmptyXToken) {
@@ -1004,6 +990,78 @@ class CheckXTokenValidStream extends Transform {
 
       return duplicates;
    }
+
+   private validateElementDecl(elDecl: ElementDeclaration): void {
+      const openSToken = elDecl.pToken && elDecl.pToken.open;
+      let isMixed = false;
+
+      // Validity Constraint: §3.2.0: Validity constraint: Unique Element Type Declaration
+      //    An element type must not be declared more than once.
+      if (this.elementDeclarations[elDecl.name]) {
+         this.pushValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
+            [ elDecl.name ], openSToken);
+         return;
+      }
+
+      if (elDecl.contentSpecType === 'EMPTY') {
+         this.elementDeclarations[elDecl.name] = {
+            token: elDecl,
+            type: 'EMPTY_CONTENT',
+         };
+      } else if (elDecl.contentSpecType === 'ANY') {
+         this.elementDeclarations[elDecl.name] = {
+            token: elDecl,
+            type: 'ANY_CONTENT',
+         };
+      } else {
+         const children: XNameList = elDecl.children || {
+            names: [],
+            listType: 'CHOICE',
+            repeat: 'ONE',
+         };
+
+         // §3.2.0: At user option, an XML processor may issue a warning when a declaration mentions an
+         //    element type for which no declaration is provided, but this is not an error.
+         const childNamesMap = getNamesFromList(children);
+         const childNames = Object.keys(childNamesMap);
+         for (let index = 0; index < childNames.length; index++) {
+            const childName = childNames[index];
+
+            if (childName.toLocaleUpperCase() === '#PCDATA') {
+               isMixed = true;
+               continue;
+            }
+         }
+
+         if (isMixed) {
+            const childrenNames: MixedChildrenMap = {};
+
+            this.elementDeclarations[elDecl.name] = {
+               token: elDecl,
+               type: 'MIXED_CONTENT',
+               children: childrenNames,
+            };
+
+            // §3.2.2: Validity constraint: No Duplicate Types
+            //    The same name must not appear more than once in a single mixed-content declaration.
+            const names: Array<XName> = children.names as Array<XName>;
+
+            names.forEach((child: XName) => {
+               if (child.name && child.name.toLocaleUpperCase() !== '#PCDATA') {
+                  childrenNames[child.name] = true;
+               }
+            });
+         } else {
+            this.elementDeclarations[elDecl.name] = {
+               token: elDecl,
+               type: 'ELEMENT_CONTENT',
+               externallyDeclared: this.externalDeclarations, // §2.9
+               graph: nameList.graphFromNameList(children),
+            };
+         }
+      }
+   }
+
 
    /*
     * Does all checks that can only be done once we have the whole DTD processed

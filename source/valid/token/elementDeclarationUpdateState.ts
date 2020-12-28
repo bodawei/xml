@@ -39,7 +39,7 @@ function extractNames(contentModel: ContentModelP): DetailsFragment {
    return { names, duplicateNames };
 }
 
-function recordElementDeclaration(
+function elementDeclarationUpdateState(
    elDecl: ElementDeclarationPToken,
    state: ValidateState,
 ): ValidateState {
@@ -98,4 +98,4 @@ function recordElementDeclaration(
    return state;
 }
 
-export { recordElementDeclaration };
+export { elementDeclarationUpdateState };

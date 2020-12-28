@@ -41,13 +41,52 @@ interface ParameterEntityDetails {
    replacementText: ElidedEntityDeclarationPToken;
 }
 
-interface ValidateState {
-   elementDeclarations: {
+interface ElementContext {
+   declDetails: DeclarationDetails;
+   parentName: string;
+   stateId: number;
+}
+
+interface ValidateStateProps {
+   elementDeclarations?: {
       [name: string]: DeclarationDetails;
    };
-   parameterEntities: {
+
+   parameterEntities?: {
       [name: string]: ParameterEntityDetails;
+   };
+
+   elementContext?: {
+      contextStack: ReadonlyArray<ElementContext>;
+      activeContext?: ElementContext; // if this is undefined, contextStack is 0 length
+      pastEnd: boolean; // when this is true, activeContext will be undefined
    };
 }
 
-export { DeclarationDetails, ElDeclType, ValidateState };
+class ValidateState {
+   elementDeclarations: {
+      [name: string]: DeclarationDetails;
+   };
+
+   parameterEntities: {
+      [name: string]: ParameterEntityDetails;
+   };
+
+   elementContext: {
+      readonly contextStack: ReadonlyArray<ElementContext>;
+      readonly activeContext?: ElementContext; // if this is undefined, contextStack is 0 length
+      readonly pastEnd: boolean; // when this is true, activeContext will be undefined
+   };
+
+   constructor(otherState?: ValidateStateProps) {
+      this.elementDeclarations = otherState?.elementDeclarations || {};
+      this.parameterEntities = otherState?.parameterEntities || {};
+      this.elementContext = {
+         contextStack: otherState?.elementContext?.contextStack || [],
+         activeContext: otherState?.elementContext?.activeContext,
+         pastEnd: otherState?.elementContext?.pastEnd || false,
+      };
+   }
+}
+
+export { DeclarationDetails, ElementContext, ElDeclType, ValidateState };

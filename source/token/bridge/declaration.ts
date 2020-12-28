@@ -1,12 +1,13 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ParseValue, parseAttListDeclaration, parseNotationDeclaration,    parseEntityDeclaration,
+   ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   parseElementDeclaration,
 AttListDeclarationPToken, NotationDeclarationPToken } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
-   elementDeclaration,
    parseDocTypeEnd,
    parseDocTypeStart,
 
@@ -22,7 +23,7 @@ type DeclarationStart = {
    declTypeSpace?: SToken,
 };
 
-type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseValue>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken| AttListDeclarationPToken) => void;
+type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseValue>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken| AttListDeclarationPToken | ElementDeclarationPToken) => void;
 
 /**********************************************************************\
  parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or
@@ -60,6 +61,9 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
          case 'ATTLIST':
             parseAttListDeclaration(source, start, deliverPToken);
             return;
+         case 'ELEMENT':
+            parseElementDeclaration(source, start, deliverPToken);
+            return;
          // When you finish this, need to do checkWellFormed on unknown types
       }
 
@@ -88,9 +92,6 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
                   });
                }
             });
-            break;
-         case 'ELEMENT':
-            elementDeclaration.parse(source, newResult, deliverPToken);
             break;
          default:
             deliverPToken(newResult);

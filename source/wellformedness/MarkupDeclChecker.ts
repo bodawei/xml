@@ -2,10 +2,11 @@
 
 import { ErrorCollector, WellFormedError } from 'error';
 import {
-   GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken,
    AttListDeclarationPToken,
+   ElementDeclarationPToken,
+   GeneralEntityDeclarationPToken,
    NotationDeclarationPToken,
+   ParameterEntityDeclarationPToken,
    ParseValue,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
@@ -37,16 +38,13 @@ import { SPACE_PTOKEN } from '../token/space';
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
 
-import { ElementDeclarationPToken } from '../token/elementDeclaration';
 import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
+import { ELEMENT_DECLARATION_PTOKEN } from '../pToken/token/elementDeclaration';
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
 import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/generalEntityDeclaration';
 import { PARAMETER_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/parameterEntityDeclaration';
-
-// WTFFFF!!
-const ELEMENT_DECLARATION_PTOKEN = 'ELEMENTDECL';
 
 import {
    CHECKER_DONE,
@@ -286,12 +284,7 @@ function checkDeclaration(
    //     occur in external parameter entities or to the external subset.)
    if (state === States.INTERNAL_SUBSET) {
       ec.check(
-         pToken.type === NOTATION_DECLARATION_PTOKEN ||
-            pToken.type === ATTLIST_DECLARATION_PTOKEN ||
-            pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ||
-            pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN
-            ? pToken.unexpanded
-            : pToken.peRefPlus.length > 0,
+         pToken.unexpanded,
          WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
          [],
          pToken.open,

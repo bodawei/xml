@@ -1,9 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { defaultExtractors } from 'extractor';
 import { InstructionStart, parseTextDeclaration } from 'pToken';
-import { STokenSource, SToken, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 
 import { textDeclarationToSTokens } from '../textDeclarationToSTokens';
 

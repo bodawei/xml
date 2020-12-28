@@ -3,16 +3,17 @@
 import { toSToken } from 'sToken';
 import { ElementDeclarationPToken } from 'pToken';
 
-import { ElDeclType } from '../../validateState';
-import { recordElementDeclaration } from '../recordElementDeclaration';
+import { ElDeclType, ValidateState } from '../../validateState';
+import { elementDeclarationUpdateState } from '../elementDeclarationUpdateState';
 
 import * as makeCmGraphModule from '../../contentModal/makeCmGraph';
 
 jest.mock('../../contentModal/makeCmGraph');
 
-describe('recordElementDeclaration (unit)', () => {
+describe('elementDeclarationUpdateState (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let makeCmGraph: jest.MockedFunction<typeof makeCmGraphModule.makeCmGraph>;
+   let state: ValidateState;
 
    beforeEach(async () => {
       ({ makeCmGraph } = (await import('../../contentModal/makeCmGraph')) as {
@@ -24,19 +25,23 @@ describe('recordElementDeclaration (unit)', () => {
          name: toSToken('elementName'),
          close: toSToken('>'),
       });
+
+      state = new ValidateState();
    });
 
    it('adds a declaration with a content spec or model to the state as an ANY type', () => {
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.ANY,
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.ANY,
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('adds a declaration with an ANY contentSpec as an ANY type', () => {
@@ -47,16 +52,18 @@ describe('recordElementDeclaration (unit)', () => {
          contentSpec: toSToken('ANY'),
          close: toSToken('>'),
       });
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.ANY,
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.ANY,
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('adds a declaration with an EMPTY contentSpec as an EMPTY type', () => {
@@ -67,16 +74,18 @@ describe('recordElementDeclaration (unit)', () => {
          contentSpec: toSToken('EMPTY'),
          close: toSToken('>'),
       });
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.EMPTY,
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.EMPTY,
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('does not override another entry already present for the same name', () => {
@@ -87,17 +96,19 @@ describe('recordElementDeclaration (unit)', () => {
          contentSpec: toSToken('EMPTY'),
          close: toSToken('>'),
       });
-      const result1 = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
-      const result2 = recordElementDeclaration(second, result1);
+      const result1 = elementDeclarationUpdateState(elementDeclaration, state);
+      const result2 = elementDeclarationUpdateState(second, result1);
 
-      expect(result2).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.ANY,
+      expect(result2).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.ANY,
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('adds a MIXED entry if it encounters a content model with #PCDATA at the start', () => {
@@ -126,18 +137,20 @@ describe('recordElementDeclaration (unit)', () => {
          },
          close: toSToken('>'),
       });
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.MIXED,
-               names: ['one', 'two'],
-               duplicateNames: [],
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.MIXED,
+                  names: ['one', 'two'],
+                  duplicateNames: [],
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('does not add a mis-cased #pcdata to the results', () => {
@@ -161,18 +174,20 @@ describe('recordElementDeclaration (unit)', () => {
          },
          close: toSToken('>'),
       });
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.MIXED,
-               names: ['one'],
-               duplicateNames: [],
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.MIXED,
+                  names: ['one'],
+                  duplicateNames: [],
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('does adds duplicate names to the duplicate list (a single time)', () => {
@@ -206,18 +221,20 @@ describe('recordElementDeclaration (unit)', () => {
          },
          close: toSToken('>'),
       });
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.MIXED,
-               names: ['one'],
-               duplicateNames: ['one'],
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.MIXED,
+                  names: ['one'],
+                  duplicateNames: ['one'],
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('ignores emedded content models', () => {
@@ -252,18 +269,20 @@ describe('recordElementDeclaration (unit)', () => {
          },
          close: toSToken('>'),
       });
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.MIXED,
-               names: ['one'],
-               duplicateNames: [],
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.MIXED,
+                  names: ['one'],
+                  duplicateNames: [],
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('treats an empty top-level content model as an empty entry', () => {
@@ -276,16 +295,18 @@ describe('recordElementDeclaration (unit)', () => {
          },
          close: toSToken('>'),
       });
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.EMPTY,
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.EMPTY,
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('turns the non-mixed content model into a graph', () => {
@@ -325,17 +346,19 @@ describe('recordElementDeclaration (unit)', () => {
       });
       makeCmGraph.mockReturnValue({ startId: 0, endId: 0, states: {} });
 
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.CHILDREN,
-               graph: { startId: 0, endId: 0, states: {} },
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.CHILDREN,
+                  graph: { startId: 0, endId: 0, states: {} },
+               },
             },
-         },
-      });
+         }),
+      );
    });
 
    it('treats an initial deliited particle without a particle as a children', () => {
@@ -359,16 +382,18 @@ describe('recordElementDeclaration (unit)', () => {
       });
       makeCmGraph.mockReturnValue({ startId: 0, endId: 0, states: {} });
 
-      const result = recordElementDeclaration(elementDeclaration, { elementDeclarations: {} });
+      const result = elementDeclarationUpdateState(elementDeclaration, state);
 
-      expect(result).toEqual({
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.CHILDREN,
-               graph: { startId: 0, endId: 0, states: {} },
+      expect(result).toEqual(
+         new ValidateState({
+            elementDeclarations: {
+               elementName: {
+                  token: elementDeclaration,
+                  type: ElDeclType.CHILDREN,
+                  graph: { startId: 0, endId: 0, states: {} },
+               },
             },
-         },
-      });
+         }),
+      );
    });
 });

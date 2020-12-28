@@ -1,3 +1,14 @@
+## Architecture
+
+The wellformedness check system approached checking by having a global context which is checked in the main routine, and then having token-specific checking routines.  The notion was that there is a bunch of more "global" state (bigger than individual tokens) that needs coordinateing.  As a result we had "global" state and "global" processing, as well as local processing.
+
+The downsides to this is that that global state and code is relatively complex to read, write and test.  Though it isn't going to happen, adding another token type is complex.
+
+The first draft of validation ended up with a huge file with a lot of complex state and functionality spread around. Some parts could have been extracted into individual routines, but it has the same problems that the wellformedness checks.
+
+In an effort to cut down on complex "global" logic, this is experimenting with doing all validation only at the element level.  This will produce some duplication, and entails having some pretty detailed global state. otoh, we had pretty detailed global state before.
+
+
 
 ## ContentModelGraphs
 In order to validate whether the elements in a particular model conform to the cnotent model description in an element declaration, this converts a content model in to a graph representation.  
@@ -158,3 +169,9 @@ The last processing phase does two things:
 ### Implementation note
 * The graph processing all works with mutable data structures. It might be nice to switch this to working more with immutable structures.
 * We probably ought to have a different internal structure and external structure, so the `autoTrans` property is never seen outside.
+
+## Specific token details
+
+### Element end
+* If this encounters an unbalanced end, it will ignore the end element.
+   * Like wellformedness, this does not try to auto-close parent elements.

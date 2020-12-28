@@ -97,6 +97,10 @@ fdescribe('elementDeclarationValidate (unit)', () => {
                },
             },
          },
+         elementContext: {
+            contextStack: [],
+            pastEnd: false,
+         },
       };
    });
 

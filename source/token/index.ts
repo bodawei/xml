@@ -2,14 +2,12 @@
 
 import declaration from './bridge/baseDeclaration';
 
-import elementDeclaration, { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN } from './elementDeclaration';
 
 import { AttributeValuePToken, AttributeValueElement } from './common/attribute';
 import unassigned from './common/unassigned';
 import { parseAllUnassignedValues } from './common/unassigned';
 import { UnassignedArray, UnassignedType, UnassignedValue, spaceFromSToken, wordFromSToken } from './common/unassigned';
 import literalValue from './common/literalValue';
-import { NamePToken, NameListPToken, ContentParticlePToken } from './contentspec/nameList';
 import { WordListPToken, WordListType, WordListEntryPToken, parseWordList } from './common/wordList';
 import { DocTypeStartPToken } from './docTypeStart';
 import { InternalSubsetStartToken } from './marker/internalSubsetStart';
@@ -85,7 +83,6 @@ type PToken =
    | ConditionalPToken
    | DocTypeStartPToken
    | DocTypeEndPToken
-   | ElementDeclarationPToken
    | ElementEmptyPToken
    | ElementEndPToken
    | ElementStartPToken
@@ -107,14 +104,9 @@ type PToken =
    export * from './getFirstSToken';
 
 export {
-   ELEMENT_DECLARATION_PTOKEN,
    ERROR_TYPE,
 
    AttributeValueElement,
-   ElementDeclarationPToken,
-   ContentParticlePToken,
-   NamePToken,
-   NameListPToken,
    UnassignedArray, UnassignedType,
    UnassignedValue,
    WordListPToken,
@@ -127,8 +119,6 @@ export {
    parseWordList,
 
    declaration,
-
-   elementDeclaration,
 
    unassigned,
    literalValue,
