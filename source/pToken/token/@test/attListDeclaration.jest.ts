@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { UnexpandedMarkupDetails } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
@@ -80,10 +81,10 @@ describe('AttListDeclaration (unit)', () => {
    });
 
    describe('parseAttListDeclaration()', () => {
-      let callback: jasmine.Spy;
+      let callback: jest.MockedFunction<(result: AttListDeclarationPToken) => void>;
 
       beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
+         callback = jest.fn();
 
          (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) =>
             done(),
@@ -661,7 +662,7 @@ describe('AttListDeclaration (unit)', () => {
          expect(parseWordList).toHaveBeenCalledWith(
             mockSource,
             WordListType.ENUMERATION,
-            (expect as JestExpect).any(Function),
+            expect.any(Function),
          );
       });
 

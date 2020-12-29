@@ -3,32 +3,33 @@
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
+   ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    AttListDeclarationPToken,
    ContextType,
+   ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParseValue,
    externalIdToEntityId,
    resumeParseAttListDeclaration,
-   resumeParseNotationDeclaration,
+   resumeParseElementDeclaration,
    resumeParseEntityDeclaration,
+   resumeParseNotationDeclaration,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
-   ELEMENT_DECLARATION_PTOKEN,
    ELEMENT_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    DocTypeEndPToken,
    DocTypeStartPToken,
-   ElementDeclarationPToken,
    ElementStartPToken,
    ElementEmptyPToken,
    GeneralEntityReferencePToken,
@@ -45,12 +46,10 @@ import {
    TextPToken,
 } from 'token';
 
-import { assignElementDeclaration } from './unassigned/assignElementDeclaration';
 import { EntityDetails } from './utils/EntityDetails';
 import { setupConditional } from './utils/setupConditional';
 import { expandAttributes } from './utils/expandAttributes';
 import { expandEntityValue } from './utils/expandEntityValue';
-import { expandUnassigned } from './utils/expandUnassigned';
 import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 import { EntityProcessors, ExpandParams } from './types';
 import { EntityContextStack } from './utils/EntityContextStack';
@@ -418,31 +417,25 @@ class EntityExpander {
          );
          return;
       } else {
-         // UNASSIGNED REFACTOR/CLEANUP: Lookes like unassigned should never be undefined
-         if (!declarationPToken.unassigned || declarationPToken.unassigned.length === 0) {
-            this.deliverToken(declarationPToken);
-            handled();
-            return;
-         }
-
-         expandUnassigned(
-            declarationPToken.unassigned,
+         expandMarkupUnexpanded(
+            declarationPToken.unexpanded ? declarationPToken.unexpanded.tokens : [],
             this.expandParams,
             this.entityContextStack,
-            true,
             (results) => {
-               // UNASSIGNED REFACTOR/CLEANUP: We should not be assigning back to unassigned
-               declarationPToken.unassigned = results.newValue;
-
-               if (declarationPToken.type === ELEMENT_DECLARATION_PTOKEN) {
-                  assignElementDeclaration(results.newValue, declarationPToken);
-               }
-
                this.deliverByproducts(results.byproducts);
-               this.deliverToken(declarationPToken);
-               handled();
+               const source = entityValueToSTokenSource(
+                  results.expandedTokens || [],
+                  this.expandParams.entityId,
+                  true,
+               ); // THIS entityId IS WRONG!!!!
+
+               resumeParseElementDeclaration(source, declarationPToken, (innerResults) => {
+                  this.deliverToken(innerResults);
+                  handled();
+               });
             },
          );
+         return;
       }
    }
 

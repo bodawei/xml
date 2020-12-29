@@ -20,6 +20,7 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    SPACE_PTOKEN,
 } from 'token';
+import { ELEMENT_DECLARATION_PTOKEN } from 'source/pToken/token/ElementDeclaration';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -119,7 +120,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses an ELEMENT', (done) => {
-      expectInputToProduceTypes('<!ELEMENT myEntity EMPTY>', 'ELEMENTDECL', done);
+      expectInputToProduceTypes('<!ELEMENT myEntity EMPTY>', ELEMENT_DECLARATION_PTOKEN, done);
    });
 
    it('parse entity reference', (done) => {

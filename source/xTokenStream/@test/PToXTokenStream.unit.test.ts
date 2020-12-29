@@ -1,17 +1,12 @@
-/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { NotationDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
    declaration,
 
-   elementDeclaration,
-
    CdataPToken,
    CharDataPToken,
-   ConditionalClosePToken,
    ElementEndPToken,
    TextPToken,
    GeneralEntityReferencePToken,
@@ -27,13 +22,10 @@ import {
    ElementEmptyPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
-   ConditionalPToken,
    SpacePToken,
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
-
-import * as xTokenStuff from 'xToken';
 
 describe('PToXTokenStream (unit)', () => {
    let tokenStream: PToXTokenStream;
@@ -152,15 +144,15 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls elementDeclaration.pTokenToXToken()', () => {
-      spyOn(elementDeclaration, 'pTokenToXToken');
-      const pToken: any = { type: elementDeclaration.PTYPE };
+   // it('calls elementDeclaration.pTokenToXToken()', () => {
+   //    spyOn(elementDeclaration, 'pTokenToXToken');
+   //    const pToken: any = { type: elementDeclaration.PTYPE };
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(elementDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
-   });
+   //    expect(elementDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
+   // });
 
    it('calls peStart.toXToken() with a parameter entity reference', () => {
       const pToken = new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('&') }));

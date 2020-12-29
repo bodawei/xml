@@ -34,9 +34,10 @@ describe('elementDeclaration (unit)', () => {
       });
       dummyCM = new ContentModelP({});
 
-      resumeParseContentModelMock = jest.spyOn(contentModel, 'resumeParseContentModel') as jest.MockedFunction<
-         typeof contentModel.resumeParseContentModel
-      >;
+      resumeParseContentModelMock = jest.spyOn(
+         contentModel,
+         'resumeParseContentModel',
+      ) as jest.MockedFunction<typeof contentModel.resumeParseContentModel>;
       parseContentModelMock = jest.spyOn(contentModel, 'parseContentModel') as jest.MockedFunction<
          typeof contentModel.parseContentModel
       >;
@@ -62,7 +63,7 @@ describe('elementDeclaration (unit)', () => {
             extra: toSToken('6'),
             unexpanded: {
                tokens: [],
-               propName: 'contentModel',
+               propName: 'contentSpec',
             },
             close: toSToken('>'),
          });
@@ -81,7 +82,7 @@ describe('elementDeclaration (unit)', () => {
                extra: toSToken('6'),
                unexpanded: {
                   tokens: [],
-                  propName: 'contentModel',
+                  propName: 'contentSpec',
                },
                close: toSToken('>'),
             }),
@@ -476,7 +477,10 @@ describe('elementDeclaration (unit)', () => {
             },
             close: toSToken('>'),
          });
-         const mockSource = new MockSTokenSource([[undefined, 'space'], ['(', 'peekChar']]);
+         const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
+            ['(', 'peekChar'],
+         ]);
 
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
@@ -517,7 +521,12 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error
-         expect(resumeParseContentModelMock).toHaveBeenCalledWith(mockSource, { delimitedParticles: []}, undefined, expect.any(Function));
+         expect(resumeParseContentModelMock).toHaveBeenCalledWith(
+            mockSource,
+            { delimitedParticles: [] },
+            undefined,
+            expect.any(Function),
+         );
       });
 
       it('returns an element declaration with a content model interrupted in the middle', () => {

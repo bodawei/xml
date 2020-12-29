@@ -10,7 +10,7 @@ import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
 import { ElementStartPToken } from 'token';
 import { CmGraph } from '../../contentModal/cmGraphTypes';
 
-fdescribe('elementStartValidate (unit)', () => {
+describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
    let state: ValidateState;

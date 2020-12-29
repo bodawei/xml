@@ -1,13 +1,8 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import * as tokenNs from 'token';
-import { AttListDeclarationPToken } from 'pToken';
-import { SToken } from 'sToken';
-import { AttListDeclarationXToken } from 'xToken';
+import { AttListDeclarationXToken, ElementDeclarationXToken, CpRepeat, CpType } from 'xToken';
 
 import { CommentXToken } from 'token';
-import elementDeclaration, { ElementDeclarationPToken } from '../../token/elementDeclaration';
 
 import FixingStream from '../FixingStream';
 
@@ -17,13 +12,9 @@ type XToken = {
 
 describe('FixingStream (unit)', () => {
    let fs: FixingStream;
-   let dummyPToken: AttListDeclarationPToken;
-   let dummyElPToken: ElementDeclarationPToken;
 
    beforeEach(() => {
       fs = new FixingStream();
-      dummyPToken = new AttListDeclarationPToken({ open: SToken.fromString('<!') });
-      dummyElPToken = new elementDeclaration.PToken();
    });
 
    function gatherTokens(stream: FixingStream, cb: (val: Array<XToken>) => void) {
@@ -143,242 +134,242 @@ describe('FixingStream (unit)', () => {
    describe('ELEMENT', () => {
 
       it('capitalizes the type if it is not capitalized', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'any', undefined, dummyElPToken);
+         const before = new ElementDeclarationXToken('elName', 'any', undefined);
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentSpecType).toEqual('ANY');
+            expect(tokens[0].contentSpec).toEqual('ANY');
             done();
          });
       });
 
       it('changes a missing type to ANY', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', '', undefined, dummyElPToken);
+         const before = new ElementDeclarationXToken('elName', '', undefined);
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentSpecType).toEqual('ANY');
+            expect(tokens[0].contentSpec).toEqual('ANY');
             done();
          });
       });
 
       it('changes a bad type to ANY', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'bogus', undefined, dummyElPToken);
+         const before = new ElementDeclarationXToken('elName', 'bogus', undefined);
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentSpecType).toEqual('ANY');
+            expect(tokens[0].contentSpec).toEqual('ANY');
             done();
          });
       });
 
       it('changes a bad type to CHILDREN if there are indeed children', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'bogus', {
-            names: [],
-            listType: 'CHOICE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+         const before = new ElementDeclarationXToken('elName', 'bogus', {
+            particles: [],
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentSpecType).toEqual('CHILDREN');
+            expect(tokens[0].contentSpec).toEqual('CHILDREN');
             done();
          });
       });
 
-      it('removes children if the type is ANY', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'ANY', {
-            names: [],
-            listType: 'CHOICE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+      it('removes contentModel if the type is ANY', (done) => {
+         const before = new ElementDeclarationXToken('elName', 'ANY', {
+            particles: [],
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].children).toBeUndefined();
+            expect(tokens[0].contentModel).toBeUndefined();
             done();
          });
       });
 
-      it('removes children if the type is EMPTY', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'EMPTY', {
-            names: [],
-            listType: 'CHOICE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+      it('removes contentModel if the type is EMPTY', (done) => {
+         const before = new ElementDeclarationXToken('elName', 'EMPTY', {
+            particles: [],
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].children).toBeUndefined();
+            expect(tokens[0].contentModel).toBeUndefined();
             done();
          });
       });
 
       it('capitalizes #PCDATA', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'CHILDREN', {
-            names: [{
+         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+            particles: [{
                name: '#pcdata',
-               repeat: 'ZEROPLUS'
+               repeat: CpRepeat.ZEROPLUS
             }],
-            listType: 'CHOICE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].children.names[0]).toEqual({
+            expect(tokens[0].contentModel.particles[0]).toEqual({
                name: '#PCDATA',
-               repeat: 'ONE'
+               repeat: CpRepeat.ONE
             });
             done();
          });
       });
 
       it('moves #PCDATA to the start', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'CHILDREN', {
-            names: [{
+         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+            particles: [{
                name: 'one',
-               repeat: 'ONEPLUS',
+               repeat: CpRepeat.ONEPLUS,
             }, {
                name: '#pcdata',
-               repeat: 'ZEROPLUS'
+               repeat: CpRepeat.ZEROPLUS
             }],
-            listType: 'CHOICE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].children.names[0]).toEqual({
+            expect(tokens[0].contentModel.particles[0]).toEqual({
                name: '#PCDATA',
-               repeat: 'ONE'
+               repeat: CpRepeat.ONE
             });
             done();
          });
       });
 
       it('moves #PCDATA to the start, even if in a sublist', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'CHILDREN', {
-            names: [{
+         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+            particles: [{
                name: 'one',
-               repeat: 'ONEPLUS',
+               repeat: CpRepeat.ONEPLUS,
             }, {
-               names: [{
+               particles: [{
                   name: '#pcdata',
-                  repeat: 'ZEROPLUS'
+                  repeat: CpRepeat.ZEROPLUS
                }],
-               listType: 'CHOICE',
-               repeat: 'ONE'
+               listType: CpType.CHOICE,
+               repeat: CpRepeat.ONE
             }],
-            listType: 'CHOICE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].children.names[0]).toEqual({
+            expect(tokens[0].contentModel.particles[0]).toEqual({
                name: '#PCDATA',
-               repeat: 'ONE'
+               repeat: CpRepeat.ONE
             });
             done();
          });
       });
 
       it('removes duplicate #PCDATA', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'CHILDREN', {
-            names: [{
+         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+            particles: [{
                name: '#pcdata',
-               repeat: 'ZEROPLUS'
+               repeat: CpRepeat.ZEROPLUS
             }, {
                name: 'one',
-               repeat: 'ONEPLUS',
+               repeat: CpRepeat.ONEPLUS,
             }, {
                name: '#pcdata',
-               repeat: 'ZEROPLUS'
+               repeat: CpRepeat.ZEROPLUS
             }],
-            listType: 'CHOICE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].children.names.length).toEqual(2);
+            expect(tokens[0].contentModel.particles.length).toEqual(2);
             done();
          });
       });
 
       it('flattens a Mixed list, removes duplicates and sets repeat correctly', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', 'CHILDREN', {
-            names: [{
+         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+            particles: [{
                name: 'one',
-               repeat: 'ONEPLUS',
+               repeat: CpRepeat.ONEPLUS,
             }, {
-               names: [{
+               particles: [{
                   name: '#pcdata',
-                  repeat: 'ZEROPLUS'
+                  repeat: CpRepeat.ZEROPLUS
                }, {
                   name: 'two',
-                  repeat: 'ONEPLUS',
+                  repeat: CpRepeat.ONEPLUS,
                }, {
-                  names: [{
+                  particles: [{
                      name: 'three',
-                     repeat: 'ONEPLUS',
+                     repeat: CpRepeat.ONEPLUS,
                   }],
-                  listType: 'SEQUENCE',
-                  repeat: 'ONE'
+                  listType: CpType.SEQUENCE,
+                  repeat: CpRepeat.ONE
                }],
-               listType: 'SEQUENCE',
-               repeat: 'ONE'
+               listType: CpType.SEQUENCE,
+               repeat: CpRepeat.ONE
             }, {
                name: 'four',
-               repeat: 'ONEPLUS',
+               repeat: CpRepeat.ONEPLUS,
             }, {
                name: 'one',
-               repeat: 'ONEPLUS',
+               repeat: CpRepeat.ONEPLUS,
             }],
-            listType: 'SEQUENCE',
-            repeat: 'ONE',
-         }, dummyElPToken);
+            listType: CpType.SEQUENCE,
+            repeat: CpRepeat.ONE,
+         });
 
          fs.write(before);
          fs.end();
 
          gatherTokens(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].children.names).toEqual([{
+            expect(tokens[0].contentModel.particles).toEqual([{
                name: '#PCDATA',
-               repeat: 'ONE',
+               repeat: CpRepeat.ONE,
             }, {
                name: 'one',
-               repeat: 'ONE',
+               repeat: CpRepeat.ONEPLUS,
             }, {
                name: 'two',
-               repeat: 'ONE',
+               repeat: CpRepeat.ONEPLUS,
             }, {
                name: 'three',
-               repeat: 'ONE',
+               repeat: CpRepeat.ONEPLUS,
             }, {
                name: 'four',
-               repeat: 'ONE',
+               repeat: CpRepeat.ONEPLUS,
             }]);
             done();
          });

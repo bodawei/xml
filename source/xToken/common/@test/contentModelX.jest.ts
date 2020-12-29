@@ -1,7 +1,10 @@
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+
+import { describe, expect, it } from '@jest/globals';
 import { ContentModelP } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { ContentModelX, CpRepeat, CpType } from '../ContentModelX';
+import { ContentModelX, CpRepeat, CpType, isContentNameX } from '../ContentModelX';
 
 describe('ContentModelX()', () => {
    let contentModelP: ContentModelP;
@@ -452,6 +455,45 @@ describe('ContentModelX()', () => {
             listType: CpType.CHOICE,
             repeat: CpRepeat.ONE,
          });
+      });
+   });
+
+   describe('isContentNameX', () => {
+      it('returns false if given a content model', () => {
+         const contentModel = new ContentModelX(contentModelP);
+
+         expect(isContentNameX(contentModel)).toEqual(false);
+      });
+
+      it('returns true if given a contentName', () => {
+         expect(
+            isContentNameX({
+               name: 'foo',
+               repeat: CpRepeat.ONE,
+            }),
+         ).toEqual(true);
+      });
+
+      it('returns false if given soemthing without a name, but with a particles', () => {
+         expect(
+            isContentNameX({
+               repeat: CpRepeat.ONE,
+               particles: [],
+               listType: CpType.CHOICE,
+            }),
+         ).toEqual(false);
+      });
+
+      it('returns false if given soemthing a name, but with a listType', () => {
+         expect(
+            isContentNameX(
+               {
+                  name: 'fred',
+                  repeat: CpRepeat.ONE,
+                  listType: CpType.CHOICE,
+               } as any /* allow no particles */,
+            ),
+         ).toEqual(false);
       });
    });
 });

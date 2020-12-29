@@ -38,7 +38,7 @@ type DeclarationDetails = AnyDetails | EmptyDetails | MixedDetails | ChildrenDet
 
 interface ParameterEntityDetails {
    token: ParameterEntityDeclarationPToken;
-   replacementText: ElidedEntityDeclarationPToken;
+   replacementText?: ElidedEntityDeclarationPToken;
 }
 
 interface ElementContext {

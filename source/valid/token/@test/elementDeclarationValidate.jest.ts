@@ -18,7 +18,7 @@ import {
    TextPToken,
 } from 'token';
 
-fdescribe('elementDeclarationValidate (unit)', () => {
+describe('elementDeclarationValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
    let state: ValidateState;

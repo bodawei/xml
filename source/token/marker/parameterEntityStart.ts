@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
-// import { parameterEntityReferenceCheck } from 'wellformedness';
+import { parameterEntityReferenceCheck } from 'wellformedness';
 
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
@@ -23,7 +23,7 @@ class ParameterEntityStartPToken {
    }
 
    checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
-      // parameterEntityReferenceCheck(this.referencePToken, ec, confVer);
+      parameterEntityReferenceCheck(this.referencePToken, ec, confVer);
    }
 
    toXToken() {

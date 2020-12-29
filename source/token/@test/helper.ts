@@ -1,8 +1,16 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
-import {    AttListDeclarationPToken,    GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken, NotationDeclarationPToken,   ProcessingInstructionPToken, TextDeclarationPToken,XmlDeclarationPToken } from 'pToken';
+import {
+   AttListDeclarationPToken,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   NotationDeclarationPToken,
+   ProcessingInstructionPToken,
+   TextDeclarationPToken,
+   XmlDeclarationPToken,
+   ElementDeclarationPToken,
+ } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import {
    CdataPToken,
@@ -25,10 +33,8 @@ import {
    ParameterEntityStartPToken,
    SpacePToken,
    TextPToken,
-   elementDeclaration,
    CharDataPToken,
    CharRefPToken,
-   ElementDeclarationPToken,
 } from 'token';
 import { AttrValue } from '../../token/common/attribute';
 
@@ -191,15 +197,15 @@ function makeElementStartWithAttrValueFromString(value: string, origValue?: stri
 }
 
 function makeElementDeclaration(): ElementDeclarationPToken {
-   return new elementDeclaration.PToken({
+   return new ElementDeclarationPToken({
       open: toSToken('<!'),
-      postOpenSpace: undefined,
+      openSpace: undefined,
       declType: toSToken('ELEMENT'),
-      postDeclTypeSpace: toSToken(' '),
+      declTypeSpace: toSToken(' '),
       name: toSToken('elementName'),
-      postNameSpace: toSToken(' '),
+      nameSpace: toSToken(' '),
       contentSpec: toSToken('ANY'),
-      postContentSpecSpace: toSToken(' '),
+      contentSpecSpace: toSToken(' '),
       close: toSToken('>'),
    });
 }

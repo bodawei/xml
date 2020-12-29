@@ -7,6 +7,7 @@ import {
    ContextType,
    NOTATION_DECLARATION_PTOKEN,
    AttListDeclarationPToken,
+   ElementDeclarationPToken,
    NotationDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
@@ -26,21 +27,17 @@ import {
    ConditionalPToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
-   ElementDeclarationPToken,
    ElementStartPToken,
    ElementEmptyPToken,
    GeneralEntityReferencePToken,
    TextPToken,
    XmlError,
    ParameterEntityReferencePToken,
-   unassigned,
 } from 'token';
 
 import * as pToken from 'pToken';
-import * as assignElementDeclaration from '../unassigned/assignElementDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
 import * as expandEntityValueModule from '../utils/expandEntityValue';
-import * as expandUnassigned from '../utils/expandUnassigned';
 import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
 import * as setupConditional from '../utils/setupConditional';
 import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
@@ -51,14 +48,12 @@ import { EntityContextStack } from '../utils/EntityContextStack';
 import { EntityId } from 'basic';
 
 describe('EntityExpander (unit)', () => {
-   let expandUnassignedSpy: jasmine.Spy;
    let setupConditionalSpy: jasmine.Spy;
    let expandMarkupUnexpandedSpy: jasmine.Spy;
    let resumeParseNotationDeclarationSpy: jasmine.Spy;
    let resolveEntityId: (a: any, b: any) => any;
 
    beforeEach(() => {
-      expandUnassignedSpy = spyOn(expandUnassigned, 'expandUnassigned');
       setupConditionalSpy = spyOn(setupConditional, 'setupConditional');
       resolveEntityId = () => '';
    });
@@ -546,8 +541,15 @@ describe('EntityExpander (unit)', () => {
 
    describe('ELEMENT declaration', () => {
       let elementDecl: ElementDeclarationPToken;
+      let resumeParseElementDeclarationSpy: jasmine.Spy;
 
       beforeEach(() => {
+         resumeParseElementDeclarationSpy = spyOn(pToken, 'resumeParseElementDeclaration');
+
+         resumeParseElementDeclarationSpy.and.callFake((source, params, callback) => {
+            callback(params);
+         });
+
          elementDecl = new ElementDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('student'),
@@ -564,34 +566,15 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('asks the element to assign any newly unassigned values to itself', (done) => {
-         const one = unassigned.wordFromSToken(toSToken('1'));
-         const two = unassigned.wordFromSToken(toSToken('2'));
-         elementDecl.unassigned = [one];
-         spyOn(assignElementDeclaration, 'assignElementDeclaration');
-
-         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [two], byproducts: [] });
+         elementDecl = new ElementDeclarationPToken(elementDecl, {
+            unexpanded: {
+               tokens: [],
+               propName: 'contentSpec',
+            },
          });
 
          doExpand([elementDecl], true, () => {
-            expect(assignElementDeclaration.assignElementDeclaration).toHaveBeenCalled();
-            done();
-         });
-      });
-
-      it('passes tells expandUnassigned to treat this as an element for parsing purposes', (done) => {
-         const one = unassigned.wordFromSToken(toSToken('1'));
-         elementDecl.unassigned = [one];
-         spyOn(assignElementDeclaration, 'assignElementDeclaration');
-
-         expandUnassignedSpy.and.callFake((unassigned, params, chain, isElement, callback) => {
-            callback({ newValue: [], byproducts: [] });
-         });
-
-         doExpand([elementDecl], true, () => {
-            const params = expandUnassignedSpy.calls.argsFor(0);
-
-            expect(params[3]).toEqual(true);
+            expect(resumeParseElementDeclarationSpy).toHaveBeenCalled();
             done();
          });
       });

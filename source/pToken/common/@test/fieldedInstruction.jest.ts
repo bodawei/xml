@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -38,17 +39,93 @@ describe('FieldedInstruction (unit)', () => {
       });
    });
 
+   describe('construction()', () => {
+      it('clones the provided FieldedIntruction', () => {
+         const source = expected;
+         const result = new FieldedInstruction(source);
+
+         expect(result).toEqual(source);
+         expect(result).not.toBe(source);
+      });
+
+      it('overrides the properties wof the base FieldedInstruction', () => {
+         const source = expected;
+         const result = new FieldedInstruction(source, {
+            open: toSToken('1'),
+            close: toSToken('2'),
+            openSpace: toSToken('3'),
+            target: toSToken('4'),
+            targetSpace: toSToken('5'),
+            fields: [
+               {
+                  name: toSToken('6'),
+                  openQuote: toSToken('7'),
+                  closeQuote: toSToken('8'),
+                  valueSpace: toSToken('9'),
+                  nameSpace: toSToken('10'),
+                  equal: toSToken('11'),
+                  equalSpace: toSToken('12'),
+               },
+            ],
+         });
+
+         expect(result).toEqual(
+            new FieldedInstruction({
+               open: toSToken('1'),
+               close: toSToken('2'),
+               openSpace: toSToken('3'),
+               target: toSToken('4'),
+               targetSpace: toSToken('5'),
+               fields: [
+                  {
+                     name: toSToken('6'),
+                     openQuote: toSToken('7'),
+                     closeQuote: toSToken('8'),
+                     valueSpace: toSToken('9'),
+                     nameSpace: toSToken('10'),
+                     equal: toSToken('11'),
+                     equalSpace: toSToken('12'),
+                  },
+               ],
+            }),
+         );
+      });
+
+      it('assures fields is an empty array, even when other provides an undefined value', () => {
+         const source = expected;
+         const result = new FieldedInstruction(source, {
+            open: toSToken('1'),
+            close: toSToken('2'),
+            openSpace: toSToken('3'),
+            target: toSToken('4'),
+            targetSpace: toSToken('5'),
+            fields: undefined,
+         });
+
+         expect(result).toEqual(
+            new FieldedInstruction({
+               open: toSToken('1'),
+               close: toSToken('2'),
+               openSpace: toSToken('3'),
+               target: toSToken('4'),
+               targetSpace: toSToken('5'),
+               fields: [],
+            }),
+         );
+      });
+   });
+
    describe('parseFieldedInstruction()', () => {
-      let callback: jasmine.Spy;
-      let litParse: jasmine.Spy;
+      let callback: jest.MockedFunction<(result: FieldedInstruction) => void>;
+      let litParse: jest.MockedFunction<typeof literal.parse>;
 
       beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
-         litParse = spyOn(literal, 'parse');
+         callback = jest.fn();
+         litParse = jest.spyOn(literal, 'parse') as jest.MockedFunction<typeof literal.parse>;
       });
 
       it('does a basic parsing', () => {
-         litParse.and.callFake((_1, _2, cb: () => void) => {
+         litParse.mockImplementation((_1, _2, cb: () => void) => {
             cb();
          });
          const mockSource = new MockSTokenSource([
@@ -81,7 +158,7 @@ describe('FieldedInstruction (unit)', () => {
          parseFieldedInstruction(mockSource, { open: toSToken('<?') }, legalParams, callback);
          mockSource.respondInAsyncTime();
 
-         const args = litParse.calls.argsFor(0);
+         const args = litParse.mock.calls[0];
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toBeUndefined();
          expect(args[2]).toBeInstanceOf(Function);
@@ -111,7 +188,7 @@ describe('FieldedInstruction (unit)', () => {
                },
             ],
          });
-         litParse.and.callFake((_1, _2, cb: (result?: any) => void) => {
+         litParse.mockImplementation((_1, _2, cb: (result?: any) => void) => {
             calls++;
             cb(calls === 1 ? { value: [] } : undefined);
          });
@@ -141,7 +218,7 @@ describe('FieldedInstruction (unit)', () => {
          expected = new FieldedInstruction(expected, {
             fields: [],
          });
-         litParse.and.callFake((_1, _2, cb: () => void) => {
+         litParse.mockImplementation((_1, _2, cb: () => void) => {
             cb();
          });
          const mockSource = new MockSTokenSource([
@@ -173,7 +250,7 @@ describe('FieldedInstruction (unit)', () => {
             ],
             close: undefined,
          });
-         litParse.and.callFake((_1, _2, cb: () => void) => {
+         litParse.mockImplementation((_1, _2, cb: () => void) => {
             cb();
          });
          const mockSource = new MockSTokenSource([

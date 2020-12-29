@@ -2,14 +2,18 @@
 
 import { Transform } from 'stream';
 
-import { ATTLIST_DECLARATION_PTOKEN,    GENERAL_ENTITY_DECLARATION_PTOKEN,
+import {
+   ATTLIST_DECLARATION_PTOKEN,
+   ELEMENT_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
-NOTATION_DECLARATION_PTOKEN, PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN, XMLDECL_PTOKEN } from 'pToken';
+   NOTATION_DECLARATION_PTOKEN,
+   PROCESSING_INSTRUCTION_PTOKEN,
+   TEXTDECL_PTOKEN, XMLDECL_PTOKEN
+} from 'pToken';
 
 import {
    declaration,
-
-   elementDeclaration,
 
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
@@ -55,9 +59,6 @@ class PToXTokenStream extends Transform {
          case declaration.PTYPE:
             this.push(declaration.pTokenToXToken(pToken));
             break;
-         case elementDeclaration.PTYPE:
-            this.push(elementDeclaration.pTokenToXToken(pToken));
-            break;
          case CDATA_PTOKEN:
          case CHARDATA_PTOKEN:
          case COMMENT_PTOKEN:
@@ -77,6 +78,7 @@ class PToXTokenStream extends Transform {
          case CONDITIONAL_CLOSE_PTOKEN:
          case CONDITIONAL_PTOKEN:
          case ATTLIST_DECLARATION_PTOKEN:
+         case ELEMENT_DECLARATION_PTOKEN:
          case CHARREF_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
          case GENERAL_ENTITY_DECLARATION_PTOKEN:

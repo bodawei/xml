@@ -3,16 +3,23 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, Range } from 'basic';
 import { defaultExtractors } from 'extractor';
+import { ELEMENT_DECLARATION_PTOKEN, ParseValue, ContextType } from 'pToken';
 import { gatherPTokens } from 'pToken-test';
 import { SToken, STokenSource } from 'sToken';
-import { DOCTYPE_START_PTOKEN, ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, DOCTYPE_END_PTOKEN, CHARDATA_PTOKEN, CharDataPToken } from 'token';
+import {
+   CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN,
+   DOCTYPE_START_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_END_PTOKEN,
+   DOCTYPE_END_PTOKEN,
+   CHARDATA_PTOKEN,
+   CharDataPToken
+} from 'token';
 
 import * as pTokenStuff from 'pToken';
 import * as tokenStuff from 'token';
 
 import PTokenStream from '../PTokenStream';
-import { ParseValue, PToken, ContextType } from 'pToken';
-import { CONDITIONAL_PTOKEN, ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN } from 'token';
 
 type TokenArray = Array<ParseValue>;
 

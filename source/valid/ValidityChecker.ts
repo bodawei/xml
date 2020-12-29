@@ -1,16 +1,30 @@
+import { ConformanceVersion } from 'basic';
 import { ErrorCollector, ValidityError, XmlWarning } from 'error';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_END_PTOKEN,
+   ELIDED_ENTITY_DECLARATION_PTOKEN,
+   ElidedEntityDeclarationPToken,
 } from 'token';
 import {
+   ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    ParseValue,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { elementDeclarationValidate } from './token/elementDeclarationValidate';
+import { ValidateState } from './validateState';
+import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
+import { elementStartValidate } from './token/elementStartValidate';
+import { elementStartUpdateState } from './token/elementStartUpdateState';
+import { elementEndValidate } from './token/elementEndValidate';
+import { elementEndUpdateState } from './token/elementEndUpdateState';
 
 /*
 TODO:
@@ -92,7 +106,14 @@ class ValidityChecker {
 
    private peDecls: Record<string, PeDeclInfo>;
 
+   private version: ConformanceVersion;
+
+   private state: ValidateState;
+
    constructor() {
+      this.version = new ConformanceVersion();
+      this.state = new ValidateState();
+
       this.geDecls = {};
       this.peDecls = {};
    }
@@ -116,12 +137,53 @@ class ValidityChecker {
                   isInternal: !token.externalId,
                };
             }
+
+            let replacementText: ElidedEntityDeclarationPToken | undefined;
+
+            // Not sure this is right.
+            if (token.value) {
+               replacementText = new ElidedEntityDeclarationPToken(token, token.value as any);
+            }
+
+            this.state.parameterEntities = {
+               ...this.state.parameterEntities,
+               [peDeclName]: {
+                  token,
+                  replacementText,
+               },
+            };
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             this.checkGERef(token, ec);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             this.checkPERef(token, ec);
+            break;
+         case ELIDED_ENTITY_DECLARATION_PTOKEN:
+            if (token.isPE) {
+               const elidedName = strOrBlank(token.name);
+
+               this.state.parameterEntities = {
+                  ...this.state.parameterEntities,
+                  [elidedName]: {
+                     token: token.token,
+                     replacementText: token,
+                  },
+               };
+            }
+            break;
+         case ELEMENT_START_PTOKEN:
+         case ELEMENT_EMPTY_PTOKEN:
+            elementStartValidate(token, this.state, ec);
+            this.state = elementStartUpdateState(token, this.state);
+            break;
+         case ELEMENT_END_PTOKEN:
+            elementEndValidate(token, this.state, ec);
+            this.state = elementEndUpdateState(token, this.state);
+            break;
+         case ELEMENT_DECLARATION_PTOKEN:
+            this.state = elementDeclarationUpdateState(token, this.state);
+            elementDeclarationValidate(token, this.state, ec, this.version);
             break;
          default:
             break;

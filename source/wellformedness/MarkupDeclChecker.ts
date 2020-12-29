@@ -390,8 +390,8 @@ class MarkupDeclChecker implements Checker {
             );
             checkDeclaration(pToken, this.state, errorCollector);
             break;
-         case ELEMENT_DECLARATION_PTOKEN as any:
-            checkDeclaration(pToken as any, this.state, errorCollector);
+         case ELEMENT_DECLARATION_PTOKEN:
+            checkDeclaration(pToken, this.state, errorCollector);
             break;
          case NOTATION_DECLARATION_PTOKEN:
             checkDeclaration(pToken, this.state, errorCollector);

@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -15,7 +16,7 @@ describe('ProcessingInstructionPToken (unit)', () => {
          const result = new ProcessingInstructionPToken({ open: toSToken('<?') });
 
          expect(result).toEqual(
-            jasmine.objectContaining({
+            expect.objectContaining({
                type: PROCESSING_INSTRUCTION_PTOKEN,
                open: toSToken('<?'),
                target: undefined,
@@ -37,7 +38,7 @@ describe('ProcessingInstructionPToken (unit)', () => {
          });
 
          expect(result).toEqual(
-            jasmine.objectContaining({
+            expect.objectContaining({
                type: PROCESSING_INSTRUCTION_PTOKEN,
                open: toSToken('<?'),
                openSpace: toSToken(' '),
@@ -69,7 +70,7 @@ describe('ProcessingInstructionPToken (unit)', () => {
          });
 
          expect(result).toEqual(
-            jasmine.objectContaining({
+            expect.objectContaining({
                type: PROCESSING_INSTRUCTION_PTOKEN,
                open: toSToken('<?'),
                openSpace: toSToken('\n'),
@@ -83,10 +84,10 @@ describe('ProcessingInstructionPToken (unit)', () => {
    });
 
    describe('parseProcessingInstruction()', () => {
-      let callback: jasmine.Spy;
+      let callback: jest.MockedFunction<(pToken: ProcessingInstructionPToken) => void>;
 
       beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
+         callback = jest.fn();
       });
 
       it('does a basic parse', () => {

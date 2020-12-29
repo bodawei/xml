@@ -1,3 +1,5 @@
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+
 import { ContentModelP, isContentModelP } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -25,7 +27,7 @@ const REPEAT_MAP: { [key: string]: CpRepeat } = {
 };
 
 class ContentModelX {
-   public readonly particles: Array<ContentNameX | ContentModelX>;
+   public readonly particles: ReadonlyArray<ContentNameX | ContentModelX>;
 
    public readonly listType: CpType;
 
@@ -64,4 +66,8 @@ class ContentModelX {
    }
 }
 
-export { ContentModelX, ContentNameX, CpRepeat, CpType };
+function isContentNameX(item: ContentModelX | ContentNameX): item is ContentNameX {
+   return 'name' in item && !('particles' in item) && !('listType' in item);
+}
+
+export { ContentModelX, ContentNameX, CpRepeat, CpType, isContentNameX };

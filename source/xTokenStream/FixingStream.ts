@@ -3,9 +3,7 @@
 import { Transform } from 'stream';
 
 import { AttListDeclarationXToken } from 'xToken';
-import * as tokenNs from 'token';
-import { ElementDeclaration, isXName } from '../token/elementDeclaration';
-import nameList, { XName, XNameList } from '../token/contentspec/nameList';
+import { ElementDeclarationXToken, isContentNameX, CpRepeat, CpType, ContentModelX, ContentNameX } from 'xToken';
 
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
 const DEFAULT_TYPES = [ '#FIXED', '#REQUIRED', '#IMPLIED' ];
@@ -34,8 +32,8 @@ class FixingStream extends Transform {
    _transform(token: any, encoding: string, callback: () => void) {
       if (token instanceof AttListDeclarationXToken) {
          adjustAttListDeclaration(token);
-      } else if (token instanceof tokenNs.elementDeclaration.XToken) {
-         adjustElementDeclaration(token);
+      } else if (token instanceof ElementDeclarationXToken) {
+         token = adjustElementDeclaration(token);
       }
 
       this.push(token);
@@ -81,93 +79,129 @@ function adjustAttListDeclaration(token: any) {
  */
 const ALLOWED_CONTENT_SPEC_TYPES = [ 'ANY', 'EMPTY', 'CHILDREN' ];
 
-function adjustElementDeclaration(token: ElementDeclaration) {
-   const contentSpecType = token.contentSpecType || '';
-   const capContentSpecType = contentSpecType.toLocaleUpperCase();
+function adjustElementDeclaration(token: ElementDeclarationXToken): ElementDeclarationXToken {
+   const contentSpec = token.contentSpec || '';
+   const capContentSpec = contentSpec.toLocaleUpperCase();
+   let newToken = token;
 
    // should fix all the names somehow
 
-   if (ALLOWED_CONTENT_SPEC_TYPES.indexOf(capContentSpecType) === -1) {
-      token.contentSpecType = token.children ? 'CHILDREN' : 'ANY';
-   } else if (contentSpecType !== capContentSpecType) {
-      token.contentSpecType = capContentSpecType;
+   if (ALLOWED_CONTENT_SPEC_TYPES.indexOf(capContentSpec) === -1) {
+      const newContentSpec = token.contentModel ? 'CHILDREN' : 'ANY';
+      newToken = new ElementDeclarationXToken(token.name, newContentSpec, token.contentModel);
+   } else if (contentSpec !== capContentSpec) {
+      newToken = new ElementDeclarationXToken(token.name, capContentSpec, token.contentModel);
    }
 
-   if (token.contentSpecType === 'ANY' || token.contentSpecType === 'EMPTY') {
-      delete (token as any).children;
+   if (newToken.contentSpec === 'ANY' || token.contentSpec === 'EMPTY') {
+      newToken = new ElementDeclarationXToken(newToken.name, newToken.contentSpec, undefined);
    }
 
-   if (token.children) {
-      putPCDataFirst(token.children, true);
-      flattenMixed(token.children, true);
+   if (newToken.contentModel) {
+      const first = putPCDataFirst(newToken.contentModel, true);
+      const flattened = flattenMixed(first.contentModel, true);
+      newToken = new ElementDeclarationXToken(newToken.name, newToken.contentSpec, flattened.contentModel);
    }
+
+   return newToken;
 }
 
-function putPCDataFirst(list: XNameList, topList: boolean): boolean {
-   let seenPCData = false;
+interface Result {
+   seenPcData: boolean,
+   contentModel: ContentModelX,
+}
 
-   for (let index = list.names.length - 1; index >= 0; index--) {
-      const item = list.names[index];
+function putPCDataFirst(list: ContentModelX, topList: boolean): Result {
+   let seenPcData = false;
+   let particles = [...list.particles];
 
-      if (isXName(item)) {
+   for (let index = particles.length - 1; index >= 0; index--) {
+      const item = particles[index];
+
+      if (isContentNameX(item)) {
          if (item.name.toLocaleUpperCase() === '#PCDATA') {
-            seenPCData = true;
-            list.names.splice(index, 1);
+            seenPcData = true;
+            particles.splice(index, 1);
          }
       } else {
-         seenPCData = seenPCData || putPCDataFirst(item, false);
+         const result = putPCDataFirst(item, false);;
+         seenPcData = seenPcData || result.seenPcData;
+         particles.splice(index, 1, result.contentModel);
       }
    }
 
-   if (seenPCData && topList) {
-      list.names.unshift({
+   if (seenPcData && topList) {
+      particles.unshift({
          name: '#PCDATA',
-         repeat: 'ONE',
+         repeat: CpRepeat.ONE,
       });
    }
 
-   return seenPCData;
+   return {
+      seenPcData,
+      contentModel: {
+         ...list,
+         particles,
+      }
+   };
 }
 
 type SimpleMap = { [name: string]: boolean };
-
-function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
-   const listItem = list.names[0];
-   const isMixed = list.names.length > 0 && isXName(listItem) && listItem.name === '#PCDATA';
+interface FlattenedResult {
+   particles: Array<ContentNameX | ContentModelX>,
+   contentModel: ContentModelX,
+};
+function flattenMixed(list: ContentModelX, topList: boolean): FlattenedResult {
+   const listItem = list.particles[0];
+   const isMixed = list.particles.length > 0 && isContentNameX(listItem) && listItem.name === '#PCDATA';
 
    if (topList && !isMixed) {
-      return [];
+      return { particles: [], contentModel: list };
    }
 
-   for (let index = list.names.length - 1; index >= 0; index--) {
-      const item = list.names[index];
+   const particles = [...list.particles];
 
-      if (!isXName(item)) {
-         const newChildren = flattenMixed(item, false);
-         list.names.splice(index, 1, ...newChildren);
+   for (let index = particles.length - 1; index >= 0; index--) {
+      const item = particles[index];
+
+      if (!isContentNameX(item)) {
+         const flat = flattenMixed(item, false);
+         const newChildren = flat.particles;
+         particles.splice(index, 1, ...newChildren);
       }
    }
+
+   let contentModel = list;
 
    if (topList) {
       const seenNames: SimpleMap = {};
-      const newNames: Array<XName> = [];
+      const newParticles = [];
 
-      for (let index = 0; index < list.names.length; index++) {
-         const item = list.names[index];
+      for (let index = 0; index < particles.length; index++) {
+         let item = particles[index];
 
-         if (isXName(item) && !seenNames[item.name]) {
+         if (isContentNameX(item) && !seenNames[item.name]) {
             seenNames[item.name] = true;
-            newNames.push(item);
-            item.repeat = 'ONE';
+            item = {
+               ...item,
+               repeat: item.repeat || CpRepeat.ONE,
+            };
+            newParticles.push(item);
          }
       }
 
-      list.names = newNames;
-      list.listType = 'CHOICE';
-      list.repeat = list.names.length === 1 ? 'ONE' : 'ZEROPLUS';
+      contentModel = {
+         ...contentModel,
+         particles: newParticles,
+         listType: CpType.CHOICE,
+         repeat: particles.length === 1 ? CpRepeat.ONE : CpRepeat.ZEROPLUS,
+      }
    }
 
-   return list.names as Array<XName>;
+   return {
+      particles,
+      contentModel,
+   };
 }
 
 export default FixingStream;

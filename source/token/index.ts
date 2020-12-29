@@ -2,7 +2,6 @@
 
 import declaration from './bridge/baseDeclaration';
 
-
 import { AttributeValuePToken, AttributeValueElement } from './common/attribute';
 import unassigned from './common/unassigned';
 import { parseAllUnassignedValues } from './common/unassigned';

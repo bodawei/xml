@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import { SToken } from 'sToken';
 
 type Props =  { [name: string]: any, calls?: any };
@@ -40,9 +41,9 @@ function makeRangeless(item: undefined | Props): Props | undefined | null {
    return result;
 }
 
-function getTheOneArg(callback: jasmine.Spy) {
-   if (callback.calls) {
-      const args = callback.calls.allArgs();
+function getTheOneArg(callback: jest.MockedFunction<any>) {
+   if (callback.mock?.calls) {
+      const args = callback.mock.calls;
 
       if (args.length !== 1 || args[0].length !== 1) {
          throw new Error('toEqualRangeless() wanted one call with one argument. ' +
@@ -75,7 +76,7 @@ function fixUndef(value: Array<any> | Props | void): string | Props {
 }
 
 expect.extend({
-   toEqualRangeless(callbackSpy: jasmine.Spy, expectedProps?: Props) {
+   toEqualRangeless(callbackSpy: jest.MockedFunction<any>, expectedProps?: Props) {
       if (!callbackSpy) {
          throw new Error('Did not get a spy as expected.');
       }
@@ -116,3 +117,13 @@ expect.extend({
       };
    }
 });
+
+
+
+declare global {
+   namespace jest {
+      interface Matchers<T> {
+         toEqualRangeless(callbackSpy: jest.MockedFunction<any>, expectedProps?: Props): T;
+      }
+   }
+}

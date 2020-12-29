@@ -105,7 +105,7 @@ function parseUnexpandedAfterPeRef(
             return;
          }
 
-         const restTokens = rest ? rest.tokens : [];
+         const restTokens = rest?.tokens || [];
 
          done({
             propName,

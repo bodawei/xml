@@ -473,9 +473,9 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-119': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
    'not-wf-sa-120': 'REFERENCE_NO_NAME', // ok - Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,must be doubly quoted': 'error', // encoded either as_amp;_or as_#38;#38;_.
    'not-wf-sa-121': 'ENTITYDECL_NAME_INVALID', // great - A name of an ENTITY was started with an invalid character.
-   'not-wf-sa-122': 'NAMELIST_NO_DELIM', // meh - Invalid syntax mixed connectors are used.
+   'not-wf-sa-122': 'CONTENTMODEL_NO_DELIM', // meh - Invalid syntax mixed connectors are used.
    'not-wf-sa-123': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax mismatched parenthesis.
-   'not-wf-sa-124': 'NAMELIST_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
+   'not-wf-sa-124': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
    'not-wf-sa-125': 'error', // Invalid syntax extra set of parenthesis not necessary.
    'not-wf-sa-126': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
    'not-wf-sa-127': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
@@ -484,13 +484,13 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-130': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
    'not-wf-sa-131': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
    'not-wf-sa-132': 'error', // Invalid syntax mixed connectors used.
-   'not-wf-sa-133': 'NAMELIST_NAME_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
-   'not-wf-sa-134': 'NAMELIST_CLOSE_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
-   'not-wf-sa-135': 'NAMELIST_NAME_INVALID', // ok - Invalid character used as connector.
+   'not-wf-sa-133': 'CONTENTMODEL_NAME_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
+   'not-wf-sa-134': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
+   'not-wf-sa-135': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid character used as connector.
    'not-wf-sa-136': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Tag omission is invalid in XML.
    'not-wf-sa-137': 'ELEMENTDECL_NAME_NO_SPACE', // great - Space is required before a content model.
-   'not-wf-sa-138': 'NAMELIST_NO_DELIM', // meh - Invalid syntax for content particle.
-   'not-wf-sa-139': 'NAMELIST_NO_NAMES', // great - The element-content model should not be empty.
+   'not-wf-sa-138': 'CONTENTMODEL_NO_DELIM', // meh - Invalid syntax for content particle.
+   'not-wf-sa-139': 'CONTENTMODEL_NO_NAMES', // great - The element-content model should not be empty.
    'not-wf-sa-140': 'ELEMENT_NAME_INVALID', // ok - Character '#x309a;' is a CombiningChar, not a Letter, and so may not begin a name.
    'not-wf-sa-141': 'ELEMENT_NAME_INVALID', // good - Character #x0E5C is not legal in XML names.
    'not-wf-sa-142': 'CHARREF_INVALID_CHAR', // good - Character #x0000 is not legal anywhere in an XML document.
@@ -562,8 +562,8 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-180': 'REFERENCE_NO_DECLARATION', // good - The_Entity Declared_WFC requires entities to be declared before they are used in an attribute list declaration.
    'not-wf-sa-181': 'CDATA_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
    'not-wf-sa-182': 'COMMENT_NO_CLOSE', // OK - Internal parsed entities must match the_content_production to be well formed.
-   'not-wf-sa-183': 'NAMELIST_MIXED_NAME_EXTRA_REPEAT', // good - Mixed content declarations may not include content particles.
-   'not-wf-sa-184': 'NAMELIST_MIXED_INVALID_SUBPARTICLE', // OK - In mixed content models, element names must not be parenthesized.
+   'not-wf-sa-183': 'CONTENTMODEL_MIXED_NAME_EXTRA_REPEAT', // good - Mixed content declarations may not include content particles.
+   'not-wf-sa-184': 'CONTENTMODEL_MIXED_INVALID_SUBPARTICLE', // OK - In mixed content models, element names must not be parenthesized.
    'not-wf-sa-185': 'REFERENCE_NO_DECLARATION', // great - Tests the_Entity Declared_WFC._Note:_a nonvalidating parser is permitted not to report this WFC violation, since it would need to read an external parameter entity to distinguish it from a violation of the_Standalone Declaration_VC.
    'not-wf-sa-186': 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // great - Whitespace is required between attribute/value pairs.
 
@@ -603,12 +603,12 @@ const expectedNotWfCodes: IdToErrorMap = {
       id: 'CONDITIONAL_UNKNOWN',
       message: '""',
    },
-   content01: 'NAMELIST_CLOSE_EXTRA_SPACE', // No whitespace before "?" in content model
-   content02: 'NAMELIST_CLOSE_EXTRA_SPACE', // No whitespace before "*" in content model
-   content03: 'NAMELIST_NAME_EXTRA_SPACE', // No whitespace before "+" in content model
+   content01: 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // No whitespace before "?" in content model
+   content02: 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // No whitespace before "*" in content model
+   content03: 'CONTENTMODEL_NAME_EXTRA_SPACE', // No whitespace before "+" in content model
    decl01: 'TEXTDECL_NO_CLOSE', // External entities may not have standalone decls.
-   'nwf-dtd00': 'NAMELIST_NO_DELIM', // Comma mandatory in content model
-   'nwf-dtd01': 'NAMELIST_NAME_INVALID', // Can't mix comma and vertical bar in content models
+   'nwf-dtd00': 'CONTENTMODEL_NO_DELIM', // Comma mandatory in content model
+   'nwf-dtd01': 'CONTENTMODEL_NAME_INVALID', // Can't mix comma and vertical bar in content models
    dtd02: 'PEREF_XTRA_SPACE', // PE name immediately after "%"
    dtd03: 'PEREF_XTRA_TRAILING_SPACE', // PE name immediately followed by ";"
    dtd04: 'LITERAL_NO_OPEN_QUOTE', // PUBLIC literal must be quoted
@@ -621,7 +621,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    element04: {
       // Illegal markup (!ELEMENT ...>)
       id: 'CONTENT_INVALID_TOKEN',
-      message: 'ELEMENTDECL',
+      message: 'ELEMENT_DECLARATION_PTOKEN',
    },
    encoding01: 'XMLDECL_ENCODING_INVALID', // Illegal character " " in encoding name
    encoding02: 'XMLDECL_ENCODING_INVALID', // Illegal character "/" in encoding name
@@ -652,7 +652,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    sgml10: 'ELEMENTDECL_NO_CLOSE', // SGML Content model exception specifications are not allowed
    sgml11: 'ELEMENTDECL_SPEC_UNKNOWN', // CDATA is not a valid content model spec
    sgml12: 'ELEMENTDECL_SPEC_UNKNOWN', // RCDATA is not a valid content model spec
-   sgml13: 'NAMELIST_NO_DELIM', // SGML Unordered content models not allowed
+   sgml13: 'CONTENTMODEL_NO_DELIM', // SGML Unordered content models not allowed
 
    'o-p01fail1': {
       // S cannot occur before the prolog
@@ -834,31 +834,31 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p44fail3': 'ATTRIBUTE_INVALID_NAME', // Illegal comment in Empty element tag.
    'o-p44fail4': 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // Whitespace required between attributes.
    'o-p44fail5': 'ATTRIBUTE_DUPLICATE_NAME', // Duplicate attribute name is illegal.
-   'o-p45fail1': 'DECL_DECLTYPE_INVALID_CASE', // ELEMENT must be upper case.
+   'o-p45fail1': 'ELEMENTDECL_DECLTYPE_INVALID', // ELEMENT must be upper case.
    'o-p45fail2': 'ELEMENTDECL_NAME_NO_SPACE', // S before contentspec is required.
    'o-p45fail3': 'ELEMENTDECL_NO_NAME', // only one content spec
    'o-p45fail4': 'ELEMENTDECL_NO_CLOSE', // no comments in declarations (contrast with SGML)
-   'o-p46fail1': 'NAMELIST_NAME_INVALID', // no parens on declared content
-   'o-p46fail2': 'NAMELIST_CLOSE_EXTRA_SPACE', // no inclusions (contrast with SGML)
+   'o-p46fail1': 'CONTENTMODEL_NAME_INVALID', // no parens on declared content
+   'o-p46fail2': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // no inclusions (contrast with SGML)
    'o-p46fail3': 'ELEMENTDECL_NO_CLOSE', // no exclusions (contrast with SGML)
-   'o-p46fail4': 'NAMELIST_CLOSE_EXTRA_SPACE', // no space before occurrence
+   'o-p46fail4': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // no space before occurrence
    'o-p46fail5': 'ELEMENTDECL_NO_CLOSE', // single group
    'o-p46fail6': 'ELEMENTDECL_NO_CLOSE', // can't be both declared and modeled
-   'o-p47fail1': 'NAMELIST_NO_DELIM', // Invalid operator '|' must match previous operator ','
+   'o-p47fail1': 'CONTENTMODEL_NO_DELIM', // Invalid operator '|' must match previous operator ','
    'o-p47fail2': 'ELEMENTDECL_NO_CLOSE', // Illegal character '-' in Element-content model
    'o-p47fail3': 'ELEMENTDECL_SPEC_UNKNOWN', // Optional character must follow a name or list
-   'o-p47fail4': 'NAMELIST_CLOSE_EXTRA_SPACE', // Illegal space before optional character
-   'o-p48fail1': 'NAMELIST_NAME_EXTRA_SPACE', // Illegal space before optional character
-   'o-p48fail2': 'NAMELIST_CLOSE_EXTRA_SPACE', // Illegal space before optional character
-   'o-p49fail1': 'NAMELIST_NO_DELIM', // connectors must match
-   'o-p50fail1': 'NAMELIST_NO_DELIM', // connectors must match
+   'o-p47fail4': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // Illegal space before optional character
+   'o-p48fail1': 'CONTENTMODEL_NAME_EXTRA_SPACE', // Illegal space before optional character
+   'o-p48fail2': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // Illegal space before optional character
+   'o-p49fail1': 'CONTENTMODEL_NO_DELIM', // connectors must match
+   'o-p50fail1': 'CONTENTMODEL_NO_DELIM', // connectors must match
    'o-p51fail1': 'error', // occurrence on #PCDATA group must be *
    'o-p51fail2': 'error', // occurrence on #PCDATA group must be *
-   'o-p51fail3': 'NAMELIST_NAME_INVALID', // #PCDATA must come first
-   'o-p51fail4': 'NAMELIST_MIXED_INVALID_REPEAT', // occurrence on #PCDATA group must be *
-   'o-p51fail5': 'NAMELIST_NAME_INVALID', // only '|' connectors
-   'o-p51fail6': 'NAMELIST_BAD_CHOICE', // Only '|' connectors and occurrence on #PCDATA group must be *
-   'o-p51fail7': 'NAMELIST_MIXED_INVALID_SUBPARTICLE', // no nested groups
+   'o-p51fail3': 'CONTENTMODEL_NAME_INVALID', // #PCDATA must come first
+   'o-p51fail4': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // occurrence on #PCDATA group must be *
+   'o-p51fail5': 'CONTENTMODEL_NAME_INVALID', // only '|' connectors
+   'o-p51fail6': 'CONTENTMODEL_BAD_CHOICE', // Only '|' connectors and occurrence on #PCDATA group must be *
+   'o-p51fail7': 'CONTENTMODEL_MIXED_INVALID_SUBPARTICLE', // no nested groups
    'o-p52fail1': 'ATTLISTDECL_NO_ELEMENT_NAME', // A name is required
    'o-p52fail2': 'ATTLISTDECL_NO_ELEMENT_NAME', // A name is required
    'o-p53fail1': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // S is required before default
@@ -1148,7 +1148,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    // §2.8 Misc
    'ibm-not-wf-P27-ibm27n01.xml': {
       id: 'TOKEN_INVALID_CONTEXT',
-      message: /ELEMENTDECL/,
+      message: /ELEMENT_DECLARATION_PTOKEN/,
    },
 
    // §2.8 doctypedecl
@@ -1265,7 +1265,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
    'ibm-not-wf-P43-ibm43n02.xml': {
       id: 'CONTENT_INVALID_TOKEN',
-      message: /ELEMENTDECL/,
+      message: /ELEMENT_DECLARATION_PTOKEN/,
    },
    'ibm-not-wf-P43-ibm43n04.xml': {
       id: 'CONTENT_INVALID_TOKEN',
@@ -1293,8 +1293,8 @@ const expectedNotWfCodes: IdToErrorMap = {
       id: 'MARKUPDECL_INVALID_TOKEN',
       message: /ELEMENT_START_PTOKEN/,
    },
-   'ibm-not-wf-P45-ibm45n08.xml': 'DECL_DECLTYPE_INVALID_CASE',
-   'ibm-not-wf-P45-ibm45n09.xml': 'DECL_DECLTYPE_INVALID_CASE',
+   'ibm-not-wf-P45-ibm45n08.xml': 'ELEMENTDECL_DECLTYPE_INVALID',
+   'ibm-not-wf-P45-ibm45n09.xml': 'ELEMENTDECL_DECLTYPE_INVALID',
 
    // §3.2.0 contentspec
    'ibm-not-wf-P46-ibm46n01.xml': 'ELEMENTDECL_SPEC_INVALID_CASE',
@@ -1312,39 +1312,39 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-not-wf-P47-ibm47n06.xml': 'ELEMENTDECL_NO_CLOSE',
 
    // §3.2.1 cp
-   'ibm-not-wf-P48-ibm48n01.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P48-ibm48n02.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P48-ibm48n03.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P48-ibm48n04.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P48-ibm48n05.xml': 'NAMELIST_NO_DELIM',
-   'ibm-not-wf-P48-ibm48n06.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P48-ibm48n07.xml': 'NAMELIST_NAME_INVALID',
+   'ibm-not-wf-P48-ibm48n01.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P48-ibm48n02.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P48-ibm48n03.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P48-ibm48n04.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P48-ibm48n05.xml': 'CONTENTMODEL_NO_DELIM',
+   'ibm-not-wf-P48-ibm48n06.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P48-ibm48n07.xml': 'CONTENTMODEL_NAME_INVALID',
 
    // §3.2.1 choice
-   'ibm-not-wf-P49-ibm49n01.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P49-ibm49n02.xml': 'NAMELIST_EXTRA_DELIM',
-   'ibm-not-wf-P49-ibm49n03.xml': 'NAMELIST_NAME_INVALID',
-   'ibm-not-wf-P49-ibm49n04.xml': 'NAMELIST_NO_DELIM',
-   'ibm-not-wf-P49-ibm49n05.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P49-ibm49n06.xml': 'NAMELIST_NAME_EXTRA_SPACE',
+   'ibm-not-wf-P49-ibm49n01.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P49-ibm49n02.xml': 'CONTENTMODEL_EXTRA_DELIM',
+   'ibm-not-wf-P49-ibm49n03.xml': 'CONTENTMODEL_NAME_INVALID',
+   'ibm-not-wf-P49-ibm49n04.xml': 'CONTENTMODEL_NO_DELIM',
+   'ibm-not-wf-P49-ibm49n05.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P49-ibm49n06.xml': 'CONTENTMODEL_NAME_EXTRA_SPACE',
 
    // §3.2.1 seq
-   'ibm-not-wf-P50-ibm50n01.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P50-ibm50n02.xml': 'NAMELIST_EXTRA_DELIM',
-   'ibm-not-wf-P50-ibm50n03.xml': 'NAMELIST_NAME_INVALID',
-   'ibm-not-wf-P50-ibm50n04.xml': 'NAMELIST_NO_DELIM',
-   'ibm-not-wf-P50-ibm50n05.xml': 'NAMELIST_NO_NAME',
-   'ibm-not-wf-P50-ibm50n06.xml': 'NAMELIST_NO_DELIM',
-   'ibm-not-wf-P50-ibm50n07.xml': 'NAMELIST_NAME_INVALID',
+   'ibm-not-wf-P50-ibm50n01.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P50-ibm50n02.xml': 'CONTENTMODEL_EXTRA_DELIM',
+   'ibm-not-wf-P50-ibm50n03.xml': 'CONTENTMODEL_NAME_INVALID',
+   'ibm-not-wf-P50-ibm50n04.xml': 'CONTENTMODEL_NO_DELIM',
+   'ibm-not-wf-P50-ibm50n05.xml': 'CONTENTMODEL_NO_NAME',
+   'ibm-not-wf-P50-ibm50n06.xml': 'CONTENTMODEL_NO_DELIM',
+   'ibm-not-wf-P50-ibm50n07.xml': 'CONTENTMODEL_NAME_INVALID',
 
    // §3.2.2 Mixed
-   'ibm-not-wf-P51-ibm51n01.xml': 'NAMELIST_PCDATA_INVALID_CASE',
-   'ibm-not-wf-P51-ibm51n02.xml': 'NAMELIST_NAME_INVALID',
-   'ibm-not-wf-P51-ibm51n03.xml': 'NAMELIST_NO_DELIM',
-   'ibm-not-wf-P51-ibm51n04.xml': 'NAMELIST_NAME_INVALID',
-   'ibm-not-wf-P51-ibm51n05.xml': 'NAMELIST_MIXED_INVALID_REPEAT',
-   'ibm-not-wf-P51-ibm51n06.xml': 'NAMELIST_NO_DELIM',
-   'ibm-not-wf-P51-ibm51n07.xml': 'NAMELIST_NO_CLOSE',
+   'ibm-not-wf-P51-ibm51n01.xml': 'CONTENTMODEL_PCDATA_INVALID_CASE',
+   'ibm-not-wf-P51-ibm51n02.xml': 'CONTENTMODEL_NAME_INVALID',
+   'ibm-not-wf-P51-ibm51n03.xml': 'CONTENTMODEL_NO_DELIM',
+   'ibm-not-wf-P51-ibm51n04.xml': 'CONTENTMODEL_NAME_INVALID',
+   'ibm-not-wf-P51-ibm51n05.xml': 'CONTENTMODEL_MIXED_INVALID_REPEAT',
+   'ibm-not-wf-P51-ibm51n06.xml': 'CONTENTMODEL_NO_DELIM',
+   'ibm-not-wf-P51-ibm51n07.xml': 'CONTENTMODEL_NO_CLOSE',
 
    // §3.3.0 AttlistDecl
    'ibm-not-wf-P52-ibm52n01.xml': 'ATTLISTDECL_ATTR_NO_ATTTYPE',

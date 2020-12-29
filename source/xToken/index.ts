@@ -45,7 +45,7 @@ export {
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionXToken,
 } from './token/processingInstructionXToken';
-export { ContentModelX, ContentNameX } from './common/contentModelX';
+export { ContentModelX, ContentNameX, CpRepeat, CpType, isContentNameX } from './common/contentModelX';
 
 export { TEXTDECL_XTOKEN, TextDeclarationXToken } from './token/textDeclarationXToken';
 export { XMLDECL_XTOKEN, XmlDeclarationXToken } from './token/xmlDeclarationXToken';

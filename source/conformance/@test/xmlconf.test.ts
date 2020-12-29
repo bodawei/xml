@@ -17,6 +17,7 @@ import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
 import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
+import CheckValidityStream from 'source/nodeStream/CheckValidityStream';
 
 function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
    const sTokenSource = new STokenSource(defaultExtractors);
@@ -27,10 +28,17 @@ function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Tra
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
    const checkWF = new CheckWellFormed();
+   const checkValidity = new CheckValidityStream();
    const toXToken = new PToXTokenStream();
    const checkValid = new CheckXTokenValidStream();
 
-   pTokenStream.pipe(entityExpander).pipe(attFix).pipe(checkWF).pipe(toXToken).pipe(checkValid);
+   pTokenStream
+      .pipe(entityExpander)
+      .pipe(attFix)
+      .pipe(checkWF)
+      .pipe(checkValidity)
+      .pipe(toXToken)
+      .pipe(checkValid);
 
    pTokenStream.addText(test.testData || '');
    pTokenStream.endText();

@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -159,7 +160,6 @@ describe('ContentModel (unit)', () => {
    });
 
    describe('parseContentModel()', () => {
-
       it('parses a two name content spec', () => {
          const mockSource = new MockSTokenSource([
             ['(', 'match', '('],
@@ -704,7 +704,6 @@ describe('ContentModel (unit)', () => {
    });
 
    describe('resumeParseContentModel()', () => {
-
       it('resumes a parse after a topmost close', () => {
          const mockSource = new MockSTokenSource([
             ['+', 'multi', ['?', '*', '+']],
@@ -713,8 +712,7 @@ describe('ContentModel (unit)', () => {
          contentSpec = new ContentModelP({
             open: toSToken('('),
             openSpace: toSToken(' '),
-            delimitedParticles: [
-            ],
+            delimitedParticles: [],
             close: toSToken(')'),
             closeSpace: toSToken(' '),
             repeat: undefined,
@@ -733,13 +731,11 @@ describe('ContentModel (unit)', () => {
       });
 
       it('resumes a parse after a topmost content model is already done', () => {
-         const mockSource = new MockSTokenSource([
-         ]);
+         const mockSource = new MockSTokenSource([]);
          contentSpec = new ContentModelP({
             open: toSToken('('),
             openSpace: toSToken(' '),
-            delimitedParticles: [
-            ],
+            delimitedParticles: [],
             close: toSToken(')'),
             closeSpace: toSToken(' '),
             repeat: toSToken('+'),
@@ -749,21 +745,23 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
-         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-            repeatSpace: toSToken(' \t'),
-         }));
+         expect(result).toEqualRangeless(
+            new ContentModelP(contentSpec, {
+               repeatSpace: toSToken(' \t'),
+            }),
+         );
       });
 
       it('resumes parse with empty delimited particles', () => {
          const mockSource = new MockSTokenSource([
-            ['p', 'peekChar', ],
-            ['p', 'word', ],
+            ['p', 'peekChar'],
+            ['p', 'word'],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             [undefined, 'multi'],
             [' ', 'space'],
-            [ undefined, 'peekChar'],
+            [undefined, 'peekChar'],
             [')', 'match', ')'],
             ['\n', 'space'],
             [undefined, 'multi', ['?', '*', '+']],
@@ -778,28 +776,32 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
-         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-            openSpace: toSToken(' \t'),
-            delimitedParticles: [{
-               particle: {
-                  name: toSToken('p'),
-                  nameSpace: toSToken(' '),
-                  repeat: toSToken('*'),
-                  repeatSpace: toSToken(' '),
-               },
-               delimiter: undefined,
-               delimiterSpace: toSToken(' '),
-            }],
-            close: toSToken(')'),
-            closeSpace: toSToken('\n'),
-            repeat: undefined,
-            repeatSpace: undefined,
-         }));
+         expect(result).toEqualRangeless(
+            new ContentModelP(contentSpec, {
+               openSpace: toSToken(' \t'),
+               delimitedParticles: [
+                  {
+                     particle: {
+                        name: toSToken('p'),
+                        nameSpace: toSToken(' '),
+                        repeat: toSToken('*'),
+                        repeatSpace: toSToken(' '),
+                     },
+                     delimiter: undefined,
+                     delimiterSpace: toSToken(' '),
+                  },
+               ],
+               close: toSToken(')'),
+               closeSpace: toSToken('\n'),
+               repeat: undefined,
+               repeatSpace: undefined,
+            }),
+         );
       });
 
       it('resumes parse with an empty delimited particle', () => {
          const mockSource = new MockSTokenSource([
-            [')', 'peekChar', ],
+            [')', 'peekChar'],
             [')', 'match', ')'],
             ['\n', 'space'],
             [undefined, 'multi', ['?', '*', '+']],
@@ -814,14 +816,16 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
-         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-            openSpace: toSToken(' \t'),
-            delimitedParticles: [{}],
-            close: toSToken(')'),
-            closeSpace: toSToken('\n'),
-            repeat: undefined,
-            repeatSpace: undefined,
-         }));
+         expect(result).toEqualRangeless(
+            new ContentModelP(contentSpec, {
+               openSpace: toSToken(' \t'),
+               delimitedParticles: [{}],
+               close: toSToken(')'),
+               closeSpace: toSToken('\n'),
+               repeat: undefined,
+               repeatSpace: undefined,
+            }),
+         );
       });
 
       it('resumes a parse after a mid-content name particle', () => {
@@ -830,7 +834,7 @@ describe('ContentModel (unit)', () => {
             [' ', 'space'],
             [undefined, 'multi'],
             [' ', 'space'],
-            [ undefined, 'peekChar'],
+            [undefined, 'peekChar'],
             [')', 'match', ')'],
             ['\n', 'space'],
             ['+', 'multi', ['?', '*', '+']],
@@ -839,33 +843,39 @@ describe('ContentModel (unit)', () => {
          contentSpec = new ContentModelP({
             open: toSToken('('),
             openSpace: toSToken(' '),
-            delimitedParticles: [{
-               particle: {
-                  name: toSToken('a'),
-                  nameSpace: toSToken(' '),
+            delimitedParticles: [
+               {
+                  particle: {
+                     name: toSToken('a'),
+                     nameSpace: toSToken(' '),
+                  },
                },
-            }],
+            ],
          });
 
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
-         expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-            delimitedParticles: [{
-               particle: {
-                  name: toSToken('a'),
-                  nameSpace: toSToken(' \t'),
-                  repeat: toSToken('*'),
-                  repeatSpace: toSToken(' '),
-               },
-               delimiter: undefined,
-               delimiterSpace: toSToken(' '),
-            }],
-            close: toSToken(')'),
-            closeSpace: toSToken('\n'),
-            repeat: toSToken('+'),
-            repeatSpace: toSToken(' '),
-         }));
+         expect(result).toEqualRangeless(
+            new ContentModelP(contentSpec, {
+               delimitedParticles: [
+                  {
+                     particle: {
+                        name: toSToken('a'),
+                        nameSpace: toSToken(' \t'),
+                        repeat: toSToken('*'),
+                        repeatSpace: toSToken(' '),
+                     },
+                     delimiter: undefined,
+                     delimiterSpace: toSToken(' '),
+                  },
+               ],
+               close: toSToken(')'),
+               closeSpace: toSToken('\n'),
+               repeat: toSToken('+'),
+               repeatSpace: toSToken(' '),
+            }),
+         );
       });
    });
 
@@ -887,39 +897,46 @@ describe('ContentModel (unit)', () => {
       contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         delimitedParticles: [{
-            particle: {
-               name: toSToken('a'),
-               nameSpace: toSToken(' '),
+         delimitedParticles: [
+            {
+               particle: {
+                  name: toSToken('a'),
+                  nameSpace: toSToken(' '),
+               },
+               delimiter: toSToken('|'),
             },
-            delimiter: toSToken('|'),
-         }],
+         ],
       });
 
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
-      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-         delimitedParticles: [{
-            particle: {
-               name: toSToken('a'),
-               nameSpace: toSToken(' '),
-            },
-            delimiter: toSToken('|'),
-            delimiterSpace: toSToken('\t'),
-         }, {
-            particle: {
-               name: toSToken('b'),
-               nameSpace: toSToken(' '),
-               repeat: toSToken('+'),
-               repeatSpace: toSToken(' '),
-            },
-         }],
-         close: toSToken(')'),
-         closeSpace: toSToken('\n'),
-         repeat: toSToken('+'),
-         repeatSpace: toSToken(' '),
-      }));
+      expect(result).toEqualRangeless(
+         new ContentModelP(contentSpec, {
+            delimitedParticles: [
+               {
+                  particle: {
+                     name: toSToken('a'),
+                     nameSpace: toSToken(' '),
+                  },
+                  delimiter: toSToken('|'),
+                  delimiterSpace: toSToken('\t'),
+               },
+               {
+                  particle: {
+                     name: toSToken('b'),
+                     nameSpace: toSToken(' '),
+                     repeat: toSToken('+'),
+                     repeatSpace: toSToken(' '),
+                  },
+               },
+            ],
+            close: toSToken(')'),
+            closeSpace: toSToken('\n'),
+            repeat: toSToken('+'),
+            repeatSpace: toSToken(' '),
+         }),
+      );
    });
 
    it('resumes a parse with a second partial token', () => {
@@ -937,42 +954,50 @@ describe('ContentModel (unit)', () => {
       contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         delimitedParticles: [{
-            particle: {
-               name: toSToken('a'),
-               nameSpace: toSToken(' '),
+         delimitedParticles: [
+            {
+               particle: {
+                  name: toSToken('a'),
+                  nameSpace: toSToken(' '),
+               },
+               delimiter: toSToken('|'),
             },
-            delimiter: toSToken('|'),
-         }, {
-            particle: {
-               name: toSToken('b'),
+            {
+               particle: {
+                  name: toSToken('b'),
+               },
             },
-         }],
+         ],
       });
 
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
-      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-         delimitedParticles: [{
-            particle: {
-               name: toSToken('a'),
-               nameSpace: toSToken(' '),
-            },
-            delimiter: toSToken('|'),
-         }, {
-            particle: {
-               name: toSToken('b'),
-               nameSpace: toSToken('\t'),
-               repeat: toSToken('+'),
-               repeatSpace: toSToken(' '),
-            },
-         }],
-         close: toSToken(')'),
-         closeSpace: toSToken('\n'),
-         repeat: toSToken('+'),
-         repeatSpace: toSToken(' '),
-      }));
+      expect(result).toEqualRangeless(
+         new ContentModelP(contentSpec, {
+            delimitedParticles: [
+               {
+                  particle: {
+                     name: toSToken('a'),
+                     nameSpace: toSToken(' '),
+                  },
+                  delimiter: toSToken('|'),
+               },
+               {
+                  particle: {
+                     name: toSToken('b'),
+                     nameSpace: toSToken('\t'),
+                     repeat: toSToken('+'),
+                     repeatSpace: toSToken(' '),
+                  },
+               },
+            ],
+            close: toSToken(')'),
+            closeSpace: toSToken('\n'),
+            repeat: toSToken('+'),
+            repeatSpace: toSToken(' '),
+         }),
+      );
    });
 
    it('resumes a parse with a partial content model', () => {
@@ -993,32 +1018,38 @@ describe('ContentModel (unit)', () => {
       contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         delimitedParticles: [{
-            particle: {
-               open: toSToken('('),
-               openSpace: toSToken(' '),
+         delimitedParticles: [
+            {
+               particle: {
+                  open: toSToken('('),
+                  openSpace: toSToken(' '),
+               },
             },
-         }],
+         ],
       });
 
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
-      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-         delimitedParticles: [{
-            particle: {
-               open: toSToken('('),
-               openSpace: toSToken(' \t'),
-               delimitedParticles: [],
-               close: toSToken(')'),
-               closeSpace: toSToken('\n'),
-               repeat: toSToken('+'),
-               repeatSpace: toSToken(' '),
-            },
-         }],
-         close: toSToken(')'),
-         repeat: toSToken('?'),
-      }));
+      expect(result).toEqualRangeless(
+         new ContentModelP(contentSpec, {
+            delimitedParticles: [
+               {
+                  particle: {
+                     open: toSToken('('),
+                     openSpace: toSToken(' \t'),
+                     delimitedParticles: [],
+                     close: toSToken(')'),
+                     closeSpace: toSToken('\n'),
+                     repeat: toSToken('+'),
+                     repeatSpace: toSToken(' '),
+                  },
+               },
+            ],
+            close: toSToken(')'),
+            repeat: toSToken('?'),
+         }),
+      );
    });
 
    it('resumes a parse with a complete content model', () => {
@@ -1032,31 +1063,37 @@ describe('ContentModel (unit)', () => {
       contentSpec = new ContentModelP({
          open: toSToken('('),
          openSpace: toSToken(' '),
-         delimitedParticles: [{
-            particle: {
-               open: toSToken('('),
-               openSpace: toSToken(' '),
-               close: toSToken(')'),
-               repeat: toSToken('+'),
+         delimitedParticles: [
+            {
+               particle: {
+                  open: toSToken('('),
+                  openSpace: toSToken(' '),
+                  close: toSToken(')'),
+                  repeat: toSToken('+'),
+               },
             },
-         }],
+         ],
       });
 
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
-      expect(result).toEqualRangeless(new ContentModelP(contentSpec, {
-         delimitedParticles: [{
-            particle: {
-               open: toSToken('('),
-               openSpace: toSToken(' '),
-               close: toSToken(')'),
-               repeat: toSToken('+'),
-            },
-            delimiterSpace: toSToken('\t'),
-         }],
-         close: toSToken(')'),
-         repeat: toSToken('?'),
-      }));
+      expect(result).toEqualRangeless(
+         new ContentModelP(contentSpec, {
+            delimitedParticles: [
+               {
+                  particle: {
+                     open: toSToken('('),
+                     openSpace: toSToken(' '),
+                     close: toSToken(')'),
+                     repeat: toSToken('+'),
+                  },
+                  delimiterSpace: toSToken('\t'),
+               },
+            ],
+            close: toSToken(')'),
+            repeat: toSToken('?'),
+         }),
+      );
    });
 });

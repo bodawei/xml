@@ -4,15 +4,27 @@ import { Transform } from 'stream';
 
 import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
-import { AttListDeclarationPToken } from 'pToken';
+import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
-import { CHARREF_XTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN, PARAMETER_ENTITY_REFERENCE_XTOKEN,    PROCESSING_INSTRUCTION_XTOKEN,   TEXTDECL_XTOKEN, XMLDECL_XTOKEN,
+import {
+   CHARREF_XTOKEN,
+   GENERAL_ENTITY_REFERENCE_XTOKEN,
+   PARAMETER_ENTITY_REFERENCE_XTOKEN,
+   PROCESSING_INSTRUCTION_XTOKEN,
+   TEXTDECL_XTOKEN,
+   XMLDECL_XTOKEN,
    AttListDeclarationXToken,
    AttDefinitionXToken,
+   ContentModelX,
+   CpRepeat,
+   CpType,
+   ElementDeclarationXToken,
    GeneralEntityDeclarationXToken,
+   isContentNameX,
    NotationDeclarationXToken,
    ParameterEntityDeclarationXToken,
  } from 'xToken';
+
 
 import {
    isTextXToken,
@@ -48,9 +60,6 @@ import {
 } from 'token';
 
 import { AttributeValueXToken } from '../token/common/attribute';
-import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
-import nameList, { XName } from '../token/contentspec/nameList';
-import { Graph } from '../token/contentspec/nameListGraphTypes';
 
 type XToken = {
    type: string;
@@ -75,31 +84,25 @@ type AttDefinitions = {
    };
 }
 
-type MixedChildrenMap = {
-   [xName: string]: true;
-};
-
 type AnyContentDeclInfo = {
    type: 'ANY_CONTENT';
-   token: ElementDeclaration;
+   token: ElementDeclarationXToken;
 }
 
 type EmptyContentDeclInfo = {
    type: 'EMPTY_CONTENT';
-   token: ElementDeclaration;
+   token: ElementDeclarationXToken;
 }
 
 type MixedContentDeclInfo = {
    type: 'MIXED_CONTENT';
-   token: ElementDeclaration;
-   children: MixedChildrenMap;
+   token: ElementDeclarationXToken;
 }
 
 type ElementContentDeclInfo = {
    type: 'ELEMENT_CONTENT';
    externallyDeclared: boolean; // §2.9
-   token: ElementDeclaration;
-   graph: Graph;
+   token: ElementDeclarationXToken;
 }
 
 type ElementDeclInfo = AnyContentDeclInfo | EmptyContentDeclInfo | MixedContentDeclInfo | ElementContentDeclInfo;
@@ -474,8 +477,6 @@ class CheckXTokenValidStream extends Transform {
          const notAllowedParams = [ declInfo.token.name, this.confVer.version.toString(),
             this.confVer.revision.toString() ];
 
-         const currentState = declInfo.graph.states[context.stateId];
-
          if (xToken.type === SPACE_XTOKEN) {
             if (isNoSpaceAtEndsVersion && context.atElementContentStart) {
                this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
@@ -487,11 +488,6 @@ class CheckXTokenValidStream extends Transform {
          switch (xToken.type) {
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
-               const destState = currentState.trans[xToken.name];
-
-               if (destState) {
-                  context.stateId = destState.stateId;
-               }
                break;
             case ELEMENT_END_XTOKEN:
                if (isNoSpaceAtEndsVersion && context.lastElementContentValue === SPACE_XTOKEN) {
@@ -636,7 +632,7 @@ class CheckXTokenValidStream extends Transform {
                this.externalDeclarations = false;
             }
          }
-      } else if (xToken instanceof ElementDeclaration) {
+      } else if (xToken instanceof ElementDeclarationXToken) {
          this.validateElementDecl(xToken);
       } else if (xToken instanceof DocTypeStartXToken) {
          this.docType = xToken;
@@ -661,7 +657,7 @@ class CheckXTokenValidStream extends Transform {
             } else {
                this.currentContext = {
                   declInfo: {
-                     token: new ElementDeclaration(xToken.name, 'ANY', undefined),
+                     token: new ElementDeclarationXToken(xToken.name, 'ANY', undefined),
                      type: 'ANY_CONTENT',
                   },
                   stateId: 0,
@@ -991,7 +987,7 @@ class CheckXTokenValidStream extends Transform {
       return duplicates;
    }
 
-   private validateElementDecl(elDecl: ElementDeclaration): void {
+   private validateElementDecl(elDecl: ElementDeclarationXToken): void {
       const openSToken = elDecl.pToken && elDecl.pToken.open;
       let isMixed = false;
 
@@ -1003,21 +999,21 @@ class CheckXTokenValidStream extends Transform {
          return;
       }
 
-      if (elDecl.contentSpecType === 'EMPTY') {
+      if (elDecl.contentSpec === 'EMPTY') {
          this.elementDeclarations[elDecl.name] = {
             token: elDecl,
             type: 'EMPTY_CONTENT',
          };
-      } else if (elDecl.contentSpecType === 'ANY') {
+      } else if (elDecl.contentSpec === 'ANY') {
          this.elementDeclarations[elDecl.name] = {
             token: elDecl,
             type: 'ANY_CONTENT',
          };
       } else {
-         const children: XNameList = elDecl.children || {
-            names: [],
-            listType: 'CHOICE',
-            repeat: 'ONE',
+         const children: ContentModelX | undefined = elDecl.contentModel || {
+            particles: [],
+            listType: CpType.CHOICE,
+            repeat: CpRepeat.ONE,
          };
 
          // §3.2.0: At user option, an XML processor may issue a warning when a declaration mentions an
@@ -1034,30 +1030,16 @@ class CheckXTokenValidStream extends Transform {
          }
 
          if (isMixed) {
-            const childrenNames: MixedChildrenMap = {};
-
             this.elementDeclarations[elDecl.name] = {
                token: elDecl,
                type: 'MIXED_CONTENT',
-               children: childrenNames,
             };
-
-            // §3.2.2: Validity constraint: No Duplicate Types
-            //    The same name must not appear more than once in a single mixed-content declaration.
-            const names: Array<XName> = children.names as Array<XName>;
-
-            names.forEach((child: XName) => {
-               if (child.name && child.name.toLocaleUpperCase() !== '#PCDATA') {
-                  childrenNames[child.name] = true;
-               }
-            });
          } else {
             this.elementDeclarations[elDecl.name] = {
                token: elDecl,
                type: 'ELEMENT_CONTENT',
                externallyDeclared: this.externalDeclarations, // §2.9
-               graph: nameList.graphFromNameList(children),
-            };
+            } as any;
          }
       }
    }
@@ -1460,12 +1442,12 @@ class CheckXTokenValidStream extends Transform {
 
 type NamesMap = { [elName: string]: true };
 
-function getNamesFromList(children: XNameList): NamesMap {
+function getNamesFromList(children: ContentModelX): NamesMap {
    let childNames: NamesMap = {};
-   for (let index = 0; index < children.names.length; index++) {
-      const child = children.names[index];
+   for (let index = 0; index < children.particles.length; index++) {
+      const child = children.particles[index];
 
-      if (isXName(child)) {
+      if (isContentNameX(child)) {
          childNames[child.name] = true;
       } else {
          childNames = Object.assign(childNames, getNamesFromList(child)) as NamesMap;

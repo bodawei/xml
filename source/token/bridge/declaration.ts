@@ -1,10 +1,14 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ParseValue, parseAttListDeclaration, parseNotationDeclaration,    parseEntityDeclaration,
+import {
+   ParseValue,
+   parseAttListDeclaration,
+   parseElementDeclaration,
+   parseNotationDeclaration,
+   parseEntityDeclaration,
    ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
-   parseElementDeclaration,
 AttListDeclarationPToken, NotationDeclarationPToken } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {

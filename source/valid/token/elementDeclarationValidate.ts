@@ -126,7 +126,7 @@ function validateEntities(
       const entityName = strOrBlank(token.name);
       const details = state.parameterEntities[entityName];
 
-      if (!details) {
+      if (!details || !details.replacementText) {
          continue;
       }
 
@@ -207,7 +207,6 @@ function elementDeclarationValidate(
    if (!declInfo) {
       return;
    }
-
    // §3.2.0: Validity constraint: Unique Element Type Declaration
    //    An element type must not be declared more than once.
    ec.setPos(openSToken);

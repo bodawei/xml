@@ -6,6 +6,7 @@ import { ConditionalClosePToken, ConditionalPToken } from 'token';
 import {
    makeAttListDeclaration,
    makeCharRef,
+   makeElementDeclaration,
    makeGeneralEntityDeclaration,
    makeGeneralEntityReference,
    makeNotationDeclaration,
@@ -21,6 +22,7 @@ import { convertPTokenToXToken } from '../convertPTokenToXToken';
 import { CHARREF_XTOKEN } from '../token/charRefXToken';
 import { CONDITIONAL_SECTION_END_XTOKEN } from '../token/conditionalSectionEndXToken';
 import { CONDITIONAL_SECTION_START_XTOKEN } from '../token/conditionalSectionStartXToken';
+import { ELEMENT_DECLARATION_XTOKEN } from '../token/elementDeclarationXToken';
 import { GENERAL_ENTITY_DECLARATION_XTOKEN } from '../token/generalEntityDeclarationXToken';
 import { GENERAL_ENTITY_REFERENCE_XTOKEN } from '../token/generalEntityReferenceXToken';
 import { NOTATION_DECLARATION_XTOKEN } from '../token/notationDeclarationXToken';
@@ -55,6 +57,14 @@ describe('convertPTokenToXToken() (integration)', () => {
       const result = convertPTokenToXToken(new ConditionalPToken({ open: toSToken('<![') }));
 
       expect(result.type).toEqual(CONDITIONAL_SECTION_START_XTOKEN);
+   });
+
+   it('converts an ELEMENT Declaration', () => {
+      const pToken = makeElementDeclaration();
+
+      const result = convertPTokenToXToken(pToken);
+
+      expect(result.type).toEqual(ELEMENT_DECLARATION_XTOKEN);
    });
 
    it('converts an General entity reference token', () => {

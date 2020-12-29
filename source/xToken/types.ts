@@ -4,6 +4,7 @@ import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
 import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
 import { CharRefXToken } from './token/CharRefXToken';
+import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
 import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
 import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
@@ -47,6 +48,7 @@ type XToken =
    | SpaceXToken
    // Fully blessed
    | AttListDeclarationXToken
+   | ElementDeclarationXToken
    | GeneralEntityDeclarationXToken
    | NotationDeclarationXToken
    | ParameterEntityDeclarationXToken

@@ -255,7 +255,7 @@ function parseElementDeclaration(
       }
 
       parseName(source, protoToken, (withName) => {
-         parseUnexpanded(source, 'contentModel', (unexpanded) => {
+         parseUnexpanded(source, 'contentSpec', (unexpanded) => {
             if (unexpanded) {
                withName.unexpanded = unexpanded;
                parseClose(source, withName, deliverPToken);
