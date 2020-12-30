@@ -19,11 +19,11 @@ import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
 import CheckValidityStream from 'source/nodeStream/CheckValidityStream';
 
-function setUpStreams(test: TestDetails, ver: XmlVersion, rev: XmlRevision): Transform {
+function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlRevision): Transform {
    const sTokenSource = new STokenSource(defaultExtractors);
    const pTokenStream = new PTokenStream(sTokenSource, {
       context: ContextType.DOCUMENT,
-      confVer: new ConformanceVersion(ver, rev),
+      confVer: ver && rev ? new ConformanceVersion(ver, rev) : undefined,
    });
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
@@ -53,15 +53,19 @@ describe('XML Conformance tests', () => {
       const ver = testData.VERSION ? (Number.parseFloat(testData.VERSION) as XmlVersion) : 1.0;
       const defaultRev: XmlRevision = ver === 1.0 ? 5 : 2;
       const editionString = testData.EDITION ? testData.EDITION : String(defaultRev);
+      const hasEdition = !!testData.EDITION;
 
       const allEditions = editionString
          .split(/ +/)
          .map((ver) => Number.parseInt(ver, 10) as XmlRevision);
 
       allEditions.forEach((edition) => {
-         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
+         fit(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
             const hasOutput = 'outputData' in testData;
-            const testStream = setUpStreams(testData, ver, edition);
+            // If an edition was specified in the test data, then we enforce which version to use in the processor. Otherwise we let the document decide
+            const verToUse = hasEdition ? ver : undefined;
+            const revToUse = hasEdition ? edition : undefined;
+            const testStream = setUpStreams(testData, verToUse, revToUse);
             const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
 
             // If the test details includes output, then we should test that the output matches

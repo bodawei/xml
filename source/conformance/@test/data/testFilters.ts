@@ -6,11 +6,8 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [], // ['inv-not-sa04'],
    excludedIds: [
-      // Introduced problem.  processing version and version in actual doc do not match
-      'rmt-034', //XMLDECL_VERSION_INVALD
-      'rmt-044',
       // Attribute defaulting separate from validatio ncauses problems
       'inv-not-sa04', // ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
       'inv-not-sa05', //ATTLISTDECL_TYPE_EXTERNAL_DECLARED

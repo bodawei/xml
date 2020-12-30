@@ -1192,7 +1192,6 @@ class CheckXTokenValidStream extends Transform {
                      defaultType: '',
                   };
 
-                  //
                   // §2.9 Validity constraint: Standalone Document Declaration
                   // The standalone document declaration must have the value "no" if any external markup
                   // declarations contain declarations of:
