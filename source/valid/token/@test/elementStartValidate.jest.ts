@@ -61,7 +61,7 @@ describe('elementStartValidate (unit)', () => {
          parentName: 'elementName',
          stateId: 4,
       };
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                type: ElDeclType.CHILDREN,
@@ -74,13 +74,12 @@ describe('elementStartValidate (unit)', () => {
                graph,
             },
          },
-         parameterEntities: {},
          elementContext: {
             contextStack: [currentContext],
             activeContext: currentContext,
             pastEnd: false,
          },
-      };
+      });
    });
 
    it('reports an error when the context is EMPTY', () => {

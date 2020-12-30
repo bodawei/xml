@@ -7,7 +7,7 @@ import { InstructionStart } from '../../bridge/instruction';
 import {
    XmlDeclarationPToken,
    parseXmlDeclaration,
-   xmlDeclIsStandalone,
+   isXmlDeclStandalone,
    XMLDECL_PTOKEN,
 } from '../xmlDeclaration';
 
@@ -178,9 +178,9 @@ describe('xmlDeclaration (unit)', () => {
       });
    });
 
-   describe('xmlDeclIsStandalone()', () => {
+   describe('isXmlDeclStandalone()', () => {
       it('returns false if there is no standalone property', () => {
-         expect(xmlDeclIsStandalone(xmlDeclPToken)).toEqual(false);
+         expect(isXmlDeclStandalone(xmlDeclPToken)).toEqual(false);
       });
 
       it('returns true if there is a standalone property set to yes', () => {
@@ -198,7 +198,7 @@ describe('xmlDeclaration (unit)', () => {
             close: toSToken('?>'),
          });
 
-         expect(xmlDeclIsStandalone(xmlDeclPToken)).toEqual(true);
+         expect(isXmlDeclStandalone(xmlDeclPToken)).toEqual(true);
       });
 
       it('returns false if there is a standalone property set to no', () => {
@@ -216,7 +216,7 @@ describe('xmlDeclaration (unit)', () => {
             close: toSToken('?>'),
          });
 
-         expect(xmlDeclIsStandalone(xmlDeclPToken)).toEqual(false);
+         expect(isXmlDeclStandalone(xmlDeclPToken)).toEqual(false);
       });
 
       it('returns true if there is a standalone property and value are all the wrong case', () => {
@@ -234,7 +234,7 @@ describe('xmlDeclaration (unit)', () => {
             close: toSToken('?>'),
          });
 
-         expect(xmlDeclIsStandalone(xmlDeclPToken)).toEqual(true);
+         expect(isXmlDeclStandalone(xmlDeclPToken)).toEqual(true);
       });
    });
 });

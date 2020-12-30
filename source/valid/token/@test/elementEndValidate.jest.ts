@@ -58,7 +58,7 @@ describe('elementEndValidate (unit)', () => {
          parentName: 'elementName',
          stateId: 4,
       };
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                type: ElDeclType.CHILDREN,
@@ -71,13 +71,12 @@ describe('elementEndValidate (unit)', () => {
                graph,
             },
          },
-         parameterEntities: {},
          elementContext: {
             contextStack: [currentContext],
             activeContext: currentContext,
             pastEnd: false,
          },
-      };
+      });
    });
 
    it('reports an error the current context is a CHILDREN context, but we are not at the end', () => {

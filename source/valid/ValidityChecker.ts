@@ -16,6 +16,7 @@ import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    ParseValue,
+   XMLDECL_PTOKEN,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { elementDeclarationValidate } from './token/elementDeclarationValidate';
@@ -25,6 +26,7 @@ import { elementStartValidate } from './token/elementStartValidate';
 import { elementStartUpdateState } from './token/elementStartUpdateState';
 import { elementEndValidate } from './token/elementEndValidate';
 import { elementEndUpdateState } from './token/elementEndUpdateState';
+import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
 
 /*
 TODO:
@@ -110,9 +112,12 @@ class ValidityChecker {
 
    private state: ValidateState;
 
+   private seenXmlDecl: boolean;
+
    constructor() {
       this.version = new ConformanceVersion();
       this.state = new ValidateState();
+      this.seenXmlDecl = false;
 
       this.geDecls = {};
       this.peDecls = {};
@@ -170,6 +175,12 @@ class ValidityChecker {
                      replacementText: token,
                   },
                };
+            }
+            break;
+         case XMLDECL_PTOKEN:
+            if (!this.seenXmlDecl) {
+               this.state = xmlDeclarationUpdateState(token, this.state);
+               this.seenXmlDecl = true;
             }
             break;
          case ELEMENT_START_PTOKEN:

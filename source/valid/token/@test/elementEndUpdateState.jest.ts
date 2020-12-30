@@ -24,20 +24,14 @@ describe('elementEndUpdateState (unit)', () => {
          name: toSToken('elementName'),
          close: toSToken('>'),
       });
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
          },
-         parameterEntities: {},
-         elementContext: {
-            contextStack: [],
-            activeContext: undefined,
-            pastEnd: false,
-         },
-      };
+      });
    });
 
    it('removes the context from the stack if the name matches', () => {
@@ -57,20 +51,19 @@ describe('elementEndUpdateState (unit)', () => {
          parentName: 'elementName',
          stateId: 0,
       };
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
          },
-         parameterEntities: {},
          elementContext: {
             contextStack: [expectedContext, otherContext],
             activeContext: otherContext,
             pastEnd: false,
          },
-      };
+      });
 
       const newState = elementEndUpdateState(elementEnd, state);
 
@@ -93,20 +86,19 @@ describe('elementEndUpdateState (unit)', () => {
          parentName: 'elementName',
          stateId: 0,
       };
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
          },
-         parameterEntities: {},
          elementContext: {
             contextStack: [expectedContext],
             activeContext: expectedContext,
             pastEnd: false,
          },
-      };
+      });
 
       const newState = elementEndUpdateState(elementEnd, state);
 
@@ -136,7 +128,7 @@ describe('elementEndUpdateState (unit)', () => {
          parentName: 'elementName',
          stateId: 9,
       };
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
@@ -144,13 +136,12 @@ describe('elementEndUpdateState (unit)', () => {
                graph: { startId: 9, endId: 10, states: {} },
             },
          },
-         parameterEntities: {},
          elementContext: {
             contextStack: [currentContext],
             activeContext: currentContext,
             pastEnd: false,
          },
-      };
+      });
       elementEnd = new ElementEndPToken({
          open: toSToken('</'),
          name: toSToken('other'),

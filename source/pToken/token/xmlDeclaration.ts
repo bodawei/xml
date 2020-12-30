@@ -90,7 +90,7 @@ function parseXmlDeclaration(
    });
 }
 
-function xmlDeclIsStandalone(decl: XmlDeclarationPToken): boolean {
+function isXmlDeclStandalone(decl: XmlDeclarationPToken): boolean {
    for (const field of decl.fields) {
       const name = strOrBlank(field.name);
       const value = strOrBlank(field.value);
@@ -103,4 +103,4 @@ function xmlDeclIsStandalone(decl: XmlDeclarationPToken): boolean {
    return false;
 }
 
-export { XMLDECL_PTOKEN, XmlDeclarationPToken, parseXmlDeclaration, xmlDeclIsStandalone };
+export { XMLDECL_PTOKEN, XmlDeclarationPToken, parseXmlDeclaration, isXmlDeclStandalone };

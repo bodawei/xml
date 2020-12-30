@@ -61,6 +61,8 @@ interface ValidateStateProps {
       activeContext?: ElementContext; // if this is undefined, contextStack is 0 length
       pastEnd: boolean; // when this is true, activeContext will be undefined
    };
+
+   isStandalone?: boolean;
 }
 
 class ValidateState {
@@ -78,6 +80,8 @@ class ValidateState {
       readonly pastEnd: boolean; // when this is true, activeContext will be undefined
    };
 
+   readonly isStandalone: boolean;
+
    constructor(otherState?: ValidateStateProps) {
       this.elementDeclarations = otherState?.elementDeclarations || {};
       this.parameterEntities = otherState?.parameterEntities || {};
@@ -86,6 +90,7 @@ class ValidateState {
          activeContext: otherState?.elementContext?.activeContext,
          pastEnd: otherState?.elementContext?.pastEnd || false,
       };
+      this.isStandalone = otherState?.isStandalone ?? false;
    }
 }
 

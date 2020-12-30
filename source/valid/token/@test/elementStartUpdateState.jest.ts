@@ -52,20 +52,14 @@ describe('elementStartUpdateState (unit)', () => {
          name: toSToken('elementName'),
          close: toSToken('>'),
       });
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
          },
-         parameterEntities: {},
-         elementContext: {
-            contextStack: [],
-            activeContext: undefined,
-            pastEnd: false,
-         },
-      };
+      });
    });
 
    it('adds a context to the stack and makes it active for the specified element', () => {
@@ -118,7 +112,7 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('adds a context to the stack with a fake token if no details could be found', () => {
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
@@ -126,13 +120,7 @@ describe('elementStartUpdateState (unit)', () => {
                graph: { startId: 9, endId: 10, states: {} },
             },
          },
-         parameterEntities: {},
-         elementContext: {
-            contextStack: [],
-            activeContext: undefined,
-            pastEnd: false,
-         },
-      };
+      });
       const expectedContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
@@ -166,7 +154,7 @@ describe('elementStartUpdateState (unit)', () => {
          stateId: 4,
       };
       const modifiedActive = { ...activeContext, stateId: 5 };
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
@@ -174,13 +162,12 @@ describe('elementStartUpdateState (unit)', () => {
                graph,
             },
          },
-         parameterEntities: {},
          elementContext: {
             contextStack: [activeContext],
             activeContext: activeContext,
             pastEnd: false,
          },
-      };
+      });
       const expectedContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
@@ -213,7 +200,7 @@ describe('elementStartUpdateState (unit)', () => {
          parentName: 'elementName',
          stateId: 4,
       };
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
@@ -221,13 +208,12 @@ describe('elementStartUpdateState (unit)', () => {
                graph,
             },
          },
-         parameterEntities: {},
          elementContext: {
             contextStack: [activeContext],
             activeContext: activeContext,
             pastEnd: false,
          },
-      };
+      });
       elementStart = new ElementStartPToken({
          open: toSToken('<'),
          name: toSToken('noTransition'),
@@ -268,9 +254,7 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('changes nothing if it encounters an empty element while in the body of the document', () => {
-      state = {
-         elementDeclarations: {},
-         parameterEntities: {},
+      state = new ValidateState({
          elementContext: {
             contextStack: [
                {
@@ -285,7 +269,7 @@ describe('elementStartUpdateState (unit)', () => {
             activeContext: undefined,
             pastEnd: false,
          },
-      };
+      });
 
       const newState = elementStartUpdateState(elementEmpty, state);
 
