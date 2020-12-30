@@ -1,12 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ContextType, externalIdToEntityId } from 'pToken';
+import { ContextType, externalIdToEntityId, ParseValue } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityReferencePToken,
    GeneralEntityReferencePToken,
-   PToken,
    XmlError,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
@@ -24,11 +23,11 @@ import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { ExpandParams } from '../types';
 import { EntityContextStack } from './EntityContextStack';
 
-type DeliverToken = (result: PToken | void, handled: () => void) => void;
+type DeliverToken = (result: ParseValue | undefined, handled: () => void) => void;
 
 function deliverMultipleTokens(
-   allTokens: Array<PToken | void>,
-   deliverToken: (result: PToken | void, callback: () => void) => void,
+   allTokens: Array<ParseValue | undefined>,
+   deliverToken: (result: ParseValue | undefined, callback: () => void) => void,
    allDone: () => void,
 ): void {
    function process(): void {
@@ -65,8 +64,8 @@ function streamParsedReplacementText(
    let sTokenSource: STokenSource;
    let getErrors: () => Array<XmlError>;
    let context = ContextType.DOCUMENT;
-   let start: PToken;
-   let end: PToken;
+   let start: ParseValue;
+   let end: ParseValue;
    let entityLoc = entityContextStack.getCurrentEntityLoc();
 
    if (!expandParams.loadExternalEntities) {

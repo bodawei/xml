@@ -3,7 +3,11 @@
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import {
+   TextPToken,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+} from 'pToken';
 import { toSToken } from 'sToken';
 
 import * as externalId from '../../common/externalIdCheck';
@@ -12,7 +16,6 @@ import { nameCheck } from '../util/nameCheck';
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
 // ick
-import { TextPToken } from 'token';
 import literal from '../../../token/common/literal';
 import * as misc from '../../../token/common/misc';
 

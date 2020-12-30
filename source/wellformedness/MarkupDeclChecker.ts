@@ -33,7 +33,6 @@ import { EXTERNAL_SUBSET_END_TOKEN } from '../token/marker/externalSubsetEnd';
 import { InternalSubsetStartToken } from '../token/marker/internalSubsetStart';
 import { INTERNAL_SUBSET_END_TOKEN } from '../token/marker/internalSubsetEnd';
 import { getFirstSToken } from '../token/getFirstSToken';
-import { TEXT_PTOKEN } from '../token/text';
 import { SPACE_PTOKEN } from '../token/space';
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
@@ -45,6 +44,7 @@ import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
 import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/generalEntityDeclaration';
 import { PARAMETER_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/parameterEntityDeclaration';
+import { TEXT_PTOKEN } from '../pToken/token/text';
 
 import {
    CHECKER_DONE,

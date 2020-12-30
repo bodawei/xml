@@ -1,6 +1,5 @@
-import { ParameterEntityDeclarationPToken } from 'pToken';
+import { ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
-import { TextPToken } from 'token';
 import { parameterEntityDeclarationToSTokens } from '../parameterEntityDeclarationToSTokens';
 
 describe('toSTokenArray()', () => {

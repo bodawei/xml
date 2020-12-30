@@ -91,7 +91,7 @@ describe('ContentModel (integration)', () => {
          source.endText();
 
          parseContentModel(source, (result) => {
-            // @ts-expect-error jasmine overlow
+            // @ts-expect-error matcher not recognized
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toMatchInlineSnapshot(`
                ContentModelP {

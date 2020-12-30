@@ -23,12 +23,12 @@ import {
    isContentNameX,
    NotationDeclarationXToken,
    ParameterEntityDeclarationXToken,
+   isTextXToken,
+   TextXToken,
  } from 'xToken';
 
 
 import {
-   isTextXToken,
-
    DocTypeEndXToken,
    DocTypeStartXToken,
    ElementEmptyXToken,
@@ -56,7 +56,6 @@ import {
 
    SPACE_XTOKEN,
 
-   TextXToken,
 } from 'token';
 
 import { AttributeValueXToken } from '../token/common/attribute';
@@ -237,7 +236,7 @@ class CheckXTokenValidStream extends Transform {
             prevHadTrailingSpace = str[str.length - 1] === ' ';
          }
 
-         const newPiece = new TextXToken(str, piece.pToken as any); // typeHack
+         const newPiece = new TextXToken(str);
          newValue.push(newPiece);
          if (!isCData) {
             prevPiece = newPiece;

@@ -3,11 +3,11 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, Range } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { ELEMENT_DECLARATION_PTOKEN, ParseValue, ContextType } from 'pToken';
+import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseValue, ContextType } from 'pToken';
 import { gatherPTokens } from 'pToken-test';
 import { SToken, STokenSource } from 'sToken';
 import {
-   CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN,
+   CONDITIONAL_PTOKEN, CONDITIONAL_CLOSE_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ELEMENT_START_PTOKEN,
    ELEMENT_END_PTOKEN,

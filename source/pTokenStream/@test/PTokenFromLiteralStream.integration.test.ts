@@ -2,8 +2,8 @@
 
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
-import { TEXTDECL_PTOKEN } from 'pToken';
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'token';
+import { TEXTDECL_PTOKEN, TEXT_PTOKEN } from 'pToken';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
 
 import * as xToken from 'token';
 

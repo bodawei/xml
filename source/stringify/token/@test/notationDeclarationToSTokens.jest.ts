@@ -1,11 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { NotationDeclarationPToken } from 'pToken';
+import { NotationDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { notationDeclarationToSTokens } from '../notationDeclarationToSTokens';
-
-// ick
-import { TextPToken } from 'token';
 
 describe('notationDeclarationToSTokens() (unit)', () => {
    it('returns all the STokens', () => {

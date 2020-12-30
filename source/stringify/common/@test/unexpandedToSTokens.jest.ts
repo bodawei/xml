@@ -1,14 +1,14 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { UnexpandedDetails } from 'pToken';
+import { UnexpandedMarkupDetails, TextPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 // ick1
-import { ParameterEntityReferencePToken, TextPToken } from 'token';
+import { ParameterEntityReferencePToken } from 'token';
 
 import { unexpandedToSTokens } from '../unexpandedToSTokens';
 
 describe('unexpandedToSTokens()', () => {
-   let unexpanded: UnexpandedDetails;
+   let unexpanded: UnexpandedMarkupDetails;
 
    beforeEach(() => {
       unexpanded = { propName: '', tokens: [] };

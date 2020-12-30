@@ -2,12 +2,12 @@
 
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
+import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank, STokenSource, SToken } from 'sToken';
 
 import literal, { LiteralPToken } from './literal';
 import unassigned from './unassigned';
 import { UnassignedArray } from './unassigned';
-import { TEXT_PTOKEN } from '../text';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's

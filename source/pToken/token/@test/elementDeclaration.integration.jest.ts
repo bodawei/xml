@@ -49,7 +49,7 @@ describe('elementDeclaration', () => {
          source.endText();
 
          parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-            // @ts-expect-error it is still matching jasmine
+            // @ts-expect-error matcher not recognized
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toMatchInlineSnapshot(`
                ElementDeclarationPToken {
@@ -1074,46 +1074,52 @@ describe('elementDeclaration', () => {
                   contentModel: {
                      open: toSToken('('),
                      openSpace: toSToken('\t'),
-                     delimitedParticles: [{
-                        particle: {
-                           name: toSToken('a'),
-                           nameSpace: toSToken(' '),
-                           repeat: undefined,
-                           repeatSpace: undefined
+                     delimitedParticles: [
+                        {
+                           particle: {
+                              name: toSToken('a'),
+                              nameSpace: toSToken(' '),
+                              repeat: undefined,
+                              repeatSpace: undefined,
+                           },
+                           delimiter: toSToken('|'),
+                           delimiterSpace: toSToken(' '),
                         },
-                        delimiter: toSToken('|'),
-                        delimiterSpace: toSToken(' '),
-                     }, {
-                        particle: {
-                           open: toSToken('('),
-                           openSpace: toSToken(' '),
-                           delimitedParticles: [{
-                              particle: {
-                                 name: toSToken('c'),
-                                 nameSpace: undefined,
-                                 repeat: undefined,
-                                 repeatSpace: undefined
-                              },
-                              delimiter: toSToken(','),
-                              delimiterSpace: toSToken(' '),
-                           }, {
-                              particle: {
-                                 name: toSToken('d'),
-                                 nameSpace: toSToken(' '),
-                                 repeat: undefined,
-                                 repeatSpace: undefined
-                              },
-                              delimiter: undefined,
-                              delimiterSpace: undefined,
-                           }],
-                           close: toSToken(')'),
-                           closeSpace: undefined,
-                           repeat: undefined,
-                           repeatSpace: undefined,
+                        {
+                           particle: {
+                              open: toSToken('('),
+                              openSpace: toSToken(' '),
+                              delimitedParticles: [
+                                 {
+                                    particle: {
+                                       name: toSToken('c'),
+                                       nameSpace: undefined,
+                                       repeat: undefined,
+                                       repeatSpace: undefined,
+                                    },
+                                    delimiter: toSToken(','),
+                                    delimiterSpace: toSToken(' '),
+                                 },
+                                 {
+                                    particle: {
+                                       name: toSToken('d'),
+                                       nameSpace: toSToken(' '),
+                                       repeat: undefined,
+                                       repeatSpace: undefined,
+                                    },
+                                    delimiter: undefined,
+                                    delimiterSpace: undefined,
+                                 },
+                              ],
+                              close: toSToken(')'),
+                              closeSpace: undefined,
+                              repeat: undefined,
+                              repeatSpace: undefined,
+                           },
+                           delimiter: undefined,
+                           delimiterSpace: undefined,
                         },
-                        delimiter: undefined,
-                        delimiterSpace: undefined,
-                     }],
+                     ],
                      close: toSToken(')'),
                      closeSpace: undefined,
                      repeat: undefined,

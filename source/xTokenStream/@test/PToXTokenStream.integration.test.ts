@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import { defaultExtractors } from 'extractor';
+import { TextPToken, } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import {
    AttListDeclarationXToken,
@@ -15,6 +16,7 @@ import {
    GeneralEntityReferenceXToken,
    CpRepeat,
    CpType,
+   TextXToken,
 } from 'xToken';
 import {
    declaration,
@@ -28,8 +30,8 @@ import {
    ElementStartXToken,
    ElementEmptyXToken,
    SpaceXToken,
-   TextXToken,
-   TextPToken,
+   
+   
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';

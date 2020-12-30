@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { defaultExtractors } from 'extractor';
 import { parseAttListDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
@@ -38,7 +39,7 @@ describe('attListDeclarationXToken (integration)', () => {
                attDefs: [],
             }),
          );
-         done();
+         done?.();
       });
    });
 
@@ -65,7 +66,7 @@ describe('attListDeclarationXToken (integration)', () => {
             }),
          );
 
-         done();
+         done?.();
       });
    });
 
@@ -92,7 +93,7 @@ describe('attListDeclarationXToken (integration)', () => {
             }),
          );
 
-         done();
+         done?.();
       });
    });
 });

@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import { ElementDeclarationPToken, ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
@@ -15,7 +15,6 @@ import {
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
-   TextPToken,
 } from 'token';
 
 describe('elementDeclarationValidate (unit)', () => {

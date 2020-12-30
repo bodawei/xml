@@ -1,13 +1,7 @@
 import { defaultExtractors } from 'extractor';
-import { ContextType } from 'pToken';
+import { TEXT_PTOKEN, ContextType, ParseValue } from 'pToken';
 import { strOrBlank, STokenSource, toSToken } from 'sToken';
-import {
-   ParameterEntityReferencePToken,
-   TEXT_PTOKEN,
-   CHARREF_PTOKEN,
-   PToken,
-   EntityValuePToken,
-} from 'token';
+import { ParameterEntityReferencePToken, CHARREF_PTOKEN, EntityValuePToken } from 'token';
 import { ConditionalInfo, ExpandParams } from '../types';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
@@ -33,7 +27,7 @@ function setupConditional(
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
    context: ContextType,
-   deliverToken: (aToken: PToken, handled: () => void) => void,
+   deliverToken: (aToken: ParseValue, handled: () => void) => void,
    done: Done,
 ): void {
    addProtoReplacementText(ref, expandParams, entityContextStack, () => {

@@ -3,10 +3,10 @@
 
 import { EntityId } from 'basic';
 import { defaultExtractors } from 'extractor';
+import { TEXT_PTOKEN } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    CHARREF_PTOKEN,
-   TEXT_PTOKEN,
    EntityValuePToken,
    PARAMETER_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,

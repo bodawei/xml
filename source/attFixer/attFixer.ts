@@ -1,6 +1,12 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { AttListDeclarationPToken, ATTLIST_DECLARATION_PTOKEN, ParseValue } from 'pToken';
+import {
+   AttListDeclarationPToken,
+   ATTLIST_DECLARATION_PTOKEN,
+   ParseValue,
+   TEXT_PTOKEN,
+   TextPToken,
+} from 'pToken';
 import { strOrBlank, toSToken, SToken } from 'sToken';
 
 // ick
@@ -9,8 +15,6 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    ElementStartPToken,
    ElementEmptyPToken,
-   TEXT_PTOKEN,
-   TextPToken,
    CHARREF_PTOKEN,
 } from 'token';
 import { LiteralValuePToken } from '../token/common/literal';

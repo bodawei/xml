@@ -13,6 +13,7 @@ import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/ParameterEntityReferenceXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
+import { TextXToken } from './token/textXToken';
 
 // Temporary additions to allow us to build out the XTokenToXmlStream data
 
@@ -52,6 +53,7 @@ type XToken =
    | GeneralEntityDeclarationXToken
    | NotationDeclarationXToken
    | ParameterEntityDeclarationXToken
-   | ProcessingInstructionXToken;
+   | ProcessingInstructionXToken
+   | TextXToken;
 
 export { XToken };

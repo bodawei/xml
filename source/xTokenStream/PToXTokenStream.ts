@@ -9,7 +9,8 @@ import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
-   TEXTDECL_PTOKEN, XMLDECL_PTOKEN
+   TEXTDECL_PTOKEN, XMLDECL_PTOKEN,
+   TEXT_PTOKEN,
 } from 'pToken';
 
 import {
@@ -38,7 +39,6 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    SPACE_PTOKEN,
-   TEXT_PTOKEN,
 
    ELIDED_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
@@ -72,7 +72,6 @@ class PToXTokenStream extends Transform {
          case PARAMETER_ENTITY_END_PTOKEN:
          case PARAMETER_ENTITY_START_PTOKEN:
          case SPACE_PTOKEN:
-         case TEXT_PTOKEN:
             this.push(pToken.toXToken());
             break;
          case CONDITIONAL_CLOSE_PTOKEN:
@@ -86,6 +85,7 @@ class PToXTokenStream extends Transform {
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          case PROCESSING_INSTRUCTION_PTOKEN:
+         case TEXT_PTOKEN:
          case TEXTDECL_PTOKEN:
          case XMLDECL_PTOKEN:
             this.push(convertPTokenToXToken(pToken));

@@ -4,14 +4,14 @@
 import { ConformanceVersion } from 'basic';
 import { WellFormedError } from '../../../error/index';
 import { MockErrorCollector } from 'error-test';
+import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { GeneralEntityReferencePToken } from 'token';
-import { GeneralEntityReferenceXToken } from 'xToken';
+import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';
-import { TextPToken, TextXToken } from '../../text';
 
 type LiteralValueCallback = (value: LiteralValuePToken) => void;
 
@@ -239,7 +239,7 @@ describe('literal (unit)', () => {
       });
 
       it('returns the string from the PToken result', () => {
-         litValMakeCompatSpy.and.returnValue([ new TextXToken('xxx', new TextPToken({ text: SToken.fromString('xxx') })) ])
+         litValMakeCompatSpy.and.returnValue([ new TextXToken(new TextPToken({ text: SToken.fromString('xxx') })) ])
          const result = literal.makeOneTokenCompatible(literalPToken);
 
          expect(result).toEqual('xxx');

@@ -1,9 +1,12 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { CharRefPToken, EntityValuePToken, TextPToken } from 'token';
+import { CharRefPToken, EntityValuePToken } from 'token';
 
-type NameToEntityValue = { [entityName: string]: EntityValuePToken };
+interface NameToEntityValue {
+   [entityName: string]: EntityValuePToken;
+}
 
 // §4.6.0: This is our set of data to populate our "info" objects for the predefined entities.
 const PREDEFINED_ENTITIES: NameToEntityValue = {

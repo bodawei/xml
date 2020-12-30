@@ -2,14 +2,15 @@
 
 import { WellFormedError, ErrorCollector } from '../../../error/index';
 import { defaultExtractors } from '../../../extractor';
+import {  TextPToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
+import { TextXToken,  } from 'xToken';
 
 import literalValue from '../literalValue';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { CharRefPToken } from '../../charRef';
-import { TextXToken, TextPToken } from '../../text';
 import { GeneralEntityReferenceXToken } from 'xToken';
 import { ConformanceVersion } from 'basic';
 
@@ -131,9 +132,9 @@ describe('literalValue (integration)', () => {
             const pToken2 = new TextPToken({ text: makeSToken('two') });
 
             expect(results).toEqual([
-               new TextXToken('one', pToken1),
+               new TextXToken(pToken1),
                new GeneralEntityReferenceXToken(pTokenRef),
-               new TextXToken('two', pToken2),
+               new TextXToken(pToken2),
             ]);
             done();
          });

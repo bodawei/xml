@@ -1,8 +1,9 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
+import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
-import { ParameterEntityReferencePToken, TextPToken } from 'token';
+import { ParameterEntityReferencePToken } from 'token';
 
 import { DeclarationStart } from '../../../token/bridge/declaration';
 

@@ -2,11 +2,11 @@
 
 import { EntityId, Range } from 'basic';
 import { ErrorCollector } from 'error';
+import { TextPToken } from 'pToken';
 import { SToken, STokenSource, strOrBlank } from 'sToken';
 import { parameterEntityReferenceToSTokens } from 'stringify';
 
 import { ParameterEntityReferencePToken, parseParameterEntityReference } from '../parameterEntityReference';
-import { TextPToken } from '../text';
 import literal, { LiteralPToken } from '../common/literal';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];

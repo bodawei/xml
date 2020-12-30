@@ -2,9 +2,9 @@
 
 import { PTokenStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
-import { XmlDeclarationPToken, XMLDECL_PTOKEN } from 'pToken';
+import { XmlDeclarationPToken, XMLDECL_PTOKEN, TextPToken } from 'pToken';
 import { gatherPTokens } from 'pToken-test';
-import { ElementStartPToken, TextPToken } from 'token';
+import { ElementStartPToken } from 'token';
 
 import { AttFixerStream } from '../AttFixerStream';
 import { defaultExtractors } from 'extractor';

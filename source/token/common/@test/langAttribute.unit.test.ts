@@ -3,9 +3,10 @@
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
+import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
+import {  TextXToken } from 'xToken';
 
-import { TextPToken, TextXToken } from '../../text';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { GeneralEntityEndPToken } from '../../marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from '../../marker/generalEntityStart';
@@ -181,7 +182,7 @@ describe('langAttribute (unit)', () => {
 
          it('reports an error with a three letter langcode in an XToken', () => {
             const textToken = new TextPToken({ text: SToken.fromString('abc') });
-            const textXToken = new TextXToken('abc', textToken);
+            const textXToken = new TextXToken(textToken);
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
                [ 'abc' ], textToken.text, textToken.text);
    

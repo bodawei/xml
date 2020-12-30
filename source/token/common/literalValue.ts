@@ -6,7 +6,8 @@ import { SToken, STokenSource } from 'sToken';
 import { generalEntityReferenceToSTokens } from 'stringify';
 import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken } from 'xToken';
 
-import { TextPToken, TextXToken, isTextPToken } from '../text';
+import { TextPToken, isTextPToken } from 'pToken';
+import { TextXToken } from 'xToken';
 import misc from './misc';
 import { GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from '../generalEntityReference';
 import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../parameterEntityReference';
@@ -140,7 +141,7 @@ function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
       const item = pToken[index];
 
       if (isTextPToken(item)) {
-         value.push(new TextXToken(item.text.str, item));
+         value.push(new TextXToken(item));
       } else if (item.type === CHARREF_PTOKEN) {
          value.push(new CharRefXToken(item));
       } else if (item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {

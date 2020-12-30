@@ -1,11 +1,11 @@
 import { EntityId, ConformanceVersion } from 'basic';
-import { ContextType } from 'pToken';
+import { ContextType, ParseValue } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
-import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token';
+import { AttributeValuePToken, EntityValuePToken, XmlError } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
 
-type ExpandToken = (token: PToken | void, tokenProcessed: TokenHandled) => void;
+type ExpandToken = (token: ParseValue | void, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
 
 interface ConditionalInfo {

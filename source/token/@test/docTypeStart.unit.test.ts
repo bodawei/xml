@@ -4,6 +4,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from'error-test';
+import { TextPToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 import { WellFormedError } from 'error';
@@ -14,7 +15,6 @@ import { EXTERNAL_ID } from '../common/externalId';
 import * as externalId from '../common/externalId';
 import misc from '../common/misc';
 import { ExternalIdX } from 'xToken';
-import { TextPToken } from '../text';
 
 describe('docTypeStart (unit)', () => {
    let docTypeStartPToken: DocTypeStartPToken;

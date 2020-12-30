@@ -1,4 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+
+import { TextPToken } from 'pToken';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -12,7 +14,7 @@ import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDec
 
 import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 
-import { DeclarationStart, TextPToken } from 'token';
+import { DeclarationStart } from 'token';
 import literal, { LiteralPToken } from '../../../token/common/literal';
 
 jest.mock('../../common/externalId');

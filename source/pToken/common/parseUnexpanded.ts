@@ -1,8 +1,9 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { doAsyncWhileLoop } from 'basic';
+import { TextPToken, parseText } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
-import { TextPToken, parseParameterEntityReference, parseText } from 'token';
+import { parseParameterEntityReference } from 'token';
 
 import { UnexpandedMarkupDetails, UnexpandedMarkupToken } from '../types';
 

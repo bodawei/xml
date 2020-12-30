@@ -1,8 +1,8 @@
+import { TextPToken } from './token/text';
 import {
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
-   TextPToken,
 } from 'token';
 
 type UnexpandedMarkupToken = TextPToken | ParameterEntityReferencePToken;

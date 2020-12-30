@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { UnexpandedMarkupDetails } from 'pToken';
+import { UnexpandedMarkupDetails, TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -12,7 +12,6 @@ import {
 } from '../attListDeclaration';
 import { parseUnexpanded } from '../../common/parseUnexpanded';
 
-import { TextPToken } from 'token';
 import literal from '../../../token/common/literal';
 import { parseWordList } from '../../../token/common/wordList';
 import { WordListPToken, WordListType } from '../../../token/common/wordList';

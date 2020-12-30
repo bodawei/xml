@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
-import { TextPToken } from 'token';
+import { TextPToken } from 'pToken';
 
 import literal from '../../../token/common/literal';
 

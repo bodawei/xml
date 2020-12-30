@@ -10,6 +10,7 @@ import {
    TextDeclarationPToken,
    XmlDeclarationPToken,
    ElementDeclarationPToken,
+   TextPToken,
  } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import {
@@ -32,7 +33,6 @@ import {
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
    SpacePToken,
-   TextPToken,
    CharDataPToken,
    CharRefPToken,
 } from 'token';

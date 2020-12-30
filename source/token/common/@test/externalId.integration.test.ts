@@ -3,9 +3,10 @@
 
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
+import { TextPToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import { ParameterEntityReferencePToken, ParameterEntityStartPToken, TextPToken } from 'token';
+import { ParameterEntityReferencePToken,  } from 'token';
 
 import { UnassignedType } from '../unassigned';
 import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from '../externalId';

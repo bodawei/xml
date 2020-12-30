@@ -3,13 +3,13 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken, STokenSource } from 'sToken';
+import { isTextXToken } from 'xToken';
 
 import literalValue, {
    LiteralValuePToken,
    Terminators as LiteralValueTerminators,
    LiteralValueXToken,
 } from './literalValue';
-import { isTextXToken } from '../text';
 
 const WFEID = WellFormedError.ID;
 

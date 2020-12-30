@@ -21,7 +21,6 @@ import { ConditionalPToken } from './conditional';
 import { ConditionalClosePToken } from './conditionalClose';
 import { CharRefPToken } from './charRef';
 import { ElidedEntityDeclarationPToken } from './ElidedEntityDeclarationPToken';
-import { TextPToken } from './text';
 import { GeneralEntityReferencePToken } from './generalEntityReference';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
 import { GeneralEntityStartPToken, GENERAL_ENTITY_START_PTOKEN } from './marker/generalEntityStart';
@@ -59,7 +58,6 @@ export * from './elementStart';
 export * from './generalEntityReference';
 export * from './parameterEntityReference';
 export * from './space';
-export * from './text';
 
 import { EXTERNAL_ID, ExternalId, parseExternalId } from './common/externalId';
 
@@ -97,7 +95,6 @@ type PToken =
    | ParameterEntityReferencePToken
    | ParameterEntityStartPToken
    | SpacePToken
-   | TextPToken
    ;
 
    export * from './getFirstSToken';

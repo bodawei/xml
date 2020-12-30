@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { GeneralEntityDeclarationPToken } from 'pToken';
+import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
-import { TextPToken } from 'token';
+
 import { generalEntityDeclarationToSTokens } from '../generalEntityDeclarationToSTokens';
 
 describe('toSTokenArray()', () => {

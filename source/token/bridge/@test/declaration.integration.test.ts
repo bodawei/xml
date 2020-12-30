@@ -3,9 +3,8 @@
 
 import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { GeneralEntityDeclarationPToken } from 'pToken';
+import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 import { STokenSource, SToken, toSToken } from 'sToken';
-import { TextPToken } from 'token';
 
 import { parseDeclaration } from '../declaration';
 

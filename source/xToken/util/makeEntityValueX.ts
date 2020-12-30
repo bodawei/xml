@@ -1,10 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
+import { TEXT_PTOKEN } from 'pToken';
 import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
 
 // ick
 import { LiteralValuePToken } from '../../token/common/literalValue';
-import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'token';
+import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
 import { strOrBlank } from 'sToken';
 
 type MutableExntityValueX = Array<string | ParameterEntityReferenceXToken>;

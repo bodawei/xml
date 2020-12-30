@@ -1,7 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { CharRefPToken, TextPToken } from 'token';
+import { CharRefPToken } from 'token';
 
 import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
 

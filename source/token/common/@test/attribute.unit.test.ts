@@ -4,9 +4,10 @@
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { SToken } from 'sToken';
-import { GeneralEntityReferencePToken, TextPToken } from 'token';
+import { GeneralEntityReferencePToken } from 'token';
 
 import * as langAttribute from '../langAttribute';
 import attribute from '../attribute';

@@ -4,11 +4,12 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
+import { TextPToken, } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
+import {  TextXToken } from 'xToken';
 
 import attribute from '../attribute';
-import { TextPToken, TextXToken } from '../../text';
 
 describe('attribute (integration)', () => {
    let source: STokenSource;

@@ -2,16 +2,18 @@
 
 import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
 import { WellFormedError } from 'error';
-import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import {
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   TextPToken,
+} from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
    ElidedEntityDeclarationPToken,
    EntityValuePToken,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
-   TextPToken,
    XmlError,
-   EXTERNAL_ID,
 } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';

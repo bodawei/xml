@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { AttListDeclarationPToken } from 'pToken';
+import { AttListDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken, SToken } from 'sToken';
 import {
    makeAttListDeclaration,
@@ -15,7 +15,6 @@ import {
 // ick
 import {
    ElementStartPToken,
-   TextPToken,
    GeneralEntityReferencePToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,

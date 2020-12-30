@@ -1,14 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion } from 'basic';
-import { ContextType, ParameterEntityDeclarationPToken } from 'pToken';
+import { ContextType, ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import {
-   TextPToken,
-   ParameterEntityReferencePToken,
-   CharRefPToken,
-   EntityValuePToken,
-} from 'token';
+import { ParameterEntityReferencePToken, CharRefPToken, EntityValuePToken } from 'token';
 
 import { ExpandParams } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';

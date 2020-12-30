@@ -7,6 +7,7 @@ import {
    ContextType,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   TextPToken,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
@@ -19,7 +20,6 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    ParameterEntityReferencePToken,
-   TextPToken,
    PToken,
    XmlError,
    PARAMETER_ENTITY_START_PTOKEN,
@@ -162,18 +162,18 @@ describe('EntityExpander (integration)', () => {
       const decl0 = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('second'),
-         value: [new TextPToken('middle')],
+         value: [new TextPToken(toSToken('middle'))],
       });
       const decl1 = new GeneralEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('first'),
          value: [
-            new TextPToken('('),
+            new TextPToken(toSToken('(')),
             new ParameterEntityReferencePToken({
                open: toSToken('%'),
                name: toSToken('second'),
             }),
-            new TextPToken(')'),
+            new TextPToken(toSToken(')')),
          ],
       });
       const start = new ElementStartPToken({

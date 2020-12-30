@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
+import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
-import { TextPToken } from 'token';
 
 import { parseExternalId, ExternalIdP } from '../externalId';
 

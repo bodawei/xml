@@ -4,12 +4,13 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
+import { TextPToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
+import { TextXToken } from 'xToken';
 
 import { ElementStartPToken, ElementStartXToken, parseElementStart } from '../elementStart';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
-import { TextPToken, TextXToken } from '../text';
 
 describe('elementStart (integration)', () => {
    let elementStartPToken: ElementStartPToken;
@@ -160,8 +161,8 @@ describe('elementStart (integration)', () => {
          parseElementStart(source, elementStartPToken.open, (pToken) => {
             const token = pToken!.toXToken();
             token.pToken = undefined;
-            (token.attributes[0].value[0] as any).pToken = undefined;
-            (token.attributes[1].value[0] as any).pToken = undefined;
+            delete (token.attributes[0].value[0] as any).pToken;
+            delete (token.attributes[1].value[0] as any).pToken;
 
             expect(token).toEqual(new ElementStartXToken('aName', [ {
                name: 'attr1',

@@ -7,7 +7,22 @@ import * as basic from 'basic';
 import { ConformanceVersion } from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from 'sToken';
-import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken, } from 'xToken';
+import {
+   AttListDeclarationXToken,
+   CharRefXToken,
+   CpRepeat,
+   CpType,
+   ElementDeclarationXToken,
+   NotationDeclarationXToken,
+   ParameterEntityReferenceXToken,
+   GeneralEntityReferenceXToken,
+   ProcessingInstructionXToken,
+   XmlDeclarationXToken,
+   TextXToken,
+   GeneralEntityDeclarationXToken,
+   ParameterEntityDeclarationXToken,
+} from 'xToken';
+
 import {
    SPACE_XTOKEN,
 
@@ -29,21 +44,8 @@ import {
    InternalSubsetEndToken,
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,     
-   TextXToken,
 } from 'token';
 import { makeDocTypeEnd } from 'token-test';
-import {
-   AttListDeclarationXToken,
-   CharRefXToken,
-   CpRepeat,
-   CpType,
-   ElementDeclarationXToken,
-   NotationDeclarationXToken,
-   ParameterEntityReferenceXToken,
-   GeneralEntityReferenceXToken,
-   ProcessingInstructionXToken,
-   XmlDeclarationXToken
-} from 'xToken';
 
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';

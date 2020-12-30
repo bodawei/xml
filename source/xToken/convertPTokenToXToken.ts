@@ -13,6 +13,7 @@ import { ELEMENT_DECLARATION_PTOKEN } from '../pToken/token/elementDeclaration';
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/generalEntityDeclaration';
 import { PARAMETER_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/parameterEntityDeclaration';
+import { TEXT_PTOKEN } from '../pToken/token/text';
 
 import {
    CHARREF_PTOKEN,
@@ -35,6 +36,7 @@ import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclara
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
+import { TextXToken } from './token/textXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
 
@@ -62,6 +64,8 @@ function convertPTokenToXToken(pToken: ParseValue): XToken {
          return new ParameterEntityReferenceXToken(pToken);
       case PROCESSING_INSTRUCTION_PTOKEN:
          return new ProcessingInstructionXToken(pToken);
+      case TEXT_PTOKEN:
+         return new TextXToken(pToken);
       case TEXTDECL_PTOKEN:
          return new TextDeclarationXToken(pToken);
       case XMLDECL_PTOKEN:

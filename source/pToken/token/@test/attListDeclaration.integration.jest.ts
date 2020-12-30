@@ -1,6 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
+import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
 import {
@@ -11,7 +12,7 @@ import {
 
 // ick
 import { WordListPToken, WordListType } from '../../../token/common/wordList';
-import { ParameterEntityReferencePToken, TextPToken } from 'token';
+import { ParameterEntityReferencePToken } from 'token';
 
 describe('attListDeclaration (integration)', () => {
    describe('parseAttListDeclaration()', () => {

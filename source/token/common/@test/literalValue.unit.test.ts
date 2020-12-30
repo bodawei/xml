@@ -3,9 +3,10 @@
 
 import { ConformanceVersion, Range, EntityId } from 'basic';
 import { MockErrorCollector } from 'error-test';
+import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { TextPToken, TextXToken } from 'token';
+import { TextXToken } from 'xToken';
 
 import * as charRef from '../../charRef';
 import * as generalEntityReference from '../../generalEntityReference';
@@ -227,7 +228,7 @@ describe('literalValue (unit)', () => {
          const pToken = [ new TextPToken({ text: SToken.fromString('blah') }) ];
          const result = literalValue.makeXTokenCompatible(pToken);
 
-         expect(result).toEqual([ new TextXToken('blah', pToken[0]) ]);
+         expect(result).toEqual([ new TextXToken(pToken[0]) ]);
       });
 
       // it('calls reference.toXToken for each reference in the pToken value', () => {

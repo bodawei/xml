@@ -1,8 +1,9 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { AttListDeclarationPToken } from 'pToken';
+import { AttListDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { TextPToken, TextXToken, WordListPToken, WordListType } from 'token';
+import { TextXToken } from 'xToken';
+import { WordListPToken, WordListType } from 'token';
 
 import { ATTLIST_DECLARATION_XTOKEN, AttListDeclarationXToken } from '../attListDeclarationXToken';
 

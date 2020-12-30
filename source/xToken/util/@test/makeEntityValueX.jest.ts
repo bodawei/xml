@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { ParameterEntityReferenceXToken } from '../../token/parameterEntityReferenceXToken';
@@ -12,7 +13,6 @@ import {
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
-   TextPToken,
 } from 'token';
 
 describe('GeneralEntityDeclarationXToken()', () => {

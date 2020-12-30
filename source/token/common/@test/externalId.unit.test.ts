@@ -4,8 +4,8 @@
 import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
+import { TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
-import { TextPToken } from 'token';
 
 import unassigned from '../unassigned';
 import { UnassignedArray } from '../unassigned';

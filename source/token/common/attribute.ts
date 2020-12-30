@@ -4,7 +4,8 @@ import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning,  } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
-import { TextXToken, isTextPToken, TextPToken } from '../text';
+import { isTextPToken, TextPToken } from 'pToken';
+import { TextXToken } from 'xToken';
 
 import { checkXmlLangWellFormed } from './langAttribute';
 import misc from './misc';

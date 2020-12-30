@@ -1,14 +1,14 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { STokenArrayBuilder, SToken } from 'sToken';
-import { UnexpandedDetails } from 'pToken';
+import { TEXT_PTOKEN, UnexpandedMarkupDetails } from 'pToken';
 // ick
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'token';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
 import { parameterEntityReferenceToSTokens } from '../token/parameterEntityReferenceToSTokens';
 
-const DEFAULT: UnexpandedDetails = { propName: '', tokens: [] };
+const DEFAULT: UnexpandedMarkupDetails = { propName: '', tokens: [] };
 
-function unexpandedToSTokens(details: UnexpandedDetails = DEFAULT): Array<SToken> {
+function unexpandedToSTokens(details: UnexpandedMarkupDetails = DEFAULT): Array<SToken> {
    const builder = new STokenArrayBuilder();
    const tokens = details.tokens;
 

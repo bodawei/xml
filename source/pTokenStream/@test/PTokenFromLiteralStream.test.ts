@@ -2,10 +2,11 @@
 /* eslint-env jasmine */
 
 import { Range, EntityId } from 'basic';
+import { TextPToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { CharRefPToken, TextPToken } from 'token';
+import { CharRefPToken,  } from 'token';
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
 import * as pTokenStuff from 'pToken';
@@ -49,7 +50,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { });
-            const parseSpy = spyOn(tokenStuff, 'parseText');
+            const parseSpy = spyOn(pTokenStuff, 'parseText');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -71,7 +72,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(tokenStuff, 'parseText');
+            const parseSpy = spyOn(pTokenStuff, 'parseText');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -92,7 +93,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(tokenStuff, 'parseText').and.callFake((source: STokenSource, term: Array<string>, cb: (x?: any) => any ) => {
+            const parseSpy = spyOn(pTokenStuff, 'parseText').and.callFake((source: STokenSource, term: Array<string>, cb: (x?: any) => any ) => {
                cb();
             });
             const pushSpy = spyOn(pTokenStream, 'push');
@@ -150,7 +151,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
             // now we hit parseText
          ]);
          const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-         const parseSpy = spyOn(tokenStuff, 'parseText');
+         const parseSpy = spyOn(pTokenStuff, 'parseText');
 
          pTokenStream.read();
          mockSource.respondInAsyncTime();

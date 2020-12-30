@@ -1,11 +1,12 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
+import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
 import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 
-import { DeclarationStart, ParameterEntityReferencePToken, TextPToken } from 'token';
+import { DeclarationStart, ParameterEntityReferencePToken } from 'token';
 import { GeneralEntityDeclarationPToken } from '../../token/generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDeclaration';
 

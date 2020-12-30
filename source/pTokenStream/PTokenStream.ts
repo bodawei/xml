@@ -3,8 +3,7 @@
 import { Readable } from 'stream';
 
 import { CONFORMANCE_VERSION, ConformanceVersion, XmlVersion, XmlRevision, EntityId } from 'basic';
-import { defaultExtractors } from 'extractor';
-import { ParseValue,   parseInstruction, } from 'pToken';
+import { ParseValue,   parseInstruction, TextPToken,} from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    ELEMENT_END_PTOKEN,
@@ -25,7 +24,6 @@ import {
    CharDataPToken,
    ConditionalClosePToken,
    ConditionalPToken,
-   TextPToken,
 
    ElementStartPToken,
 } from 'token';

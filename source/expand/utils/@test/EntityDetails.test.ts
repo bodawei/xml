@@ -1,8 +1,12 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'sToken';
-import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
-import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'token';
+import {
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   TextPToken,
+} from 'pToken';
+import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'token';
 
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';

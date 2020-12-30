@@ -3,6 +3,7 @@
 import { ConformanceVersion, isSpace } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import {
+   TEXT_PTOKEN,
    ContentModelP,
    ElementDeclarationPToken,
    isContentModelP,
@@ -13,7 +14,6 @@ import {
    EntityValuePToken,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    CHARREF_PTOKEN,
-   TEXT_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
 } from 'token';

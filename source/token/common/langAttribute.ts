@@ -1,11 +1,12 @@
 import { pattern as BCP47_REGEX } from 'bcp47-validate';
 import { ConformanceVersion } from "basic";
 import { ErrorCollector, WellFormedError } from "error";
+import { isTextPToken } from "pToken";
 import { SToken } from "sToken";
+import { isTextXToken } from "xToken";
 
 import { AttributeValuePToken, AttributeValueXToken } from '../common/attribute';
 import { GENERAL_ENTITY_REFERENCE_PTOKEN } from "../generalEntityReference";
-import { isTextPToken, isTextXToken } from "../text";
 import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'xToken';
 
 const WFID = WellFormedError.ID;

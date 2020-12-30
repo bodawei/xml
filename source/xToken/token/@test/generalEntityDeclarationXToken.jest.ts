@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ExternalIdP, GeneralEntityDeclarationPToken } from 'pToken';
+import { ExternalIdP, GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
@@ -14,7 +14,6 @@ import {
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
-   TextPToken,
 } from 'token';
 
 describe('GeneralEntityDeclarationXToken()', () => {

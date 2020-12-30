@@ -6,6 +6,7 @@ import {
    CHARREF_XTOKEN,
    NOTATION_DECLARATION_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
+   TEXT_XTOKEN,
    XMLDECL_XTOKEN,
    ExternalIdX,
 } from 'xToken';
@@ -18,7 +19,6 @@ import {
    ELEMENT_END_XTOKEN,
    CDATA_XTOKEN,
    CHARDATA_XTOKEN,
-   TEXT_XTOKEN,
    DocTypeStartXToken,
 } from 'token';
 import { AttributeXToken } from '../../../token/common/attribute';

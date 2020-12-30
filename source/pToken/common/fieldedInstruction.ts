@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
+import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
-import { TEXT_PTOKEN } from 'token';
 
 import { InstructionStart } from '../bridge/instruction';
 import literal from '../../token/common/literal';

@@ -6,11 +6,13 @@ import {
    ParseValue,
    ContextType,
    NOTATION_DECLARATION_PTOKEN,
+   TEXT_PTOKEN,
    AttListDeclarationPToken,
    ElementDeclarationPToken,
    NotationDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import {
@@ -21,7 +23,6 @@ import {
    ERROR_TYPE,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
-   TEXT_PTOKEN,
    CharRefPToken,
    ConditionalClosePToken,
    ConditionalPToken,
@@ -30,7 +31,6 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
    GeneralEntityReferencePToken,
-   TextPToken,
    XmlError,
    ParameterEntityReferencePToken,
 } from 'token';
@@ -940,7 +940,7 @@ describe('EntityExpander (unit)', () => {
             sectionType: toSToken('IGNORE'),
          });
 
-         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+         doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
             const types = results.map((item) => item.type);
 
             expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
@@ -954,7 +954,7 @@ describe('EntityExpander (unit)', () => {
             sectionType: toSToken('OOPSIE'),
          });
 
-         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+         doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
             const types = results.map((item) => item.type);
 
             expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
@@ -968,7 +968,7 @@ describe('EntityExpander (unit)', () => {
             sectionType: toSToken('INCLUDE'),
          });
 
-         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+         doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
             const types = results.map((item) => item.type);
 
             expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
@@ -982,7 +982,7 @@ describe('EntityExpander (unit)', () => {
             sectionType: toSToken('INCLUDE'),
          });
 
-         doExpand([condStart, new TextPToken('foo'), condEnd], true, (results) => {
+         doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
             const types = results.map((item) => item.type);
 
             expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);

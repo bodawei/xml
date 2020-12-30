@@ -1,10 +1,12 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+import { TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { externalIdToEntityId } from '../externalIdToEntityId';
 
 // ick
-import { TextPToken, CharRefPToken, GeneralEntityReferencePToken } from 'token';
+import { CharRefPToken, GeneralEntityReferencePToken } from 'token';
 
 describe('externalIdToEntityId', () => {
    it('converts to an EntityId', () => {
@@ -25,7 +27,7 @@ describe('externalIdToEntityId', () => {
       });
 
       expect(token).toEqual(
-         jasmine.objectContaining({
+         expect.objectContaining({
             type: 'ENTITY_ID',
             systemId: 'sysFoo',
             publicId: 'a',
@@ -43,7 +45,7 @@ describe('externalIdToEntityId', () => {
       });
 
       expect(token).toEqual(
-         jasmine.objectContaining({
+         expect.objectContaining({
             type: 'ENTITY_ID',
             systemId: '',
             publicId: '',

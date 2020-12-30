@@ -4,13 +4,13 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
+import { TextPToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { ExternalIdX } from 'xToken';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
-import { TextPToken } from '../text';
 import { EXTERNAL_ID } from '../common/externalId';
 
 describe('docTypeStart (integration)', () => {

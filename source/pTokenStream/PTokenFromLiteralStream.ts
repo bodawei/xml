@@ -2,14 +2,12 @@
 
 import { Transform } from 'stream';
 
-import { parseInstruction } from 'pToken';
+import { parseInstruction, TextPToken, parseText,} from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    parseCharRef,
    parseGeneralEntityReference,
    parseParameterEntityReference,
-   parseText,
-   TextPToken,
 } from 'token';
 
 type Options = {

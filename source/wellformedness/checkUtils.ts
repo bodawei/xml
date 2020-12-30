@@ -2,12 +2,12 @@ import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import {
+   TEXT_PTOKEN,
    ParseValue,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
 } from 'pToken';
 import {
-   TEXT_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    CHARREF_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,

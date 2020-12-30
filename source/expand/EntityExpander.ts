@@ -19,6 +19,8 @@ import {
    resumeParseElementDeclaration,
    resumeParseEntityDeclaration,
    resumeParseNotationDeclaration,
+   TEXT_PTOKEN,
+   TextPToken,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
@@ -40,10 +42,8 @@ import {
    ElidedEntityDeclarationPToken,
    CONDITIONAL_PTOKEN,
    ConditionalPToken,
-   TEXT_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
    ConditionalClosePToken,
-   TextPToken,
 } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';

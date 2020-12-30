@@ -10,6 +10,7 @@ import { GeneralEntityDeclarationPToken } from './token/generalEntityDeclaration
 import { NotationDeclarationPToken } from './token/notationDeclaration';
 import { ParameterEntityDeclarationPToken } from './token/parameterEntityDeclaration';
 import { ProcessingInstructionPToken } from './token/processingInstruction';
+import { TextPToken } from './token/text';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
 
@@ -25,6 +26,7 @@ export * from './token/notationDeclaration';
 export * from './token/parameterEntityDeclaration';
 export * from './token/processingInstruction';
 export * from './token/textDeclaration';
+export * from './token/text';
 export * from './token/xmlDeclaration';
 export * from './util/externalIdToEntityId';
 export * from './types';
@@ -41,6 +43,7 @@ type ParseValue =
    | ParameterEntityDeclarationPToken
    | ProcessingInstructionPToken
    | TextDeclarationPToken
+   | TextPToken
    | XmlDeclarationPToken;
 
 enum ContextType {

@@ -1,9 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { NotationDeclarationPToken } from 'pToken';
+import { TextPToken, NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
-// ick
-import { TextPToken } from 'token';
 
 import { ExternalIdX } from '../../common/externalIdX';
 import {
