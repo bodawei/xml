@@ -15,9 +15,6 @@ import { parseUnexpanded } from '../../common/parseUnexpanded';
 import literal from '../../../token/common/literal';
 import { parseWordList } from '../../../token/common/wordList';
 import { WordListPToken, WordListType } from '../../../token/common/wordList';
-interface JestExpect {
-   any: (value: any) => any;
-}
 
 jest.mock('../../../token/common/literal');
 jest.mock('../../../token/common/wordList');
@@ -33,13 +30,13 @@ describe('AttListDeclaration (unit)', () => {
    let aldPToken: AttListDeclarationPToken;
    let actual: AttListDeclarationPToken | undefined;
    let parseCb: (result: AttListDeclarationPToken) => void;
+   let parseUnexpandedMock: jest.MockedFunction<typeof parseUnexpanded>;
 
    beforeEach(() => {
-      (parseUnexpanded as jest.Mock).mockImplementation(
-         (source, name, cb: (value: undefined) => void) => {
-            cb(undefined);
-         },
-      );
+      parseUnexpandedMock = parseUnexpanded as jest.MockedFunction<typeof parseUnexpanded>;
+      parseUnexpandedMock.mockImplementation((source, name, cb: (value: undefined) => void) => {
+         cb(undefined);
+      });
 
       (WordListPToken as jest.Mock).mockReturnValue({ type: 'WordListPToken' });
 
@@ -279,7 +276,7 @@ describe('AttListDeclaration (unit)', () => {
          (literal.parse as jest.Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = [new TextPToken({ text: toSToken('dummyValue') })];
-               done();
+               done?.();
             },
          );
          const mockSource = new MockSTokenSource([
@@ -310,7 +307,7 @@ describe('AttListDeclaration (unit)', () => {
          (literal.parse as jest.Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = [new TextPToken({ text: toSToken('dummyValue') })];
-               done();
+               done?.();
             },
          );
          const mockSource = new MockSTokenSource([
@@ -353,7 +350,7 @@ describe('AttListDeclaration (unit)', () => {
          (literal.parse as jest.Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = DUMMY_VALUE;
-               done();
+               done?.();
             },
          );
          const mockSource = new MockSTokenSource([
@@ -410,7 +407,7 @@ describe('AttListDeclaration (unit)', () => {
          (literal.parse as jest.Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = DUMMY_VALUE;
-               done();
+               done?.();
             },
          );
          const mockSource = new MockSTokenSource([
@@ -527,7 +524,7 @@ describe('AttListDeclaration (unit)', () => {
          ]);
          (parseWordList as jest.Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
-               done();
+               done?.();
             },
          );
 
@@ -541,7 +538,7 @@ describe('AttListDeclaration (unit)', () => {
          expect(parseWordList).toHaveBeenCalledWith(
             mockSource,
             WordListType.NOTATION,
-            (expect as JestExpect).any(Function),
+            expect.any(Function),
          );
       });
 
@@ -561,7 +558,7 @@ describe('AttListDeclaration (unit)', () => {
          ]);
          (parseWordList as jest.Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
-               done();
+               done?.();
             },
          );
 
@@ -647,7 +644,7 @@ describe('AttListDeclaration (unit)', () => {
          ]);
          (parseWordList as jest.Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
-               done();
+               done?.();
             },
          );
 
@@ -702,7 +699,7 @@ describe('AttListDeclaration (unit)', () => {
 
       describe('parameter entity reference', () => {
          it('returns ann unexpanded value when finding a PE Ref at the start', () => {
-            (parseUnexpanded as jest.Mock).mockImplementation(
+            parseUnexpandedMock.mockImplementation(
                (_1: any, propName: string, done: (un: UnexpandedMarkupDetails) => void) => {
                   done({ propName, tokens: [] });
                },
@@ -726,7 +723,7 @@ describe('AttListDeclaration (unit)', () => {
 
          it('returns an unexpanded value when finding a PE Ref instead of an attr name', () => {
             const calls = [undefined, true];
-            (parseUnexpanded as jest.Mock).mockImplementation(
+            parseUnexpandedMock.mockImplementation(
                (
                   source: STokenSource,
                   propName: string,
@@ -760,7 +757,7 @@ describe('AttListDeclaration (unit)', () => {
 
          it('returns an unexpanded value when finding a PE Ref instead of an attr type', () => {
             const calls = [false, false, true];
-            (parseUnexpanded as jest.Mock).mockImplementation(
+            parseUnexpandedMock.mockImplementation(
                (
                   source: STokenSource,
                   propName: string,
@@ -801,9 +798,50 @@ describe('AttListDeclaration (unit)', () => {
             );
          });
 
+         it('returns an unexpanded value when finding a PE Ref instead of a NOTATION value', () => {
+            const calls = [false, false, false, true];
+            parseUnexpandedMock.mockImplementation((source, propName, done) => {
+               done(calls.shift() ? { propName, tokens: [] } : undefined);
+            });
+            const mockSource = new MockSTokenSource([
+               ['elName', 'word', ['>', '%']],
+               [' ', 'space'],
+               ['attName', 'word', ['>', '%']],
+               [' ', 'space'],
+               ['NOTATION', 'word', ['>', '%', '(', '#', '"', "'"]],
+               ['\t', 'space'],
+               ['>', 'match', '>'],
+            ]);
+
+            parseAttListDeclaration(mockSource, { open: toSToken('<!') }, parseCb);
+            mockSource.respondInAsyncTime();
+
+            expect(actual).toEqualRangeless(
+               new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  elementName: toSToken('elName'),
+                  elementNameSpace: toSToken(' '),
+                  attDefs: [
+                     {
+                        name: toSToken('attName'),
+                        nameSpace: toSToken(' '),
+                        type: toSToken('NOTATION'),
+                        typeSpace: toSToken('\t'),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'notation',
+                     tokens: [],
+                  },
+                  close: toSToken('>'),
+               }),
+            );
+         });
+
          it('returns an unexpanded value when finding a PE Ref instead of an default type', () => {
             const calls = [false, false, false, true];
-            (parseUnexpanded as jest.Mock).mockImplementation(
+            parseUnexpandedMock.mockImplementation(
                (
                   source: STokenSource,
                   propName: string,
@@ -850,7 +888,7 @@ describe('AttListDeclaration (unit)', () => {
 
          it('returns an unexpanded value when finding a PE Ref instead of an attValue', () => {
             const calls = [false, false, false, false, true];
-            (parseUnexpanded as jest.Mock).mockImplementation(
+            parseUnexpandedMock.mockImplementation(
                (
                   source: STokenSource,
                   propName: string,
@@ -926,7 +964,7 @@ describe('AttListDeclaration (unit)', () => {
 
          resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             expect(result).toBe(pToken);
-            done();
+            done?.();
          });
          mockSource.respondInAsyncTime();
       });
@@ -977,7 +1015,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1029,7 +1067,7 @@ describe('AttListDeclaration (unit)', () => {
                   extra: toSToken('goodies'),
                }),
             );
-            done();
+            done?.();
          });
          mockSource.respondInAsyncTime();
       });
@@ -1076,7 +1114,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1124,7 +1162,7 @@ describe('AttListDeclaration (unit)', () => {
                   extra: toSToken('stuff'),
                }),
             );
-            done();
+            done?.();
          });
          mockSource.respondInAsyncTime();
       });
@@ -1180,7 +1218,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1252,7 +1290,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1290,7 +1328,7 @@ describe('AttListDeclaration (unit)', () => {
                expect(parseWordList).toHaveBeenCalledWith(
                   mockSource,
                   WordListType.NOTATION,
-                  (expect as JestExpect).any(Function),
+                  expect.any(Function),
                );
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
@@ -1307,7 +1345,62 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
+            });
+            mockSource.respondInAsyncTime();
+         });
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a NOTATION list ${msg}`, (done) => {
+            const mockSource = new MockSTokenSource([
+               [sourceStr, 'space'],
+               ['#', 'peekChar'],
+               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+               [' ', 'space'],
+               // jump directly to the name
+               [undefined, 'word'],
+               [undefined, 'all'],
+            ]);
+            const pToken = new AttListDeclarationPToken({
+               open: toSToken('<!'),
+               attDefs: [
+                  {
+                     name: toSToken('foo'),
+                     nameSpace: toSToken(' '),
+                     type: toSToken('NOTATION'),
+                     typeSpace: toSToken(' '),
+                     value: [],
+                  },
+               ],
+               unexpanded: {
+                  propName: 'notation',
+                  tokens: [],
+               },
+            });
+
+            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+               expect(parseWordList).toHaveBeenCalledWith(
+                  mockSource,
+                  WordListType.NOTATION,
+                  expect.any(Function),
+               );
+               expect(result).toEqualRangeless(
+                  new AttListDeclarationPToken(pToken, {
+                     attDefs: [
+                        {
+                           name: toSToken('foo'),
+                           nameSpace: toSToken(' '),
+                           type: toSToken('NOTATION'),
+                           typeSpace: toSToken(destStr),
+                           defaultType: toSToken('#REQUIRED'),
+                           defaultTypeSpace: toSToken(' '),
+                           value: [],
+                        },
+                     ],
+                  }),
+               );
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1345,7 +1438,7 @@ describe('AttListDeclaration (unit)', () => {
                expect(parseWordList).toHaveBeenCalledWith(
                   mockSource,
                   WordListType.ENUMERATION,
-                  (expect as JestExpect).any(Function),
+                  expect.any(Function),
                );
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
@@ -1362,7 +1455,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1412,7 +1505,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1456,7 +1549,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1502,7 +1595,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1550,7 +1643,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1598,7 +1691,7 @@ describe('AttListDeclaration (unit)', () => {
                   extra: toSToken('xtra'),
                }),
             );
-            done();
+            done?.();
          });
          mockSource.respondInAsyncTime();
       });
@@ -1639,7 +1732,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });
@@ -1689,7 +1782,7 @@ describe('AttListDeclaration (unit)', () => {
                      ],
                   }),
                );
-               done();
+               done?.();
             });
             mockSource.respondInAsyncTime();
          });

@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { combineSTokens, SToken, STokenSource } from 'sToken';
+import { combineSTokens, SToken, STokenSource, strOrBlank } from 'sToken';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
 import { UnexpandedMarkupDetails } from '../types';
@@ -173,13 +173,10 @@ function parseAttType(source: STokenSource, attDef: AttDefinitionProps, done: Pa
    source.extract('word', ['>', '%', '(', '#', '"', "'"], (attType) => {
       if (attType) {
          attDef.type = attType;
-         source.extractToObjectNoParams('space', attDef, 'typeSpace');
-
-         if (attType.str.toLocaleUpperCase() === 'NOTATION') {
-            parseWordList(source, WordListType.NOTATION, populateList);
-         } else {
+         source.extractNoParams('space', (typeSpace) => {
+            attDef.typeSpace = typeSpace;
             done(attDef);
-         }
+         });
          return;
       }
 
@@ -228,6 +225,32 @@ function parseAttValue(source: STokenSource, attDef: AttDefinitionProps, done: P
    );
 }
 
+function parseFullAttType(
+   source: STokenSource,
+   protoToken: AttListDeclarationProps,
+   protoAttr: AttDefinitionProps,
+   done: (withAttrs: AttListDeclarationProps, attr: AttDefinitionProps) => void,
+): void {
+   parseAttType(source, protoAttr, (attWithType) => {
+      if (attWithType.type && attWithType.type.str.toUpperCase() === 'NOTATION') {
+         parseUnexpanded(source, 'notation', (unexpanded) => {
+            if (unexpanded) {
+               protoToken.unexpanded = unexpanded;
+               done(protoToken, attWithType);
+               return;
+            }
+
+            parseWordList(source, WordListType.NOTATION, (list) => {
+               attWithType.enumeration = list;
+               done(protoToken, attWithType);
+            });
+         });
+      } else {
+         done(protoToken, attWithType);
+      }
+   });
+}
+
 function parseAttDefs(
    source: STokenSource,
    protoToken: AttListDeclarationProps,
@@ -255,36 +278,41 @@ function parseAttDefs(
                return;
             }
 
-            parseAttType(source, attDef, (attWithType) => {
+            parseFullAttType(source, protoToken, attDef, (tokenWithAttr, attWithType) => {
+               if (tokenWithAttr.unexpanded) {
+                  done(tokenWithAttr);
+                  return;
+               }
+
                parseUnexpanded(source, 'defaultType', (unexpanded) => {
                   if (unexpanded) {
-                     protoToken.unexpanded = unexpanded;
-                     done(protoToken);
+                     tokenWithAttr.unexpanded = unexpanded;
+                     done(tokenWithAttr);
                      return;
                   }
 
                   parseAttDefaultType(source, attWithType, (withDefault) => {
                      if (!withDefault.defaultType) {
                         parseAttValue(source, withDefault, () => {
-                           parseAttDefs(source, protoToken, done);
+                           parseAttDefs(source, tokenWithAttr, done);
                         });
                         return;
                      }
 
                      if (withDefault.defaultType.str.toLowerCase() !== '#fixed') {
-                        parseAttDefs(source, protoToken, done);
+                        parseAttDefs(source, tokenWithAttr, done);
                         return;
                      }
 
                      parseUnexpanded(source, 'value', (unexpanded) => {
                         if (unexpanded) {
-                           protoToken.unexpanded = unexpanded;
-                           done(protoToken);
+                           tokenWithAttr.unexpanded = unexpanded;
+                           done(tokenWithAttr);
                            return;
                         }
 
                         parseAttValue(source, withDefault, () => {
-                           parseAttDefs(source, protoToken, done);
+                           parseAttDefs(source, tokenWithAttr, done);
                         });
                      });
                   });
@@ -334,7 +362,23 @@ function resumeParseAttDef(
       case 'type':
          parseAttType(source, def, (attWithType) => {
             attWithType.nameSpace = combineSTokens(attWithType.nameSpace, extraSpace);
-            resumeParseAttDef(source, 'defaultType', attWithType, undefined, done);
+
+            if (strOrBlank(attWithType.type).toUpperCase() === 'NOTATION') {
+               resumeParseAttDef(source, 'notation', attWithType, undefined, done);
+            } else {
+               resumeParseAttDef(source, 'defaultType', attWithType, undefined, done);
+            }
+         });
+         break;
+      case 'notation':
+         parseWordList(source, WordListType.NOTATION, (list) => {
+            const newDef = {
+               ...def,
+               typeSpace: combineSTokens(def.typeSpace, extraSpace),
+               enumeration: list,
+            };
+
+            resumeParseAttDef(source, 'defaultType', newDef, undefined, done);
          });
          break;
       case 'defaultType':
