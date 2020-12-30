@@ -1,26 +1,33 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { parseInstruction } from '../instruction';
 
-import * as pTokenThings from 'pToken';
 import * as pi from '../../token/processingInstruction';
+import * as textDecl from '../../token/textDeclaration';
+import * as xmlDecl from '../../token/xmlDeclaration';
 
 describe('parseInstruction (unit)', () => {
-   let callback: jasmine.Spy;
+   let callback: jest.MockedFunction<(
+      section:
+         | pi.ProcessingInstructionPToken
+         | xmlDecl.XmlDeclarationPToken
+         | textDecl.TextDeclarationPToken,
+   ) => void>;
    let open: SToken;
 
    beforeEach(() => {
       open = toSToken('<?');
-      callback = jasmine.createSpy('callbackSpy');
+      callback = jest.fn();
    });
 
    // See the integration test for validation that this actually returns something through callback
 
    it('calls parseProcessingInstruction() when the target is not "xml"', () => {
-      const piParse = spyOn(pi, 'parseProcessingInstruction');
+      const piParse = jest.spyOn(pi, 'parseProcessingInstruction').mockImplementation(() => {});
       const mockSource = new MockSTokenSource([
          [undefined, 'space'],
          [undefined, 'word', ['?>']],
@@ -30,7 +37,7 @@ describe('parseInstruction (unit)', () => {
       parseInstruction(mockSource, open, true, callback);
       mockSource.respondInAsyncTime();
 
-      const args = piParse.calls.argsFor(0);
+      const args = piParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
       expect(args[1]).toEqualRangeless({
          open: open,
@@ -38,11 +45,11 @@ describe('parseInstruction (unit)', () => {
          target: undefined,
          targetSpace: undefined,
       });
-      expect(args[2]).toBeInstanceOf(Function);
+      expect(args[2]).toEqual(expect.any(Function));
    });
 
    it('parses an XnlDeclaration if it finds a target of xml and is not in a document entity', () => {
-      const xmlParse = spyOn(pTokenThings, 'parseXmlDeclaration');
+      const xmlParse = jest.spyOn(xmlDecl, 'parseXmlDeclaration').mockImplementation(() => {});
       const mockSource = new MockSTokenSource([
          [undefined, 'space'],
          ['xml', 'word', ['?>']],
@@ -52,7 +59,7 @@ describe('parseInstruction (unit)', () => {
       parseInstruction(mockSource, open, true, callback);
       mockSource.respondInAsyncTime();
 
-      const args = xmlParse.calls.argsFor(0);
+      const args = xmlParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
       expect(args[1]).toEqualRangeless({
          open: open,
@@ -60,11 +67,11 @@ describe('parseInstruction (unit)', () => {
          target: toSToken('xml'),
          targetSpace: undefined,
       });
-      expect(args[2]).toBeInstanceOf(Function);
+      expect(args[2]).toEqual(expect.any(Function));
    });
 
    it('parses an TextDeclaration if it finds a target of xml and is not in a document entity', () => {
-      const textParse = spyOn(pTokenThings, 'parseTextDeclaration');
+      const textParse = jest.spyOn(textDecl, 'parseTextDeclaration').mockImplementation(() => {});
       const mockSource = new MockSTokenSource([
          ['\t', 'space'],
          ['xml', 'word', ['?>']],
@@ -74,7 +81,7 @@ describe('parseInstruction (unit)', () => {
       parseInstruction(mockSource, open, false, callback);
       mockSource.respondInAsyncTime();
 
-      const args = textParse.calls.argsFor(0);
+      const args = textParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
       expect(args[1]).toEqualRangeless({
          open: open,
@@ -82,6 +89,6 @@ describe('parseInstruction (unit)', () => {
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
       });
-      expect(args[2]).toBeInstanceOf(Function);
+      expect(args[2]).toEqual(expect.any(Function));
    });
 });

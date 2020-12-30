@@ -55,24 +55,26 @@ describe('notationdeDeclaration (unit)', () => {
    });
 
    describe('parseNotationDeclaration()', () => {
-      let callback: jasmine.Spy;
-      let externalIDParseSpy: jasmine.Spy;
-      let parseUnexpSpy: jasmine.Spy;
+      let callback: jest.MockedFunction<(pToken: NotationDeclarationPToken) => void>;
+      let externalIDParseSpy: jest.MockedFunction<typeof externalId.parseExternalId>;
+      let parseUnexpSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
 
       beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
-         externalIDParseSpy = spyOn(externalId, 'parseExternalId');
-         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
+         callback = jest.fn();
+         externalIDParseSpy = jest.spyOn(externalId, 'parseExternalId') as jest.MockedFunction<
+            typeof externalId.parseExternalId
+         >;
+         externalIDParseSpy.mockImplementation((_1, _2, cb) => {
             cb({ externalId: {} });
          });
 
-         parseUnexpSpy = spyOn(parseUnexpanded, 'parseUnexpanded');
+         parseUnexpSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
+            typeof parseUnexpanded.parseUnexpanded
+         >;
 
-         parseUnexpSpy.and.callFake(
-            (source: STokenSource, name: string, cb: (result: undefined) => void) => {
-               cb(undefined);
-            },
-         );
+         parseUnexpSpy.mockImplementation((source, name, cb) => {
+            cb(undefined);
+         });
       });
 
       it('calls externalId.parse()', () => {
@@ -86,9 +88,9 @@ describe('notationdeDeclaration (unit)', () => {
          parseNotationDeclaration(mockSource, notationPToken, callback);
          mockSource.respondInAsyncTime();
 
-         expect(externalIDParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(externalIDParseSpy.calls.argsFor(0)[1]).toEqual(['>']);
-         expect(externalIDParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(externalIDParseSpy.mock.calls[0][0]).toEqual(mockSource);
+         expect(externalIDParseSpy.mock.calls[0][1]).toEqual(['>']);
+         expect(externalIDParseSpy.mock.calls[0][2]).toBeInstanceOf(Function);
       });
 
       it('does a simple parse', () => {
@@ -109,7 +111,7 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('notationName'),
@@ -122,18 +124,12 @@ describe('notationdeDeclaration (unit)', () => {
       });
 
       it('parses a parameter entity reference instead of the name', () => {
-         parseUnexpSpy.and.callFake(
-            (
-               source: STokenSource,
-               name: string,
-               cb: (result: UnexpandedMarkupDetails | undefined) => void,
-            ) => {
-               cb({
-                  tokens: [],
-                  propName: 'fred',
-               });
-            },
-         );
+         parseUnexpSpy.mockImplementation((source, name, cb) => {
+            cb({
+               tokens: [],
+               propName: 'fred',
+            });
+         });
          notationPToken = new NotationDeclarationPToken({
             open: toSToken('<!'),
             close: toSToken('>'),
@@ -149,7 +145,7 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: undefined,
@@ -177,7 +173,7 @@ describe('notationdeDeclaration (unit)', () => {
             [undefined, 'space'],
             ['>', 'match', '>'],
          ]);
-         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
+         externalIDParseSpy.mockImplementation((_1, _2, cb) => {
             cb(undefined);
          });
 
@@ -190,7 +186,7 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('notationName'),
@@ -209,16 +205,10 @@ describe('notationdeDeclaration (unit)', () => {
                propName: 'fred',
             },
          ];
-         parseUnexpSpy.and.callFake(
-            (
-               source: STokenSource,
-               name: string,
-               cb: (result: UnexpandedMarkupDetails | undefined) => void,
-            ) => {
-               cb(results.shift());
-            },
-         );
-         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
+         parseUnexpSpy.mockImplementation((source, name, cb) => {
+            cb(results.shift());
+         });
+         externalIDParseSpy.mockImplementation((_1, _2, cb) => {
             cb({ externalId: {}, nextPropName: 'george' });
          });
          notationPToken = new NotationDeclarationPToken({
@@ -240,7 +230,7 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)[0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('theName'),
@@ -258,16 +248,16 @@ describe('notationdeDeclaration (unit)', () => {
    });
 
    describe('resumeParseNotationDeclaration()', () => {
-      let resumeParseSpy: jasmine.Spy;
+      let resumeParseSpy: jest.MockedFunction<typeof externalId.resumeParseExternalId>;
 
       beforeEach(() => {
-         resumeParseSpy = spyOn(externalId, 'resumeParseExternalId');
+         resumeParseSpy = jest.spyOn(externalId, 'resumeParseExternalId') as jest.MockedFunction<
+            typeof externalId.resumeParseExternalId
+         >;
 
-         resumeParseSpy.and.callFake(
-            (_1: any, _2: any, _3: any, _4: any, cb: (arg: any) => void) => {
-               cb({ externalId: {} });
-            },
-         );
+         resumeParseSpy.mockImplementation((_1, _2, _3, _4, cb) => {
+            cb({ externalId: {} });
+         });
       });
 
       it('restores everything at and after the name', (done) => {

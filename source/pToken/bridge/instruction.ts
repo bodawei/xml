@@ -1,13 +1,9 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import {
-   TextDeclarationPToken,
-   XmlDeclarationPToken,
-   parseXmlDeclaration,
-   parseTextDeclaration,
-} from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
+import { XmlDeclarationPToken, parseXmlDeclaration } from '../token/xmlDeclaration';
+import { TextDeclarationPToken, parseTextDeclaration } from '../token/textDeclaration';
 import {
    ProcessingInstructionPToken,
    parseProcessingInstruction,
