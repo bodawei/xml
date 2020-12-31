@@ -69,7 +69,7 @@ describe('combineSTokens()', () => {
 
       const result = combineSTokens(sToken1, sToken2);
 
-      expect(result.ranges).toEqual([
+      expect(result?.ranges).toEqual([
          new Range(new EntityId('here'), 1, 2, 3),
          new Range(new EntityId('there'), 1, 2, 3),
       ]);
@@ -87,7 +87,7 @@ describe('combineSTokens()', () => {
 
       const result = combineSTokens(sToken1, sToken2);
 
-      expect(result.ranges).toEqual([
+      expect(result?.ranges).toEqual([
          new Range(new EntityId('here'), 1, 2, 3),
          new Range(new EntityId('foo'), 1, 0, 1, 5, 2, 1),
          new Range(new EntityId('there'), 1, 2, 3),

@@ -10,8 +10,11 @@ import {
    ELEMENT_END_PTOKEN,
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    ElidedEntityDeclarationPToken,
+   EXTERNAL_SUBSET_START_TOKEN,
+   EXTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 import {
+   ATTLIST_DECLARATION_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
@@ -24,8 +27,11 @@ import { ValidateState } from './validateState';
 import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
 import { elementStartValidate } from './token/elementStartValidate';
 import { elementStartUpdateState } from './token/elementStartUpdateState';
+import { externalSubsetStartUpdateState } from './token/externalSubsetStartUpdateState';
+import { externalSubsetEndUpdateState } from './token/externalSubsetEndUpdateState';
 import { elementEndValidate } from './token/elementEndValidate';
 import { elementEndUpdateState } from './token/elementEndUpdateState';
+import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
 
 /*
@@ -177,11 +183,20 @@ class ValidityChecker {
                };
             }
             break;
+         case EXTERNAL_SUBSET_START_TOKEN:
+            this.state = externalSubsetStartUpdateState(token, this.state);
+            break;
+         case EXTERNAL_SUBSET_END_TOKEN:
+            this.state = externalSubsetEndUpdateState(token, this.state);
+            break;
          case XMLDECL_PTOKEN:
             if (!this.seenXmlDecl) {
                this.state = xmlDeclarationUpdateState(token, this.state);
                this.seenXmlDecl = true;
             }
+            break;
+         case ATTLIST_DECLARATION_PTOKEN:
+            this.state = attListDeclarationUpdateState(token, this.state);
             break;
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:

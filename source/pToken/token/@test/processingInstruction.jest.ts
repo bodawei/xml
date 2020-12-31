@@ -84,11 +84,11 @@ describe('ProcessingInstructionPToken (unit)', () => {
    });
 
    describe('parseProcessingInstruction()', () => {
-      let callback: jest.MockedFunction<(pToken: ProcessingInstructionPToken) => void>;
+      let result: ProcessingInstructionPToken;
 
-      beforeEach(() => {
-         callback = jest.fn();
-      });
+      function getResult(x: ProcessingInstructionPToken): void {
+         result = x;
+      }
 
       it('does a basic parse', () => {
          const mockSource = new MockSTokenSource([
@@ -96,10 +96,10 @@ describe('ProcessingInstructionPToken (unit)', () => {
             ['?>', 'match', '?>'],
          ]);
 
-         parseProcessingInstruction(mockSource, { open: toSToken('<?') }, callback);
+         parseProcessingInstruction(mockSource, { open: toSToken('<?') }, getResult);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ProcessingInstructionPToken({
                open: toSToken('<?'),
                instruction: toSToken('blah'),
@@ -111,10 +111,10 @@ describe('ProcessingInstructionPToken (unit)', () => {
       it('returns a value with no values if we are at end of input', () => {
          const mockSource = new MockSTokenSource([undefined, undefined]);
 
-         parseProcessingInstruction(mockSource, { open: toSToken('<?') }, callback);
+         parseProcessingInstruction(mockSource, { open: toSToken('<?') }, getResult);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless({
+         expect(result).toEqualRangeless({
             open: toSToken('<?'),
             instruction: undefined,
             close: undefined,

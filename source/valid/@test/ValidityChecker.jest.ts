@@ -2,14 +2,25 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'error-test';
-import { makeXmlDecl } from 'token-test';
+import {
+   makeAttListDeclaration,
+   makeExternalSubsetEnd,
+   makeExternalSubsetStart,
+   makeXmlDecl,
+} from 'token-test';
 
 import { ValidityChecker } from '../ValidityChecker';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
+import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpdateState';
+import { externalSubsetEndUpdateState } from '../token/externalSubsetEndUpdateState';
+import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
 
+jest.mock('../token/attListDeclarationUpdateState');
+jest.mock('../token/externalSubsetEndUpdateState');
+jest.mock('../token/externalSubsetStartUpdateState');
 jest.mock('../token/xmlDeclarationUpdateState');
 
-describe('xmlDeclarationUpdateState (unit)', () => {
+describe('ValidityChecker (unit)', () => {
    let checker: ValidityChecker;
    let ec: MockErrorCollector;
 
@@ -18,7 +29,31 @@ describe('xmlDeclarationUpdateState (unit)', () => {
       ec = new MockErrorCollector();
    });
 
-   it('updates the state when passed an XML Declaration', () => {
+   it('calls the routine to update the state when passed an ATTLIST declaration', () => {
+      const attListDecl = makeAttListDeclaration();
+
+      checker.checkPToken(attListDecl, ec);
+
+      expect(attListDeclarationUpdateState).toHaveBeenCalledWith(attListDecl, expect.any(Object));
+   });
+
+   it('calls the routine to update the state when passed an external subset start', () => {
+      const exSSStart = makeExternalSubsetStart();
+
+      checker.checkPToken(exSSStart, ec);
+
+      expect(externalSubsetStartUpdateState).toHaveBeenCalledWith(exSSStart, expect.any(Object));
+   });
+
+   it('calls the routine to update the state when passed an external subset start', () => {
+      const esSSEnd = makeExternalSubsetEnd();
+
+      checker.checkPToken(esSSEnd, ec);
+
+      expect(externalSubsetEndUpdateState).toHaveBeenCalledWith(esSSEnd, expect.any(Object));
+   });
+
+   it('calls the routine to update the state when passed an XML Declaration', () => {
       const xmlDecl = makeXmlDecl();
 
       checker.checkPToken(xmlDecl, ec);

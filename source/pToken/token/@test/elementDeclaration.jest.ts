@@ -1,5 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -176,6 +178,8 @@ describe('elementDeclaration (unit)', () => {
          parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -206,6 +210,8 @@ describe('elementDeclaration (unit)', () => {
          parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -246,6 +252,8 @@ describe('elementDeclaration (unit)', () => {
          parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -278,6 +286,8 @@ describe('elementDeclaration (unit)', () => {
          parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -321,6 +331,8 @@ describe('elementDeclaration (unit)', () => {
          parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -366,6 +378,8 @@ describe('elementDeclaration (unit)', () => {
          parseElementDeclaration(mockSource, declarationStart, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -449,6 +463,8 @@ describe('elementDeclaration (unit)', () => {
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -485,6 +501,8 @@ describe('elementDeclaration (unit)', () => {
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -520,7 +538,6 @@ describe('elementDeclaration (unit)', () => {
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
 
-         // @ts-expect-error
          expect(resumeParseContentModelMock).toHaveBeenCalledWith(
             mockSource,
             { delimitedParticles: [] },
@@ -548,6 +565,8 @@ describe('elementDeclaration (unit)', () => {
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
@@ -584,6 +603,8 @@ describe('elementDeclaration (unit)', () => {
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),

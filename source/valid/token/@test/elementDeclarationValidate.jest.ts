@@ -1,5 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
@@ -60,7 +62,7 @@ describe('elementDeclarationValidate (unit)', () => {
          graph: { startId: 0, endId: 0, states: {} },
       };
       version = new ConformanceVersion();
-      state = {
+      state = new ValidateState({
          elementDeclarations: {
             elementName: {
                type: ElDeclType.ANY,
@@ -100,7 +102,7 @@ describe('elementDeclarationValidate (unit)', () => {
             contextStack: [],
             pastEnd: false,
          },
-      };
+      });
    });
 
    it('reports an error if there is more than one ELEMENT declaration for the same element type', () => {

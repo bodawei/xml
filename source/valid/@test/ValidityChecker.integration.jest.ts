@@ -2,8 +2,7 @@
 
 import { ErrorCollector } from 'error';
 import { defaultExtractors } from 'extractor';
-import { ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
-import { ContextType, TextPToken } from 'pToken';
+import { ContextType } from 'pToken';
 import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
 import { gatherPTokens } from 'pToken-test';
@@ -14,13 +13,10 @@ import { ValidityError } from '../../error/ValidityError';
 
 // ick
 import { PTokenStream } from '../../pTokenStream';
-import { ElementEndPToken, XmlError } from 'token';
+import { XmlError } from 'token';
 
 describe('ValidityChecker (integration)', () => {
-   let elementDeclaration: ElementDeclarationPToken;
    let ec: ErrorCollector;
-   let state: ValidateState;
-   let elementEnd: ElementEndPToken;
    let checker: ValidityChecker;
    let pTokenStream: PTokenStream;
 

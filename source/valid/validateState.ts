@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import { AttDefinition, ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { ElidedEntityDeclarationPToken } from 'token';
 import { CmGraph } from './contentModal/cmGraphTypes';
 
@@ -48,6 +48,10 @@ interface ElementContext {
 }
 
 interface ValidateStateProps {
+   attributeDefs?: {
+      [elementName: string]: AttributeDefs;
+   };
+
    elementDeclarations?: {
       [name: string]: DeclarationDetails;
    };
@@ -62,10 +66,24 @@ interface ValidateStateProps {
       pastEnd: boolean; // when this is true, activeContext will be undefined
    };
 
+   inExternalSubset?: boolean;
    isStandalone?: boolean;
 }
 
+interface AttributeDefs {
+   [attName: string]: {
+      readonly def: AttDefinition;
+      readonly isExternal: boolean;
+   };
+}
+
 class ValidateState {
+   readonly inExternalSubset: boolean;
+
+   readonly attributeDefs: {
+      readonly [elementName: string]: AttributeDefs;
+   };
+
    elementDeclarations: {
       [name: string]: DeclarationDetails;
    };
@@ -91,7 +109,9 @@ class ValidateState {
          pastEnd: otherState?.elementContext?.pastEnd || false,
       };
       this.isStandalone = otherState?.isStandalone ?? false;
+      this.attributeDefs = otherState?.attributeDefs || {};
+      this.inExternalSubset = otherState?.inExternalSubset ?? false;
    }
 }
 
-export { DeclarationDetails, ElementContext, ElDeclType, ValidateState };
+export { AttributeDefs, DeclarationDetails, ElementContext, ElDeclType, ValidateState };

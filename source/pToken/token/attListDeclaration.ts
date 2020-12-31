@@ -556,6 +556,7 @@ function parseAttListDeclaration(
 
 export {
    ATTLIST_DECLARATION_PTOKEN,
+   AttDefinition,
    AttListDeclarationPToken,
    parseAttListDeclaration,
    resumeParseAttListDeclaration,

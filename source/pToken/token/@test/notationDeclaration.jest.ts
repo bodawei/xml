@@ -1,12 +1,11 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { STokenSource, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
-// ick
+
 import * as parseUnexpanded from '../../common/parseUnexpanded';
 import * as externalId from '../../common/externalId';
 
-import { UnexpandedMarkupDetails } from '../../types';
 import {
    NotationDeclarationPToken,
    parseNotationDeclaration,

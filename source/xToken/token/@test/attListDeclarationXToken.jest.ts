@@ -109,7 +109,7 @@ describe('attListDeclarationXToken', () => {
                type: 'bogus',
                defaultType: '#FIXED',
                enumeration: undefined,
-               value: [new TextXToken('x', new TextPToken({ text: toSToken('x') }))],
+               value: [new TextXToken(new TextPToken({ text: toSToken('x') }))],
             },
          ],
          pToken: testToken,

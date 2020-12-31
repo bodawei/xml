@@ -117,13 +117,3 @@ expect.extend({
       };
    }
 });
-
-
-
-declare global {
-   namespace jest {
-      interface Matchers<T> {
-         toEqualRangeless(callbackSpy: jest.MockedFunction<any>, expectedProps?: Props): T;
-      }
-   }
-}

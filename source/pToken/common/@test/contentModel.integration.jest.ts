@@ -1,5 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -49,7 +51,7 @@ describe('ContentModel (integration)', () => {
 
          parseContentModel(source, (result) => {
             expect(result).toEqualRangeless(contentSpec);
-            done();
+            done?.();
          });
       });
 
@@ -81,7 +83,7 @@ describe('ContentModel (integration)', () => {
                   repeatSpace: undefined,
                }),
             );
-            done();
+            done?.();
          });
       });
 
@@ -705,7 +707,7 @@ describe('ContentModel (integration)', () => {
                  "repeatSpace": undefined,
                }
             `);
-            done();
+            done?.();
          });
       });
    });
