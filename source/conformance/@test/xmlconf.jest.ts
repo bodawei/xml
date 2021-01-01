@@ -17,7 +17,7 @@ import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
 import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
-import CheckValidityStream from 'source/nodeStream/CheckValidityStream';
+import CheckValidityStream from '../../nodeStream/CheckValidityStream';
 
 function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlRevision): Transform {
    const sTokenSource = new STokenSource(defaultExtractors);
@@ -79,7 +79,7 @@ describe('XML Conformance tests', () => {
             }
 
             // We also want to test  whether the errors match as expected
-            gatherPTokens(testStream as any, (results) => {
+            gatherPTokens(testStream, (results) => {
                const key = `V${ver}R${edition}`;
                let expectedError;
 

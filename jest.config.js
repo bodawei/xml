@@ -132,6 +132,9 @@ module.exports = {
 
   // Use this configuration option to add custom reporters to Jest
   // reporters: undefined,
+   "reporters": [
+      ["jest-simple-dot-reporter", {"color": true}]
+   ],
 
   // Automatically reset mock state between every test
   // resetMocks: false,
@@ -163,6 +166,7 @@ module.exports = {
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
      './build/beforeJest.ts',
+     './source/conformance/@test/helper/beforeJest.ts',
      './source/error/@test/beforeJest.ts',
    //   './source/sToken/@test/beforeJest.ts',
      './source/token/@test/beforeJest.ts',
