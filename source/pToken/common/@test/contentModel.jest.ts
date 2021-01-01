@@ -4,7 +4,12 @@ import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { ContentModelP, parseContentModel, resumeParseContentModel } from '../contentModel';
+import {
+   ContentModelP,
+   isContentModelP,
+   parseContentModel,
+   resumeParseContentModel,
+} from '../contentModel';
 
 describe('ContentModel (unit)', () => {
    let contentSpec: ContentModelP;
@@ -47,7 +52,31 @@ describe('ContentModel (unit)', () => {
       result = item;
    }
 
+   describe('isContentModelP', () => {
+      it('returns false if given a non-content model', () => {
+         expect(isContentModelP({})).toEqual(false);
+      });
+
+      it('returns true if given a content model', () => {
+         expect(isContentModelP(contentSpec)).toEqual(true);
+      });
+   });
+
    describe('construction', () => {
+      it('returns simple instance given no parameter', () => {
+         expect(new ContentModelP()).toMatchInlineSnapshot(`
+            ContentModelP {
+              "close": undefined,
+              "closeSpace": undefined,
+              "delimitedParticles": Array [],
+              "open": undefined,
+              "openSpace": undefined,
+              "repeat": undefined,
+              "repeatSpace": undefined,
+            }
+         `);
+      });
+
       it('can override all properties with the second parameter', () => {
          const result = new ContentModelP(
             {
@@ -92,6 +121,8 @@ describe('ContentModel (unit)', () => {
             },
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
@@ -147,6 +178,8 @@ describe('ContentModel (unit)', () => {
             },
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
@@ -165,14 +198,14 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
             ['t', 'peekChar'],
-            ['two', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
+            ['two', 'word', ['|', '%', ')', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
@@ -188,6 +221,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(contentSpec);
       });
 
@@ -196,14 +231,14 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
             ['t', 'peekChar'],
-            ['two', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
+            ['two', 'word', ['|', '%', ')', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
@@ -224,6 +259,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -232,14 +269,14 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             [',', 'multi', ['|', ',']],
             [' ', 'space'],
             ['t', 'peekChar'],
-            ['two', 'word', [',', ')', '%', '>', '?', '*', '+', '(']],
+            ['two', 'word', [',', '%', ')', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
@@ -279,6 +316,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -287,14 +326,14 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
             ['t', 'peekChar'],
-            ['two', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
+            ['two', 'word', ['|', '%', ')', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
@@ -310,6 +349,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(contentSpec);
       });
 
@@ -318,14 +359,14 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             [',', 'multi', ['|', ',']],
             [' ', 'space'],
             ['t', 'peekChar'],
-            ['two', 'word', [',', ')', '%', '>', '?', '*', '+', '(']],
+            ['two', 'word', [',', '%', ')', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
@@ -364,6 +405,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -372,14 +415,14 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             ['|', 'multi', ['|', ',']],
             [' ', 'space'],
             ['|', 'peekChar'],
-            [undefined, 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
+            [undefined, 'word', ['|', '%', ')', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
@@ -418,6 +461,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -426,14 +471,14 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
             [undefined, 'multi'],
             [undefined, 'space'],
             ['t', 'peekChar'],
-            ['two', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['two', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [undefined, 'space'],
             [undefined, 'multi', ['?', '*', '+']],
             [undefined, 'space'],
@@ -472,6 +517,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -498,7 +545,7 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
@@ -528,6 +575,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -548,6 +597,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -556,7 +607,7 @@ describe('ContentModel (unit)', () => {
             ['(', 'match', '('],
             [' ', 'space'],
             ['o', 'peekChar'],
-            ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+            ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
@@ -586,6 +637,8 @@ describe('ContentModel (unit)', () => {
          parseContentModel(mockSource, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -595,7 +648,7 @@ describe('ContentModel (unit)', () => {
                ['(', 'match', '('],
                [' ', 'space'],
                ['o', 'peekChar'],
-               ['one', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+               ['one', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
                [' ', 'space'],
                ['?', 'multi', ['?', '*', '+']],
                [' ', 'space'],
@@ -605,14 +658,14 @@ describe('ContentModel (unit)', () => {
                ['(', 'match', '('],
                [' ', 'space'],
                ['t', 'peekChar'],
-               ['two', 'word', ['|', ',', ')', '%', '>', '?', '*', '+', '(']],
+               ['two', 'word', ['|', ',', '%', ')', '>', '?', '*', '+', '(']],
                [' ', 'space'],
                ['+', 'multi', ['?', '*', '+']],
                [' ', 'space'],
                ['|', 'multi', ['|', ',']],
                [' ', 'space'],
                ['t', 'peekChar'],
-               ['three', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
+               ['three', 'word', ['|', '%', ')', '>', '?', '*', '+', '(']],
                [' ', 'space'],
                ['*', 'multi', ['?', '*', '+']],
                [' ', 'space'],
@@ -626,7 +679,7 @@ describe('ContentModel (unit)', () => {
                [',', 'multi', [',']],
                [' ', 'space'],
                ['f', 'peekChar'],
-               ['four', 'word', [',', ')', '%', '>', '?', '*', '+', '(']],
+               ['four', 'word', [',', '%', ')', '>', '?', '*', '+', '(']],
                [undefined, 'space'],
                [undefined, 'multi', ['?', '*', '+']],
                [undefined, 'space'],
@@ -698,6 +751,8 @@ describe('ContentModel (unit)', () => {
             parseContentModel(mockSource, getResult);
             mockSource.respondInAsyncTime();
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(expected);
          });
       });
@@ -727,6 +782,8 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -745,6 +802,8 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                repeatSpace: toSToken(' \t'),
@@ -755,7 +814,7 @@ describe('ContentModel (unit)', () => {
       it('resumes parse with empty delimited particles', () => {
          const mockSource = new MockSTokenSource([
             ['p', 'peekChar'],
-            ['p', 'word'],
+            ['p', 'word', ['|', ',', ')', '>', '?', '*', '+', '(']],
             [' ', 'space'],
             ['*', 'multi', ['?', '*', '+']],
             [' ', 'space'],
@@ -776,6 +835,8 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                openSpace: toSToken(' \t'),
@@ -816,6 +877,8 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                openSpace: toSToken(' \t'),
@@ -856,6 +919,8 @@ describe('ContentModel (unit)', () => {
          resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                delimitedParticles: [
@@ -882,7 +947,7 @@ describe('ContentModel (unit)', () => {
    it('resumes a parse after a particle boundary', () => {
       const mockSource = new MockSTokenSource([
          ['b', 'peekChar'],
-         ['b', 'word', ['|', ')', '%', '>', '?', '*', '+', '(']],
+         ['b', 'word', ['|', ')', '>', '?', '*', '+', '(']],
          [' ', 'space'],
          ['+', 'multi', ['?', '*', '+']],
          [' ', 'space'],
@@ -911,6 +976,8 @@ describe('ContentModel (unit)', () => {
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [
@@ -973,6 +1040,8 @@ describe('ContentModel (unit)', () => {
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [
@@ -1031,6 +1100,8 @@ describe('ContentModel (unit)', () => {
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [
@@ -1078,6 +1149,8 @@ describe('ContentModel (unit)', () => {
       resumeParseContentModel(mockSource, contentSpec, toSToken('\t'), getResult);
       mockSource.respondInAsyncTime();
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [

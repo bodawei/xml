@@ -62,7 +62,7 @@ class ContentModelP {
 
    public readonly repeatSpace?: SToken;
 
-   constructor(props: ContentModelP | ContentModelProps, other?: ContentModelProps) {
+   constructor(props: ContentModelP | ContentModelProps = {}, other?: ContentModelProps) {
       this.open = props.open;
       this.openSpace = props.openSpace;
       this.delimitedParticles = props.delimitedParticles || [];
@@ -122,10 +122,15 @@ function parseRepeat(
 function parseName(
    source: STokenSource,
    delimterType: DelimiterType,
+   inResume: boolean,
    deliverName: (name: ContentNameProps) => void,
 ) {
    const name: ContentNameProps = {};
-   const wordDelims = [')', '%', '>', '?', '*', '+', '('];
+   const wordDelims = [')', '>', '?', '*', '+', '('];
+
+   if (!inResume) {
+      wordDelims.unshift('%');
+   }
 
    switch (delimterType) {
       case 'CHOICE':
@@ -178,6 +183,7 @@ function parseDelimiter(
 function parseDelimitedParticle(
    source: STokenSource,
    delimterType: DelimiterType,
+   inResume: boolean,
    deliverDelimited: (result: ContentDelimitedParticleProps | undefined) => void,
 ): void {
    source.extractNoParams('peekChar', (charSToken) => {
@@ -185,7 +191,7 @@ function parseDelimitedParticle(
          !charSToken ||
          charSToken.str === '>' ||
          charSToken.str === ')' ||
-         charSToken.str === '%'
+         (!inResume && charSToken.str === '%')
       ) {
          deliverDelimited(undefined);
          return;
@@ -200,7 +206,7 @@ function parseDelimitedParticle(
             parseDelimiter(source, delimitedParticle, delimterType, deliverDelimited);
          });
       } else {
-         parseName(source, delimterType, (name) => {
+         parseName(source, delimterType, inResume, (name) => {
             delimitedParticle.particle = name;
             parseDelimiter(source, delimitedParticle, delimterType, deliverDelimited);
          });
@@ -211,12 +217,13 @@ function parseDelimitedParticle(
 function parseDelimitedParticles(
    source: STokenSource,
    delimterType: DelimiterType,
+   inResume: boolean,
    deliverDelimiteds: (result: DelimitedParticleProps) => void,
 ): void {
    let type = delimterType;
 
    doAsyncWhileLoop<ContentDelimitedParticleProps>((deliverResult) => {
-      parseDelimitedParticle(source, type, (newDelimited) => {
+      parseDelimitedParticle(source, type, inResume, (newDelimited) => {
          if (!newDelimited) {
             deliverResult(undefined);
             return;
@@ -275,7 +282,7 @@ function parseContentModel(source: STokenSource, deliverDelimiteds: DeliverConte
       props.open = charSToken;
       source.extractToObjectNoParams('space', props, 'openSpace');
 
-      parseDelimitedParticles(source, 'ANY', (delimiteds) => {
+      parseDelimitedParticles(source, 'ANY', false, (delimiteds) => {
          parseContentModelClose(
             source,
             { ...props, delimitedParticles: delimiteds },
@@ -332,7 +339,7 @@ function resumeParseDelimitedParticle(
    const { particle } = dp;
 
    if (!particle || Object.keys(particle).length === 0) {
-      parseDelimitedParticle(source, type, (delimited) => {
+      parseDelimitedParticle(source, type, true, (delimited) => {
          deliver(delimited);
       });
    } else if (isContentModelP(particle)) {
@@ -373,7 +380,7 @@ function resumeParseContentModelP(
       // Theoretically we could get here with no open or openSpace. But our parser won't generate a token in that configuration
       partial.openSpace = combineSTokens(partial.openSpace, preSpace);
       partial.delimitedParticles = delParticles;
-      parseDelimitedParticles(source, 'ANY', (withNames) => {
+      parseDelimitedParticles(source, 'ANY', true, (withNames) => {
          partial.delimitedParticles = withNames;
          parseContentModelClose(source, partial, deliverDelimiteds);
       });
@@ -390,12 +397,12 @@ function resumeParseContentModelP(
                parseContentModelClose(source, partial, deliverDelimiteds);
                return;
             }
-      
+
             if (type === 'ANY') {
                type = DELIMITER_MAP[strOrBlank(particle.delimiter)] || 'ANY';
             }
 
-            parseDelimitedParticles(source, type, (remainingParticles) => {
+            parseDelimitedParticles(source, type, true, (remainingParticles) => {
                const butLast = [...delParticles];
                butLast.pop();
 
@@ -406,7 +413,7 @@ function resumeParseContentModelP(
       } else {
          last.delimiterSpace = combineSTokens(last.delimiterSpace, preSpace);
 
-         parseDelimitedParticles(source, type, (withNames) => {
+         parseDelimitedParticles(source, type, true, (withNames) => {
             partial.delimitedParticles = [...delParticles, ...withNames];
             parseContentModelClose(source, partial, deliverDelimiteds);
          });
