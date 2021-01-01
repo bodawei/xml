@@ -7,7 +7,7 @@ import { STokenSource, toSToken } from 'sToken';
 
 import { DeclarationStart } from 'token';
 
-import { AttListDeclarationXToken } from '../attListDeclarationXToken';
+import { AttListDeclarationXToken, ATTLIST_DECLARATION_XTOKEN } from '../attListDeclarationXToken';
 
 describe('attListDeclarationXToken (integration)', () => {
    let declarationStart: DeclarationStart;
@@ -33,12 +33,12 @@ describe('attListDeclarationXToken (integration)', () => {
 
          const token = new AttListDeclarationXToken(pToken);
 
-         expect(token).toEqual(
-            expect.objectContaining({
-               elementName: 'foo',
-               attDefs: [],
-            }),
-         );
+         expect(token).toEqual({
+            type: ATTLIST_DECLARATION_XTOKEN,
+            elementName: 'foo',
+            attDefs: [],
+            pToken,
+         });
          done?.();
       });
    });
@@ -51,20 +51,20 @@ describe('attListDeclarationXToken (integration)', () => {
       parseAttListDeclaration(source, declarationStart, (pToken) => {
          const token = new AttListDeclarationXToken(pToken);
 
-         expect(token).toEqual(
-            expect.objectContaining({
-               elementName: 'elName',
-               attDefs: [
-                  {
-                     name: 'attrName',
-                     type: 'ENUMERATION',
-                     enumeration: ['one', 'two'],
-                     defaultType: '#REQUIRED',
-                     value: [],
-                  },
-               ],
-            }),
-         );
+         expect(token).toEqual({
+            type: ATTLIST_DECLARATION_XTOKEN,
+            elementName: 'elName',
+            attDefs: [
+               {
+                  name: 'attrName',
+                  type: 'ENUMERATION',
+                  enumeration: ['one', 'two'],
+                  defaultType: '#REQUIRED',
+                  value: [],
+               },
+            ],
+            pToken,
+         });
 
          done?.();
       });
@@ -78,20 +78,20 @@ describe('attListDeclarationXToken (integration)', () => {
       parseAttListDeclaration(source, declarationStart, (pToken) => {
          const token = new AttListDeclarationXToken(pToken);
 
-         expect(token).toEqual(
-            expect.objectContaining({
-               elementName: 'elName',
-               attDefs: [
-                  {
-                     name: 'attrName',
-                     type: 'NOTATION',
-                     enumeration: ['one', 'two'],
-                     defaultType: '#REQUIRED',
-                     value: [],
-                  },
-               ],
-            }),
-         );
+         expect(token).toEqual({
+            type: ATTLIST_DECLARATION_XTOKEN,
+            elementName: 'elName',
+            attDefs: [
+               {
+                  name: 'attrName',
+                  type: 'NOTATION',
+                  enumeration: ['one', 'two'],
+                  defaultType: '#REQUIRED',
+                  value: [],
+               },
+            ],
+            pToken,
+         });
 
          done?.();
       });

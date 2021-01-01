@@ -15,16 +15,14 @@ describe('ProcessingInstructionPToken (unit)', () => {
       it('can be constructed with just an open token', () => {
          const result = new ProcessingInstructionPToken({ open: toSToken('<?') });
 
-         expect(result).toEqual(
-            expect.objectContaining({
-               type: PROCESSING_INSTRUCTION_PTOKEN,
-               open: toSToken('<?'),
-               target: undefined,
-               targetSpace: undefined,
-               instruction: undefined,
-               close: undefined,
-            }),
-         );
+         expect(result).toEqual({
+            type: PROCESSING_INSTRUCTION_PTOKEN,
+            open: toSToken('<?'),
+            target: undefined,
+            targetSpace: undefined,
+            instruction: undefined,
+            close: undefined,
+         });
       });
 
       it('can be constructed with a full raw PToken', () => {
@@ -37,17 +35,15 @@ describe('ProcessingInstructionPToken (unit)', () => {
             close: toSToken('?>'),
          });
 
-         expect(result).toEqual(
-            expect.objectContaining({
-               type: PROCESSING_INSTRUCTION_PTOKEN,
-               open: toSToken('<?'),
-               openSpace: toSToken(' '),
-               target: toSToken('xml'),
-               targetSpace: toSToken('\t'),
-               instruction: toSToken('blahblah'),
-               close: toSToken('?>'),
-            }),
-         );
+         expect(result).toEqual({
+            type: PROCESSING_INSTRUCTION_PTOKEN,
+            open: toSToken('<?'),
+            openSpace: toSToken(' '),
+            target: toSToken('xml'),
+            targetSpace: toSToken('\t'),
+            instruction: toSToken('blahblah'),
+            close: toSToken('?>'),
+         });
       });
 
       it('can be constructed with a full ProcessingInstructionPToken and a set of overriding values', () => {
@@ -69,17 +65,15 @@ describe('ProcessingInstructionPToken (unit)', () => {
             close: toSToken('?>'),
          });
 
-         expect(result).toEqual(
-            expect.objectContaining({
-               type: PROCESSING_INSTRUCTION_PTOKEN,
-               open: toSToken('<?'),
-               openSpace: toSToken('\n'),
-               target: toSToken('frog'),
-               targetSpace: toSToken(' '),
-               instruction: toSToken('no way'),
-               close: toSToken('?>'),
-            }),
-         );
+         expect(result).toEqual({
+            type: PROCESSING_INSTRUCTION_PTOKEN,
+            open: toSToken('<?'),
+            openSpace: toSToken('\n'),
+            target: toSToken('frog'),
+            targetSpace: toSToken(' '),
+            instruction: toSToken('no way'),
+            close: toSToken('?>'),
+         });
       });
    });
 
@@ -99,6 +93,8 @@ describe('ProcessingInstructionPToken (unit)', () => {
          parseProcessingInstruction(mockSource, { open: toSToken('<?') }, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ProcessingInstructionPToken({
                open: toSToken('<?'),
@@ -114,6 +110,8 @@ describe('ProcessingInstructionPToken (unit)', () => {
          parseProcessingInstruction(mockSource, { open: toSToken('<?') }, getResult);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless({
             open: toSToken('<?'),
             instruction: undefined,

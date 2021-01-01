@@ -26,13 +26,11 @@ describe('externalIdToEntityId', () => {
          },
       });
 
-      expect(token).toEqual(
-         expect.objectContaining({
-            type: 'ENTITY_ID',
-            systemId: 'sysFoo',
-            publicId: 'a',
-         }),
-      );
+      expect(token).toEqual({
+         type: 'ENTITY_ID',
+         systemId: 'sysFoo',
+         publicId: 'a',
+      });
    });
 
    it('converts empty values to an EntityId with empty values', () => {
@@ -44,12 +42,10 @@ describe('externalIdToEntityId', () => {
          public: undefined,
       });
 
-      expect(token).toEqual(
-         expect.objectContaining({
-            type: 'ENTITY_ID',
-            systemId: '',
-            publicId: '',
-         }),
-      );
+      expect(token).toEqual({
+         type: 'ENTITY_ID',
+         systemId: '',
+         publicId: '',
+      });
    });
 });
