@@ -52,8 +52,8 @@ describe('contentModelCheck()', () => {
          repeatSpace: undefined,
       });
 
-      spyOn(misc, 'checkName');
-      spyOn(misc, 'checkNMToken');
+      jest.spyOn(misc, 'checkName');
+      jest.spyOn(misc, 'checkNMToken');
    });
 
    describe('universal', () => {

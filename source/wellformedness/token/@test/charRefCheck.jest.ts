@@ -1,5 +1,4 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { ConformanceVersion, extractSurrogatePair, isChar } from 'basic';
 import { MockErrorCollector } from 'error-test';

@@ -15,6 +15,8 @@ import {
    GENERAL_ENTITY_START_PTOKEN,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
+   PARAMETER_ENTITY_END_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
 
@@ -179,9 +181,6 @@ function scanAttributeValues(
    const refNameStack: Array<string> = [];
 
    for (const att of attributes) {
-      if (att.value === undefined) {
-         continue;
-      }
       for (const val of att.value) {
          switch (val.type) {
             case GENERAL_ENTITY_REFERENCE_PTOKEN:
@@ -229,6 +228,8 @@ function scanAttributeValues(
                break;
             case TEXT_PTOKEN:
             case CHARREF_PTOKEN:
+            case PARAMETER_ENTITY_START_PTOKEN:
+            case PARAMETER_ENTITY_END_PTOKEN:
             case PARAMETER_ENTITY_REFERENCE_PTOKEN:
                // do nothing
                break;

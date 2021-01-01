@@ -1,18 +1,11 @@
-/* Copyright ® 2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
+
+import { describe, expect, it } from '@jest/globals';
 
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import {
-   ElementStartPToken,
-   ElementEmptyPToken,
-   GeneralEntityEndPToken,
-   GeneralEntityStartPToken,
-   GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
-} from 'token';
 
 import {
    scanAttributeValues,
@@ -21,6 +14,16 @@ import {
    isParamEntityExternal,
    CheckState,
 } from '../checkUtils';
+
+// ick
+import {
+   ElementStartPToken,
+   ElementEmptyPToken,
+   GeneralEntityEndPToken,
+   GeneralEntityStartPToken,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
+} from 'token';
 
 describe('checkUtils (unit)', () => {
    let state: CheckState;
@@ -59,6 +62,8 @@ describe('checkUtils (unit)', () => {
 
          scanAttributeValues(unbalancedElement.attributes, {}, state, [], ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
             params: ['testRef', 'second'],
@@ -84,6 +89,8 @@ describe('checkUtils (unit)', () => {
 
          scanAttributeValues(unbalancedElement.attributes, {}, state, [], ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toNotReportError(WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED);
       });
 
@@ -100,6 +107,8 @@ describe('checkUtils (unit)', () => {
 
          scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
@@ -121,10 +130,16 @@ describe('checkUtils (unit)', () => {
 
          scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
       it('reports no error if an undeclared reference is found, but it is a predefined one', () => {
+         generalEntityReference = new GeneralEntityReferencePToken(generalEntityReference, {
+            open: generalEntityReference.open,
+            name: toSToken('lt'),
+         });
          const undeclaredRef = new ElementStartPToken({
             open: toSToken('<'),
             attributes: [
@@ -134,10 +149,11 @@ describe('checkUtils (unit)', () => {
                },
             ],
          });
-         (generalEntityReference as any).name = toSToken('lt');
 
          scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
@@ -168,6 +184,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
@@ -202,6 +220,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
@@ -257,6 +277,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['one'],
@@ -311,6 +333,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['one'],
@@ -344,6 +368,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
@@ -378,6 +404,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
@@ -390,6 +418,8 @@ describe('checkUtils (unit)', () => {
       it('reports an error if an undeclared reference is found (§4.1.0)', () => {
          checkGeneralEntity(generalEntityReference, false, {}, state, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
@@ -401,14 +431,21 @@ describe('checkUtils (unit)', () => {
          state.peRefCount = 1;
          checkGeneralEntity(generalEntityReference, false, {}, state, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
       it('reports no error if an undeclared reference is found, but it is a predefined one (§4.1.0)', () => {
-         (generalEntityReference as any).name = toSToken('lt');
+         generalEntityReference = new GeneralEntityReferencePToken(generalEntityReference, {
+            open: generalEntityReference.open,
+            name: toSToken('lt'),
+         });
 
          checkGeneralEntity(generalEntityReference, false, {}, state, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
@@ -429,6 +466,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
@@ -453,6 +492,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
@@ -478,6 +519,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_STANDALONE,
             params: ['testRef'],
@@ -530,6 +573,8 @@ describe('checkUtils (unit)', () => {
 
          checkParameterEntity(peRef, {}, state, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
@@ -555,6 +600,8 @@ describe('checkUtils (unit)', () => {
             ec,
          );
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
@@ -567,6 +614,8 @@ describe('checkUtils (unit)', () => {
 
          checkParameterEntity(peRef, {}, state, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
    });

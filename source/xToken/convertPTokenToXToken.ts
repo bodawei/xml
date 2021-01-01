@@ -1,19 +1,17 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import {
+   ATTLIST_DECLARATION_PTOKEN,
+   ELEMENT_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   TEXT_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
    ParseValue,
-   ATTLIST_DECLARATION_PTOKEN,
 } from 'pToken';
-
-// ick
-import { ELEMENT_DECLARATION_PTOKEN } from '../pToken/token/elementDeclaration';
-import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
-import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/generalEntityDeclaration';
-import { PARAMETER_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/parameterEntityDeclaration';
-import { TEXT_PTOKEN } from '../pToken/token/text';
 
 import {
    CHARREF_PTOKEN,

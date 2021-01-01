@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
+import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
@@ -37,7 +37,7 @@ describe('textDeclaration (integration)', () => {
          textDeclarationCheck(result, ec, confVer);
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-         done();
+         done?.();
       });
    });
 
@@ -50,7 +50,7 @@ describe('textDeclaration (integration)', () => {
          textDeclarationCheck(result, ec, confVer);
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-         done();
+         done?.();
       });
    });
 });

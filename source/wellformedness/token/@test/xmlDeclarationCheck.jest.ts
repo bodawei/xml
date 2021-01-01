@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
+import { describe, expect, it } from '@jest/globals';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { XmlDeclarationPToken } from 'pToken';
@@ -47,7 +47,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          confVer = new ConformanceVersion();
-         spyOn(misc, 'checkCharWellFormed');
+         jest.spyOn(misc, 'checkCharWellFormed');
       });
 
       it('calls misc.checkCharWellFormed() on the target value', () => {
@@ -103,6 +103,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_SPACE_AFTER_OPEN,
             params: undefined,
@@ -115,6 +117,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_TARGET,
             params: undefined,
@@ -127,6 +131,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_TARGET_INVALID_CASE,
             params: ['XmL'],
@@ -139,6 +145,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_SPACE_AFTER_TARGET,
             params: undefined,
@@ -181,6 +189,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_PARAMS,
             params: undefined,
@@ -208,6 +218,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_PARAM_INVALID_CASE,
             params: ['version', 'VERSION'],
@@ -220,6 +232,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_CLOSE,
             params: undefined,
@@ -254,6 +268,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_SPACE_BETWEEN_PARAMS,
             params: ['standalone'],
@@ -289,6 +305,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
                params: undefined,
@@ -316,6 +334,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 4));
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
                params: ['1.2'],
@@ -420,6 +440,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
                   params: undefined,
@@ -454,6 +476,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
                   params: ['$$BAD_ENCODING$$'],
@@ -490,6 +514,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
                   params: undefined,
@@ -524,6 +550,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
                   params: ['Maybe'],
@@ -558,6 +586,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
                   params: ['yes', 'YES'],
@@ -587,6 +617,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,
                   params: ['bogus'],

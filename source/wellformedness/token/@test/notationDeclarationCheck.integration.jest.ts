@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
@@ -33,7 +34,7 @@ describe('notationDeclarationCheck() (integration)', () => {
          notationDeclarationCheck(parsing, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
-         done();
+         done?.();
       });
    });
 
@@ -47,7 +48,7 @@ describe('notationDeclarationCheck() (integration)', () => {
          notationDeclarationCheck(result, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
-         done();
+         done?.();
       });
    });
 
@@ -62,7 +63,7 @@ describe('notationDeclarationCheck() (integration)', () => {
          notationDeclarationCheck(parsing, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED);
-         done();
+         done?.();
       });
    });
 });

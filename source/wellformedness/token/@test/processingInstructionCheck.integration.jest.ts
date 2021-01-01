@@ -1,11 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { ProcessingInstructionPToken, parseProcessingInstruction } from 'pToken';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource, toSToken } from 'sToken';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
@@ -22,7 +21,9 @@ describe('processingInstructionCheck() (integration)', () => {
    });
 
    it('asks the instruction module report if there is an extra space', (done) => {
-      (piPToken as any).openSpace = SToken.fromString(' '); // typeHack
+      piPToken = new ProcessingInstructionPToken(piPToken, {
+         openSpace: toSToken(' '),
+      });
       const source = new STokenSource(defaultExtractors);
       source.addText('blah blah?>');
       source.endText();

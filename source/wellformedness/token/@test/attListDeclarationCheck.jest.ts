@@ -1,5 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { ConformanceVersion, Range, EntityId } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
@@ -41,9 +43,9 @@ describe('attListDeclarationCheck()', () => {
       mockErrorCollector = new MockErrorCollector();
       confVer = new ConformanceVersion();
 
-      spyOn(literal, 'checkWellFormed');
-      spyOn(misc, 'checkName');
-      spyOn(misc, 'checkWellFormedNameRecommendation');
+      jest.spyOn(literal, 'checkWellFormed'); // this doesn't seem to be working
+      jest.spyOn(misc, 'checkName');
+      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
    });
 
    it('reports an error if the declaration type is not all caps', () => {
@@ -53,6 +55,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_DECLTYPE_INVALID,
          params: ['attlist'],
@@ -68,6 +72,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_NO_ELEMENT_NAME,
          params: undefined,
@@ -83,6 +89,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE,
          params: undefined,
@@ -172,6 +180,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ATTLISTDECL_ATTR_NAME_DUPLICATE,
          params: ['att1'],
@@ -196,6 +206,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NAME_NO_SPACE,
          params: ['att1', 'elementName'],
@@ -221,6 +233,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_UNKNOWN,
          params: ['att1', 'elementName', 'bogus'],
@@ -422,6 +436,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_INVALID,
          params: ['att1', 'elementName', 'cdata'],
@@ -446,6 +462,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ATTTYPE,
          params: ['att1', 'elementName'],
@@ -454,7 +472,7 @@ describe('attListDeclarationCheck()', () => {
    });
 
    it('calls enumeration.checkWellFormed() if this is an enumerated type', () => {
-      const cwfSpy = jasmine.createSpy();
+      const cwfSpy = jest.fn();
       const enumeration = new WordListPToken(WordListType.ENUMERATION, {
          open: toSToken(' '),
       });
@@ -501,6 +519,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE,
          params: ['att1', 'elementName'],
@@ -525,6 +545,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION,
          params: ['att1', 'elementName'],
@@ -533,7 +555,7 @@ describe('attListDeclarationCheck()', () => {
    });
 
    it('calls enumeration.checkWellFormed() if this is an NOTATION type', () => {
-      const cwfSpy = jasmine.createSpy();
+      const cwfSpy = jest.fn();
       const enumeration = new WordListPToken(WordListType.NOTATION, {
          open: toSToken(' '),
       });
@@ -580,6 +602,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE,
          params: ['att1', 'elementName'],
@@ -604,6 +628,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_NO_SPACE,
          params: ['att1', 'elementName'],
@@ -629,6 +655,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
          params: ['att1', 'elementName', '#IMPLICIT'],
@@ -687,6 +715,7 @@ describe('attListDeclarationCheck()', () => {
                defaultType: toSToken('#FIXED'),
                defaultTypeSpace: toSToken(' '),
                openQuote: toSToken('"'),
+               closeQuote: toSToken('"'),
                value: [],
             },
          ],
@@ -714,6 +743,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID,
          params: ['att1', 'elementName', '#required'],
@@ -738,6 +769,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_SPACE,
          params: ['att1', 'elementName'],
@@ -763,6 +796,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_VALUE,
          params: ['att1', 'elementName'],
@@ -788,6 +823,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_VALUE,
          params: ['att1', 'elementName'],
@@ -839,6 +876,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_EXTRA_VALUE,
          params: ['att1', 'elementName'],
@@ -853,6 +892,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_NO_CLOSE,
          params: ['elementName'],
@@ -868,6 +909,8 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ATTLISTDECL_EXTRA_TEXT,
          params: ['CDATA'],

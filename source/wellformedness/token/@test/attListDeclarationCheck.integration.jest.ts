@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
@@ -36,7 +37,7 @@ describe('checkWellFormed()', () => {
    //       attListDeclarationCheck(parsing, ec, new ConformanceVersion());
 
    //       expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
-   //       done();
+   //       done?.();
    //    });
    // });
 
@@ -48,7 +49,7 @@ describe('checkWellFormed()', () => {
          attListDeclarationCheck(result, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
-         done();
+         done?.();
       });
    });
 
@@ -60,7 +61,7 @@ describe('checkWellFormed()', () => {
          attListDeclarationCheck(result, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
-         done();
+         done?.();
       });
    });
 
@@ -72,7 +73,7 @@ describe('checkWellFormed()', () => {
          attListDeclarationCheck(result, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
-         done();
+         done?.();
       });
    });
 
@@ -84,7 +85,7 @@ describe('checkWellFormed()', () => {
          attListDeclarationCheck(result, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NMTOKEN);
-         done();
+         done?.();
       });
    });
 
@@ -96,7 +97,7 @@ describe('checkWellFormed()', () => {
          attListDeclarationCheck(result, ec, new ConformanceVersion());
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NAME);
-         done();
+         done?.();
       });
    });
 });

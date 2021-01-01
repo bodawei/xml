@@ -1,6 +1,6 @@
-/* Copyright ® 2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import {
@@ -121,6 +121,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(comment, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
             params: [comment.type],
@@ -157,6 +159,8 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(internalSubsetStart, ec);
          checker.check(textDecl, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
             params: [textDecl.type],
@@ -203,6 +207,8 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports an error if a textdecl appears after an internal parameter entity start', () => {
             checker.check(textDecl, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
                params: [textDecl.type],
@@ -288,6 +294,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(paramEntityDecl, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
             params: [],
@@ -309,6 +317,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(paramEntityDecl, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
             params: [],
@@ -328,6 +338,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(generalEntityDecl, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
             params: [],
@@ -363,6 +375,8 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(textDecl, ec);
          checker.check(textDecl, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
             params: [textDecl.type],
@@ -404,6 +418,8 @@ describe('MarkupDeclChecker (unit)', () => {
          it('an error if the end of the external subset happens', () => {
             checker.check(new ExternalSubsetEndToken(), ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.CONDITIONAL_NO_CLOSE,
                params: [],
@@ -431,6 +447,8 @@ describe('MarkupDeclChecker (unit)', () => {
          it('reports an error if a textdecl appears after an internal parameter entity start', () => {
             checker.check(textDecl, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
                params: [textDecl.type],
@@ -506,7 +524,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
    describe('ATTLIST', () => {
       it('calls scanAttributeValues() on the attributes in the ATTLIST', () => {
-         const spy = spyOn(checkUtils, 'scanAttributeValues');
+         const spy = jest.spyOn(checkUtils, 'scanAttributeValues');
          checker = new MarkupDeclChecker(checkState, []);
 
          checker.check(internalSubsetStart, ec);
@@ -538,6 +556,8 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
                params: ['testRef', 'second'],
@@ -567,6 +587,8 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toNotReportError(WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED);
          });
 
@@ -611,6 +633,8 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
                params: ['testRef'],
@@ -681,6 +705,8 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
                params: ['testRef'],
@@ -711,6 +737,8 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
                params: ['testRef'],
@@ -758,6 +786,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(peDecl2, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['two'],
@@ -788,6 +818,8 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(peDecl, ec);
          checker.check(geDecl, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).not.toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['two'],
@@ -812,6 +844,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(peDecl, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testEntity'],
@@ -840,6 +874,8 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(peDecl, ec);
          checker.check(elided, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testEntity'],
@@ -889,6 +925,8 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(parameterEntityStart, ec);
          checker.check(peStart2, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['entityName'],
@@ -907,6 +945,8 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(parameterEntityStart, ec);
          checker.check(peStart2, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).not.toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['entityName2'],
@@ -924,6 +964,8 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(parameterEntityStart, ec);
          checker.check(peRef2, ec);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['entityName'],

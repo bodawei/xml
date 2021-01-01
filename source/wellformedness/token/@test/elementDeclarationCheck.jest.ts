@@ -36,10 +36,6 @@ describe('elementDeclarationCheck()', () => {
          nameSpace: toSToken('\n'),
          close: toSToken('>'),
       });
-
-      // spyOn(declaration, 'checkWellFormed');
-      // spyOn(misc, 'checkName');
-      // spyOn(misc, 'checkWellFormedNameRecommendation');
    });
 
    it('reports an error if there is a space after the open', () => {

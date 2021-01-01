@@ -14,6 +14,7 @@ import {
    makeParameterEntityReference,
    makeProcessingInstruction,
    makeTextDecl,
+   makeTextPToken,
    makeXmlDecl,
 } from 'token-test';
 import { ATTLIST_DECLARATION_XTOKEN, TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
@@ -29,6 +30,7 @@ import { NOTATION_DECLARATION_XTOKEN } from '../token/notationDeclarationXToken'
 import { PARAMETER_ENTITY_DECLARATION_XTOKEN } from '../token/parameterEntityDeclarationXToken';
 import { PARAMETER_ENTITY_REFERENCE_XTOKEN } from '../token/parameterEntityReferenceXToken';
 import { PROCESSING_INSTRUCTION_XTOKEN } from '../token/processingInstructionXToken';
+import { TEXT_XTOKEN } from '../token/textXToken';
 
 describe('convertPTokenToXToken() (integration)', () => {
    it('converts an ATTLIST Declaration', () => {
@@ -115,7 +117,15 @@ describe('convertPTokenToXToken() (integration)', () => {
       expect(result.type).toEqual(PROCESSING_INSTRUCTION_XTOKEN);
    });
 
-   it('converts an Text Declaration', () => {
+   it('converts a Text', () => {
+      const pToken = makeTextPToken('foo');
+
+      const result = convertPTokenToXToken(pToken);
+
+      expect(result.type).toEqual(TEXT_XTOKEN);
+   });
+
+   it('converts a Text Declaration', () => {
       const pToken = makeTextDecl();
 
       const result = convertPTokenToXToken(pToken);

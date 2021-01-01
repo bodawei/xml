@@ -1,5 +1,6 @@
-/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+
+import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
@@ -57,7 +58,7 @@ import { checkMap } from '../checkMap';
 describe('DocumentChecker (unit)', () => {
    let checker: DocumentChecker;
    let subState: CheckState;
-   let subParams: any;
+   let subParams: Array<unknown>;
    let cdata: CdataPToken;
    let comment: CommentPToken;
    let space: SpacePToken;
@@ -66,7 +67,9 @@ describe('DocumentChecker (unit)', () => {
    let confVer: ConformanceVersion;
    let textDecl: TextDeclarationPToken;
    let xmlDecl: XmlDeclarationPToken;
+   let xmlDeclStandalone: XmlDeclarationPToken;
    let docTypeStart: DocTypeStartPToken;
+   let docTypeStartExtSubset: DocTypeStartPToken;
    let docTypeEnd: DocTypeEndPToken;
    let elementEnd: ElementEndPToken;
    let elementStart: ElementStartPToken;
@@ -83,8 +86,9 @@ describe('DocumentChecker (unit)', () => {
          subState = checkState;
       }
 
-      check(pToken: PToken): void | typeof CHECKER_DONE {
-         subParams = arguments; // eslint-disable-line prefer-rest-params
+      check(...args: Array<unknown>): void | typeof CHECKER_DONE {
+         subParams = args; // eslint-disable-line prefer-rest-params
+         const pToken: PToken = args[0] as PToken;
          if (pToken.type === ELEMENT_EMPTY_PTOKEN) {
             return CHECKER_DONE;
          }
@@ -108,7 +112,7 @@ describe('DocumentChecker (unit)', () => {
 
    beforeEach(() => {
       subState = new CheckState();
-      subParams = undefined;
+      subParams = [];
       ec = new MockErrorCollector();
       checker = new DocumentChecker({
          content: MockChecker,
@@ -132,25 +136,37 @@ describe('DocumentChecker (unit)', () => {
       elementStart = makeElementStart();
       elementEnd = makeElementEnd();
       elementEmpty = makeElementEmpty();
+      xmlDeclStandalone = new XmlDeclarationPToken({
+         ...xmlDecl,
+         fields: [
+            ...xmlDecl.fields,
+            {
+               name: toSToken('standalone'),
+               value: toSToken('yes'),
+            },
+         ],
+      });
+      docTypeStartExtSubset = new DocTypeStartPToken({
+         ...docTypeStart,
+         openSubset: undefined,
+         externalId: {},
+      });
    });
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = spyOn(checkMap, XMLDECL_PTOKEN);
+         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN);
          checker.check(confVer, ec);
 
          checker.check(xmlDecl, ec);
 
-         const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toBe(xmlDecl);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(confVer);
+         expect(cwfSpy).toHaveBeenCalledWith(xmlDecl, expect.any(ErrorCollector), confVer);
       });
 
       it('handles an XmlError with no problems', () => {
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS);
 
-         checker.check(error as any, ec);
+         checker.check(error, ec);
 
          expect(ec.errors).toEqual([]);
       });
@@ -179,7 +195,10 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('passes subset flags when there is no dtd at all', () => {
-            delete (docTypeStart as any).openSubset;
+            docTypeStart = new DocTypeStartPToken({
+               ...docTypeStart,
+               openSubset: undefined,
+            });
             const expected = new CheckState();
             expected.hasNoDTD = true;
 
@@ -192,29 +211,23 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('passes subset flags when there is an external subset', () => {
-            delete (docTypeStart as any).openSubset;
-            (docTypeStart as any).externalId = {};
             const expected = new CheckState();
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
 
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(docTypeStartExtSubset, ec);
             checker.check(internalSubsetStart, ec);
 
             expect(subState).toEqual(expected);
          });
 
          it('passes standalone flag', () => {
-            (xmlDecl.fields as any).push({
-               name: toSToken('standalone'),
-               value: toSToken('yes'),
-            });
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDecl, ec);
+            checker.check(xmlDeclStandalone, ec);
             checker.check(space, ec);
             checker.check(docTypeStart, ec);
             checker.check(internalSubsetStart, ec);
@@ -223,15 +236,13 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('repeated doctype starts have no effect', () => {
-            delete (docTypeStart as any).openSubset;
-            (docTypeStart as any).externalId = {};
             const expected = new CheckState();
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
 
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(docTypeStartExtSubset, ec);
             checker.check(makeDocTypeStart(), ec);
             checker.check(internalSubsetStart, ec);
 
@@ -239,14 +250,10 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('repeated XML Declarations do not affect the first one', () => {
-            (xmlDecl.fields as any).push({
-               name: toSToken('standalone'),
-               value: toSToken('yes'),
-            });
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDecl, ec);
+            checker.check(xmlDeclStandalone, ec);
             checker.check(space, ec);
             checker.check(makeXmlDecl(), ec);
             checker.check(docTypeStart, ec);
@@ -279,7 +286,10 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('passes subset flags when there is no dtd at all', () => {
-            delete (docTypeStart as any).openSubset;
+            docTypeStart = new DocTypeStartPToken({
+               ...docTypeStart,
+               openSubset: undefined,
+            });
             const expected = new CheckState();
             expected.hasNoDTD = true;
 
@@ -293,14 +303,12 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('passes subset flags when there is an external subset', () => {
-            delete (docTypeStart as any).openSubset;
-            (docTypeStart as any).externalId = {};
             const expected = new CheckState();
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
 
             checker.check(xmlDecl, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(docTypeStartExtSubset, ec);
             checker.check(docTypeEnd, ec);
             checker.check(elementStart, ec);
 
@@ -308,14 +316,10 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('passes standalone flag', () => {
-            (xmlDecl.fields as any).push({
-               name: toSToken('standalone'),
-               value: toSToken('yes'),
-            });
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDecl, ec);
+            checker.check(xmlDeclStandalone, ec);
             checker.check(docTypeStart, ec);
             checker.check(docTypeEnd, ec);
             checker.check(elementStart, ec);
@@ -324,15 +328,13 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('repeated doctype starts have no effect', () => {
-            delete (docTypeStart as any).openSubset;
-            (docTypeStart as any).externalId = {};
             const expected = new CheckState();
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
 
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(docTypeStartExtSubset, ec);
             checker.check(docTypeEnd, ec);
             checker.check(makeDocTypeStart(), ec);
             checker.check(elementStart, ec);
@@ -341,14 +343,10 @@ describe('DocumentChecker (unit)', () => {
          });
 
          it('repeated XML Declarations do not affect the first one', () => {
-            (xmlDecl.fields as any).push({
-               name: toSToken('standalone'),
-               value: toSToken('yes'),
-            });
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDecl, ec);
+            checker.check(xmlDeclStandalone, ec);
             checker.check(makeXmlDecl(), ec);
             checker.check(docTypeStart, ec);
             checker.check(docTypeEnd, ec);
@@ -368,12 +366,16 @@ describe('DocumentChecker (unit)', () => {
          it('does not report an error if document starts with an element start', () => {
             checker.check(elementStart, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
          });
 
          it('reports an error when a textDecl is found at the start', () => {
             checker.check(textDecl, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [textDecl.type],
@@ -384,6 +386,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports no error when a space is found at the start', () => {
             checker.check(space, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
          });
 
@@ -392,6 +396,8 @@ describe('DocumentChecker (unit)', () => {
             checker.check(xmlDecl, ec);
 
             expect(ec.errors.length).toEqual(1);
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [XMLDECL_PTOKEN],
@@ -408,6 +414,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports an error if something incorrect is found', () => {
             checker.check(cdata, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -472,6 +480,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports an error if something incorrect is found', () => {
             checker.check(cdata, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -502,6 +512,8 @@ describe('DocumentChecker (unit)', () => {
             checker.check(internalSubsetEnd, ec);
             checker.check(internalSubsetStart, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [INTERNAL_SUBSET_START_TOKEN],
@@ -514,6 +526,8 @@ describe('DocumentChecker (unit)', () => {
             checker.check(externalSubsetEnd, ec);
             checker.check(externalSubsetStart, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [EXTERNAL_SUBSET_START_TOKEN],
@@ -526,6 +540,8 @@ describe('DocumentChecker (unit)', () => {
             checker.check(externalSubsetEnd, ec);
             checker.check(internalSubsetStart, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [INTERNAL_SUBSET_START_TOKEN],
@@ -550,6 +566,8 @@ describe('DocumentChecker (unit)', () => {
             checker.check(docTypeEnd, ec);
 
             expect(ec.errors.length).toEqual(1);
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [ELEMENT_START_PTOKEN],
@@ -568,6 +586,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports an error if something incorrect is found', () => {
             checker.check(cdata, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -645,6 +665,8 @@ describe('DocumentChecker (unit)', () => {
             checker.check(elementEnd, ec);
             checker.check(cdata, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -656,6 +678,8 @@ describe('DocumentChecker (unit)', () => {
             checker.check(elementEmpty, ec);
             checker.check(cdata, ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -703,6 +727,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports an error if called before anything has been processed', () => {
             checker.finish(ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -719,6 +745,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports an error if called after the XML Declaration', () => {
             checker.finish(ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -737,6 +765,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports an error when called after a DOCTYPE has started', () => {
             checker.finish(ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -755,6 +785,8 @@ describe('DocumentChecker (unit)', () => {
          it('reports an error if called after the DOCTYPE', () => {
             checker.finish(ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -767,6 +799,8 @@ describe('DocumentChecker (unit)', () => {
 
             checker.finish(ec);
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,

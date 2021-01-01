@@ -26,7 +26,7 @@ describe('parameterEntityReferenceCheck()', () => {
          close: toSToken(';'),
       });
 
-      spyOn(util, 'nameCheck');
+      jest.spyOn(util, 'nameCheck');
    });
 
    it('checks that the name is a valid name ', () => {
