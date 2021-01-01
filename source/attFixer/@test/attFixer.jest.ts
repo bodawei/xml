@@ -169,10 +169,20 @@ describe('AttFixer', () => {
          const attList = makeAttListDeclaration('CDATA');
          const elementStart = makeElementStartWithAttrValueFromString('\n\nxyz');
          fixAttributes.processPToken(attList);
+         const expected: ElementStartPToken = new ElementStartPToken({
+            ...elementStart,
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: [new TextPToken({ text: new SToken('  xyz', '\n\nxyz', []) })],
+                  normalized: true,
+               },
+            ],
+         });
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStartWithAttrValueFromString('  xyz', '\n\nxyz'));
+         expect(result).toEqual(expected);
       });
 
       it('does only default normalization of attributes when there is no ATTLIST declaration for it', () => {
@@ -180,7 +190,11 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStartWithAttrValueFromString('xyz', '\n\nxyz'));
+         expect(result).toEqual(
+            makeElementStartWithAttrValueFromString('xyz', '\n\nxyz', {
+               normalized: true,
+            }),
+         );
       });
 
       it('modifies a CDATA attribute to replace newlines with spaces in an empty element', () => {
@@ -190,7 +204,11 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementEmptyWithAttrValueFromString('  xyz', '\n\nxyz'));
+         expect(result).toEqual(
+            makeElementEmptyWithAttrValueFromString('  xyz', '\n\nxyz', {
+               normalized: true,
+            }),
+         );
       });
 
       it('has no effect if the attribute list has no element name', () => {
@@ -222,7 +240,9 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(
-            makeElementStartWithAttrValueFromString('x     yz', 'x\n\r\n\t yz'),
+            makeElementStartWithAttrValueFromString('x     yz', 'x\n\r\n\t yz', {
+               normalized: true,
+            }),
          );
       });
 
@@ -262,7 +282,11 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz'));
+         expect(result).toEqual(
+            makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz', {
+               normalized: true,
+            }),
+         );
       });
 
       it('modifies a non-CDATA attribute to trim leading newlines', () => {
@@ -272,7 +296,11 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStartWithAttrValueFromString('xyz', '\n\nxyz'));
+         expect(result).toEqual(
+            makeElementStartWithAttrValueFromString('xyz', '\n\nxyz', {
+               normalized: true,
+            }),
+         );
       });
 
       it('modifies a non-CDATA attribute to replace multiple sequential whitespace characters with space', () => {
@@ -282,7 +310,11 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz'));
+         expect(result).toEqual(
+            makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz', {
+               normalized: true,
+            }),
+         );
       });
 
       it('modifies a non-CDATA attribute to remove trailing space', () => {
@@ -292,7 +324,11 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart);
 
-         expect(result).toEqual(makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz   '));
+         expect(result).toEqual(
+            makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz   ', {
+               normalized: true,
+            }),
+         );
       });
 
       it('modifies a non-CDATA attribute remove space, but not space the spans a charref', () => {
@@ -374,15 +410,20 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(
-            makeElementStartWithAttrValue([
-               ...entityDSpace,
-               ...entityDSpace,
-               makeTextPToken('A'),
-               ...entityASpace,
-               ...entityASpace,
-               makeTextPToken('B'),
-               ...entityDASpace,
-            ]),
+            makeElementStartWithAttrValue(
+               [
+                  ...entityDSpace,
+                  ...entityDSpace,
+                  makeTextPToken('A'),
+                  ...entityASpace,
+                  ...entityASpace,
+                  makeTextPToken('B'),
+                  ...entityDASpace,
+               ],
+               {
+                  normalized: true,
+               },
+            ),
          );
       });
 
@@ -406,15 +447,20 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart);
 
          expect(result).toEqual(
-            makeElementStartWithAttrValue([
-               ...entityDEmpty,
-               ...entityDEmpty,
-               makeTextPToken('A'),
-               ...entityASpace,
-               ...entityAEmpty,
-               makeTextPToken('B'),
-               ...entityDAEmpty,
-            ]),
+            makeElementStartWithAttrValue(
+               [
+                  ...entityDEmpty,
+                  ...entityDEmpty,
+                  makeTextPToken('A'),
+                  ...entityASpace,
+                  ...entityAEmpty,
+                  makeTextPToken('B'),
+                  ...entityDAEmpty,
+               ],
+               {
+                  normalized: true,
+               },
+            ),
          );
       });
 

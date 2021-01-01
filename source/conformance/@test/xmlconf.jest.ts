@@ -74,6 +74,8 @@ describe('XML Conformance tests', () => {
                const toXmlStream = testStream.pipe(new XTokenToXmlStream());
 
                gatherStrings(toXmlStream, (results: Array<string>) => {
+                  // @ts-expect-error 2329/matchers
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   expect(results).toEqualNormalized(testData.outputData);
                   doneWhenAllDone();
                });
@@ -111,8 +113,12 @@ describe('XML Conformance tests', () => {
                // console.log(xxx.join('\n'));
 
                if (expectedError) {
+                  // @ts-expect-error 2329/matchers
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   expect(results).toHaveErrors([expectedError]);
                } else {
+                  // @ts-expect-error 2329/matchers
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   expect(results).not.toHaveErrors();
                }
                doneWhenAllDone();

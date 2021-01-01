@@ -132,9 +132,9 @@ module.exports = {
 
   // Use this configuration option to add custom reporters to Jest
   // reporters: undefined,
-   "reporters": [
-      ["jest-simple-dot-reporter", {"color": true}]
-   ],
+   // "reporters": [
+   //    ["jest-simple-dot-reporter", {"color": true}]
+   // ],
 
   // Automatically reset mock state between every test
   // resetMocks: false,

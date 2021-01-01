@@ -206,12 +206,10 @@ class CheckXTokenValidStream extends Transform {
     */
    normalizeAttributeValue(attribute: any, attInfo: AttInfo | void, elName: string, pToken: any): any { // typeHack
       const attrDef: AttDefinitionXToken | void = attInfo ? attInfo.def : undefined;
-      const externallyDeclared = attInfo ? attInfo.externallyDeclared : false;
       const isCData = !attrDef || attrDef.type === 'CDATA';
       let prevHadTrailingSpace = true; // consider the start to already be space terminated
       let prevPiece: { text: string } | void;
       const newValue = [];
-      let cDataDifference = false;
 
       for (let index = 0; index < attribute.value.length; index++) {
          const piece = attribute.value[index];
@@ -241,26 +239,10 @@ class CheckXTokenValidStream extends Transform {
          if (!isCData) {
             prevPiece = newPiece;
          }
-
-         if (cDataText !== newPiece.text) {
-            cDataDifference = true;
-         }
       }
 
       if (prevHadTrailingSpace && prevPiece) {
          prevPiece!.text = prevPiece!.text.replace(/ $/, ''); // typeHack
-         cDataDifference = true;
-      }
-
-      // §2.9 Validity constraint: Standalone Document Declaration
-      // The standalone document declaration must have the value "no" if any external markup
-      // declarations contain declarations of:
-      // - attributes with tokenized types, where the attribute appears in the document
-      //   with a value such that normalization will produce a different value from that
-      //   which would be produced in the absence of the declaration
-      if (this.standalone && cDataDifference && externallyDeclared) {
-         this.pushValidityError(ValidityError.ID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
-            [ elName, attribute.name ], pToken);
       }
 
       return newValue;
@@ -1148,19 +1130,15 @@ class CheckXTokenValidStream extends Transform {
       const elementDecl = this.elementDeclarations[elStart.name];
       const attributes = elStart.attributes;
       const pTokenOpen = elStart.pToken && elStart.pToken.open;
-      const attributesByName: AttributeMap = {};
       const elName = elementDecl ? elementDecl.token.name : '';
 
       // §3.3.3: Normalization
       for (let index = 0; index < attributes.length; index++) {
          const attrName = attributes[index].name;
          const attrInfo = elemAttrDef && elemAttrDef.attributes[attrName];
-         const attrDef = attrInfo && attrInfo.def;
 
          attributes[index].value = this.normalizeAttributeValue(attributes[index], attrInfo,
             elName, pTokenOpen);
-
-         attributesByName[attrName] = attributes[index] as any; // typehack
       }
 
       if (elemAttrDef) { // This must be required somewhere...

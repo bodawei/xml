@@ -21,7 +21,8 @@ import { LiteralValuePToken } from '../token/common/literal';
 import { AttributePToken } from '../token/common/attribute';
 
 interface AugmentedAttributePToken extends AttributePToken {
-   defaulted: boolean;
+   defaulted?: boolean;
+   normalized?: boolean;
 }
 
 interface AttDetals {
@@ -52,7 +53,7 @@ const TRAILING_SPACE_REGEX = /[ ]+$/;
 function isAugmentedAttribute(
    attribute: AttributePToken | AugmentedAttributePToken,
 ): attribute is AugmentedAttributePToken {
-   return 'defaulted' in attribute;
+   return 'normalized' in attribute || 'defaulted' in attribute;
 }
 
 /*
@@ -81,9 +82,16 @@ function normalizeString(input: string, details: AttDetals): string {
  * TEXT_PTOKENs.  Presumably, though the spec doesn 't mention this explicitly,
  * a CHARREF that contains a space is not so normalized.
  */
-function normalizeAttr(attributeValue: LiteralValuePToken, details: AttDetals): LiteralValuePToken {
+function normalizeAttr(
+   attributeValue: LiteralValuePToken,
+   details: AttDetals,
+): {
+   normalized: boolean;
+   value: LiteralValuePToken;
+} {
    const newValue: LiteralValuePToken = [];
    let lastWasSpace = true;
+   let normalized = false;
    let lastItem;
 
    /*
@@ -110,6 +118,7 @@ function normalizeAttr(attributeValue: LiteralValuePToken, details: AttDetals): 
     */
    for (const val of attributeValue) {
       const isLast = lastItem === val;
+
       switch (val.type) {
          case TEXT_PTOKEN:
             let newStr = normalizeString(strOrBlank(val.text), details);
@@ -130,7 +139,13 @@ function normalizeAttr(attributeValue: LiteralValuePToken, details: AttDetals): 
             const lastText = new TextPToken({
                text: new SToken(newStr, val.text.originalStr, val.text.ranges),
             });
-            newValue.push(lastText);
+
+            if (newStr !== val.text.str) {
+               newValue.push(lastText);
+               normalized = true;
+            } else {
+               newValue.push(val);
+            }
             break;
          case CHARREF_PTOKEN:
             lastWasSpace = false;
@@ -142,7 +157,10 @@ function normalizeAttr(attributeValue: LiteralValuePToken, details: AttDetals): 
       }
    }
 
-   return newValue;
+   return {
+      value: newValue,
+      normalized,
+   };
 }
 
 /*
@@ -157,11 +175,17 @@ function normalizeAttributes(
    for (const attr of attributes) {
       const attrName = strOrBlank(attr.name);
       const attrDef = attrDefs[attrName] ?? { isCData: false };
-
-      newAttributes.push({
+      const normalizedInfo = normalizeAttr(attr.value, attrDef);
+      const newAttr: AugmentedAttributePToken = {
          ...attr,
-         value: normalizeAttr(attr.value, attrDef),
-      });
+         value: normalizedInfo.value,
+      };
+
+      if (normalizedInfo.normalized) {
+         newAttr.normalized = true;
+      }
+
+      newAttributes.push(newAttr);
    }
 
    return newAttributes;

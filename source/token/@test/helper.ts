@@ -156,7 +156,7 @@ function makeElementStart(): ElementStartPToken {
 }
 
 
-function makeElementStartWithAttrValue(value: AttrValue): ElementStartPToken {
+function makeElementStartWithAttrValue(value: AttrValue, addedProps: Record<string, unknown> = {}): ElementStartPToken {
    return new ElementStartPToken({
       open: toSToken('<'),
       name: toSToken('elStart'),
@@ -165,12 +165,13 @@ function makeElementStartWithAttrValue(value: AttrValue): ElementStartPToken {
          {
             name: toSToken('att1'),
             value,
+            ...addedProps
          },
       ],
    });
 }
 
-function makeElementEmptyWithAttrValue(value: AttrValue): ElementEmptyPToken {
+function makeElementEmptyWithAttrValue(value: AttrValue, addedProps: Record<string, unknown> = {}): ElementEmptyPToken {
    return new ElementEmptyPToken({
       open: toSToken('<'),
       name: toSToken('elStart'),
@@ -179,21 +180,22 @@ function makeElementEmptyWithAttrValue(value: AttrValue): ElementEmptyPToken {
          {
             name: toSToken('att1'),
             value,
+            ...addedProps
          },
       ],
    });
 }
-function makeElementEmptyWithAttrValueFromString(value: string, origValue?: string): ElementEmptyPToken {
+function makeElementEmptyWithAttrValueFromString(value: string, origValue?: string, addedProps?: Record<string, unknown>): ElementEmptyPToken {
    return makeElementEmptyWithAttrValue([
       new TextPToken({ text: new SToken(value, origValue || value, []) }),
-   ]);
+   ], addedProps);
 }
 
 
-function makeElementStartWithAttrValueFromString(value: string, origValue?: string): ElementStartPToken {
+function makeElementStartWithAttrValueFromString(value: string, origValue?: string, addedProps?: Record<string, unknown> ): ElementStartPToken {
    return makeElementStartWithAttrValue([
       new TextPToken({ text: new SToken(value, origValue || value, []) }),
-   ]);
+   ], addedProps);
 }
 
 function makeElementDeclaration(): ElementDeclarationPToken {
