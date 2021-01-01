@@ -5,7 +5,7 @@
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
-import * as checks from 'wellformedness';
+import * as checks from '../../../wellformedness/token/parameterEntityReferenceCheck';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../parameterEntityStart';

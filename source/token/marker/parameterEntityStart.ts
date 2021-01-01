@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
-import { parameterEntityReferenceCheck } from 'wellformedness';
+import { parameterEntityReferenceCheck } from '../../wellformedness/token/parameterEntityReferenceCheck';
 
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 

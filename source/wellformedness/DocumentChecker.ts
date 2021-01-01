@@ -2,7 +2,7 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { ERROR_TYPE, ErrorCollector, WellFormedError } from 'error';
-import { ParseValue } from 'pToken';
+import { PROCESSING_INSTRUCTION_PTOKEN, XMLDECL_PTOKEN, ParseValue, isXmlDeclStandalone } from 'pToken';
 
 // circular dependency problem
 import { DOCTYPE_START_PTOKEN } from '../token/docTypeStart';
@@ -13,8 +13,6 @@ import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStar
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
 import { getFirstSToken } from '../token/getFirstSToken';
-import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
-import { XMLDECL_PTOKEN, isXmlDeclStandalone } from '../pToken/token/xmlDeclaration';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
