@@ -484,103 +484,6 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('default value', () => {
 
-            it('adds an attribute with a default value if no attribute was on the original start token', (done) => {
-               const elDecl1 = new ElementDeclarationXToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
-                  name: 'textAttr',
-                  type: 'CDATA',
-                  value: [new TextXToken('the default value')],
-                  defaultType: '',
-               }]);
-               const startToken1 = new ElementStartXToken('testEl', []);
-
-               validator.write(elDecl1);
-               validator.write(attListDecl1);
-               validator.write(startToken1);
-               validator.end();
-
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens[2].attributes[0].value[0].text)
-                     .toEqual('the default value');
-                  done();
-               });
-            });
-
-            it('adds a default value to an attribute if, somehow, it has no value but the attr is still defined', (done) => {
-               const elDecl1 = new ElementDeclarationXToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
-                  name: 'textAttr',
-                  type: 'CDATA',
-                  value: [new TextXToken('the default value')],
-                  defaultType: '',
-               }]);
-               const startToken1 = new ElementStartXToken('testEl', [{
-                  name: 'textAttr',
-                  value: []
-               }]);
-
-               validator.write(elDecl1);
-               validator.write(attListDecl1);
-               validator.write(startToken1);
-               validator.end();
-
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens[2].attributes[0].value[0].text)
-                     .toEqual('the default value');
-                  done();
-               });
-            });
-
-            it('adds a default value to an attribute if, somehow, it has an empty value but the attr is still defined', (done) => {
-               const elDecl1 = new ElementDeclarationXToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
-                  name: 'textAttr',
-                  type: 'CDATA',
-                  value: [new TextXToken('the default value')],
-                  defaultType: '',
-               }]);
-               const startToken1 = new ElementStartXToken('testEl', [{
-                  name: 'textAttr',
-                  value: []
-               }]);
-
-               validator.write(elDecl1);
-               validator.write(attListDecl1);
-               validator.write(startToken1);
-               validator.end();
-
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens[2].attributes[0].value[0].text)
-                     .toEqual('the default value');
-                  done();
-               });
-            });
-
-            it('does not add the default value if an attribute already has a value', (done) => {
-               const elDecl1 = new ElementDeclarationXToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
-                  name: 'textAttr',
-                  type: 'CDATA',
-                  value: [new TextXToken('the default value')],
-                  defaultType: '',
-               }]);
-               const startToken1 = new ElementStartXToken('testEl', [{
-                  name: 'textAttr',
-                  value: [new TextXToken('original')]
-               }]);
-
-               validator.write(elDecl1);
-               validator.write(attListDecl1);
-               validator.write(startToken1);
-               validator.end();
-
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens[2].attributes[0].value[0].text)
-                     .toEqual('original');
-                  done();
-               });
-            });
-
             it('reports an error if a #FIXED attribute does not match the declared default', (done) => {
                const elDecl1 = new ElementDeclarationXToken('testEl', 'ANY', undefined);
                const attListDecl1 = new AttListDeclarationXToken('testEl', [{
@@ -641,29 +544,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                expectNoErrorsOrWarnings(validator, done);
-            });
-
-            it('reports an error if an attribute default must be added, and the declration was external (§2.9)', (done) => {
-               const elDecl1 = new ElementDeclarationXToken('testEl', 'ANY', undefined);
-               const attListDecl1 = new AttListDeclarationXToken('testEl', [{
-                  name: 'textAttr',
-                  type: 'CDATA',
-                  value: [new TextXToken('the default value')],
-                  defaultType: '',
-               }]);
-               const startToken1 = new ElementStartXToken('testEl', []);
-
-               validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-               validator.write(new ExternalSubsetStartToken());
-               validator.write(elDecl1);
-               validator.write(attListDecl1);
-               validator.write(new ExternalSubsetEndToken());
-               validator.write(startToken1);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
-                  ['testEl', 'textAttr']);
-               expectStream(validator, expected, done);
             });
 
             it('reports no error if an attribute default must be added, and the declration was not external (§2.9)', (done) => {

@@ -3,7 +3,7 @@
 import { Transform } from 'stream';
 
 import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } from 'basic';
-import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
+import { ValidityError, ERROR_TYPE, XmlWarning } from 'error';
 import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
@@ -1177,42 +1177,9 @@ class CheckXTokenValidStream extends Transform {
             const attDefName = attDefNames[index];
             const attrInfo = elemAttrDef.attributes[attDefName];
             const attDef = attrInfo.def;
-            const attribute = attributesByName[attDefName];
 
             if (attDef.defaultType === '#REQUIRED') {
                requiredNames.push(attDef.name);
-            } else if (attDef.value.length > 0) {
-               let newAttribute = attribute;
-
-               if (!attribute) {
-                  newAttribute = {
-                     name: attDefName,
-                     value: attDef.value,
-                     type: '',
-                     defaultType: '',
-                  };
-
-                  // §2.9 Validity constraint: Standalone Document Declaration
-                  // The standalone document declaration must have the value "no" if any external markup
-                  // declarations contain declarations of:
-                  // - attributes with default values, if elements to which these attributes apply appear
-                  // in the document without specifications of values for these attributes, ...
-                  //
-                  // Translation: If this was marked as standalone="yes", and we find an element without
-                  // an attribute that was declared as having a default value, and that declaration was
-                  // an external declaration, then we have a validity error. (We can't just check this
-                  // at declaration time, since if it isn't used it is not an error).
-                  //
-                  if (this.standalone && attrInfo.externallyDeclared) {
-                     this.pushValidityError(ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
-                        [ elStart.name, attDefName ], pTokenOpen);
-                  }
-
-                  attributesByName[attDefName] = newAttribute;
-                  (attributes as any).push(newAttribute); //typeHack
-               } else if (!attribute.value || attribute.value.length === 0) {
-                  (attribute as any).value = attDef.value; // ick typehack
-               }
             }
          }
 

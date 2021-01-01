@@ -1,11 +1,45 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'error';
+import { isAugmentedAttribute } from 'attFixer';
 import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
 import { ValidityError } from '../error/ValidityError';
 import { ElDeclType, ValidateState } from '../validateState';
+
+const VID = ValidityError.ID;
+
+function checkAttributes(
+   el: ElementStartPToken | ElementEmptyPToken,
+   elName: string,
+   state: ValidateState,
+   ec: ErrorCollector,
+): void {
+   const attributes = el.attributes;
+
+   for (const attr of attributes) {
+      if (state.isStandalone && isAugmentedAttribute(attr) && attr.defaulted) {
+         const attName = strOrBlank(attr.name);
+         const details = state.attributeDefs[elName][attName];
+
+         // §2.9 Validity constraint: Standalone Document Declaration
+         // The standalone document declaration must have the value "no" if any external markup
+         // declarations contain declarations of:
+         // - attributes with default values, if elements to which these attributes apply appear
+         // in the document without specifications of values for these attributes, ...
+         //
+         // Translation: If this was marked as standalone="yes", and we find an element without
+         // an attribute that was declared as having a default value, and that declaration was
+         // an external declaration, then we have a validity error. (We can't just check this
+         // at declaration time, since if it isn't used it is not an error).
+         ec.check(details.isExternal, VID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED, [
+            elName,
+            attName,
+         ]);
+      }
+   }
+}
 
 function elementStartValidate(
    el: ElementStartPToken | ElementEmptyPToken,
@@ -15,22 +49,25 @@ function elementStartValidate(
    const elName = strOrBlank(el.name);
    const context = state.elementContext.activeContext;
 
+   ec.setPos(el.open);
+
+   checkAttributes(el, elName, state, ec);
+
    // If we aren't in any context, then there's nothing to validate
    if (!context || state.elementContext.pastEnd) {
       return;
    }
 
-   ec.setPos(el.open);
    switch (context.declDetails.type) {
       case ElDeclType.EMPTY:
-         ec.report(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [context.parentName]);
+         ec.report(VID.CONTENT_IN_EMPTY_ELEMENT, [context.parentName]);
          break;
       case ElDeclType.ANY:
          // §3.0.0 Validity Constraint: Element Valid
          //     4. The declaration matches ANY, and the types of any child
          //     elements have been declared.
          ec.setPos(el.name);
-         ec.check(!state.elementDeclarations[elName], ValidityError.ID.ANY_UNDECLARED_ELEMENT, [
+         ec.check(!state.elementDeclarations[elName], VID.ANY_UNDECLARED_ELEMENT, [
             context.parentName,
             elName,
          ]);
@@ -43,10 +80,7 @@ function elementStartValidate(
          const allowedChild = context.declDetails.names.includes(elName);
 
          ec.setPos(el.name);
-         ec.check(!allowedChild, ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [
-            context.parentName,
-            elName,
-         ]);
+         ec.check(!allowedChild, VID.UNDECLARED_ELEMENT_IN_MIXED, [context.parentName, elName]);
          break;
       case ElDeclType.CHILDREN:
          // §3.0.0 Validity Constraint: Element Valid
@@ -58,10 +92,7 @@ function elementStartValidate(
          const destState = currentState.trans[elName];
 
          ec.setPos(el.name);
-         ec.check(!destState, ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [
-            context.parentName,
-            elName,
-         ]);
+         ec.check(!destState, VID.INVALID_ELEMENT_IN_CONTENT, [context.parentName, elName]);
          break;
    }
 }

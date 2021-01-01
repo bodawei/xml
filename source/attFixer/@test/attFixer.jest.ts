@@ -20,9 +20,9 @@ import {
    GeneralEntityEndPToken,
    CharRefPToken,
 } from 'token';
-import { AttrValue } from '../../token/common/attribute';
+import { AttributePToken, AttrValue } from '../../token/common/attribute';
 
-import { AttFixer } from '../AttFixer';
+import { isAugmentedAttribute, AttFixer, AugmentedAttributePToken } from '../AttFixer';
 
 describe('AttFixer', () => {
    let fixAttributes: AttFixer;
@@ -115,6 +115,37 @@ describe('AttFixer', () => {
       ];
 
       fixAttributes = new AttFixer();
+   });
+
+   describe('isAugmentedAttribute', () => {
+      it('returns true if given an augmented attribute definition', () => {
+         const augmented: AugmentedAttributePToken = {
+            name: toSToken('foo'),
+            value: [],
+            defaulted: true,
+         };
+
+         expect(isAugmentedAttribute(augmented)).toEqual(true);
+      });
+
+      it('returns true if given an augmented attribute definition, even when defaulted is faulse', () => {
+         const augmented: AugmentedAttributePToken = {
+            name: toSToken('foo'),
+            value: [],
+            defaulted: false,
+         };
+
+         expect(isAugmentedAttribute(augmented)).toEqual(true);
+      });
+
+      it('returns false if given an ordinary attribute definition', () => {
+         const plain: AttributePToken = {
+            name: toSToken('foo'),
+            value: [],
+         };
+
+         expect(isAugmentedAttribute(plain)).toEqual(false);
+      });
    });
 
    it('returns an ATTLIST unchanged when passed one', () => {
@@ -469,6 +500,7 @@ describe('AttFixer', () => {
                      value: [new TextPToken({ text: toSToken('x') })],
                      closeQuote: toSToken('"'),
                      trailingSpace: toSToken(' '),
+                     defaulted: true,
                   },
                ],
                close: toSToken('>'),
@@ -525,6 +557,7 @@ describe('AttFixer', () => {
                      value: [new TextPToken({ text: toSToken('x') })],
                      closeQuote: toSToken('"'),
                      trailingSpace: toSToken(' '),
+                     defaulted: true,
                   },
                ],
             }),
@@ -573,6 +606,7 @@ describe('AttFixer', () => {
                      value: [new TextPToken({ text: toSToken('x') })],
                      closeQuote: toSToken('"'),
                      trailingSpace: toSToken(' '),
+                     defaulted: true,
                   },
                ],
             }),
@@ -620,6 +654,7 @@ describe('AttFixer', () => {
                      value: [new TextPToken({ text: toSToken('x') })],
                      closeQuote: toSToken('"'),
                      trailingSpace: toSToken(' '),
+                     defaulted: true,
                   },
                ],
             }),

@@ -20,6 +20,10 @@ import {
 import { LiteralValuePToken } from '../token/common/literal';
 import { AttributePToken } from '../token/common/attribute';
 
+interface AugmentedAttributePToken extends AttributePToken {
+   defaulted: boolean;
+}
+
 interface AttDetals {
    name: SToken;
    isCData: boolean;
@@ -44,6 +48,12 @@ const CDATA_REGEX = /[ \r\n\t]/g;
 const OTHER_REGEX = /[ \r\n\t]+/g;
 const LEADING_SPACE_REGEX = /^[ ]+/;
 const TRAILING_SPACE_REGEX = /[ ]+$/;
+
+function isAugmentedAttribute(
+   attribute: AttributePToken | AugmentedAttributePToken,
+): attribute is AugmentedAttributePToken {
+   return 'defaulted' in attribute;
+}
 
 /*
  * §3.3.3: (1.0/1) a whitespace character (#x20, #xD, #xA, #x9) is processed by appending #x20
@@ -172,9 +182,9 @@ function normalizeAttributes(
 function gatherDefaults(
    item: ElementStartPToken | ElementEmptyPToken,
    attrDefs: ElementDetails,
-): Array<AttributePToken> {
+): Array<AugmentedAttributePToken> {
    const hasAttr: NameMap = {};
-   const newAttrs: Array<AttributePToken> = [];
+   const newAttrs: Array<AugmentedAttributePToken> = [];
 
    for (const attr of item.attributes) {
       hasAttr[strOrBlank(attr.name)] = true;
@@ -191,6 +201,7 @@ function gatherDefaults(
             value: attrDef.defaultValue,
             closeQuote: attrDef.closeQuote,
             trailingSpace: toSToken(' '),
+            defaulted: true,
          });
       }
    }
@@ -306,4 +317,4 @@ class AttFixer {
    }
 }
 
-export { AttFixer };
+export { AugmentedAttributePToken, isAugmentedAttribute, AttFixer };

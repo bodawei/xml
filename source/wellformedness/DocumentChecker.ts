@@ -2,7 +2,12 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { ERROR_TYPE, ErrorCollector, WellFormedError } from 'error';
-import { PROCESSING_INSTRUCTION_PTOKEN, XMLDECL_PTOKEN, ParseValue, isXmlDeclStandalone } from 'pToken';
+import {
+   PROCESSING_INSTRUCTION_PTOKEN,
+   XMLDECL_PTOKEN,
+   ParseValue,
+   isXmlDeclStandalone,
+} from 'pToken';
 
 // circular dependency problem
 import { DOCTYPE_START_PTOKEN } from '../token/docTypeStart';

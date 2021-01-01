@@ -6,10 +6,9 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [], // ['inv-not-sa04'],
+   includedIds: [],
    excludedIds: [
       // Attribute defaulting separate from validatio ncauses problems
-      'inv-not-sa04', // ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
       'inv-not-sa05', //ATTLISTDECL_TYPE_EXTERNAL_DECLARED
       'inv-not-sa06', // ATTLISTDECL_TYPE_EXTERNAL_DECLARED
       'inv-not-sa07', // ATTLISTDECL_TYPE_EXTERNAL_DECLARED
@@ -19,9 +18,8 @@ const testFilters: FilterData = {
       'inv-not-sa11', // ATTLISTDECL_TYPE_EXTERNAL_DECLARED
       'inv-not-sa12', // ATTLISTDECL_TYPE_EXTERNAL_DECLARED
       'inv-not-sa13', // ATTLISTDECL_TYPE_EXTERNAL_DECLARED
-      'o-p08fail1', // ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
-      'ibm-invalid-P32-ibm32i01.xml', // ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
       'ibm-invalid-P32-ibm32i03.xml', // ATTLISTDECL_TYPE_EXTERNAL_DECLARED
+      'o-p08fail1', // ELEMENTSTART_NMTOKENS_NOT_NMTOKEN --- ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
 
       //  This messes up with attlists with enumerations.  It doesn't recognize the right wrod boundaries.
       // but the same is true for element declarations <!ELEMENT %name; (a|b)*>
