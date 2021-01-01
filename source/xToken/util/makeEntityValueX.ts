@@ -5,7 +5,12 @@ import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenc
 
 // ick
 import { LiteralValuePToken } from '../../token/common/literalValue';
-import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
+import {
+   CHARREF_PTOKEN,
+   PARAMETER_ENTITY_END_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
+} from 'token';
 import { strOrBlank } from 'sToken';
 
 type MutableExntityValueX = Array<string | ParameterEntityReferenceXToken>;
@@ -30,8 +35,8 @@ function makeEntityValueX(value: LiteralValuePToken): ExntityValueX {
             }
             result.push(new ParameterEntityReferenceXToken(item));
             break;
-         // case PARAMETER_ENTITY_START_PTOKEN:
-         // case PARAMETER_ENTITY_END_PTOKEN:
+         case PARAMETER_ENTITY_START_PTOKEN:
+         case PARAMETER_ENTITY_END_PTOKEN:
          default:
             // do nothing
             break;

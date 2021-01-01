@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { AttListDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken, SToken } from 'sToken';
 import {
@@ -353,6 +354,8 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart) as ElementStartPToken;
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result.attributes[0].value).toEqualRangeless([
             new TextPToken({ text: new SToken('a ', '   \na   ', []) }),
             new CharRefPToken({ open: toSToken('&'), digits: toSToken('65') }),
@@ -385,6 +388,8 @@ describe('AttFixer', () => {
 
          const result = fixAttributes.processPToken(elementStart) as ElementStartPToken;
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result.attributes[0].value).toEqualRangeless([
             new TextPToken({ text: new SToken('a ', '   \na   ', []) }),
             new GeneralEntityStartPToken(reference),

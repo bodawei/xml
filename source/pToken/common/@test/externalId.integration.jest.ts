@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
@@ -17,6 +18,8 @@ describe('parseExternalId()', () => {
       source.addText('PUBLIC "pub.xml"\t"sys.xml">');
 
       parseExternalId(source, [], (result) => {
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless({
             externalId: {
                externalType: toSToken('PUBLIC'),
@@ -34,7 +37,7 @@ describe('parseExternalId()', () => {
                },
             },
          });
-         done();
+         done?.();
       });
    });
 
@@ -54,12 +57,14 @@ describe('parseExternalId()', () => {
             system: undefined,
          };
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless({
             externalId,
             nextPropName: 'system',
          });
 
-         done();
+         done?.();
       });
    });
 });

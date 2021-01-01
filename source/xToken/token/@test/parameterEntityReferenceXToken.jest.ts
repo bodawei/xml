@@ -39,7 +39,7 @@ describe('ParameterEntityReferenceXToken', () => {
 
       const token = new ParameterEntityReferenceXToken(pePToken);
 
-      expect(token).toEqualRangeless({
+      expect(token).toEqual({
          type: PARAMETER_ENTITY_REFERENCE_XTOKEN,
          name: 'testing',
          pToken: pePToken,

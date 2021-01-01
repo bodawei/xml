@@ -1,5 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
@@ -62,6 +64,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_OPEN,
             params: undefined,
@@ -75,6 +79,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_NAMES,
             params: undefined,
@@ -104,6 +110,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_NAME,
             params: ['1'],
@@ -132,6 +140,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_DELIM,
             params: ['0'],
@@ -166,6 +176,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_EXTRA_DELIM,
             params: ['1'],
@@ -181,6 +193,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_CLOSE,
             params: undefined,
@@ -228,6 +242,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_CHOICE,
             params: ['1', ','],
@@ -261,6 +277,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_SEQUENCE,
             params: ['1', '|'],
@@ -273,6 +291,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NAME_EXTRA_SPACE,
             params: ['0'],
@@ -288,6 +308,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_CLOSE_EXTRA_SPACE,
             params: undefined,
@@ -336,6 +358,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_CLOSE_EXTRA_SPACE,
             params: undefined,
@@ -359,6 +383,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_PCDATA_INVALID_CASE,
             params: ['#pcData'],
@@ -380,6 +406,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_CHOICE,
             params: ['0', ','],
@@ -418,6 +446,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_SUBPARTICLE,
             params: ['1'],
@@ -444,6 +474,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_NAME_EXTRA_REPEAT,
             params: ['1', '*'],
@@ -503,6 +535,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_REPEAT,
             params: ['+'],
@@ -535,6 +569,8 @@ describe('contentModelCheck()', () => {
 
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_REPEAT,
             params: [''],

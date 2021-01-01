@@ -1,5 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
@@ -22,6 +24,8 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -58,7 +62,7 @@ describe('attListDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
 
@@ -68,6 +72,8 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -117,7 +123,7 @@ describe('attListDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
 
@@ -127,6 +133,8 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -169,7 +177,7 @@ describe('attListDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
 
@@ -179,6 +187,8 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -215,7 +225,7 @@ describe('attListDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
 
@@ -242,8 +252,10 @@ describe('attListDeclaration (integration)', () => {
                close: toSToken('>'),
             });
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(expected);
-            done();
+            done?.();
          });
       });
 
@@ -287,8 +299,10 @@ describe('attListDeclaration (integration)', () => {
                close: toSToken('>'),
             });
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(expected);
-            done();
+            done?.();
          });
       });
 
@@ -345,8 +359,10 @@ describe('attListDeclaration (integration)', () => {
                close: toSToken('>'),
             });
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(expected);
-            done();
+            done?.();
          });
       });
 
@@ -403,8 +419,10 @@ describe('attListDeclaration (integration)', () => {
                close: toSToken('>'),
             });
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(expected);
-            done();
+            done?.();
          });
       });
    });
@@ -441,6 +459,8 @@ describe('attListDeclaration (integration)', () => {
          });
 
          resumeParseAttListDeclaration(source, attListDecl, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -481,7 +501,7 @@ describe('attListDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
    });

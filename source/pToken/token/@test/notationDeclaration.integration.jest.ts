@@ -1,5 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
@@ -34,7 +36,7 @@ describe('notationDeclaration (integration)', () => {
 
          parseNotationDeclaration(source, declarationStart, (parsing) => {
             expect(parsing.externalId?.externalType?.str).toEqual('SYSTEM');
-            done();
+            done?.();
          });
       });
 
@@ -44,6 +46,8 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
@@ -62,7 +66,7 @@ describe('notationDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
 
@@ -72,6 +76,8 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   type: NOTATION_DECLARATION_PTOKEN,
@@ -92,7 +98,7 @@ describe('notationDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
    });
@@ -117,6 +123,8 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          resumeParseNotationDeclaration(source, nd, (parsed) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(parsed).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
@@ -146,7 +154,7 @@ describe('notationDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
 
@@ -175,6 +183,8 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          resumeParseNotationDeclaration(source, nd, (parsed) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(parsed).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
@@ -204,7 +214,7 @@ describe('notationDeclaration (integration)', () => {
                   close: toSToken('>'),
                }),
             );
-            done();
+            done?.();
          });
       });
    });

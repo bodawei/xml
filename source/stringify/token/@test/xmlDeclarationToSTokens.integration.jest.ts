@@ -1,5 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { defaultExtractors } from 'extractor';
 import { parseXmlDeclaration } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
@@ -21,6 +23,8 @@ describe('xmlDeclarationToSTokens (unit)', () => {
       parseXmlDeclaration(source, start, (parsing) => {
          const result = xmlDeclarationToSTokens(parsing);
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless([
             toSToken('<?'),
             toSToken('xml'),
@@ -39,7 +43,7 @@ describe('xmlDeclarationToSTokens (unit)', () => {
             toSToken(' '),
             toSToken('?>'),
          ]);
-         done();
+         done?.();
       });
    });
 });

@@ -1,5 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { ErrorCollector } from 'error';
 import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
@@ -74,7 +76,7 @@ describe('ValidityChecker (integration)', () => {
       // };
    });
 
-   fit('reports an error the current context is a CHILDREN context, but we are not at the end', (done) => {
+   it('reports an error the current context is a CHILDREN context, but we are not at the end', (done) => {
       const finalResults: Array<XmlError> = [];
 
       pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
@@ -107,7 +109,7 @@ describe('ValidityChecker (integration)', () => {
 
          // console.log('resultx', results);
          expect(finalResults[0].id).toEqual(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED);
-         done();
+         done?.();
       });
 
       // const pDecl = new ParameterEntityDeclarationPToken({

@@ -50,7 +50,7 @@ function checkFields(
             ec.setPos(param.openQuote);
             ec.setPos(value);
             checkCharWellFormed(value, ec, confVer);
-            ec.check(!valueText.match(ENCODING_REGEXP), WFEID.TEXTDECL_ENCODING_INVALID, [
+            ec.check(!ENCODING_REGEXP.test(valueText), WFEID.TEXTDECL_ENCODING_INVALID, [
                valueText,
             ]);
             break;

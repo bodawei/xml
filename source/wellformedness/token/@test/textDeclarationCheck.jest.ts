@@ -6,7 +6,7 @@ import { ConformanceVersion } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { TextDeclarationPToken } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 
 import * as misc from '../../../token/common/misc';
 import { InstructionStart } from '../../../pToken/bridge/instruction';
@@ -83,7 +83,9 @@ describe('textDeclaration (unit)', () => {
    });
 
    it('reports an error if there is a space after the "<?"', () => {
-      (textDeclPToken as any).openSpace = SToken.fromString(' ');
+      textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
+         openSpace: toSToken(' '),
+      });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
@@ -97,7 +99,9 @@ describe('textDeclaration (unit)', () => {
    });
 
    it('reports an error if there is no target', () => {
-      delete (textDeclPToken as any).target;
+      textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
+         target: undefined,
+      });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
@@ -111,7 +115,9 @@ describe('textDeclaration (unit)', () => {
    });
 
    it('reports an error if there is no space after the target', () => {
-      delete (textDeclPToken as any).targetSpace;
+      textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
+         targetSpace: undefined,
+      });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
@@ -144,7 +150,7 @@ describe('textDeclaration (unit)', () => {
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector.report).not.toHaveBeenCalled();
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 
    it('reports no errors if there are no parameters in the declaration', () => {

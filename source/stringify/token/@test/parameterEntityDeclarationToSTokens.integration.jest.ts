@@ -1,3 +1,5 @@
+import { describe, expect, it } from '@jest/globals';
+
 import { ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import { parameterEntityDeclarationToSTokens } from '../parameterEntityDeclarationToSTokens';

@@ -1,5 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { SToken, toSToken } from 'sToken';
 import { AttListDeclarationPToken } from 'pToken';
 

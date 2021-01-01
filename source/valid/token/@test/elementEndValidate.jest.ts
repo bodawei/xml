@@ -1,5 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { MockErrorCollector } from 'error-test';
 import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -82,6 +84,8 @@ describe('elementEndValidate (unit)', () => {
    it('reports an error the current context is a CHILDREN context, but we are not at the end', () => {
       elementEndValidate(elementEnd, state, mockErrorCollector);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.CHILDREN_UNEXPECTED_END,
          params: ['elementName', 'one, two'],

@@ -1,5 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -36,8 +38,10 @@ describe('elementDeclaration', () => {
                close: toSToken('>'),
             });
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(expected);
-            done();
+            done?.();
          });
       });
 
@@ -49,8 +53,6 @@ describe('elementDeclaration', () => {
          source.endText();
 
          parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-            // @ts-expect-error matcher not recognized
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toMatchInlineSnapshot(`
                ElementDeclarationPToken {
                  "close": SToken {
@@ -1009,7 +1011,7 @@ describe('elementDeclaration', () => {
                  "unexpanded": undefined,
                }
             `);
-            done();
+            done?.();
          });
       });
    });
@@ -1043,8 +1045,10 @@ describe('elementDeclaration', () => {
                   close: toSToken('>'),
                });
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(expected);
-               done();
+               done?.();
             },
          );
       });
@@ -1132,8 +1136,10 @@ describe('elementDeclaration', () => {
                   close: toSToken('>'),
                });
 
+               // @ts-expect-error 2329/matchers
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(expected);
-               done();
+               done?.();
             },
          );
       });

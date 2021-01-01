@@ -99,7 +99,9 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('reports an error if there is a space after the "<?"', () => {
-         (xmlDeclPToken as any).openSpace = toSToken(' ');
+         xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
+            openSpace: toSToken(' '),
+         });
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
@@ -113,7 +115,9 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('reports an error if there is no target', () => {
-         delete (xmlDeclPToken as any).target;
+         xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
+            target: undefined,
+         });
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
@@ -127,7 +131,9 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('reports an error if xml is the wrong case', () => {
-         (xmlDeclPToken as any).target.str = 'XmL';
+         xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
+            target: toSToken('XmL'),
+         });
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
@@ -141,7 +147,9 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('reports an error if there is no space after the target', () => {
-         delete (xmlDeclPToken as any).targetSpace;
+         xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
+            targetSpace: undefined,
+         });
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
@@ -174,7 +182,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector.report).not.toHaveBeenCalled();
+         expect(mockErrorCollector.errors).toEqual([]);
       });
 
       it('reports an error if there are no parameters in the base document entity', () => {
@@ -363,6 +371,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 1));
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
          });
 
@@ -386,6 +396,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.1, 1));
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
          });
 
@@ -409,6 +421,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 5));
 
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
          });
 

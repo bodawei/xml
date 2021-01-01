@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { defaultExtractors } from 'extractor';
 import { InstructionStart, parseTextDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
@@ -27,7 +28,7 @@ describe('textDeclarationToSTokens() (integration)', () => {
          const result = textDeclarationToSTokens(parsing);
 
          expect(result[0]).toEqual(toSToken('<?'));
-         done();
+         done?.();
       });
    });
 });

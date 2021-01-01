@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { AttListDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { TextXToken } from 'xToken';
@@ -24,9 +25,10 @@ describe('attListDeclarationXToken', () => {
    it('creates an XToken from a PToken', () => {
       const xToken = new AttListDeclarationXToken(aldPToken);
 
-      expect(xToken).toEqualRangeless({
+      expect(xToken).toEqual({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
+         attDefs: [],
          pToken: aldPToken,
       });
    });
@@ -41,7 +43,7 @@ describe('attListDeclarationXToken', () => {
          },
       ]);
 
-      expect(xToken).toEqualRangeless({
+      expect(xToken).toEqual({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'theName',
          attDefs: [
@@ -62,9 +64,10 @@ describe('attListDeclarationXToken', () => {
 
       const xToken = new AttListDeclarationXToken(testToken);
 
-      expect(xToken).toEqualRangeless({
+      expect(xToken).toEqual({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: '',
+         attDefs: [],
          pToken: testToken,
       });
    });
@@ -93,7 +96,7 @@ describe('attListDeclarationXToken', () => {
       });
       const xToken = new AttListDeclarationXToken(testToken);
 
-      expect(xToken).toEqualRangeless({
+      expect(xToken).toEqual({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
          attDefs: [
@@ -137,7 +140,7 @@ describe('attListDeclarationXToken', () => {
 
       const xToken = new AttListDeclarationXToken(testToken);
 
-      expect(xToken).toEqualRangeless({
+      expect(xToken).toEqual({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
          attDefs: [
@@ -173,7 +176,7 @@ describe('attListDeclarationXToken', () => {
 
       const xToken = new AttListDeclarationXToken(testToken);
 
-      expect(xToken).toEqualRangeless({
+      expect(xToken).toEqual({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
          attDefs: [
@@ -204,7 +207,7 @@ describe('attListDeclarationXToken', () => {
 
       const xToken = new AttListDeclarationXToken(testToken);
 
-      expect(xToken).toEqualRangeless({
+      expect(xToken).toEqual({
          type: ATTLIST_DECLARATION_XTOKEN,
          elementName: 'elementName',
          attDefs: [

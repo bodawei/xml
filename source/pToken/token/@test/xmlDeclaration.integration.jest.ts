@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
@@ -26,7 +27,7 @@ describe('xmlDeclaration (integration)', () => {
 
          parseXmlDeclaration(source, start, (parsing) => {
             expect(parsing.fields[0].name.str).toEqual('version');
-            done();
+            done?.();
          });
       });
 
@@ -37,7 +38,7 @@ describe('xmlDeclaration (integration)', () => {
 
          parseXmlDeclaration(source, start, (parsing) => {
             expect(parsing.fields[1].value!.str).toEqual('ascii');
-            done();
+            done?.();
          });
       });
    });

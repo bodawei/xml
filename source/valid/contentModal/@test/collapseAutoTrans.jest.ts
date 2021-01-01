@@ -1,5 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { defaultExtractors } from 'extractor';
 import { parseContentModel } from 'pToken';
 import { STokenSource } from 'sToken';
@@ -467,7 +469,7 @@ describe('collapseAutoTrans()', () => {
             },
          });
 
-         done();
+         done?.();
       });
    });
 
@@ -514,7 +516,7 @@ describe('collapseAutoTrans()', () => {
             },
          });
 
-         done();
+         done?.();
       });
    });
 
@@ -590,7 +592,7 @@ describe('collapseAutoTrans()', () => {
             },
          });
 
-         done();
+         done?.();
       });
    });
 
@@ -657,7 +659,7 @@ describe('collapseAutoTrans()', () => {
             },
          });
 
-         done();
+         done?.();
       });
    });
 
@@ -749,7 +751,7 @@ describe('collapseAutoTrans()', () => {
             },
          });
 
-         done();
+         done?.();
       });
    });
 
@@ -908,7 +910,7 @@ describe('collapseAutoTrans()', () => {
             },
          });
 
-         done();
+         done?.();
       });
    });
 

@@ -1,5 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
+
 import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
@@ -110,6 +112,8 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
@@ -144,6 +148,8 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
@@ -185,6 +191,8 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
@@ -229,6 +237,8 @@ describe('notationdeDeclaration (unit)', () => {
          );
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
@@ -281,6 +291,8 @@ describe('notationdeDeclaration (unit)', () => {
          ]);
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
@@ -296,7 +308,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done();
+            done?.();
          });
 
          mockSource.respondInAsyncTime();
@@ -324,6 +336,8 @@ describe('notationdeDeclaration (unit)', () => {
          ]);
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
@@ -340,7 +354,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done();
+            done?.();
          });
 
          mockSource.respondInAsyncTime();
@@ -366,6 +380,8 @@ describe('notationdeDeclaration (unit)', () => {
          ]);
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
@@ -381,7 +397,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done();
+            done?.();
          });
 
          mockSource.respondInAsyncTime();
@@ -407,6 +423,8 @@ describe('notationdeDeclaration (unit)', () => {
          ]);
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
@@ -423,7 +441,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done();
+            done?.();
          });
 
          mockSource.respondInAsyncTime();
@@ -444,7 +462,7 @@ describe('notationdeDeclaration (unit)', () => {
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             expect(result).toBe(notationDeclaration);
 
-            done();
+            done?.();
          });
 
          mockSource.respondInAsyncTime();

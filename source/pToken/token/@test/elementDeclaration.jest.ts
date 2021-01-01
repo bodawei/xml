@@ -22,7 +22,9 @@ describe('elementDeclaration (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let dummyCM: ContentModelP;
    let parseContentModelMock: jest.MockedFunction<typeof contentModel.parseContentModel>;
-   let resumeParseContentModelMock: jest.MockedFunction<typeof contentModel.resumeParseContentModel>;
+   let resumeParseContentModelMock: jest.MockedFunction<
+      typeof contentModel.resumeParseContentModel
+   >;
 
    beforeEach(() => {
       elementDeclaration = new ElementDeclarationPToken({
