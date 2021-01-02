@@ -32,9 +32,9 @@ describe('notationdeDeclaration (unit)', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-      jest.spyOn(externalId, 'externalIdCheck');
-      jest.spyOn(nameCheck, 'nameCheck');
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
+      jest.spyOn(externalId, 'externalIdCheck').mockImplementation();
+      jest.spyOn(nameCheck, 'nameCheck').mockImplementation();
+      jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
    });
 
    it('asks the externalId module to look for well formed problems', () => {

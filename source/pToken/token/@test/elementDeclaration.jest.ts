@@ -42,6 +42,7 @@ describe('elementDeclaration (unit)', () => {
          contentModel,
          'resumeParseContentModel',
       ) as jest.MockedFunction<typeof contentModel.resumeParseContentModel>;
+      resumeParseContentModelMock.mockImplementation();
       parseContentModelMock = jest.spyOn(contentModel, 'parseContentModel') as jest.MockedFunction<
          typeof contentModel.parseContentModel
       >;
@@ -410,15 +411,9 @@ describe('elementDeclaration (unit)', () => {
             typeof parseUnexpanded.parseUnexpanded
          >;
 
-         parseUnexpandedSpy.mockImplementation(
-            (
-               source: STokenSource,
-               propName: string,
-               cb: (result: UnexpandedMarkupDetails | undefined) => void,
-            ) => {
-               cb(undefined);
-            },
-         );
+         parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
+            cb(undefined);
+         });
       });
 
       function getResult(item: ElementDeclarationPToken) {

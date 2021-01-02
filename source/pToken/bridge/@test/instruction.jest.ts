@@ -11,12 +11,14 @@ import * as textDecl from '../../token/textDeclaration';
 import * as xmlDecl from '../../token/xmlDeclaration';
 
 describe('parseInstruction (unit)', () => {
-   let callback: jest.MockedFunction<(
-      section:
-         | pi.ProcessingInstructionPToken
-         | xmlDecl.XmlDeclarationPToken
-         | textDecl.TextDeclarationPToken,
-   ) => void>;
+   let callback: jest.MockedFunction<
+      (
+         section:
+            | pi.ProcessingInstructionPToken
+            | xmlDecl.XmlDeclarationPToken
+            | textDecl.TextDeclarationPToken,
+      ) => void
+   >;
    let open: SToken;
 
    beforeEach(() => {
@@ -27,7 +29,7 @@ describe('parseInstruction (unit)', () => {
    // See the integration test for validation that this actually returns something through callback
 
    it('calls parseProcessingInstruction() when the target is not "xml"', () => {
-      const piParse = jest.spyOn(pi, 'parseProcessingInstruction').mockImplementation(() => {});
+      const piParse = jest.spyOn(pi, 'parseProcessingInstruction').mockImplementation();
       const mockSource = new MockSTokenSource([
          [undefined, 'space'],
          [undefined, 'word', ['?>']],
@@ -39,6 +41,8 @@ describe('parseInstruction (unit)', () => {
 
       const args = piParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(args[1]).toEqualRangeless({
          open: open,
          openSpace: undefined,
@@ -49,7 +53,7 @@ describe('parseInstruction (unit)', () => {
    });
 
    it('parses an XnlDeclaration if it finds a target of xml and is not in a document entity', () => {
-      const xmlParse = jest.spyOn(xmlDecl, 'parseXmlDeclaration').mockImplementation(() => {});
+      const xmlParse = jest.spyOn(xmlDecl, 'parseXmlDeclaration').mockImplementation();
       const mockSource = new MockSTokenSource([
          [undefined, 'space'],
          ['xml', 'word', ['?>']],
@@ -61,6 +65,8 @@ describe('parseInstruction (unit)', () => {
 
       const args = xmlParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(args[1]).toEqualRangeless({
          open: open,
          openSpace: undefined,
@@ -71,7 +77,7 @@ describe('parseInstruction (unit)', () => {
    });
 
    it('parses an TextDeclaration if it finds a target of xml and is not in a document entity', () => {
-      const textParse = jest.spyOn(textDecl, 'parseTextDeclaration').mockImplementation(() => {});
+      const textParse = jest.spyOn(textDecl, 'parseTextDeclaration').mockImplementation();
       const mockSource = new MockSTokenSource([
          ['\t', 'space'],
          ['xml', 'word', ['?>']],
@@ -83,6 +89,8 @@ describe('parseInstruction (unit)', () => {
 
       const args = textParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(args[1]).toEqualRangeless({
          open: open,
          openSpace: toSToken('\t'),

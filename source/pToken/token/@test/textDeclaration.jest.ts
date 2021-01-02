@@ -135,6 +135,7 @@ describe('textDeclaration (unit)', () => {
          fieldedSpy = jest.spyOn(fieldedInstr, 'parseFieldedInstruction') as jest.MockedFunction<
             typeof fieldedInstr.parseFieldedInstruction
          >;
+         fieldedSpy.mockImplementation();
       });
 
       it('calls parseInstructionCommon()', () => {

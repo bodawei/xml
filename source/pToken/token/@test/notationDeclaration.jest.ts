@@ -72,7 +72,6 @@ describe('notationdeDeclaration (unit)', () => {
          parseUnexpSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
             typeof parseUnexpanded.parseUnexpanded
          >;
-
          parseUnexpSpy.mockImplementation((source, name, cb) => {
             cb(undefined);
          });
@@ -263,7 +262,6 @@ describe('notationdeDeclaration (unit)', () => {
          resumeParseSpy = jest.spyOn(externalId, 'resumeParseExternalId') as jest.MockedFunction<
             typeof externalId.resumeParseExternalId
          >;
-
          resumeParseSpy.mockImplementation((_1, _2, _3, _4, cb) => {
             cb({ externalId: {} });
          });

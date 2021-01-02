@@ -44,7 +44,7 @@ describe('textDeclaration (unit)', () => {
       };
       mockErrorCollector = new MockErrorCollector();
       confVer = new ConformanceVersion();
-      jest.spyOn(misc, 'checkCharWellFormed');
+      jest.spyOn(misc, 'checkCharWellFormed').mockImplementation();
    });
 
    it('calls misc.checkCharWellFormed() on the target value', () => {

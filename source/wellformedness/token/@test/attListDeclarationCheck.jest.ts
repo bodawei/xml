@@ -43,9 +43,9 @@ describe('attListDeclarationCheck()', () => {
       mockErrorCollector = new MockErrorCollector();
       confVer = new ConformanceVersion();
 
-      jest.spyOn(literal, 'checkWellFormed'); // this doesn't seem to be working
-      jest.spyOn(misc, 'checkName');
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
+      jest.spyOn(literal, 'checkWellFormed').mockImplementation();
+      jest.spyOn(misc, 'checkName').mockImplementation();
+      jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
    });
 
    it('reports an error if the declaration type is not all caps', () => {

@@ -121,7 +121,9 @@ describe('FieldedInstruction (unit)', () => {
 
       beforeEach(() => {
          callback = jest.fn();
-         litParse = jest.spyOn(literal, 'parse') as jest.MockedFunction<typeof literal.parse>;
+         litParse = jest.spyOn(literal, 'parse').mockImplementation() as jest.MockedFunction<
+            typeof literal.parse
+         >;
       });
 
       it('does a basic parsing', () => {
@@ -141,6 +143,8 @@ describe('FieldedInstruction (unit)', () => {
          parseFieldedInstruction(mockSource, start, legalParams, callback);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback).toEqualRangeless(expected);
       });
 
@@ -211,6 +215,8 @@ describe('FieldedInstruction (unit)', () => {
          parseFieldedInstruction(mockSource, start, legalParams, callback);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback).toEqualRangeless(expected);
       });
 
@@ -229,6 +235,8 @@ describe('FieldedInstruction (unit)', () => {
          parseFieldedInstruction(mockSource, start, legalParams, callback);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback).toEqualRangeless(expected);
       });
 
@@ -266,6 +274,8 @@ describe('FieldedInstruction (unit)', () => {
          parseFieldedInstruction(mockSource, start, legalParams, callback);
          mockSource.respondInAsyncTime();
 
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback).toEqualRangeless(expected);
       });
    });

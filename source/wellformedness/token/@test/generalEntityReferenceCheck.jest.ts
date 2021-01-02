@@ -26,7 +26,7 @@ describe('generalEntityReferenceCheck()', () => {
          close: toSToken(';'),
       });
 
-      jest.spyOn(util, 'nameCheck');
+      jest.spyOn(util, 'nameCheck').mockImplementation();
    });
 
    it('checks that the name is a valid name', () => {

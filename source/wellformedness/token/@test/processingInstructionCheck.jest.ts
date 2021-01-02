@@ -30,12 +30,12 @@ describe('processingInstructionCheck() (unit)', () => {
       confVer = new ConformanceVersion();
       piPToken = new ProcessingInstructionPToken(protoPToken);
 
-      jest.spyOn(misc, 'checkCharWellFormed');
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
+      jest.spyOn(misc, 'checkCharWellFormed').mockImplementation();
+      jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
    });
 
    it('calls misc.checkName() on the target', () => {
-      jest.spyOn(misc, 'checkName');
+      jest.spyOn(misc, 'checkName').mockImplementation();
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
       expect(misc.checkName).toHaveBeenCalledWith(

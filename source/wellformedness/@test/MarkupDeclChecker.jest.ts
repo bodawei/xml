@@ -74,6 +74,8 @@ describe('MarkupDeclChecker (unit)', () => {
    let textDecl: TextDeclarationPToken;
 
    beforeEach(() => {
+      jest.restoreAllMocks();
+      jest.resetAllMocks();
       ec = new MockErrorCollector();
       checkState = new CheckState();
       attributeListDeclaration = makeAttListDeclaration();
@@ -552,7 +554,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
    describe('ATTLIST', () => {
       it('calls scanAttributeValues() on the attributes in the ATTLIST', () => {
-         const spy = jest.spyOn(checkUtils, 'scanAttributeValues');
+         const spy = jest.spyOn(checkUtils, 'scanAttributeValues').mockImplementation();
          checker = new MarkupDeclChecker(checkState, []);
 
          checker.check(internalSubsetStart, ec);

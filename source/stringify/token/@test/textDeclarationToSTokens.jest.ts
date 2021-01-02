@@ -30,6 +30,7 @@ describe('textDeclarationToSTokens() (unit)', () => {
 
    it('calls fieldedInstructionToSTokens()', () => {
       const entitySpy = jest.spyOn(fieldedInstr, 'fieldedInstructionToSTokens');
+      entitySpy.mockImplementation(() => []);
 
       textDeclarationToSTokens(textDeclPToken);
 

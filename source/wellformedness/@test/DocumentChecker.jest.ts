@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 
 import { ConformanceVersion, EntityId } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
@@ -115,6 +115,8 @@ describe('DocumentChecker (unit)', () => {
    }
 
    beforeEach(() => {
+      jest.restoreAllMocks();
+      jest.resetAllMocks();
       subState = new CheckState();
       subParams = [];
       ec = new MockErrorCollector();
@@ -159,7 +161,7 @@ describe('DocumentChecker (unit)', () => {
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN);
+         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN).mockImplementation();;
          checker.check(confVer, ec);
 
          checker.check(xmlDecl, ec);

@@ -53,16 +53,19 @@ describe('entityDeclarationCheck (unit)', () => {
       miscSpy = jest.spyOn(misc, 'checkWellFormedNameRecommendation') as jest.MockedFunction<
          typeof misc.checkWellFormedNameRecommendation
       >;
+      miscSpy.mockImplementation(() => []);
       miscWellFormedSpy = jest.spyOn(misc, 'checkCharWellFormed') as jest.MockedFunction<
          typeof misc.checkCharWellFormed
       >;
+      miscWellFormedSpy.mockImplementation(() => []);
       externalIdSpy = jest.spyOn(externalId, 'externalIdCheck') as jest.MockedFunction<
          typeof externalId.externalIdCheck
       >;
+      externalIdSpy.mockImplementation(() => []);
    });
 
    it('asks the literal module to look for problems in the declaration part', () => {
-      const literalSpy = jest.spyOn(literal, 'checkWellFormed');
+      const literalSpy = jest.spyOn(literal, 'checkWellFormed').mockImplementation();
 
       const pToken = new ParameterEntityDeclarationPToken(paramEntityDeclarationPToken, {
          value: [new TextPToken({ text: toSToken('yipes') })],
