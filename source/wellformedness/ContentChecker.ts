@@ -212,7 +212,7 @@ class ContentChecker implements Checker {
 
             const entityName = strOrBlank(pToken.referencePToken.name);
 
-            if (entityName !== undefined) {
+            if (entityName !== '') {
                errorCollector.check(
                   this.geContext.includes(entityName),
                   WellFormedError.ID.REFERENCE_INVALID_RECURSION,
@@ -256,7 +256,7 @@ class ContentChecker implements Checker {
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             const refName = strOrBlank(pToken.name);
 
-            if (refName !== undefined) {
+            if (refName !== '') {
                errorCollector.check(
                   this.geContext.includes(refName),
                   WellFormedError.ID.REFERENCE_INVALID_RECURSION,

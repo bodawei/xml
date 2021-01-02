@@ -71,6 +71,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          parameterEntities: {
             delimiter: {
+               isInternal: true,
                token: peDecl,
                replacementText: {
                   value: [new TextPToken({ text: toSToken('|') })],
@@ -80,6 +81,7 @@ describe('elementDeclarationValidate (unit)', () => {
                },
             },
             empty: {
+               isInternal: true,
                token: peDecl,
                replacementText: {
                   value: [new TextPToken({ text: toSToken('') })],
@@ -89,6 +91,7 @@ describe('elementDeclarationValidate (unit)', () => {
                },
             },
             close: {
+               isInternal: true,
                token: peDecl,
                replacementText: {
                   value: [new TextPToken({ text: toSToken(')') })],
@@ -118,6 +121,8 @@ describe('elementDeclarationValidate (unit)', () => {
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
          params: ['elementName'],
@@ -159,6 +164,8 @@ describe('elementDeclarationValidate (unit)', () => {
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
          params: ['elementName', 'bogus'],
@@ -205,6 +212,8 @@ describe('elementDeclarationValidate (unit)', () => {
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
          params: ['elementName', 'bogus1,bogus2'],
@@ -271,6 +280,8 @@ describe('elementDeclarationValidate (unit)', () => {
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
          params: ['elementName', 'foo,bar'],
@@ -353,6 +364,8 @@ describe('elementDeclarationValidate (unit)', () => {
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
          params: ['elementName', 'last (/4,/99),first (/2/1,/3)'],
@@ -372,21 +385,28 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('(') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('(') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = childrenDetails;
+         elementDeclarations: {
+            elementName: childrenDetails,
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
          params: ['elementName', 'x'],
@@ -406,17 +426,20 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('( foo | bar | ( baz | ginger))') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: true,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('( foo | bar | ( baz | ginger))') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
+      });
       state.elementDeclarations.elementName = {
          type: ElDeclType.CHILDREN,
          token: elementDeclaration,
@@ -439,17 +462,20 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('( foo | ( bar )') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: true,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('( foo | ( bar )') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
+      });
       state.elementDeclarations.elementName = {
          type: ElDeclType.MIXED,
          token: elementDeclaration,
@@ -459,6 +485,8 @@ describe('elementDeclarationValidate (unit)', () => {
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
          params: ['elementName', 'x'],
@@ -478,28 +506,35 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'midSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [
-                  new CharRefPToken({ open: toSToken('&#'), digits: toSToken('65') }),
-                  new TextPToken({ text: toSToken('|') }),
-               ],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: true,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [
+                     new CharRefPToken({ open: toSToken('&#'), digits: toSToken('65') }),
+                     new TextPToken({ text: toSToken('|') }),
+                  ],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         token: elementDeclaration,
-         graph: { startId: 0, endId: 0, states: {} },
-      };
+         elementDeclarations: {
+            elementName: {
+               type: ElDeclType.CHILDREN,
+               token: elementDeclaration,
+               graph: { startId: 0, endId: 0, states: {} },
+            },
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
          params: ['elementName', 'x'],
@@ -519,21 +554,28 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'midSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('   ') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: true,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('   ') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = childrenDetails;
+         elementDeclarations: {
+            elementName: childrenDetails,
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
@@ -553,18 +595,23 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'midSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('   ') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('   ') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = childrenDetails;
+         elementDeclarations: {
+            elementName: childrenDetails,
+         },
+      });
 
       elementDeclarationValidate(
          elementDeclaration,
@@ -573,6 +620,8 @@ describe('elementDeclarationValidate (unit)', () => {
          new ConformanceVersion(1, 1),
       );
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).not.toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
@@ -601,6 +650,8 @@ describe('elementDeclarationValidate (unit)', () => {
          new ConformanceVersion(1, 1),
       );
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'empty'],
@@ -620,29 +671,34 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [
-                  new ParameterEntityReferencePToken({
-                     open: toSToken('&'),
-                  }),
-                  new ParameterEntityStartPToken(peRefX), // just a dummy peRef to make it happy
-                  new TextPToken({ text: toSToken('()') }),
-                  new ParameterEntityEndPToken(peRefX), // just a dummy peRef to make it happy
-               ],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [
+                     new ParameterEntityReferencePToken({
+                        open: toSToken('&'),
+                     }),
+                     new ParameterEntityStartPToken(peRefX), // just a dummy peRef to make it happy
+                     new TextPToken({ text: toSToken('()') }),
+                     new ParameterEntityEndPToken(peRefX), // just a dummy peRef to make it happy
+                  ],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         token: elementDeclaration,
-         graph: { startId: 0, endId: 0, states: {} },
-      };
+         elementDeclarations: {
+            elementName: {
+               type: ElDeclType.CHILDREN,
+               token: elementDeclaration,
+               graph: { startId: 0, endId: 0, states: {} },
+            },
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
@@ -660,22 +716,27 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('()') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('()') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         token: elementDeclaration,
-         graph: { startId: 0, endId: 0, states: {} },
-      };
+         elementDeclarations: {
+            elementName: {
+               type: ElDeclType.CHILDREN,
+               token: elementDeclaration,
+               graph: { startId: 0, endId: 0, states: {} },
+            },
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
@@ -715,22 +776,27 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('  ') })], // note this would be an error if in the content model
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('  ') })], // note this would be an error if in the content model
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         token: elementDeclaration,
-         graph: { startId: 0, endId: 0, states: {} },
-      };
+         elementDeclarations: {
+            elementName: {
+               type: ElDeclType.CHILDREN,
+               token: elementDeclaration,
+               graph: { startId: 0, endId: 0, states: {} },
+            },
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
@@ -748,22 +814,27 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken(')') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken(')') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         token: elementDeclaration,
-         graph: { startId: 0, endId: 0, states: {} },
-      };
+         elementDeclarations: {
+            elementName: {
+               type: ElDeclType.CHILDREN,
+               token: elementDeclaration,
+               graph: { startId: 0, endId: 0, states: {} },
+            },
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
@@ -781,22 +852,27 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'midSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('foo') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('foo') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         token: elementDeclaration,
-         graph: { startId: 0, endId: 0, states: {} },
-      };
+         elementDeclarations: {
+            elementName: {
+               type: ElDeclType.CHILDREN,
+               token: elementDeclaration,
+               graph: { startId: 0, endId: 0, states: {} },
+            },
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
@@ -814,21 +890,28 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'contentSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('  ') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('  ') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = childrenDetails;
+         elementDeclarations: {
+            elementName: childrenDetails,
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
+      // @ts-expect-error 2329/matchers
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
@@ -848,22 +931,27 @@ describe('elementDeclarationValidate (unit)', () => {
             propName: 'midSpec',
          },
       });
-      state.parameterEntities = {
-         x: {
-            token: peDecl,
-            replacementText: {
-               value: [new TextPToken({ text: toSToken('  ') })],
-               isPE: true,
+      state = new ValidateState({
+         parameterEntities: {
+            x: {
+               isInternal: false,
                token: peDecl,
-               type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               replacementText: {
+                  value: [new TextPToken({ text: toSToken('  ') })],
+                  isPE: true,
+                  token: peDecl,
+                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
+               },
             },
          },
-      };
-      state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
-         token: elementDeclaration,
-         graph: { startId: 0, endId: 0, states: {} },
-      };
+         elementDeclarations: {
+            elementName: {
+               type: ElDeclType.CHILDREN,
+               token: elementDeclaration,
+               graph: { startId: 0, endId: 0, states: {} },
+            },
+         },
+      });
 
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 

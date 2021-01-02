@@ -216,6 +216,21 @@ describe('ContentChecker (unit)', () => {
          });
       });
 
+      it('reports no recursive error if a general entity start has no name (§4.1.0)', () => {
+         const geRef2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+         });
+         const geStart2 = new GeneralEntityStartPToken(geRef2);
+         const checker = makeChecker();
+
+         checker.check(generalEntityStart, ec);
+         checker.check(geStart2, ec);
+
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_INVALID_RECURSION);
+      });
+
       it('does not report a recursive error if a general entity start matches the name of this checker start (§4.1.0)', () => {
          const geRef2 = new GeneralEntityReferencePToken({
             open: toSToken('&'),
@@ -253,6 +268,21 @@ describe('ContentChecker (unit)', () => {
             params: ['testRef'],
             position: geRef2.open,
          });
+      });
+
+      it('@reports no recursive error if a general entity reference has no name (§4.1.0)', () => {
+         const geRef2 = new GeneralEntityReferencePToken({
+            open: toSToken('&'),
+            name: undefined,
+         });
+         const checker = makeChecker();
+
+         checker.check(generalEntityStart, ec);
+         checker.check(geRef2, ec);
+
+         // @ts-expect-error 2329/matchers
+         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_INVALID_RECURSION);
       });
    });
 

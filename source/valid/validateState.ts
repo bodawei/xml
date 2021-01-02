@@ -37,6 +37,7 @@ interface ChildrenDetails {
 type DeclarationDetails = AnyDetails | EmptyDetails | MixedDetails | ChildrenDetails;
 
 interface ParameterEntityDetails {
+   isInternal: boolean;
    token: ParameterEntityDeclarationPToken;
    replacementText?: ElidedEntityDeclarationPToken;
 }
@@ -47,17 +48,28 @@ interface ElementContext {
    stateId: number;
 }
 
+interface GeneralEntityDetails {
+   isInternal: boolean;
+}
+
+type ReadonlyGeneralEntityDetails = Readonly<GeneralEntityDetails>;
+type ReadonlyParameterEntityDetails = Readonly<ParameterEntityDetails>;
+
 interface ValidateStateProps {
    attributeDefs?: {
       [elementName: string]: AttributeDefs;
    };
 
-   elementDeclarations?: {
-      [name: string]: DeclarationDetails;
+   generalEntities?: {
+      [elementName: string]: GeneralEntityDetails;
    };
 
    parameterEntities?: {
       [name: string]: ParameterEntityDetails;
+   };
+
+   elementDeclarations?: {
+      [name: string]: DeclarationDetails;
    };
 
    elementContext?: {
@@ -84,12 +96,16 @@ class ValidateState {
       readonly [elementName: string]: AttributeDefs;
    };
 
+   readonly generalEntities: {
+      readonly [elementName: string]: ReadonlyGeneralEntityDetails;
+   };
+
    elementDeclarations: {
       [name: string]: DeclarationDetails;
    };
 
-   parameterEntities: {
-      [name: string]: ParameterEntityDetails;
+   readonly parameterEntities: {
+      readonly [elementName: string]: ReadonlyParameterEntityDetails;
    };
 
    elementContext: {
@@ -101,15 +117,19 @@ class ValidateState {
    readonly isStandalone: boolean;
 
    constructor(otherState?: ValidateStateProps) {
+      this.attributeDefs = otherState?.attributeDefs || {};
       this.elementDeclarations = otherState?.elementDeclarations || {};
-      this.parameterEntities = otherState?.parameterEntities || {};
+      // Too simplistic.
+      this.generalEntities = otherState?.generalEntities ? { ...otherState?.generalEntities } : {};
+      this.parameterEntities = otherState?.parameterEntities
+         ? { ...otherState?.parameterEntities }
+         : {};
       this.elementContext = {
          contextStack: otherState?.elementContext?.contextStack || [],
          activeContext: otherState?.elementContext?.activeContext,
          pastEnd: otherState?.elementContext?.pastEnd || false,
       };
       this.isStandalone = otherState?.isStandalone ?? false;
-      this.attributeDefs = otherState?.attributeDefs || {};
       this.inExternalSubset = otherState?.inExternalSubset ?? false;
    }
 }

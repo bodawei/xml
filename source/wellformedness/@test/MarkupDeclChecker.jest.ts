@@ -25,6 +25,7 @@ import {
    GeneralEntityEndPToken,
    ElidedEntityDeclarationPToken,
    ConditionalPToken,
+   ConditionalClosePToken,
 } from 'token';
 
 import { MarkupDeclChecker } from '../MarkupDeclChecker';
@@ -410,12 +411,11 @@ describe('MarkupDeclChecker (unit)', () => {
 
          beforeEach(() => {
             conditionalSection = new ConditionalPToken({ open: toSToken('<!['), peRefPlus: [] });
-
-            checker.check(new ExternalSubsetStartToken(), ec);
-            checker.check(conditionalSection, ec);
          });
 
          it('an error if the end of the external subset happens', () => {
+            checker.check(conditionalSection, ec);
+
             checker.check(new ExternalSubsetEndToken(), ec);
 
             // @ts-expect-error 2329/matchers
@@ -424,6 +424,34 @@ describe('MarkupDeclChecker (unit)', () => {
                id: WellFormedError.ID.CONDITIONAL_NO_CLOSE,
                params: [],
                position: conditionalSection.open,
+            });
+         });
+
+         it('an error if the conditional section appears before the start of an external subset', () => {
+            checker = new MarkupDeclChecker(checkState, []);
+
+            checker.check(conditionalSection, ec);
+
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            expect(ec).toReportError({
+               id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
+               params: [conditionalSection.type],
+               position: conditionalSection.open,
+            });
+         });
+
+         it('an error if the conditional end is delivered without an opening', () => {
+            const close = new ConditionalClosePToken({ open: toSToken(']>') });
+
+            checker.check(close, ec);
+
+            // @ts-expect-error 2329/matchers
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            expect(ec).toReportError({
+               id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
+               params: [close.type],
+               position: close.open,
             });
          });
       });

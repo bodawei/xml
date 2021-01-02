@@ -4,32 +4,101 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'error-test';
 import {
    makeAttListDeclaration,
+   makeElementDeclaration,
+   makeElementEmpty,
+   makeElementEnd,
+   makeElementStart,
    makeExternalSubsetEnd,
    makeExternalSubsetStart,
+   makeGeneralEntityDeclaration,
+   makeGeneralEntityReference,
+   makeParameterEntityDeclaration,
+   makeParameterEntityReference,
    makeXmlDecl,
 } from 'token-test';
 
 import { ValidityChecker } from '../ValidityChecker';
-import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
+import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
+import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
+import { elementDeclarationValidate } from '../token/elementDeclarationValidate';
+import { elementEndUpdateState } from '../token/elementEndUpdateState';
+import { elementEndValidate } from '../token/elementEndValidate';
+import { elementStartUpdateState } from '../token/elementStartUpdateState';
+import { elementStartValidate } from '../token/elementStartValidate';
+import { elidedEntityDeclarationUpdateState } from '../token/elidedEntityDeclarationUpdateState';
 import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpdateState';
 import { externalSubsetEndUpdateState } from '../token/externalSubsetEndUpdateState';
-import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
+import { generalEntityDeclarationUpdateState } from '../token/generalEntityDeclarationUpdateState';
+import { generalEntityReferenceValidate } from '../token/generalEntityReferenceValidate';
+import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityDeclarationUpdateState';
+import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
+import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
+import { ConformanceVersion } from 'basic';
+import { ElidedEntityDeclarationPToken } from 'token';
 
 jest.mock('../token/attListDeclarationUpdateState');
+jest.mock('../token/elementDeclarationUpdateState');
+jest.mock('../token/elementDeclarationValidate');
+jest.mock('../token/elementEndUpdateState');
+jest.mock('../token/elementEndValidate');
+jest.mock('../token/elementStartUpdateState');
+jest.mock('../token/elementStartValidate');
+jest.mock('../token/elidedEntityDeclarationUpdateState');
 jest.mock('../token/externalSubsetEndUpdateState');
 jest.mock('../token/externalSubsetStartUpdateState');
+jest.mock('../token/generalEntityDeclarationUpdateState');
+jest.mock('../token/generalEntityReferenceValidate');
+jest.mock('../token/parameterEntityDeclarationUpdateState');
+jest.mock('../token/parameterEntityReferenceValidate');
 jest.mock('../token/xmlDeclarationUpdateState');
 
 describe('ValidityChecker (unit)', () => {
+   let version: ConformanceVersion;
    let checker: ValidityChecker;
    let ec: MockErrorCollector;
+   let elementDeclarationUpdateStateMock: jest.MockedFunction<typeof elementDeclarationUpdateState>;
 
    beforeEach(async () => {
+      version = new ConformanceVersion();
       checker = new ValidityChecker();
       ec = new MockErrorCollector();
+
+      elementDeclarationUpdateStateMock = elementDeclarationUpdateState as jest.MockedFunction<
+         typeof elementDeclarationUpdateState
+      >;
+      elementDeclarationUpdateStateMock.mockImplementation((token, state) => state);
    });
 
-   it('calls the routine to update the state when passed an ATTLIST declaration', () => {
+   it('stores the version passed to it and pass that on to other validations', () => {
+      const elDecl = makeElementDeclaration();
+
+      checker.checkPToken(version, ec);
+      checker.checkPToken(elDecl, ec);
+
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(
+         elDecl,
+         expect.any(Object),
+         ec,
+         version,
+      );
+   });
+
+   it('stores only the first version passed to it', () => {
+      const elDecl = makeElementDeclaration();
+      checker.checkPToken(version, ec);
+
+      checker.checkPToken(new ConformanceVersion(1, 2), ec);
+      checker.checkPToken(elDecl, ec);
+
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(
+         elDecl,
+         expect.any(Object),
+         ec,
+         version,
+      );
+   });
+
+   it('updates the state when passed an ATTLIST declaration', () => {
       const attListDecl = makeAttListDeclaration();
 
       checker.checkPToken(attListDecl, ec);
@@ -37,15 +106,70 @@ describe('ValidityChecker (unit)', () => {
       expect(attListDeclarationUpdateState).toHaveBeenCalledWith(attListDecl, expect.any(Object));
    });
 
-   it('calls the routine to update the state when passed an external subset start', () => {
-      const exSSStart = makeExternalSubsetStart();
+   it('updates the state when passed an element start', () => {
+      const elementEmpty = makeElementEmpty();
 
-      checker.checkPToken(exSSStart, ec);
+      checker.checkPToken(elementEmpty, ec);
 
-      expect(externalSubsetStartUpdateState).toHaveBeenCalledWith(exSSStart, expect.any(Object));
+      expect(elementStartUpdateState).toHaveBeenCalledWith(elementEmpty, expect.any(Object));
    });
 
-   it('calls the routine to update the state when passed an external subset start', () => {
+   it('validates an element start', () => {
+      const elStart = makeElementStart();
+
+      checker.checkPToken(elStart, ec);
+
+      expect(elementStartValidate).toHaveBeenCalledWith(elStart, expect.any(Object), ec);
+   });
+
+   it('updates the state when passed an element declaration', () => {
+      const elDecl = makeElementDeclaration();
+
+      checker.checkPToken(elDecl, ec);
+
+      expect(elementDeclarationUpdateState).toHaveBeenCalledWith(elDecl, expect.any(Object));
+   });
+
+   it('validates an element declaration', () => {
+      const elDecl = makeElementDeclaration();
+      checker.checkPToken(version, ec);
+
+      checker.checkPToken(elDecl, ec);
+
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(
+         elDecl,
+         expect.any(Object),
+         ec,
+         version,
+      );
+   });
+
+   it('updates the state when passed an element end', () => {
+      const elementEnd = makeElementEnd();
+
+      checker.checkPToken(elementEnd, ec);
+
+      expect(elementEndUpdateState).toHaveBeenCalledWith(elementEnd, expect.any(Object));
+   });
+
+   it('validates an element end', () => {
+      const elementEnd = makeElementEnd();
+
+      checker.checkPToken(elementEnd, ec);
+
+      expect(elementEndValidate).toHaveBeenCalledWith(elementEnd, expect.any(Object), ec);
+   });
+
+   it('updates the state when passed an elided entity declaration', () => {
+      const peDecl = makeParameterEntityDeclaration();
+      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value as any);
+
+      checker.checkPToken(elided, ec);
+
+      expect(elidedEntityDeclarationUpdateState).toHaveBeenCalledWith(elided, expect.any(Object));
+   });
+
+   it('updates the state when passed an external subset end', () => {
       const esSSEnd = makeExternalSubsetEnd();
 
       checker.checkPToken(esSSEnd, ec);
@@ -53,7 +177,50 @@ describe('ValidityChecker (unit)', () => {
       expect(externalSubsetEndUpdateState).toHaveBeenCalledWith(esSSEnd, expect.any(Object));
    });
 
-   it('calls the routine to update the state when passed an XML Declaration', () => {
+   it('updates the state when passed an external subset start', () => {
+      const esSSStart = makeExternalSubsetStart();
+
+      checker.checkPToken(esSSStart, ec);
+
+      expect(externalSubsetStartUpdateState).toHaveBeenCalledWith(esSSStart, expect.any(Object));
+   });
+
+   it('updates the state when passed a general entity declaration', () => {
+      const geDecl = makeGeneralEntityDeclaration();
+
+      checker.checkPToken(geDecl, ec);
+
+      expect(generalEntityDeclarationUpdateState).toHaveBeenCalledWith(geDecl, expect.any(Object));
+   });
+
+   it('validates an general entity reference', () => {
+      const geRef = makeGeneralEntityReference();
+
+      checker.checkPToken(geRef, ec);
+
+      expect(generalEntityReferenceValidate).toHaveBeenCalledWith(geRef, expect.any(Object), ec);
+   });
+
+   it('updates the state when passed a parameter entity declaration', () => {
+      const peDecl = makeParameterEntityDeclaration();
+
+      checker.checkPToken(peDecl, ec);
+
+      expect(parameterEntityDeclarationUpdateState).toHaveBeenCalledWith(
+         peDecl,
+         expect.any(Object),
+      );
+   });
+
+   it('validates an parameter entity reference', () => {
+      const peRef = makeParameterEntityReference();
+
+      checker.checkPToken(peRef, ec);
+
+      expect(parameterEntityReferenceValidate).toHaveBeenCalledWith(peRef, expect.any(Object), ec);
+   });
+
+   it('updates the state when passed an XML Declaration', () => {
       const xmlDecl = makeXmlDecl();
 
       checker.checkPToken(xmlDecl, ec);
@@ -61,7 +228,7 @@ describe('ValidityChecker (unit)', () => {
       expect(xmlDeclarationUpdateState).toHaveBeenCalledWith(xmlDecl, expect.any(Object));
    });
 
-   it('will not update the state twice', () => {
+   it('will not update the state twice when called with two XML Declarations', () => {
       const xmlDecl = makeXmlDecl();
 
       checker.checkPToken(xmlDecl, ec);

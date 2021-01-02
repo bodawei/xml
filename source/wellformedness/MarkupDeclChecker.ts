@@ -42,9 +42,11 @@ import { ELEMENT_DECLARATION_PTOKEN } from '../pToken/token/elementDeclaration';
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
-import { GENERAL_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/generalEntityDeclaration';
-import { PARAMETER_ENTITY_DECLARATION_PTOKEN } from '../pToken/token/parameterEntityDeclaration';
-import { TEXT_PTOKEN } from '../pToken/token/text';
+import {
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   TEXT_PTOKEN,
+} from 'pToken';
 
 import {
    CHECKER_DONE,
@@ -501,7 +503,7 @@ class MarkupDeclChecker implements Checker {
     * as just relying on the graph enumerated above.
     */
    private transition(pToken: ParseValue, ec: ErrorCollector): boolean {
-      let newState: States | typeof NO_CHANGE | void;
+      let newState: States | typeof NO_CHANGE | undefined;
 
       if (pToken.type === PARAMETER_ENTITY_START_PTOKEN && this.state === States.PRE) {
          if (isParamEntityExternal(pToken.referencePToken, this.checkState.paramDecls)) {
@@ -522,7 +524,9 @@ class MarkupDeclChecker implements Checker {
          (pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
             (this.start.type === EXTERNAL_SUBSET_START_TOKEN ||
                this.start.type === CONDITIONAL_PTOKEN)) ||
-         (pToken.type === CONDITIONAL_CLOSE_PTOKEN && this.start.type === CONDITIONAL_PTOKEN)
+         (pToken.type === CONDITIONAL_CLOSE_PTOKEN &&
+            this.start &&
+            this.start.type === CONDITIONAL_PTOKEN)
       ) {
          newState = States.DONE;
       }

@@ -67,7 +67,7 @@ describe('XML Conformance tests', () => {
             const verToUse = hasEdition ? ver : undefined;
             const revToUse = hasEdition ? edition : undefined;
             const testStream = setUpStreams(testData, verToUse, revToUse);
-            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done!);
+            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
 
             // If the test details includes output, then we should test that the output matches
             if (hasOutput) {

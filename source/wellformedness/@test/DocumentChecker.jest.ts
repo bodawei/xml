@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, EntityId } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import {
@@ -32,6 +32,7 @@ import {
    InternalSubsetStartToken,
    SpacePToken,
    PToken,
+   ConditionalPToken,
 } from 'token';
 import {
    makeTextDecl,
@@ -54,6 +55,9 @@ import {
 import { DocumentChecker } from '../DocumentChecker';
 import { CHECKER_DONE, CheckState, Checker } from '../checkUtils';
 import { checkMap } from '../checkMap';
+import checkConditionalStartWellFormed from '../token/conditionalStart';
+
+jest.mock('../token/conditionalStart');
 
 describe('DocumentChecker (unit)', () => {
    let checker: DocumentChecker;
@@ -169,6 +173,23 @@ describe('DocumentChecker (unit)', () => {
          checker.check(error, ec);
 
          expect(ec.errors).toEqual([]);
+      });
+
+      it('handles an EntityId with no problems', () => {
+         checker.check(new EntityId(), ec);
+
+         expect(ec.errors).toEqual([]);
+      });
+
+      it('handles an ConditionalSection start with no problems', () => {
+         const conditional = new ConditionalPToken({
+            open: toSToken('<!['),
+            bracket: toSToken('['),
+         });
+
+         checker.check(conditional, ec);
+
+         expect(checkConditionalStartWellFormed).toHaveBeenCalledWith(conditional, ec);
       });
 
       describe('dtd subchecker', () => {

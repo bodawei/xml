@@ -8,6 +8,8 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
+      // 'rmt-012', // the problem here is that the doc is 1.0, but it is in the 1.1 section.
+
       'rmt-e2e-36', // (valid:1/5) An external ATTLIST declaration does not make a document non-standalone if the normalization would have been the same without the declaration
       'o-p08fail1', // ELEMENTSTART_NMTOKENS_NOT_NMTOKEN --- ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
 
@@ -16,8 +18,6 @@ const testFilters: FilterData = {
       // The solution is either we need to always add other delimiters to word identification
       // or we need to completely chnage unassigned to just work with strings rather than preparsed
       'pr-xml-utf-8', // japanese charas in utf8... what happened
-      // When tests are running 1.1 test, the xmldecl should override it
-      'rmt-012', // the problem here is that the doc is 1.0, but it is in the 1.1 section.
 
       // Misc
       'ext01', // We are creating PACE_PTOKEN's that we should not
