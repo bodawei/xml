@@ -37,5 +37,9 @@ There are a couple caveats to this:
       * The char references in CRLF_INDIRECT will be processed as is normal for internal entities.
       * When referenced in the attribute value, these will be parsed, as literal `\r` and `\n` characters, and will be normalized to two spaces.
       * You can essentially see this in the second row example in §3.3.3 or in the corresponding unit test for this feature.
+4. In 1.0/3, the wording was changed to make it explicit that a document may not be marked as `standalone="yes"` if information in external portions of the DTD would cause you to make a different normalization than you would without that info.  In particular, this means that non-CDATA attributes might (or might not) change their values during the normalization process (that is `"foo bar"` would not but `"    foo   bar "` would.
+   * For 1.0/3 and later, this is clear.  The wording, however in 1.0/1 is less clear. It says "The standalone document declaration must have the value "no" if any external markup declarations contain declarations of ... attributes with values subjecct to normalization, where the attribute ... value ... will change as a result of the normalization".  This could be taken to mean any normalization, even CDATA normalization (whitespace chars changed to newlines)
+   * At the moment, this does not interpret 1.0/1 and /2 as saying ANY normalization changes is a violation of `standalone="no"`.
+
 
 ## Default attributes

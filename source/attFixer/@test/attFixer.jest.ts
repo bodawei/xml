@@ -194,6 +194,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             makeElementStartWithAttrValueFromString('xyz', '\n\nxyz', {
                normalized: true,
+               dtdChangedNormalization: true,
             }),
          );
       });
@@ -286,6 +287,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz', {
                normalized: true,
+               dtdChangedNormalization: true,
             }),
          );
       });
@@ -300,6 +302,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             makeElementStartWithAttrValueFromString('xyz', '\n\nxyz', {
                normalized: true,
+               dtdChangedNormalization: true,
             }),
          );
       });
@@ -314,6 +317,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz', {
                normalized: true,
+               dtdChangedNormalization: true,
             }),
          );
       });
@@ -328,6 +332,7 @@ describe('AttFixer', () => {
          expect(result).toEqual(
             makeElementStartWithAttrValueFromString('x yz', 'x\n\r\n\t yz   ', {
                normalized: true,
+               dtdChangedNormalization: true,
             }),
          );
       });
@@ -464,6 +469,7 @@ describe('AttFixer', () => {
                ],
                {
                   normalized: true,
+                  dtdChangedNormalization: true,
                },
             ),
          );

@@ -45,7 +45,11 @@ function checkAttributes(
          // - attributes with tokenized types, where the attribute appears in the document
          //   with a value such that normalization will produce a different value from that
          //   which would be produced in the absence of the declaration
-         ec.check(attr.normalized, VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED, [elName, attName]);
+         ec.check(
+            attr.normalized && attr.dtdChangedNormalization,
+            VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
+            [elName, attName],
+         );
       }
    }
 }

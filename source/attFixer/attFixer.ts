@@ -23,6 +23,7 @@ import { AttributePToken } from '../token/common/attribute';
 interface AugmentedAttributePToken extends AttributePToken {
    defaulted?: boolean;
    normalized?: boolean;
+   dtdChangedNormalization?: boolean;
 }
 
 interface AttDetals {
@@ -57,23 +58,6 @@ function isAugmentedAttribute(
 }
 
 /*
- * §3.3.3: (1.0/1) a whitespace character (#x20, #xD, #xA, #x9) is processed by appending #x20
- *    to the normalized value, except that only a single #x20 is appended for a "#xD#xA"
- *    sequence that is part of an external parsed entity or the literal entity value of
- *    an internal parsed entity
- * §3.3.3 (1.0/2+) For a white space character (#x20, #xD, #xA, #x9), append a space
- *    character (#x20) to the normalized value.
- * (See discussion in the README for this)
- */
-function normalizeString(input: string, details: AttDetals): string {
-   if (details.isCData) {
-      return input.replace(CDATA_REGEX, ' ');
-   } else {
-      return input.replace(OTHER_REGEX, ' ');
-   }
-}
-
-/*
  * This is the heart of the noramlization work. Remember an attribute value will contain
  * a sereis of TEXT_PTOKENs, CHARREF_PTOKEN and GENERAL_ENTITY_REFERENCE_PTOKENs.
  * It is relevant to note that if the attribute is not a CDATA attribute, then
@@ -87,11 +71,13 @@ function normalizeAttr(
    details: AttDetals,
 ): {
    normalized: boolean;
+   dtdChangedNormalization: boolean;
    value: LiteralValuePToken;
 } {
    const newValue: LiteralValuePToken = [];
    let lastWasSpace = true;
    let normalized = false;
+   let dtdChangedNormalization = false;
    let lastItem;
 
    /*
@@ -121,19 +107,34 @@ function normalizeAttr(
 
       switch (val.type) {
          case TEXT_PTOKEN:
-            let newStr = normalizeString(strOrBlank(val.text), details);
+            /*
+             * §3.3.3: (1.0/1) a whitespace character (#x20, #xD, #xA, #x9) is processed by appending #x20
+             *    to the normalized value, except that only a single #x20 is appended for a "#xD#xA"
+             *    sequence that is part of an external parsed entity or the literal entity value of
+             *    an internal parsed entity
+             * §3.3.3 (1.0/2+) For a white space character (#x20, #xD, #xA, #x9), append a space
+             *    character (#x20) to the normalized value.
+             * (See discussion in the README for this)
+             */
+            const baseNormalization = strOrBlank(val.text).replace(CDATA_REGEX, ' ');
+            let newStr: string = baseNormalization;
 
-            // Remove any leading space if there was space before this text token
-            if (lastWasSpace && !details.isCData) {
-               newStr = newStr.replace(LEADING_SPACE_REGEX, '');
-            }
+            // Do more normalization if this isn't CDATA
+            if (!details.isCData) {
+               newStr = baseNormalization.replace(OTHER_REGEX, ' ');
 
-            // Remove all trailing space, if present
-            if (isLast && !details.isCData) {
-               newStr = newStr.replace(TRAILING_SPACE_REGEX, '');
-               lastWasSpace = false;
-            } else {
-               lastWasSpace = newStr.length === 0 ? lastWasSpace : newStr.endsWith(' ');
+               // Remove any leading space if there was space before this text token
+               if (lastWasSpace) {
+                  newStr = newStr.replace(LEADING_SPACE_REGEX, '');
+               }
+
+               // Remove all trailing space, if present
+               if (isLast) {
+                  newStr = newStr.replace(TRAILING_SPACE_REGEX, '');
+                  lastWasSpace = false;
+               } else {
+                  lastWasSpace = newStr.length === 0 ? lastWasSpace : newStr.endsWith(' ');
+               }
             }
 
             const lastText = new TextPToken({
@@ -143,6 +144,20 @@ function normalizeAttr(
             if (newStr !== val.text.str) {
                newValue.push(lastText);
                normalized = true;
+
+               //
+               // §2.9 Validity Constraint: Standaone Document Declaration
+               //    ...attributes with values subject to normalization, where
+               //    the attribute appears in the document with a value WHICH WILL
+               //    CHANGE AS A RESULT OF NORMALIZATION, ..
+               //    (or as 1.0/3 phrases it)
+               //    attributes with tokenized types, where the attribute appears
+               //    in the document with a value such that normalization will produce
+               //    a different value from that which would be produced in the absence
+               //    of the declaration,
+               if (baseNormalization !== newStr) {
+                  dtdChangedNormalization = true;
+               }
             } else {
                newValue.push(val);
             }
@@ -160,6 +175,7 @@ function normalizeAttr(
    return {
       value: newValue,
       normalized,
+      dtdChangedNormalization,
    };
 }
 
@@ -183,6 +199,10 @@ function normalizeAttributes(
 
       if (normalizedInfo.normalized) {
          newAttr.normalized = true;
+      }
+
+      if (normalizedInfo.dtdChangedNormalization) {
+         newAttr.dtdChangedNormalization = true;
       }
 
       newAttributes.push(newAttr);
