@@ -103,7 +103,11 @@ function attListDeclarationCheck(
       } else {
          ec.check(!knownType, WFEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [attName, elNameText, attType]);
          ec.setPos(attDef.typeSpace);
-         ec.check(!attDef.typeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [attName, elNameText]);
+         ec.check(!attDef.typeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [
+            attName,
+            attType,
+            elNameText,
+         ]);
 
          if (upperAttType === 'NOTATION') {
             if (!attDef.enumeration) {
