@@ -129,8 +129,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(unbalancedElement, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['test', 'bogus'],
@@ -153,8 +152,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(unbalancedEnd, ec);
          checker.check(unbalancedEnd2, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['test', 'bogus2'],
@@ -168,8 +166,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(elementEnd, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['', 'test'],
@@ -207,8 +204,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(geStart2, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
@@ -226,8 +222,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(geStart2, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_INVALID_RECURSION);
       });
 
@@ -242,8 +237,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(geStart2, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).not.toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef2'],
@@ -261,8 +255,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(geRef2, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
@@ -280,8 +273,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(geRef2, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_INVALID_RECURSION);
       });
    });
@@ -301,8 +293,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(textDeclStart, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.CONTENT_INVALID_TOKEN);
       });
 
@@ -320,8 +311,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(textDeclStart, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [TEXTDECL_PTOKEN],
@@ -335,8 +325,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(cdata, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.CONTENT_INVALID_TOKEN);
       });
 
@@ -347,8 +336,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(comment, ec);
          checker.check(textDeclStart, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [TEXTDECL_PTOKEN],
@@ -362,8 +350,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(textDeclStart, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [TEXTDECL_PTOKEN],
@@ -378,8 +365,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(notationDecl, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [NOTATION_DECLARATION_PTOKEN],
@@ -394,8 +380,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(charData, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.CHARDATA_INVALID_SECTION_END,
             params: [],
@@ -446,8 +431,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(unparsedReference, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['unparsed'],
@@ -483,8 +467,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(badRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['test'],
@@ -504,8 +487,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['noDecl'],
@@ -520,8 +502,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(endityEnd, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [GENERAL_ENTITY_END_PTOKEN],
@@ -540,8 +521,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(noDeclStart, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['noDecl'],
@@ -561,8 +541,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
@@ -578,8 +557,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
@@ -595,8 +573,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
       });
 
@@ -612,8 +589,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['noDecl'],
@@ -659,8 +635,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementStart, ec);
          checker.check(generalEntityEnd, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['test', GENERAL_ENTITY_END_PTOKEN],
@@ -679,8 +654,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityStart, ec);
          checker.check(bogusEnd, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [GENERAL_ENTITY_END_PTOKEN],
@@ -709,8 +683,7 @@ describe('ContentChecker (unit)', () => {
 
          checker.check(unbalancedElement, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
             params: ['testRef', 'second'],
@@ -737,8 +710,7 @@ describe('ContentChecker (unit)', () => {
 
          checker.check(unbalancedElement, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED);
       });
 
@@ -778,8 +750,7 @@ describe('ContentChecker (unit)', () => {
 
          checker.check(undeclaredRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
@@ -828,8 +799,7 @@ describe('ContentChecker (unit)', () => {
 
          checker.check(withExternalRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
@@ -859,8 +829,7 @@ describe('ContentChecker (unit)', () => {
 
          checker.check(withUnparsedRef, ec);
 
-         // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+         // @ts-expect-error TS2339 - matchers
          expect(ec).toReportError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],

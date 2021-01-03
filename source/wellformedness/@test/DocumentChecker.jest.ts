@@ -161,7 +161,7 @@ describe('DocumentChecker (unit)', () => {
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN).mockImplementation();;
+         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN).mockImplementation();
          checker.check(confVer, ec);
 
          checker.check(xmlDecl, ec);
@@ -390,7 +390,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(elementStart, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
          });
 
@@ -398,7 +397,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(textDecl, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [textDecl.type],
@@ -410,7 +408,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(space, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
          });
 
@@ -420,7 +417,6 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors.length).toEqual(1);
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [XMLDECL_PTOKEN],
@@ -438,7 +434,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -504,7 +499,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -536,7 +530,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [INTERNAL_SUBSET_START_TOKEN],
@@ -550,7 +543,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(externalSubsetStart, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [EXTERNAL_SUBSET_START_TOKEN],
@@ -564,7 +556,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [INTERNAL_SUBSET_START_TOKEN],
@@ -590,7 +581,6 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors.length).toEqual(1);
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [ELEMENT_START_PTOKEN],
@@ -610,7 +600,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -689,7 +678,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -702,7 +690,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
@@ -751,7 +738,6 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -769,7 +755,6 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -789,7 +774,6 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -809,7 +793,6 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
@@ -823,7 +806,6 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(ec).toReportError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,

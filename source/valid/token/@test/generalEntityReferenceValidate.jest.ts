@@ -46,8 +46,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       generalEntityReferenceValidate(ref, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.GEREF_UNDEFINED,
          params: ['testRef'],
          position: ref.name,
@@ -89,8 +88,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       generalEntityReferenceValidate(ref, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportWarning({
+            expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.PREDEFINED_UNDECLARED,
          params: ['lt'],
          position: ref.name,

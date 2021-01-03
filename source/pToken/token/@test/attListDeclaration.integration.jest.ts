@@ -25,8 +25,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -73,8 +72,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -134,8 +132,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -188,8 +185,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -253,8 +249,7 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(expected);
+                        expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -300,8 +295,7 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(expected);
+                        expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -360,8 +354,7 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(expected);
+                        expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -420,8 +413,7 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(expected);
+                        expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -460,8 +452,7 @@ describe('attListDeclaration (integration)', () => {
 
          resumeParseAttListDeclaration(source, attListDecl, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),

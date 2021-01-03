@@ -360,8 +360,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart) as ElementStartPToken;
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result.attributes[0].value).toEqualRangeless([
+                  expect(result.attributes[0].value).toEqualRangeless([
             new TextPToken({ text: new SToken('a ', '   \na   ', []) }),
             new CharRefPToken({ open: toSToken('&'), digits: toSToken('65') }),
             new TextPToken({ text: new SToken(' a', '   \na   ', []) }),
@@ -394,8 +393,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart) as ElementStartPToken;
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result.attributes[0].value).toEqualRangeless([
+                  expect(result.attributes[0].value).toEqualRangeless([
             new TextPToken({ text: new SToken('a ', '   \na   ', []) }),
             new GeneralEntityStartPToken(reference),
             new TextPToken({ text: new SToken('', '   \n\t   ', []) }),

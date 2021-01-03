@@ -19,8 +19,7 @@ describe('ProcessingInstructionPToken (integration)', () => {
 
          parseProcessingInstruction(source, { open: toSToken('<?') }, (parsing) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(parsing).toEqualRangeless({
+                        expect(parsing).toEqualRangeless({
                type: PROCESSING_INSTRUCTION_PTOKEN,
                open: toSToken('<?'),
                instruction: toSToken('blah blahx'),

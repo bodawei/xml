@@ -122,8 +122,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
          params: ['elementName'],
          position: elementDeclaration.name,
@@ -165,8 +164,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportWarning({
+            expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
          params: ['elementName', 'bogus'],
          position: elementDeclaration.contentModel?.open,
@@ -213,8 +211,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportWarning({
+            expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
          params: ['elementName', 'bogus1,bogus2'],
          position: elementDeclaration.contentModel?.open,
@@ -281,8 +278,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
          params: ['elementName', 'foo,bar'],
          position: elementDeclaration.contentModel?.open,
@@ -365,8 +361,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
          params: ['elementName', 'last (/4,/99),first (/2/1,/3)'],
          position: elementDeclaration.contentModel?.open,
@@ -406,8 +401,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -486,8 +480,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -534,8 +527,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportWarning({
+            expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -575,8 +567,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportWarning({
+            expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -621,8 +612,7 @@ describe('elementDeclarationValidate (unit)', () => {
       );
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).not.toReportWarning({
+            expect(mockErrorCollector).not.toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -651,8 +641,7 @@ describe('elementDeclarationValidate (unit)', () => {
       );
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportWarning({
+            expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'empty'],
          position: elementDeclaration.contentModel?.open,
@@ -911,8 +900,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportWarning({
+            expect(mockErrorCollector).toReportWarning({
          id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,

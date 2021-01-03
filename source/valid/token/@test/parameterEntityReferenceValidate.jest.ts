@@ -47,8 +47,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
       parameterEntityReferenceValidate(ref, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.PEREF_UNDEFINED,
          params: ['entityName'],
          position: ref.name,

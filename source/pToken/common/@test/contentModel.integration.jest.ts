@@ -94,8 +94,7 @@ describe('ContentModel (integration)', () => {
 
          parseContentModel(source, (result) => {
             // @ts-expect-error matcher not recognized
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toMatchInlineSnapshot(`
+                        expect(result).toMatchInlineSnapshot(`
                ContentModelP {
                  "close": SToken {
                    "originalStr": ")",

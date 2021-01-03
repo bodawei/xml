@@ -61,7 +61,7 @@ describe('XML Conformance tests', () => {
          .map((ver) => Number.parseInt(ver, 10) as XmlRevision);
 
       allEditions.forEach((edition) => {
-         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
+         fit(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
             const hasOutput = 'outputData' in testData;
             // If an edition was specified in the test data, then we enforce which version to use in the processor. Otherwise we let the document decide
             const verToUse = hasEdition ? ver : undefined;
@@ -75,7 +75,6 @@ describe('XML Conformance tests', () => {
 
                gatherStrings(toXmlStream, (results: Array<string>) => {
                   // @ts-expect-error 2329/matchers
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   expect(results).toEqualNormalized(testData.outputData);
                   doneWhenAllDone();
                });
@@ -98,7 +97,7 @@ describe('XML Conformance tests', () => {
                //    'results',
                //    results.map((r) => r.type),
                // );
-               // console.log(JSON.stringify(results, undefined, 5));
+               // console.json(results);
                // const actualErrors: Array<any> = results.filter(
                //    (token) => token.type === 'ERROR_TYPE' && (token as any).subtype !== 'WARNING',
                // ) as any;
@@ -114,11 +113,9 @@ describe('XML Conformance tests', () => {
 
                if (expectedError) {
                   // @ts-expect-error 2329/matchers
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   expect(results).toHaveErrors([expectedError]);
                } else {
                   // @ts-expect-error 2329/matchers
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   expect(results).not.toHaveErrors();
                }
                doneWhenAllDone();

@@ -94,8 +94,7 @@ describe('ProcessingInstructionPToken (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ProcessingInstructionPToken({
                open: toSToken('<?'),
                instruction: toSToken('blah'),
@@ -111,8 +110,7 @@ describe('ProcessingInstructionPToken (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless({
+                  expect(result).toEqualRangeless({
             open: toSToken('<?'),
             instruction: undefined,
             close: undefined,

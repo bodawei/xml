@@ -172,7 +172,7 @@ function checkGeneralEntity(
  * Examine the contents of the attribute values for any well-formedness problems
  */
 function scanAttributeValues(
-   attributes: Array<AttributePToken>,
+   attributes: ReadonlyArray<AttributePToken>,
    entityDecls: GeneralEntitiesInfo,
    state: CheckState,
    geContext: Array<string>,

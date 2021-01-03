@@ -104,7 +104,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [],
@@ -156,7 +155,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(callback).toEqualRangeless(aldPToken);
       });
 
@@ -188,7 +186,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -247,7 +244,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -310,7 +306,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(aldPToken);
       });
 
@@ -342,7 +337,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -393,7 +387,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -454,7 +447,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -508,7 +500,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -589,7 +580,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -634,7 +624,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -707,7 +696,6 @@ describe('AttListDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(actual).toEqualRangeless(
             new AttListDeclarationPToken(aldPToken, {
                attDefs: [
@@ -735,7 +723,6 @@ describe('AttListDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(actual).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -769,7 +756,6 @@ describe('AttListDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(actual).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -807,7 +793,6 @@ describe('AttListDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(actual).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -848,7 +833,6 @@ describe('AttListDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(actual).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -897,7 +881,6 @@ describe('AttListDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(actual).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -949,7 +932,6 @@ describe('AttListDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(actual).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
@@ -1035,7 +1017,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      declTypeSpace: toSToken(doneStr),
@@ -1088,7 +1069,6 @@ describe('AttListDeclaration (unit)', () => {
 
          resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   declTypeSpace: toSToken(' '),
@@ -1140,7 +1120,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      elementNameSpace: toSToken(destStr),
@@ -1189,7 +1168,6 @@ describe('AttListDeclaration (unit)', () => {
 
          resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   elementNameSpace: toSToken(' '),
@@ -1244,7 +1222,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1309,7 +1286,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1380,7 +1356,6 @@ describe('AttListDeclaration (unit)', () => {
                   expect.any(Function),
                );
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1437,7 +1412,6 @@ describe('AttListDeclaration (unit)', () => {
                   expect.any(Function),
                );
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1494,7 +1468,6 @@ describe('AttListDeclaration (unit)', () => {
                   expect.any(Function),
                );
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1546,7 +1519,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1595,7 +1567,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1642,7 +1613,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1691,7 +1661,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1740,7 +1709,6 @@ describe('AttListDeclaration (unit)', () => {
 
          resumeParseAttListDeclaration(mockSource, pToken, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(
                new AttListDeclarationPToken(pToken, {
                   attDefs: [
@@ -1786,7 +1754,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [
@@ -1834,7 +1801,6 @@ describe('AttListDeclaration (unit)', () => {
 
             resumeParseAttListDeclaration(mockSource, pToken, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
                      attDefs: [

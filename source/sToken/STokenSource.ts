@@ -8,11 +8,11 @@ import SToken from './SToken';
 
 type DeliverSToken = (stoken?: SToken) => void;
 
-type ExtractorContext = {
+interface ExtractorContext {
    extractor: Extractor;
    startIndex?: number;
    callback: DeliverSToken;
-};
+}
 
 /**********************************************************************\
  A STokenSource combines three things, and returns SToken using them.
@@ -78,14 +78,23 @@ type ExtractorContext = {
 
 class STokenSource {
    public errors: Array<Error>;
+
    private confVer: ConformanceVersion;
+
    private entityId: EntityId;
+
    private _extractorInfo: ExtractorMap;
+
    public _segments: Array<Segment>;
+
    public _extractors: Array<ExtractorContext>;
+
    private _lastOffset?: Offset;
+
    private _allTextAdded = false;
+
    private _orphanedRange?: Range;
+
    private _resuming?: boolean;
 
    constructor(extractorInfo: ExtractorMap, entityId?: EntityId) {
@@ -160,7 +169,10 @@ class STokenSource {
          extractorConstructor = extractorDefinition.extractorConstructor;
 
          if (extractorDefinition.params.extractorConstructor) {
-            params = new extractorDefinition.params.extractorConstructor(this.confVer.version, params);
+            params = new extractorDefinition.params.extractorConstructor(
+               this.confVer.version,
+               params,
+            );
          } else {
             params = extractorDefinition.params;
          }
@@ -219,8 +231,11 @@ class STokenSource {
          this._restorePartiallyAndUnusedSegments(results.segments);
 
          // Store where we left off, unless we got no ranges, or we didn't actually consume any segments
-         if (results.segments.length > 0 &&
-            ((results.segments[0] as SegmentInfo).segment as Segment).index !== extContext.startIndex) { // typeHack
+         if (
+            results.segments.length > 0 &&
+            (results.segments[0].segment as Segment).index !== extContext.startIndex
+         ) {
+            // typeHack
             this._lastOffset = ranges[ranges.length - 1].getEndOffset();
          }
 
@@ -249,12 +264,13 @@ class STokenSource {
       for (let index = 0; index < segInfos.length; index++) {
          const info = segInfos[index];
 
-         if ((info.segment as Segment).text) { // typeHack
+         if ((info.segment as Segment).text) {
+            // typeHack
             returnedSegments.push(info.segment);
          }
       }
 
-      this._segments = (returnedSegments.concat(this._segments) as Array<Segment>); // typeHack
+      this._segments = returnedSegments.concat(this._segments) as Array<Segment>; // typeHack
    }
 
    _computeRanges(segInfos: Array<SegmentInfo>) {
@@ -273,20 +289,37 @@ class STokenSource {
          const segment = info.segment;
 
          // If we seem to have changed which entity we are reading from, create a new range.
-         if (segment.range && !(currentRange.entityId.systemId === segment.range.entityId.systemId && currentRange.entityId.publicId === segment.range.entityId.publicId)) {
+         if (
+            segment.range &&
+            !(
+               currentRange.entityId.systemId === segment.range.entityId.systemId &&
+               currentRange.entityId.publicId === segment.range.entityId.publicId
+            )
+         ) {
             // store the range if it actually has changed
             ranges.push(currentRange);
 
-            currentRange = new Range(segment.range.entityId,
-               segment.range.startIndex, segment.range.startRow, segment.range.startColumn,
-               segment.range.startIndex, segment.range.startRow, segment.range.startColumn);
+            currentRange = new Range(
+               segment.range.entityId,
+               segment.range.startIndex,
+               segment.range.startRow,
+               segment.range.startColumn,
+               segment.range.startIndex,
+               segment.range.startRow,
+               segment.range.startColumn,
+            );
          }
 
-         currentRange = new Range(currentRange.entityId,
-            currentRange.startIndex, currentRange.startRow, currentRange.startColumn,
-            currentRange.endIndex + info.chars, currentRange.endRow + info.rows,
+         currentRange = new Range(
+            currentRange.entityId,
+            currentRange.startIndex,
+            currentRange.startRow,
+            currentRange.startColumn,
+            currentRange.endIndex + info.chars,
+            currentRange.endRow + info.rows,
             // NEED A test for the following.
-            info.rows === 0 ? currentRange.endColumn + info.columns : info.columns);
+            info.rows === 0 ? currentRange.endColumn + info.columns : info.columns,
+         );
       }
 
       ranges.push(currentRange);
@@ -294,7 +327,12 @@ class STokenSource {
       return ranges;
    }
 
-   _reportResults(extractorContext: ExtractorContext, str: string, originalStr: string, ranges: Array<Range>) {
+   _reportResults(
+      extractorContext: ExtractorContext,
+      str: string,
+      originalStr: string,
+      ranges: Array<Range>,
+   ) {
       if (extractorContext.extractor.state === Extractor.STATE.SUCCESS) {
          extractorContext.callback(new SToken(str, originalStr, ranges));
       } else {

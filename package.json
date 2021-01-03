@@ -1,21 +1,20 @@
 {
    "name": "xt4j",
-   "version": "0.229.5",
+   "version": "0.229.6",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
    "license": "UNLICENCED",
    "private": true,
    "scripts": {
-      "check": "prettier --write  'source/expand/**/*.ts' 'source/pToken/**/*.ts' 'source/wellformedness/**/*.ts' 'source/stringify/**/*.ts' 'source/xToken/**/*.ts'",
+      "build:locale": "node ./build/tool/doDerive.js",
+      "build:xmlconf": "ts-node -r tsconfig-paths/register ./build/tool/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json",
+      "check": "prettier --write  'source/attFixer/**/*.ts' 'source/conformance/**/*.ts' 'source/expand/**/*.ts' 'source/pToken/**/*.ts' 'source/wellformedness/**/*.ts' 'source/stringify/**/*.ts' 'source/xToken/**/*.ts'",
+      "check:types": "./node_modules/typescript/bin/tsc",
       "lint": "eslint --fix --config ./.eslintrc.json source/**/*.ts",
       "jest:all": "jest --config ./jest.config.js --coverage",
       "jest": "jest --config ./jest.config.js --watch --coverage",
-      "build:locale": "node ./build/tool/doDerive.js",
-      "test": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' ",
-      "build:xmlconf": "ts-node -r tsconfig-paths/register ./build/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json",
-      "old:build:watch": "babel --no-babelrc --config-file ./build/babelrc-new.json5 --extensions '.ts' --watch 'source/**/*.ts' --out-dir ./temp/build/",
-      "old:tn": "ts-node -r tsconfig-paths/register"
+      "test": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' "
    },
    "devDependencies": {
       "@babel/cli": "7.12.10",
@@ -56,6 +55,7 @@
    },
    "dependencies": {
       "bcp47-validate": "1.0.0",
+      "eslint-plugin-custom-rules": "file:build/eslint/eslint-plugin-custom-rules",
       "iconv-lite": "0.6.2"
    }
 }

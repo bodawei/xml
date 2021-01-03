@@ -126,8 +126,7 @@ describe('ExternalId (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls).toEqualRangeless([
+                  expect(callback.mock.calls).toEqualRangeless([
             [
                {
                   externalId: {
@@ -159,8 +158,7 @@ describe('ExternalId (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls).toEqualRangeless([
+                  expect(callback.mock.calls).toEqualRangeless([
             [
                {
                   externalId: {
@@ -220,8 +218,7 @@ describe('ExternalId (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls).toEqualRangeless([
+                  expect(callback.mock.calls).toEqualRangeless([
             [
                {
                   externalId: {
@@ -260,8 +257,7 @@ describe('ExternalId (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls).toEqualRangeless([
+                  expect(callback.mock.calls).toEqualRangeless([
             [
                {
                   externalId: {
@@ -299,8 +295,7 @@ describe('ExternalId (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls).toEqualRangeless([
+                  expect(callback.mock.calls).toEqualRangeless([
             [
                {
                   externalId: {
@@ -339,8 +334,7 @@ describe('ExternalId (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls).toEqualRangeless([
+                  expect(callback.mock.calls).toEqualRangeless([
             [
                {
                   externalId: {
@@ -369,8 +363,7 @@ describe('ExternalId (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(callback.mock.calls).toEqualRangeless([
+                        expect(callback.mock.calls).toEqualRangeless([
                [
                   {
                      externalId: undefined,
@@ -398,8 +391,7 @@ describe('ExternalId (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(callback.mock.calls).toEqualRangeless([
+                        expect(callback.mock.calls).toEqualRangeless([
                [
                   {
                      externalId: {
@@ -435,8 +427,7 @@ describe('ExternalId (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(callback.mock.calls).toEqualRangeless([
+                        expect(callback.mock.calls).toEqualRangeless([
                [
                   {
                      externalId: {
@@ -465,8 +456,7 @@ describe('ExternalId (unit)', () => {
 
             resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-               expect(result).toEqualRangeless({
+                              expect(result).toEqualRangeless({
                   preSpace: sourceStr,
                   externalId: undefined,
                });
@@ -485,8 +475,7 @@ describe('ExternalId (unit)', () => {
 
             resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-               expect(result).toEqualRangeless({
+                              expect(result).toEqualRangeless({
                   preSpace: sourceStr,
                   externalId: new ExternalIdP({
                      externalType: toSToken('PUBLIC'),
@@ -514,8 +503,7 @@ describe('ExternalId (unit)', () => {
 
             resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-               expect(result).toEqualRangeless({
+                              expect(result).toEqualRangeless({
                   preSpace: sourceStr,
                   externalId: new ExternalIdP({
                      externalType: toSToken('SYSTEM'),
@@ -550,8 +538,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   // @ts-expect-error 2329/matchers
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                  expect(result).toEqualRangeless({
+                                    expect(result).toEqualRangeless({
                      externalId: new ExternalIdP({
                         externalType: toSToken('PUBLIC'),
                         externalTypeSpace: destStr,
@@ -585,8 +572,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   // @ts-expect-error 2329/matchers
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                  expect(result).toEqualRangeless({
+                                    expect(result).toEqualRangeless({
                      externalId: new ExternalIdP({
                         externalType: toSToken('PUBLIC'),
                         externalTypeSpace: destStr,
@@ -615,8 +601,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   // @ts-expect-error 2329/matchers
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                  expect(result).toEqualRangeless({
+                                    expect(result).toEqualRangeless({
                      externalId: new ExternalIdP({
                         externalType: toSToken('PUBLIC'),
                         public: undefined,
@@ -644,8 +629,7 @@ describe('ExternalId (unit)', () => {
                },
                (result) => {
                   // @ts-expect-error 2329/matchers
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                  expect(result).toEqualRangeless({
+                                    expect(result).toEqualRangeless({
                      externalId: new ExternalIdP({
                         externalType: toSToken('SYSTEM'),
                         externalTypeSpace: destStr,

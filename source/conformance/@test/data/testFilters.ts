@@ -6,7 +6,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [], // ['pr-xml-utf-8'],
    excludedIds: [
       //  This messes up with attlists with enumerations.  It doesn't recognize the right wrod boundaries.
       // but the same is true for element declarations <!ELEMENT %name; (a|b)*>

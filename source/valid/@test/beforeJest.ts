@@ -6,7 +6,6 @@ import validityMessages from '../../error/derive/ValidityError.json';
 
 import { ValidityError } from '../../error/ValidityError';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 expect.extend({
    toReportValidityError: makeErrorMatcher(ValidityError, {
       ValidityError: new StringBundle(validityMessages.message),

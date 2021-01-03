@@ -39,8 +39,7 @@ describe('elementDeclaration', () => {
             });
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(expected);
+                        expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -1046,8 +1045,7 @@ describe('elementDeclaration', () => {
                });
 
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-               expect(result).toEqualRangeless(expected);
+                              expect(result).toEqualRangeless(expected);
                done?.();
             },
          );
@@ -1137,8 +1135,7 @@ describe('elementDeclaration', () => {
                });
 
                // @ts-expect-error 2329/matchers
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-               expect(result).toEqualRangeless(expected);
+                              expect(result).toEqualRangeless(expected);
                done?.();
             },
          );

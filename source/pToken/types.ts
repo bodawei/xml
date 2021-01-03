@@ -13,7 +13,7 @@ type ExpandedMarkupToken =
    | ParameterEntityEndPToken;
 
 interface UnexpandedMarkupDetails {
-   tokens: Array<UnexpandedMarkupToken>;
+   tokens: ReadonlyArray<UnexpandedMarkupToken>;
    propName: string;
 }
 

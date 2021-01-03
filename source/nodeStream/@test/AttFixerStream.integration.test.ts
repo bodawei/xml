@@ -67,6 +67,7 @@ describe('AttFixerStream (integration)', () => {
                closeQuote: toSToken('"'),
                trailingSpace: undefined,
                normalized: true,
+               dtdChangedNormalization: true,
             }],
          );
          done();

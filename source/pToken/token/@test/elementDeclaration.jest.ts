@@ -182,8 +182,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -214,8 +213,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -256,8 +254,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -290,8 +287,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: undefined,
@@ -335,8 +331,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -382,8 +377,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -461,8 +455,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -499,8 +492,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -563,8 +555,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -601,8 +592,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless(
+                  expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('foo'),

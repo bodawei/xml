@@ -63,7 +63,7 @@ function expandPeRef(
  * produce an STokenStream with those contents
  */
 function expandMarkupUnexpanded(
-   value: Array<UnexpandedMarkupToken>,
+   value: ReadonlyArray<UnexpandedMarkupToken>,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
    expanded: (result: ExpandResults) => void,

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { AttDefinition, ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import { AttDefinitionP, ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { ElidedEntityDeclarationPToken } from 'token';
 import { CmGraph } from './contentModal/cmGraphTypes';
 
@@ -84,7 +84,7 @@ interface ValidateStateProps {
 
 interface AttributeDefs {
    [attName: string]: {
-      readonly def: AttDefinition;
+      readonly def: AttDefinitionP;
       readonly isExternal: boolean;
    };
 }

@@ -8,7 +8,7 @@ import { EntityId, ConformanceVersion } from 'basic';
 import { PTokenStream } from 'pTokenStream';
 import { EntityExpanderStream } from 'nodeStream';
 import { PToXTokenStream } from 'xTokenStream';
-import SimpleObj from '../source/simpleobj/so';
+import SimpleObj from '../../source/simpleobj/so';
 import { STokenSource } from 'sToken';
 import { defaultExtractors } from 'extractor';
 

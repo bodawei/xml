@@ -144,8 +144,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback).toEqualRangeless(expected);
+                  expect(callback).toEqualRangeless(expected);
       });
 
       it('calls literal.parse()', () => {
@@ -216,8 +215,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback).toEqualRangeless(expected);
+                  expect(callback).toEqualRangeless(expected);
       });
 
       it('parses zero fields', () => {
@@ -236,8 +234,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback).toEqualRangeless(expected);
+                  expect(callback).toEqualRangeless(expected);
       });
 
       it('stops parsing if an unexpected field name is found', () => {
@@ -275,8 +272,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback).toEqualRangeless(expected);
+                  expect(callback).toEqualRangeless(expected);
       });
    });
 });

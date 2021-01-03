@@ -19,8 +19,7 @@ describe('parseExternalId()', () => {
 
       parseExternalId(source, [], (result) => {
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless({
+                  expect(result).toEqualRangeless({
             externalId: {
                externalType: toSToken('PUBLIC'),
                externalTypeSpace: toSToken(' '),
@@ -58,8 +57,7 @@ describe('parseExternalId()', () => {
          };
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless({
+                  expect(result).toEqualRangeless({
             externalId,
             nextPropName: 'system',
          });

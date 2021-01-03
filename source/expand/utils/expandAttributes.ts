@@ -219,7 +219,7 @@ function expandOneAttribute(
  * more complete AttributeValuePTokens.
  */
 function expandAttributes(
-   valueObjects: Array<AttrValueObj>,
+   valueObjects: ReadonlyArray<AttrValueObj>,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
    expanded: (results: Array<ExpandAttrResult>) => void,

@@ -101,8 +101,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
          params: ['parentName'],
          position: elementStart.open,
@@ -132,8 +131,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ANY_UNDECLARED_ELEMENT,
          params: ['parentName', 'other'],
          position: elementStart.name,
@@ -161,8 +159,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
          params: ['parentName', 'elementName'],
          position: elementStart.name,
@@ -189,8 +186,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportValidityError({
+            expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.INVALID_ELEMENT_IN_CONTENT,
          params: ['parentName', 'elementName'],
          position: elementStart.name,
@@ -257,8 +253,7 @@ describe('elementStartValidate (unit)', () => {
          elementStartValidate(elementStart, state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(mockErrorCollector).toReportValidityError({
+                  expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
             params: ['elementName', 'att1'],
             position: elementStart.open,

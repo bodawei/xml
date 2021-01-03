@@ -122,7 +122,6 @@ describe('ContentModel (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
@@ -179,7 +178,6 @@ describe('ContentModel (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless({
             open: toSToken('1'),
             openSpace: toSToken('2'),
@@ -222,7 +220,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(contentSpec);
       });
 
@@ -260,7 +257,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -317,7 +313,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -350,7 +345,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(contentSpec);
       });
 
@@ -406,7 +400,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -462,7 +455,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -518,7 +510,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -576,7 +567,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -598,7 +588,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -638,7 +627,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -752,7 +740,6 @@ describe('ContentModel (unit)', () => {
             mockSource.respondInAsyncTime();
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             expect(result).toEqualRangeless(expected);
          });
       });
@@ -783,7 +770,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(expected);
       });
 
@@ -803,7 +789,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                repeatSpace: toSToken(' \t'),
@@ -836,7 +821,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                openSpace: toSToken(' \t'),
@@ -878,7 +862,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                openSpace: toSToken(' \t'),
@@ -920,7 +903,6 @@ describe('ContentModel (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
          expect(result).toEqualRangeless(
             new ContentModelP(contentSpec, {
                delimitedParticles: [
@@ -977,7 +959,6 @@ describe('ContentModel (unit)', () => {
       mockSource.respondInAsyncTime();
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [
@@ -1041,7 +1022,6 @@ describe('ContentModel (unit)', () => {
       mockSource.respondInAsyncTime();
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [
@@ -1101,7 +1081,6 @@ describe('ContentModel (unit)', () => {
       mockSource.respondInAsyncTime();
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [
@@ -1150,7 +1129,6 @@ describe('ContentModel (unit)', () => {
       mockSource.respondInAsyncTime();
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(result).toEqualRangeless(
          new ContentModelP(contentSpec, {
             delimitedParticles: [

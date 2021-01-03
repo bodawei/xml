@@ -18,7 +18,7 @@ interface AttListDeclarationProps {
    declTypeSpace?: SToken;
    elementName?: SToken;
    elementNameSpace?: SToken;
-   attDefs?: Array<AttDefinition>;
+   attDefs?: Array<AttDefinitionP>;
    unexpanded?: UnexpandedMarkupDetails | undefined;
    extra?: SToken | false;
    close?: SToken;
@@ -42,7 +42,7 @@ type RawAttListDeclaration = AttListDeclarationProps & {
    open: SToken;
 };
 
-type AttDefinition = Readonly<AttDefinitionProps>;
+type AttDefinitionP = Readonly<AttDefinitionProps>;
 
 type ParsedAttCallback = (result: AttDefinitionProps) => void;
 
@@ -76,7 +76,7 @@ class AttListDeclarationPToken {
 
    public readonly elementNameSpace?: SToken;
 
-   public readonly attDefs: Array<AttDefinition>;
+   public readonly attDefs: ReadonlyArray<AttDefinitionP>;
 
    public readonly unexpanded: UnexpandedMarkupDetails | undefined;
 
@@ -98,7 +98,7 @@ class AttListDeclarationPToken {
       if (isNotDeclarationStart(base)) {
          this.elementName = base.elementName;
          this.elementNameSpace = base.elementNameSpace;
-         attDefs = base.attDefs || [];
+         attDefs = base.attDefs ? [...base.attDefs] : [];
          this.unexpanded = base.unexpanded;
          this.extra = base.extra;
          this.close = base.close;
@@ -112,10 +112,10 @@ class AttListDeclarationPToken {
       this.extra = 'extra' in other ? other.extra : this.extra;
       this.close = 'close' in other ? other.close : this.close;
 
-      this.attDefs = [];
+      const populatedDefs: Array<AttDefinitionProps> = [];
 
       for (const def of attDefs) {
-         this.attDefs.push({
+         populatedDefs.push({
             name: def.name,
             nameSpace: def.nameSpace,
             type: def.type,
@@ -129,6 +129,8 @@ class AttListDeclarationPToken {
             valueSpace: def.valueSpace,
          });
       }
+
+      this.attDefs = populatedDefs;
    }
 }
 
@@ -431,7 +433,12 @@ function resumeParseAttListDeclaration(
 
       switch (propName) {
          case 'elementName':
-            parseElementName(source, attListDeclaration, (withName) => {
+            const attListCopy = {
+               ...attListDeclaration,
+               attDefs: [...attListDeclaration.attDefs],
+            };
+
+            parseElementName(source, attListCopy, (withName) => {
                resumeParseAttDefName(source, (attDefs) => {
                   source.extractNoParams('all', (extra) => {
                      deliverPToken(
@@ -556,7 +563,7 @@ function parseAttListDeclaration(
 
 export {
    ATTLIST_DECLARATION_PTOKEN,
-   AttDefinition,
+   AttDefinitionP,
    AttListDeclarationPToken,
    parseAttListDeclaration,
    resumeParseAttListDeclaration,

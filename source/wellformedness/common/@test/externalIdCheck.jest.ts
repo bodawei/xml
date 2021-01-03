@@ -79,7 +79,6 @@ describe('externalIdCheck()', () => {
       cb();
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['&'],
@@ -108,7 +107,6 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['{'],
@@ -131,7 +129,6 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).not.toReportError({
          id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['{'],
@@ -147,7 +144,6 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.EXTERNALID_UNKNOWN,
          params: ['Bogus'],
@@ -163,7 +159,6 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
          params: ['PUBLIC', 'public'],
@@ -179,7 +174,6 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.EXTERNALID_EXTERNALTYPE_NO_SPACE,
          params: undefined,
@@ -195,7 +189,6 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
          params: undefined,

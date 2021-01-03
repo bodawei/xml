@@ -4,7 +4,7 @@ class STokenArrayBuilder {
    public sTokenArray: Array<SToken> = [];
 
    add(...values: Array<SToken | Array<SToken | undefined> | undefined>) {
-      const arr = this.sTokenArray as Array<SToken>;
+      const arr = this.sTokenArray;
 
       for (let index = 0; index < values.length; index++) {
          const value = values[index];

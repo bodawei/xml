@@ -112,8 +112,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls[0][0]).toEqualRangeless(
+                  expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('notationName'),
@@ -148,8 +147,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls[0][0]).toEqualRangeless(
+                  expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: undefined,
@@ -191,8 +189,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls[0][0]).toEqualRangeless(
+                  expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('notationName'),
@@ -237,8 +234,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(callback.mock.calls[0][0]).toEqualRangeless(
+                  expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('theName'),
@@ -290,8 +286,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('theName'),
@@ -335,8 +330,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   declTypeSpace: toSToken('\n'),
@@ -379,8 +373,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('aName'),
@@ -422,8 +415,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('aName'),

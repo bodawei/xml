@@ -47,8 +47,7 @@ describe('notationDeclaration (integration)', () => {
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   unexpanded: {
@@ -77,8 +76,7 @@ describe('notationDeclaration (integration)', () => {
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(result).toEqualRangeless(
+                        expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   type: NOTATION_DECLARATION_PTOKEN,
                   open: toSToken('<!'),
@@ -124,8 +122,7 @@ describe('notationDeclaration (integration)', () => {
 
          resumeParseNotationDeclaration(source, nd, (parsed) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(parsed).toEqualRangeless(
+                        expect(parsed).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('elName'),
@@ -184,8 +181,7 @@ describe('notationDeclaration (integration)', () => {
 
          resumeParseNotationDeclaration(source, nd, (parsed) => {
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(parsed).toEqualRangeless(
+                        expect(parsed).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('aName'),

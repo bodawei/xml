@@ -90,8 +90,7 @@ describe('textDeclaration (unit)', () => {
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.TEXTDECL_SPACE_AFTER_OPEN,
          params: undefined,
          position: textDeclPToken.openSpace,
@@ -106,8 +105,7 @@ describe('textDeclaration (unit)', () => {
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.TEXTDECL_NO_TARGET,
          params: undefined,
          lastPosition: textDeclPToken.open,
@@ -122,8 +120,7 @@ describe('textDeclaration (unit)', () => {
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.TEXTDECL_NO_SPACE_AFTER_TARGET,
          params: undefined,
          lastPosition: textDeclPToken.target,
@@ -189,8 +186,7 @@ describe('textDeclaration (unit)', () => {
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.TEXTDECL_PARAM_INVALID_CASE,
          params: ['version', 'VERSION'],
          position: textDeclPToken.fields[0].name,
@@ -203,8 +199,7 @@ describe('textDeclaration (unit)', () => {
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.TEXTDECL_NO_CLOSE,
          params: undefined,
          lastPosition: textDeclPToken.targetSpace,
@@ -240,8 +235,7 @@ describe('textDeclaration (unit)', () => {
          textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(mockErrorCollector).toReportError({
+                  expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_VERSION_INVALID_ORDER,
             params: undefined,
             position: textDeclPToken.fields[1].name,
@@ -269,8 +263,7 @@ describe('textDeclaration (unit)', () => {
          textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(mockErrorCollector).toReportError({
+                  expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_VERSION_INVALD,
             params: ['1.2'],
             position: textDeclPToken.fields[0].value,
@@ -306,8 +299,7 @@ describe('textDeclaration (unit)', () => {
             textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
             // @ts-expect-error 2329/matchers
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            expect(mockErrorCollector).toReportError({
+                        expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.TEXTDECL_ENCODING_INVALID,
                params: ['$$BAD_ENCODING$$'],
                position: textDeclPToken.fields[1].value,

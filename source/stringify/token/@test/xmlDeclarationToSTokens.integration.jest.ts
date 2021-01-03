@@ -24,8 +24,7 @@ describe('xmlDeclarationToSTokens (unit)', () => {
          const result = xmlDeclarationToSTokens(parsing);
 
          // @ts-expect-error 2329/matchers
-         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-         expect(result).toEqualRangeless([
+                  expect(result).toEqualRangeless([
             toSToken('<?'),
             toSToken('xml'),
             toSToken(' '),

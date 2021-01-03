@@ -42,8 +42,7 @@ describe('parseInstruction (unit)', () => {
       const args = piParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(args[1]).toEqualRangeless({
+            expect(args[1]).toEqualRangeless({
          open: open,
          openSpace: undefined,
          target: undefined,
@@ -66,8 +65,7 @@ describe('parseInstruction (unit)', () => {
       const args = xmlParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(args[1]).toEqualRangeless({
+            expect(args[1]).toEqualRangeless({
          open: open,
          openSpace: undefined,
          target: toSToken('xml'),
@@ -90,8 +88,7 @@ describe('parseInstruction (unit)', () => {
       const args = textParse.mock.calls[0];
       expect(args[0]).toEqual(mockSource);
       // @ts-expect-error 2329/matchers
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      expect(args[1]).toEqualRangeless({
+            expect(args[1]).toEqualRangeless({
          open: open,
          openSpace: toSToken('\t'),
          target: toSToken('xml'),
