@@ -20,7 +20,14 @@ import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
 import CheckValidityStream from '../../nodeStream/CheckValidityStream';
 
-function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlRevision): Transform {
+function setupWellFormedStream(
+   test: TestDetails,
+   ver?: XmlVersion,
+   rev?: XmlRevision,
+): {
+   pTokenStream: PTokenStream;
+   wellFormedStream: CheckWellFormed;
+} {
    const sTokenSource = new STokenSource(defaultExtractors);
    const pTokenStream = new PTokenStream(sTokenSource, {
       context: ContextType.DOCUMENT,
@@ -29,17 +36,22 @@ function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlRevision): T
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
    const checkWF = new CheckWellFormed();
+
+   pTokenStream.pipe(entityExpander).pipe(attFix).pipe(checkWF);
+
+   return {
+      pTokenStream,
+      wellFormedStream: checkWF,
+   };
+}
+
+function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlRevision): Transform {
+   const { pTokenStream, wellFormedStream } = setupWellFormedStream(test, ver, rev);
    const checkValidity = new CheckValidityStream();
    const toXToken = new PToXTokenStream();
    const checkValid = new CheckXTokenValidStream();
 
-   pTokenStream
-      .pipe(entityExpander)
-      .pipe(attFix)
-      .pipe(checkWF)
-      .pipe(checkValidity)
-      .pipe(toXToken)
-      .pipe(checkValid);
+   wellFormedStream.pipe(checkValidity).pipe(toXToken).pipe(checkValid);
 
    pTokenStream.addText(test.testData || '');
    pTokenStream.endText();
@@ -121,6 +133,28 @@ describe('XML Conformance tests', () => {
                doneWhenAllDone();
             });
          });
+
+         if (testData.TYPE === 'invalid') {
+            fit(`${testData.ID} (${testData.TYPE}:${ver}/${edition} Running WITHOUT validation) ${testData.description}`, (done) => {
+               const verToUse = hasEdition ? ver : undefined;
+               const revToUse = hasEdition ? edition : undefined;
+               const { pTokenStream, wellFormedStream } = setupWellFormedStream(
+                  testData,
+                  verToUse,
+                  revToUse,
+               );
+
+               pTokenStream.addText(testData.testData || '');
+               pTokenStream.endText();
+
+               // We also want to test  whether the errors match as expected
+               gatherPTokens(wellFormedStream, (results) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(results).not.toHaveErrors();
+                  done();
+               });
+            });
+         }
       });
    });
 });

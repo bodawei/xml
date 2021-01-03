@@ -6,7 +6,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: ['o-p53fail4'],
+   includedIds: [],
    excludedIds: [
       'o-p08fail1', // ELEMENTSTART_NMTOKENS_NOT_NMTOKEN --- ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
 
@@ -36,6 +36,8 @@ const testFilters: FilterData = {
       'valid-ext-sa-007', // utf16 BOM
       // utf8/BOM
       'rmt-e2e-22', // Starts with a BOM
+
+      'inv-not-sa02', // This is an invalid test but reports wellformedness errors
 
       // Valid / Text problems
       // NOTE: A bunch of the 1.1 ones are easily fixed by adding the <?xml version="1.1" to the output.
