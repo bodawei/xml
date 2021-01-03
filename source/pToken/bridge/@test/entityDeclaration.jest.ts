@@ -53,24 +53,12 @@ describe('entityDeclaration (unit)', () => {
          cb(undefined);
       });
 
-      parseExternalId.mockImplementation(
-         (
-            sTokenSource: STokenSource,
-            terminators: TermArray,
-            cb: (result?: ParsedExternalId) => void,
-         ) => {
-            cb();
-         },
-      );
-      literalParse.mockImplementation(
-         (
-            _1: STokenSource,
-            stuff: LitParams | undefined,
-            callback: (result?: LiteralPToken) => void,
-         ) => {
-            callback(undefined);
-         },
-      );
+      parseExternalId.mockImplementation((sTokenSource, terminators, cb) => {
+         cb();
+      });
+      literalParse.mockImplementation((_1, stuff, callback) => {
+         callback(undefined);
+      });
    });
 
    describe('parseEntityDeclaration()', () => {

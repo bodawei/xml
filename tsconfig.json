@@ -17,6 +17,9 @@
          "basic": [
             "./source/basic"
          ],
+         "basic-test": [
+            "./source/basic/@test/helper"
+         ],
          "error": [
             "./source/error"
          ],
@@ -34,9 +37,6 @@
          ],
          "pToken": [
             "./source/pToken"
-         ],
-         "pToken-test": [
-            "./source/pToken/@test/helper"
          ],
          "pTokenStream": [
             "./source/pTokenStream"
@@ -63,6 +63,7 @@
             "./source/wellformedness"
          ],
          "xToken": ["./source/xToken"],
+         "xToken-test": ["./source/xToken/@test/helper"],
          "xTokenStream": ["./source/xTokenStream"]
       }
    },

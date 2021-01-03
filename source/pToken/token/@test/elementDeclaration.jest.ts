@@ -19,6 +19,7 @@ import {
 } from '../elementDeclaration';
 
 describe('elementDeclaration (unit)', () => {
+   let result: ElementDeclarationPToken | undefined;
    let elementDeclaration: ElementDeclarationPToken;
    let dummyCM: ContentModelP;
    let parseContentModelMock: jest.MockedFunction<typeof contentModel.parseContentModel>;
@@ -26,7 +27,12 @@ describe('elementDeclaration (unit)', () => {
       typeof contentModel.resumeParseContentModel
    >;
 
+   function getResult(item: ElementDeclarationPToken) {
+      result = item;
+   }
+
    beforeEach(() => {
+      result = undefined;
       elementDeclaration = new ElementDeclarationPToken({
          open: toSToken('<!'),
          openSpace: undefined,
@@ -141,32 +147,20 @@ describe('elementDeclaration (unit)', () => {
 
    describe('parseElementDeclaration()', () => {
       let declarationStart: DeclarationStart;
-      let result: ElementDeclarationPToken | undefined;
       let parseUnexpandedSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
 
       beforeEach(() => {
          declarationStart = {
             open: toSToken('<!'),
          };
-         result = undefined;
          parseUnexpandedSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
             typeof parseUnexpanded.parseUnexpanded
          >;
 
-         parseUnexpandedSpy.mockImplementation(
-            (
-               source: STokenSource,
-               propName: string,
-               cb: (result: UnexpandedMarkupDetails | undefined) => void,
-            ) => {
-               cb(undefined);
-            },
-         );
+         parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
+            cb(undefined);
+         });
       });
-
-      function getResult(item: ElementDeclarationPToken) {
-         result = item;
-      }
 
       it('does a parse of an element declaration with a non-list content spec', () => {
          const mockSource = new MockSTokenSource([
@@ -182,7 +176,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -213,7 +207,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -254,7 +248,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -287,7 +281,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: undefined,
@@ -331,7 +325,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -377,7 +371,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -396,11 +390,9 @@ describe('elementDeclaration (unit)', () => {
    });
 
    describe('resumeParseElementDeclaration()', () => {
-      let result: ElementDeclarationPToken | undefined;
       let parseUnexpandedSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
 
       beforeEach(() => {
-         result = undefined;
          parseUnexpandedSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
             typeof parseUnexpanded.parseUnexpanded
          >;
@@ -409,10 +401,6 @@ describe('elementDeclaration (unit)', () => {
             cb(undefined);
          });
       });
-
-      function getResult(item: ElementDeclarationPToken) {
-         result = item;
-      }
 
       it('returns the original token if there are no unexpanded values', () => {
          const elementDecl = new ElementDeclarationPToken({
@@ -455,7 +443,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -492,7 +480,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -555,7 +543,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('elementName'),
@@ -592,7 +580,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ElementDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('foo'),

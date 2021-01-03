@@ -1,7 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'error';
 import { isAugmentedAttribute } from 'attFixer';
+import { ErrorCollector } from 'error';
+import { attValueToString } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
@@ -19,10 +20,19 @@ function checkAttributes(
    const attributes = el.attributes;
 
    for (const attr of attributes) {
-      if (state.isStandalone && isAugmentedAttribute(attr)) {
-         const attName = strOrBlank(attr.name);
-         const details = state.attributeDefs[elName][attName];
+      const attName = strOrBlank(attr.name);
+      const details = state.attributeDefs?.[elName]?.[attName];
 
+      if (!details) {
+         continue;
+      }
+
+      const type = strOrBlank(details.def.type).toUpperCase();
+      const attrValue = attValueToString(attr.value);
+
+      ec.setPos(attr.name);
+
+      if (state.isStandalone && isAugmentedAttribute(attr)) {
          if (!details.isExternal) {
             continue;
          }
@@ -51,6 +61,22 @@ function checkAttributes(
             [elName, attName],
          );
       }
+
+      ec.setPos(attr.openQuote);
+
+      // §3.3.1 Validity Constraint: Name Token
+      //    Values of type NMTOKEN must match the Nmtoken production;
+      //    values of type **NMTOKENS** must match Nmtokens.
+      ec.check(
+         type === 'NMTOKENS' && attrValue.trim() === '',
+         VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+         [attrValue, elName, attName],
+      );
+      ec.check(
+         type === 'NMTOKEN' && attrValue.trim() === '',
+         VID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
+         [attrValue, elName, attName],
+      );
    }
 }
 

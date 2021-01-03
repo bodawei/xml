@@ -6,13 +6,14 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: ['o-p08fail1'],
    excludedIds: [
-      'o-p08fail1', // ELEMENTSTART_NMTOKENS_NOT_NMTOKEN --- ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
+      // 'o-p08fail1', // ELEMENTSTART_NMTOKENS_NOT_NMTOKEN --- ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
 
       // Misc
       'ext01', // We are creating PACE_PTOKEN's that we should not
       'sa02', // Some standalone problem/ misinterpretation
+      'inv-not-sa02', // This is an invalid test but reports wellformedness errors
       'sa03', // Some standalone problem/ misinterpretation
       'sa04', // Some standalone problem/ misinterpretation
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)
@@ -36,8 +37,6 @@ const testFilters: FilterData = {
       'valid-ext-sa-007', // utf16 BOM
       // utf8/BOM
       'rmt-e2e-22', // Starts with a BOM
-
-      'inv-not-sa02', // This is an invalid test but reports wellformedness errors
 
       // Valid / Text problems
       // NOTE: A bunch of the 1.1 ones are easily fixed by adding the <?xml version="1.1" to the output.

@@ -3,6 +3,7 @@
 import { Transform } from 'stream';
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
+import { gatherStreamResults } from 'basic-test';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import {
@@ -16,21 +17,11 @@ import { XmlDeclarationXToken, XMLDECL_XTOKEN } from 'xToken';
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import CommentFixingStream from '../CommentFixingStream';
+import { XToken } from 'source/xToken/types';
 
 describe('CommentFixingStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let xTokenStream: PToXTokenStream;
-
-   function gatherTokens(stream: Transform, done: (result: Array<any>) => void) {
-      const results: Array<any> = [];
-
-      stream.on('data', (data: any) => {
-         results.push(data);
-      });
-      stream.on('end', () => {
-         done(results);
-      });
-   }
 
    function testTransformation(before: string, after: string, done: () => void) {
       const cf = new CommentFixingStream();
@@ -41,7 +32,7 @@ describe('CommentFixingStream (integration)', () => {
       pTokenStream.endText();
       (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
 
-      gatherTokens(cf, (results) => {
+      gatherStreamResults<any>(cf, (results) => {
          const result = results.find(r => r.type === COMMENT_XTOKEN);
 
          expect(result.text).toEqual(after);
@@ -89,7 +80,7 @@ describe('CommentFixingStream (integration)', () => {
          const cf = new CommentFixingStream();
          (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
 
-         gatherTokens(cf, (results) => {
+         gatherStreamResults<any>(cf, (results) => {
             const types = results.map(r => r.type);
 
             expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);

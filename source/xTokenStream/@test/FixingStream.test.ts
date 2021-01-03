@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { gatherStreamResults } from 'basic-test';
 import { AttListDeclarationXToken, ElementDeclarationXToken, CpRepeat, CpType } from 'xToken';
 
 import { CommentXToken } from 'token';
@@ -17,24 +18,13 @@ describe('FixingStream (unit)', () => {
       fs = new FixingStream();
    });
 
-   function gatherTokens(stream: FixingStream, cb: (val: Array<XToken>) => void) {
-      const tokens: Array<XToken> = [];
-
-      stream.on('data', (item: XToken) => {
-         tokens.push(item);
-      });
-      stream.on('end', () => {
-         cb(tokens);
-      });
-   }
-
    it('passes a comment through', (done) => {
       const before = new CommentXToken('elName');
 
       fs.write(before);
       fs.end();
 
-      gatherTokens(fs, (tokens: Array<XToken>) => {
+      gatherStreamResults<XToken>(fs, (tokens) => {
          expect(tokens[0]).toEqual(before);
          done();
       });
@@ -53,7 +43,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].type).toEqual('ID');
             done();
          });
@@ -70,7 +60,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].type).toEqual('CDATA');
             done();
          });
@@ -89,7 +79,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens) => {
+         gatherStreamResults<XToken>(fs, (tokens) => {
             expect(tokens[0].attDefs[0].type).toEqual('CDATA');
             done();
          });
@@ -106,7 +96,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].defaultType).toEqual('#REQUIRED');
             done();
          });
@@ -123,7 +113,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].defaultType).toEqual('#IMPLIED');
             done();
          });
@@ -139,7 +129,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpec).toEqual('ANY');
             done();
          });
@@ -151,7 +141,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpec).toEqual('ANY');
             done();
          });
@@ -163,7 +153,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpec).toEqual('ANY');
             done();
          });
@@ -179,7 +169,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpec).toEqual('CHILDREN');
             done();
          });
@@ -195,7 +185,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentModel).toBeUndefined();
             done();
          });
@@ -211,7 +201,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentModel).toBeUndefined();
             done();
          });
@@ -230,7 +220,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentModel.particles[0]).toEqual({
                name: '#PCDATA',
                repeat: CpRepeat.ONE
@@ -255,7 +245,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentModel.particles[0]).toEqual({
                name: '#PCDATA',
                repeat: CpRepeat.ONE
@@ -284,7 +274,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentModel.particles[0]).toEqual({
                name: '#PCDATA',
                repeat: CpRepeat.ONE
@@ -312,7 +302,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentModel.particles.length).toEqual(2);
             done();
          });
@@ -354,7 +344,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
 
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentModel.particles).toEqual([{
                name: '#PCDATA',
                repeat: CpRepeat.ONE,

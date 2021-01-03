@@ -1,12 +1,11 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { gatherStreamResults } from 'basic-test';
 import { defaultExtractors } from 'extractor';
-import { TextPToken, } from 'pToken';
-import { SToken, STokenSource } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 import {
    AttListDeclarationXToken,
-   ElementDeclarationXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityReferenceXToken,
    ProcessingInstructionXToken,
@@ -14,10 +13,9 @@ import {
    ExternalIdX,
    NotationDeclarationXToken,
    GeneralEntityReferenceXToken,
-   CpRepeat,
-   CpType,
    TextXToken,
 } from 'xToken';
+import { stripPTokens } from 'xToken-test';
 import {
    declaration,
 
@@ -30,15 +28,13 @@ import {
    ElementStartXToken,
    ElementEmptyXToken,
    SpaceXToken,
-   
-   
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
+import { TextPToken } from 'pToken';
 
-type Token = { type: string, pToken?: any };
-type TokenArray = Array<Token>;
+type Token = unknown;
 
 describe('PToXTokenStream (integration)', () => {
    let pTokenStream: PTokenStream;
@@ -50,25 +46,26 @@ describe('PToXTokenStream (integration)', () => {
       pTokenStream.pipe(tokenStream);
    });
 
-   function expectInputToProduce(inputDocument: string, expecteds: TokenArray | Token, done: () => void) {
-      const results: TokenArray = [];
-
+   function expectInputToProduce(inputDocument: string, expecteds: Array<Token> | Token, done: () => void) {
       pTokenStream.addText(inputDocument);
       pTokenStream.endText();
 
-      tokenStream.on('data', (data: Token) => results.push(data));
-      tokenStream.on('end', () => {
+      gatherStreamResults<Token>(tokenStream, (results) => {
+         let arrExpected: Array<Token>;
+
          if (!Array.isArray(expecteds)) {
-            expecteds = [ expecteds ];
+            arrExpected = [ expecteds ];
+         } else {
+            arrExpected = expecteds;
          }
 
-         expecteds.forEach((expected) => {
-            const actuals = results.filter((actual) => actual instanceof expected.constructor);
+         arrExpected.forEach((expected) => {
+            const actuals = results.filter((actual) => actual instanceof (expected as any).constructor);
 
-            delete actuals[0].pToken;
-            delete expected.pToken;
+            stripPTokens(actuals);
+            stripPTokens(expected);
 
-            expect({...actuals[0]}).toEqual({...expected });
+            expect(actuals[0]).toEqual(expected as any);
          });
          done();
       });
@@ -186,12 +183,9 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes text', (done) => {
-      const results: TokenArray = [];
-      tokenStream.write(new TextPToken({ text: SToken.fromString('foo') }));
+      tokenStream.write(new TextPToken({ text: toSToken('foo') }));
       tokenStream.end();
-      tokenStream.on('data', (xToken: Token) => results.push(xToken));
-
-      tokenStream.on('end', () => {
+      gatherStreamResults<Token>(tokenStream, (results) => {
          expect((results[0] as TextXToken).text).toEqual('foo');
          done();
       });

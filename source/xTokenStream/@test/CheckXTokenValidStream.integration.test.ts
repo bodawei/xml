@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Transform } from 'stream';
-
 import { EntityId, Offset } from 'basic';
+import { gatherStreamResults } from 'basic-test';
 import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpanderStream } from '../../nodeStream/EntityExpanderStream';
@@ -18,19 +17,9 @@ describe('CheckXTokenValidStream (integration)', () => {
    let parser: PTokenStream;
    let replacer: EntityExpanderStream;
 
-   function gatherTokens(stream: Transform, cb: (tokens: any) => void) {
-      const tokens: any = [];
-
-      stream.on('data', (item: any) => {
-         tokens.push(item);
-      });
-      stream.on('end', () => {
-         cb(tokens);
-      });
-   }
 
    function expectStream(validator: CheckXTokenValidStream, expected: any, done: () => void) {
-      gatherTokens(validator, (tokens) => {
+      gatherStreamResults<any>(validator, (tokens) => {
          (expect(tokens) as any).toHaveError(expected); // typeHack
          done();
       });

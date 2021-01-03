@@ -20,7 +20,7 @@ module.exports = {
       '@typescript-eslint',
    ],
    rules: {
-      'max-block-comment-len': [ ERROR, 72 ],
+      // 'max-block-comment-len': [ ERROR, 72 ],
    },
    env: {
       browser: true,

@@ -2,9 +2,9 @@
 /* eslint-env jasmine */
 
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, Range } from 'basic';
+import { gatherStreamResults } from 'basic-test';
 import { defaultExtractors } from 'extractor';
 import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseValue, ContextType } from 'pToken';
-import { gatherPTokens } from 'pToken-test';
 import { SToken, STokenSource } from 'sToken';
 import {
    CONDITIONAL_PTOKEN, CONDITIONAL_CLOSE_PTOKEN,
@@ -60,7 +60,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
             expect(result).toEqual(
@@ -78,7 +78,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<?xml version="1.1"?>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
             expect(result).toEqual(
@@ -102,7 +102,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<?xml version="1.1"?>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
             expect(result).toEqual(jasmine.objectContaining({
@@ -119,7 +119,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<one></one>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
             expect(result).toEqual(jasmine.objectContaining({
@@ -138,7 +138,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<one></one>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
             expect(result).toBeUndefined();
@@ -154,7 +154,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, ENTITY_ID);
 
             expect(result).toEqual(
@@ -174,7 +174,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, ENTITY_ID);
 
             expect(result).toEqual(
@@ -196,7 +196,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<?xml version="1.0"?>');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, (results) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (results) => {
             const result = findToken(results, ENTITY_ID);
 
             expect(result).toBeUndefined();
@@ -213,7 +213,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText(']');
          pTokenStream.endText();
 
-         gatherPTokens(pTokenStream, () => {
+         gatherStreamResults<ParseValue>(pTokenStream, () => {
             expect(pTokenStream._parseClose).not.toHaveBeenCalled();
             done();
          });
@@ -226,7 +226,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!ATTLIST something bar CDATA #REQUIRED>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -239,7 +239,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('&#foo;');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1]).toBeInstanceOf(SToken);
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -252,7 +252,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('asdf</foo>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1]).toEqual([]);
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -265,7 +265,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!DOCTYPE foo [ asdf</foo>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1]).toEqual([ '%' ]);
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -278,7 +278,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!--asdf-->');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(tokenStuff.parseComment).toHaveBeenCalled();
          done();
       });
@@ -289,7 +289,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<foo>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(tokenStuff.parseElementStart).toHaveBeenCalled();
          done();
       });
@@ -300,7 +300,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!DOCTYPE theType>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -313,7 +313,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!docType theType>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -326,7 +326,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('</foo>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(tokenStuff.parseElementEnd).toHaveBeenCalled();
          done();
       });
@@ -337,7 +337,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!ELEMENT something "foo">');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -350,7 +350,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!ENTITY something "foo">');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -363,7 +363,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('&foo;');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)));
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -376,7 +376,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('%foo;');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
          done();
@@ -389,7 +389,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('%foo;');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy).not.toHaveBeenCalled();
          done();
       });
@@ -400,7 +400,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!NOTATION something>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -413,7 +413,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<?something foo?>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<?');
          expect(parseSpy.calls.argsFor(0)[2]).toEqual(true);
@@ -427,7 +427,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('   x');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(tokenStuff.parseSpace).toHaveBeenCalled();
          done();
       });
@@ -438,7 +438,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<foo>   ');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.count()).toEqual(1);
          done();
       });
@@ -449,7 +449,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<foo></foo>   ');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.count()).toEqual(3);
          done();
       });
@@ -460,7 +460,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<></>   ');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.count()).toEqual(3);
          done();
       });
@@ -471,7 +471,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<foo></bar></foo>   ');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.count()).toEqual(3);
          done();
       });
@@ -483,7 +483,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.endText();
 
       
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -495,7 +495,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<!');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, (pTokens) => {
+      gatherStreamResults<ParseValue>(pTokenStream, (pTokens) => {
          const result = findToken(pTokens, 'UNKNOWNDECL');
          expect(result).not.toBeUndefined();
          done();
@@ -507,7 +507,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<![FOO [');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, () => {
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<![');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
@@ -519,7 +519,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.addText('<?xml version="1.0"?><one>]</one>');
       pTokenStream.endText();
 
-      gatherPTokens(pTokenStream, (pTokens) => {
+      gatherStreamResults<ParseValue>(pTokenStream, (pTokens) => {
          const result = findToken(pTokens, CHARDATA_PTOKEN) as CharDataPToken;
          expect(result.text.str).toEqual(']'); // typeHack
          done();
@@ -532,7 +532,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<![IGNORE[foo bar]]>');
          pTokenStream.endText();
    
-         gatherPTokens(pTokenStream, (pTokens) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
             expect(tokenTypes).toEqual([CONFORMANCE_VERSION, ENTITY_ID, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
             done();
@@ -543,7 +543,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<![IGNORE[foo <![INCLUDE[bar]]>]]>');
          pTokenStream.endText();
    
-         gatherPTokens(pTokenStream, (pTokens) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (pTokens) => {
             const strings: Array<String> = [];
             pTokens.forEach(token => {
                if (token.type === TEXT_PTOKEN) {
@@ -560,7 +560,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<![INCLUDE[<!ELEMENT foo ANY><![IGNORE[bar]]>]]>');
          pTokenStream.endText();
    
-         gatherPTokens(pTokenStream, (pTokens) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
 
             expect(tokenTypes).toEqual([
@@ -581,7 +581,7 @@ describe('PTokenStream (unit)', () => {
          pTokenStream.addText('<!DOCTYPE one [<![INCLUDE[<!ELEMENT one ANY><![IGNORE[bar]]>]><one></one>');
          pTokenStream.endText();
    
-         gatherPTokens(pTokenStream, (pTokens) => {
+         gatherStreamResults<ParseValue>(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
 
             expect(tokenTypes).toEqual([

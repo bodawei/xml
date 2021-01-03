@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Transform } from 'stream';
-
 import * as basic from 'basic';
+import { gatherStreamResults } from 'basic-test';
 import { ConformanceVersion } from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from 'sToken';
@@ -58,19 +57,8 @@ describe('CheckXTokenValidStream (unit)', () => {
       validator = new CheckXTokenValidStream();
    });
 
-   function gatherTokens(stream: Transform, cb: (tokens: any) => void) {
-      const tokens: any = [];
-
-      stream.on('data', (item: any) => {
-         tokens.push(item);
-      });
-      stream.on('end', () => {
-         cb(tokens);
-      });
-   }
-
    function expectStream(validator: CheckXTokenValidStream, expected: any, done: () => void) {
-      gatherTokens(validator, (tokens) => {
+      gatherStreamResults<any>(validator, (tokens) => {
          let arrayExpected: Array<any> = [];
 
          if (!Array.isArray(expected)) {
@@ -85,14 +73,14 @@ describe('CheckXTokenValidStream (unit)', () => {
    }
 
    function expectNoErrorsOrWarnings(validator: CheckXTokenValidStream, done: () => void) {
-      gatherTokens(validator, (tokens) => {
+      gatherStreamResults<any>(validator, (tokens) => {
          (expect(tokens) as any).toBeErrorAndWarningFree(); // typeHack
          done();
       });
    }
 
    function expectNoErrors(validator: CheckXTokenValidStream, done: () => void) {
-      gatherTokens(validator, (tokens) => {
+      gatherStreamResults<any>(validator, (tokens) => {
          (expect(tokens) as any).toBeErrorFree(); // typeHack
          done();
       });
@@ -342,7 +330,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken1);
                validator.end();
 
-               gatherTokens(validator, (tokens) => {
+               gatherStreamResults<any>(validator, (tokens) => {
                   expect(tokens[2].attributes[0].value[0].text)
                      .toEqual('  this is fun.    but a can not actually happen  ');
                   done();
@@ -371,7 +359,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken1);
                validator.end();
 
-               gatherTokens(validator, (tokens) => {
+               gatherStreamResults<any>(validator, (tokens) => {
                   expect(tokens[2].attributes[0].value)
                      .toEqual([
                         new TextXToken('one two'),
@@ -395,7 +383,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken1);
                validator.end();
 
-               gatherTokens(validator, (tokens) => {
+               gatherStreamResults<any>(validator, (tokens) => {
                   expect(tokens[1].attributes[0].value[0].text)
                      .toEqual('   one two  three four');
                   done();
@@ -540,7 +528,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken1);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('$$BAD', 1.1, 2);
                   done();
                });
@@ -663,7 +651,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
                });
@@ -886,7 +874,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
                });
@@ -1041,7 +1029,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isNmToken).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
                });
@@ -1597,7 +1585,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
@@ -1643,7 +1631,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
@@ -1689,7 +1677,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
@@ -1735,7 +1723,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
@@ -1781,7 +1769,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
@@ -1846,7 +1834,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
@@ -1891,7 +1879,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               gatherTokens(validator, () => {
+               gatherStreamResults<any>(validator, () => {
                   expect(basic.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
@@ -2242,7 +2230,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             const notExpected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
                ['elementType', 'anAttribute']);
-            gatherTokens(validator, (tokens) => {
+            gatherStreamResults<any>(validator, (tokens) => {
                (expect(tokens) as any).not.toHaveError(notExpected); // typeHack
                done();
             });
@@ -2761,7 +2749,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new WellFormedError(WellFormedError.ID.ELEMENTDECL_NO_NAME, ['x']));
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
+            gatherStreamResults<any>(validator, (tokens) => {
                const errors = tokens.filter((token: any) => token.type === ERROR_TYPE);
 
                expect(errors.length).toBe(1);
@@ -3528,7 +3516,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementStartXToken('child', []));
                validator.end();
 
-               gatherTokens(validator, (tokens) => {
+               gatherStreamResults<any>(validator, (tokens) => {
                   expect(tokens[2].type).toEqual(SPACE_XTOKEN);
                   done();
                });

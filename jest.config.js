@@ -95,6 +95,7 @@ module.exports = {
   moduleNameMapper: {
      '^attFixer$': '<rootDir>/source/attFixer',
      '^basic$': '<rootDir>/source/basic',
+     '^basic-test$': '<rootDir>/source/basic/@test/helper',
      '^conformance$': '<rootDir>/source/conformance',
      '^error$': '<rootDir>/source/error',
      '^error-test$': '<rootDir>/source/error/@test/helper',

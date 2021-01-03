@@ -16,6 +16,7 @@ import { XmlDeclarationPToken } from './token/xmlDeclaration';
 
 export * from './bridge/instruction';
 export * from './bridge/entityDeclaration';
+export * from './common/attValueToString';
 export * from './common/contentModel';
 export * from './common/externalId';
 export * from './common/fieldedInstruction';

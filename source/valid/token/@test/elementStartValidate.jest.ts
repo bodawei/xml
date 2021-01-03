@@ -101,7 +101,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+      expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
          params: ['parentName'],
          position: elementStart.open,
@@ -131,7 +131,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+      expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ANY_UNDECLARED_ELEMENT,
          params: ['parentName', 'other'],
          position: elementStart.name,
@@ -159,7 +159,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+      expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
          params: ['parentName', 'elementName'],
          position: elementStart.name,
@@ -186,7 +186,7 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+      expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.INVALID_ELEMENT_IN_CONTENT,
          params: ['parentName', 'elementName'],
          position: elementStart.name,
@@ -223,6 +223,84 @@ describe('elementStartValidate (unit)', () => {
    });
 
    describe('attributes', () => {
+      it('reports an error when a NMTOKEN value is empty (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {
+                  att1: {
+                     def: {
+                        name: toSToken('att1'),
+                        type: toSToken('NMTOKEN'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+         elementStart = new ElementStartPToken({
+            open: toSToken('</'),
+            name: toSToken('elementName'),
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  openQuote: toSToken('"'),
+                  value: [],
+                  defaulted: true,
+               },
+            ],
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
+            params: ['', 'elementName', 'att1'],
+            position: toSToken('"'),
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports an error when a NMTOKENS value is empty (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {
+                  att1: {
+                     def: {
+                        name: toSToken('att1'),
+                        type: toSToken('NMTOKENS'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+         elementStart = new ElementStartPToken({
+            open: toSToken('</'),
+            name: toSToken('elementName'),
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  openQuote: toSToken('"'),
+                  value: [],
+                  defaulted: true,
+               },
+            ],
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            params: ['', 'elementName', 'att1'],
+            position: toSToken('"'),
+            lastPosition: undefined,
+         });
+      });
+
       it('reports an error when an attribute is defaulted from an external ATTLIST declaration, and the document is standalone', () => {
          state = new ValidateState({
             attributeDefs: {
@@ -253,10 +331,10 @@ describe('elementStartValidate (unit)', () => {
          elementStartValidate(elementStart, state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportValidityError({
+         expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
             params: ['elementName', 'att1'],
-            position: elementStart.open,
+            position: toSToken('att1'),
             lastPosition: undefined,
          });
       });

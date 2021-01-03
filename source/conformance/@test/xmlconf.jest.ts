@@ -3,17 +3,16 @@
 import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
 import { ConformanceVersion, XmlRevision, XmlVersion } from 'basic';
+import { gatherStreamResults } from 'basic-test';
 import { defaultExtractors } from 'extractor';
 import { AttFixerStream, CheckWellFormed } from 'nodeStream';
-import { gatherPTokens } from 'pToken-test';
-import { ContextType } from 'pToken';
+import { ContextType, ParseValue } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
 
 import metadata from './data/xmlconf.json';
 import { TestDetails, buildTestDetails } from './helper/buildTestDetails';
-import { gatherStrings } from './helper/gatherStrings';
 import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
 import { TestExpanderStream } from './helper/TestExpanderStream';
@@ -85,7 +84,7 @@ describe('XML Conformance tests', () => {
             if (hasOutput) {
                const toXmlStream = testStream.pipe(new XTokenToXmlStream());
 
-               gatherStrings(toXmlStream, (results: Array<string>) => {
+               gatherStreamResults<string>(toXmlStream, (results) => {
                   // @ts-expect-error 2329/matchers
                   expect(results).toEqualNormalized(testData.outputData);
                   doneWhenAllDone();
@@ -93,7 +92,7 @@ describe('XML Conformance tests', () => {
             }
 
             // We also want to test  whether the errors match as expected
-            gatherPTokens(testStream, (results) => {
+            gatherStreamResults<ParseValue>(testStream, (results) => {
                const key = `V${ver}R${edition}`;
                let expectedError;
 
@@ -148,7 +147,7 @@ describe('XML Conformance tests', () => {
                pTokenStream.endText();
 
                // We also want to test  whether the errors match as expected
-               gatherPTokens(wellFormedStream, (results) => {
+               gatherStreamResults<ParseValue>(wellFormedStream, (results) => {
                   // @ts-expect-error 2329/matchers
                   expect(results).not.toHaveErrors();
                   done();
