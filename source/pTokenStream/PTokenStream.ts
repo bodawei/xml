@@ -202,9 +202,6 @@ class PTokenStream extends Readable {
             case '&':
                this._markupParse(deliverParse);
                break;
-            case '%':
-               parseParameterEntityReference(this._sTokenSource, deliverParse);
-               break;
             case ']':
                if (this.conditionalStack.length > 0) {
                   this._sTokenSource.extract('match', ']]>', (sToken) => {
@@ -238,16 +235,21 @@ class PTokenStream extends Readable {
                   });
                }
                break;
+               // 'pr-xml-utf-8'
             default:
-               let terminators: Array<string> = [];
+               if (sToken.str === '%' && !this.inContent) {
+                  parseParameterEntityReference(this._sTokenSource, deliverParse);
+               } else {
+                  let terminators: Array<string> = [];
 
-               if (this.waitingForInternalClose) {
-                  terminators = [ '%' ];
+                  if (this.waitingForInternalClose) {
+                     terminators = [ '%' ];
+                  }
+
+                  parseCharData(this._sTokenSource, terminators, (result) => {
+                     deliverParse(result);
+                  });
                }
-
-               parseCharData(this._sTokenSource, terminators, (result) => {
-                  deliverParse(result);
-               });
                break;
          }
       });

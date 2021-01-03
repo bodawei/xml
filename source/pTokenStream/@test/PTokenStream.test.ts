@@ -383,6 +383,18 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
+   it('does not call parseParameterEntityReference() if already in content', (done) => {
+      const parseSpy = spyOn(tokenStuff, 'parseParameterEntityReference').and.callThrough();
+      pTokenStream.addText('<one>');
+      pTokenStream.addText('%foo;');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(parseSpy).not.toHaveBeenCalled();
+         done();
+      });
+   });
+
    it('calls parseDeclaration() when encountering a notation', (done) => {
       const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!NOTATION something>');

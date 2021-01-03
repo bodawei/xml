@@ -6,14 +6,8 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [], // ['pr-xml-utf-8'],
+   includedIds: [],
    excludedIds: [
-      //  This messes up with attlists with enumerations.  It doesn't recognize the right wrod boundaries.
-      // but the same is true for element declarations <!ELEMENT %name; (a|b)*>
-      // The solution is either we need to always add other delimiters to word identification
-      // or we need to completely chnage unassigned to just work with strings rather than preparsed
-      'pr-xml-utf-8', // japanese charas in utf8... what happened
-
       'o-p08fail1', // ELEMENTSTART_NMTOKENS_NOT_NMTOKEN --- ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
 
       // Misc
