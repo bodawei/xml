@@ -235,7 +235,6 @@ class PTokenStream extends Readable {
                   });
                }
                break;
-               // 'pr-xml-utf-8'
             default:
                if (sToken.str === '%' && !this.inContent) {
                   parseParameterEntityReference(this._sTokenSource, deliverParse);
