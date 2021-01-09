@@ -6,57 +6,62 @@ import { EntityId, Range } from 'basic';
 import SToken from '../SToken';
 
 describe('SToken', () => {
-
    describe('construction', () => {
-
       it('creates an SToken with the provided parameters', () => {
          const sToken = new SToken('one', 'two', new Range(new EntityId()));
 
-         expect(sToken).toEqualProps({
-            str: 'one',
-            originalStr: 'two',
-            ranges: [ new Range(new EntityId()) ],
-         });
+         expect(sToken).toEqual(
+            jasmine.objectContaining({
+               str: 'one',
+               originalStr: 'two',
+               ranges: [new Range(new EntityId())],
+            }),
+         );
       });
 
       it('creates an SToken with an empty range if none provided', () => {
          const sToken = new SToken('one', 'two', []);
 
-         expect(sToken).toEqualProps({
-            str: 'one',
-            originalStr: 'two',
-            ranges: [ ],
-         });
+         expect(sToken).toEqual(
+            jasmine.objectContaining({
+               str: 'one',
+               originalStr: 'two',
+               ranges: [],
+            }),
+         );
       });
 
       it('creates an SToken with a the provided range array', () => {
-         const sToken = new SToken('one', 'two', [ new Range(new EntityId()), new Range(new EntityId()) ]);
+         const sToken = new SToken('one', 'two', [
+            new Range(new EntityId()),
+            new Range(new EntityId()),
+         ]);
 
-         expect(sToken).toEqualProps({
-            str: 'one',
-            originalStr: 'two',
-            ranges: [ new Range(new EntityId()), new Range(new EntityId()) ],
-         });
+         expect(sToken).toEqual(
+            jasmine.objectContaining({
+               str: 'one',
+               originalStr: 'two',
+               ranges: [new Range(new EntityId()), new Range(new EntityId())],
+            }),
+         );
       });
-
    });
 
    describe('SToken.fromString()', () => {
-
       it('creates an SToken using just the single provided string', () => {
          const sToken = SToken.fromString('one');
 
-         expect(sToken).toEqualProps({
-            str: 'one',
-            originalStr: 'one',
-            ranges: [ new Range(new EntityId()) ],
-         });
+         expect(sToken).toEqual(
+            jasmine.objectContaining({
+               str: 'one',
+               originalStr: 'one',
+               ranges: [new Range(new EntityId())],
+            }),
+         );
       });
-
    });
 
    describe('.clone()', () => {
-
       it('makes a copy of the current token', () => {
          const sToken1 = new SToken(' \n', ' \r\n', new Range(new EntityId(), 1, 2, 3));
 
@@ -68,11 +73,9 @@ describe('SToken', () => {
 
          expect(clone).toEqual(new SToken(' \n', ' \r\n', new Range(new EntityId(), 1, 2, 3)));
       });
-
    });
 
    describe('.firstRange', () => {
-
       it('is undefined if there is no first range', () => {
          const sToken = new SToken(' \n', ' \r\n', []);
 
@@ -87,11 +90,9 @@ describe('SToken', () => {
 
          expect(sToken.firstRange).toEqual(new Range(new EntityId(), 1, 2, 3, 4, 5, 6));
       });
-
    });
 
    describe('.lastRange', () => {
-
       it('is undefined if there is no last range', () => {
          const sToken = new SToken(' \n', ' \r\n', []);
 
@@ -106,22 +107,22 @@ describe('SToken', () => {
 
          expect(sToken.lastRange).toEqual(new Range(new EntityId(), 10, 22, 33, 44, 55, 66));
       });
-
    });
 
    describe('.merge()', () => {
-
       it('merges a second Stoken with the first', () => {
          const sToken1 = new SToken(' \n', ' \r\n', []);
          const sToken2 = new SToken('two', 'two', []);
 
          sToken1.merge(sToken2);
 
-         expect(sToken1).toEqualProps({
-            str: ' \ntwo',
-            originalStr: ' \r\ntwo',
-            ranges: [],
-         });
+         expect(sToken1).toEqual(
+            jasmine.objectContaining({
+               str: ' \ntwo',
+               originalStr: ' \r\ntwo',
+               ranges: [],
+            }),
+         );
       });
 
       it('returns the target SToken', () => {
@@ -139,11 +140,13 @@ describe('SToken', () => {
 
          sToken1.merge(sToken2);
 
-         expect(sToken1).toEqualProps({
-            str: ' \ntwo',
-            originalStr: ' \r\ntwo',
-            ranges: [ new Range(new EntityId(), 1, 2, 3) ],
-         });
+         expect(sToken1).toEqual(
+            jasmine.objectContaining({
+               str: ' \ntwo',
+               originalStr: ' \r\ntwo',
+               ranges: [new Range(new EntityId(), 1, 2, 3)],
+            }),
+         );
       });
 
       it('combines range if second has no range', () => {
@@ -152,11 +155,13 @@ describe('SToken', () => {
 
          sToken1.merge(sToken2);
 
-         expect(sToken1).toEqualProps({
-            str: ' \ntwo',
-            originalStr: ' \r\ntwo',
-            ranges: [ new Range(new EntityId(), 1, 2, 3) ],
-         });
+         expect(sToken1).toEqual(
+            jasmine.objectContaining({
+               str: ' \ntwo',
+               originalStr: ' \r\ntwo',
+               ranges: [new Range(new EntityId(), 1, 2, 3)],
+            }),
+         );
       });
 
       it('simply concatnates the ranges if the two have no overlap', () => {
@@ -189,7 +194,5 @@ describe('SToken', () => {
             new Range(new EntityId('there'), 1, 2, 3),
          ]);
       });
-
    });
-
 });

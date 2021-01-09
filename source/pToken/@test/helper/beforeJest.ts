@@ -1,7 +1,10 @@
-import { describe, expect, it } from '@jest/globals';
+import { expect } from '@jest/globals';
 import { SToken } from 'sToken';
 
-type Props =  { [name: string]: any, calls?: any };
+interface Props {
+   [name: string]: any;
+   calls?: any;
+}
 
 function makeRangeless(item: undefined | Props): Props | undefined | null {
    const result: Props = {};
@@ -14,7 +17,7 @@ function makeRangeless(item: undefined | Props): Props | undefined | null {
       return item;
    }
 
-   let props = item;
+   const props = item;
 
    if (props instanceof SToken) {
       return new SToken(props.str, props.originalStr, []);
@@ -46,8 +49,10 @@ function getTheOneArg(callback: jest.MockedFunction<any>) {
       const args = callback.mock.calls;
 
       if (args.length !== 1 || args[0].length !== 1) {
-         throw new Error('toEqualRangeless() wanted one call with one argument. ' +
-            `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
+         throw new Error(
+            'toEqualRangeless() wanted one call with one argument. ' +
+               `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`,
+         );
       }
 
       return args[0][0];
@@ -68,7 +73,8 @@ function fixUndef(value: Array<any> | Props | void): string | Props {
       });
 
       return newObj;
-   } if (value === undefined) {
+   }
+   if (value === undefined) {
       return '•undefined•';
    }
 
@@ -82,9 +88,9 @@ expect.extend({
       }
 
       let pass = true;
-      let def = 'Expected properties not to be found in callback, but they were.';
-      let actual: Props = makeRangeless(getTheOneArg(callbackSpy)) || {};
-      let expected: Props = makeRangeless(expectedProps) || {};
+      const def = 'Expected properties not to be found in callback, but they were.';
+      const actual: Props = makeRangeless(getTheOneArg(callbackSpy)) || {};
+      const expected: Props = makeRangeless(expectedProps) || {};
       let message = '';
 
       Object.keys(expected).forEach((propName) => {
@@ -104,16 +110,16 @@ expect.extend({
          if (!this.equals(act, exp)) {
             pass = false;
             // note JSON.stringify() loses properties that have undefined values
-            message += `"${propName}"'s value did not match.\n` +
+            message +=
+               `"${propName}"'s value did not match.\n` +
                `   ACTUAL:   ${JSON.stringify(fixUndef(act), undefined, 2)}\n` +
                `   EXPECTED: ${JSON.stringify(fixUndef(exp), undefined, 2)}\n`;
          }
       });
 
-
       return {
          pass,
          message: () => message || def,
       };
-   }
+   },
 });

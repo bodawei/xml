@@ -39,7 +39,7 @@ function toEqualNormalized(actual: Array<string>, expected = ''): JestResult {
  * or with an array of error ID's, in which case you are expecting each of those to
  * be found.
  */
-function toHaveErrors(
+function toHaveXmlConfErrors(
    actual: Array<PToken>,
    expected: Array<ErrorDetails | string> = [],
 ): JestResult {
@@ -92,21 +92,21 @@ function toHaveErrors(
       .join(', ');
 
    if (pass) {
-      // expect(results).not.toHaveErrors(['foo', 'bar']);
+      // expect(results).not.toHaveXmlConfErrors(['foo', 'bar']);
       if (errorsExpected) {
          message = () =>
             `Was expecting ${expectedDisplay}, but found ${errorsFound.join('\n\t')} instead.`;
       } else {
-         // expect(results).not.toHaveErrors();
+         // expect(results).not.toHaveXmlConfErrors();
          message = () =>
             `Expected no errors, but found the following errors:\n\t${errorsFound.join('\n\t')}\n`;
       }
    } else if (errorsExpected) {
-      // expect(results).toHaveErrors([ 'foo', 'bar']);
+      // expect(results).toHaveXmlConfErrors([ 'foo', 'bar']);
       message = () =>
          `Did not find ${expectedDisplay}, but instead found\n\t${errorsFound.join('\n\t')}\n`;
    } else {
-      // expect(results).toHaveErrors();
+      // expect(results).toHaveXmlConfErrors();
       message = () => 'Expected to find errors, but none were found.';
    }
 
@@ -120,13 +120,16 @@ function toHaveErrors(
 //    // eslint-disable-next-line @typescript-eslint/no-namespace
 //    namespace jest {
 //       interface Matchers<R, T = {}> {
-//          toHaveErrors(stuff?: Array<string | ErrorDetails>): R;
+//          toHaveXmlConfErrors(stuff?: Array<string | ErrorDetails>): R;
 //          toEqualNormalized(expected?: string): R;
 //       }
 //    }
 // }
 
-expect.extend({
-   toHaveErrors,
-   toEqualNormalized,
-});
+function installMatchers(): void {
+   expect.extend({
+      toHaveXmlConfErrors,
+      toEqualNormalized,
+   });
+}
+export { installMatchers };

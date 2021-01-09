@@ -76,7 +76,8 @@ describe('expandAttributes() (unit)', () => {
 
    it('calls back with a copy of the set of attribute values when it contains no general entity references', (done) => {
       expandAttributes([{ value: [textPToken] }], params, new EntityContextStack(), (result) => {
-         expect(result).toEqualShallowDifferent([{ newValue: [textPToken], byproducts: [] }]);
+         expect(result).toEqual([{ newValue: [textPToken], byproducts: [] }]);
+         expect(result).not.toBe([{ newValue: [textPToken], byproducts: [] }]);
          done();
       });
    });

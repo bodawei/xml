@@ -81,7 +81,8 @@ describe('expandMarkupUnexpanded() (unit)', () => {
       const unexpandedTokens: Array<UnexpandedMarkupToken> = [textPToken];
 
       expandMarkupUnexpanded(unexpandedTokens, params, new EntityContextStack(), (result) => {
-         expect(result.expandedTokens).toEqualShallowDifferent(unexpandedTokens);
+         expect(result.expandedTokens).toEqual(unexpandedTokens);
+         expect(result.expandedTokens).not.toBe(unexpandedTokens);
          done();
       });
    });
@@ -94,7 +95,8 @@ describe('expandMarkupUnexpanded() (unit)', () => {
       const unexpandedTokens: Array<UnexpandedMarkupToken> = [bogus];
 
       expandMarkupUnexpanded(unexpandedTokens, params, new EntityContextStack(), (result) => {
-         expect(result.expandedTokens).toEqualShallowDifferent(unexpandedTokens);
+         expect(result.expandedTokens).toEqual(unexpandedTokens);
+         expect(result.expandedTokens).not.toBe(unexpandedTokens);
          done();
       });
    });

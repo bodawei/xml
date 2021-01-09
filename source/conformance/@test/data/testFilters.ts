@@ -6,10 +6,8 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: ['o-p08fail1'],
+   includedIds: [],
    excludedIds: [
-      // 'o-p08fail1', // ELEMENTSTART_NMTOKENS_NOT_NMTOKEN --- ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED
-
       // Misc
       'ext01', // We are creating PACE_PTOKEN's that we should not
       'sa02', // Some standalone problem/ misinterpretation

@@ -222,6 +222,9 @@ interface ErrorProps {
 declare global {
    namespace jasmine {
       interface Matchers<T> {
+         toHaveError(expectedXmlErrorInstance: any): void; // given tokens: Array<any>, 
+         toBeErrorFree(): void; // given tokens: Array<any>
+         toBeErrorAndWarningFree(): void; // given tokens: Array<any>
          toReportError(errorProps: ErrorProps): void;
          toNotReportError(id: string): void;
          toReportWarning(errorProps: ErrorProps): void;

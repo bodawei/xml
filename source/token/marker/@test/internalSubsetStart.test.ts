@@ -13,9 +13,7 @@ describe('InternalSubsetStart (unit)', () => {
       it('has a type property', () => {
          const token = new InternalSubsetStartToken();
 
-         expect(token).toEqualShape({
-            type: INTERNAL_SUBSET_START_TOKEN,
-         });
+         expect(token.type).toEqual(INTERNAL_SUBSET_START_TOKEN);
       });
 
    });

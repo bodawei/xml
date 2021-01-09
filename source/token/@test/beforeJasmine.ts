@@ -185,7 +185,6 @@ beforeEach(() => {
 module.exports = {
    toContainPTokenProps,
    toEqualRangeless,
-   makeRangeless,
 };
 
 declare global {
@@ -193,7 +192,6 @@ declare global {
       interface Matchers<T> {
          toEqualRangeless(matcher: any): void;
          toContainPTokenProps(matcher: any): void;
-         toBeInstanceOf(klazz: any):void;
       }
    }
 }

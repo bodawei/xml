@@ -13,11 +13,14 @@ import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
 
 import metadata from './data/xmlconf.json';
 import { TestDetails, buildTestDetails } from './helper/buildTestDetails';
+import { installMatchers } from './helper/customMatchers';
 import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
 import { TestExpanderStream } from './helper/TestExpanderStream';
 import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
 import CheckValidityStream from '../../nodeStream/CheckValidityStream';
+
+installMatchers();
 
 function setupWellFormedStream(
    test: TestDetails,
@@ -124,10 +127,10 @@ describe('XML Conformance tests', () => {
 
                if (expectedError) {
                   // @ts-expect-error 2329/matchers
-                  expect(results).toHaveErrors([expectedError]);
+                  expect(results).toHaveXmlConfErrors([expectedError]);
                } else {
                   // @ts-expect-error 2329/matchers
-                  expect(results).not.toHaveErrors();
+                  expect(results).not.toHaveXmlConfErrors();
                }
                doneWhenAllDone();
             });
@@ -149,7 +152,7 @@ describe('XML Conformance tests', () => {
                // We also want to test  whether the errors match as expected
                gatherStreamResults<ParseValue>(wellFormedStream, (results) => {
                   // @ts-expect-error 2329/matchers
-                  expect(results).not.toHaveErrors();
+                  expect(results).not.toHaveXmlConfErrors();
                   done();
                });
             });

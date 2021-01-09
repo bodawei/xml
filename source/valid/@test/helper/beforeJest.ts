@@ -2,9 +2,9 @@ import { expect } from '@jest/globals';
 import { StringBundle } from 'basic';
 import { makeErrorMatcher } from 'error-test';
 
-import validityMessages from '../../error/derive/ValidityError.json';
+import validityMessages from '../../../error/derive/ValidityError.json';
 
-import { ValidityError } from '../../error/ValidityError';
+import { ValidityError } from '../../../error/ValidityError';
 
 expect.extend({
    toReportValidityError: makeErrorMatcher(ValidityError, {

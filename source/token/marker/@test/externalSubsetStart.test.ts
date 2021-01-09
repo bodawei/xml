@@ -13,9 +13,7 @@ describe('ExternalSubsetStart (unit)', () => {
       it('has a type property', () => {
          const token = new ExternalSubsetStartToken();
 
-         expect(token).toEqualShape({
-            type: EXTERNAL_SUBSET_START_TOKEN,
-         });
+         expect(token.type).toEqual(EXTERNAL_SUBSET_START_TOKEN);
       });
 
    });

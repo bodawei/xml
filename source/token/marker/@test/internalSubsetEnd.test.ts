@@ -13,9 +13,7 @@ describe('internalSubsetEnd (unit)', () => {
       it('has only a type property', () => {
          const token = new InternalSubsetEndToken();
 
-         expect(token).toEqualShape({
-            type: INTERNAL_SUBSET_END_TOKEN,
-         });
+         expect(token.type).toEqual(INTERNAL_SUBSET_END_TOKEN);
       });
 
    });

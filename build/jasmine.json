@@ -6,12 +6,9 @@
    ],
  
    "helpers": [
-      "build/beforeJasmine.ts",
-      "source/conformance/@test/helper/beforeJasmine.ts",
+      "source/basic/helper/beforeJasmine.ts",
       "source/error/@test/beforeJasmine.ts",
-      "source/sToken/@test/beforeJasmine.ts",
-      "source/token/@test/beforeJasmine.ts",
-      "source/error/@test/helper.ts"
+      "source/token/@test/beforeJasmine.ts"
    ],
  
    "stopSpecOnExpectationFailure": false,

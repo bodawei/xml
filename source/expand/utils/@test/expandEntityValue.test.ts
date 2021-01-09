@@ -78,7 +78,8 @@ describe('expandEntityValue() (unit)', () => {
 
    it('calls back with an shallow copied unchanged value when given an entity value with no references', (done) => {
       expandEntityValue([textPToken], params, new EntityContextStack(), (result) => {
-         expect(result.newValue).toEqualShallowDifferent([textPToken]);
+         expect(result.newValue).toEqual([textPToken]);
+         expect(result.newValue).not.toBe([textPToken]);
          done();
       });
    });
