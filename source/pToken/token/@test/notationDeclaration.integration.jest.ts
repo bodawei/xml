@@ -40,6 +40,27 @@ describe('notationDeclaration (integration)', () => {
          });
       });
 
+      it('parses a trailing PE Reference if there is one after the end of content', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('foo SYSTEM "sys.dtd" %other;>');
+         source.endText();
+
+         parseNotationDeclaration(source, declarationStart, (parsing) => {
+            // @ts-expect-error 2329/matchers
+            expect(parsing.unexpanded).toEqualRangeless({
+               propName: 'trailing',
+               tokens: [
+                  new ParameterEntityReferencePToken({
+                     open: toSToken('%'),
+                     name: toSToken('other'),
+                     close: toSToken(';'),
+                  }),
+               ],
+            });
+            done?.();
+         });
+      });
+
       it('parses a PERef (check unexpanded calls)', (done) => {
          const source = new STokenSource(defaultExtractors);
          source.addText('%foo;>');
@@ -47,7 +68,7 @@ describe('notationDeclaration (integration)', () => {
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   unexpanded: {
@@ -76,7 +97,7 @@ describe('notationDeclaration (integration)', () => {
 
          parseNotationDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   type: NOTATION_DECLARATION_PTOKEN,
                   open: toSToken('<!'),
@@ -122,7 +143,7 @@ describe('notationDeclaration (integration)', () => {
 
          resumeParseNotationDeclaration(source, nd, (parsed) => {
             // @ts-expect-error 2329/matchers
-                        expect(parsed).toEqualRangeless(
+            expect(parsed).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('elName'),
@@ -181,7 +202,7 @@ describe('notationDeclaration (integration)', () => {
 
          resumeParseNotationDeclaration(source, nd, (parsed) => {
             // @ts-expect-error 2329/matchers
-                        expect(parsed).toEqualRangeless(
+            expect(parsed).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('aName'),

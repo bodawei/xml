@@ -112,7 +112,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback.mock.calls[0][0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('notationName'),
@@ -147,7 +147,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback.mock.calls[0][0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: undefined,
@@ -189,7 +189,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback.mock.calls[0][0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('notationName'),
@@ -200,6 +200,7 @@ describe('notationdeDeclaration (unit)', () => {
             }),
          );
       });
+
       it('parses a parameter entity reference after the externalId', () => {
          const results = [
             undefined,
@@ -234,7 +235,7 @@ describe('notationdeDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback.mock.calls[0][0]).toEqualRangeless(
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
             new NotationDeclarationPToken({
                open: toSToken('<!'),
                name: toSToken('theName'),
@@ -244,6 +245,57 @@ describe('notationdeDeclaration (unit)', () => {
                unexpanded: {
                   tokens: [],
                   propName: 'fred',
+               },
+               close: toSToken('>'),
+            }),
+         );
+      });
+
+      it('parses a parameter entity reference after a complete externalId', () => {
+         const results = [
+            undefined,
+            {
+               tokens: [],
+               propName: 'trailing',
+            },
+         ];
+         parseUnexpSpy.mockImplementation((source, name, cb) => {
+            cb(results.shift());
+         });
+         externalIDParseSpy.mockImplementation((_1, _2, cb) => {
+            cb({ externalId: {} });
+         });
+         notationPToken = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([
+            ['theName', 'word', ['>']],
+            ['\t', 'space'],
+            ['\n', 'space'],
+            ['>', 'match', '>'],
+         ]);
+
+         parseNotationDeclaration(
+            mockSource,
+            {
+               open: toSToken('<!'),
+            },
+            callback,
+         );
+         mockSource.respondInAsyncTime();
+
+         // @ts-expect-error 2329/matchers
+         expect(callback.mock.calls[0][0]).toEqualRangeless(
+            new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('theName'),
+               nameSpace: toSToken('\t'),
+               externalId: {},
+               externalIdSpace: toSToken('\n'),
+               unexpanded: {
+                  tokens: [],
+                  propName: 'trailing',
                },
                close: toSToken('>'),
             }),
@@ -286,7 +338,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('theName'),
@@ -330,7 +382,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   declTypeSpace: toSToken('\n'),
@@ -373,7 +425,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('aName'),
@@ -383,6 +435,44 @@ describe('notationdeDeclaration (unit)', () => {
                   unexpanded: {
                      tokens: [],
                      propName: 'externalType',
+                  },
+                  close: toSToken('>'),
+               }),
+            );
+
+            done?.();
+         });
+
+         mockSource.respondInAsyncTime();
+      });
+
+      it('adds trailing space', (done) => {
+         const notationDeclaration = new NotationDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('aName'),
+            nameSpace: toSToken(' '),
+            externalId: {},
+            externalIdSpace: toSToken('\t\t'),
+            unexpanded: {
+               tokens: [],
+               propName: 'trailing',
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([['\n', 'space']]);
+
+         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+            // @ts-expect-error 2329/matchers
+            expect(result).toEqualRangeless(
+               new NotationDeclarationPToken({
+                  open: toSToken('<!'),
+                  name: toSToken('aName'),
+                  nameSpace: toSToken(' '),
+                  externalId: {},
+                  externalIdSpace: toSToken('\t\t\n'),
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'trailing',
                   },
                   close: toSToken('>'),
                }),
@@ -415,7 +505,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new NotationDeclarationPToken({
                   open: toSToken('<!'),
                   name: toSToken('aName'),

@@ -168,7 +168,11 @@ function parseNotationDeclaration(
                });
             } else {
                source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
-               parseClose(source, declarationStart, protoToken, deliverPToken);
+
+               parseUnexpanded(source, 'trailing', (innerunexpanded) => {
+                  protoToken.unexpanded = innerunexpanded;
+                  parseClose(source, declarationStart, protoToken, deliverPToken);
+               });
             }
          });
       });
@@ -217,6 +221,9 @@ function resumeParseNotationDeclaration(
 
             resumeExternalParse(source, undefined, 'externalType', protoToken, decl, deliverPToken);
          });
+      } else if (propName === 'trailing') {
+         protoToken.externalIdSpace = combineSTokens(protoToken.externalIdSpace, preSpace);
+         deliverPToken(new NotationDeclarationPToken(decl, protoToken));
       } else {
          resumeExternalParse(source, preSpace, propName, protoToken, decl, deliverPToken);
       }
