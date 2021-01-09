@@ -9,7 +9,6 @@ const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
       // Misc
-      'ext01', // We are creating PACE_PTOKEN's that we should not
       'sa02', // Some standalone problem/ misinterpretation
       'inv-not-sa02', // This is an invalid test but reports wellformedness errors
       'sa03', // Some standalone problem/ misinterpretation

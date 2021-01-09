@@ -495,7 +495,7 @@ describe('EntityExpanderStream (integration)', () => {
                   ELEMENT_END_PTOKEN,
                   CHARDATA_PTOKEN,
                   ELEMENT_END_PTOKEN,
-                  SPACE_PTOKEN,
+                  CHARDATA_PTOKEN,
                   GENERAL_ENTITY_END_PTOKEN,
                   CHARDATA_PTOKEN,
                   ELEMENT_END_PTOKEN

@@ -455,6 +455,21 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
+   it('does not call space.parse() after the topmost element start and end have been found in a general entity (whitebox)', (done) => {
+      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+         context: ContextType.GENERAL_ENTITY,
+      });
+      const parseSpy = spyOn(tokenStuff, 'parseSpace').and.callThrough();
+      pTokenStream.addText('<foo></foo>   ');
+      pTokenStream.endText();
+
+      gatherStreamResults<ParseValue>(pTokenStream, () => {
+         expect(parseSpy.calls.count()).toEqual(0);
+         done();
+      });
+   });
+
+
    it('call space.parse() after nameless start and end have been found (whitebox)', (done) => {
       const parseSpy = spyOn(tokenStuff, 'parseSpace').and.callThrough();
       pTokenStream.addText('<></>   ');

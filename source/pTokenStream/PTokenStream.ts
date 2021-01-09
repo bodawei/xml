@@ -127,7 +127,10 @@ class PTokenStream extends Readable {
 
                if (name === topName) {
                   this._elementStack.pop();
-                  this.inContent = this._elementStack.length > 0;
+                  // We are always inContent if we are in a general entity. do not change that.
+                  if (this.context !== ContextType.GENERAL_ENTITY) {
+                     this.inContent = this._elementStack.length > 0;
+                  }
                }
             }
          }
