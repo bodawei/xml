@@ -25,7 +25,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -72,7 +72,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -132,7 +132,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -185,7 +185,7 @@ describe('attListDeclaration (integration)', () => {
 
          parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -249,7 +249,7 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(expected);
+            expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -295,7 +295,7 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(expected);
+            expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -354,7 +354,7 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(expected);
+            expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -413,7 +413,54 @@ describe('attListDeclaration (integration)', () => {
             });
 
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(expected);
+            expect(result).toEqualRangeless(expected);
+            done?.();
+         });
+      });
+
+      it('parses a PERef in the trailing position (could be just blank spaces)', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('elName one ID "value" %foo; >');
+         source.endText();
+
+         parseAttListDeclaration(source, { open: toSToken('<!') }, (result) => {
+            const expected = new AttListDeclarationPToken({
+               open: toSToken('<!'),
+               elementName: toSToken('elName'),
+               elementNameSpace: toSToken(' '),
+               attDefs: [
+                  {
+                     name: toSToken('one'),
+                     nameSpace: toSToken(' '),
+                     type: toSToken('ID'),
+                     typeSpace: toSToken(' '),
+                     enumeration: undefined,
+                     defaultType: undefined,
+                     defaultTypeSpace: undefined,
+                     openQuote: toSToken('"'),
+                     value: [new TextPToken(toSToken('value'))],
+                     closeQuote: toSToken('"'),
+                     valueSpace: toSToken(' '),
+                  },
+               ],
+               unexpanded: {
+                  propName: 'name',
+                  tokens: [
+                     new ParameterEntityReferencePToken({
+                        open: toSToken('%'),
+                        openSpace: undefined,
+                        name: toSToken('foo'),
+                        nameSpace: undefined,
+                        close: toSToken(';'),
+                     }),
+                     new TextPToken(toSToken(' ')),
+                  ],
+               },
+               close: toSToken('>'),
+            });
+
+            // @ts-expect-error 2329/matchers
+            expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -452,7 +499,7 @@ describe('attListDeclaration (integration)', () => {
 
          resumeParseAttListDeclaration(source, attListDecl, (result) => {
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(
+            expect(result).toEqualRangeless(
                new AttListDeclarationPToken({
                   open: toSToken('<!'),
                   elementName: toSToken('elName'),
@@ -488,6 +535,69 @@ describe('attListDeclaration (integration)', () => {
                   unexpanded: {
                      tokens: [],
                      propName: 'type',
+                  },
+                  close: toSToken('>'),
+               }),
+            );
+            done?.();
+         });
+      });
+
+      it('insets trailing space after the last attribute', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('\t');
+         source.endText();
+         const attListDecl = new AttListDeclarationPToken({
+            open: toSToken('<!'),
+            elementName: toSToken('elName'),
+            elementNameSpace: toSToken(' '),
+            attDefs: [
+               {
+                  name: toSToken('one'),
+                  nameSpace: toSToken(' '),
+                  type: toSToken('ID'),
+                  typeSpace: toSToken(' '),
+                  enumeration: undefined,
+                  defaultType: undefined,
+                  defaultTypeSpace: undefined,
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken(toSToken('value'))],
+                  closeQuote: toSToken('"'),
+                  valueSpace: toSToken(' '),
+               },
+            ],
+            unexpanded: {
+               tokens: [],
+               propName: 'name',
+            },
+            close: toSToken('>'),
+         });
+
+         resumeParseAttListDeclaration(source, attListDecl, (result) => {
+            // @ts-expect-error 2329/matchers
+            expect(result).toEqualRangeless(
+               new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  elementName: toSToken('elName'),
+                  elementNameSpace: toSToken(' '),
+                  attDefs: [
+                     {
+                        name: toSToken('one'),
+                        nameSpace: toSToken(' '),
+                        type: toSToken('ID'),
+                        typeSpace: toSToken(' '),
+                        enumeration: undefined,
+                        defaultType: undefined,
+                        defaultTypeSpace: undefined,
+                        openQuote: toSToken('"'),
+                        value: [new TextPToken(toSToken('value'))],
+                        closeQuote: toSToken('"'),
+                        valueSpace: toSToken(' \t'),
+                     },
+                  ],
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'name',
                   },
                   close: toSToken('>'),
                }),
