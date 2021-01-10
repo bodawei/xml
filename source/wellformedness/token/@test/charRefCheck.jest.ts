@@ -72,7 +72,7 @@ describe('charRefCheck()', () => {
 
       expect(mockErrorCollector).toReportError({
          id: WellFormedError.ID.CHARREF_INVALID_CHAR,
-         params: ['1F026'],
+         params: ['x1F026'],
          position: charRefPToken.digits,
          lastPosition: undefined,
       });

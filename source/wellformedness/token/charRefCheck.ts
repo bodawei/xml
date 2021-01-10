@@ -36,6 +36,7 @@ function charRefCheck(
     */
    if (pToken.digits) {
       const char = pToken.char;
+      let charInfo = strOrBlank(pToken.digits);
 
       // if (charNumber > 0xffff) {
       //    const chars = extractSurrogatePair(charNumber);
@@ -44,9 +45,11 @@ function charRefCheck(
       //    char = String.fromCharCode(charNumber);
       // }
 
-      ec.check(!isChar(char, confVer.version), WFEID.CHARREF_INVALID_CHAR, [
-         strOrBlank(pToken.digits),
-      ]);
+      if (pToken.hexMarker) {
+         charInfo = `x${charInfo}`;
+      }
+
+      ec.check(!isChar(char, confVer.version), WFEID.CHARREF_INVALID_CHAR, [charInfo]);
    }
 
    ec.setPos(pToken.digitsSpace);
