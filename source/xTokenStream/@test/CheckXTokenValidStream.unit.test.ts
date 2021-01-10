@@ -4,8 +4,9 @@
 import * as basic from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ConformanceVersion } from 'basic';
-import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
+import { WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from 'sToken';
+import { ValidityError, } from 'valid';
 import {
    AttListDeclarationXToken,
    CharRefXToken,

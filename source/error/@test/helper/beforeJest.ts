@@ -11,13 +11,10 @@ import { makeErrorMatcher } from '../makeErrorMatcher';
 // @ts-ignore
 import warningMessages from '../../derive/XmlWarning.json';
 // @ts-ignore
-import validityMessages from '../../derive/ValidityError.json';
-// @ts-ignore
 import wellFormedMessages from '../../derive/WellFormedError.json';
 
 
 const messages: { [errorTypeName: string]: StringBundle } = {
-   ValidityError: new StringBundle(validityMessages.message),
    XmlWarning: new StringBundle(warningMessages.message),
    WellFormedError: new StringBundle(wellFormedMessages.message),
 };
@@ -28,7 +25,7 @@ function toHaveError(actual: any, expected: any) {
    let message: string;
 
    actual.forEach((token: any) => {
-      if (token.type === 'XML_ERROR') {
+      if (token.type === 'ERROR_TYPE') {
          pass = pass || this.equals(token, expected);
       }
    });
@@ -50,7 +47,7 @@ function toBeErrorFree(actual: any) {
    let message: string;
 
    actual.forEach((token: any) => {
-      if (token.type === 'XML_ERROR' && token.subtype !== 'XML_WARNING') {
+      if (token.type === 'ERROR_TYPE' && token.subtype !== 'WARNING') {
          error = token;
       }
    });
@@ -72,7 +69,7 @@ function toBeErrorAndWarningFree(actual: any) {
    let message: string;
 
    actual.forEach((token: any) => {
-      if (token.type === 'XML_ERROR') {
+      if (token.type === 'ERROR_TYPE') {
          error = token;
       }
    });

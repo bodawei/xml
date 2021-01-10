@@ -3,7 +3,7 @@
 import { Transform } from 'stream';
 
 import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } from 'basic';
-import { ValidityError, ERROR_TYPE, XmlWarning } from 'error';
+import { ERROR_TYPE, XmlWarning } from 'error';
 import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
@@ -26,6 +26,7 @@ import {
    isTextXToken,
    TextXToken,
  } from 'xToken';
+ import { ValidityError, } from 'valid';
 
 
 import {

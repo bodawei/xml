@@ -3,7 +3,7 @@
 
 import { EntityId, Offset } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { ValidityError, WellFormedError } from 'error';
+import { ValidityError, } from 'valid';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpanderStream } from '../../nodeStream/EntityExpanderStream';
 

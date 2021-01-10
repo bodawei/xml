@@ -22,7 +22,13 @@ function makeMatcher(ErrorClass: any, messages: any) {
          const actual = errors[index];
 
          if (expectedError.id === actual.id) {
-            const errMsg = messages[ErrorClass.name].lookup(actual.id || '', 'base');
+            let errMsg;
+               
+            if (ErrorClass.MSG_BUNDLE) {
+               errMsg = ErrorClass.MSG_BUNDLE.lookup(actual.id || '', 'base');
+            } else {
+               errMsg = messages[ErrorClass.name].lookup(actual.id || '', 'base');
+            }
 
             if (!errMsg) {
                pass = false;

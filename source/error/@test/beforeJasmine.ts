@@ -1,18 +1,14 @@
 import { StringBundle } from 'basic';
-import { ValidityError, WellFormedError, XmlWarning } from 'error';
+import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector, ErrorInfo } from 'error-test';
 
 
 // @ts-ignore
 import warningMessages from '../derive/XmlWarning.json';
 // @ts-ignore
-import validityMessages from '../derive/ValidityError.json';
-// @ts-ignore
 import wellFormedMessages from '../derive/WellFormedError.json';
 
-
 const messages: { [errorTypeName: string]: StringBundle } = {
-   ValidityError: new StringBundle(validityMessages.message),
    XmlWarning: new StringBundle(warningMessages.message),
    WellFormedError: new StringBundle(wellFormedMessages.message),
 };
@@ -25,7 +21,7 @@ function toHaveError(util: any) {
          let message;
 
          actual.forEach((token: any) => {
-            if (token instanceof XmlWarning || token instanceof ValidityError || token instanceof WellFormedError) {
+            if (token.type === 'ERROR_TYPE') {
                pass = pass || util.equals(token, expected);
             }
          });
@@ -47,11 +43,11 @@ function toHaveError(util: any) {
 function toBeErrorFree() {
    return {
       compare: (actual: any) => {
-         let error: ValidityError | WellFormedError | void;
+         let error: WellFormedError | void;
          let message: string;
 
          actual.forEach((token: any) => {
-            if (token instanceof ValidityError || token instanceof WellFormedError) {
+            if (token.type === 'ERROR_TYPE' && token.subtype !== 'WARNING') {
                error = token;
             }
          });
@@ -73,11 +69,11 @@ function toBeErrorFree() {
 function toBeErrorAndWarningFree() {
    return {
       compare: (actual: any) => {
-         let error: XmlWarning | ValidityError | WellFormedError | void;
+         let error: XmlWarning | WellFormedError | void;
          let message: string;
 
          actual.forEach((token: any) => {
-            if (token instanceof XmlWarning || token instanceof ValidityError || token instanceof WellFormedError) {
+            if (token.type === 'ERROR_TYPE') {
                error = token;
             }
          });
@@ -148,7 +144,13 @@ function makeCompareObject(util: any, ErrorClass: any) {
             const actual = errors[index];
 
             if (expectedError.id === actual.id) {
-               const errMsg = messages[ErrorClass.name].lookup(actual.id || '', 'base');
+               let errMsg;
+               
+               if (ErrorClass.MSG_BUNDLE) {
+                  errMsg = ErrorClass.MSG_BUNDLE.lookup(actual.id || '', 'base');
+               } else {
+                  errMsg = messages[ErrorClass.name].lookup(actual.id || '', 'base');
+               }
 
                if (!errMsg) {
                   pass = false;

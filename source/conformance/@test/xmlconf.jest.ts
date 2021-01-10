@@ -137,7 +137,7 @@ describe('XML Conformance tests', () => {
          });
 
          if (testData.TYPE === 'invalid') {
-            fit(`${testData.ID} (${testData.TYPE}:${ver}/${edition} Running WITHOUT validation) ${testData.description}`, (done) => {
+            it(`${testData.ID} (${testData.TYPE}:${ver}/${edition} Running WITHOUT validation) ${testData.description}`, (done) => {
                const verToUse = hasEdition ? ver : undefined;
                const revToUse = hasEdition ? edition : undefined;
                const { pTokenStream, wellFormedStream } = setupWellFormedStream(

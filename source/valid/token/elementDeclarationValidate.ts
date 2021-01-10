@@ -81,7 +81,7 @@ function validateEntities(
       return;
    }
 
-   const unexpandedTokens: Array<UnexpandedMarkupToken> = elDecl.unexpanded.tokens;
+   const unexpandedTokens: Array<UnexpandedMarkupToken> = [...elDecl.unexpanded.tokens];
    let cmEndFound = false;
    let cmDepth = 0;
 

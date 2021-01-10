@@ -11,7 +11,7 @@ import { STokenSource } from 'sToken';
 import { AttFixerStream, EntityExpanderStream } from 'nodeStream';
 
 import { ValidityChecker } from '../ValidityChecker';
-import { ValidityError } from '../../error/ValidityError';
+import { ValidityError } from '../error/ValidityError';
 
 // ick
 import { PTokenStream } from '../../pTokenStream';

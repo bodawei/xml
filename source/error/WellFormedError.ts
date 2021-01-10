@@ -18,6 +18,7 @@ const messages: MessageCache = {
 
 class WellFormedError extends BaseError {
    public static readonly ID: { [id: string]: string } = messagesAndStrings.id;
+   public static readonly MSG_BUNDLE = messages.message;
    public readonly subtype: typeof WELL_FORMED_ERROR_SUBTYPE = WELL_FORMED_ERROR_SUBTYPE;
 
    constructor(id: string, params?: Array<string>, place?: Position, contextOffset?: Position) {
