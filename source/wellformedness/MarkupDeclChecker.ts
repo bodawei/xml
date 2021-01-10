@@ -471,15 +471,20 @@ class MarkupDeclChecker implements Checker {
             const inInternalSubset =
                this.state === States.PARAM_START_INTERNAL_SUBSET ||
                this.state === States.INTERNAL_SUBSET;
-            this.checkState.generalDecls[strOrBlank(pToken.name)] = {
-               token: pToken,
-               declaredInInternalSubset: inInternalSubset,
-            };
+
+            if (!this.checkState.generalDecls[strOrBlank(pToken.name)]) {
+               this.checkState.generalDecls[strOrBlank(pToken.name)] = {
+                  token: pToken,
+                  declaredInInternalSubset: inInternalSubset,
+               };
+            }
             checkDeclaration(pToken, this.state, errorCollector);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
-            this.checkState.paramDecls[strOrBlank(pToken.name)] = pToken;
+            if (!this.checkState.paramDecls[strOrBlank(pToken.name)]) {
+               this.checkState.paramDecls[strOrBlank(pToken.name)] = pToken;
+            }
             checkDeclaration(pToken, this.state, errorCollector);
             break;
          case ELIDED_ENTITY_DECLARATION_PTOKEN:

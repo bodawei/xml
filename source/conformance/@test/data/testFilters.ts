@@ -10,7 +10,6 @@ const testFilters: FilterData = {
    excludedIds: [
       // Misc
       'sa02', // Some standalone problem/ misinterpretation
-      'inv-not-sa02', // This is an invalid test but reports wellformedness errors
       'sa03', // Some standalone problem/ misinterpretation
       'sa04', // Some standalone problem/ misinterpretation
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)

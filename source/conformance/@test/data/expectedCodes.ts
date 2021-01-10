@@ -30,7 +30,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    id08: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (matches an ID) VC
    id09: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (IDREFS matches an ID) VC
    'inv-not-sa01': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that optional whitespace causes a validity error.
-   'inv-not-sa02': 'REFERENCE_INVALID_STANDALONE', // Tests the Standalone Document Declaration VC, ensuring that attributes needing normalization cause a validity error.
+   'inv-not-sa02': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that attributes needing normalization cause a validity error.
    'inv-not-sa04': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that attributes needing defaulting cause a validity error.
    'inv-not-sa05': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that a token attribute that needs normalization causes a validity error.
    'inv-not-sa06': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that a NOTATION attribute that needs normalization causes a validity error.

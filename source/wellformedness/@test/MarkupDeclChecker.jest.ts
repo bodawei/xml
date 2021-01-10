@@ -9,7 +9,7 @@ import {
    ParameterEntityDeclarationPToken,
    TextDeclarationPToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { strOrBlank, toSToken } from 'sToken';
 
 import {
    CommentPToken,
@@ -257,6 +257,18 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(internalSubsetEnd, ec);
 
             expect(ec.errors).toEqual([]);
+         });
+
+         it('does not replace an parameter entity in the state with a second one', () => {
+            const name = strOrBlank(parameterEntityDeclaration.name);
+            checkState.paramDecls[name] = parameterEntityDeclaration;
+            checker = new MarkupDeclChecker(checkState, []);
+            const secondDeclaration = makeParameterEntityDeclaration();
+
+            checker.check(externalSubsetStart, ec);
+            checker.check(secondDeclaration, ec);
+
+            expect(checkState.paramDecls[name]).toBe(parameterEntityDeclaration);
          });
       });
 
@@ -774,6 +786,22 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(generalEntityDeclaration, ec);
 
          expect(checkState.generalDecls.geDecl.token).toEqual(generalEntityDeclaration);
+      });
+
+      it('does not replace an general entity in the state with a new one from the external subset', () => {
+         const name = strOrBlank(generalEntityDeclaration.name);
+         checkState.generalDecls[name] = {
+            token: generalEntityDeclaration,
+            declaredInInternalSubset: true,
+         };
+         checker = new MarkupDeclChecker(checkState, []);
+         const secondDeclaration = makeGeneralEntityDeclaration();
+
+         checker.check(externalSubsetStart, ec);
+         checker.check(secondDeclaration, ec);
+
+         expect(checkState.generalDecls[name].token).toBe(generalEntityDeclaration);
+         expect(checkState.generalDecls[name].declaredInInternalSubset).toEqual(true);
       });
    });
 
