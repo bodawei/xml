@@ -3,8 +3,8 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion } from 'basic';
+import { MockErrorCollector } from 'basic-test';
 import { WellFormedError } from 'error';
-import { MockErrorCollector } from 'error-test';
 import { ContentModelP, ContentNameP } from 'pToken';
 import { toSToken } from 'sToken';
 
@@ -65,7 +65,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_OPEN,
             params: undefined,
             position: undefined,
@@ -79,7 +79,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_NAMES,
             params: undefined,
             position: undefined,
@@ -109,7 +109,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_NAME,
             params: ['1'],
             position: undefined,
@@ -138,7 +138,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_DELIM,
             params: ['0'],
             position: undefined,
@@ -173,7 +173,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_EXTRA_DELIM,
             params: ['1'],
             position: cmToken.delimitedParticles[1].delimiter,
@@ -189,7 +189,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NO_CLOSE,
             params: undefined,
             lastPosition: particle.name,
@@ -237,7 +237,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_CHOICE,
             params: ['1', ','],
             position: cmToken.delimitedParticles[1].delimiter,
@@ -271,7 +271,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_SEQUENCE,
             params: ['1', '|'],
             position: cmToken.delimitedParticles[1].delimiter,
@@ -284,7 +284,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_NAME_EXTRA_SPACE,
             params: ['0'],
             position: particle.nameSpace,
@@ -300,7 +300,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_CLOSE_EXTRA_SPACE,
             params: undefined,
             position: cmToken.closeSpace,
@@ -349,7 +349,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_CLOSE_EXTRA_SPACE,
             params: undefined,
             position: ((cmToken.delimitedParticles[0].particle as ContentModelP)
@@ -373,7 +373,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_PCDATA_INVALID_CASE,
             params: ['#pcData'],
             position: (cmToken.delimitedParticles[0].particle as ContentNameP).name,
@@ -395,7 +395,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_BAD_CHOICE,
             params: ['0', ','],
             position: cmToken.delimitedParticles[0].delimiter,
@@ -434,7 +434,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_SUBPARTICLE,
             params: ['1'],
             position: (cmToken.delimitedParticles[1].particle as ContentModelP).open,
@@ -461,7 +461,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_NAME_EXTRA_REPEAT,
             params: ['1', '*'],
             position: (cmToken.delimitedParticles[1].particle as ContentModelP).repeat,
@@ -521,7 +521,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_REPEAT,
             params: ['+'],
             position: cmToken.repeat,
@@ -554,7 +554,7 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer);
 
          // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_REPEAT,
             params: [''],
             lastPosition: cmToken.close,

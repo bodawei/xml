@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'error';
+import { ErrorCollector } from 'basic';
 import { ElementEndPToken } from 'token';
 
 import { ValidityError } from '../error/ValidityError';

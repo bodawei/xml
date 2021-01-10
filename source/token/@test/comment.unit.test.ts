@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, Offset, EntityId } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
-import { MockErrorCollector } from'error-test';
+import { ConformanceVersion, Offset, EntityId, ErrorCollector } from 'basic';
+import { MockErrorCollector } from'basic-test';
+import {  WellFormedError } from 'error';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import {

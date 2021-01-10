@@ -1,26 +1,22 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { Offset, Range, EntityId } from 'basic';
 import { SToken } from 'sToken';
 
 import ErrorCollector from '../ErrorCollector';
-import { WellFormedError } from '../WellFormedError';
+import { WellFormedError } from '../../error/WellFormedError';
 
 describe('ErrorCollector', () => {
-
    describe('construction', () => {
-
       it('can be constructed without error', () => {
          expect(() => {
             new ErrorCollector(SToken.fromString('foo'), WellFormedError);
          }).not.toThrow();
       });
-
    });
 
    describe('check', () => {
-      let ec;
+      let ec: ErrorCollector;
 
       it('calls report if condition is truthy', () => {
          ec = new ErrorCollector(SToken.fromString('foo'), WellFormedError);
@@ -39,7 +35,6 @@ describe('ErrorCollector', () => {
 
          expect(ec.report).not.toHaveBeenCalled();
       });
-
    });
 
    describe('report', () => {
@@ -60,32 +55,46 @@ describe('ErrorCollector', () => {
       });
 
       it('adds an instance of the error to the set of errors', () => {
-         ec.report(errorId, [ 'name' ], errorStart);
+         ec.report(errorId, ['name'], errorStart);
 
-         expect(ec.getErrors()).toEqual([ { id: 'x' } ]);
+         expect(ec.getErrors()).toEqual([{ id: 'x' }]);
       });
 
       it('passes the start position and the context to the error by default', () => {
-         ec.report(errorId, [ 'name' ], errorStart);
+         ec.report(errorId, ['name'], errorStart);
 
-         expect(constructorSpy).toHaveBeenCalledWith(errorId, [ 'name' ], new Offset(loc, 1, 0, 1), contextStart);
+         expect(constructorSpy).toHaveBeenCalledWith(
+            errorId,
+            ['name'],
+            new Offset(loc, 1, 0, 1),
+            contextStart,
+         );
       });
 
       it('uses the start position from the last setPos if no position passed', () => {
          ec.setPos(errorStart);
-         ec.report(errorId, [ 'name' ]);
+         ec.report(errorId, ['name']);
 
-         expect(constructorSpy).toHaveBeenCalledWith(errorId, [ 'name' ], new Offset(loc, 1, 0, 1), contextStart);
+         expect(constructorSpy).toHaveBeenCalledWith(
+            errorId,
+            ['name'],
+            new Offset(loc, 1, 0, 1),
+            contextStart,
+         );
       });
 
       it('uses the end position from setPos() if no position passed and setPos() was last called with nothing', () => {
          ec.setPos(errorStart);
          ec.setPos();
-         ec.report(errorId, [ 'name' ]);
+         ec.report(errorId, ['name']);
 
-         expect(constructorSpy).toHaveBeenCalledWith(errorId, [ 'name' ], new Offset(loc, 6, 0, 6), contextStart);
+         expect(constructorSpy).toHaveBeenCalledWith(
+            errorId,
+            ['name'],
+            new Offset(loc, 6, 0, 6),
+            contextStart,
+         );
       });
-
    });
 
    describe('reportError()', () => {
@@ -105,25 +114,34 @@ describe('ErrorCollector', () => {
 
       it('uses the specified constructor instead of the default', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
-         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], errorStart); // typeHack
+         ec.reportError('FOO', otherConstructorSpy as any, ['name'], errorStart); // typeHack
 
-         expect(ec.getErrors()).toEqual([ { id: 'x' } ]);
+         expect(ec.getErrors()).toEqual([{ id: 'x' }]);
       });
 
       it('passes the start position and the context to the error by default', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
-         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], errorStart); // typeHack
+         ec.reportError('FOO', otherConstructorSpy as any, ['name'], errorStart); // typeHack
 
-         expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 1, 0, 1), contextStart);
+         expect(otherConstructorSpy).toHaveBeenCalledWith(
+            'FOO',
+            ['name'],
+            new Offset(loc, 1, 0, 1),
+            contextStart,
+         );
       });
 
       it('accepts an offset as the position', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
-         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], new Offset(loc, 5, 5, 5));
+         ec.reportError('FOO', otherConstructorSpy as any, ['name'], new Offset(loc, 5, 5, 5));
 
-         expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 5, 5, 5), contextStart);
+         expect(otherConstructorSpy).toHaveBeenCalledWith(
+            'FOO',
+            ['name'],
+            new Offset(loc, 5, 5, 5),
+            contextStart,
+         );
       });
-
    });
 
    describe('appendFrom()', () => {
@@ -142,16 +160,14 @@ describe('ErrorCollector', () => {
       });
 
       it('combines both the current and new errors', () => {
-         ec.reportError('FOO', constructorSpy as any, [ 'name' ], errorStart);
+         ec.reportError('FOO', constructorSpy as any, ['name'], errorStart);
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
          const ec2 = new ErrorCollector(SToken.fromString('x'), otherConstructorSpy as any);
-         ec2.reportError('FOO2', otherConstructorSpy as any, [ 'name' ], errorStart);
+         ec2.reportError('FOO2', otherConstructorSpy as any, ['name'], errorStart);
 
          ec.appendFrom(ec2);
 
-         expect(ec.getErrors()).toEqual([ { id: 'constructorSpy' }, { id: 'x' } ]);
+         expect(ec.getErrors()).toEqual([{ id: 'constructorSpy' }, { id: 'x' }]);
       });
-
    });
-
 });

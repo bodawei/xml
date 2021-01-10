@@ -1,7 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, isName } from 'basic';
-import { ErrorCollector } from 'error';
+import { ConformanceVersion, ErrorCollector, isName } from 'basic';
 import { SToken } from 'sToken';
 
 /**********************************************************************\

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 

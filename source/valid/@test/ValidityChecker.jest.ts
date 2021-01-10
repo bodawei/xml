@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 import {
    makeAttListDeclaration,
    makeElementDeclaration,

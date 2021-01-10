@@ -1,4 +1,5 @@
-import { ErrorCollector, WellFormedError } from 'error';
+import { ErrorCollector } from 'basic';
+import { WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import { ConditionalPToken } from 'token';
 

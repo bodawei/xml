@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion, Range, EntityId } from 'basic';
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';

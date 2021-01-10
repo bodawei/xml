@@ -2,8 +2,8 @@
 
 import { describe, expect, it } from '@jest/globals';
 
+import { ErrorCollector } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { ErrorCollector } from 'error';
 import { defaultExtractors } from 'extractor';
 import { ContextType, ParseValue } from 'pToken';
 import { toSToken } from 'sToken';

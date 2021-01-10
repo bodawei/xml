@@ -2,8 +2,6 @@
 
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
 import { SToken } from 'sToken';
 // import * as checks from 'wellformedness';
 

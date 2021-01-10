@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
 import { StringBundle } from 'basic';
-import { makeErrorMatcher } from 'error-test';
+import { makeErrorMatcher } from 'basic-test';
 
 import validityMessages from '../../error/derive/ValidityError.json';
 

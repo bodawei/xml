@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
+import { MockErrorCollector } from 'basic-test';
 import { WellFormedError } from '../../../error/index';
-import { MockErrorCollector } from 'error-test';
 import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';

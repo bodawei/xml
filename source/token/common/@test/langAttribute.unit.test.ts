@@ -1,8 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
+import { ErrorCollector, ConformanceVersion } from 'basic';
+import { WellFormedError } from 'error';
 import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import {  TextXToken } from 'xToken';

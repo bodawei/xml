@@ -1,8 +1,8 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { MockErrorCollector } from 'basic-test';
 import { WellFormedError } from 'error';
-import { MockErrorCollector } from 'error-test';
 import {
    NOTATION_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,

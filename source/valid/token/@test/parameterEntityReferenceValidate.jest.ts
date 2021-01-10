@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { parameterEntityReferenceValidate } from '../parameterEntityReferenceValidate';
@@ -47,7 +47,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
       parameterEntityReferenceValidate(ref, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+      expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.PEREF_UNDEFINED,
          params: ['entityName'],
          position: ref.name,

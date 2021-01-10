@@ -1,8 +1,9 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+
+import { ConformanceVersion, ErrorCollector } from 'basic';
+import { WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
 import { parseNotationDeclaration } from 'pToken';
 import { SToken, STokenSource } from 'sToken';

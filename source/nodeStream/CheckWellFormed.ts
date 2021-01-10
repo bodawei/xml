@@ -2,7 +2,8 @@
 
 import { Transform } from 'stream';
 
-import { ErrorCollector, WellFormedError } from 'error';
+import { ErrorCollector } from 'basic';
+import { WellFormedError } from 'error';
 import { SToken } from 'sToken';
 import { getFirstSToken, PToken } from 'token';
 import { ContentChecker, DocumentChecker, MarkupDeclChecker } from 'wellformedness';

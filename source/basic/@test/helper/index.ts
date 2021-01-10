@@ -2,6 +2,9 @@
 
 import { Readable } from 'stream';
 
+import { MockErrorCollector, ErrorInfo } from './helper';
+import { makeErrorMatcher } from './makeErrorMatcher';
+
 function gatherStreamResults<ElemenType>(
    stream: Readable,
    expect: (results: Array<ElemenType>) => void,
@@ -17,4 +20,4 @@ function gatherStreamResults<ElemenType>(
    });
 }
 
-export { gatherStreamResults };
+export { gatherStreamResults, makeErrorMatcher, MockErrorCollector, ErrorInfo };

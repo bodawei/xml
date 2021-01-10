@@ -1,5 +1,4 @@
-import { ConformanceVersion, CONFORMANCE_VERSION } from 'basic';
-import { ErrorCollector } from 'error';
+import { ErrorCollector, ConformanceVersion, CONFORMANCE_VERSION } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,

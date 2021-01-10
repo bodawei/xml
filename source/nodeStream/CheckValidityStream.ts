@@ -2,7 +2,7 @@
 
 import { Transform } from 'stream';
 
-import { ErrorCollector } from 'error';
+import { ErrorCollector } from 'basic';
 import { getFirstSToken, PToken } from 'token';
 import { ValidityError, ValidityChecker } from 'valid';
 

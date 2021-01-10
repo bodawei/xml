@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, isChar, extractSurrogatePair } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
+import { ConformanceVersion, ErrorCollector, isChar } from 'basic';
+import { WellFormedError } from 'error';
 import { CharRefPToken } from 'token';
 import { strOrBlank } from 'sToken';
 

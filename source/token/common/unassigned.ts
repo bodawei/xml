@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { EntityId, Range } from 'basic';
-import { ErrorCollector } from 'error';
+import { EntityId, Range, ErrorCollector } from 'basic';
 import { TextPToken } from 'pToken';
 import { SToken, STokenSource, strOrBlank } from 'sToken';
 import { parameterEntityReferenceToSTokens } from 'stringify';

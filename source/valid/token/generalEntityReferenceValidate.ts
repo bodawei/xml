@@ -1,6 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, XmlWarning } from 'error';
+import { ErrorCollector } from 'basic';
+import { XmlWarning } from 'error';
 import { strOrBlank } from 'sToken';
 
 import { GeneralEntityReferencePToken } from 'token';

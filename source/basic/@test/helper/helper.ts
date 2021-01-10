@@ -1,28 +1,27 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import ErrorCollector from '../../ErrorCollector';
 import { SToken } from 'sToken';
 
-import { Position } from '../BaseError';
-import { WellFormedError } from '../WellFormedError';
-import ErrorCollector  from '../ErrorCollector';
-import { makeErrorMatcher } from './makeErrorMatcher';
+import { Position } from '../../../error/BaseError';
+import { WellFormedError } from '../../../error/WellFormedError';
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace
 \**********************************************************************/
 
 interface ErrorInfo {
-   position: Position,
-   id: string,
-   params?: Array<string>,
-   lastPosition?: Position
-};
+   position: Position;
+   id: string;
+   params?: Array<string>;
+   lastPosition?: Position;
+}
 
 declare class ErrorToken {
    public readonly id: string;
    constructor(id: string, params: Array<string>, position: Position, context: Position);
-};
+}
 
 type ErrConstFunc = typeof ErrorToken;
 
@@ -35,8 +34,11 @@ type ErrConstFunc = typeof ErrorToken;
  */
 class MockErrorCollector extends ErrorCollector {
    public _lastNotNull?: SToken;
+
    public _lastPos?: SToken;
+
    public _lastPosition?: SToken;
+
    public errors: Array<ErrorInfo> = [];
 
    constructor() {
@@ -86,8 +88,4 @@ class MockErrorCollector extends ErrorCollector {
    }
 }
 
-export {
-   MockErrorCollector,
-   ErrorInfo,
-   makeErrorMatcher,
-};
+export { MockErrorCollector, ErrorInfo };

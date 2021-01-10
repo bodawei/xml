@@ -1,7 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector } from 'error';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { generalEntityReferenceCheck } from '../../wellformedness/token/generalEntityReferenceCheck';
 

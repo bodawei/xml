@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { MockErrorCollector } from 'basic-test';
 import { WellFormedError } from 'error';
-import { MockErrorCollector } from 'error-test';
 import { toSToken } from 'sToken';
 import { ParameterEntityReferencePToken } from 'token';
 

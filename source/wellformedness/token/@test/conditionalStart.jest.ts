@@ -1,4 +1,4 @@
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 import { ConditionalPToken } from 'token';
 import { toSToken } from 'sToken';
 

@@ -2,7 +2,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclaration';
 import { toSToken } from 'sToken';
 

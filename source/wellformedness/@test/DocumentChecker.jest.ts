@@ -2,9 +2,9 @@
 
 import { describe, expect, it, jest } from '@jest/globals';
 
-import { ConformanceVersion, EntityId } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
-import { MockErrorCollector } from 'error-test';
+import { ErrorCollector, ConformanceVersion, EntityId } from 'basic';
+import { MockErrorCollector } from 'basic-test';
+import { WellFormedError } from 'error';
 import {
    ProcessingInstructionPToken,
    TextDeclarationPToken,

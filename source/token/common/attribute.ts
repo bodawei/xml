@@ -1,10 +1,9 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning,  } from 'error';
-import { strOrBlank, SToken, STokenSource } from 'sToken';
-
+import { ConformanceVersion, ErrorCollector } from 'basic';
+import {  WellFormedError, XmlWarning,  } from 'error';
 import { isTextPToken, TextPToken } from 'pToken';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 import { TextXToken } from 'xToken';
 
 import { checkXmlLangWellFormed } from './langAttribute';

@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector } from 'error';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 import misc from './common/misc';

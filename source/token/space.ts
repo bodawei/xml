@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector } from 'error';
+import { ErrorCollector, ConformanceVersion } from 'basic';
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 const SPACE_PTOKEN = 'SPACE_PTOKEN';

@@ -1,5 +1,5 @@
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
+import { ErrorCollector, ConformanceVersion } from 'basic';
+import { WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import {
    TEXT_PTOKEN,

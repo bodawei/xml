@@ -1,7 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector } from 'error';
+import { ErrorCollector, ConformanceVersion } from 'basic';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../token/parameterEntityReference'; // WTF?
 import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference'; // WTF?

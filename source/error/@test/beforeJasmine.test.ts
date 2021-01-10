@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { Offset, EntityId } from 'basic';
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 
 import { toReportError, toReportWarning } from './beforeJasmine';
 

@@ -2,11 +2,10 @@
 
 import {expect} from '@jest/globals'
 import { StringBundle } from 'basic';
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector, makeErrorMatcher } from 'basic-test';
 
 import { WellFormedError } from '../../WellFormedError';
 import { XmlWarning } from '../../XmlWarning';
-import { makeErrorMatcher } from '../makeErrorMatcher';
 
 // @ts-ignore
 import warningMessages from '../../derive/XmlWarning.json';

@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'error';
+import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 
 import { ParameterEntityReferencePToken } from 'token';

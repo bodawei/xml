@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, Offset } from 'basic';
-import { WellFormedError, ErrorCollector } from 'error';
+import { ConformanceVersion, ErrorCollector, Offset } from 'basic';
+import { WellFormedError } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import misc from './common/misc';
 

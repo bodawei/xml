@@ -3,7 +3,7 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from 'basic-test';
 import { SToken } from 'sToken';
 import * as checks from '../../../wellformedness/token/parameterEntityReferenceCheck';
 

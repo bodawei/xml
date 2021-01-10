@@ -1,15 +1,22 @@
-import { MockErrorCollector } from 'error-test';
+import { MockErrorCollector } from './helper';
 
-import { Position } from '../BaseError';
+import { Position } from '../../../error/BaseError';
 interface ErrorInfo {
-   position: Position,
-   id: string,
-   params?: Array<string>,
-   lastPosition?: Position
-};
+   position: Position;
+   id: string;
+   params?: Array<string>;
+   lastPosition?: Position;
+}
 
+interface JestThis {
+   equals: (one: any, two: any) => boolean;
+}
 function makeMatcher(ErrorClass: any, messages: any) {
-   return function (mockErrorCollector: MockErrorCollector, expectedError: ErrorInfo) {
+   return function (
+      this: JestThis,
+      mockErrorCollector: MockErrorCollector,
+      expectedError: ErrorInfo,
+   ) {
       if (!mockErrorCollector) {
          throw new Error('Did not get a mock error collector as expected.');
       }
@@ -23,7 +30,7 @@ function makeMatcher(ErrorClass: any, messages: any) {
 
          if (expectedError.id === actual.id) {
             let errMsg;
-               
+
             if (ErrorClass.MSG_BUNDLE) {
                errMsg = ErrorClass.MSG_BUNDLE.lookup(actual.id || '', 'base');
             } else {
@@ -43,7 +50,6 @@ function makeMatcher(ErrorClass: any, messages: any) {
                   offset = errMsg.indexOf('{', offset + 1);
                }
 
-
                const params = actual.params || [];
                if (count !== params.length) {
                   pass = false;
@@ -52,19 +58,21 @@ function makeMatcher(ErrorClass: any, messages: any) {
                }
             }
 
-            // @ts-ignore
             if (!this.equals(expectedError.params, actual.params)) {
-               message = `Parameters for ${expectedError.id} do not match:\n` +
+               message =
+                  `Parameters for ${expectedError.id} do not match:\n` +
                   `  Actual:   ${actual.params}\n  Expected: ${expectedError.params}`;
-            // @ts-ignore
             } else if (!this.equals(expectedError.position, actual.position)) {
-               message = `Positions for ${expectedError.id} do not match:\n` +
+               message =
+                  `Positions for ${expectedError.id} do not match:\n` +
                   `  Actual:   ${JSON.stringify(actual.position)}\n` +
                   `  Expected: ${JSON.stringify(expectedError.position)}`;
-            } else if ((expectedError.lastPosition || !expectedError.position) &&
-               // @ts-ignore
-               !this.equals(expectedError.lastPosition, actual.lastPosition)) {
-               message = `Last positions for ${expectedError.id} do not match:\n` +
+            } else if (
+               (expectedError.lastPosition || !expectedError.position) &&
+               !this.equals(expectedError.lastPosition, actual.lastPosition)
+            ) {
+               message =
+                  `Last positions for ${expectedError.id} do not match:\n` +
                   `  Actual:   ${JSON.stringify(actual.lastPosition)}\n` +
                   `  Expected: ${JSON.stringify(expectedError.lastPosition)}`;
             } else {
@@ -83,4 +91,4 @@ function makeMatcher(ErrorClass: any, messages: any) {
 
 const makeErrorMatcher = makeMatcher;
 
-export { ErrorInfo, makeErrorMatcher }
+export { ErrorInfo, makeErrorMatcher };

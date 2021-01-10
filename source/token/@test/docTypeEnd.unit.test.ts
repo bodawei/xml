@@ -3,7 +3,7 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from'error-test';
+import { MockErrorCollector } from'basic-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError } from 'error';

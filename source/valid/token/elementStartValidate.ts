@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { isAugmentedAttribute } from 'attFixer';
-import { ErrorCollector } from 'error';
+import { ErrorCollector } from 'basic';
 import { attValueToString } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';

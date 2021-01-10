@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { ErrorCollector } from 'error';
+import { ErrorCollector } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import { generalEntityReferenceToSTokens } from 'stringify';
 import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken } from 'xToken';

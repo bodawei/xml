@@ -3,8 +3,8 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, Range, EntityId } from 'basic';
+import { MockErrorCollector } from 'basic-test';
 import { WellFormedError, XmlWarning } from 'error';
-import { MockErrorCollector } from 'error-test';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 

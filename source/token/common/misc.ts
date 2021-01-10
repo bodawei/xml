@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { isName, isNmToken, ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { isName, isNmToken, ConformanceVersion, ErrorCollector } from 'basic';
+import {  WellFormedError, XmlWarning } from 'error';
 import { SToken } from 'sToken';
 
 const WFEID = WellFormedError.ID;

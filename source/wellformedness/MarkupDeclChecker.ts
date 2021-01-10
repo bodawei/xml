@@ -1,6 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, WellFormedError } from 'error';
+import { ErrorCollector } from 'basic';
+import { WellFormedError } from 'error';
 import {
    AttListDeclarationPToken,
    ElementDeclarationPToken,

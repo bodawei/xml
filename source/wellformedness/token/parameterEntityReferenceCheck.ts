@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
+import { ConformanceVersion, ErrorCollector } from 'basic';
+import { WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import { nameCheck } from './util/nameCheck';
 import { ParameterEntityReferencePToken } from 'token';

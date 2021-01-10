@@ -1,7 +1,7 @@
 /* Copyright ® 2017-201 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { ConformanceVersion, ErrorCollector } from 'basic';
+import { WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import attribute, { AttributePToken, AttributeXToken } from './common/attribute';

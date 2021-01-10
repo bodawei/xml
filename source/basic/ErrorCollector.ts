@@ -44,9 +44,13 @@ type ErrConstFunc = typeof ErrorToken;
 
 class ErrorCollector {
    private ErrorConstructor: ErrConstFunc;
+
    private context: Position;
+
    private position: SToken;
+
    private posStart: boolean;
+
    public errors: Array<ErrorToken>;
 
    constructor(context: SToken, ErrorConstructor: ErrConstFunc) {
@@ -57,7 +61,7 @@ class ErrorCollector {
       this.errors = [];
    }
 
-   setPos(currentSToken?: SToken | void) {
+   setPos(currentSToken?: SToken | void): void {
       this.posStart = !!currentSToken;
 
       if (currentSToken) {
@@ -65,21 +69,26 @@ class ErrorCollector {
       }
    }
 
-   getErrors() {
+   getErrors(): Array<ErrorToken> {
       return this.errors;
    }
 
-   check(truthy: any, code: string, params?: Array<string>, position?: Position) {
+   check(truthy: any, code: string, params?: Array<string>, position?: Position): void {
       if (truthy) {
          this.report(code, params, position);
       }
    }
 
-   report(code: string, params: Array<string> = [], position?: Position) {
+   report(code: string, params: Array<string> = [], position?: Position): void {
       this.reportError(code, this.ErrorConstructor, params, position);
    }
 
-   reportError(code: string, constructor: ErrConstFunc, params: Array<string>, position?: Position) {
+   reportError(
+      code: string,
+      constructor: ErrConstFunc,
+      params: Array<string>,
+      position?: Position,
+   ): void {
       let posOffset: Offset;
 
       if (position instanceof Offset) {
@@ -87,9 +96,9 @@ class ErrorCollector {
       } else if (position) {
          posOffset = position.ranges[0].getStartOffset();
       } else if (this.position) {
-         posOffset = this.posStart ?
-            this.position.ranges[0].getStartOffset() :
-            this.position.ranges[0].getEndOffset();
+         posOffset = this.posStart
+            ? this.position.ranges[0].getStartOffset()
+            : this.position.ranges[0].getEndOffset();
       } else {
          posOffset = new Offset(new EntityId(), 0, 0, 0);
       }
@@ -97,7 +106,7 @@ class ErrorCollector {
       this.errors.push(new constructor(code, params, posOffset, this.context));
    }
 
-   appendFrom(other: ErrorCollector) {
+   appendFrom(other: ErrorCollector): void {
       this.errors = this.errors.concat(other.getErrors());
    }
 }
