@@ -131,6 +131,37 @@ function normalizeAttr(
                // Remove all trailing space, if present
                if (isLast) {
                   newStr = newStr.replace(TRAILING_SPACE_REGEX, '');
+
+                  if (newStr === '' && newValue.length > 0) {
+                     let foundNonWhite = false;
+                     let index = newValue.length;
+                     const temp: LiteralValuePToken = [];
+
+                     while (foundNonWhite === false && index !== 0) {
+                        index -= 1;
+                        const prev = newValue[index];
+
+                        // not enough. would have to go back further if it is not ext
+                        if (prev.type === TEXT_PTOKEN) {
+                           const newer = prev.text.str.replace(TRAILING_SPACE_REGEX, '');
+                           const newPrev = new TextPToken({
+                              text: new SToken(newer, prev.text.originalStr, prev.text.ranges),
+                           });
+
+                           if (newer.length > 0) {
+                              foundNonWhite = true;
+                           }
+                           newValue.pop();
+                           temp.unshift(newPrev);
+                        } else {
+                           temp.unshift(prev);
+                           newValue.pop();
+                        }
+                     }
+
+                     newValue.push(...temp);
+                  }
+
                   lastWasSpace = false;
                } else {
                   lastWasSpace = newStr.length === 0 ? lastWasSpace : newStr.endsWith(' ');

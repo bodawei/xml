@@ -9,7 +9,6 @@ const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
       // Misc
-      'sa02', // Some standalone problem/ misinterpretation
       'sa03', // Some standalone problem/ misinterpretation
       'sa04', // Some standalone problem/ misinterpretation
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)

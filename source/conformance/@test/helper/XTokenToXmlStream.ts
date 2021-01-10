@@ -29,7 +29,9 @@ function formatExternalId(externalId?: ExternalIdX): string {
    }
 
    if (externalId.publicId) {
-      return `PUBLIC '${externalId.publicId}'`;
+      return `PUBLIC '${externalId.publicId}'${
+         externalId.systemId ? ` '${externalId.systemId}'` : ''
+      }`;
    } else {
       return `SYSTEM '${externalId.systemId}'`;
    }
@@ -52,7 +54,13 @@ function formatAttrs(attrs?: ReadonlyArray<AttributeXToken>): string {
       return '';
    }
 
-   const attrStrings = attrs.map((attr) => {
+   const sortedAttrs = attrs.sort((left, right) => {
+      const a = left.name;
+      const b = right.name;
+      return a === b ? 0 : a > b ? 1 : -1;
+   });
+
+   const attrStrings = sortedAttrs.map((attr) => {
       const value = attr.value.map((element) => {
          if (element.type === TEXT_XTOKEN) {
             return formatText(element.text);
