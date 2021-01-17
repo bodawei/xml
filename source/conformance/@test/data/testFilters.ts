@@ -6,11 +6,9 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: ['sa03', 'sa04'],
+   includedIds: [],
    excludedIds: [
       // Misc
-      'sa03', // Some standalone problem/ misinterpretation
-      'sa04', // Some standalone problem/ misinterpretation
       'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)
       'rmt-e2e-18', // Tests relative entity lookup  one in a subdirectlry should be finding relative to the main document, not itself?????
       // characters

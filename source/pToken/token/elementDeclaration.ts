@@ -203,6 +203,13 @@ function resumeParseProperties(
             },
          );
          break;
+      case 'trailing':
+         deliverPToken(
+            new ElementDeclarationPToken(props, {
+               contentSpecSpace: combineSTokens(props.contentSpecSpace, preSpace),
+            }),
+         );
+         break;
    }
 }
 
@@ -264,7 +271,13 @@ function parseElementDeclaration(
 
             parseSimpleContentSpec(source, withName, (withContentSimpleSpec) => {
                if (withContentSimpleSpec) {
-                  parseClose(source, withContentSimpleSpec, deliverPToken);
+                  parseUnexpanded(source, 'trailing', (unexpanded) => {
+                     if (unexpanded) {
+                        withContentSimpleSpec.unexpanded = unexpanded;
+                     }
+                     parseClose(source, withContentSimpleSpec, deliverPToken);
+                     return;
+                  });
                   return;
                }
 

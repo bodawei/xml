@@ -2,10 +2,9 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { STokenSource, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { UnexpandedMarkupDetails } from '../../types';
 import { ContentModelP } from '../../common/contentModel';
 import * as contentModel from '../../common/contentModel';
 import * as parseUnexpanded from '../../common/parseUnexpanded';
@@ -53,7 +52,7 @@ describe('elementDeclaration (unit)', () => {
          typeof contentModel.parseContentModel
       >;
       parseContentModelMock.mockImplementation(
-         (source: STokenSource, cb: (spec: ContentModelP | undefined) => void) => {
+         (source, cb: (spec: ContentModelP | undefined) => void) => {
             cb(dummyCM);
          },
       );
@@ -198,7 +197,7 @@ describe('elementDeclaration (unit)', () => {
             [undefined, 'match', '>'],
          ]);
          parseContentModelMock.mockImplementation(
-            (source: STokenSource, cb: (spec: ContentModelP | undefined) => void) => {
+            (source, cb: (spec: ContentModelP | undefined) => void) => {
                cb(undefined);
             },
          );
@@ -263,18 +262,12 @@ describe('elementDeclaration (unit)', () => {
       });
 
       it('sets up to let unassigned handle checking for a PE Reference instead of the name', () => {
-         parseUnexpandedSpy.mockImplementation(
-            (
-               source: STokenSource,
-               propName: string,
-               cb: (result: UnexpandedMarkupDetails | undefined) => void,
-            ) => {
-               cb({
-                  propName,
-                  tokens: [],
-               });
-            },
-         );
+         parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
+            cb({
+               propName,
+               tokens: [],
+            });
+         });
          const mockSource = new MockSTokenSource([['>', 'match', '>']]);
 
          parseElementDeclaration(mockSource, declarationStart, getResult);
@@ -306,15 +299,9 @@ describe('elementDeclaration (unit)', () => {
                tokens: [],
             },
          ];
-         parseUnexpandedSpy.mockImplementation(
-            (
-               source: STokenSource,
-               propName: string,
-               cb: (result: UnexpandedMarkupDetails | undefined) => void,
-            ) => {
-               cb(calls.shift());
-            },
-         );
+         parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
+            cb(calls.shift());
+         });
          const mockSource = new MockSTokenSource([
             ['elementName', 'word', ['>', '(']],
             [' ', 'space'],
@@ -342,6 +329,47 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
+      it('sets up to let unassigned handle checking for a PE Reference after the contentSpec', () => {
+         const calls = [
+            undefined,
+            undefined,
+            {
+               propName: 'trailing',
+               tokens: [],
+            },
+         ];
+         parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
+            cb(calls.shift());
+         });
+         const mockSource = new MockSTokenSource([
+            ['elementName', 'word', ['>', '(']],
+            [' ', 'space'],
+            ['A', 'peekChar'],
+            ['ANY', 'word', ['>']],
+            [' ', 'space'],
+            ['>', 'match', '>'],
+         ]);
+
+         parseElementDeclaration(mockSource, declarationStart, getResult);
+         mockSource.respondInAsyncTime();
+
+         // @ts-expect-error 2329/matchers
+         expect(result).toEqualRangeless(
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('elementName'),
+               nameSpace: toSToken(' '),
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               unexpanded: {
+                  propName: 'trailing',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            }),
+         );
+      });
+
       it('sets up to let unassigned handle checking for a PE Reference after a content spec', () => {
          const calls = [
             undefined,
@@ -351,15 +379,9 @@ describe('elementDeclaration (unit)', () => {
                tokens: [],
             },
          ];
-         parseUnexpandedSpy.mockImplementation(
-            (
-               source: STokenSource,
-               propName: string,
-               cb: (result: UnexpandedMarkupDetails | undefined) => void,
-            ) => {
-               cb(calls.shift());
-            },
-         );
+         parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
+            cb(calls.shift());
+         });
          const mockSource = new MockSTokenSource([
             ['elementName', 'word', ['>', '(']],
             [' ', 'space'],
@@ -453,6 +475,42 @@ describe('elementDeclaration (unit)', () => {
                contentModel: undefined,
                unexpanded: {
                   propName: 'contentSpec',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            }),
+         );
+      });
+
+      it('returns an element declaration with whitespace after the content spec', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('elementName'),
+            nameSpace: toSToken(' '),
+            contentSpec: toSToken('ANY'),
+            contentSpecSpace: toSToken(' '),
+            unexpanded: {
+               propName: 'trailing',
+               tokens: [],
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([['\t', 'space']]);
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         // @ts-expect-error 2329/matchers
+         expect(result).toEqualRangeless(
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('elementName'),
+               nameSpace: toSToken(' '),
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' \t'),
+               contentModel: undefined,
+               unexpanded: {
+                  propName: 'trailing',
                   tokens: [],
                },
                close: toSToken('>'),

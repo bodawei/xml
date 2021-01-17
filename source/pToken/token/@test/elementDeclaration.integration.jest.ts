@@ -39,7 +39,40 @@ describe('elementDeclaration', () => {
             });
 
             // @ts-expect-error 2329/matchers
-                        expect(result).toEqualRangeless(expected);
+            expect(result).toEqualRangeless(expected);
+            done?.();
+         });
+      });
+
+      it('parses an empty PERef after a simple content model', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('elementName ANY %foo;>');
+         source.endText();
+
+         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+            const expected = new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('elementName'),
+               nameSpace: toSToken(' '),
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               unexpanded: {
+                  tokens: [
+                     new ParameterEntityReferencePToken({
+                        open: toSToken('%'),
+                        openSpace: undefined,
+                        name: toSToken('foo'),
+                        nameSpace: undefined,
+                        close: toSToken(';'),
+                     }),
+                  ],
+                  propName: 'trailing',
+               },
+               close: toSToken('>'),
+            });
+
+            // @ts-expect-error 2329/matchers
+            expect(result).toEqualRangeless(expected);
             done?.();
          });
       });
@@ -1013,6 +1046,31 @@ describe('elementDeclaration', () => {
             done?.();
          });
       });
+
+      it('parses an empty PERef after a complex content model', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText(
+            'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? %foo;>',
+         );
+         source.endText();
+
+         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+            // @ts-expect-error 2329/matchers
+            expect(result.unexpanded).toEqualRangeless({
+               tokens: [
+                  new ParameterEntityReferencePToken({
+                     open: toSToken('%'),
+                     openSpace: undefined,
+                     name: toSToken('foo'),
+                     nameSpace: undefined,
+                     close: toSToken(';'),
+                  }),
+               ],
+               propName: 'midSpec',
+            });
+            done?.();
+         });
+      });
    });
 
    describe('resumeParseElementDeclaration()', () => {
@@ -1045,7 +1103,7 @@ describe('elementDeclaration', () => {
                });
 
                // @ts-expect-error 2329/matchers
-                              expect(result).toEqualRangeless(expected);
+               expect(result).toEqualRangeless(expected);
                done?.();
             },
          );
@@ -1135,7 +1193,86 @@ describe('elementDeclaration', () => {
                });
 
                // @ts-expect-error 2329/matchers
-                              expect(result).toEqualRangeless(expected);
+               expect(result).toEqualRangeless(expected);
+               done?.();
+            },
+         );
+      });
+
+      it('resumes an entity declaration with a simple content spec and a trailing empty peref', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('\t');
+         source.endText();
+
+         resumeParseElementDeclaration(
+            source,
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               unexpanded: {
+                  tokens: [],
+                  propName: 'trailing',
+               },
+               close: toSToken('>'),
+            }),
+            (result) => {
+               const expected = new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  contentSpec: toSToken('ANY'),
+                  contentSpecSpace: toSToken(' \t'),
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'trailing',
+                  },
+                  close: toSToken('>'),
+               });
+
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(expected);
+               done?.();
+            },
+         );
+      });
+
+      it('resumes an entity declaration with a complex content model and a trailing empty peref', (done) => {
+         const source = new STokenSource(defaultExtractors);
+         source.addText('\t');
+         source.endText();
+
+         resumeParseElementDeclaration(
+            source,
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               contentModel: {
+                  open: toSToken('('),
+                  close: toSToken(')'),
+                  delimitedParticles: [],
+               },
+               unexpanded: {
+                  tokens: [],
+                  propName: 'midSpec',
+               },
+               close: toSToken('>'),
+            }),
+            (result) => {
+               const expected = new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  contentModel: {
+                     open: toSToken('('),
+                     close: toSToken(')'),
+                     closeSpace: toSToken('\t'),
+                     delimitedParticles: [],
+                  },
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'midSpec',
+                  },
+                  close: toSToken('>'),
+               });
+
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(expected);
                done?.();
             },
          );
