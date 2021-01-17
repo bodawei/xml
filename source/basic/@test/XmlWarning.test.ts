@@ -4,17 +4,13 @@
 import { XmlWarning } from '../XmlWarning';
 
 describe('XmlWarning', () => {
-
    describe('class values', () => {
-
       it('populates the ID property', () => {
          expect(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).toEqual('ELEMENT_NAME_XML_RESERVED');
       });
-
    });
 
    describe('construction', () => {
-
       it('throws no error when constructed', () => {
          expect(() => {
             new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
@@ -34,20 +30,19 @@ describe('XmlWarning', () => {
       });
 
       it('sets the id', () => {
-         expect(new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).id)
-            .toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+         expect(new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).id).toEqual(
+            XmlWarning.ID.ELEMENT_NAME_XML_RESERVED,
+         );
       });
 
       it('sets the code', () => {
-         expect(new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).code)
-            .toEqual(3001);
+         expect(new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).code).toEqual(3001);
       });
 
       it('sets the message', () => {
-         expect(new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).message)
-            .toEqual('Element names should not start with [Xx][Mm][Ll]. Found "{0}".');
+         expect(new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED).message).toEqual(
+            'Element names should not start with [Xx][Mm][Ll]. Found "{0}".',
+         );
       });
-
    });
-
 });

@@ -1,8 +1,8 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError, XmlWarning } from 'error';
+import { WellFormedError } from 'error';
 import {
    TextPToken,
    GeneralEntityDeclarationPToken,

@@ -3,9 +3,26 @@
 type XmlVersion = 1.0 | 1.1;
 type XmlRevision = 1 | 2 | 3 | 4 | 5 | 6;
 
+interface ErrorLocale {
+   code: {
+      [name: string]: number;
+   };
+   id: {
+      [name: string]: string;
+   };
+   message: {
+      [locale: string]: {
+         [name: string]: string;
+      };
+   };
+}
+export { ErrorLocale };
+
 export { default as Offset } from './Offset';
 export { default as Range } from './Range';
 export { default as ErrorCollector } from './ErrorCollector';
+export * from './BaseError';
+export * from './XmlWarning';
 export * from './StringBundle';
 export * from './token';
 export * from './conformanceVersion';

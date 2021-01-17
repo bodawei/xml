@@ -2,9 +2,9 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError, XmlWarning } from 'error';
+import { WellFormedError } from 'error';
 import { ElementDeclarationPToken, ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 

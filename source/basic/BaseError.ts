@@ -1,16 +1,16 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { Offset, StringBundle } from 'basic';
-import { SToken } from '../sToken';
+import { SToken } from 'sToken';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
 type Position = SToken | Offset | void;
 
-type MessageCache = {
+interface MessageCache {
    code: { [id: string]: number };
    message: StringBundle;
-};
+}
 
 /**********************************************************************\
  BaseError is a base type for all error objects.
@@ -49,13 +49,24 @@ type MessageCache = {
 
 class BaseError {
    public readonly type: typeof ERROR_TYPE = ERROR_TYPE;
+
    public readonly id: string;
+
    public readonly code: number;
+
    public readonly message: string;
+
    public readonly place: Offset | void;
+
    public readonly context: Array<Offset>;
 
-   constructor(msgCache: MessageCache, id: string, params?: Array<string>, place?: Position, contextOffset?: Position) {
+   constructor(
+      msgCache: MessageCache,
+      id: string,
+      params?: Array<string>,
+      place?: Position,
+      contextOffset?: Position,
+   ) {
       this.id = id;
 
       params = params || [];
@@ -69,7 +80,8 @@ class BaseError {
       if (contextOffset) {
          if (contextOffset instanceof SToken) {
             contextOffset = contextOffset.ranges[0].getStartOffset();
-         } else { // offset
+         } else {
+            // offset
             contextOffset = contextOffset.clone();
          }
       }
@@ -83,13 +95,8 @@ class BaseError {
       this.code = msgCache.code[id];
       this.message = msgCache.message.substitute(id, params, 'base') || '';
       this.place = place ? place.clone() : undefined;
-      this.context = contextOffset ? [ contextOffset ] : [];
+      this.context = contextOffset ? [contextOffset] : [];
    }
 }
 
-export {
-   ERROR_TYPE,
-   BaseError,
-   MessageCache,
-   Position,
-};
+export { ERROR_TYPE, BaseError, MessageCache, Position };

@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { StringBundle } from 'basic';
-import { BaseError, ErrorLocale, MessageCache, Position } from 'error';
+import { BaseError, ErrorLocale, MessageCache, Position } from 'basic';
 
 import validtyErrorStrings from './derive/ValidityError.json';
 

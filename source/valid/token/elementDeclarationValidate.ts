@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion, isSpace } from 'basic';
-import { WellFormedError, XmlWarning } from 'error';
+import { ErrorCollector, ConformanceVersion, isSpace, XmlWarning } from 'basic';
+import { WellFormedError } from 'error';
 import {
    TEXT_PTOKEN,
    ContentModelP,

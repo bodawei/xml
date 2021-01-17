@@ -1,6 +1,6 @@
 import { MockErrorCollector } from './helper';
 
-import { Position } from '../../../error/BaseError';
+import { Position } from '../../BaseError';
 interface ErrorInfo {
    position: Position;
    id: string;

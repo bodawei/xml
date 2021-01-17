@@ -1,7 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
-import { ERROR_TYPE, WellFormedError } from 'error';
+import { ERROR_TYPE, ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
+import { WellFormedError } from 'error';
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    XMLDECL_PTOKEN,

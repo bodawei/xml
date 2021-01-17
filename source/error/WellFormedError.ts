@@ -4,7 +4,7 @@ import { StringBundle } from 'basic';
 
 // @ts-ignore
 import messagesAndStrings from './derive/WellFormedError.json';
-import { BaseError, MessageCache, Position } from './BaseError';
+import { BaseError, MessageCache, Position } from 'basic';
 
 const WELL_FORMED_ERROR_SUBTYPE = 'WELL_FORMED_ERROR';
 const messages: MessageCache = {

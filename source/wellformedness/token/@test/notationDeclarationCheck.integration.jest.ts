@@ -2,8 +2,8 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError, XmlWarning } from 'error';
+import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { parseNotationDeclaration } from 'pToken';
 import { SToken, STokenSource } from 'sToken';

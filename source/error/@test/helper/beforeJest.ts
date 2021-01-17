@@ -1,20 +1,16 @@
 /* Copyright ® 2017-202 by 柏大衛. All rights reserved. */
 
 import {expect} from '@jest/globals'
-import { StringBundle } from 'basic';
+import { StringBundle, XmlWarning } from 'basic';
 import { MockErrorCollector, makeErrorMatcher } from 'basic-test';
 
 import { WellFormedError } from '../../WellFormedError';
-import { XmlWarning } from '../../XmlWarning';
 
-// @ts-ignore
-import warningMessages from '../../derive/XmlWarning.json';
 // @ts-ignore
 import wellFormedMessages from '../../derive/WellFormedError.json';
 
 
 const messages: { [errorTypeName: string]: StringBundle } = {
-   XmlWarning: new StringBundle(warningMessages.message),
    WellFormedError: new StringBundle(wellFormedMessages.message),
 };
 

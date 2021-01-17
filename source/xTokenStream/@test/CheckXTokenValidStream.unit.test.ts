@@ -3,8 +3,8 @@
 
 import * as basic from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { ConformanceVersion } from 'basic';
-import { WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
+import { ConformanceVersion, ERROR_TYPE, XmlWarning } from 'basic';
+import { WellFormedError,  } from 'error';
 import { SToken } from 'sToken';
 import { ValidityError, } from 'valid';
 import {

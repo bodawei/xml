@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { expect } from '@jest/globals';
-import { ERROR_TYPE } from 'error';
+import { ERROR_TYPE } from 'basic';
 import { PToken, XmlError } from 'token';
 
 import { ErrorDetails } from './types';

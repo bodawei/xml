@@ -2,8 +2,7 @@
 
 import { Transform } from 'stream';
 
-import { ConformanceVersion, isSpace, isName, isNmToken, CONFORMANCE_VERSION } from 'basic';
-import { ERROR_TYPE, XmlWarning } from 'error';
+import { ConformanceVersion, isSpace, isName, isNmToken, ERROR_TYPE, XmlWarning, CONFORMANCE_VERSION } from 'basic';
 import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {

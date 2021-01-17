@@ -4,7 +4,7 @@
 import ErrorCollector from '../../ErrorCollector';
 import { SToken } from 'sToken';
 
-import { Position } from '../../../error/BaseError';
+import { Position } from '../../BaseError';
 import { WellFormedError } from '../../../error/WellFormedError';
 
 /**********************************************************************\

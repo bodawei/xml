@@ -1,6 +1,6 @@
-import { StringBundle } from 'basic';
+import { StringBundle, XmlWarning } from 'basic';
 import { MockErrorCollector, ErrorInfo } from 'basic-test';
-import { WellFormedError, XmlWarning } from 'error';
+import { WellFormedError } from 'error';
 
 
 // @ts-ignore
