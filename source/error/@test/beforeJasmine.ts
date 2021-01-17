@@ -4,12 +4,9 @@ import { WellFormedError } from 'error';
 
 
 // @ts-ignore
-import warningMessages from '../derive/XmlWarning.json';
-// @ts-ignore
 import wellFormedMessages from '../derive/WellFormedError.json';
 
 const messages: { [errorTypeName: string]: StringBundle } = {
-   XmlWarning: new StringBundle(warningMessages.message),
    WellFormedError: new StringBundle(wellFormedMessages.message),
 };
 

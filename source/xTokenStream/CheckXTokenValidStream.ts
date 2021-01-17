@@ -585,10 +585,12 @@ class CheckXTokenValidStream extends Transform {
       } else if (xToken instanceof AttListDeclarationXToken) {
          this.validateAttListDecl(xToken);
       } else if (xToken instanceof GeneralEntityDeclarationXToken || xToken instanceof ParameterEntityDeclarationXToken) {
-         this.entityInfo[xToken.name] = {
-            token: xToken,
-            externallyDeclared: this.externalDeclarations,
-         };
+         if (!this.entityInfo[xToken.name]) {
+            this.entityInfo[xToken.name] = {
+               token: xToken,
+               externallyDeclared: this.externalDeclarations,
+            };
+         }
          this.checkEntityDeclaration(xToken);
       } else if (xToken instanceof GeneralEntityStartXToken) {
          if (this.isInvalidEntityReference(xToken)) {
@@ -1016,11 +1018,13 @@ class CheckXTokenValidStream extends Transform {
                type: 'MIXED_CONTENT',
             };
          } else {
-            this.elementDeclarations[elDecl.name] = {
-               token: elDecl,
-               type: 'ELEMENT_CONTENT',
-               externallyDeclared: this.externalDeclarations, // §2.9
-            } as any;
+            if (!this.elementDeclarations[elDecl.name]) {
+               this.elementDeclarations[elDecl.name] = {
+                  token: elDecl,
+                  type: 'ELEMENT_CONTENT',
+                  externallyDeclared: this.externalDeclarations, // §2.9
+               } as any;
+            }
          }
       }
    }
@@ -1269,10 +1273,11 @@ class CheckXTokenValidStream extends Transform {
                      parsed.push(names[index]);
                   }
 
-                  if (this.isInvalidEntityReference(names[index])) {
-                     this.pushValidityError(ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED, // @@ rename
-                        [ names[index], attrName ], pTokenOpen);
-                  }
+                  // It doesn't matter if the entity is externally declared.  sa03
+                  // if (this.isInvalidEntityReference(names[index])) {
+                  //    this.pushValidityError(ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED, // @@ rename
+                  //       [ names[index], attrName ], pTokenOpen);
+                  // }
                }
 
                if (undeclared.length > 0) {

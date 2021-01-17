@@ -2552,31 +2552,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected1, done);
          });
 
-         it('is reported as an error if used as an ENTITY attribute value and standlone=yes (§2.9)', (done) => {
-            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ElementDeclarationXToken('testEl', 'ANY'));
-            validator.write(new AttListDeclarationXToken('testEl', [{
-               name: 'entityAttr',
-               type: 'ENTITY',
-               value: [],
-               defaultType: '#REQUIRED',
-            }]));
-            validator.write(new ExternalSubsetStartToken());
-            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
-            validator.write(new ExternalSubsetEndToken());
-            validator.write(new ElementStartXToken('testEl', [{
-               name: 'entityAttr',
-               value: [
-                  new TextXToken('extDeclEntity'),
-               ],
-            }]))
-            validator.end();
-
-            const expected1 = new ValidityError(ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED,
-               ['extDeclEntity', 'entityAttr']);
-            expectStream(validator, expected1, done);
-         });
-
          it('is reported as an error if externally declared and referenced from attr default and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartToken());
