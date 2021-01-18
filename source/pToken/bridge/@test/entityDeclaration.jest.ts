@@ -69,15 +69,9 @@ describe('entityDeclaration (unit)', () => {
       }
 
       it('does a parse of a general entity declaration with a literal value', () => {
-         literalParse.mockImplementation(
-            (
-               _1: STokenSource,
-               stuff: LitParams | undefined,
-               callback: (value?: LiteralPToken) => void,
-            ) => {
-               callback({ ...(stuff || {}).pToken, openQuote: toSToken('"'), value: [] });
-            },
-         );
+         literalParse.mockImplementation((_1, stuff, callback) => {
+            callback({ ...(stuff || {}).pToken, openQuote: toSToken('"'), value: [] });
+         });
          const mockSource = new MockSTokenSource([
             [undefined, 'match', '%'],
             [undefined, 'space'],
@@ -216,15 +210,9 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('adds trailing space after quoted value if present: <!ENTITY entityName "foo" >', () => {
-         literalParse.mockImplementation(
-            (
-               _1: STokenSource,
-               stuff: LitParams | undefined,
-               callback: (value?: LiteralPToken) => void,
-            ) => {
-               callback({ ...(stuff || {}).pToken, openQuote: toSToken('"'), value: [] });
-            },
-         );
+         literalParse.mockImplementation((_1, stuff, callback) => {
+            callback({ ...(stuff || {}).pToken, openQuote: toSToken('"'), value: [] });
+         });
          const mockSource = new MockSTokenSource([
             [undefined, 'match', '%'],
             [undefined, 'space'],
@@ -252,7 +240,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns a space after the externalID: <!ENTITY entityName SYSTEM "foo" >', () => {
          parseExternalId.mockImplementation(
-            (mockSource: STokenSource, term: TermArray, cb: (result: ParsedExternalId) => void) => {
+            (mockSource, term, cb: (result: ParsedExternalId) => void) => {
                cb({ externalId: {} });
             },
          );
@@ -284,7 +272,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns a space after the externalID: <!ENTITY % entityName SYSTEM "foo" >', () => {
          parseExternalId.mockImplementation(
-            (mockSource: STokenSource, term: TermArray, cb: (result: ParsedExternalId) => void) => {
+            (mockSource, term, cb: (result: ParsedExternalId) => void) => {
                cb({ externalId: {} });
             },
          );
@@ -318,7 +306,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns an NDATA clause if found: <!ENTITY entityName SYSTEM "foo" NDATA testNData >', () => {
          parseExternalId.mockImplementation(
-            (mockSource: STokenSource, term: TermArray, cb: (result: ParsedExternalId) => void) => {
+            (mockSource, term, cb: (result: ParsedExternalId) => void) => {
                cb({ externalId: {} });
             },
          );
@@ -358,7 +346,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('recognizes a non-all caps NDATA: <!ENTITY entityName SYSTEM "foo" ndaTa testNData >', () => {
          parseExternalId.mockImplementation(
-            (mockSource: STokenSource, term: TermArray, cb: (result: ParsedExternalId) => void) => {
+            (mockSource, term, cb: (result: ParsedExternalId) => void) => {
                cb({ externalId: {} });
             },
          );
@@ -398,7 +386,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('does not mind no space after the ndata value: <!ENTITY entityName SYSTEM "foo" ndaTa testNData>', () => {
          parseExternalId.mockImplementation(
-            (mockSource: STokenSource, term: TermArray, cb: (result: ParsedExternalId) => void) => {
+            (mockSource, term, cb: (result: ParsedExternalId) => void) => {
                cb({ externalId: {} });
             },
          );
@@ -437,7 +425,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns if stops after NDATA: <!ENTITY entityName SYSTEM "foo" NDATA', () => {
          parseExternalId.mockImplementation(
-            (mockSource: STokenSource, term: TermArray, cb: (result: ParsedExternalId) => void) => {
+            (mockSource, term, cb: (result: ParsedExternalId) => void) => {
                cb({ externalId: {} });
             },
          );
@@ -474,11 +462,7 @@ describe('entityDeclaration (unit)', () => {
       describe('parameter entity reference', () => {
          it('returns an unassigned value when finding a PE Ref at the starting position', () => {
             parseUnexpandedAfterPeRef.mockImplementation(
-               (
-                  _1: STokenSource,
-                  propName: string,
-                  handler: (result?: UnexpandedMarkupDetails) => void,
-               ) => {
+               (_1, propName, handler: (result?: UnexpandedMarkupDetails) => void) => {
                   handler({ propName, tokens: [new TextPToken({ text: toSToken('x') })] });
                },
             );
@@ -516,11 +500,7 @@ describe('entityDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref at the starting position when there is nothing after the peref', () => {
             parseUnexpandedAfterPeRef.mockImplementation(
-               (
-                  _1: STokenSource,
-                  propName: string,
-                  handler: (result?: UnexpandedMarkupDetails) => void,
-               ) => {
+               (_1, propName, handler: (result?: UnexpandedMarkupDetails) => void) => {
                   handler(undefined);
                },
             );
@@ -555,15 +535,9 @@ describe('entityDeclaration (unit)', () => {
          });
 
          it('returns an unexpanded value when finding a PE Ref at the name position', () => {
-            parseUnexpanded.mockImplementation(
-               (
-                  source: STokenSource,
-                  propName: string,
-                  cb: (result?: UnexpandedMarkupDetails) => void,
-               ) => {
-                  cb({ propName, tokens: [] });
-               },
-            );
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               cb({ propName, tokens: [] });
+            });
             const mockSource = new MockSTokenSource([
                ['%', 'match', '%'],
                [' ', 'space'],
@@ -588,16 +562,10 @@ describe('entityDeclaration (unit)', () => {
 
          it('returns an unexpanded value when finding a PE Ref at the value position', () => {
             const vals = [undefined, { tokens: [] }];
-            parseUnexpanded.mockImplementation(
-               (
-                  source: STokenSource,
-                  propName: string,
-                  cb: (result?: UnexpandedMarkupDetails) => void,
-               ) => {
-                  const next = vals.shift();
-                  cb(next ? { ...next, propName } : undefined);
-               },
-            );
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               const next = vals.shift();
+               cb(next ? { ...next, propName } : undefined);
+            });
             const mockSource = new MockSTokenSource([
                ['%', 'match', '%'],
                [' ', 'space'],
@@ -625,27 +593,48 @@ describe('entityDeclaration (unit)', () => {
             });
          });
 
+         it('returns an unexpanded value when finding a PE Ref AFTER the value position', () => {
+            const vals = [undefined, undefined, { tokens: [] }];
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               const next = vals.shift();
+               cb(next ? { ...next, propName } : undefined);
+            });
+            const mockSource = new MockSTokenSource([
+               ['%', 'match', '%'],
+               [' ', 'space'],
+               ['entityName', 'word', ['>', '"', "'", ';']],
+               [' ', 'space'],
+               ['"', 'peekChar'],
+               // unexpanded happens here
+               ['>', 'match', '>'],
+            ]);
+
+            parseEntityDeclaration(mockSource, declarationStart, getResult);
+            mockSource.respondInAsyncTime();
+
+            expect(result).toEqualRangeless({
+               open: toSToken('<!'),
+               parameter: toSToken('%'),
+               parameterSpace: toSToken(' '),
+               name: toSToken('entityName'),
+               nameSpace: toSToken(' '),
+               unexpanded: {
+                  propName: 'trailing',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            });
+         });
+
          it('returns an unexpanded value when finding a PE Ref at the middle of the externalID', () => {
             const vals = [undefined, undefined, { tokens: [] }];
-            parseUnexpanded.mockImplementation(
-               (
-                  source: STokenSource,
-                  propName: string,
-                  cb: (result?: UnexpandedMarkupDetails) => void,
-               ) => {
-                  const next = vals.shift();
-                  cb(next ? { ...next, propName } : undefined);
-               },
-            );
-            parseExternalId.mockImplementation(
-               (
-                  mockSource: STokenSource,
-                  term: TermArray,
-                  cb: (result: ParsedExternalId) => void,
-               ) => {
-                  cb({ externalId: {}, nextPropName: 'externalType' });
-               },
-            );
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               const next = vals.shift();
+               cb(next ? { ...next, propName } : undefined);
+            });
+            parseExternalId.mockImplementation((mockSource, term, cb) => {
+               cb({ externalId: {}, nextPropName: 'externalType' });
+            });
             const mockSource = new MockSTokenSource([
                ['%', 'match', '%'],
                [' ', 'space'],
@@ -673,27 +662,53 @@ describe('entityDeclaration (unit)', () => {
             });
          });
 
+         it('returns an unexpanded value when finding a PE Ref AFTER the external ide in a parameter entity reference', () => {
+            const vals = [undefined, undefined, { tokens: [] }];
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               const next = vals.shift();
+               cb(next ? { ...next, propName } : undefined);
+            });
+            parseExternalId.mockImplementation((mockSource, term, cb) => {
+               cb({ externalId: {}, nextPropName: undefined });
+            });
+            const mockSource = new MockSTokenSource([
+               ['%', 'match', '%'],
+               [' ', 'space'],
+               ['entityName', 'word', ['>', '"', "'", ';']],
+               [' ', 'space'],
+               ['S', 'peekChar'], // system
+               ['\t', 'space'],
+               // unexpanded happens here
+               ['>', 'match', '>'],
+            ]);
+
+            parseEntityDeclaration(mockSource, declarationStart, getResult);
+            mockSource.respondInAsyncTime();
+
+            expect(result).toEqualRangeless({
+               open: toSToken('<!'),
+               parameter: toSToken('%'),
+               parameterSpace: toSToken(' '),
+               name: toSToken('entityName'),
+               nameSpace: toSToken(' '),
+               externalIdSpace: toSToken('\t'),
+               unexpanded: {
+                  propName: 'trailing',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            });
+         });
+
          it('returns an unexpanded value when finding a PE Ref at the NDATA', () => {
             const vals = [undefined, undefined, { tokens: [] }];
-            parseUnexpanded.mockImplementation(
-               (
-                  source: STokenSource,
-                  propName: string,
-                  cb: (result?: UnexpandedMarkupDetails) => void,
-               ) => {
-                  const next = vals.shift();
-                  cb(next ? { ...next, propName } : undefined);
-               },
-            );
-            parseExternalId.mockImplementation(
-               (
-                  mockSource: STokenSource,
-                  term: TermArray,
-                  cb: (result: ParsedExternalId) => void,
-               ) => {
-                  cb({ externalId: {}, nextPropName: undefined });
-               },
-            );
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               const next = vals.shift();
+               cb(next ? { ...next, propName } : undefined);
+            });
+            parseExternalId.mockImplementation((mockSource, term, cb) => {
+               cb({ externalId: {}, nextPropName: undefined });
+            });
             const mockSource = new MockSTokenSource([
                [undefined, 'match', '%'],
                [undefined, 'space'],
@@ -722,25 +737,13 @@ describe('entityDeclaration (unit)', () => {
 
          it('returns an unexpanded value when finding a PE Ref at the NDATA name', () => {
             const vals = [undefined, undefined, undefined, { tokens: [] }];
-            parseUnexpanded.mockImplementation(
-               (
-                  source: STokenSource,
-                  propName: string,
-                  cb: (result?: UnexpandedMarkupDetails) => void,
-               ) => {
-                  const next = vals.shift();
-                  cb(next ? { ...next, propName } : undefined);
-               },
-            );
-            parseExternalId.mockImplementation(
-               (
-                  mockSource: STokenSource,
-                  term: TermArray,
-                  cb: (result: ParsedExternalId) => void,
-               ) => {
-                  cb({ externalId: {}, nextPropName: undefined });
-               },
-            );
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               const next = vals.shift();
+               cb(next ? { ...next, propName } : undefined);
+            });
+            parseExternalId.mockImplementation((mockSource, term, cb) => {
+               cb({ externalId: {}, nextPropName: undefined });
+            });
             const mockSource = new MockSTokenSource([
                [undefined, 'match', '%'],
                [undefined, 'space'],
@@ -767,6 +770,51 @@ describe('entityDeclaration (unit)', () => {
                nDataSpace: toSToken(' '),
                unexpanded: {
                   propName: 'nDataName',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+            });
+         });
+
+         it('returns an unexpanded value when finding a PE Ref after the NDATA name', () => {
+            const vals = [undefined, undefined, undefined, undefined, { tokens: [] }];
+            parseUnexpanded.mockImplementation((source, propName, cb) => {
+               const next = vals.shift();
+               cb(next ? { ...next, propName } : undefined);
+            });
+            parseExternalId.mockImplementation((mockSource, term, cb) => {
+               cb({ externalId: {}, nextPropName: undefined });
+            });
+            const mockSource = new MockSTokenSource([
+               [undefined, 'match', '%'],
+               [undefined, 'space'],
+               ['entityName', 'word', ['>', '"', "'", ';']],
+               [' ', 'space'],
+               // externalid
+               ['\t', 'space'],
+               ['ndaTa', 'peekWord', ['>']],
+               ['ndaTa', 'word', ['>']],
+               [' ', 'space'],
+               ['theName', 'word', ['>']],
+               [' ', 'space'],
+               // unexpanded happens here
+               ['>', 'match', '>'],
+            ]);
+
+            parseEntityDeclaration(mockSource, declarationStart, getResult);
+            mockSource.respondInAsyncTime();
+
+            expect(result).toEqualRangeless({
+               open: toSToken('<!'),
+               name: toSToken('entityName'),
+               nameSpace: toSToken(' '),
+               externalIdSpace: toSToken('\t'),
+               nData: toSToken('ndaTa'),
+               nDataSpace: toSToken(' '),
+               nDataName: toSToken('theName'),
+               nDataNameSpace: toSToken(' '),
+               unexpanded: {
+                  propName: 'trailing',
                   tokens: [],
                },
                close: toSToken('>'),
@@ -818,6 +866,47 @@ describe('entityDeclaration (unit)', () => {
 
          expect(result).toEqual(geRef);
          expect(result).not.toBe(geRef);
+      });
+
+      it('adds a trailing space if this has an ndata name', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            nData: toSToken('NDATA'),
+            nDataSpace: toSToken('\n'),
+            nDataName: toSToken('NData!'),
+            nDataNameSpace: toSToken('\t'),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'trailing',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               close: toSToken('>'),
+               nData: toSToken('NDATA'),
+               nDataSpace: toSToken('\n'),
+               nDataName: toSToken('NData!'),
+               nDataNameSpace: toSToken('\t\n'),
+               unexpanded: {
+                  propName: 'trailing',
+                  tokens: [],
+               },
+            }),
+         );
       });
 
       it('adds an nDataName when the prop is nDataName', () => {
@@ -1031,17 +1120,11 @@ describe('entityDeclaration (unit)', () => {
             [undefined, 'space'],
             [undefined, 'all'],
          ]);
-         parseExternalId.mockImplementation(
-            (
-               sTokenSource: STokenSource,
-               terminators: TermArray,
-               cb: (result?: ParsedExternalId) => void,
-            ) => {
-               cb({
-                  externalId: {},
-               });
-            },
-         );
+         parseExternalId.mockImplementation((sTokenSource, terminators, cb) => {
+            cb({
+               externalId: {},
+            });
+         });
 
          resumeParseEntityDeclaration(mockSource, geRef, getResult);
          mockSource.respondInAsyncTime();
@@ -1066,6 +1149,45 @@ describe('entityDeclaration (unit)', () => {
          );
       });
 
+      it('adds blank space after the external ID if this is parameter entity and the propname is trailing', () => {
+         const peRef = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            parameter: toSToken('%'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            externalId: {},
+            externalIdSpace: toSToken(' '),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'trailing',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, peRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new ParameterEntityDeclarationPToken({
+               open: toSToken('<!'),
+               parameter: toSToken('%'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               close: toSToken('>'),
+               externalId: {},
+               externalIdSpace: toSToken(' \n'),
+               unexpanded: {
+                  propName: 'trailing',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
       it('does not try to add an ndata if this is a parameter entity', () => {
          const peRef = new ParameterEntityDeclarationPToken({
             open: toSToken('<!'),
@@ -1083,17 +1205,11 @@ describe('entityDeclaration (unit)', () => {
             ['\t', 'space'],
             [undefined, 'all'],
          ]);
-         parseExternalId.mockImplementation(
-            (
-               sTokenSource: STokenSource,
-               terminators: TermArray,
-               cb: (result?: ParsedExternalId) => void,
-            ) => {
-               cb({
-                  externalId: {},
-               });
-            },
-         );
+         parseExternalId.mockImplementation((sTokenSource, terminators, cb) => {
+            cb({
+               externalId: {},
+            });
+         });
 
          resumeParseEntityDeclaration(mockSource, peRef, getResult);
          mockSource.respondInAsyncTime();
@@ -1109,6 +1225,47 @@ describe('entityDeclaration (unit)', () => {
                externalIdSpace: toSToken('\t'),
                unexpanded: {
                   propName: 'externalIdOrValue',
+                  tokens: [],
+               },
+            }),
+         );
+      });
+
+      it('adds a trailing space after the value if value is defined and the propName is trailing', () => {
+         const geRef = new GeneralEntityDeclarationPToken({
+            open: toSToken('<!'),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            openQuote: toSToken('"'),
+            value: [],
+            closeQuote: toSToken('"'),
+            valueSpace: toSToken('\t'),
+            close: toSToken('>'),
+            unexpanded: {
+               propName: 'trailing',
+               tokens: [],
+            },
+         });
+         const mockSource = new MockSTokenSource([
+            ['\n', 'space'],
+            [undefined, 'all'],
+         ]);
+
+         resumeParseEntityDeclaration(mockSource, geRef, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new GeneralEntityDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('anEntity'),
+               nameSpace: toSToken(' '),
+               openQuote: toSToken('"'),
+               value: [],
+               closeQuote: toSToken('"'),
+               valueSpace: toSToken('\t\n'),
+               close: toSToken('>'),
+               unexpanded: {
+                  propName: 'trailing',
                   tokens: [],
                },
             }),
@@ -1133,11 +1290,7 @@ describe('entityDeclaration (unit)', () => {
             [undefined, 'all'],
          ]);
          literalParse.mockImplementation(
-            (
-               _1: STokenSource,
-               stuff: LitParams | undefined,
-               callback: (result?: LiteralPToken) => void,
-            ) => {
+            (_1, stuff, callback: (result?: LiteralPToken) => void) => {
                callback({
                   ...stuff?.pToken,
                   openQuote: toSToken('"'),
@@ -1187,11 +1340,7 @@ describe('entityDeclaration (unit)', () => {
             [undefined, 'all'],
          ]);
          literalParse.mockImplementation(
-            (
-               _1: STokenSource,
-               stuff: LitParams | undefined,
-               callback: (result?: LiteralPToken) => void,
-            ) => {
+            (_1, stuff, callback: (result?: LiteralPToken) => void) => {
                callback({
                   ...stuff?.pToken,
                   openQuote: toSToken('"'),
@@ -1350,11 +1499,7 @@ describe('entityDeclaration (unit)', () => {
             ['stuff', 'all'],
          ]);
          literalParse.mockImplementation(
-            (
-               _1: STokenSource,
-               stuff: LitParams | undefined,
-               callback: (result?: LiteralPToken) => void,
-            ) => {
+            (_1, stuff, callback: (result?: LiteralPToken) => void) => {
                callback({
                   ...stuff?.pToken,
                   openQuote: toSToken('"'),

@@ -118,6 +118,22 @@ function parseClose(
    });
 }
 
+function parsePeRefThenClose(
+   source: STokenSource,
+   declarationStart: DeclarationStart,
+   props: AnyEntityDeclaration, // may mutate
+   deliverPToken: (
+      result: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
+   ) => void,
+) {
+   parseUnexpanded(source, 'trailing', (unexp) => {
+      if (unexp) {
+         props.unexpanded = unexp;
+      }
+      parseClose(source, declarationStart, props, deliverPToken);
+   });
+}
+
 function parseValue(
    source: STokenSource,
    declarationStart: DeclarationStart,
@@ -135,7 +151,7 @@ function parseValue(
       parseExternalId(source, ['>'], (parsedExtId) => {
          if (!parsedExtId) {
             parseLiteralValue(source, props, (withLiteralValue) => {
-               parseClose(source, declarationStart, withLiteralValue, done);
+               parsePeRefThenClose(source, declarationStart, withLiteralValue, done);
             });
             return;
          }
@@ -154,7 +170,7 @@ function parseValue(
             props.externalIdSpace = externalIdSpace;
 
             if (!isGeDecl) {
-               parseClose(source, declarationStart, props, done);
+               parsePeRefThenClose(source, declarationStart, props, done);
                return;
             }
 
@@ -179,7 +195,7 @@ function parseValue(
                      }
 
                      parseNDataName(source, props, (withName) => {
-                        parseClose(source, declarationStart, withName, done);
+                        parsePeRefThenClose(source, declarationStart, withName, done);
                      });
                   });
                });
@@ -333,6 +349,27 @@ function resumeParseParts(
       case 'nDataName':
          props.nDataSpace = combineSTokens(props.nDataSpace, preSpace);
          parseNDataName(source, props, deliverProps);
+         break;
+      case 'trailing':
+         let newResult: AnyEntityDeclaration;
+
+         if (props.nData || props.nDataName) {
+            newResult = {
+               ...props,
+               nDataNameSpace: combineSTokens(props.nDataNameSpace, preSpace),
+            };
+         } else if (!props.externalId) {
+            newResult = {
+               ...props,
+               valueSpace: combineSTokens(props.valueSpace, preSpace),
+            };
+         } else {
+            newResult = {
+               ...props,
+               externalIdSpace: combineSTokens(props.externalIdSpace, preSpace),
+            };
+         }
+         deliverProps(newResult);
          break;
       default:
          deliverProps(props);
