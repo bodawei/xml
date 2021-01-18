@@ -172,6 +172,40 @@ describe('elementDeclarationValidate (unit)', () => {
       });
    });
 
+   it('does not report #PCDATA as an invalid name (§3.2.0)', () => {
+      elementDeclaration = new ElementDeclarationPToken({
+         open: toSToken('<!'),
+         declType: toSToken('ELEMENT'),
+         name: toSToken('elementName'),
+         contentModel: {
+            open: toSToken('('),
+            delimitedParticles: [
+               {
+                  particle: {
+                     name: toSToken('#PCDATA'),
+                  },
+               },
+               {
+                  particle: {
+                     name: toSToken('bogus'),
+                  },
+               },
+            ],
+         },
+         close: toSToken('>'),
+      });
+
+      elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).not.toReportWarning({
+         id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+         params: ['elementName', '#PCDATA'],
+         position: elementDeclaration.contentModel?.open,
+         lastPosition: undefined,
+      });
+   });
+
    it('reports an warning if there is a name in the children content model that has no declaration (§3.2.0)', () => {
       elementDeclaration = new ElementDeclarationPToken({
          open: toSToken('<!'),

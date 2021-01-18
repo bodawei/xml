@@ -36,7 +36,7 @@ function getElementNames(contentModel: ContentModelP): Array<string> {
       } else {
          const name = strOrBlank(aParticle.name);
 
-         if (name !== '') {
+         if (name !== '' && name.toUpperCase() !== '#PCDATA') {
             childNames.push(name);
          }
       }
