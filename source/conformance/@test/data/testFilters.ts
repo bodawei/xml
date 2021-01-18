@@ -9,7 +9,6 @@ const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
       // Misc
-      'rmt-e2e-60', // conditional section mishandled (thinks it is in the wrong context)
       'rmt-e2e-18', // Tests relative entity lookup  one in a subdirectlry should be finding relative to the main document, not itself?????
       // characters
       'rmt-054', // Unclear what is going wrong

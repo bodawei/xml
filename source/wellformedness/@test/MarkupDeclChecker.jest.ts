@@ -250,6 +250,12 @@ describe('MarkupDeclChecker (unit)', () => {
             expect(ec.errors).toEqual([]);
          });
 
+         it('reports no error if a conditional section appears after an external parameter entity start', () => {
+            checker.check(new ConditionalPToken({ open: toSToken('<!') }), ec);
+
+            expect(ec.errors).toEqual([]);
+         });
+
          it('closes the parameter entity and internal subset without problems', () => {
             const end = new ParameterEntityEndPToken(paramEntityRef);
             checker.check(generalEntityDeclaration, ec);

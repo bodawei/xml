@@ -337,7 +337,7 @@ class MarkupDeclChecker implements Checker {
       | ParameterEntityStartPToken
       | ConditionalPToken;
 
-   private inExternalSubset = false;
+   private inExtSubset = false; // That is, in production 30. This can be either the external subset or the body of an external entity
 
    private checkState: CheckState;
 
@@ -349,7 +349,7 @@ class MarkupDeclChecker implements Checker {
 
    public constructor(checkState: CheckState, peContext: Array<string>, inExternalSubset = false) {
       this.checkState = checkState;
-      this.inExternalSubset = inExternalSubset;
+      this.inExtSubset = inExternalSubset;
       this.peContext = peContext;
       this.declsSeen = {};
    }
@@ -357,13 +357,18 @@ class MarkupDeclChecker implements Checker {
    public check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
       if (this.state === States.PRE) {
          if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
-            this.inExternalSubset = false;
+            this.inExtSubset = false;
             this.start = pToken;
          } else if (pToken.type === EXTERNAL_SUBSET_START_TOKEN) {
-            this.inExternalSubset = true;
+            this.inExtSubset = true;
             this.start = pToken;
          } else if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
             this.start = pToken;
+            const name = strOrBlank(pToken.referencePToken.name);
+            const decl = this.checkState.paramDecls[name];
+            if (decl?.externalId) {
+               this.inExtSubset = true;
+            }
          } else if (pToken.type === CONDITIONAL_PTOKEN) {
             this.start = pToken;
          }
@@ -427,7 +432,7 @@ class MarkupDeclChecker implements Checker {
                this.embeddedChecker = new MarkupDeclChecker(
                   this.checkState,
                   this.peContext,
-                  this.inExternalSubset,
+                  this.inExtSubset,
                );
                this.embeddedChecker.check(pToken, errorCollector);
                return;
@@ -462,7 +467,7 @@ class MarkupDeclChecker implements Checker {
                this.embeddedChecker = new MarkupDeclChecker(
                   this.checkState,
                   this.peContext,
-                  this.inExternalSubset,
+                  this.inExtSubset,
                );
                this.embeddedChecker.check(pToken, errorCollector);
                return;
@@ -513,14 +518,14 @@ class MarkupDeclChecker implements Checker {
 
       if (pToken.type === PARAMETER_ENTITY_START_PTOKEN && this.state === States.PRE) {
          if (isParamEntityExternal(pToken.referencePToken, this.checkState.paramDecls)) {
-            newState = this.inExternalSubset
+            newState = this.inExtSubset
                ? States.PARAM_START_EXTERNAL_SUBSET
                : States.PARAM_START_INTERNAL_SUBSET;
          } else {
-            newState = this.inExternalSubset ? States.EXTERNAL_SUBSET : States.INTERNAL_SUBSET;
+            newState = this.inExtSubset ? States.EXTERNAL_SUBSET : States.INTERNAL_SUBSET;
          }
       } else if (pToken.type === CONDITIONAL_PTOKEN && this.state === States.PRE) {
-         newState = this.inExternalSubset ? States.INSIDE_CONDITIONAL : undefined;
+         newState = this.inExtSubset ? States.INSIDE_CONDITIONAL : undefined;
       } else if (
          (this.start &&
             pToken.type === PARAMETER_ENTITY_END_PTOKEN &&
