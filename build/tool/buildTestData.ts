@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { dirname, extname, relative, resolve } from 'path';
+import { dirname, extname, relative, resolve, join } from 'path';
 import { Transform } from 'stream';
 
 import { EntityId, ConformanceVersion } from 'basic';
@@ -254,6 +254,7 @@ function addDirectory(pathToHere: string, testCases: TestCases, root: string): v
             if (!isEduni) {
                return
             } else {
+               console.log('eduni path', finalPath);
                addDirectory(finalPath, testCases, root);
                return;
             }
@@ -264,7 +265,7 @@ function addDirectory(pathToHere: string, testCases: TestCases, root: string): v
          }
 
          const testContent = readFileSync(finalPath, { encoding: 'utf-8' });
-         const relativePath = (pathToHere[0] !== '.') ? relative(root, pathToHere) : pathToHere;
+         const relativePath = (pathToHere[0] !== '.') ? './' + join(root, relative(root, pathToHere)) : pathToHere;
 
          testCases.entityPaths[relativePath] = testCases.entityPaths[relativePath] || {};
          testCases.entityPaths[relativePath][entryName] = testContent;

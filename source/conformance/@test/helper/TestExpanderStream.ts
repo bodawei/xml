@@ -1,9 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { basename, dirname, relative, resolve } from 'path';
+import { basename, dirname, relative, resolve, join } from 'path';
 import { Transform } from 'stream';
 
-import { EntityId } from 'basic';
+import { EntityId, ENTITY_ID } from 'basic';
 import { EntityExpander, OpaqueEntityLoc, RetrieveResults, AttributeValueResults } from 'expand';
 import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
@@ -19,6 +19,12 @@ import {
 
 import { TestCases } from './types';
 import { TestDetails } from './buildTestDetails';
+
+interface ResolvedInfo {
+   testDetails: TestDetails;
+   pathToEntity: string;
+   entityId: EntityId;
+}
 
 function parseBody(
    sTokenSource: STokenSource,
@@ -79,6 +85,13 @@ function findEntityContent(cases: Array<TestCases>, docDir: string, entitySubPat
    const name = basename(fullPath);
    const dir = `./${relative(process.cwd(), fullTargetDir)}`;
 
+   // console.log('docDir', docDir);
+   // console.log('entitySubPath', entitySubPath);
+   // console.log('fullPath', fullPath);
+   // console.log('fullTargetDir', fullTargetDir);
+   // console.log('dir', dir);
+   // console.log('name', name);
+
    for (const testcase of cases) {
       if (testcase.entityPaths[dir] && testcase.entityPaths[dir][name]) {
          return testcase.entityPaths[dir][name];
@@ -112,20 +125,43 @@ function resolveEntityId(
    relativeEntity: EntityId,
 ): OpaqueEntityLoc {
    const entityName = relativeEntity.systemId;
+   let pathToEntity: string;
+
+   /*
+    * Given a baseEntity and a relative Entity, compute the path
+    * relative to the test details to find the entity.
+    */
+   if (baseEntity.type === ENTITY_ID) {
+      // This is too simple for the completely general purpose case
+      pathToEntity = './' + entityName;
+   } else {
+      const base = baseEntity as ResolvedInfo;
+
+      // §4.2.2: relative URIs are relative to the location of the resource within which the entity declaration occurs
+      // Implicitly, non-relative are not.  So are relative to the document entity.
+      if (entityName.startsWith('.')) {
+         const baseEntityDir = dirname(base.pathToEntity);
+         pathToEntity = './' + join(baseEntityDir, entityName);
+      } else {
+         pathToEntity = './' + entityName;
+      }
+   }
 
    return {
       testDetails,
-      entityName,
+      pathToEntity,
+      entityId: relativeEntity,
    };
 }
 function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
+   const castEntity = entityLoc as ResolvedInfo;
    // console.log('>>>', baseEntity, relativeEntity);
    // console.log('RETRIEVE IN TEST EXPANDER', entityName, baseEntity, relativeEntity);
-   const entityText = findEntity(entityLoc.testDetails, entityLoc.entityName);
+   const entityText = findEntity(castEntity.testDetails, castEntity.pathToEntity);
    // console.log('entityText', entityText, '\n');
    // Throw an error if we can't find the entity?
 
-   const source = new STokenSource(defaultExtractors, entityLoc);
+   const source = new STokenSource(defaultExtractors, castEntity.entityId);
    source.addText(entityText);
    source.endText();
 
