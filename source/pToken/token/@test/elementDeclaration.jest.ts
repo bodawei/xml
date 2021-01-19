@@ -459,6 +459,7 @@ describe('elementDeclaration (unit)', () => {
             ['A', 'peekChar'],
             ['ANY', 'word', ['>']],
             [' ', 'space'],
+            [undefined, 'all'],
          ]);
 
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
@@ -495,7 +496,10 @@ describe('elementDeclaration (unit)', () => {
             },
             close: toSToken('>'),
          });
-         const mockSource = new MockSTokenSource([['\t', 'space']]);
+         const mockSource = new MockSTokenSource([
+            ['\t', 'space'],
+            [undefined, 'all'],
+         ]);
 
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
          mockSource.respondInAsyncTime();
@@ -532,6 +536,7 @@ describe('elementDeclaration (unit)', () => {
          const mockSource = new MockSTokenSource([
             [undefined, 'space'],
             ['(', 'peekChar'],
+            [undefined, 'all'],
          ]);
 
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
@@ -565,7 +570,10 @@ describe('elementDeclaration (unit)', () => {
             },
             close: toSToken('>'),
          });
-         const mockSource = new MockSTokenSource([[undefined, 'space']]);
+         const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
+            [undefined, 'all'],
+         ]);
          resumeParseContentModelMock.mockImplementation((source, props, pre, cb) => {
             cb({ delimitedParticles: [], repeat: toSToken('|') });
          });
@@ -592,7 +600,10 @@ describe('elementDeclaration (unit)', () => {
             },
             close: toSToken('>'),
          });
-         const mockSource = new MockSTokenSource([[undefined, 'space']]);
+         const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
+            [undefined, 'all'],
+         ]);
          resumeParseContentModelMock.mockImplementation((source, props, pre, cb) => {
             cb({ delimitedParticles: [], repeat: toSToken('|') });
          });
@@ -632,6 +643,7 @@ describe('elementDeclaration (unit)', () => {
             ['A', 'peekChar'],
             ['ANY', 'word', ['>']],
             [' ', 'space'],
+            [undefined, 'all'],
          ]);
 
          resumeParseElementDeclaration(mockSource, elementDecl, getResult);
@@ -651,6 +663,47 @@ describe('elementDeclaration (unit)', () => {
                   tokens: [],
                },
                close: toSToken('>'),
+            }),
+         );
+      });
+
+      it('returns an element declaration with extra stuff in it', () => {
+         const elementDecl = new ElementDeclarationPToken({
+            open: toSToken('<!'),
+            unexpanded: {
+               propName: 'name',
+               tokens: [],
+            },
+            close: toSToken('>'),
+         });
+         const mockSource = new MockSTokenSource([
+            [undefined, 'space'],
+            ['foo', 'word'],
+            [' ', 'space'],
+            ['A', 'peekChar'],
+            ['ANY', 'word', ['>']],
+            [' ', 'space'],
+            ['what is this', 'all'],
+         ]);
+
+         resumeParseElementDeclaration(mockSource, elementDecl, getResult);
+         mockSource.respondInAsyncTime();
+
+         // @ts-expect-error 2329/matchers
+         expect(result).toEqualRangeless(
+            new ElementDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('foo'),
+               nameSpace: toSToken(' '),
+               contentSpec: toSToken('ANY'),
+               contentSpecSpace: toSToken(' '),
+               contentModel: undefined,
+               unexpanded: {
+                  propName: 'name',
+                  tokens: [],
+               },
+               close: toSToken('>'),
+               extra: toSToken('what is this'),
             }),
          );
       });

@@ -167,7 +167,7 @@ function resumeParseProperties(
    propName: string,
    props: RawElementDeclaration,
    preSpace: SToken | undefined,
-   deliverPToken: DeliverCB,
+   deliverPToken: (result: RawElementDeclaration) => void,
 ): void {
    switch (propName) {
       case 'name':
@@ -180,10 +180,10 @@ function resumeParseProperties(
          props.nameSpace = combineSTokens(props.nameSpace, preSpace);
          parseSimpleContentSpec(source, props, (withContentSimpleSpec) => {
             if (withContentSimpleSpec) {
-               deliverPToken(new ElementDeclarationPToken(withContentSimpleSpec));
+               deliverPToken(withContentSimpleSpec);
             } else {
                parseComplexContentSpec(source, props, (withComplexContentSpec) => {
-                  deliverPToken(new ElementDeclarationPToken(withComplexContentSpec));
+                  deliverPToken(withComplexContentSpec);
                });
             }
          });
@@ -194,21 +194,18 @@ function resumeParseProperties(
             props.contentModel || { delimitedParticles: [] },
             preSpace,
             (contentModel) => {
-               deliverPToken(
-                  new ElementDeclarationPToken({
-                     ...props,
-                     contentModel,
-                  }),
-               );
+               deliverPToken({
+                  ...props,
+                  contentModel,
+               });
             },
          );
          break;
       case 'trailing':
-         deliverPToken(
-            new ElementDeclarationPToken(props, {
-               contentSpecSpace: combineSTokens(props.contentSpecSpace, preSpace),
-            }),
-         );
+         deliverPToken({
+            ...props,
+            contentSpecSpace: combineSTokens(props.contentSpecSpace, preSpace),
+         });
          break;
    }
 }
@@ -225,7 +222,15 @@ function resumeParseElementDeclaration(
    const propName = elementDeclaration.unexpanded.propName;
 
    source.extractNoParams('space', (preSpace) => {
-      resumeParseProperties(source, propName, { ...elementDeclaration }, preSpace, deliverPToken);
+      resumeParseProperties(source, propName, { ...elementDeclaration }, preSpace, (result) => {
+         source.extract('all', [], (extra) => {
+            deliverPToken(
+               new ElementDeclarationPToken(result, {
+                  extra,
+               }),
+            );
+         });
+      });
    });
 }
 
