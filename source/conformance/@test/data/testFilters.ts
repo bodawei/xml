@@ -6,11 +6,28 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: ['rmt-054'],
    excludedIds: [
       'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
-      // characters
-      'rmt-054', // Unclear what is going wrong
+      /*
+       * This is nasty, and I think it reflects we are doing something wrong.
+       * an internal GE has "&#x0c" which is a form feed char. The replacement text has \f in it.
+       *    So far, this is ok, as the replacement text has to match `content`, which it does.
+       * We have parsed the "\f" as CharData. which is OK
+       * But then when we do a checkWellFormed on CharData, we barf, because it is wrong.
+       * But, that isn't true. CharData allows any char.  The trouble is we are mixing two things.
+       * raw CharData in any entity may not have \f or other chars. But stuff passed through
+       * into replacement text may. And indeed the logical document may too:
+       *    Encoded document: Must be content - restrictedChar
+       *    Logical document: any
+       * The trouble is we do not make this distinction in the code. CharData is CharData.
+       * We can detect this as we go through the check well formed and notice if we are in a general entity,
+       * and process differently.
+       *
+       * I think we need to remove the check from CharData and do this check in ContentChecker if not in a general entity.
+       * Review uses of misc.checkCharWellFormed()
+       */
+      'rmt-054',
       // xml:lang
       'v-lang03', // xml:lang violation
       'v-lang04', // xml:lang violation
