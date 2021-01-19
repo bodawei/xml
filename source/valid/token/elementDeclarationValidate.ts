@@ -7,16 +7,11 @@ import {
    ElementDeclarationPToken,
    isContentModelP,
    UnexpandedMarkupToken,
+   pTokenArrayToString,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { WellFormedError } from 'wellformedness';
-import {
-   EntityValuePToken,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   CHARREF_PTOKEN,
-   PARAMETER_ENTITY_START_PTOKEN,
-   PARAMETER_ENTITY_END_PTOKEN,
-} from 'token';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
 
 import { ValidityError } from '../error/ValidityError';
 import { ElDeclType, ValidateState } from '../validateState';
@@ -43,31 +38,6 @@ function getElementNames(contentModel: ContentModelP): Array<string> {
    }
 
    return childNames;
-}
-
-/*
- * Given an EntityValuePToken, extract all the textual information in it and insert that
- * into an STokenSource, returning that.
- */
-function textFromEntityValue(entityValue: EntityValuePToken): string {
-   const result: Array<string> = [];
-
-   for (const element of entityValue) {
-      switch (element.type) {
-         case PARAMETER_ENTITY_START_PTOKEN:
-         case PARAMETER_ENTITY_END_PTOKEN:
-         case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            break;
-         case CHARREF_PTOKEN:
-            result.push(element.char);
-            break;
-         case TEXT_PTOKEN:
-            result.push(strOrBlank(element.text));
-            break;
-      }
-   }
-
-   return result.join('');
 }
 
 function validateEntities(
@@ -130,7 +100,7 @@ function validateEntities(
          continue;
       }
 
-      const replacementText = textFromEntityValue(details.replacementText.value);
+      const replacementText = pTokenArrayToString(details.replacementText.value);
       let depth = 0;
       let space = 0;
       let nonSpace = 0;

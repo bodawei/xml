@@ -304,7 +304,7 @@ function checkDeclaration(
             // Refactor/cleanup again getting bitten by the types in entity values
             if (
                item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN ||
-               (item.type as any) === PARAMETER_ENTITY_START_PTOKEN // TYPEHACK
+               item.type === PARAMETER_ENTITY_START_PTOKEN
             ) {
                hasPERef = true;
             }
@@ -504,8 +504,8 @@ class MarkupDeclChecker implements Checker {
 
       this.transition(pToken, errorCollector);
 
+      // @ts-expect-error ts2367 the transition may change the state.
       if ((this.state as any) === States.DONE) {
-         // typeHack - this.transition may change the state
          return CHECKER_DONE;
       }
    }

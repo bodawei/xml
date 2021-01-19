@@ -281,8 +281,8 @@ class ContentChecker implements Checker {
 
       this.transition(pToken, errorCollector);
 
+      // @ts-expect-error ts2367 this.transition may change the state
       if ((this.state as any) === State.DONE) {
-         // typeHack - this.transition may change the state
          return CHECKER_DONE;
       }
    }

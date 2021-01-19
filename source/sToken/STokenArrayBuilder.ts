@@ -3,7 +3,7 @@ import SToken from './SToken';
 class STokenArrayBuilder {
    public sTokenArray: Array<SToken> = [];
 
-   add(...values: Array<SToken | Array<SToken | undefined> | undefined>) {
+   add(...values: Array<SToken | Array<SToken | undefined> | undefined>): Array<SToken> {
       const arr = this.sTokenArray;
 
       for (let index = 0; index < values.length; index++) {

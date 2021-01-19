@@ -109,11 +109,11 @@ class STokenSource {
       this._lastOffset = undefined;
    }
 
-   setConfVer(version: ConformanceVersion) {
+   setConfVer(version: ConformanceVersion): void {
       this.confVer = version;
    }
 
-   addText(text: string, range?: Range) {
+   addText(text: string, range?: Range): void {
       if (this._allTextAdded) {
          throw new Error('Can not add text after endText() has been called.');
       }
@@ -142,7 +142,7 @@ class STokenSource {
       this._resumeOperation();
    }
 
-   endText() {
+   endText(): void {
       this._allTextAdded = true;
       this._resumeOperation();
    }
@@ -153,7 +153,7 @@ class STokenSource {
 
    extractToObject(type: string, params: any, obj: Record<string, any>, name: string): void {
       this.extract(type, params, (sToken) => {
-         (obj as any)[name] = sToken; // typeHack
+         obj[name] = sToken; // typeHack
       });
    }
 
@@ -195,7 +195,7 @@ class STokenSource {
       this._resumeOperation();
    }
 
-   _resumeOperation() {
+   _resumeOperation(): void {
       // There are two alternate ways of running this routine.
       // - A is faster, but allows some callers to get "synchronous" returns.
       // - B is much slower, but forces asynchronous returns.
@@ -258,7 +258,7 @@ class STokenSource {
       this._resuming = false;
    }
 
-   _restorePartiallyAndUnusedSegments(segInfos: Array<SegmentInfo>) {
+   _restorePartiallyAndUnusedSegments(segInfos: Array<SegmentInfo>): void {
       const returnedSegments = [];
 
       for (let index = 0; index < segInfos.length; index++) {
@@ -273,7 +273,7 @@ class STokenSource {
       this._segments = returnedSegments.concat(this._segments) as Array<Segment>; // typeHack
    }
 
-   _computeRanges(segInfos: Array<SegmentInfo>) {
+   _computeRanges(segInfos: Array<SegmentInfo>): Array<Range> {
       if (segInfos.length === 0) {
          return [];
       }
@@ -332,7 +332,7 @@ class STokenSource {
       str: string,
       originalStr: string,
       ranges: Array<Range>,
-   ) {
+   ): void {
       if (extractorContext.extractor.state === Extractor.STATE.SUCCESS) {
          extractorContext.callback(new SToken(str, originalStr, ranges));
       } else {

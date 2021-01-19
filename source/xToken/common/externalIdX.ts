@@ -1,28 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { TEXT_PTOKEN, ExternalIdP } from 'pToken';
-// ick
-import { CHARREF_PTOKEN } from 'token';
-import { LiteralValuePToken } from '../../token/common/literal';
-
-function valueToString(value: LiteralValuePToken = []): string {
-   const pieces = [];
-
-   for (const piece of value) {
-      switch (piece.type) {
-         case TEXT_PTOKEN:
-            pieces.push(piece.text.str);
-            break;
-         case CHARREF_PTOKEN:
-            pieces.push(piece.char);
-            break;
-         default:
-         // do nothing
-      }
-   }
-
-   return pieces.join('');
-}
+import { ExternalIdP, pTokenArrayToString } from 'pToken';
 
 /*
  * Converts an ExternaId PToken into an XToken.  This is always
@@ -40,8 +18,8 @@ class ExternalIdX {
          this.systemId = externalIdOrSystemId;
          this.publicId = publicId;
       } else {
-         this.systemId = valueToString(externalIdOrSystemId?.system?.value);
-         this.publicId = valueToString(externalIdOrSystemId?.public?.value) || undefined;
+         this.systemId = pTokenArrayToString(externalIdOrSystemId?.system?.value);
+         this.publicId = pTokenArrayToString(externalIdOrSystemId?.public?.value) || undefined;
       }
    }
 }

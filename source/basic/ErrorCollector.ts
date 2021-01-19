@@ -73,7 +73,7 @@ class ErrorCollector {
       return this.errors;
    }
 
-   check(truthy: any, code: string, params?: Array<string>, position?: Position): void {
+   check(truthy: unknown, code: string, params?: Array<string>, position?: Position): void {
       if (truthy) {
          this.report(code, params, position);
       }

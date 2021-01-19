@@ -1,26 +1,14 @@
 import { defaultExtractors } from 'extractor';
-import { TEXT_PTOKEN, ContextType, ParseValue } from 'pToken';
+import { ContextType, ParseValue, pTokenArrayToString } from 'pToken';
 import { strOrBlank, STokenSource, toSToken } from 'sToken';
-import { ParameterEntityReferencePToken, CHARREF_PTOKEN, EntityValuePToken } from 'token';
+
+import { ParameterEntityReferencePToken } from 'token';
+
 import { ConditionalInfo, ExpandParams } from '../types';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
 
 type Done = (result: ConditionalInfo) => void;
-
-function extractType(replacementText: EntityValuePToken): string {
-   let entityText = '';
-
-   for (const element of replacementText) {
-      if (element.type === TEXT_PTOKEN) {
-         entityText += strOrBlank(element.text);
-      } else if (element.type === CHARREF_PTOKEN) {
-         entityText += element.char; // Reminder: It may be multiple utf16 codepoints
-      }
-   }
-
-   return entityText.trim();
-}
 
 function setupConditional(
    ref: ParameterEntityReferencePToken,
@@ -41,7 +29,7 @@ function setupConditional(
          return;
       }
 
-      const sectionTypeText = extractType(entityDetails.protoReplacementText);
+      const sectionTypeText = pTokenArrayToString(entityDetails.protoReplacementText).trim();
 
       if (alreadyInEntity || sectionTypeText.toLocaleLowerCase() !== 'include') {
          done({

@@ -366,14 +366,14 @@ module.exports = {
             //    },
             //  ],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-dynamic-delete.md
-            //  // "@typescript-eslint/no-dynamic-delete": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-dynamic-delete.md
+             "@typescript-eslint/no-dynamic-delete": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-empty-interface.md
-            //  // "@typescript-eslint/no-empty-interface": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-empty-interface.md
+             "@typescript-eslint/no-empty-interface": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md
-            //  // "@typescript-eslint/no-explicit-any": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md
+             "@typescript-eslint/no-explicit-any": ["error"],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extra-non-null-assertion.md
             //  // "@typescript-eslint/no-extra-non-null-assertion": ["error"],
@@ -441,20 +441,20 @@ module.exports = {
             //    */,
             //  ],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-type-assertion.md
-            //  '@typescript-eslint/no-unnecessary-type-assertion': ['error'],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-type-assertion.md
+             '@typescript-eslint/no-unnecessary-type-assertion': ['error'],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-assignment.md
-            //  '@typescript-eslint/no-unsafe-assignment': ['error'],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-assignment.md
+             '@typescript-eslint/no-unsafe-assignment': ['error'],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-call.md
-            //  '@typescript-eslint/no-unsafe-call': ['error'],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-call.md
+             '@typescript-eslint/no-unsafe-call': ['error'],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-member-access.md
-            //  '@typescript-eslint/no-unsafe-member-access': ['error'],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-member-access.md
+             '@typescript-eslint/no-unsafe-member-access': ['error'],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-return.md
-            //  '@typescript-eslint/no-unsafe-return': ['error'],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-return.md
+             '@typescript-eslint/no-unsafe-return': ['error'],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-vars-experimental.md
             //  // ???

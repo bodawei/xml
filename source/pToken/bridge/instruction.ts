@@ -52,7 +52,7 @@ function parseInstruction(
    const start: InstructionStart = { open: openSToken };
 
    source.extractToObjectNoParams('space', start, 'openSpace');
-   source.extractToObject('word', ['?>'], start, 'target');
+   source.extractToObject('word', ['?>'], start as any, 'target');
 
    source.extractNoParams('space', (sToken) => {
       start.targetSpace = sToken;

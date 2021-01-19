@@ -2,7 +2,7 @@
 
 import { isAugmentedAttribute } from 'attFixer';
 import { ErrorCollector } from 'basic';
-import { attValueToString } from 'pToken';
+import { pTokenArrayToString } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
@@ -28,7 +28,7 @@ function checkAttributes(
       }
 
       const type = strOrBlank(details.def.type).toUpperCase();
-      const attrValue = attValueToString(attr.value);
+      const attrValue = pTokenArrayToString(attr.value);
 
       ec.setPos(attr.name);
 

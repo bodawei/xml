@@ -13,10 +13,10 @@ import { ProcessingInstructionPToken } from './token/processingInstruction';
 import { TextPToken } from './token/text';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
+import { pTokenArrayToString } from './util/pTokenArrayToString';
 
 export * from './bridge/instruction';
 export * from './bridge/entityDeclaration';
-export * from './common/attValueToString';
 export * from './common/contentModel';
 export * from './common/externalId';
 export * from './common/fieldedInstruction';
@@ -54,4 +54,4 @@ enum ContextType {
    GENERAL_ENTITY,
 }
 
-export { InstructionStart, ContextType, ParseValue, PToken };
+export { InstructionStart, ContextType, ParseValue, PToken, pTokenArrayToString };

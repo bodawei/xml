@@ -13,17 +13,17 @@ import {
    makeParameterEntityStart,
 } from 'token-test';
 
-import { attValueToString } from '../attValueToString';
+import { pTokenArrayToString } from '../pTokenArrayToString';
 
-describe('attValueToString (unit)', () => {
+describe('pTokenArrayToString (unit)', () => {
    it('returns an empty array as a blank string', () => {
-      const result = attValueToString([]);
+      const result = pTokenArrayToString([]);
 
       expect(result).toEqual('');
    });
 
    it('converts text and chars to the result but no other types', () => {
-      const result = attValueToString([
+      const result = pTokenArrayToString([
          new TextPToken({ text: toSToken('fo') }),
          makeGeneralEntityStart(),
          makeGeneralEntityEnd(),
@@ -33,8 +33,9 @@ describe('attValueToString (unit)', () => {
          makeParameterEntityEnd(),
          makeParameterEntityReference(),
          new TextPToken({ text: toSToken('bar') }),
+         new TextPToken({ text: toSToken('   ') }),
       ]);
 
-      expect(result).toEqual('foAbar');
+      expect(result).toEqual('foAbar   ');
    });
 });

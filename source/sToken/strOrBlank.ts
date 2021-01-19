@@ -1,6 +1,6 @@
 import SToken from './SToken';
 
-function strOrBlank(sToken: SToken | void) {
+function strOrBlank(sToken: SToken | void): string {
    return sToken ? sToken.str : '';
 }
 
