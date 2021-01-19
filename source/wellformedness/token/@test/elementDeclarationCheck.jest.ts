@@ -1,11 +1,11 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'basic-test';
 import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclaration';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { nameCheck } from '../util/nameCheck';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
@@ -45,7 +45,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_OPEN_XTRA_SPACE_AFTER,
          params: undefined,
          position: elementDeclaration.openSpace,
@@ -60,7 +60,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_DECLTYPE_INVALID,
          params: ['Element'],
          position: elementDeclaration.declType,
@@ -75,7 +75,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_DECLTYPE_NO_SPACE,
          params: undefined,
          position: undefined,
@@ -90,7 +90,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_NO_NAME,
          params: undefined,
          position: undefined,
@@ -129,7 +129,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_NAME_NO_SPACE,
          params: ['elementName'],
          position: undefined,
@@ -145,7 +145,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_NO_SPEC,
          params: ['elementName'],
          position: undefined,
@@ -160,7 +160,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_SPEC_UNKNOWN,
          params: ['elementName', 'XYZ'],
          position: elementDeclaration.contentSpec,
@@ -174,7 +174,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
          params: ['elementName', 'ANY', 'any'],
          position: elementDeclaration.contentSpec,
@@ -188,7 +188,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_NO_CLOSE,
          params: ['elementName'],
          position: undefined,
@@ -217,7 +217,7 @@ describe('elementDeclarationCheck()', () => {
 
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_EXTRA_TEXT,
          params: ['foo'],
          position: elementDeclaration.extra,

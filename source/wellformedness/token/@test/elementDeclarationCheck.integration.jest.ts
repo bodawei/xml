@@ -1,11 +1,11 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { parseElementDeclaration } from '../../../pToken/token/elementDeclaration';
 import { STokenSource, toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
 import { DeclarationStart } from 'token';

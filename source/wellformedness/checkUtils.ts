@@ -1,5 +1,4 @@
 import { ErrorCollector, ConformanceVersion } from 'basic';
-import { WellFormedError } from 'error';
 import { strOrBlank } from 'sToken';
 import {
    TEXT_PTOKEN,
@@ -7,6 +6,7 @@ import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
 } from 'pToken';
+import { WellFormedError } from './error/WellFormedError';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    CHARREF_PTOKEN,

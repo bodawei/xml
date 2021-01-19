@@ -7,7 +7,7 @@ import { MockErrorCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
-import { WellFormedError } from 'error';
+import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 
 import declaration from '../bridge/baseDeclaration';
 import { DocTypeStartPToken, parseDocTypeStart, DOCTYPE_START_XTOKEN } from '../docTypeStart';
@@ -115,7 +115,7 @@ describe('docTypeStart (unit)', () => {
 
          docTypeStartPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.DOCTYPE_NO_NAME,
             params: undefined,
             lastPosition: undefined, // would be pToken.postDeclTypeSpace, but we're mocking that out
@@ -125,7 +125,7 @@ describe('docTypeStart (unit)', () => {
       it('reports no error if there is an elment name', () => {
          docTypeStartPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).not.toReportError({
+         expect(mockErrorCollector).not.toReportWFError({
             id: WellFormedError.ID.DOCTYPE_NO_NAME,
             params: undefined,
             position: undefined,

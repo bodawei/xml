@@ -1,9 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion } from 'basic';
-import { WellFormedError } from 'error';
 import { ParameterEntityDeclarationPToken, UnexpandedMarkupToken, TextPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
+import { WellFormedError } from 'wellformedness';
 import {
    ParameterEntityReferencePToken,
    XmlError,

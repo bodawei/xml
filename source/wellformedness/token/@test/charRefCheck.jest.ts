@@ -2,10 +2,11 @@
 
 import { ConformanceVersion, extractSurrogatePair, isChar } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { toSToken } from 'sToken';
 import { CharRefPToken } from 'token';
 import { makeCharRef } from 'token-test';
+
+import { WellFormedError } from '../../error/WellFormedError';
 
 jest.mock('basic');
 
@@ -51,7 +52,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_INVALID_CHAR,
          params: ['65535'],
          position: charRefPToken.digits,
@@ -70,7 +71,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_INVALID_CHAR,
          params: ['x1F026'],
          position: charRefPToken.digits,
@@ -86,7 +87,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_XTRA_POST_OPEN_SPACE,
          params: undefined,
          position: charRefPToken.openSpace,
@@ -102,7 +103,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_INVALID_HEX_CASE,
          params: undefined,
          position: charRefPToken.hexMarker,
@@ -118,7 +119,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_XTRA_POST_HEX_SPACE,
          params: undefined,
          position: charRefPToken.hexMarkerSpace,
@@ -134,7 +135,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_NO_DIGITS,
          params: undefined,
          position: undefined,
@@ -150,7 +151,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_XTRA_POST_DIGITS_SPACE,
          params: undefined,
          position: charRefPToken.digitsSpace,
@@ -167,7 +168,7 @@ describe('charRefCheck()', () => {
 
       charRefCheck(charRefPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CHARREF_NO_CLOSE,
          params: undefined,
          position: undefined,

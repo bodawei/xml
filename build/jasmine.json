@@ -7,8 +7,8 @@
  
    "helpers": [
       "source/basic/helper/beforeJasmine.ts",
-      "source/error/@test/beforeJasmine.ts",
-      "source/token/@test/beforeJasmine.ts"
+      "source/token/@test/beforeJasmine.ts",
+      "source/wellformedness/@test/beforeJasmine.ts"
    ],
  
    "stopSpecOnExpectationFailure": false,

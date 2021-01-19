@@ -1,9 +1,10 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
 import { DeclarationStart } from 'token';
 import { strOrBlank } from 'sToken';
+
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 const DECLARATION_TYPES = ['ATTLIST', 'DOCTYPE', 'ELEMENT', 'ENTITY', 'NOTATION'];

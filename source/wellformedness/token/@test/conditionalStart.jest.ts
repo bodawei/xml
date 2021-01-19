@@ -2,8 +2,8 @@ import { MockErrorCollector } from 'basic-test';
 import { ConditionalPToken } from 'token';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import checkConditionalStartWellFormed from '../conditionalStart';
-import { WellFormedError } from 'error';
 
 describe('checkWellFormed()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -32,7 +32,7 @@ describe('checkWellFormed()', () => {
 
       checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CONDITIONAL_UNKNOWN,
          params: ['bogus'],
          position: conditionalPToken.sectionType,
@@ -47,7 +47,7 @@ describe('checkWellFormed()', () => {
 
       checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CONDITIONAL_INVALID_CASE,
          params: ['ignore', 'IGNORE'],
          position: conditionalPToken.sectionType,

@@ -3,7 +3,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from '../../../error/index';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -180,7 +180,7 @@ describe('literal (unit)', () => {
 
          literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'aType');
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.LITERAL_NO_OPEN_QUOTE,
             params: [ 'aType' ],
             lastPosition: undefined,
@@ -192,7 +192,7 @@ describe('literal (unit)', () => {
 
          literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'aType');
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE,
             params: [ 'aType' ],
             lastPosition: literalPToken.openQuote,

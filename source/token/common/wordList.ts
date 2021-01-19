@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
+import { WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import misc from './misc';

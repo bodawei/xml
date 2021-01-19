@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
 import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
+import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 
 import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';

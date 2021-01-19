@@ -3,7 +3,7 @@
 
 import { ErrorCollector, ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import {  WellFormedError,  } from 'error';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { SToken } from 'sToken';
 import { makeSToken } from 'sToken-test';
 import * as basic from 'basic';
@@ -233,7 +233,7 @@ describe('misc', () => {
          misc.checkCharWellFormed(sToken, mockErrorCollector,
             new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CHARDATA_INVALID_CHAR,
             params: [ '1, 3' ],
             position: undefined,
@@ -246,7 +246,7 @@ describe('misc', () => {
          misc.checkCharWellFormed(sToken, mockErrorCollector,
             new ConformanceVersion(1.1, 2));
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CHARDATA_INVALID_CHAR,
             params: [ '3' ],
             position: undefined,

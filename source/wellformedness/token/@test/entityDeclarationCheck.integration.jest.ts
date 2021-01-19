@@ -1,10 +1,10 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
 import { parseEntityDeclaration } from '../../../pToken/bridge/entityDeclaration';

@@ -4,8 +4,7 @@
 import ErrorCollector from '../../ErrorCollector';
 import { SToken } from 'sToken';
 
-import { Position } from '../../BaseError';
-import { WellFormedError } from '../../../error/WellFormedError';
+import { Position, BaseError } from '../../BaseError';
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace
@@ -42,7 +41,7 @@ class MockErrorCollector extends ErrorCollector {
    public errors: Array<ErrorInfo> = [];
 
    constructor() {
-      super(SToken.fromString('test'), WellFormedError);
+      super(SToken.fromString('test'), BaseError as any);
       this.errors = [];
       this.setPos = this.setPos.bind(this);
       this.report = this.report.bind(this);

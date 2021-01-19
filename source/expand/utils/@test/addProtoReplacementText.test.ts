@@ -1,13 +1,13 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
-import { WellFormedError } from 'error';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
+import { WellFormedError } from 'wellformedness';
 import {
    ElidedEntityDeclarationPToken,
    EntityValuePToken,

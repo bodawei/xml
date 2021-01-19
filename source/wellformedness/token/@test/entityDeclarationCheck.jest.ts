@@ -2,7 +2,6 @@
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import {
    TextPToken,
    GeneralEntityDeclarationPToken,
@@ -10,6 +9,7 @@ import {
 } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import * as externalId from '../../common/externalIdCheck';
 import { nameCheck } from '../util/nameCheck';
 
@@ -88,7 +88,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE,
          params: ['anEntity'],
          position: undefined,
@@ -103,7 +103,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ENTITYDECL_NO_NAME,
          params: undefined,
          position: undefined,
@@ -142,7 +142,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE,
          params: ['anEntity'],
          position: undefined,
@@ -169,7 +169,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ENTITYDECL_NDATA_INVALID_CASE,
          params: ['anEntity', 'nData'],
          position: pToken.nData,
@@ -184,7 +184,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ENTITYDECL_NDATA_NO_NAME,
          params: ['anEntity'],
          lastPosition: pToken.nData,
@@ -210,7 +210,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ENTITYDECL_NO_CLOSE,
          params: ['anEntity'],
          position: undefined,
@@ -225,7 +225,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ENTITYDECL_EXTRA_TEXT,
          params: ['fooo'],
          position: pToken.extra,

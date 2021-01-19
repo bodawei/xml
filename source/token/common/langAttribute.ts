@@ -1,6 +1,6 @@
 import { pattern as BCP47_REGEX } from 'bcp47-validate';
 import { ConformanceVersion, ErrorCollector } from "basic";
-import {  WellFormedError } from "error";
+import { WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { isTextPToken } from "pToken";
 import { SToken } from "sToken";
 import { isTextXToken } from "xToken";

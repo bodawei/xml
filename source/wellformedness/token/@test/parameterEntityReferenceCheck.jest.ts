@@ -2,10 +2,10 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { toSToken } from 'sToken';
 import { ParameterEntityReferencePToken } from 'token';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import * as util from '../util/nameCheck';
 import { parameterEntityReferenceCheck } from '../parameterEntityReferenceCheck';
 
@@ -43,7 +43,7 @@ describe('parameterEntityReferenceCheck()', () => {
    it('reports an error if there is a space after the opening % (syntax)', () => {
       parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PEREF_XTRA_SPACE,
          params: ['entityName'],
          position: pePToken.openSpace,
@@ -61,7 +61,7 @@ describe('parameterEntityReferenceCheck()', () => {
 
       parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PEREF_NO_NAME,
          params: undefined,
          lastPosition: pePToken.open,
@@ -71,7 +71,7 @@ describe('parameterEntityReferenceCheck()', () => {
    it('reports an error if there is a space after the entity name (syntax)', () => {
       parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PEREF_XTRA_TRAILING_SPACE,
          params: ['entityName'],
          position: pePToken.nameSpace,
@@ -89,7 +89,7 @@ describe('parameterEntityReferenceCheck()', () => {
 
       parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PEREF_NO_SEMICOLON,
          params: ['refName'],
          lastPosition: pePToken.name,

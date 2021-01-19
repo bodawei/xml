@@ -4,7 +4,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from'basic-test';
-import { WellFormedError } from 'error';
+import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
@@ -91,7 +91,7 @@ describe('cdata (unit)', () => {
 
          cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CDATA_NO_TYPE,
             params: undefined,
             position: undefined,
@@ -104,7 +104,7 @@ describe('cdata (unit)', () => {
 
          cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CDATA_INVALID_CASE,
             params: [ 'CDATA', 'cdata' ],
             position: cDataPToken.sectionType,
@@ -116,7 +116,7 @@ describe('cdata (unit)', () => {
 
          cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CDATA_NO_SECOND_BRACKET,
             params: [ 'CDATA' ],
             lastPosition: cDataPToken.sectionType,
@@ -128,7 +128,7 @@ describe('cdata (unit)', () => {
 
          cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_OPEN,
             params: [ 'CDATA' ],
             position: cDataPToken.openSpace,
@@ -140,7 +140,7 @@ describe('cdata (unit)', () => {
 
          cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_TYPE,
             params: [ 'CDATA' ],
             position: cDataPToken.sectionTypeSpace,
@@ -152,7 +152,7 @@ describe('cdata (unit)', () => {
 
          cDataPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.CDATA_NO_CLOSE,
             params: undefined,
             lastPosition: cDataPToken.text,

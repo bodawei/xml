@@ -1,13 +1,14 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ERROR_TYPE, ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
-import { WellFormedError } from 'error';
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    XMLDECL_PTOKEN,
    ParseValue,
    isXmlDeclStandalone,
 } from 'pToken';
+
+import { WellFormedError } from './error/WellFormedError';
 
 // circular dependency problem
 import { DOCTYPE_START_PTOKEN } from '../token/docTypeStart';

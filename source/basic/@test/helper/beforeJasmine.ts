@@ -2,6 +2,11 @@
 
 /* eslint-env jasmine */
 
+import { BaseError } from '../../BaseError';
+import { XmlWarning } from '../../XmlWarning';
+import { MockErrorCollector } from './helper';
+import { makeJasmineErrorMatcher } from './makeJasmineErrorMatcher';
+
 interface JasmineResult {
    pass: boolean;
    message: string;
@@ -43,18 +48,164 @@ function toBeInstanceOf(): JestMatcher {
    };
 }
 
-beforeEach(() => {
-   jasmine.addMatchers({
-      toBeInstanceOf,
+function toHaveError(util: any) {
+   return {
+      compare: (actual: any, expected: any) => {
+         let pass = false;
+         let message;
+
+         actual.forEach((token: any) => {
+            if (token.type === 'ERROR_TYPE') {
+               const somePass =
+                  token.id === expected.id &&
+                  token.type === expected.type &&
+                  token.message === expected.message;
+               pass =
+                  pass ||
+                  (somePass &&
+                     util.equals(token.place, expected.place) &&
+                     util.equals(token.context, expected.context));
+            }
+         });
+
+         if (pass) {
+            message = `Expected not to find "${JSON.stringify(expected, undefined, 2)}".`;
+         } else {
+            message = `Expected to find "${JSON.stringify(
+               expected,
+               undefined,
+               2,
+            )}". Instead found ${JSON.stringify(actual, undefined, 2)}.`;
+         }
+
+         return {
+            pass: pass,
+            message: message,
+         };
+      },
+   };
+}
+
+function toBeErrorFree() {
+   return {
+      compare: (actual: any) => {
+         let error: BaseError | undefined;
+         let message: string;
+
+         actual.forEach((token: any) => {
+            if (token.type === 'ERROR_TYPE' && token.subtype !== 'WARNING') {
+               error = token;
+            }
+         });
+
+         if (!error!) {
+            message = 'Expected to find one or more XmlErrors.';
+         } else {
+            message = `Expected to find no XmlErrors, but found ${(error! as any).message}. (${
+               (error! as any).id
+            })`; // typeHack
+         }
+
+         return {
+            pass: !error!,
+            message: message,
+         };
+      },
+   };
+}
+
+function toBeErrorAndWarningFree() {
+   return {
+      compare: (actual: any) => {
+         let error: BaseError | undefined;
+         let message: string;
+
+         actual.forEach((token: any) => {
+            if (token.type === 'ERROR_TYPE') {
+               error = token;
+            }
+         });
+
+         if (!error!) {
+            message = 'Expected to find one or more XmlErrors.';
+         } else {
+            message = `Expected to find no XmlErrors, but found ${(error! as any).message}. (${
+               (error! as any).id
+            })`; // typeHack
+         }
+
+         return {
+            pass: !error!,
+            message: message,
+         };
+      },
+   };
+}
+
+function toNotReportError(util: any) {
+   return {
+      compare: (mockErrorCollector: MockErrorCollector, expectedId: string) => {
+         if (!mockErrorCollector) {
+            throw new Error('Did not get a mock error collector as expected.');
+         }
+
+         const errors = mockErrorCollector.errors;
+         let pass = true;
+         let message = `No error with the id ${expectedId} reported.`;
+
+         for (let index = 0; index < errors.length; index++) {
+            const actual = errors[index];
+
+            if (expectedId === actual.id) {
+               pass = false;
+               message = `The error ${expectedId} was found.`;
+            }
+         }
+
+         return {
+            pass,
+            message,
+         };
+      },
+   };
+}
+
+function toReportWarning(util: any) {
+   return makeJasmineErrorMatcher(util, XmlWarning);
+}
+
+if (typeof jest === 'undefined') {
+   beforeEach(() => {
+      jasmine.addMatchers({
+         toBeInstanceOf,
+         toHaveError,
+         toBeErrorFree,
+         toBeErrorAndWarningFree,
+         toNotReportError,
+         toReportWarning,
+      });
    });
-});
+}
+
+interface ErrorProps {
+   id: string;
+   params?: Array<string>;
+   position?: any;
+   lastPosition?: any;
+}
 
 declare global {
    namespace jasmine {
       interface Matchers<T> {
          toBeInstanceOf(anObject: Object): void;
+         toHaveError(expectedXmlErrorInstance: any): void; // given tokens: Array<any>,
+         toBeErrorFree(): void; // given tokens: Array<any>
+         toBeErrorAndWarningFree(): void; // given tokens: Array<any>
+         toNotReportError(id: string): void;
+         toReportWarning(errorProps: ErrorProps): void;
+         toReportWFError(errorProps: ErrorProps): void; // not sure why this isn't picked up from wf
       }
    }
 }
 
-export { toBeInstanceOf };
+export { toBeInstanceOf, toReportWarning };

@@ -3,7 +3,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
@@ -103,7 +103,7 @@ describe('declaration (unit)', () => {
 
          declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
             params: undefined,
             position: declarationPToken.postOpenSpace,
@@ -115,7 +115,7 @@ describe('declaration (unit)', () => {
 
          declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.DECL_NO_DECLTYPE,
             params: undefined,
             position: undefined,
@@ -128,7 +128,7 @@ describe('declaration (unit)', () => {
 
          declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
             params: [ 'DOCTYPE', 'docType' ],
             position: declarationPToken.declType,
@@ -140,7 +140,7 @@ describe('declaration (unit)', () => {
 
          declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.DECL_UNKNOWN,
             params: [ 'BOGUSTYPE' ],
             position: declarationPToken.declType,

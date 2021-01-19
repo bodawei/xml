@@ -3,11 +3,11 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { parseNotationDeclaration } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { DeclarationStart } from '../../../token/bridge/declaration'; // ick
 
 import { notationDeclarationCheck } from '../notationDeclarationCheck';

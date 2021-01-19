@@ -2,10 +2,10 @@
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import * as misc from '../../../token/common/misc';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
@@ -76,7 +76,7 @@ describe('processingInstructionCheck() (unit)', () => {
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PI_SPACE_AFTER_OPEN,
          params: ['target'],
          position: piPToken.openSpace,
@@ -90,7 +90,7 @@ describe('processingInstructionCheck() (unit)', () => {
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PI_NO_TARGET,
          params: undefined,
          lastPosition: piPToken.open,
@@ -104,7 +104,7 @@ describe('processingInstructionCheck() (unit)', () => {
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PI_TARGET_HAS_XML,
          params: ['fofoXmLTarget'],
          position: piPToken.target,
@@ -118,7 +118,7 @@ describe('processingInstructionCheck() (unit)', () => {
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PI_NO_SPACE_AFTER_TARGET,
          params: ['target'],
          lastPosition: piPToken.target,
@@ -133,7 +133,7 @@ describe('processingInstructionCheck() (unit)', () => {
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).not.toReportError({
+      expect(mockErrorCollector).not.toReportWFError({
          id: WellFormedError.ID.PI_NO_SPACE_AFTER_TARGET,
          params: ['target'],
          lastPosition: piPToken.target,
@@ -147,7 +147,7 @@ describe('processingInstructionCheck() (unit)', () => {
 
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.PI_NO_CLOSE,
          params: ['target'],
          lastPosition: piPToken.instruction,

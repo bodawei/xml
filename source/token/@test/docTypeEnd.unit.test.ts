@@ -6,7 +6,7 @@ import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from'basic-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { WellFormedError } from 'error';
+import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 
 import { DocTypeEndPToken, DocTypeEndXToken, parseDocTypeEnd } from '../docTypeEnd';
 import { DocTypeStartPToken } from '../docTypeStart';
@@ -104,7 +104,7 @@ describe('docTypeEnd (unit)', () => {
 
          docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).not.toReportError({
+         expect(mockErrorCollector).not.toReportWFError({
             id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
             params: undefined,
             position: docTypeEndPToken.closeSubsetSpace,
@@ -116,7 +116,7 @@ describe('docTypeEnd (unit)', () => {
 
          docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).not.toReportError({
+         expect(mockErrorCollector).not.toReportWFError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
             params: undefined,
             position: docTypeEndPToken.closeSubsetSpace,
@@ -126,7 +126,7 @@ describe('docTypeEnd (unit)', () => {
       it('reports an error if there is a "]", but there was no start token', () => {
          docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).not.toReportError({
+         expect(mockErrorCollector).not.toReportWFError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
             params: undefined,
             position: docTypeEndPToken.closeSubsetSpace,

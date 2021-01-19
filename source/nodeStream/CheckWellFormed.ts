@@ -3,10 +3,10 @@
 import { Transform } from 'stream';
 
 import { ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
+import { WellFormedError } from 'wellformedness';
 import { SToken } from 'sToken';
 import { getFirstSToken, PToken } from 'token';
-import { ContentChecker, DocumentChecker, MarkupDeclChecker } from 'wellformedness';
+import { ContentChecker, DocumentChecker, MarkupDeclChecker, } from 'wellformedness';
 
 /*
  * This consumes a stream of PTokens and checks most of the Well-formedness

@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
+import { WellFormedError } from '../error/WellFormedError';
 import { strOrBlank } from 'sToken';
 import { ElementDeclarationPToken } from '../../pToken/token/ElementDeclaration';
 

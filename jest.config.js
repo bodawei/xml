@@ -167,9 +167,10 @@ module.exports = {
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
      './build/beforeJest.ts', // for console.json
-     './source/error/@test/helper/beforeJest.ts',
+     './source/basic/@test/helper/beforeJest.ts',
      './source/pToken/@test/helper/beforeJest.ts',
      './source/valid/@test/helper/beforeJest.ts',
+     './source/wellformedness/@test/helper/beforeJest.ts',
   ],
 
   // The number of seconds after which a test is considered as slow and reported as such in the results.

@@ -6,7 +6,7 @@ import { MockErrorCollector } from 'basic-test';
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 import { parseWordList, WordListPToken, WordListType } from '../wordList';
-import { WellFormedError } from '../../../error/index';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 
 import misc from '../../common/misc';
 
@@ -267,7 +267,7 @@ describe('wordList (unit)', () => {
 
          wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.WORDLIST_NO_WORDS,
             params: undefined,
             position: undefined,
@@ -287,7 +287,7 @@ describe('wordList (unit)', () => {
 
          wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.WORDLIST_NO_WORD,
             params: [ '0' ],
             position: undefined,
@@ -312,7 +312,7 @@ describe('wordList (unit)', () => {
 
          wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.WORDLIST_NO_CONNECTOR,
             params: [ '0' ],
             position: undefined,
@@ -332,7 +332,7 @@ describe('wordList (unit)', () => {
 
          wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.WORDLIST_NO_WORD,
             params: [ '1' ],
             position: wlPToken.words[0].connector,
@@ -346,7 +346,7 @@ describe('wordList (unit)', () => {
 
          wlPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.WORDLIST_NO_CLOSE,
             params: undefined,
             position: undefined,

@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ErrorCollector, ConformanceVersion } from 'basic';
-import {  WellFormedError } from 'error';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { makeSToken } from 'sToken-test';
 import { SToken } from 'sToken';
 

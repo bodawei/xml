@@ -4,17 +4,13 @@
 import { WellFormedError } from '../WellFormedError';
 
 describe('WellFormedError', () => {
-
    describe('class values', () => {
-
       it('populates the ID property', () => {
          expect(WellFormedError.ID.XMLDECL_NO_CLOSE).toEqual('XMLDECL_NO_CLOSE');
       });
-
    });
 
    describe('construction', () => {
-
       it('throws no error when constructed', () => {
          expect(() => {
             new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE);
@@ -28,20 +24,19 @@ describe('WellFormedError', () => {
       });
 
       it('sets the id', () => {
-         expect(new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE).id)
-            .toEqual(WellFormedError.ID.XMLDECL_NO_CLOSE);
+         expect(new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE).id).toEqual(
+            WellFormedError.ID.XMLDECL_NO_CLOSE,
+         );
       });
 
       it('sets the code', () => {
-         expect(new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE).code)
-            .toEqual(1102);
+         expect(new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE).code).toEqual(1102);
       });
 
       it('sets the message', () => {
-         expect(new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE).message)
-            .toEqual('Missing closing "?>" in an XML Declaration.');
+         expect(new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE).message).toEqual(
+            'Missing closing "?>" in an XML Declaration.',
+         );
       });
-
    });
-
 });

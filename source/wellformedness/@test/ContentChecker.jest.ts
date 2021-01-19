@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import {
    NOTATION_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
@@ -10,6 +9,7 @@ import {
 } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../error/WellFormedError';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    CdataPToken,
@@ -130,7 +130,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(unbalancedElement, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['test', 'bogus'],
             position: unbalancedElement.open,
@@ -153,7 +153,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(unbalancedEnd2, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['test', 'bogus2'],
             position: unbalancedEnd2.open,
@@ -167,7 +167,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(elementEnd, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['', 'test'],
             position: elementEnd.open,
@@ -205,7 +205,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(geStart2, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
             position: geRef2.open,
@@ -238,7 +238,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(geStart2, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).not.toReportError({
+         expect(ec).not.toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef2'],
             position: geRef2.open,
@@ -256,7 +256,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(geRef2, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
             position: geRef2.open,
@@ -312,7 +312,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(textDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [TEXTDECL_PTOKEN],
             position: textDeclStart.open,
@@ -337,7 +337,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(textDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [TEXTDECL_PTOKEN],
             position: textDeclStart.open,
@@ -351,7 +351,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(textDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [TEXTDECL_PTOKEN],
             position: textDeclStart.open,
@@ -366,7 +366,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(notationDecl, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [NOTATION_DECLARATION_PTOKEN],
             position: notationDecl.open,
@@ -381,7 +381,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(charData, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.CHARDATA_INVALID_SECTION_END,
             params: [],
             position: charData.text,
@@ -432,7 +432,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(unparsedReference, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['unparsed'],
             position: unparsedReference.open,
@@ -468,7 +468,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(badRef, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['test'],
             position: badRef.open,
@@ -488,7 +488,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(noDeclRef, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['noDecl'],
             position: noDeclRef.open,
@@ -503,7 +503,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(endityEnd, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [GENERAL_ENTITY_END_PTOKEN],
             position: generalEntityReference.open,
@@ -522,7 +522,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(noDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['noDecl'],
             position: noDeclRef.open,
@@ -590,7 +590,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(noDeclRef, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['noDecl'],
             position: noDeclRef.open,
@@ -636,7 +636,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(generalEntityEnd, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ELEMENT_UNBALANCED,
             params: ['test', GENERAL_ENTITY_END_PTOKEN],
             position: generalEntityEnd.referencePToken.open,
@@ -655,7 +655,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(bogusEnd, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.CONTENT_INVALID_TOKEN,
             params: [GENERAL_ENTITY_END_PTOKEN],
             position: badRef.open,
@@ -684,7 +684,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(unbalancedElement, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
             params: ['testRef', 'second'],
             position: generalEntityEnd.referencePToken.open,
@@ -751,7 +751,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(undeclaredRef, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -800,7 +800,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(withExternalRef, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
@@ -830,7 +830,7 @@ describe('ContentChecker (unit)', () => {
          checker.check(withUnparsedRef, ec);
 
          // @ts-expect-error TS2339 - matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
             position: generalEntityStart.referencePToken.open,

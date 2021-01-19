@@ -4,7 +4,6 @@ import { describe, expect, it, jest } from '@jest/globals';
 
 import { ErrorCollector, ConformanceVersion, EntityId } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import {
    ProcessingInstructionPToken,
    TextDeclarationPToken,
@@ -12,6 +11,7 @@ import {
    XMLDECL_PTOKEN,
 } from 'pToken';
 import { toSToken } from 'sToken';
+import { WellFormedError } from '../error/WellFormedError';
 import {
    CDATA_PTOKEN,
    COMMENT_PTOKEN,
@@ -397,7 +397,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(textDecl, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [textDecl.type],
                position: textDecl.open,
@@ -417,7 +417,7 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors.length).toEqual(1);
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [XMLDECL_PTOKEN],
                position: xmlDecl.open,
@@ -434,7 +434,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
                position: cdata.open,
@@ -499,7 +499,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
                position: cdata.open,
@@ -530,7 +530,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [INTERNAL_SUBSET_START_TOKEN],
                position: docTypeStart.openSubset,
@@ -543,7 +543,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(externalSubsetStart, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [EXTERNAL_SUBSET_START_TOKEN],
                position: docTypeStart.openSubset,
@@ -556,7 +556,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(internalSubsetStart, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [INTERNAL_SUBSET_START_TOKEN],
                position: docTypeStart.openSubset,
@@ -581,7 +581,7 @@ describe('DocumentChecker (unit)', () => {
 
             expect(ec.errors.length).toEqual(1);
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [ELEMENT_START_PTOKEN],
                position: elementStart.open,
@@ -600,7 +600,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
                position: cdata.open,
@@ -678,7 +678,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
                position: cdata.open,
@@ -690,7 +690,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(cdata, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [CDATA_PTOKEN],
                position: cdata.open,
@@ -738,7 +738,7 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
                position: undefined,
@@ -755,7 +755,7 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
                position: xmlDecl.close,
@@ -774,7 +774,7 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
                position: docTypeStart.openSubset,
@@ -793,7 +793,7 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
                position: docTypeStart.openSubset,
@@ -806,7 +806,7 @@ describe('DocumentChecker (unit)', () => {
             checker.finish(ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.DOC_END_EARLY,
                params: undefined,
                position: elementStart.close,

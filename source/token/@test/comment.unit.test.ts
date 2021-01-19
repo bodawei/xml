@@ -3,7 +3,7 @@
 
 import { ConformanceVersion, Offset, EntityId, ErrorCollector } from 'basic';
 import { MockErrorCollector } from'basic-test';
-import {  WellFormedError } from 'error';
+import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import {
@@ -181,7 +181,7 @@ describe('comment (unit)', () => {
 
          commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
             params: undefined,
             position: new Offset(new EntityId(), 14, 0, 14),
@@ -195,7 +195,7 @@ describe('comment (unit)', () => {
 
          commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
             params: undefined,
             position: commentPToken.text[0],
@@ -208,7 +208,7 @@ describe('comment (unit)', () => {
 
          commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.COMMENT_DOUBLE_HYPHEN,
             params: undefined,
             position: commentPToken.text[1],
@@ -220,7 +220,7 @@ describe('comment (unit)', () => {
 
          commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.COMMENT_NO_CLOSE,
             params: undefined,
             position: undefined,
@@ -234,7 +234,7 @@ describe('comment (unit)', () => {
 
          commentPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.COMMENT_NO_CLOSE,
             params: undefined,
             position: undefined,

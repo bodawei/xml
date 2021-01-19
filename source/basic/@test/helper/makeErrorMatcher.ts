@@ -11,7 +11,7 @@ interface ErrorInfo {
 interface JestThis {
    equals: (one: any, two: any) => boolean;
 }
-function makeMatcher(ErrorClass: any, messages: any) {
+function makeMatcher(ErrorClass: any) {
    return function (
       this: JestThis,
       mockErrorCollector: MockErrorCollector,
@@ -34,7 +34,7 @@ function makeMatcher(ErrorClass: any, messages: any) {
             if (ErrorClass.MSG_BUNDLE) {
                errMsg = ErrorClass.MSG_BUNDLE.lookup(actual.id || '', 'base');
             } else {
-               errMsg = messages[ErrorClass.name].lookup(actual.id || '', 'base');
+               throw new Error('no messages provided');
             }
 
             if (!errMsg) {

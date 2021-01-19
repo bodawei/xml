@@ -1,10 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
 import { makeCharRef } from 'token-test';
+
+import { WellFormedError } from '../../error/WellFormedError';
 
 import { checkDeclarationStart } from '../checkDeclarationStart';
 
@@ -25,7 +26,7 @@ describe('checkDeclarationStart()', () => {
 
       checkDeclarationStart(startPToken, mockErrorCollector);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
          params: undefined,
          position: startPToken.openSpace,
@@ -42,7 +43,7 @@ describe('checkDeclarationStart()', () => {
 
       checkDeclarationStart(startPToken, mockErrorCollector);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.DECL_UNKNOWN,
          params: ['frog'],
          position: startPToken.declType,
@@ -79,7 +80,7 @@ describe('checkDeclarationStart()', () => {
 
       checkDeclarationStart(startPToken, mockErrorCollector);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
          params: ['NOTATION', 'notation'],
          position: startPToken.declType,
@@ -95,7 +96,7 @@ describe('checkDeclarationStart()', () => {
 
       checkDeclarationStart(startPToken, mockErrorCollector);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.DECL_NO_DECLTYPE,
          params: undefined,
          position: startPToken.declType,
@@ -112,7 +113,7 @@ describe('checkDeclarationStart()', () => {
 
       checkDeclarationStart(startPToken, mockErrorCollector);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.DECL_TYPE_NO_SPACE_AFTER,
          params: ['notation'],
          position: startPToken.declType,

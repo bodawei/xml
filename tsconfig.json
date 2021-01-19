@@ -20,12 +20,6 @@
          "basic-test": [
             "./source/basic/@test/helper"
          ],
-         "error": [
-            "./source/error"
-         ],
-         "error-test": [
-            "./source/error/@test/helper"
-         ],
          "expand": [
             "./source/expand"
          ],
@@ -61,6 +55,9 @@
          ],
          "wellformedness": [
             "./source/wellformedness"
+         ],
+         "wellformedness-test": [
+            "./source/wellformedness/@test/helper"
          ],
          "xToken": ["./source/xToken"],
          "xToken-test": ["./source/xToken/@test/helper"],

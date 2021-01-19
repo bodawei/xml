@@ -1,7 +1,6 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
 import {
    AttListDeclarationPToken,
    ElementDeclarationPToken,
@@ -11,6 +10,8 @@ import {
    ParseValue,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
+
+import { WellFormedError } from './error/WellFormedError';
 
 // circular dependency problem
 import {

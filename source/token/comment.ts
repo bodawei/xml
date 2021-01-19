@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, Offset } from 'basic';
-import { WellFormedError } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 import misc from './common/misc';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';

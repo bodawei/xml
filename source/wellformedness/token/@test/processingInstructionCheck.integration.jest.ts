@@ -1,11 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { ProcessingInstructionPToken, parseProcessingInstruction } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
 describe('processingInstructionCheck() (integration)', () => {

@@ -3,7 +3,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
@@ -457,7 +457,7 @@ describe('externalId (unit)', () => {
          // invoke the callback function
          litWell.calls.argsFor(0)[4]();
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
             params: ['&'],
             position: pTokenPart.publicSpace, // This is only because we call the callback after
@@ -488,7 +488,7 @@ describe('externalId (unit)', () => {
 
          checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
             params: ['{'],
             position: pTokenPart.externalTypeSpace, // wrong due to mocking
@@ -500,7 +500,7 @@ describe('externalId (unit)', () => {
 
          checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.EXTERNALID_UNKNOWN,
             params: ['Bogus'],
             position: pTokenPart.externalType,
@@ -512,7 +512,7 @@ describe('externalId (unit)', () => {
 
          checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
             params: ['PUBLIC', 'public'],
             position: pTokenPart.externalType,
@@ -524,7 +524,7 @@ describe('externalId (unit)', () => {
 
          checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.EXTERNALID_EXTERNALTYPE_NO_SPACE,
             params: undefined,
             lastPosition: pTokenPart.externalType,
@@ -536,7 +536,7 @@ describe('externalId (unit)', () => {
 
          checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
             params: undefined,
             lastPosition: pTokenPart.externalTypeSpace, // beccause we are mocking out the quotes call

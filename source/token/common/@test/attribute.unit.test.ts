@@ -3,7 +3,7 @@
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError,  } from 'error';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { SToken } from 'sToken';
@@ -246,7 +246,7 @@ describe('attribute (unit)', () => {
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             undefined as any, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
             params: [ 'version' ],
             position: undefined,
@@ -259,7 +259,7 @@ describe('attribute (unit)', () => {
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
             params: [ 'another' ],
             lastPosition: attributesPChunk[0].postEqualSpace,
@@ -304,7 +304,7 @@ describe('attribute (unit)', () => {
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_NO_EQUAL,
             params: [ 'version' ],
             lastPosition: attributesPChunk[0].postNameSpace,
@@ -317,7 +317,7 @@ describe('attribute (unit)', () => {
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_DUPLICATE_NAME,
             params: [ 'version' ],
             position: attributesPChunk[1].name,
@@ -347,7 +347,7 @@ describe('attribute (unit)', () => {
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, confVer,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
             params: [ 'another' ],
             lastPosition: attributesPChunk[1].equal

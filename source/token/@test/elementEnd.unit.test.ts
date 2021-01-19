@@ -4,7 +4,7 @@
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError,  } from 'error';
+import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import misc from '../common/misc';
@@ -103,7 +103,7 @@ describe('elementEnd', () => {
 
          elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
             params: undefined,
             position: elementEndPToken.openSpace,
@@ -115,7 +115,7 @@ describe('elementEnd', () => {
 
          elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ELEMENT_NO_NAME,
             params: undefined,
             lastPosition: undefined,
@@ -127,7 +127,7 @@ describe('elementEnd', () => {
 
          elementEndPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ELEMENT_NO_CLOSE,
             params: undefined,
             lastPosition: elementEndPToken.nameSpace,

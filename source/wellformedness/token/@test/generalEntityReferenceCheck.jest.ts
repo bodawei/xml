@@ -2,10 +2,10 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { toSToken } from 'sToken';
 import { GeneralEntityReferencePToken } from 'token';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import * as util from '../util/nameCheck';
 import { generalEntityReferenceCheck } from '../generalEntityReferenceCheck';
 
@@ -43,7 +43,7 @@ describe('generalEntityReferenceCheck()', () => {
    it('reports an error if there is a space after the opening %', () => {
       generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.REFERENCE_XTRA_SPACE,
          params: ['entityName'],
          position: gePToken.openSpace,
@@ -61,7 +61,7 @@ describe('generalEntityReferenceCheck()', () => {
 
       generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.REFERENCE_NO_NAME,
          params: undefined,
          lastPosition: gePToken.open,
@@ -71,7 +71,7 @@ describe('generalEntityReferenceCheck()', () => {
    it('reports an error if there is a space after the entity name', () => {
       generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.REFERENCE_XTRA_TRAILING_SPACE,
          params: ['entityName'],
          position: gePToken.nameSpace,
@@ -89,7 +89,7 @@ describe('generalEntityReferenceCheck()', () => {
 
       generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.REFERENCE_NO_SEMICOLON,
          params: ['refName'],
          lastPosition: gePToken.name,

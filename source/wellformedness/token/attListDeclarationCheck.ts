@@ -1,9 +1,10 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
+
+import { WellFormedError } from '../error/WellFormedError';
 
 // ick
 import literal from '../../token/common/literal';

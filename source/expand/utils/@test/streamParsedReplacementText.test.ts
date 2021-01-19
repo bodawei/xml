@@ -1,7 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion, EntityId } from 'basic';
-import { WellFormedError } from 'error';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
@@ -9,6 +8,7 @@ import {
    ParseValue,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
+import { WellFormedError } from 'wellformedness';
 import {
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,

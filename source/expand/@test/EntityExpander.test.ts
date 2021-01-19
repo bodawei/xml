@@ -1,6 +1,5 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import {
    ParseValue,
@@ -15,6 +14,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
+import { WellFormedError } from 'wellformedness';
 import {
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,

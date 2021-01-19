@@ -4,10 +4,10 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, Range, EntityId, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
 //ick
@@ -56,7 +56,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_DECLTYPE_INVALID,
          params: ['attlist'],
          position: testToken.declType,
@@ -72,7 +72,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_NO_ELEMENT_NAME,
          params: undefined,
          position: undefined,
@@ -88,7 +88,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE,
          params: undefined,
          position: undefined,
@@ -203,7 +203,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NAME_NO_SPACE,
          params: ['att1', 'elementName'],
          position: undefined,
@@ -229,7 +229,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_UNKNOWN,
          params: ['att1', 'elementName', 'bogus'],
          position: testToken.attDefs[0].type,
@@ -431,7 +431,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_INVALID,
          params: ['att1', 'elementName', 'cdata'],
          position: testToken.attDefs[0].type,
@@ -456,7 +456,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ATTTYPE,
          params: ['att1', 'elementName'],
          lastPosition: testToken.attDefs[0].nameSpace,
@@ -512,7 +512,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE,
          params: ['att1', 'elementName'],
          lastPosition: testToken.attDefs[0].nameSpace,
@@ -537,7 +537,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION,
          params: ['att1', 'elementName'],
          position: testToken.attDefs[0].typeSpace,
@@ -593,7 +593,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE,
          params: ['att1', 'elementName'],
          position: testToken.attDefs[0].typeSpace, // Should be the end of the name list, but mocked out
@@ -618,7 +618,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_NO_SPACE,
          params: ['att1', 'CDATA', 'elementName'],
          position: undefined,
@@ -644,7 +644,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
          params: ['att1', 'elementName', '#IMPLICIT'],
          position: testToken.attDefs[0].defaultType,
@@ -731,7 +731,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID,
          params: ['att1', 'elementName', '#required'],
          position: testToken.attDefs[0].defaultType,
@@ -756,7 +756,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_SPACE,
          params: ['att1', 'elementName'],
          position: undefined,
@@ -782,7 +782,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_VALUE,
          params: ['att1', 'elementName'],
          position: undefined,
@@ -808,7 +808,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_VALUE,
          params: ['att1', 'elementName'],
          position: undefined,
@@ -860,7 +860,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_ATTR_EXTRA_VALUE,
          params: ['att1', 'elementName'],
          position: testToken.attDefs[0].openQuote,
@@ -875,7 +875,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_NO_CLOSE,
          params: ['elementName'],
          position: undefined,
@@ -891,7 +891,7 @@ describe('attListDeclarationCheck()', () => {
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ATTLISTDECL_EXTRA_TEXT,
          params: ['CDATA'],
          position: testToken.extra,

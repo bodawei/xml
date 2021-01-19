@@ -1,9 +1,9 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
 import { ParseValue } from 'pToken';
 import { strOrBlank } from 'sToken';
+
 import {
    CHECKER_DONE,
    Checker,
@@ -11,6 +11,7 @@ import {
    scanAttributeValues,
    checkGeneralEntity,
 } from './checkUtils';
+import { WellFormedError } from './error/WellFormedError';
 
 // circular dependency problem
 import { CDATA_PTOKEN } from '../token/cdata';

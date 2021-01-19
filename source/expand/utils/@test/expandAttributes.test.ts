@@ -3,6 +3,7 @@
 import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
 import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
+import { WellFormedError } from 'wellformedness';
 import {
    GeneralEntityEndPToken,
    GeneralEntityReferencePToken,
@@ -13,7 +14,6 @@ import {
 
 import { expandAttributes } from '../expandAttributes';
 import { ExpandParams, RetrieveResults, AttributeValueResults } from '../../types';
-import { WellFormedError } from 'error';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
 import { EntityContextStack } from '../EntityContextStack';

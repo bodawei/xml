@@ -5,7 +5,7 @@
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from'basic-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { WellFormedError,  } from 'error';
+import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 
 import attribute from '../common/attribute';
 import misc from '../common/misc';
@@ -235,7 +235,7 @@ describe('elementStart (unit)', () => {
       it('reports an error if there is a space after the opening "<"', () => {
          elementStartPTokenWithLeading.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
             params: undefined,
             position: elementStartPTokenWithLeading.openSpace,
@@ -247,7 +247,7 @@ describe('elementStart (unit)', () => {
 
          elementStartPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ELEMENT_NO_NAME,
             params: undefined,
             lastPosition: undefined,
@@ -259,7 +259,7 @@ describe('elementStart (unit)', () => {
 
          elementStartPToken.checkWellFormed(mockErrorCollector, confVer);
 
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.ELEMENT_NO_CLOSE,
             params: undefined,
             lastPosition: elementStartPToken.nameSpace,

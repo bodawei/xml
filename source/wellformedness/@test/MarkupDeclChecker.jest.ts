@@ -3,7 +3,6 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import {
    AttListDeclarationPToken,
    GeneralEntityDeclarationPToken,
@@ -11,6 +10,8 @@ import {
    TextDeclarationPToken,
 } from 'pToken';
 import { strOrBlank, toSToken } from 'sToken';
+
+import { WellFormedError } from '../error/WellFormedError';
 
 import {
    CommentPToken,
@@ -126,7 +127,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(comment, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
             params: [comment.type],
             position: comment.open,
@@ -163,7 +164,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(textDecl, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
             params: [textDecl.type],
             position: textDecl.open,
@@ -210,7 +211,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(textDecl, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
                params: [textDecl.type],
                position: textDecl.open,
@@ -294,7 +295,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
       //    checker.check(notationDeclaration, ec);
 
-      //    expect(ec).toReportError({
+      //    expect(ec).toReportWFError({
       //       id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
       //       params: [],
       //       position: notationDeclaration.open,
@@ -314,7 +315,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(paramEntityDecl, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
             params: [],
             position: paramEntityDecl.open,
@@ -336,7 +337,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(paramEntityDecl, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
             params: [],
             position: paramEntityDecl.open,
@@ -356,7 +357,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(generalEntityDecl, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
             params: [],
             position: generalEntityDecl.open,
@@ -392,7 +393,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(textDecl, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
             params: [textDecl.type],
             position: textDecl.open,
@@ -433,7 +434,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(new ExternalSubsetEndToken(), ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.CONDITIONAL_NO_CLOSE,
                params: [],
                position: conditionalSection.open,
@@ -446,7 +447,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(conditionalSection, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
                params: [conditionalSection.type],
                position: conditionalSection.open,
@@ -459,7 +460,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(close, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
                params: [close.type],
                position: close.open,
@@ -487,7 +488,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(textDecl, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
                params: [textDecl.type],
                position: textDecl.open,
@@ -552,7 +553,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
       //    checker.check(notationDeclaration, ec);
 
-      //    expect(ec).not.toReportError({
+      //    expect(ec).not.toReportWFError({
       //       id: WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
       //       params: [],
       //       position: notationDeclaration.open,
@@ -599,7 +600,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
                params: ['testRef', 'second'],
                position: generalEntityEnd.referencePToken.open,
@@ -674,7 +675,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
                params: ['testRef'],
                position: generalEntityReference.open,
@@ -745,7 +746,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
                params: ['testRef'],
                position: generalEntityStart.referencePToken.open,
@@ -776,7 +777,7 @@ describe('MarkupDeclChecker (unit)', () => {
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
-            expect(ec).toReportError({
+            expect(ec).toReportWFError({
                id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
                params: ['testRef'],
                position: generalEntityStart.referencePToken.open,
@@ -840,7 +841,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(peDecl2, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['two'],
             position: peRefToTwo.open,
@@ -871,7 +872,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(geDecl, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).not.toReportError({
+         expect(ec).not.toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['two'],
             position: peRefToTwo.open,
@@ -896,7 +897,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(peDecl, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testEntity'],
             position: refToTestEnity.open,
@@ -925,7 +926,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(elided, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testEntity'],
             position: refToTestEnity.open,
@@ -975,7 +976,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(peStart2, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['entityName'],
             position: peRef2.open,
@@ -994,7 +995,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(peStart2, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).not.toReportError({
+         expect(ec).not.toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['entityName2'],
             position: peRef2.open,
@@ -1012,7 +1013,7 @@ describe('MarkupDeclChecker (unit)', () => {
          checker.check(peRef2, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['entityName'],
             position: peRef2.open,

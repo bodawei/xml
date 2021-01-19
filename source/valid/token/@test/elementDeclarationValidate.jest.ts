@@ -4,9 +4,9 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { ElementDeclarationPToken, ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
+import { WellFormedError } from 'wellformedness';
 
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
 import { ValidityError } from '../../error/ValidityError';
@@ -361,7 +361,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
          params: ['elementName', 'last (/4,/99),first (/2/1,/3)'],
          position: elementDeclaration.contentModel?.open,

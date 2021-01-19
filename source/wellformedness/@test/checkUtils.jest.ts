@@ -3,10 +3,10 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../error/WellFormedError';
 import {
    scanAttributeValues,
    checkGeneralEntity,
@@ -63,7 +63,7 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(unbalancedElement.attributes, {}, state, [], ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
             params: ['testRef', 'second'],
             position: generalEntityEnd.referencePToken.open,
@@ -106,7 +106,7 @@ describe('checkUtils (unit)', () => {
          scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -180,7 +180,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
@@ -215,7 +215,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
@@ -271,7 +271,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['one'],
             position: ge1B.open,
@@ -326,7 +326,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['one'],
             position: ge1B.open,
@@ -360,7 +360,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -395,7 +395,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -408,7 +408,7 @@ describe('checkUtils (unit)', () => {
          checkGeneralEntity(generalEntityReference, false, {}, state, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -453,7 +453,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -478,7 +478,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -504,7 +504,7 @@ describe('checkUtils (unit)', () => {
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_INVALID_STANDALONE,
             params: ['testRef'],
             position: generalEntityReference.open,
@@ -557,7 +557,7 @@ describe('checkUtils (unit)', () => {
          checkParameterEntity(peRef, {}, state, ec);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportError({
+         expect(ec).toReportWFError({
             id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
             position: peRef.open,

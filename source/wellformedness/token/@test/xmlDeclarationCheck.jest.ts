@@ -2,10 +2,10 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import * as misc from '../../../token/common/misc';
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 import { InstructionStart } from '../../../pToken/bridge/instruction';
@@ -106,7 +106,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_SPACE_AFTER_OPEN,
             params: undefined,
             position: xmlDeclPToken.openSpace,
@@ -121,7 +121,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_NO_TARGET,
             params: undefined,
             lastPosition: xmlDeclPToken.open,
@@ -136,7 +136,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_TARGET_INVALID_CASE,
             params: ['XmL'],
             position: xmlDeclPToken.target,
@@ -151,7 +151,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_NO_SPACE_AFTER_TARGET,
             params: undefined,
             lastPosition: xmlDeclPToken.target,
@@ -194,7 +194,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_NO_PARAMS,
             params: undefined,
             position: xmlDeclPToken.targetSpace,
@@ -222,7 +222,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_PARAM_INVALID_CASE,
             params: ['version', 'VERSION'],
             position: xmlDeclPToken.fields[0].name,
@@ -235,7 +235,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_NO_CLOSE,
             params: undefined,
             lastPosition: xmlDeclPToken.targetSpace,
@@ -270,7 +270,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(mockErrorCollector).toReportWFError({
             id: WellFormedError.ID.XMLDECL_NO_SPACE_BETWEEN_PARAMS,
             params: ['standalone'],
             position: xmlDeclPToken.fields[1].name,
@@ -306,7 +306,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportWFError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
                params: undefined,
                position: xmlDeclPToken.fields[1].name,
@@ -334,7 +334,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 4));
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportError({
+            expect(mockErrorCollector).toReportWFError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
                params: ['1.2'],
                position: xmlDeclPToken.fields[0].value,
@@ -442,7 +442,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportError({
+               expect(mockErrorCollector).toReportWFError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
                   params: undefined,
                   position: xmlDeclPToken.fields[0].name,
@@ -477,7 +477,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportError({
+               expect(mockErrorCollector).toReportWFError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
                   params: ['$$BAD_ENCODING$$'],
                   position: xmlDeclPToken.fields[1].value,
@@ -514,7 +514,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportError({
+               expect(mockErrorCollector).toReportWFError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
                   params: undefined,
                   position: xmlDeclPToken.fields[0].name,
@@ -549,7 +549,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportError({
+               expect(mockErrorCollector).toReportWFError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
                   params: ['Maybe'],
                   position: xmlDeclPToken.fields[1].value,
@@ -584,7 +584,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportError({
+               expect(mockErrorCollector).toReportWFError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
                   params: ['yes', 'YES'],
                   position: xmlDeclPToken.fields[1].value,
@@ -614,7 +614,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportError({
+               expect(mockErrorCollector).toReportWFError({
                   id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,
                   params: ['bogus'],
                   position: xmlDeclPToken.fields[0].name,

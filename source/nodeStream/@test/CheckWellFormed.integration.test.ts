@@ -2,9 +2,9 @@
 /* eslint-env jasmine */
 
 import { Offset, EntityId, } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { PTokenStream } from 'pTokenStream';
+import { WellFormedError,  } from 'wellformedness';
 
 import CheckWellFormed from '../CheckWellFormed';
 

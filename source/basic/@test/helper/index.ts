@@ -4,6 +4,7 @@ import { Readable } from 'stream';
 
 import { MockErrorCollector, ErrorInfo } from './helper';
 import { makeErrorMatcher } from './makeErrorMatcher';
+import { makeJasmineErrorMatcher } from './makeJasmineErrorMatcher';
 
 function gatherStreamResults<ElemenType>(
    stream: Readable,
@@ -20,4 +21,10 @@ function gatherStreamResults<ElemenType>(
    });
 }
 
-export { gatherStreamResults, makeErrorMatcher, MockErrorCollector, ErrorInfo };
+export {
+   gatherStreamResults,
+   makeErrorMatcher,
+   makeJasmineErrorMatcher,
+   MockErrorCollector,
+   ErrorInfo,
+};

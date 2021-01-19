@@ -2,11 +2,11 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { parseAttListDeclaration } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
 // ick

@@ -4,9 +4,9 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { TextPToken } from 'pToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import literal from '../../../token/common/literal';
 
 import { ExternalIdP } from '../../../pToken/common/externalId';
@@ -79,7 +79,7 @@ describe('externalIdCheck()', () => {
       cb();
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['&'],
          position: externalId.publicSpace, // This is only because we call the callback after
@@ -107,7 +107,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['{'],
          position: externalId.externalTypeSpace, // wrong due to mocking
@@ -129,7 +129,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).not.toReportError({
+      expect(mockErrorCollector).not.toReportWFError({
          id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['{'],
          position: externalId.externalTypeSpace, // wrong due to mocking
@@ -144,7 +144,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.EXTERNALID_UNKNOWN,
          params: ['Bogus'],
          position: externalId.externalType,
@@ -159,7 +159,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
          params: ['PUBLIC', 'public'],
          position: externalId.externalType,
@@ -174,7 +174,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.EXTERNALID_EXTERNALTYPE_NO_SPACE,
          params: undefined,
          lastPosition: externalId.externalType,
@@ -189,7 +189,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
          params: undefined,
          lastPosition: externalId.externalTypeSpace, // beccause we are mocking out the quotes call

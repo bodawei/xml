@@ -1,8 +1,8 @@
 /* Copyright ® 2017-201 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 
 import attribute, { AttributePToken, AttributeXToken } from './common/attribute';
 import misc from './common/misc';

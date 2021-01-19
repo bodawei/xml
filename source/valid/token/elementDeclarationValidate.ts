@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, ConformanceVersion, isSpace, XmlWarning } from 'basic';
-import { WellFormedError } from 'error';
 import {
    TEXT_PTOKEN,
    ContentModelP,
@@ -10,6 +9,7 @@ import {
    UnexpandedMarkupToken,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { WellFormedError } from 'wellformedness';
 import {
    EntityValuePToken,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,

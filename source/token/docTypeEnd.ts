@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
 import { STokenSource, STokenArrayBuilder, SToken } from 'sToken';
+import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 
 import { DocTypeStartPToken } from './docTypeStart';
 

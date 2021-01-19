@@ -1,9 +1,10 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, ConformanceVersion } from 'basic';
-import { WellFormedError } from 'error';
 import { ContentModelP, isContentModelP } from 'pToken';
 import { strOrBlank } from 'sToken';
+
+import { WellFormedError } from '../error/WellFormedError';
 
 import { nameCheck } from '../token/util/nameCheck';
 

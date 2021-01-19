@@ -2,10 +2,10 @@
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from 'error';
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import * as nameCheck from '../util/nameCheck'; // ick
 import misc from '../../../token/common/misc'; // ick
 
@@ -86,7 +86,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.NOTATIONDECL_OPEN_XTRA_SPACE_AFTER,
          params: undefined,
          position: notationPToken.openSpace,
@@ -102,7 +102,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.NOTATIONDECL_DECLTYPE_INVALID,
          params: ['notation'],
          position: notationPToken.declType,
@@ -120,7 +120,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.NOTATIONDECL_NO_NAME,
          params: undefined,
          position: undefined,
@@ -142,7 +142,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.NOTATIONDECL_NAME_NO_SPACE,
          params: ['notationName'],
          position: undefined,
@@ -165,7 +165,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.NOTATIONDECL_NO_EXTERNALID,
          params: undefined,
          position: notationPToken.nameSpace,
@@ -187,7 +187,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.NOTATIONDECL_NO_CLOSE,
          params: [notationPToken.name!.str],
          position: undefined,
@@ -211,7 +211,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector).toReportError({
+      expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT,
          params: ['foo'],
          position: notationPToken.extra,

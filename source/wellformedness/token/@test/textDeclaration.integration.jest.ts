@@ -2,11 +2,11 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from 'error';
 import { defaultExtractors } from 'extractor';
 import { parseTextDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
+import { WellFormedError } from '../../error/WellFormedError';
 import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 import { textDeclarationCheck } from '../textDeclarationCheck';

@@ -3,7 +3,7 @@
 
 import { PassThrough } from 'stream';
 
-import { WellFormedError } from 'error';
+import { WellFormedError,  } from 'wellformedness';
 
 import { expectError } from './helpers';
 

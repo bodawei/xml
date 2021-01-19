@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector,  } from 'basic';
-import { WellFormedError } from '../../../error/index';
+import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from '../../../extractor';
 import {  TextPToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
