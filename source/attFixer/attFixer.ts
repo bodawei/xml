@@ -3,7 +3,7 @@
 import {
    AttListDeclarationPToken,
    ATTLIST_DECLARATION_PTOKEN,
-   ParseValue,
+   ParseToken,
    TEXT_PTOKEN,
    TextPToken,
 } from 'pToken';
@@ -35,11 +35,11 @@ interface AttDetals {
 }
 
 interface ElementDetails {
-   [attName: string]: AttDetals;
+   [attName: string]: AttDetals | undefined;
 }
 
 interface AttDetailsMap {
-   [elementName: string]: ElementDetails;
+   [elementName: string]: ElementDetails | undefined;
 }
 
 interface NameMap {
@@ -137,7 +137,7 @@ function normalizeAttr(
                      let index = newValue.length;
                      const temp: LiteralValuePToken = [];
 
-                     while (foundNonWhite === false && index !== 0) {
+                     while (!foundNonWhite && index !== 0) {
                         index -= 1;
                         const prev = newValue[index];
 
@@ -291,7 +291,7 @@ function gatherDefaults(
 class AttFixer {
    private attDetails: AttDetailsMap = {};
 
-   processPToken(input: ParseValue): ParseValue {
+   processPToken(input: ParseToken): ParseToken {
       switch (input.type) {
          case ATTLIST_DECLARATION_PTOKEN:
             this.captureAttributeDetails(input);

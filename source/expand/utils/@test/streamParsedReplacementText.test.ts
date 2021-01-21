@@ -5,7 +5,7 @@ import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    TextPToken,
-   ParseValue,
+   ParseToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
@@ -82,9 +82,9 @@ describe('streamParsedReplacementText() (unit)', () => {
          | ParameterEntityReferencePToken
          | GeneralEntityReferencePToken
          | ExternalDtdSubsetPseudoToken,
-      deliverResults: (results: Array<ParseValue>) => void,
+      deliverResults: (results: Array<ParseToken>) => void,
    ): void {
-      const allResults: Array<ParseValue> = [];
+      const allResults: Array<ParseToken> = [];
 
       streamParsedReplacementText(token, params, stack, (result, handled) => {
          if (!result) {
@@ -105,7 +105,7 @@ describe('streamParsedReplacementText() (unit)', () => {
 
       gatherResults(
          entityDetails.getExternalSubsetReference() as any,
-         (results: Array<ParseValue>) => {
+         (results: Array<ParseToken>) => {
             expect(results).toEqual([
                new ExternalSubsetStartToken(),
                textPToken,
@@ -135,7 +135,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       params.loadExternalEntities = false;
       const input = entityDetails.getExternalSubsetReference() as any;
 
-      gatherResults(input, (results: Array<ParseValue>) => {
+      gatherResults(input, (results: Array<ParseToken>) => {
          expect(results).toEqual([]);
          done();
       });
@@ -147,7 +147,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          name: toSToken('ge2'),
       });
 
-      gatherResults(geRef, (results: Array<ParseValue>) => {
+      gatherResults(geRef, (results: Array<ParseToken>) => {
          expect(results).toEqual([]);
          done();
       });
@@ -170,7 +170,7 @@ describe('streamParsedReplacementText() (unit)', () => {
 
       gatherResults(
          entityDetails.getExternalSubsetReference() as any,
-         (results: Array<ParseValue>) => {
+         (results: Array<ParseToken>) => {
             expect(results).toEqual([
                new ExternalSubsetStartToken(),
                textPToken,
@@ -269,7 +269,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          name: toSToken('ge'),
       });
 
-      gatherResults(geRef, (results: Array<ParseValue>) => {
+      gatherResults(geRef, (results: Array<ParseToken>) => {
          expect(results).toEqual([
             new GeneralEntityStartPToken(geRef),
             textPToken,
@@ -286,7 +286,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          name: toSToken('ge'),
       });
 
-      gatherResults(geRef, (results: Array<ParseValue>) => {
+      gatherResults(geRef, (results: Array<ParseToken>) => {
          expect(results).toEqual([]);
          done();
       });
@@ -340,7 +340,7 @@ describe('streamParsedReplacementText() (unit)', () => {
          name: toSToken('pe'),
       });
 
-      gatherResults(peRef, (results: Array<ParseValue>) => {
+      gatherResults(peRef, (results: Array<ParseToken>) => {
          expect(results).toEqual([
             new ParameterEntityStartPToken(peRef),
             textPToken,

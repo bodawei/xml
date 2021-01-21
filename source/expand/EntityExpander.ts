@@ -13,7 +13,7 @@ import {
    GeneralEntityDeclarationPToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
-   ParseValue,
+   ParseToken,
    externalIdToEntityId,
    resumeParseAttListDeclaration,
    resumeParseElementDeclaration,
@@ -64,7 +64,7 @@ type DeclToken =
    | ParameterEntityDeclarationPToken;
 
 type PTokenExpanded = () => void;
-type DeliverPToken = (token: ParseValue) => void;
+type DeliverPToken = (token: ParseToken) => void;
 
 enum State {
    AT_START,
@@ -113,7 +113,7 @@ class EntityExpander {
       };
    }
 
-   public expandPToken(pToken: ParseValue, expanded: PTokenExpanded): void {
+   public expandPToken(pToken: ParseToken, expanded: PTokenExpanded): void {
       switch (pToken.type) {
          case ENTITY_ID:
             this.expandParams.entityId = pToken;

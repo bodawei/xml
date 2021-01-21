@@ -7,7 +7,7 @@ import {
    GeneralEntityDeclarationPToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
-   ParseValue,
+   ParseToken,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -74,9 +74,11 @@ const WFID = WellFormedError.ID;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
 interface StateTable {
-   [startState: string]: {
-      [tokenType: string]: States | typeof NO_CHANGE;
-   };
+   [startState: string]:
+      | {
+           [tokenType: string]: States | typeof NO_CHANGE;
+        }
+      | undefined;
 }
 
 const transitionsByState: StateTable = {
@@ -186,9 +188,11 @@ const transitionsByState: StateTable = {
 };
 
 interface DeclarationInfo {
-   [declName: string]: {
-      referenceTokens: Array<ParameterEntityReferencePToken>;
-   };
+   [declName: string]:
+      | {
+           referenceTokens: Array<ParameterEntityReferencePToken>;
+        }
+      | undefined;
 }
 
 /*
@@ -250,7 +254,7 @@ function checkForRecursionInValue(
    // errord for other reasons. It isn't clear to me that there is value in reporting
    // that here.
 
-   const descendentRefs = declsSeen[declName].referenceTokens;
+   const descendentRefs = declsSeen[declName]?.referenceTokens || [];
 
    for (const refToken of descendentRefs) {
       const refName = strOrBlank(refToken.name);
@@ -355,7 +359,10 @@ class MarkupDeclChecker implements Checker {
       this.declsSeen = {};
    }
 
-   public check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+   public check(
+      pToken: ParseToken,
+      errorCollector: ErrorCollector,
+   ): undefined | typeof CHECKER_DONE {
       if (this.state === States.PRE) {
          if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
             this.inExtSubset = false;
@@ -514,7 +521,7 @@ class MarkupDeclChecker implements Checker {
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: ParseValue, ec: ErrorCollector): boolean {
+   private transition(pToken: ParseToken, ec: ErrorCollector): boolean {
       let newState: States | typeof NO_CHANGE | undefined;
 
       if (pToken.type === PARAMETER_ENTITY_START_PTOKEN && this.state === States.PRE) {

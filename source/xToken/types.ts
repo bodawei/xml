@@ -27,7 +27,7 @@ import {
    ElementStartXToken,
    SpaceXToken,
 } from 'token';
-import { ParseValue } from 'pToken';
+import { ParseToken } from 'pToken';
 
 type XToken =
    | CharRefXToken
@@ -36,7 +36,7 @@ type XToken =
    | TextDeclarationXToken
    | XmlDeclarationXToken
    // temp additions
-   | ParseValue // EEEK.
+   | ParseToken // EEEK.
    | ConditionalSectionEndXToken
    | ConditionalSectionStartXToken
    | CharDataXToken

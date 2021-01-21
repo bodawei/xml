@@ -1,11 +1,11 @@
 import { EntityId, ConformanceVersion } from 'basic';
-import { ContextType, ParseValue } from 'pToken';
+import { ContextType, ParseToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, XmlError } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
 
-type ExpandToken = (token: ParseValue | void, tokenProcessed: TokenHandled) => void;
+type ExpandToken = (token: ParseToken | undefined, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
 
 interface ConditionalInfo {
@@ -19,7 +19,7 @@ interface RetrieveResults {
    getErrors: () => Array<XmlError>;
 }
 interface AttributeValueResults {
-   newValue: AttributeValuePToken | void;
+   newValue: AttributeValuePToken | undefined;
    errors: Array<XmlError>;
 }
 
@@ -29,7 +29,7 @@ interface EntityProcessors {
    parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;
    parseEntityValue: (
       sTokenSource: STokenSource,
-      done: (results: EntityValuePToken | void) => void,
+      done: (results: EntityValuePToken | undefined) => void,
    ) => void;
    retrieveExternalEntity: (entityLoc: OpaqueEntityLoc) => RetrieveResults;
    resolveEntityId: (

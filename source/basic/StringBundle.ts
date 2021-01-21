@@ -178,8 +178,8 @@ class StringBundle {
    \**********************************************************************/
 
    removeLocale(localeName: string): Locale {
-      const temp = this.locales[localeName];
-      delete this.locales[localeName];
+      const { [localeName]: temp, ...rest } = this.locales;
+      this.locales = rest;
 
       return temp;
    }

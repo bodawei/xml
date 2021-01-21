@@ -12,7 +12,7 @@ import {
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
    ContextType,
-   ParseValue,
+   ParseToken,
 } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
@@ -56,7 +56,7 @@ describe('EntityExpanderStream (integration)', () => {
       pTokenStream.pipe(entityExpander);
    });
 
-   function getIndex(tokens: Array<ParseValue>, type: string): number {
+   function getIndex(tokens: Array<ParseToken>, type: string): number {
       let found = -1;
 
       for (let index = 0; index < tokens.length; index++) {

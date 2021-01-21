@@ -2,7 +2,7 @@
 
 import { strOrBlank } from 'sToken';
 
-import { ParseValue } from '../index';
+import { ParseToken } from '../index';
 import { TEXT_PTOKEN } from '../token/text';
 
 import { CHARREF_PTOKEN } from 'token';
@@ -12,7 +12,7 @@ import { CHARREF_PTOKEN } from 'token';
  * and returns just the text content from
  * the TEXT_PTOKENs and CHARREF_PTOKENs
  */
-function pTokenArrayToString(value: Array<ParseValue> = []): string {
+function pTokenArrayToString(value: Array<ParseToken> = []): string {
    const pieces = [];
 
    for (const piece of value) {

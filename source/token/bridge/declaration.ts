@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import {
-   ParseValue,
+   ParseToken,
    parseAttListDeclaration,
    parseElementDeclaration,
    parseNotationDeclaration,
@@ -27,7 +27,7 @@ type DeclarationStart = {
    declTypeSpace?: SToken,
 };
 
-type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseValue>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken| AttListDeclarationPToken | ElementDeclarationPToken) => void;
+type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseToken>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken| AttListDeclarationPToken | ElementDeclarationPToken) => void;
 
 /**********************************************************************\
  parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or

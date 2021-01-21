@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, EntityId } from 'basic';
+import { BaseToken } from 'basic';
 import { PToken as PTokenClassic } from 'token';
 
 import { InstructionStart } from './bridge/instruction';
@@ -33,10 +33,9 @@ export * from './util/externalIdToEntityId';
 export * from './types';
 
 type PToken = PTokenClassic;
-type ParseValue =
+type ParseToken =
+   | BaseToken
    | PToken
-   | ConformanceVersion
-   | EntityId
    | AttListDeclarationPToken
    | ElementDeclarationPToken
    | GeneralEntityDeclarationPToken
@@ -54,4 +53,4 @@ enum ContextType {
    GENERAL_ENTITY,
 }
 
-export { InstructionStart, ContextType, ParseValue, PToken, pTokenArrayToString };
+export { InstructionStart, ContextType, ParseToken, PToken, pTokenArrayToString };

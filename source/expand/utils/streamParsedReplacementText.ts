@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ContextType, externalIdToEntityId, ParseValue } from 'pToken';
+import { ContextType, externalIdToEntityId, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -23,11 +23,11 @@ import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { ExpandParams } from '../types';
 import { EntityContextStack } from './EntityContextStack';
 
-type DeliverToken = (result: ParseValue | undefined, handled: () => void) => void;
+type DeliverToken = (result: ParseToken | undefined, handled: () => void) => void;
 
 function deliverMultipleTokens(
-   allTokens: Array<ParseValue | undefined>,
-   deliverToken: (result: ParseValue | undefined, callback: () => void) => void,
+   allTokens: Array<ParseToken | undefined>,
+   deliverToken: (result: ParseToken | undefined, callback: () => void) => void,
    allDone: () => void,
 ): void {
    function process(): void {
@@ -64,8 +64,8 @@ function streamParsedReplacementText(
    let sTokenSource: STokenSource;
    let getErrors: () => Array<XmlError>;
    let context = ContextType.DOCUMENT;
-   let start: ParseValue;
-   let end: ParseValue;
+   let start: ParseToken;
+   let end: ParseToken;
    let entityLoc = entityContextStack.getCurrentEntityLoc();
 
    if (!expandParams.loadExternalEntities) {

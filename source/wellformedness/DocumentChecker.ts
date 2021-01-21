@@ -4,7 +4,7 @@ import { ERROR_TYPE, ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basi
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    XMLDECL_PTOKEN,
-   ParseValue,
+   ParseToken,
    isXmlDeclStandalone,
 } from 'pToken';
 
@@ -117,7 +117,7 @@ class DocumentChecker {
       this.checkers = checkerMap;
    }
 
-   check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+   check(pToken: ParseToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
       if (pToken.type === CONFORMANCE_VERSION) {
          this.checkState.confVer = pToken;
          return;
@@ -216,7 +216,7 @@ class DocumentChecker {
       }
    }
 
-   private transition(pToken: ParseValue, ec: ErrorCollector): void {
+   private transition(pToken: ParseToken, ec: ErrorCollector): void {
       const transitions = transitionsByState[this.state];
       const newState = transitions && transitions[pToken.type];
       let badSubset = false;

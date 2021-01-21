@@ -1,4 +1,4 @@
-// import { ParseValue } from "pToken";
+// import { ParseToken } from "pToken";
 import { SToken } from "sToken";
 import { DOCTYPE_END_PTOKEN } from "./docTypeEnd";
 import { GENERAL_ENTITY_END_PTOKEN } from "./marker/generalEntityEnd";

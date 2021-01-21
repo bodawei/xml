@@ -2,7 +2,7 @@
 
 import { defaultExtractors } from 'extractor';
 import {
-   ParseValue,
+   ParseToken,
    ContextType,
    NOTATION_DECLARATION_PTOKEN,
    TEXT_PTOKEN,
@@ -58,7 +58,7 @@ describe('EntityExpander (unit)', () => {
       resolveEntityId = () => '';
    });
 
-   function harvestTypes(results: Array<ParseValue>): Array<string> {
+   function harvestTypes(results: Array<ParseToken>): Array<string> {
       return results.map((element) => element.type);
    }
 
@@ -81,11 +81,11 @@ describe('EntityExpander (unit)', () => {
    }
 
    function doExpand(
-      tokens: Array<ParseValue>,
+      tokens: Array<ParseToken>,
       validate: boolean,
-      allDone: (results: Array<ParseValue>) => void,
+      allDone: (results: Array<ParseToken>) => void,
    ): void {
-      const results: Array<ParseValue> = [];
+      const results: Array<ParseToken> = [];
       const unsent = tokens.slice(0);
 
       const entityExpander = new EntityExpander(validate, results.push.bind(results), {
@@ -434,7 +434,7 @@ describe('EntityExpander (unit)', () => {
                   source: new STokenSource(defaultExtractors),
                });
             });
-            const results: Array<ParseValue> = [];
+            const results: Array<ParseToken> = [];
             const entityExpander = new EntityExpander(false, results.push.bind(results), {
                parseBody: (): void => {},
                parseEntityValue: (): void => {},
@@ -1172,7 +1172,7 @@ describe('EntityExpander (unit)', () => {
             const source = new STokenSource(defaultExtractors);
             done({ source });
          });
-         const results: Array<ParseValue> = [];
+         const results: Array<ParseToken> = [];
          const entityExpander = new EntityExpander(false, results.push.bind(results), {
             parseBody: (): void => {},
             parseEntityValue: (): void => {},

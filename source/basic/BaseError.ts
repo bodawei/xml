@@ -5,7 +5,7 @@ import { SToken } from 'sToken';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
-type Position = SToken | Offset | void;
+type Position = SToken | Offset | undefined;
 
 interface MessageCache {
    code: { [id: string]: number };
@@ -56,7 +56,7 @@ class BaseError {
 
    public readonly message: string;
 
-   public readonly place: Offset | void;
+   public readonly place: Offset | undefined;
 
    public readonly context: Array<Offset>;
 

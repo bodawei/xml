@@ -375,59 +375,59 @@ module.exports = {
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md
              "@typescript-eslint/no-explicit-any": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extra-non-null-assertion.md
-            //  // "@typescript-eslint/no-extra-non-null-assertion": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extra-non-null-assertion.md
+             "@typescript-eslint/no-extra-non-null-assertion": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extraneous-class.md
-            //  // "@typescript-eslint/no-extraneous-class": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extraneous-class.md
+             "@typescript-eslint/no-extraneous-class": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-floating-promises.md
-            //  // "@typescript-eslint/no-floating-promises": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-floating-promises.md
+             "@typescript-eslint/no-floating-promises": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-for-in-array.md
-            //  // "@typescript-eslint/no-for-in-array": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-for-in-array.md
+             "@typescript-eslint/no-for-in-array": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-implied-eval.md
-            //  // "@typescript-eslint/no-implied-eval": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-implied-eval.md
+             "@typescript-eslint/no-implied-eval": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-inferrable-types.md
-            //  // "@typescript-eslint/no-inferrable-types": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-inferrable-types.md
+             "@typescript-eslint/no-inferrable-types": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-void-type.md
-            //  // "@typescript-eslint/no-invalid-void-type": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-void-type.md
+             "@typescript-eslint/no-invalid-void-type": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-misused-new.md
-            //  // "@typescript-eslint/no-misused-new": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-misused-new.md
+             "@typescript-eslint/no-misused-new": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-misused-promises.md
-            //  // "@typescript-eslint/no-misused-promises": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-misused-promises.md
+             "@typescript-eslint/no-misused-promises": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-namespace.md
-            //  // "@typescript-eslint/no-namespace": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-namespace.md
+             "@typescript-eslint/no-namespace": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-asserted-optional-chain.md
-            //  // "@typescript-eslint/no-non-null-asserted-optional-chain": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-asserted-optional-chain.md
+             "@typescript-eslint/no-non-null-asserted-optional-chain": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md
-            //  // "@typescript-eslint/no-non-null-assertion": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md
+             "@typescript-eslint/no-non-null-assertion": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-parameter-properties.md
-            //  // "@typescript-eslint/no-parameter-properties": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-parameter-properties.md
+             "@typescript-eslint/no-parameter-properties": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-require-imports.md
-            //  // "@typescript-eslint/no-require-imports": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-require-imports.md
+             "@typescript-eslint/no-require-imports": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-throw-literal.md
-            //  // "@typescript-eslint/no-throw-literal": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-throw-literal.md
+             "@typescript-eslint/no-throw-literal": ["error"],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-type-alias.md
-            //  // "@typescript-eslint/no-type-alias": ["error"],
+            //  "@typescript-eslint/no-type-alias": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-boolean-literal-compare.md
-            //  // "@typescript-eslint/no-unnecessary-boolean-literal-compare": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-boolean-literal-compare.md
+             "@typescript-eslint/no-unnecessary-boolean-literal-compare": ["error"],
      
-            //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-condition.md
-            //  '@typescript-eslint/no-unnecessary-condition': ['error'],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-condition.md
+             '@typescript-eslint/no-unnecessary-condition': ['error'],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-qualifier.md
             //  '@typescript-eslint/no-unnecessary-qualifier': ['error'],

@@ -54,7 +54,7 @@ function formatAttrs(attrs?: ReadonlyArray<AttributeXToken>): string {
       return '';
    }
 
-   const sortedAttrs = attrs.sort((left, right) => {
+   const sortedAttrs = [...attrs].sort((left, right) => {
       const a = left.name;
       const b = right.name;
       return a === b ? 0 : a > b ? 1 : -1;
@@ -82,6 +82,14 @@ function formatAttrs(attrs?: ReadonlyArray<AttributeXToken>): string {
    return '';
 }
 
+/*
+ * In theory, this takes a stream of XTokens and produces a stream of strings that
+ * Collectively represent the Canonical XML version of the data.
+ *
+ * In practice, this only does enough of the canonicalization needed to make the xmlconf
+ * processing to pass.
+ * See: https://www.w3.org/TR/xml-c14n11/
+ */
 class XTokenToXmlStream extends Transform {
    private doctypeStart?: DocTypeStartXToken;
 

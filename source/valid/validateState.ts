@@ -120,9 +120,9 @@ class ValidateState {
       this.attributeDefs = otherState?.attributeDefs || {};
       this.elementDeclarations = otherState?.elementDeclarations || {};
       // Too simplistic.
-      this.generalEntities = otherState?.generalEntities ? { ...otherState?.generalEntities } : {};
+      this.generalEntities = otherState?.generalEntities ? { ...otherState.generalEntities } : {};
       this.parameterEntities = otherState?.parameterEntities
-         ? { ...otherState?.parameterEntities }
+         ? { ...otherState.parameterEntities }
          : {};
       this.elementContext = {
          contextStack: otherState?.elementContext?.contextStack || [],

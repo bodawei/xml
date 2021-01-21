@@ -1,7 +1,7 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
-import { ParseValue } from 'pToken';
+import { ParseToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import {
@@ -122,7 +122,7 @@ class ContentChecker implements Checker {
       this.geContext = [...geContext];
    }
 
-   check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE {
       if (this.state === State.PRE) {
          if (
             pToken.type !== ELEMENT_START_PTOKEN &&
@@ -291,7 +291,7 @@ class ContentChecker implements Checker {
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: ParseValue, ec: ErrorCollector): boolean {
+   private transition(pToken: ParseToken, ec: ErrorCollector): boolean {
       let newState: State | typeof NO_CHANGE = NO_CHANGE;
 
       if (pToken.type === GENERAL_ENTITY_START_PTOKEN && this.state === State.PRE) {

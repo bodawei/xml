@@ -8,6 +8,8 @@ import SToken from './SToken';
 
 type DeliverSToken = (stoken?: SToken) => void;
 
+type Params = string | Array<string | undefined> | undefined;
+
 interface ExtractorContext {
    extractor: Extractor;
    startIndex?: number;
@@ -147,11 +149,11 @@ class STokenSource {
       this._resumeOperation();
    }
 
-   extractToObjectNoParams(type: string, obj: Record<string, any>, name: string): void {
+   extractToObjectNoParams(type: string, obj: Record<string, unknown>, name: string): void {
       this.extractToObject(type, undefined, obj, name);
    }
 
-   extractToObject(type: string, params: any, obj: Record<string, any>, name: string): void {
+   extractToObject(type: string, params: Params, obj: Record<string, unknown>, name: string): void {
       this.extract(type, params, (sToken) => {
          obj[name] = sToken; // typeHack
       });
@@ -161,20 +163,21 @@ class STokenSource {
       this.extract(type, undefined, deliverSToken);
    }
 
-   extract(type: string, params: any, deliverSToken: DeliverSToken): void {
+   extract(type: string, params: Params, deliverSToken: DeliverSToken): void {
       const extractorDefinition = this._extractorInfo[type];
       let extractorConstructor: ExtractorConstructor;
+      let paramsToUse = params;
 
       if (typeof extractorDefinition === 'object') {
          extractorConstructor = extractorDefinition.extractorConstructor;
 
          if (extractorDefinition.params.extractorConstructor) {
-            params = new extractorDefinition.params.extractorConstructor(
+            paramsToUse = new extractorDefinition.params.extractorConstructor(
                this.confVer.version,
                params,
             );
          } else {
-            params = extractorDefinition.params;
+            paramsToUse = extractorDefinition.params;
          }
       } else {
          // put this check here to make code coverage happier. babel turns typeof object into a check for undef.
@@ -185,7 +188,7 @@ class STokenSource {
       }
 
       const typeHack = extractorConstructor as any;
-      const instance = new typeHack(this.confVer.version, params);
+      const instance = new typeHack(this.confVer.version, paramsToUse);
 
       this._extractors.push({
          extractor: instance,

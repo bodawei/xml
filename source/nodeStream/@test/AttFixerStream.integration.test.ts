@@ -3,7 +3,7 @@
 import { gatherStreamResults } from 'basic-test';
 import { PTokenStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
-import { XmlDeclarationPToken, XMLDECL_PTOKEN, TextPToken, ParseValue } from 'pToken';
+import { XmlDeclarationPToken, XMLDECL_PTOKEN, TextPToken, ParseToken } from 'pToken';
 import { ElementStartPToken } from 'token';
 
 import { AttFixerStream } from '../AttFixerStream';
@@ -23,7 +23,7 @@ describe('AttFixerStream (integration)', () => {
       pTokenStream.addText('<?xml version="1.0"?>');
       pTokenStream.endText();
 
-      gatherStreamResults<ParseValue>(fixer, (results) => {
+      gatherStreamResults<ParseToken>(fixer, (results) => {
          const result = results.find(r => r.type === XMLDECL_PTOKEN);
 
          expect(result).toEqualRangeless(new XmlDeclarationPToken({
@@ -56,7 +56,7 @@ describe('AttFixerStream (integration)', () => {
       <root nmtok="  3   4  "/>`);
       pTokenStream.endText();
 
-      gatherStreamResults<ParseValue>(fixer, (results) => {
+      gatherStreamResults<ParseToken>(fixer, (results) => {
          expect((results[12] as ElementStartPToken).attributes).toEqualRangeless([{
                name: toSToken('nmtok'),
                value: [new TextPToken({ text: new SToken('3 4', '  3   4  ', []) })],

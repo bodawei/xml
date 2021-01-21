@@ -2,9 +2,9 @@
 
 import { Transform } from 'stream';
 import { PToken } from 'token';
-import { ParseValue } from 'pToken';
+import { ParseToken } from 'pToken';
 
-type PTokenArray = Array<ParseValue>;
+type PTokenArray = Array<ParseToken>;
 
 // function gatherResult(stream: Transform, expect: (result: any) => void) {
 //    stream.on('data', (item: PToken) => {

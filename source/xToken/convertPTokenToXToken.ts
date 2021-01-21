@@ -10,7 +10,7 @@ import {
    TEXT_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
-   ParseValue,
+   ParseToken,
 } from 'pToken';
 
 import {
@@ -38,7 +38,7 @@ import { TextXToken } from './token/textXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
 
-function convertPTokenToXToken(pToken: ParseValue): XToken {
+function convertPTokenToXToken(pToken: ParseToken): XToken {
    switch (pToken.type) {
       case ATTLIST_DECLARATION_PTOKEN:
          return new AttListDeclarationXToken(pToken);

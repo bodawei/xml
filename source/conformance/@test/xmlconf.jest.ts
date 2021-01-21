@@ -6,7 +6,7 @@ import { ConformanceVersion, XmlRevision, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { defaultExtractors } from 'extractor';
 import { AttFixerStream, CheckWellFormed } from 'nodeStream';
-import { ContextType, ParseValue } from 'pToken';
+import { ContextType, ParseToken } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
@@ -81,7 +81,7 @@ describe('XML Conformance tests', () => {
             const verToUse = hasEdition ? ver : undefined;
             const revToUse = hasEdition ? edition : undefined;
             const testStream = setUpStreams(testData, verToUse, revToUse);
-            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
+            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done!);
 
             // If the test details includes output, then we should test that the output matches
             if (hasOutput) {
@@ -95,7 +95,7 @@ describe('XML Conformance tests', () => {
             }
 
             // We also want to test  whether the errors match as expected
-            gatherStreamResults<ParseValue>(testStream, (results) => {
+            gatherStreamResults<ParseToken>(testStream, (results) => {
                const key = `V${ver}R${edition}`;
                let expectedError;
 
@@ -150,7 +150,7 @@ describe('XML Conformance tests', () => {
                pTokenStream.endText();
 
                // We also want to test  whether the errors match as expected
-               gatherStreamResults<ParseValue>(wellFormedStream, (results) => {
+               gatherStreamResults<ParseToken>(wellFormedStream, (results) => {
                   // @ts-expect-error 2329/matchers
                   expect(results).not.toHaveXmlConfErrors();
                   done();

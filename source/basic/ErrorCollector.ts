@@ -4,7 +4,7 @@ import { Offset, EntityId } from 'basic';
 
 import { SToken } from 'sToken';
 
-type Position = SToken | Offset | void;
+type Position = SToken | Offset | undefined;
 
 declare class ErrorToken {
    public readonly id: string;
@@ -61,7 +61,7 @@ class ErrorCollector {
       this.errors = [];
    }
 
-   setPos(currentSToken?: SToken | void): void {
+   setPos(currentSToken?: SToken | undefined): void {
       this.posStart = !!currentSToken;
 
       if (currentSToken) {

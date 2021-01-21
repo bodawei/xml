@@ -1,5 +1,5 @@
 import { defaultExtractors } from 'extractor';
-import { ContextType, ParseValue, pTokenArrayToString } from 'pToken';
+import { ContextType, ParseToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, STokenSource, toSToken } from 'sToken';
 
 import { ParameterEntityReferencePToken } from 'token';
@@ -15,7 +15,7 @@ function setupConditional(
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
    context: ContextType,
-   deliverToken: (aToken: ParseValue, handled: () => void) => void,
+   deliverToken: (aToken: ParseToken, handled: () => void) => void,
    done: Done,
 ): void {
    addProtoReplacementText(ref, expandParams, entityContextStack, () => {

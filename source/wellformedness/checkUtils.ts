@@ -2,7 +2,7 @@ import { ErrorCollector, ConformanceVersion } from 'basic';
 import { strOrBlank } from 'sToken';
 import {
    TEXT_PTOKEN,
-   ParseValue,
+   ParseToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
 } from 'pToken';
@@ -21,14 +21,16 @@ import {
 import { AttributePToken } from '../token/common/attribute';
 
 interface GeneralEntitiesInfo {
-   [name: string]: {
-      token: GeneralEntityDeclarationPToken;
-      declaredInInternalSubset: boolean;
-   };
+   [name: string]:
+      | {
+           token: GeneralEntityDeclarationPToken;
+           declaredInInternalSubset: boolean;
+        }
+      | undefined;
 }
 
 interface ParameterEntitiesInfo {
-   [name: string]: ParameterEntityDeclarationPToken;
+   [name: string]: ParameterEntityDeclarationPToken | undefined; // https://stackoverflow.com/questions/61493377/typescript-returned-type-when-accessing-undefined-key-on-object-is-wrong
 }
 
 interface CheckerConstructor {
@@ -38,7 +40,7 @@ interface CheckerConstructor {
 const CHECKER_DONE = '**Checker Done**';
 
 interface Checker {
-   check(pToken: ParseValue, errorCollector: ErrorCollector): void | typeof CHECKER_DONE;
+   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
 }
 
 const WFID = WellFormedError.ID;
@@ -131,7 +133,7 @@ function checkGeneralEntity(
          //    Attribute values must not contain direct or indirect entity
          //    references to external entities.
          ec.check(
-            genEntityDecl !== undefined && genEntityDecl.token.externalId,
+            genEntityDecl.token.externalId,
             WFID.ATTRIBUTE_INVALID_REFERENCE,
             [name],
             pToken.open,

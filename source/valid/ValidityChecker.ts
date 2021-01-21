@@ -4,7 +4,7 @@ import {
    ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
-   ParseValue,
+   ParseToken,
    XMLDECL_PTOKEN,
 } from 'pToken';
 
@@ -53,7 +53,7 @@ class ValidityChecker {
       this.seenVersion = false;
    }
 
-   checkPToken(token: ParseValue, ec: ErrorCollector): void {
+   checkPToken(token: ParseToken, ec: ErrorCollector): void {
       switch (token.type) {
          case CONFORMANCE_VERSION:
             if (!this.seenVersion) {

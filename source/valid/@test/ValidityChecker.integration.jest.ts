@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ErrorCollector } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { defaultExtractors } from 'extractor';
-import { ContextType, ParseValue } from 'pToken';
+import { ContextType, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
 import { AttFixerStream, EntityExpanderStream } from 'nodeStream';
@@ -39,7 +39,7 @@ describe('ValidityChecker (integration)', () => {
 
       pTokenStream.pipe(entityExpander).pipe(attFixer);
 
-      gatherStreamResults<ParseValue>(attFixer, (results) => {
+      gatherStreamResults<ParseToken>(attFixer, (results) => {
          for (const result of results) {
             ec = new ErrorCollector(
                'open' in result ? result.open : toSToken('foo'),

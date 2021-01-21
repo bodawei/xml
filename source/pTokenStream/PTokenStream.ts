@@ -3,7 +3,7 @@
 import { Readable } from 'stream';
 
 import { CONFORMANCE_VERSION, ConformanceVersion, XmlVersion, XmlRevision, EntityId } from 'basic';
-import { ParseValue,   parseInstruction, TextPToken,} from 'pToken';
+import { ParseToken,   parseInstruction, TextPToken,} from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    ELEMENT_END_PTOKEN,
@@ -30,7 +30,7 @@ import {
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { ContextType } from 'pToken';
 
-type DeliverPToken = (result: ParseValue | null | undefined | Array<ParseValue>) => void; // icky typeHack
+type DeliverPToken = (result: ParseToken | null | undefined | Array<ParseToken>) => void; // icky typeHack
 enum ConditionalState {
    NONE,
    INCLUDE,
