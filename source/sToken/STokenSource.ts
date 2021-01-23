@@ -8,7 +8,7 @@ import SToken from './SToken';
 
 type DeliverSToken = (stoken?: SToken) => void;
 
-type Params = string | Array<string | undefined> | undefined;
+type Params = string | Array<string | undefined> | undefined | number;
 
 interface ExtractorContext {
    extractor: Extractor;
@@ -149,11 +149,16 @@ class STokenSource {
       this._resumeOperation();
    }
 
-   extractToObjectNoParams(type: string, obj: Record<string, unknown>, name: string): void {
+   extractToObjectNoParams(type: string, obj: Record<string, any>, name: string): void {
       this.extractToObject(type, undefined, obj, name);
    }
 
-   extractToObject(type: string, params: Params, obj: Record<string, unknown>, name: string): void {
+   extractToObject(
+      type: string,
+      params: Params | any,
+      obj: Record<string, any>,
+      name: string,
+   ): void {
       this.extract(type, params, (sToken) => {
          obj[name] = sToken; // typeHack
       });
@@ -171,12 +176,15 @@ class STokenSource {
       if (typeof extractorDefinition === 'object') {
          extractorConstructor = extractorDefinition.extractorConstructor;
 
+         // @ts-expect-error fixme
          if (extractorDefinition.params.extractorConstructor) {
+            // @ts-expect-error fixme
             paramsToUse = new extractorDefinition.params.extractorConstructor(
                this.confVer.version,
                params,
             );
          } else {
+            // @ts-expect-error fixme
             paramsToUse = extractorDefinition.params;
          }
       } else {

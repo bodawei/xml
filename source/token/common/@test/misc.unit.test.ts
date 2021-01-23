@@ -7,6 +7,7 @@ import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { SToken } from 'sToken';
 import { makeSToken } from 'sToken-test';
 import * as basic from 'basic';
+import * as char from '../../../basic/chars';
 
 import misc from '../misc';
 
@@ -141,7 +142,7 @@ describe('misc', () => {
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
          confVerV1R5 = new ConformanceVersion(1.0, 5);
          spyOn(ec, 'report');
-         utilIsName = spyOn(basic, 'isName');
+         utilIsName = spyOn(char, 'isName');
       });
 
       it('accepts an empty Stoken', () => {
@@ -153,7 +154,7 @@ describe('misc', () => {
       it('calls isName()', () => {
          misc.checkName(SToken.fromString('foo'), ec, confVerV1R5, errorId);
 
-         expect(basic.isName).toHaveBeenCalledWith('foo', 1.0, 5);
+         expect(char.isName).toHaveBeenCalledWith('foo', 1.0, 5);
       });
 
       it('reports an error if isName() returns false', () => {
@@ -182,7 +183,7 @@ describe('misc', () => {
          confVerV1R5 = new ConformanceVersion(1.0, 5);
          confVerV11R2 = new ConformanceVersion(1.1, 2);
          spyOn(ec, 'report');
-         utilIsNMToken = spyOn(basic, 'isNmToken');
+         utilIsNMToken = spyOn(char, 'isNmToken');
       });
 
       it('accepts an empty Stoken', () => {
@@ -194,7 +195,7 @@ describe('misc', () => {
       it('calls isNmToken()', () => {
          misc.checkNMToken(SToken.fromString('foo'), ec, confVerV1R5, errorId);
 
-         expect(basic.isNmToken).toHaveBeenCalledWith('foo', 1.0, 5);
+         expect(char.isNmToken).toHaveBeenCalledWith('foo', 1.0, 5);
       });
 
       it('reports an error if utilIsNMToken() returns false', () => {

@@ -512,7 +512,7 @@ class MarkupDeclChecker implements Checker {
       this.transition(pToken, errorCollector);
 
       // @ts-expect-error ts2367 the transition may change the state.
-      if ((this.state as any) === States.DONE) {
+      if (this.state === States.DONE) {
          return CHECKER_DONE;
       }
    }

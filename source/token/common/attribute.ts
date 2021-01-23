@@ -130,7 +130,7 @@ function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, optio
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, confVer: ConformanceVersion, preceedingSpace: SToken | void, type: string, checkName?: CheckAttName, checkValue?: CheckAttValue) {
+function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, confVer: ConformanceVersion, preceedingSpace: SToken | undefined, type: string, checkName?: CheckAttName, checkValue?: CheckAttValue) {
    const seenAttrNames: { [ attrName: string ]: true } = {};
 
    for (let index = 0; index < pAttributes.length; index++) {

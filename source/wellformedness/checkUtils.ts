@@ -278,7 +278,7 @@ function isParamEntityExternal(
    const paramEntityDecl = entityDecls[name];
    const declarationExists = paramEntityDecl !== undefined;
 
-   return declarationExists && paramEntityDecl.externalId !== undefined;
+   return declarationExists && paramEntityDecl?.externalId !== undefined;
 }
 
 export {

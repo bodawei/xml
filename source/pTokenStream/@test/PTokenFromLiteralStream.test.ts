@@ -9,8 +9,10 @@ import { MockSTokenSource } from 'sToken-test';
 import { CharRefPToken,  } from 'token';
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
-import * as pTokenStuff from 'pToken';
-import * as tokenStuff from 'token';
+import * as text from '../../pToken/token/text';
+import * as instruction from '../../pToken/bridge/instruction';
+import * as peRef from '../../token/parameterEntityReference';
+import * as charRef from '../../token/charRef';
 
 describe('PTokenFromLiteralStream (unit)', () => {
 
@@ -35,7 +37,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ '%', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(tokenStuff, 'parseParameterEntityReference');
+            const parseSpy = spyOn(peRef, 'parseParameterEntityReference');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -50,7 +52,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { });
-            const parseSpy = spyOn(pTokenStuff, 'parseText');
+            const parseSpy = spyOn(text, 'parseText');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -72,7 +74,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(pTokenStuff, 'parseText');
+            const parseSpy = spyOn(text, 'parseText');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -93,7 +95,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(pTokenStuff, 'parseText').and.callFake((source: STokenSource, term: Array<string>, cb: (x?: any) => any ) => {
+            const parseSpy = spyOn(text, 'parseText').and.callFake((source: STokenSource, term: Array<string>, cb: (x?: any) => any ) => {
                cb();
             });
             const pushSpy = spyOn(pTokenStream, 'push');
@@ -111,7 +113,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ '&#', 'match', '&#' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(tokenStuff, 'parseCharRef');
+            const parseSpy = spyOn(charRef, 'parseCharRef');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -151,7 +153,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
             // now we hit parseText
          ]);
          const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-         const parseSpy = spyOn(pTokenStuff, 'parseText');
+         const parseSpy = spyOn(text, 'parseText');
 
          pTokenStream.read();
          mockSource.respondInAsyncTime();
@@ -166,7 +168,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
             [ '<?', 'match', '<?' ],
             // now we hit parseText
          ]);
-         const parseSpy = spyOn(pTokenStuff, 'parseInstruction');
+         const parseSpy = spyOn(instruction, 'parseInstruction');
          const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
 
          pTokenStream.read();

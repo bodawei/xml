@@ -11,7 +11,7 @@ import WordExtractor from './WordExtractor';
 import { Extractor } from '../extractor';
 import PeekDecl from './PeekDecl';
 
-type ExtractorParams = Array<string | undefined>|string | undefined;
+type ExtractorParams = Array<string | undefined>| string | undefined | number;
 type ExtractorConstructor = { new (...args: any[]): Extractor } ;
 
 type ExtractorDefinition = ExtractorConstructor | {

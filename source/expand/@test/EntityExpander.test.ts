@@ -35,7 +35,10 @@ import {
    ParameterEntityReferencePToken,
 } from 'token';
 
-import * as pToken from 'pToken';
+import * as attListDecl from '../../pToken/token/attListDeclaration';
+import * as elementDeclaration from '../../pToken/token/elementDeclaration';
+import * as entityDeclaration from '../../pToken/bridge/entityDeclaration';
+import * as notationDeclaration from '../../pToken/token/notationDeclaration';
 import * as expandAttributes from '../utils/expandAttributes';
 import * as expandEntityValueModule from '../utils/expandEntityValue';
 import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
@@ -489,7 +492,10 @@ describe('EntityExpander (unit)', () => {
 
       it('asks resumeParseAttListDeclaration) to finish parsing any unexpanded values', (done) => {
          expandMarkupUnexpandedSpy = spyOn(expandMarkupUnexpanded, 'expandMarkupUnexpanded');
-         resumeParseNotationDeclarationSpy = spyOn(pToken, 'resumeParseNotationDeclaration');
+         resumeParseNotationDeclarationSpy = spyOn(
+            notationDeclaration,
+            'resumeParseNotationDeclaration',
+         );
          notation = new NotationDeclarationPToken({
             open: toSToken('<!'),
             name: toSToken('test'),
@@ -544,7 +550,10 @@ describe('EntityExpander (unit)', () => {
       let resumeParseElementDeclarationSpy: jasmine.Spy;
 
       beforeEach(() => {
-         resumeParseElementDeclarationSpy = spyOn(pToken, 'resumeParseElementDeclaration');
+         resumeParseElementDeclarationSpy = spyOn(
+            elementDeclaration,
+            'resumeParseElementDeclaration',
+         );
 
          resumeParseElementDeclarationSpy.and.callFake((source, params, callback) => {
             callback(params);
@@ -672,7 +681,10 @@ describe('EntityExpander (unit)', () => {
 
       it('asks the AttListDeclarationPToken to assign any newly unassigned values to itself', (done) => {
          expandMarkupUnexpandedSpy = spyOn(expandMarkupUnexpanded, 'expandMarkupUnexpanded');
-         const resumeParseAttListDeclarationSpy = spyOn(pToken, 'resumeParseAttListDeclaration');
+         const resumeParseAttListDeclarationSpy = spyOn(
+            attListDecl,
+            'resumeParseAttListDeclaration',
+         );
          const attList = new AttListDeclarationPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
@@ -729,7 +741,7 @@ describe('EntityExpander (unit)', () => {
       let resumeParseEntityDeclarationSpy: jasmine.Spy;
 
       beforeEach(() => {
-         resumeParseEntityDeclarationSpy = spyOn(pToken, 'resumeParseEntityDeclaration');
+         resumeParseEntityDeclarationSpy = spyOn(entityDeclaration, 'resumeParseEntityDeclaration');
          expandEntityValueSpy = spyOn(expandEntityValueModule, 'expandEntityValue');
          let index = 0;
 

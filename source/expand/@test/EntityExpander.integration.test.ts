@@ -66,7 +66,7 @@ describe('EntityExpander (integration)', () => {
 
    function parseEntityValue(
       sTokenSource: STokenSource,
-      done: (results: EntityValuePToken | void) => void,
+      done: (results: EntityValuePToken | undefined) => void,
    ): void {
       const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
       const results: EntityValuePToken = [];

@@ -23,6 +23,8 @@ import {
    ParameterEntityDeclarationXToken,
 } from 'xToken';
 
+import * as chars from '../../basic/chars'
+
 import {
    SPACE_XTOKEN,
 
@@ -495,7 +497,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new TextXToken('$$BAD')
                   ]
                }]);
-               spyOn(basic, 'isName').and.returnValue(false);
+               spyOn(chars, 'isName').and.returnValue(false);
 
                validator.write(elDecl1);
                validator.write(attListDecl1);
@@ -521,7 +523,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new TextXToken('$$BAD')
                   ]
                }]);
-               spyOn(basic, 'isName');
+               spyOn(chars, 'isName');
 
                validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl1);
@@ -644,7 +646,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('it calls isName() with the entity meta data (whitebox)', (done) => {
-               spyOn(basic, 'isName');
+               spyOn(chars, 'isName');
 
                validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl);
@@ -867,7 +869,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('it calls isName() with the entity meta data (whitebox)', (done) => {
-               spyOn(basic, 'isName');
+               spyOn(chars, 'isName');
 
                validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl);
@@ -1022,7 +1024,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('it calls util.isNmToken() with the entity meta data (whitebox)', (done) => {
-               spyOn(basic, 'isNmToken');
+               spyOn(chars, 'isNmToken');
 
                validator.write(new ConformanceVersion(1.1, 2));
                validator.write(elDecl);
@@ -1571,7 +1573,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('ID', () => {
 
             it('calls isName() to validate name', (done) => {
-               spyOn(basic, 'isName').and.returnValue(false);
+               spyOn(chars, 'isName').and.returnValue(false);
                const elDecl = new ElementDeclarationXToken('elementType', 'EMPTY');
                const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idAttr',
@@ -1617,7 +1619,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('IDREF', () => {
 
             it('calls isName() to validate name', (done) => {
-               spyOn(basic, 'isName').and.returnValue(false);
+               spyOn(chars, 'isName').and.returnValue(false);
                const elDecl = new ElementDeclarationXToken('elementType', 'EMPTY');
                const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idRefAttr',
@@ -1663,7 +1665,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('IDREFS', () => {
 
             it('calls isName() to validate name', (done) => {
-               spyOn(basic, 'isName').and.returnValue(false);
+               spyOn(chars, 'isName').and.returnValue(false);
                const elDecl = new ElementDeclarationXToken('elementType', 'EMPTY');
                const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'idRefsAttr',
@@ -1709,7 +1711,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('ENTITY', () => {
 
             it('calls isName() to validate name', (done) => {
-               spyOn(basic, 'isName').and.returnValue(false);
+               spyOn(chars, 'isName').and.returnValue(false);
                const elDecl = new ElementDeclarationXToken('elementType', 'EMPTY');
                const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'entityAttr',
@@ -1755,7 +1757,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('ENTITIES', () => {
 
             it('calls isName() to validate name', (done) => {
-               spyOn(basic, 'isName').and.returnValue(false);
+               spyOn(chars, 'isName').and.returnValue(false);
                const elDecl = new ElementDeclarationXToken('elementType', 'EMPTY');
                const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'entitiesAttr',
@@ -1820,7 +1822,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('NMTOKEN', () => {
 
             it('calls util.isNmToken() to validate name', (done) => {
-               spyOn(basic, 'isNmToken').and.returnValue(false);
+               spyOn(chars, 'isNmToken').and.returnValue(false);
                const elDecl = new ElementDeclarationXToken('elementType', 'EMPTY');
                const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'nmTokenAttr',
@@ -1865,7 +1867,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('NMTOKENS', () => {
 
             it('calls util.isNmToken() to validate name', (done) => {
-               spyOn(basic, 'isNmToken').and.returnValue(false);
+               spyOn(chars, 'isNmToken').and.returnValue(false);
                const elDecl = new ElementDeclarationXToken('elementType', 'EMPTY');
                const attListDecl = new AttListDeclarationXToken('elementType', [{
                   name: 'nmTokenAttr',

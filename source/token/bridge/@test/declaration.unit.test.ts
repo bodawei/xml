@@ -4,7 +4,7 @@
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import * as pToken from '../../../pToken';
+import * as pToken from '../../../pToken/bridge/entityDeclaration';
 import { parseDeclaration } from '../declaration';
 
 describe('declaration (unit)', () => {

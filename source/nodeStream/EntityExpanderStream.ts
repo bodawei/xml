@@ -29,7 +29,7 @@ function parseBody(sTokenSource: STokenSource, context: ContextType, expandToken
 
 function parseEntityValue(
    sTokenSource: STokenSource,
-   done: (results: EntityValuePToken | void) => void,
+   done: (results: EntityValuePToken | undefined) => void,
 ): void {
    const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
    const results: EntityValuePToken = [];

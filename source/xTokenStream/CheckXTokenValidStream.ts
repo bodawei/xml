@@ -150,12 +150,12 @@ class CheckXTokenValidStream extends Transform {
    private paramEntitiesSeen: { [name: string]: any } = {}; // ick
    private generalEntitiesSeen: { [name: string]: any } = {};
    private entityInfo: EntityInfoMap = {};
-   private docType: XToken | void;
+   private docType: XToken | undefined;
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
    private elementDeclarations: { [name: string]: ElementDeclInfo };
    private contentStack: Array<ContentContext>;
-   private currentContext: ContentContext | void;
+   private currentContext: ContentContext | undefined;
    private idValues: IDMap;
    private unanchoredIDRefs: IDMap;
    private confVer: ConformanceVersion = new ConformanceVersion();
@@ -204,11 +204,11 @@ class CheckXTokenValidStream extends Transform {
     * §3.3.3: Attribute value normalization.
     * This should be done whether or not we are validating.
     */
-   normalizeAttributeValue(attribute: any, attInfo: AttInfo | void, elName: string, pToken: any): any { // typeHack
-      const attrDef: AttDefinitionXToken | void = attInfo ? attInfo.def : undefined;
+   normalizeAttributeValue(attribute: any, attInfo: AttInfo | undefined, elName: string, pToken: any): any { // typeHack
+      const attrDef: AttDefinitionXToken | undefined = attInfo ? attInfo.def : undefined;
       const isCData = !attrDef || attrDef.type === 'CDATA';
       let prevHadTrailingSpace = true; // consider the start to already be space terminated
-      let prevPiece: { text: string } | void;
+      let prevPiece: { text: string } | undefined;
       const newValue = [];
 
       for (let index = 0; index < attribute.value.length; index++) {
@@ -284,19 +284,19 @@ class CheckXTokenValidStream extends Transform {
       });
    }
 
-   private pushValidityError(id: string, params: Array<string>, pos?: SToken | void, context?: SToken | void) {
+   private pushValidityError(id: string, params: Array<string>, pos?: SToken | undefined, context?: SToken | undefined) {
       const error = new ValidityError(id, params, pos, context);
 
       this.push(error);
    }
 
-   private pushWarning(id: string, params: Array<string>, pos?: SToken | void, context?: SToken | void) {
+   private pushWarning(id: string, params: Array<string>, pos?: SToken | undefined, context?: SToken | undefined) {
       const warning = new XmlWarning(id, params, pos, context);
 
       this.push(warning);
    }
 
-   private checkContextValidity(xToken: XToken, sToken: SToken | void, context: ContentContext | void) {
+   private checkContextValidity(xToken: XToken, sToken: SToken | undefined, context: ContentContext | undefined) {
       if (!context) {
          return;
       }

@@ -28,7 +28,7 @@ function getAttributeValueText(value: AttributeValue): string {
    return newValue;
 }
 
-function firstSToken(value: AttributeValue): SToken | void {
+function firstSToken(value: AttributeValue): SToken | undefined {
    if (value.length === 0) {
       return;
    }

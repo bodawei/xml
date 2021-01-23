@@ -221,7 +221,7 @@ function normalizeAttributes(
 
    for (const attr of attributes) {
       const attrName = strOrBlank(attr.name);
-      const attrDef = attrDefs[attrName] ?? { isCData: false };
+      const attrDef = attrDefs[attrName] ?? { name: attr.name, isCData: false };
       const normalizedInfo = normalizeAttr(attr.value, attrDef);
       const newAttr: AugmentedAttributePToken = {
          ...attr,
@@ -266,7 +266,7 @@ function gatherDefaults(
    }
 
    for (const attrName of Object.keys(attrDefs)) {
-      const attrDef = attrDefs[attrName];
+      const attrDef = attrDefs[attrName]!;
 
       if (!hasAttr[attrName] && attrDef.defaultValue && attrName !== '') {
          newAttrs.push({
@@ -320,7 +320,8 @@ class AttFixer {
 
       this.attDetails[elementName] = this.attDetails[elementName] || {};
 
-      const elDetails = this.attDetails[elementName];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const elDetails = this.attDetails[elementName]!;
 
       for (const def of attList.attDefs) {
          const attName = strOrBlank(def.name);
@@ -337,16 +338,18 @@ class AttFixer {
 
          // §3.3.3 All attributes for which no declaration has been read should be
          //    treated by a non-validating processor as if declared CDATA.
-         elDetails[attName] = {
+         const working: Record<string, any> = {
             name: def.name,
             isCData: attType === 'cdata',
          };
 
-         if (def.value && def.value.length > 0) {
-            elDetails[attName].openQuote = def.openQuote || toSToken('"');
-            elDetails[attName].defaultValue = def.value;
-            elDetails[attName].closeQuote = def.closeQuote || toSToken('"');
+         if (def.value.length > 0) {
+            working.openQuote = def.openQuote || toSToken('"');
+            working.defaultValue = def.value;
+            working.closeQuote = def.closeQuote || toSToken('"');
          }
+
+         elDetails[attName] = working as any;
       }
    }
 
