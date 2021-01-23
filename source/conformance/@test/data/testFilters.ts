@@ -3,6 +3,7 @@
 interface FilterData {
    includedIds: Array<string>;
    excludedIds: Array<string>;
+   futureFeatures: Array<string>;
 }
 
 const testFilters: FilterData = {
@@ -28,23 +29,6 @@ const testFilters: FilterData = {
        * Review uses of misc.checkCharWellFormed()
        */
       'rmt-054',
-      // xml:lang
-      'v-lang03', // xml:lang violation
-      'v-lang04', // xml:lang violation
-      'ibm-valid-P36-ibm36v01.xml', // a xml:lang violation
-      // --- UTF16 validity problems
-      'valid-ext-sa-008', // utf16
-      'pr-xml-little', // utf16
-      'pr-xml-utf-16', // utf16
-      'weekly-little', // UTF16!
-      'weekly-utf-16', // UTF16!
-      'valid-sa-049', // UTF16 with BOM
-      'valid-sa-050', // UTF16 with BOM
-      'valid-sa-051', // utf16
-      'valid-ext-sa-014', // External entity is utf16 with a BOM.  Oddly, the answer has the BOM in it.  Why isn't that stripped?  Be certain you understand this
-      'valid-ext-sa-007', // utf16 BOM
-      // utf8/BOM
-      'rmt-e2e-22', // Starts with a BOM
 
       // Valid / Text problems
       // NOTE: A bunch of the 1.1 ones are easily fixed by adding the <?xml version="1.1" to the output.
@@ -133,25 +117,6 @@ const testFilters: FilterData = {
       'rmt-052', // but output is bad 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
       'rmt-053', // but output is bad 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
-      // Group namespaces
-      'rmt-ns10-017', // Simple legal case: no namespaces
-      'rmt-ns10-018', // Simple legal case: default namespace
-      'rmt-ns10-019', // Simple legal case: prefixed element
-      'rmt-ns10-020', // Simple legal case: prefixed attribute
-      'rmt-ns10-021', // Simple legal case: default namespace and unbinding
-      'rmt-ns10-022', // Simple legal case: default namespace and rebinding
-      'rmt-ns10-024', // Simple legal case: prefix rebinding
-      'rmt-ns10-027', // Reserved prefixes and namespaces: using the xml prefix undeclared
-      'rmt-ns10-028', // Reserved prefixes and namespaces: declaring the xml prefix correctly
-      'rmt-ns10-034', // Reserved prefixes and namespaces: binding a reserved prefix
-      'rmt-ns10-037', // Attribute uniqueness: different attributes with same local name
-      'rmt-ns10-038', // Attribute uniqueness: prefixed and unprefixed attributes with same local name
-      'rmt-ns10-039', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, with default namespace
-      'rmt-ns10-040', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, with default namespace and element in default namespace
-      'rmt-ns10-041', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, element in same namespace as prefixed attribute
-      'rmt-ns10-045', // Colon in ID attribute name
-      'rmt-ns10-046', // Colon in ID attribute name
-
       // Group: some BOM problems. But several of these should be dying and
       'invalid-bo-1', // Byte order mark in general entity should go away (big-endian)
       'invalid-bo-2', // Byte order mark in general entity should go away (little-endian)
@@ -213,11 +178,6 @@ const testFilters: FilterData = {
       'x-ibm-1-0.5-not-wf-P04a-ibm04an22.xml', // Tests an element with an illegal NameChar: #0xD801
       'x-ibm-1-0.5-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
       'x-ibm-1-0.5-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
-
-      // Group: Namespaces
-      'rmt-ns-e1.0-13a', // The xml namespace must not be declared as the default namespace.
-      'rmt-ns-e1.0-13b', // The xmlns namespace must not be declared as the default namespace.
-      'rmt-ns-e1.0-13c', // Elements must not have the prefix xmlns.
 
       // Group: Cahracter set
       'hst-bh-001', // decimal charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
@@ -285,32 +245,6 @@ const testFilters: FilterData = {
       'rmt-041', // Contains a C1 control character (partial line up), legal in XML 1.0 but not 1.1
       'rmt-042', // Contains a character reference to a C0 control character (form-feed), legal in XML 1.1 but not 1.0
 
-      // namespaces
-      'rmt-ns10-009', // Namespace equality test: plain repetition
-      'rmt-ns10-010', // Namespace equality test: use of character reference
-      'rmt-ns10-011', // Namespace equality test: use of entity reference
-      'rmt-ns10-012', // Namespace inequality test: equal after attribute value normalization
-      'rmt-ns10-013', // Bad QName syntax: multiple colons
-      'rmt-ns10-014', // Bad QName syntax: colon at end
-      'rmt-ns10-015', // Bad QName syntax: colon at start
-      'rmt-ns10-016', // Bad QName syntax: xmlns:
-      'rmt-ns10-023', // Illegal use of 1.1-style prefix unbinding in 1.0 document
-      'rmt-ns10-025', // Unbound element prefix
-      'rmt-ns10-026', // Unbound attribute prefix
-      'rmt-ns10-029', // Reserved prefixes and namespaces: declaring the xml prefix incorrectly
-      'rmt-ns10-030', // Reserved prefixes and namespaces: binding another prefix to the xml namespace
-      'rmt-ns10-031', // Reserved prefixes and namespaces: declaring the xmlns prefix with its correct URI (illegal)
-      'rmt-ns10-032', // Reserved prefixes and namespaces: declaring the xmlns prefix with an incorrect URI
-      'rmt-ns10-033', // Reserved prefixes and namespaces: binding another prefix to the xmlns namespace
-      'rmt-ns10-035', // Attribute uniqueness: repeated identical attribute
-      'rmt-ns10-036', // Attribute uniqueness: repeated attribute with different prefixes
-      'rmt-ns10-042', // Colon in PI name
-      'rmt-ns10-043', // Colon in entity name
-      'rmt-ns10-044', // Colon in entity name
-      'rmt-ns11-005', // Illegal use of prefix that has been unbound
-      'ht-bh-ns11-007', // Attempt to unbind xmlns 'namespace'
-      'ht-bh-ns11-008', // Attempt to unbind xml namespace
-
       //
       // ////////////
       // ////////////
@@ -340,6 +274,71 @@ const testFilters: FilterData = {
       'invalid-bo-7', // A byte order mark and a backwards one in general entity cause an illegal char. error (big-endian)
       'invalid-bo-8', // A byte order mark and a backwards one in general entity cause an illegal char. error (little-endian)
       'invalid-bo-9', // A byte order mark and a backwards one in general entity cause an illegal char. error (utf-8)
+   ],
+
+   futureFeatures: [
+      // --- UTF16 validity problems
+      'valid-ext-sa-008', // utf16
+      'pr-xml-little', // utf16
+      'pr-xml-utf-16', // utf16
+      'weekly-little', // UTF16!
+      'weekly-utf-16', // UTF16!
+      'valid-sa-049', // UTF16 with BOM
+      'valid-sa-050', // UTF16 with BOM
+      'valid-sa-051', // utf16
+      'valid-ext-sa-014', // External entity is utf16 with a BOM.  Oddly, the answer has the BOM in it.  Why isn't that stripped?  Be certain you understand this
+      'valid-ext-sa-007', // utf16 BOM
+      // utf8/BOM
+      'rmt-e2e-22', // Starts with a BOM
+
+      // Valid namespaces
+      'rmt-ns10-017', // Simple legal case: no namespaces
+      'rmt-ns10-018', // Simple legal case: default namespace
+      'rmt-ns10-019', // Simple legal case: prefixed element
+      'rmt-ns10-020', // Simple legal case: prefixed attribute
+      'rmt-ns10-021', // Simple legal case: default namespace and unbinding
+      'rmt-ns10-022', // Simple legal case: default namespace and rebinding
+      'rmt-ns10-024', // Simple legal case: prefix rebinding
+      'rmt-ns10-027', // Reserved prefixes and namespaces: using the xml prefix undeclared
+      'rmt-ns10-028', // Reserved prefixes and namespaces: declaring the xml prefix correctly
+      'rmt-ns10-034', // Reserved prefixes and namespaces: binding a reserved prefix
+      'rmt-ns10-037', // Attribute uniqueness: different attributes with same local name
+      'rmt-ns10-038', // Attribute uniqueness: prefixed and unprefixed attributes with same local name
+      'rmt-ns10-039', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, with default namespace
+      'rmt-ns10-040', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, with default namespace and element in default namespace
+      'rmt-ns10-041', // Attribute uniqueness: prefixed and unprefixed attributes with same local name, element in same namespace as prefixed attribute
+      'rmt-ns10-045', // Colon in ID attribute name
+      'rmt-ns10-046', // Colon in ID attribute name
+
+      // not wellformed: Namespaces
+      'rmt-ns-e1.0-13a', // The xml namespace must not be declared as the default namespace.
+      'rmt-ns-e1.0-13b', // The xmlns namespace must not be declared as the default namespace.
+      'rmt-ns-e1.0-13c', // Elements must not have the prefix xmlns.
+
+      'rmt-ns10-009', // Namespace equality test: plain repetition
+      'rmt-ns10-010', // Namespace equality test: use of character reference
+      'rmt-ns10-011', // Namespace equality test: use of entity reference
+      'rmt-ns10-012', // Namespace inequality test: equal after attribute value normalization
+      'rmt-ns10-013', // Bad QName syntax: multiple colons
+      'rmt-ns10-014', // Bad QName syntax: colon at end
+      'rmt-ns10-015', // Bad QName syntax: colon at start
+      'rmt-ns10-016', // Bad QName syntax: xmlns:
+      'rmt-ns10-023', // Illegal use of 1.1-style prefix unbinding in 1.0 document
+      'rmt-ns10-025', // Unbound element prefix
+      'rmt-ns10-026', // Unbound attribute prefix
+      'rmt-ns10-029', // Reserved prefixes and namespaces: declaring the xml prefix incorrectly
+      'rmt-ns10-030', // Reserved prefixes and namespaces: binding another prefix to the xml namespace
+      'rmt-ns10-031', // Reserved prefixes and namespaces: declaring the xmlns prefix with its correct URI (illegal)
+      'rmt-ns10-032', // Reserved prefixes and namespaces: declaring the xmlns prefix with an incorrect URI
+      'rmt-ns10-033', // Reserved prefixes and namespaces: binding another prefix to the xmlns namespace
+      'rmt-ns10-035', // Attribute uniqueness: repeated identical attribute
+      'rmt-ns10-036', // Attribute uniqueness: repeated attribute with different prefixes
+      'rmt-ns10-042', // Colon in PI name
+      'rmt-ns10-043', // Colon in entity name
+      'rmt-ns10-044', // Colon in entity name
+      'rmt-ns11-005', // Illegal use of prefix that has been unbound
+      'ht-bh-ns11-007', // Attempt to unbind xmlns 'namespace'
+      'ht-bh-ns11-008', // Attempt to unbind xml namespace
    ],
 };
 

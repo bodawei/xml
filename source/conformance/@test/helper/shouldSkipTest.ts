@@ -8,6 +8,10 @@ function isExcluded(testData: Test): boolean {
       return true;
    }
 
+   if (testFilters.futureFeatures.includes(testData.ID)) {
+      return true;
+   }
+
    return false;
 }
 

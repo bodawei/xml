@@ -109,6 +109,33 @@ describe('langAttribute (unit)', () => {
          expect(ec.errors).toEqual([ expected ]);
       });
 
+      it('allows technically invalid grandfathered values (§2.12.0)', () => {
+         const textToken = new TextPToken({ text: SToken.fromString('i-qwe-qwe-qwe') });
+
+         checkXmlLangWellFormed([ textToken ], ec, new ConformanceVersion(1.0, 2));
+
+         expect(ec.errors).toEqual([  ]);
+      });
+
+      it('allows technically invalid private use values (§2.12.0)', () => {
+         const textToken = new TextPToken({ text: SToken.fromString('x-onetwothree-fourfive-muchmuchtoo-long') });
+
+         checkXmlLangWellFormed([ textToken ], ec, new ConformanceVersion(1.0, 2));
+
+         expect(ec.errors).toEqual([  ]);
+      });
+
+      it('reports an error if the value is irregular or grandfathered but still grossly wrong', () => {
+         const textToken = new TextPToken({ text: SToken.fromString('i-asdf---oops') });
+         const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE,
+            [ 'i-asdf---oops' ], textToken.text, textToken.text);
+
+         checkXmlLangWellFormed([ textToken ], ec, confVer);
+
+         expect(ec.errors).toEqual([ expected ]);
+      });
+
+
       describe('in 1.0/1', () => {
 
          it('allows en as a code', () => {

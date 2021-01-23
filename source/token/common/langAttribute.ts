@@ -12,6 +12,8 @@ import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'xToken';
 const WFID = WellFormedError.ID;
 const ONE_DOT_ZERO_REV1_REGEX = /^[a-z][a-z](?:-[a-z]+)*$|^[xi](?:-[a-z]+)+$/i;
 
+const LAX_BCP47 = /^[ix]-[A-Za-z]+(-[A-Za-z]+)*$/
+
 type AttributeValue = AttributeValuePToken | AttributeValueXToken;
 
 function getAttributeValueText(value: AttributeValue): string {
@@ -138,6 +140,63 @@ function check1dot0rev2AndBeyond(value: AttributeValue, attrValue: string, ec: E
    if (BCP47_REGEX.test(attrValue)) {
       return;
    }
+
+   /*
+    * The XML Conformance test suite forces a strange situation here.
+    * These three tests, with their respective xml:lang codes, break:
+    *  - v-lang03: i-klingon-whorf
+    *  - v-lang04: x-dialect-valleygirl
+    *  - ibm-valid-P36-ibm36v01.xml: i-BS-ABCD
+    * 
+    * I can not see any world where these are actually correct.
+    * §2.12 (in 1.0/2 and beyond) point to IETF RFC 1766, 3066, and BCP47
+    * 1.0/5 was done in 2008, so it probably referred to IETF RFC 4646.
+    * There has been an RFC 5646 since then, but even ignoring that
+    * it doesn't change this.
+    * All if the i-* definitions point to IANA registrations. While
+    * I can not easily find what was registered for the 1766 and
+    * 3066 RFC's, as of 4046, neither i-klingon nor i-bs seem
+    * to allow any sub-parts as far as I can tell.
+    * 
+    * 1766: https://tools.ietf.org/html/rfc1766
+    *   This allows [A-Za-z]<8>(-[A-Za-z]<8>)* but then curtails the first part
+    *   to be i, x, A-Za-z<2>
+    *   In this standard, 03 and ibm are valid, but "valleygirl" is more than 8 chars
+    *   As noted above, IANA doesn't have -whorf or -ABCD (I don't even
+    *   find any i-bs entry anywhere)
+    * 3066: https://tools.ietf.org/html/rfc3066
+    *   Same as 1766, but allows [A-Za-z]<3> as one of the curtailments.
+    *   It also allows [A-Za-z0-9]<8> in the subtag
+    *   Aa noted above, IANA doesn't have -whorf or -ABCD
+    * 4046: https://tools.ietf.org/html/rfc4646
+    *    IANA definitions: https://www.iana.org/assignments/lang-tag-apps/lang-tag-apps.xhtml
+    *    This updates the definition for "grandfathered" to be
+    *    [A-Za-z]<1,3>(-[A-Za-z0-9]<2,8>(-[A-Za-z0-9]<2,8>))
+    *    this syntax allows for 03 and ibm, above.  The wording here 
+    *    is a bit unclear to me, but I still read this as while the syntax
+    *    is general, the only i-* values allowed are ones that had
+    *    been allowed by IANA in the 1766 and 3066 timeframe
+    * 5646: https://tools.ietf.org/html/rfc5646
+    *    IANA: https://www.iana.org/assignments/lang-subtags-templates/lang-subtags-templates.xhtml#lang-subtags-templates-1
+    *       https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+    *       https://www.iana.org/protocols#index_L  (search for Language Tags)
+    *    This constrains the definition for "grandfathered" to list
+    *    only specific values, and not a general broad syntax.
+    *    My interpretation is that rather than do something general
+    *    and point to another standard to clarify the specifics, they
+    *    pulled in those "frozen" parts of the other standards. Given that
+    *    there is no reference to removing previously standard values,
+    *    my interpretation is that i-klingon-* and i-BS were never
+    *    allowed in the first place.
+    * Nonetheless, the XML conformance test suite allows these.
+    * Arguably we should provide a parameter to the parser to specify
+    * whether to be strict BCP 47 or not.  In the mean time, this will
+    * simply allow the lax values for i-* and x- entries.
+    */
+
+    if (LAX_BCP47.test(attrValue)) {
+      return;
+    }
 
    ec.report(WFID.ATTRIBUTE_LANG_BAD_CODE, [attrValue], firstSToken(value));
 }
