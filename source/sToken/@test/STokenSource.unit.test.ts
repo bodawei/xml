@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { Range, EntityId, CONFORMANCE_VERSION } from 'basic';
@@ -305,7 +305,7 @@ describe('STokenSource (unit)', () => {
 
    describe('extractToObject()', () => {
       it('extracts an SToken to the property of the provided object', (done) => {
-         const obj: { [propName: string]: any } = {};
+         const obj: { [propName: string]: SToken } = {};
          source.addText('1');
          source.endText();
 
@@ -317,7 +317,7 @@ describe('STokenSource (unit)', () => {
       });
 
       it('allows the properties to be omitted', (done) => {
-         const obj: { [propName: string]: any } = {};
+         const obj: { [propName: string]: SToken } = {};
          source.addText('1');
          source.endText();
 
@@ -368,7 +368,7 @@ describe('STokenSource (unit)', () => {
       });
 
       it('can be called multiple times before any text added', (done) => {
-         let first: SToken | void;
+         let first: SToken | undefined;
          source.extractNoParams('tox', (sToken) => (first = sToken));
          source.extractNoParams('all', (sToken) => {
             expect([(first as any).str, sToken!.str]).toEqual([' 123', 'xTest']); // EXPECT
@@ -380,7 +380,7 @@ describe('STokenSource (unit)', () => {
       });
 
       it('can be called multiple times after text added', (done) => {
-         let first: SToken | void;
+         let first: SToken | undefined;
          source.addText(' 456xTest');
          source.endText();
 
@@ -388,6 +388,32 @@ describe('STokenSource (unit)', () => {
          source.extractNoParams('all', (sToken) => {
             expect([(first as any).str, sToken!.str]).toEqual([' 456', 'xTest']); // EXPECT
             done();
+         });
+      });
+   });
+
+   describe('check()', () => {
+      it('passes no arguments to the callback', () => {
+         let results: Array<unknown> | undefined;
+         source.endText();
+
+         source.check((...rest: Array<undefined>) => {
+            results = rest;
+         });
+
+         expect(results?.length).toEqual(0);
+      });
+
+      it('calls the callback after doing earlier processing', () => {
+         const obj: Record<string, SToken> = {};
+         source.addText('1');
+         source.endText();
+         source.extractToObject('all', obj, 'propName');
+
+         source.check(() => {
+            expect(obj).toEqual({
+               propName: new SToken('1', '1', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+            });
          });
       });
    });

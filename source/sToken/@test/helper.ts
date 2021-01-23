@@ -233,7 +233,28 @@ class MockSTokenSource extends STokenSource {
       this.extractToObject(type, undefined, obj, name);
    }
 
-   extractToObject(type: string, params: any, obj: Object, name: string): void {
+   extractToObject(type: string, obj: Record<string, any>, name: string): void;
+   extractToObject(type: string, params: any, obj: Record<string, any>, name: string): void;
+   extractToObject(
+      type: string,
+      paramsOrObj: any | Record<string, any>,
+      objOrName: Record<string, any> | string,
+      nameOnly?: string,
+   ): void {
+      let params: any;
+      let obj: Record<string, any>;
+      let name: string;
+
+      if (nameOnly !== undefined) {
+         params = paramsOrObj;
+         obj = objOrName as Record<string, any>;
+         name = nameOnly;
+      } else {
+         params = undefined;
+         obj = paramsOrObj;
+         name = objOrName as string;
+      }
+
       this.queuedCalls.push({
          type,
          params,
@@ -246,15 +267,40 @@ class MockSTokenSource extends STokenSource {
       this.extract(type, undefined, deliverSToken);
    }
 
-   extract(type: string, params: any, deliverSToken: DeliverSToken): void {
+   extract(type: string, deliverSToken: DeliverSToken): void;
+   extract(type: string, params: any, deliverSToken: DeliverSToken): void;
+   extract(
+      type: string,
+      paramsOrDeliver: any | DeliverSToken,
+      deliverSToken?: DeliverSToken,
+   ): void {
+      let params: any;
+      let deliver: DeliverSToken;
+
+      if (typeof paramsOrDeliver === 'function') {
+         params = undefined;
+         deliver = paramsOrDeliver;
+      } else {
+         params = paramsOrDeliver;
+         deliver = deliverSToken!;
+      }
+
       this.queuedCalls.push({
          type,
          params,
-         callback: deliverSToken,
+         callback: deliver,
       });
    }
 
-   respondInAsyncTime() {
+   check(callback: () => void): void {
+      this.queuedCalls.push({
+         type: 'check',
+         params: undefined,
+         callback,
+      });
+   }
+
+   respondInAsyncTime(): void {
       while (this.queuedCalls.length > 0) {
          const calls = this.queuedCalls;
          this.queuedCalls = [];
@@ -266,6 +312,8 @@ class MockSTokenSource extends STokenSource {
                }
 
                qc.obj[qc.name] = this._getAdjustedValue(qc);
+            } else if (qc.type === 'check') {
+               qc.callback();
             } else {
                if (this.expectedValues.length === 0) {
                   throw new Error(

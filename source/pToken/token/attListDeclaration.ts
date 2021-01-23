@@ -140,8 +140,8 @@ function parseElementName(
    done: (result: AttListDeclarationProps) => void,
 ) {
    source.extractToObject('word', ['>', '%'], protoToken, 'elementName');
-   source.extractNoParams('space', (elementNameSpace) => {
-      protoToken.elementNameSpace = elementNameSpace;
+   source.extractToObject('space', protoToken, 'elementNameSpace');
+   source.check(() => {
       done(protoToken);
    });
 }
@@ -156,7 +156,7 @@ function parseAttName(
          return;
       }
 
-      source.extractNoParams('space', (nameSpace) => {
+      source.extract('space', (nameSpace) => {
          done({
             name,
             nameSpace,
@@ -175,14 +175,14 @@ function parseAttType(source: STokenSource, attDef: AttDefinitionProps, done: Pa
    source.extract('word', ['>', '%', '(', '#', '"', "'"], (attType) => {
       if (attType) {
          attDef.type = attType;
-         source.extractNoParams('space', (typeSpace) => {
+         source.extract('space', (typeSpace) => {
             attDef.typeSpace = typeSpace;
             done(attDef);
          });
          return;
       }
 
-      source.extractNoParams('peekChar', (charSToken) => {
+      source.extract('peekChar', (charSToken) => {
          if (charSToken?.str === '(') {
             parseWordList(source, WordListType.ENUMERATION, populateList);
          } else {
@@ -197,11 +197,11 @@ function parseAttDefaultType(
    attDef: AttDefinitionProps,
    done: ParsedAttCallback,
 ) {
-   source.extractNoParams('peekChar', (charToken) => {
+   source.extract('peekChar', (charToken) => {
       if (charToken?.str === '#') {
          source.extractToObject('word', ['>', '%', '"', "'"], attDef, 'defaultType');
-         source.extractNoParams('space', (defaultTypeSpace) => {
-            attDef.defaultTypeSpace = defaultTypeSpace;
+         source.extractToObject('space', attDef, 'defaultTypeSpace');
+         source.check(() => {
             done(attDef);
          });
       } else {
@@ -219,7 +219,7 @@ function parseAttValue(source: STokenSource, attDef: AttDefinitionProps, done: P
          charRef: true,
       },
       () => {
-         source.extractNoParams('space', (space) => {
+         source.extract('space', (space) => {
             attDef.valueSpace = space;
             done(attDef);
          });

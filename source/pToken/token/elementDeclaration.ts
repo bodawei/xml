@@ -109,9 +109,8 @@ function parseName(
    deliver: (result: RawElementDeclaration) => void,
 ): void {
    source.extractToObject('word', ['>', '('], tokens, 'name');
-   source.extractNoParams('space', (nameSpace) => {
-      tokens.nameSpace = nameSpace;
-
+   source.extractToObject('space', tokens, 'nameSpace');
+   source.check(() => {
       deliver(tokens);
    });
 }
@@ -129,8 +128,8 @@ function parseSimpleContentSpec(
 
       if (charSToken.str !== '(') {
          source.extractToObject('word', ['>'], tokens, 'contentSpec');
-         source.extractNoParams('space', (contentSpecSpace) => {
-            tokens.contentSpecSpace = contentSpecSpace;
+         source.extractToObject('space', tokens, 'contentSpecSpace');
+         source.check(() => {
             deliver(tokens);
          });
       } else {
@@ -221,7 +220,7 @@ function resumeParseElementDeclaration(
    }
    const propName = elementDeclaration.unexpanded.propName;
 
-   source.extractNoParams('space', (preSpace) => {
+   source.extract('space', (preSpace) => {
       resumeParseProperties(source, propName, { ...elementDeclaration }, preSpace, (result) => {
          source.extract('all', [], (extra) => {
             deliverPToken(

@@ -78,8 +78,8 @@ function parseProcessingInstruction(
    const raw: RawPI = {};
 
    source.extractToObject('all', ['?>'], raw, 'instruction');
-   source.extract('match', '?>', (sToken) => {
-      raw.close = sToken;
+   source.extractToObject('match', '?>', raw, 'close');
+   source.check(() => {
       deliverPToken(new ProcessingInstructionPToken(instr, raw));
    });
 }

@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, EntityId, Offset, Range } from 'basic';
 import { Extractor, Segment, ExtractorConstructor, ExtractorMap } from 'extractor';
@@ -14,6 +14,24 @@ interface ExtractorContext {
    extractor: Extractor;
    startIndex?: number;
    callback: DeliverSToken;
+}
+
+// This dummy extractor is used only to support .check().
+// This sets the state as failure simply to keep the processing engine
+// from trying to build an SToken.
+// This is a weird solution to the problem that should be revisited if
+// the SToken implementation is revised.
+class NoopExtractor extends Extractor {
+   process(segment: Segment): void {
+      const info = this.makeInfo(segment);
+      this.segInfo.push(info);
+
+      this.state = Extractor.STATE.FAILURE;
+   }
+
+   finish() {
+      return this.innerFinish();
+   }
 }
 
 /**********************************************************************\
@@ -141,24 +159,40 @@ class STokenSource {
 
       this._segments.push(new Segment(text, rangeToUse));
 
-      this._resumeOperation();
+      this.resumeOperation();
    }
 
    endText(): void {
       this._allTextAdded = true;
-      this._resumeOperation();
+      this.resumeOperation();
    }
 
    extractToObjectNoParams(type: string, obj: Record<string, any>, name: string): void {
       this.extractToObject(type, undefined, obj, name);
    }
 
+   extractToObject(type: string, obj: Record<string, any>, name: string): void;
+   extractToObject(type: string, params: Params, obj: Record<string, any>, name: string): void;
    extractToObject(
       type: string,
-      params: Params | any,
-      obj: Record<string, any>,
-      name: string,
+      paramsOrObj: Params | any | Record<string, any>,
+      objOrName: Record<string, any> | string,
+      nameOnly?: string,
    ): void {
+      let params: Params | any;
+      let obj: Record<string, any>;
+      let name: string;
+
+      if (nameOnly !== undefined) {
+         params = paramsOrObj;
+         obj = objOrName as Record<string, any>;
+         name = nameOnly;
+      } else {
+         params = undefined;
+         obj = paramsOrObj;
+         name = objOrName as string;
+      }
+
       this.extract(type, params, (sToken) => {
          obj[name] = sToken; // typeHack
       });
@@ -168,7 +202,24 @@ class STokenSource {
       this.extract(type, undefined, deliverSToken);
    }
 
-   extract(type: string, params: Params, deliverSToken: DeliverSToken): void {
+   extract(type: string, deliverSToken: DeliverSToken): void;
+   extract(type: string, params: Params, deliverSToken: DeliverSToken): void;
+   extract(
+      type: string,
+      paramsOrDeliver: Params | DeliverSToken,
+      deliverSToken?: DeliverSToken,
+   ): void {
+      let params: Params;
+      let deliver: DeliverSToken;
+
+      if (typeof paramsOrDeliver === 'function') {
+         params = undefined;
+         deliver = paramsOrDeliver;
+      } else {
+         params = paramsOrDeliver;
+         deliver = deliverSToken!;
+      }
+
       const extractorDefinition = this._extractorInfo[type];
       let extractorConstructor: ExtractorConstructor;
       let paramsToUse = params;
@@ -200,13 +251,24 @@ class STokenSource {
 
       this._extractors.push({
          extractor: instance,
-         callback: deliverSToken,
+         callback: deliver,
       });
 
-      this._resumeOperation();
+      this.resumeOperation();
    }
 
-   _resumeOperation(): void {
+   check(callback: () => void): void {
+      const noopExtractor = new NoopExtractor(1);
+
+      this._extractors.push({
+         extractor: noopExtractor,
+         callback,
+      });
+
+      this.resumeOperation();
+   }
+
+   private resumeOperation(): void {
       // There are two alternate ways of running this routine.
       // - A is faster, but allows some callers to get "synchronous" returns.
       // - B is much slower, but forces asynchronous returns.

@@ -883,7 +883,7 @@ describe('attListDeclarationCheck()', () => {
       });
    });
 
-   it('reports an error if there is extra text after unassigned', () => {
+   it('reports an error if there is extra text after unexpanded', () => {
       const testToken = new AttListDeclarationPToken(aldPToken, {
          extra: toSToken('CDATA'),
       });

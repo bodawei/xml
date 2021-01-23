@@ -118,7 +118,7 @@ function parseName(
    done: () => void,
 ): void {
    source.extractToObject('word', ['>'], protoToken, 'name');
-   source.extractToObjectNoParams('space', protoToken, 'nameSpace');
+   source.extractToObject('space', protoToken, 'nameSpace');
    done();
 }
 
@@ -167,7 +167,7 @@ function parseNotationDeclaration(
                   parseClose(source, declarationStart, protoToken, deliverPToken);
                });
             } else {
-               source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
+               source.extractToObject('space', protoToken, 'externalIdSpace');
 
                parseUnexpanded(source, 'trailing', (innerunexpanded) => {
                   protoToken.unexpanded = innerunexpanded;
@@ -189,12 +189,9 @@ function resumeExternalParse(
 ) {
    resumeParseExternalId(source, propName, preSpace, notationDeclaration.externalId, (result) => {
       protoToken.externalId = result.externalId;
-      source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
-      source.extract('all', [], (sToken) => {
-         if (sToken) {
-            protoToken.extra = sToken;
-         }
-
+      source.extractToObject('space', protoToken, 'externalIdSpace');
+      source.extractToObject('all', protoToken, 'extra');
+      source.check(() => {
          deliverPToken(new NotationDeclarationPToken(notationDeclaration, protoToken));
       });
    });
@@ -211,7 +208,7 @@ function resumeParseNotationDeclaration(
       return;
    }
 
-   source.extractNoParams('space', (preSpace) => {
+   source.extract('space', (preSpace) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const propName = decl.unexpanded!.propName;
 

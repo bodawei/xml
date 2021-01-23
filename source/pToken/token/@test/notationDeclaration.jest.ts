@@ -521,7 +521,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done?.();
+            done();
          });
 
          mockSource.respondInAsyncTime();
@@ -542,7 +542,7 @@ describe('notationdeDeclaration (unit)', () => {
          resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
             expect(result).toBe(notationDeclaration);
 
-            done?.();
+            done();
          });
 
          mockSource.respondInAsyncTime();

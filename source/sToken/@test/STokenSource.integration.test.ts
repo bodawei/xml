@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { Range, EntityId } from 'basic';
@@ -249,7 +249,7 @@ describe('STokenSource (integration)', () => {
 
    describe('extract("peekChar")', () => {
       it('delivers the next character from a segment', (done) => {
-         let first: SToken | void;
+         let first: SToken | undefined;
          source.addText('b', new Range(new EntityId()));
 
          source.extractNoParams('peekChar', (sToken) => (first = sToken));
@@ -264,7 +264,7 @@ describe('STokenSource (integration)', () => {
 
    describe('extract("peekSpace")', () => {
       it('delivers the next character from a segment', (done) => {
-         let first: SToken | void;
+         let first: SToken | undefined;
          source.addText(' \t', new Range(new EntityId()));
          source.endText();
 
@@ -385,6 +385,26 @@ describe('STokenSource (integration)', () => {
                });
             });
          });
+      });
+   });
+
+   describe('check()', () => {
+      it('pauses processing to allow other operations to happen', (done) => {
+         const obj: Record<string, SToken> = {};
+
+         source.extractToObject('char', obj, 'foo');
+         source.check(() => {
+            expect(obj).toEqual({
+               foo: new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+            });
+            source.extract('char', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('c', 'c', new Range(new EntityId(), 1, 0, 1, 2, 0, 2)),
+               );
+               done();
+            });
+         });
+         source.addText('bc', new Range(new EntityId()));
       });
    });
 });
