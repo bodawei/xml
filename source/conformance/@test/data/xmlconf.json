@@ -164,7 +164,7 @@
               "SECTIONS": "2.3 [10]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/014.xml",
               "testData": "<doc a1=\"<foo>\"></doc>\r\n",
-              "description": "Attribute values may not contain literal '' characters."
+              "description": "Attribute values may not contain literal '<' characters."
             },
             {
               "type": "TEST",
@@ -208,7 +208,7 @@
               "SECTIONS": "2.7 [19]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/018.xml",
               "testData": "<doc><![CDATA [ stuff]]></doc>\r\n",
-              "description": "CDATA sections begin with a literal '![CDATA[', no space."
+              "description": "CDATA sections begin with a literal '<![CDATA[', no space."
             },
             {
               "type": "TEST",
@@ -219,7 +219,7 @@
               "SECTIONS": "3.1 [42]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/019.xml",
               "testData": "<doc></>\r\n",
-              "description": "End tags may not be abbreviated as '/>'."
+              "description": "End tags may not be abbreviated as '</>'."
             },
             {
               "type": "TEST",
@@ -230,7 +230,7 @@
               "SECTIONS": "2.3 [10]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/020.xml",
               "testData": "<doc a1=\"A & B\"></doc>\r\n",
-              "description": "Attribute values may not contain literal '' characters except as part of an entity reference."
+              "description": "Attribute values may not contain literal '&' characters except as part of an entity reference."
             },
             {
               "type": "TEST",
@@ -241,7 +241,7 @@
               "SECTIONS": "2.3 [10]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/021.xml",
               "testData": "<doc a1=\"a&b\"></doc>\r\n",
-              "description": "Attribute values may not contain literal '' characters except as part of an entity reference."
+              "description": "Attribute values may not contain literal '&' characters except as part of an entity reference."
             },
             {
               "type": "TEST",
@@ -395,7 +395,7 @@
               "SECTIONS": "3.1 [43]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/035.xml",
               "testData": "<doc>1 < 2 but not in XML</doc>\r\n",
-              "description": "The '' character is a markup delimiter and must start an element, CDATA section, PI, or comment."
+              "description": "The '<' character is a markup delimiter and must start an element, CDATA section, PI, or comment."
             },
             {
               "type": "TEST",
@@ -714,7 +714,7 @@
               "SECTIONS": "3.3 [53]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/064.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST e a1 CDATA\"foo\">\r\n]>\r\n<doc></doc>\r\n",
-              "description": "Space is required between attribute type and default values in!ATTLIST...>declarations."
+              "description": "Space is required between attribute type and default values in<!ATTLIST...>declarations."
             },
             {
               "type": "TEST",
@@ -725,7 +725,7 @@
               "SECTIONS": "3.3 [53]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/065.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1(foo|bar) #IMPLIED>\r\n]>\r\n<doc></doc>\r\n",
-              "description": "Space is required between attribute name and type in!ATTLIST...>declarations."
+              "description": "Space is required between attribute name and type in<!ATTLIST...>declarations."
             },
             {
               "type": "TEST",
@@ -747,7 +747,7 @@
               "SECTIONS": "3.3 [53]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/067.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 (foo)\"foo\">\r\n]>\r\n<doc></doc>\r\n",
-              "description": "Space is required between attribute type and default values in!ATTLIST...>declarations."
+              "description": "Space is required between attribute type and default values in<!ATTLIST...>declarations."
             },
             {
               "type": "TEST",
@@ -758,7 +758,7 @@
               "SECTIONS": "3.3.1 [58]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/068.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ATTLIST doc a1 NOTATION(foo) #IMPLIED>\r\n]>\r\n<doc></doc>\r\n",
-              "description": "Space is required between NOTATION keyword and list of enumerated choices in!ATTLIST...>declarations."
+              "description": "Space is required between NOTATION keyword and list of enumerated choices in<!ATTLIST...>declarations."
             },
             {
               "type": "TEST",
@@ -1000,7 +1000,7 @@
               "SECTIONS": "2.3 [10]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/090.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ENTITY e \"<foo a='&#60;'></foo>\">\r\n]>\r\n<doc>&e;</doc>\r\n",
-              "description": "Attributes may not contain a literal \"\" character; this one has one because of reference expansion."
+              "description": "Attributes may not contain a literal \"<\" character; this one has one because of reference expansion."
             },
             {
               "type": "TEST",
@@ -1198,7 +1198,7 @@
               "SECTIONS": "2.7 [19]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/108.xml",
               "testData": "<doc>\r\n<![CDATA [  ]]>\r\n</doc>\r\n",
-              "description": "No space in '![CDATA['."
+              "description": "No space in '<![CDATA['."
             },
             {
               "type": "TEST",
@@ -1242,7 +1242,7 @@
               "SECTIONS": "2.7 [19]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/112.xml",
               "testData": "<doc>\r\n<![cdata[data]]>\r\n</doc>\r\n",
-              "description": "CDATA sections start '![CDATA[', not '!cdata['."
+              "description": "CDATA sections start '<![CDATA[', not '<!cdata['."
             },
             {
               "type": "TEST",
@@ -1330,7 +1330,7 @@
               "SECTIONS": "4.5",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/120.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ENTITY e \"&#38;\">\r\n]>\r\n<doc>\r\n&e;\r\n</doc>\r\n",
-              "description": "Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,must be doubly quoted - encoded either as_amp;_or as_#38;#38;_."
+              "description": "Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,&must be doubly quoted - encoded either as_&_or as_&_."
             },
             {
               "type": "TEST",
@@ -1551,7 +1551,7 @@
               "EDITION": "1 2 3 4",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/140.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ENTITY e \"<&#x309a;></&#x309a;>\">\r\n]>\r\n<doc>&e;</doc>\r\n",
-              "description": "Character '#x309a;' is a CombiningChar, not a Letter, and so may not begin a name."
+              "description": "Character '&#x309a;' is a CombiningChar, not a Letter, and so may not begin a name."
             },
             {
               "type": "TEST",
@@ -1706,7 +1706,7 @@
               "SECTIONS": "2.8 2.6 [23, 17]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/154.xml",
               "testData": "<?XML version=\"1.0\"?>\r\n<doc></doc>\r\n",
-              "description": "'?XML ...?>' is neither an XML declaration nor a legal processing instruction target name."
+              "description": "'<?XML ...?>' is neither an XML declaration nor a legal processing instruction target name."
             },
             {
               "type": "TEST",
@@ -1717,7 +1717,7 @@
               "SECTIONS": "2.8 2.6 [23, 17]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/155.xml",
               "testData": "<?xmL version=\"1.0\"?>\r\n<doc></doc>\r\n",
-              "description": "'?xmL ...?>' is neither an XML declaration nor a legal processing instruction target name."
+              "description": "'<?xmL ...?>' is neither an XML declaration nor a legal processing instruction target name."
             },
             {
               "type": "TEST",
@@ -1728,7 +1728,7 @@
               "SECTIONS": "2.8 2.6 [23, 17]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/156.xml",
               "testData": "<doc>\r\n<?xMl version=\"1.0\"?>\r\n</doc>\r\n",
-              "description": "'?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name."
+              "description": "'<?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name."
             },
             {
               "type": "TEST",
@@ -1739,7 +1739,7 @@
               "SECTIONS": "2.6 [17]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/157.xml",
               "testData": "<doc>\r\n<?xmL?>\r\n</doc>\r\n",
-              "description": "'?xmL ...?>' is not a legal processing instruction target name."
+              "description": "'<?xmL ...?>' is not a legal processing instruction target name."
             },
             {
               "type": "TEST",
@@ -1761,7 +1761,7 @@
               "SECTIONS": "2.3 [9]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/159.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY e \"<![CDATA[Tim & Michael]]>\">\r\n]>\r\n<doc>&e;</doc>\r\n",
-              "description": "Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference."
+              "description": "Uses '&' unquoted in an entity declaration, which is illegal syntax for an entity reference."
             },
             {
               "type": "TEST",
@@ -2135,7 +2135,7 @@
               "SECTIONS": "4.3.2 [79]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/not-sa/007.xml",
               "testData": "<!DOCTYPE doc SYSTEM \"007.ent\">\r\n<doc></doc>\r\n",
-              "description": "A!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
+              "description": "A<!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
             },
             {
               "type": "TEST",
@@ -2756,7 +2756,7 @@
               "testData": "<!DOCTYPE doc [\r\n<!ELEMENT doc (#PCDATA)>\r\n]>\r\n<doc><?pi some data ? > <??></doc>",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/valid/sa/out/017a.xml",
               "outputData": "<doc><?pi some data ? > <??></doc>",
-              "description": "Test demonstrates that two apparently wrong Processing Instructions make a right one, with very odd content \"some data ? >?\"."
+              "description": "Test demonstrates that two apparently wrong Processing Instructions make a right one, with very odd content \"some data ? ><?\"."
             },
             {
               "type": "TEST",
@@ -3162,7 +3162,7 @@
               "testData": "<!DOCTYPE doc [\r\n<!ENTITY e \"&#60;\">\r\n<!ELEMENT doc (#PCDATA)>\r\n]>\r\n<doc></doc>\r\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/valid/sa/out/065.xml",
               "outputData": "<doc></doc>",
-              "description": "Tests ability to define an internal entity which can't legally be expanded (contains an unquoted**undefined**)."
+              "description": "Tests ability to define an internal entity which can't legally be expanded (contains an unquoted**<**)."
             },
             {
               "type": "TEST",
@@ -4240,7 +4240,7 @@
               "testData": "<!DOCTYPE doc SYSTEM \"024.ent\">\r\n<doc></doc>\r\n",
               "outputPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/valid/not-sa/out/024.xml",
               "outputData": "<doc a1=\"v1\"></doc>",
-              "description": "Constructs an!ATTLIST...>declaration from several PEs."
+              "description": "Constructs an<!ATTLIST...>declaration from several PEs."
             },
             {
               "type": "TEST",
@@ -6212,7 +6212,7 @@
           "SECTIONS": "3.1 [43]",
           "testPath": "./source/conformance/xmlts20130923/xmlconf/sun/not-wf/element02.xml",
           "testData": "<!DOCTYPE html [ <!ELEMENT html ANY> ]>\n<html>\n    <% @ LANGUAGE=\"VBSCRIPT\" %>\n</html>\n",
-          "description": "Illegal markup (%@ ... %>)"
+          "description": "Illegal markup (<%@ ... %>)"
         },
         {
           "type": "TEST",
@@ -6222,7 +6222,7 @@
           "SECTIONS": "3.1 [43]",
           "testPath": "./source/conformance/xmlts20130923/xmlconf/sun/not-wf/element03.xml",
           "testData": "<!DOCTYPE html [ <!ELEMENT html ANY> ]>\n<html>\n    <% document.println (\"hello, world\"); %>\n</html>\n\n",
-          "description": "Illegal markup (% ... %>)"
+          "description": "Illegal markup (<% ... %>)"
         },
         {
           "type": "TEST",
@@ -6232,7 +6232,7 @@
           "SECTIONS": "3.1 [43]",
           "testPath": "./source/conformance/xmlts20130923/xmlconf/sun/not-wf/element04.xml",
           "testData": "<!DOCTYPE root [ <!ELEMENT root ANY> ]>\n<root>\n    <!ELEMENT foo EMPTY>\n</root>\n",
-          "description": "Illegal markup (!ELEMENT ...>)"
+          "description": "Illegal markup (<!ELEMENT ...>)"
         },
         {
           "type": "TEST",
@@ -6946,7 +6946,7 @@
               "URI": "p68pass1.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p68pass1.xml",
               "testData": "<!DOCTYPE doc\r\n[\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY ent \"replacement text\">\r\n]>\r\n<doc>\r\n&ent;aaa&ent;\r\n<!--Not a reference:-->\r\n<!--Charref to & doesn't make a delimiter-->\r\n&#38;en\r\n</doc>\r\n",
-              "description": "Valid entity references. Also ensures that a charref to '' isn't interpreted as an entity reference open delimiter"
+              "description": "Valid entity references. Also ensures that a charref to '&' isn't interpreted as an entity reference open delimiter"
             },
             {
               "type": "TEST",
@@ -8281,7 +8281,7 @@
               "URI": "p09fail2.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p09fail2.xml",
               "testData": "<!DOCTYPE doc SYSTEM \"p09fail2.dtd\">\r\n<doc/>",
-              "description": "EntityValue excludes ''"
+              "description": "EntityValue excludes '&'"
             },
             {
               "type": "TEST",
@@ -8321,7 +8321,7 @@
               "URI": "p10fail1.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p10fail1.xml",
               "testData": "<doc a=\"1 < 2\"/>\r\n",
-              "description": "attribute values exclude ''"
+              "description": "attribute values exclude '<'"
             },
             {
               "type": "TEST",
@@ -8331,7 +8331,7 @@
               "URI": "p10fail2.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p10fail2.xml",
               "testData": "<doc a=\"1 &\"/>\r\n",
-              "description": "attribute values exclude ''"
+              "description": "attribute values exclude '&'"
             },
             {
               "type": "TEST",
@@ -8411,7 +8411,7 @@
               "URI": "p12fail5.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p12fail5.xml",
               "testData": "<!--Inability to resolve a notation should not be reported as an error-->\r\n<!DOCTYPE doc\r\n[\r\n<!ELEMENT doc EMPTY>\r\n<!NOTATION not1 PUBLIC \"<\">\r\n]>\r\n<doc/>\r\n",
-              "description": "'' excluded"
+              "description": "'<' excluded"
             },
             {
               "type": "TEST",
@@ -8441,7 +8441,7 @@
               "URI": "p14fail1.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p14fail1.xml",
               "testData": "<doc>< </doc>\r\n",
-              "description": "'' excluded"
+              "description": "'<' excluded"
             },
             {
               "type": "TEST",
@@ -8451,7 +8451,7 @@
               "URI": "p14fail2.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p14fail2.xml",
               "testData": "<doc>& </doc>\r\n",
-              "description": "'' excluded"
+              "description": "'&' excluded"
             },
             {
               "type": "TEST",
@@ -9660,7 +9660,7 @@
               "URI": "p66fail2.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p66fail2.xml",
               "testData": "<doc>&# 65;</doc>",
-              "description": "no S after '#'"
+              "description": "no S after '&#'"
             },
             {
               "type": "TEST",
@@ -9720,7 +9720,7 @@
               "URI": "p68fail2.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p68fail2.xml",
               "testData": "<!DOCTYPE doc\r\n[\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY ent \"replacement text\">\r\n]>\r\n<doc>\r\n& ent;\r\n</doc>\r\n",
-              "description": "no S after ''"
+              "description": "no S after '&'"
             },
             {
               "type": "TEST",
@@ -9800,7 +9800,7 @@
               "URI": "p71fail3.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p71fail3.xml",
               "testData": "<!DOCTYPE doc\r\n[\r\n<!ELEMENT doc (#PCDATA)>\r\n<! ENTITY ge \"replacement text\">\r\n]>\r\n<doc/>\r\n",
-              "description": "no S after \"!\""
+              "description": "no S after \"<!\""
             },
             {
               "type": "TEST",
@@ -9810,7 +9810,7 @@
               "URI": "p71fail4.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p71fail4.xml",
               "testData": "<!DOCTYPE doc\r\n[\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ENTITYge \"replacement text\">\r\n]>\r\n<doc/>\r\n",
-              "description": "S is required after \"!ENTITY\""
+              "description": "S is required after \"<!ENTITY\""
             },
             {
               "type": "TEST",
@@ -9820,7 +9820,7 @@
               "URI": "p72fail1.xml",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/oasis/p72fail1.xml",
               "testData": "<!DOCTYPE doc\r\n[\r\n<!ELEMENT doc (#PCDATA)>\r\n<!ENTITY% pe \"<!--replacement decl-->\">\r\n]>\r\n<doc/>\r\n",
-              "description": "S is required after \"!ENTITY\""
+              "description": "S is required after \"<!ENTITY\""
             },
             {
               "type": "TEST",
@@ -25196,7 +25196,7 @@
               "VERSION": "1.0",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/eduni/errata-4e/140.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ENTITY e \"<&#x309a;></&#x309a;>\">\r\n]>\r\n<doc>&e;</doc>\r\n",
-              "description": "Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml)."
+              "description": "Character '&#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml)."
             },
             {
               "type": "TEST",

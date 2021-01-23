@@ -8,7 +8,7 @@ import {
    ElementEndXToken,
    ElementStartXToken,
 } from '../token';
-import { TEXT_XTOKEN,CHARREF_XTOKEN, CharRefXToken } from 'xToken';
+import { TEXT_XTOKEN,CHARREF_XTOKEN, CharRefXToken, XToken } from 'xToken';
 
 type Token = { type: string };
 
@@ -61,7 +61,7 @@ class SimpleObj extends Transform {
       this._root = undefined;
    }
 
-   _transform(xToken: Token, _: string, done: () => void) {
+   _transform(xToken: XToken, _: string, done: () => void) {
       let leaf;
       if (this._stack.length > 0) {
          leaf = this._stack[this._stack.length - 1];
@@ -96,8 +96,8 @@ class SimpleObj extends Transform {
       } else if (xToken instanceof CharDataXToken) {
          // console.log('TEXT ', xToken.text)
          leaf.addContent(xToken.text);
-      } else if (xToken instanceof CharRefXToken) {
-         // console.log('TEXT ', xToken.text)
+      } else if (xToken.type === CHARREF_XTOKEN) {
+         // console.log('CHARREF TEXT ', xToken.char)
          leaf.addContent(xToken.char);
       } else if (xToken instanceof CdataXToken) {
          // console.log('TEXT ', xToken.text)

@@ -254,7 +254,6 @@ function addDirectory(pathToHere: string, testCases: TestCases, root: string): v
             if (!isEduni) {
                return
             } else {
-               console.log('eduni path', finalPath);
                addDirectory(finalPath, testCases, root);
                return;
             }
