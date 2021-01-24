@@ -6,6 +6,9 @@ import {
    ParseToken,
    TEXT_PTOKEN,
    TextPToken,
+   NOTATION_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'pToken';
 import { strOrBlank, toSToken, SToken } from 'sToken';
 
@@ -19,6 +22,7 @@ import {
 } from 'token';
 import { LiteralValuePToken } from '../token/common/literal';
 import { AttributePToken } from '../token/common/attribute';
+import { externalIdNormalize } from './common/externalIdNormalize';
 
 interface AugmentedAttributePToken extends AttributePToken {
    defaulted?: boolean;
@@ -299,6 +303,17 @@ class AttFixer {
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
             return this.processElementPToken(input);
+         case NOTATION_DECLARATION_PTOKEN:
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            if (input.externalId) {
+               return {
+                  ...input,
+                  externalId: externalIdNormalize(input.externalId),
+               };
+            }
+            break;
+         // Should do externalId processing here DocTypeStartPToken here
          default:
             // ignore
             break;

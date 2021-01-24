@@ -37,15 +37,17 @@ function formatExternalId(externalId?: ExternalIdX): string {
    }
 }
 
+// We should find out what the actual rules are for canonical XML rather than cherry picking each control character for xmlconf purposes
 function formatText(text: string): string {
    return text
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/\n/g, '&#10;')
       .replace(/\t/g, '&#9;')
+      .replace(/\n/g, '&#10;')
       .replace(/\u000c/g, '&#12;') // eslint-disable-line no-control-regex
+      .replace(/\u008c/g, '&#140;') // eslint-disable-line no-control-regex
       .replace(/\r/g, '&#13;');
 }
 

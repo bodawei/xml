@@ -7,7 +7,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: ['ibm-invalid-P41-ibm41i02.xml'],
    excludedIds: [
       'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
       /*
@@ -29,47 +29,20 @@ const testFilters: FilterData = {
        * Review uses of misc.checkCharWellFormed()
        */
       'rmt-054',
-
-      // Valid / Text problems
-      // NOTE: A bunch of the 1.1 ones are easily fixed by adding the <?xml version="1.1" to the output.
-      'valid-sa-044', // Test demonstrates that the empty-element tag must be use for an elements that are declared EMPTY.
-      'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
-      'valid-sa-110', // Basically an output test, this requires that a CDATA attribute with a CRLF be normalized to one space.
-      'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
-      'valid-not-sa-009', // Test demonstrates that an external identifier may include a public identifier.
-      'valid-not-sa-018', // Test demonstrates an EnternalID whose contents contain an parameter entity declaration and a attribute list definition.
-      'valid-not-sa-019', // Test demonstrates that a parameter entity will be expanded with spaces on either side.
-      'valid-not-sa-021', // Test demonstrates a parameter entity declaration that contains a partial attribute list declaration.
-      'valid-not-sa-023', // Test demonstrates the use of a parameter entity reference within an attribute list declaration.
-      'valid-not-sa-024', // Constructs an!ATTLIST...>declaration from several PEs.
-      'valid-not-sa-025', // Test demonstrates that when more that one definition is provided for the same entity only the first declaration is binding.
-      'ext02', // Tests use of external parsed entities with different       encodings than the base document.
-      'not-sa01', // A non-standalone document is valid if declared as such.
-      'not-sa02', // A non-standalone document is valid if declared as such.
-      'not-sa03', // A non-standalone document is valid if declared as such.
-      'not-sa04', // A non-standalone document is valid if declared as such.
-      'notation01', // NOTATION declarations don't need SYSTEM IDs; and externally declared notations may be used to declare unparsed entities in the internal DTD subset. The notation must be reported to the application.
-      'sa05', // Like sa01 but this document is standalone since it has no optional whitespace. On output, requires notations to be correctly reported.
-      'v-sgml01', // XML permits token reuse, while SGML does not.
-      'rmt-007', // A vanilla XML 1.1 document
-      'rmt-010', // Contains a C1 control, legal in XML 1.0, illegal in XML 1.1
-      'rmt-022', // Has a NEL character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
-      'rmt-023', // Has a NEL character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
-      'rmt-024', // Has an LSEP character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
-      'rmt-025', // Has an LSEP character; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
-      'rmt-026', // Has CR-NEL; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
-      'rmt-027', // Has CR-NEL; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
-      'rmt-028', // Has CR-LSEP; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1. Note that CR and LSEP are not combined into a single LF
-      'rmt-029', // Has CR-LSEP; legal in both XML 1.0 and 1.1, but different canonical output because of normalization in 1.1
-      'rmt-031', // Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-033', // Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-035', // Has an NMTOKENS attribute containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
-      'rmt-040', // Contains a C1 control character (partial line up), legal in XML 1.0 but not 1.1
-      'rmt-043', // Contains a character reference to a C0 control character (form-feed), legal in XML 1.1 but not 1.0
-      'rmt-045', // Contains a character reference to a C1 control character (partial line up), legal in both XML 1.0 and 1.1 (but for different reasons)
-      'rmt-049', // has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+      /*
+       * We are processing newliens in internal entities inappropriately.
+       * once we have processed input once, we no longer convert new liness to \n
+       */
       'rmt-050', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
       'rmt-051', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
+      'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
+
+      // Something wrong with attribute normalization
+      'valid-sa-110', // Basically an output test, this requires that a CDATA attribute with a CRLF be normalized to one space.
+      'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
+
+      'rmt-040', // Unsure
+      'rmt-044', // Unsure
 
       //
       // ////////////
@@ -290,6 +263,8 @@ const testFilters: FilterData = {
       'valid-ext-sa-007', // utf16 BOM
       // utf8/BOM
       'rmt-e2e-22', // Starts with a BOM
+      // This not only is doing utf16, but may not be loading the entities correctly.
+      'ext02', // Tests use of external parsed entities with different       encodings than the base document.
 
       // Valid namespaces
       'rmt-ns10-017', // Simple legal case: no namespaces

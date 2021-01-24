@@ -1,7 +1,14 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { AttListDeclarationPToken, TextPToken } from 'pToken';
+import {
+   AttListDeclarationPToken,
+   ExternalIdP,
+   GeneralEntityDeclarationPToken,
+   NotationDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   TextPToken,
+} from 'pToken';
 import { toSToken, SToken } from 'sToken';
 import {
    makeAttListDeclaration,
@@ -11,6 +18,9 @@ import {
    makeElementEmptyWithAttrValueFromString,
    makeTextPToken,
    makeXmlDecl,
+   makeNotationDeclaration,
+   makeParameterEntityDeclaration,
+   makeGeneralEntityDeclaration,
 } from 'token-test';
 
 // ick
@@ -360,7 +370,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart) as ElementStartPToken;
 
          // @ts-expect-error 2329/matchers
-                  expect(result.attributes[0].value).toEqualRangeless([
+         expect(result.attributes[0].value).toEqualRangeless([
             new TextPToken({ text: new SToken('a ', '   \na   ', []) }),
             new CharRefPToken({ open: toSToken('&'), digits: toSToken('65') }),
             new TextPToken({ text: new SToken(' a', '   \na   ', []) }),
@@ -393,7 +403,7 @@ describe('AttFixer', () => {
          const result = fixAttributes.processPToken(elementStart) as ElementStartPToken;
 
          // @ts-expect-error 2329/matchers
-                  expect(result.attributes[0].value).toEqualRangeless([
+         expect(result.attributes[0].value).toEqualRangeless([
             new TextPToken({ text: new SToken('a ', '   \na   ', []) }),
             new GeneralEntityStartPToken(reference),
             new TextPToken({ text: new SToken('', '   \n\t   ', []) }),
@@ -530,6 +540,114 @@ describe('AttFixer', () => {
                charRefD,
                charRefA,
             ]),
+         );
+      });
+   });
+
+   describe('public literal normalization', () => {
+      it('normalizes the public literal in a notation declaration', () => {
+         const notationDeclaration = new NotationDeclarationPToken(makeNotationDeclaration(), {
+            externalId: new ExternalIdP({
+               externalType: toSToken('PUBLIC'),
+               public: {
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken(toSToken(' one   two  '))],
+                  closeQuote: toSToken('"'),
+               },
+            }),
+         });
+
+         const result = fixAttributes.processPToken(notationDeclaration);
+
+         expect(result).toEqual(
+            new NotationDeclarationPToken(makeNotationDeclaration(), {
+               externalId: new ExternalIdP({
+                  externalType: toSToken('PUBLIC'),
+                  public: {
+                     openQuote: toSToken('"'),
+                     value: [
+                        new TextPToken(new SToken('one two', ' one   two  ', toSToken(' ').ranges)),
+                     ],
+                     closeQuote: toSToken('"'),
+                  },
+               }),
+            }),
+         );
+      });
+
+      it('normalizes the public literal in a parameter entity declaration', () => {
+         const notationDeclaration = new ParameterEntityDeclarationPToken(
+            makeParameterEntityDeclaration(),
+            {
+               externalId: new ExternalIdP({
+                  externalType: toSToken('PUBLIC'),
+                  system: {
+                     openQuote: toSToken('"'),
+                     value: [new TextPToken(toSToken(' one   two  '))],
+                     closeQuote: toSToken('"'),
+                  },
+                  public: {
+                     openQuote: toSToken('"'),
+                     value: [new TextPToken(toSToken(' one   two  '))],
+                     closeQuote: toSToken('"'),
+                  },
+               }),
+            },
+         );
+
+         const result = fixAttributes.processPToken(notationDeclaration);
+
+         expect(result).toEqual(
+            new ParameterEntityDeclarationPToken(makeParameterEntityDeclaration(), {
+               externalId: new ExternalIdP({
+                  externalType: toSToken('PUBLIC'),
+                  system: {
+                     openQuote: toSToken('"'),
+                     value: [new TextPToken(toSToken(' one   two  '))],
+                     closeQuote: toSToken('"'),
+                  },
+                  public: {
+                     openQuote: toSToken('"'),
+                     value: [
+                        new TextPToken(new SToken('one two', ' one   two  ', toSToken(' ').ranges)),
+                     ],
+                     closeQuote: toSToken('"'),
+                  },
+               }),
+            }),
+         );
+      });
+
+      it('normalizes the public literal in a geenral entity declaration', () => {
+         const notationDeclaration = new GeneralEntityDeclarationPToken(
+            makeGeneralEntityDeclaration(),
+            {
+               externalId: new ExternalIdP({
+                  externalType: toSToken('PUBLIC'),
+                  public: {
+                     openQuote: toSToken('"'),
+                     value: [new TextPToken(toSToken(' one   two  '))],
+                     closeQuote: toSToken('"'),
+                  },
+               }),
+            },
+         );
+
+         const result = fixAttributes.processPToken(notationDeclaration);
+
+         expect(result).toEqual(
+            new GeneralEntityDeclarationPToken(makeGeneralEntityDeclaration(), {
+               externalId: new ExternalIdP({
+                  externalType: toSToken('PUBLIC'),
+                  public: {
+                     openQuote: toSToken('"'),
+                     value: [
+                        new TextPToken(new SToken('one two', ' one   two  ', toSToken(' ').ranges)),
+                     ],
+                     closeQuote: toSToken('"'),
+                  },
+               }),
+            }),
          );
       });
    });

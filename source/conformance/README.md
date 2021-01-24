@@ -58,3 +58,11 @@ These are valid, but the condition they say they are checking for is not entirel
 These are "wrong":
 
 * x-rmt-008 says for 1.0/1-4 it should fail, but for 1.0/5 it should pass. This is true for revision 2-5, but is not true for 1.0/1.  That is, if the assertion of the test is: if your processor can handle processing revision 5, then a version of 1.7 is legal, as long as it uses no features not found in 1.9.  Well, then, given the syntax for version in 1.0/1, then if you have a processor that can only handle processng revision 1, then 1.7 is legal as long as it only uses 1.0/1 features.
+* These three all have what I think are invalid language codes
+   * v-lang03: i-klingon-whorf
+   * v-lang04: x-dialect-valleygirl
+   * ibm-valid-P36-ibm36v01.xml: i-BS-ABCD
+
+These have errors:
+* ibm-invalid-P41-ibm41i02.xml : This has "PCDATA" when it should have "#PCDATA"
+
