@@ -54,7 +54,7 @@ import {
 } from 'token-test';
 
 import { DocumentChecker } from '../DocumentChecker';
-import { CHECKER_DONE, CheckState, Checker } from '../checkUtils';
+import { CHECKER_DONE, CheckState, MarkupChecker, ContentChecker } from '../checkUtils';
 import { checkMap } from '../checkMap';
 import checkConditionalStartWellFormed from '../token/conditionalStart';
 
@@ -84,19 +84,18 @@ describe('DocumentChecker (unit)', () => {
    let externalSubsetEnd: ExternalSubsetEndToken;
    let externalSubsetStart: ExternalSubsetStartToken;
 
-   class MockChecker implements Checker {
-      lastSeen?: PToken;
+   class MockMarkupChecker implements MarkupChecker {
+      lastSeen?: ParseToken;
 
-      constructor(checkState: CheckState) {
+      constructor(start: ParseToken, ec: ErrorCollector, checkState: CheckState) {
+         subParams = [start, ec];
          subState = checkState;
+         this.lastSeen = start;
       }
 
       check(...args: Array<unknown>): undefined | typeof CHECKER_DONE {
          subParams = args; // eslint-disable-line prefer-rest-params
          const pToken: PToken = args[0] as PToken;
-         if (pToken.type === ELEMENT_EMPTY_PTOKEN) {
-            return CHECKER_DONE;
-         }
 
          if (pToken.type === COMMENT_PTOKEN) {
             return undefined;
@@ -105,8 +104,7 @@ describe('DocumentChecker (unit)', () => {
          if (
             this.lastSeen &&
             (this.lastSeen.type === INTERNAL_SUBSET_START_TOKEN ||
-               this.lastSeen.type === EXTERNAL_SUBSET_START_TOKEN ||
-               this.lastSeen.type === ELEMENT_START_PTOKEN)
+               this.lastSeen.type === EXTERNAL_SUBSET_START_TOKEN)
          ) {
             return CHECKER_DONE;
          }
@@ -115,7 +113,7 @@ describe('DocumentChecker (unit)', () => {
       }
    }
 
-   class MockCheckerNew implements Checker {
+   class MockContentChecker implements ContentChecker {
       lastSeen?: ParseToken;
 
       allDone: boolean;
@@ -139,12 +137,7 @@ describe('DocumentChecker (unit)', () => {
             return undefined;
          }
 
-         if (
-            this.lastSeen &&
-            (this.lastSeen.type === INTERNAL_SUBSET_START_TOKEN ||
-               this.lastSeen.type === EXTERNAL_SUBSET_START_TOKEN ||
-               this.lastSeen.type === ELEMENT_START_PTOKEN)
-         ) {
+         if (this.lastSeen && this.lastSeen.type === ELEMENT_START_PTOKEN) {
             this.allDone = true;
             return CHECKER_DONE;
          }
@@ -160,8 +153,8 @@ describe('DocumentChecker (unit)', () => {
       subParams = [];
       ec = new MockErrorCollector();
       checker = new DocumentChecker({
-         content: MockCheckerNew,
-         dtd: MockChecker,
+         content: MockContentChecker,
+         dtd: MockMarkupChecker,
       });
 
       confVer = new ConformanceVersion();

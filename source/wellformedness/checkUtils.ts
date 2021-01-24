@@ -17,8 +17,23 @@ import {
    ParameterEntityReferencePToken,
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
+   ElementEmptyPToken,
+   ElementStartPToken,
+   GeneralEntityStartPToken,
+   InternalSubsetStartToken,
+   ExternalSubsetStartToken,
+   ParameterEntityStartPToken,
+   ConditionalPToken,
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
+
+type ContentStart = ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
+
+type MarkupStart =
+   | InternalSubsetStartToken
+   | ExternalSubsetStartToken
+   | ParameterEntityStartPToken
+   | ConditionalPToken;
 
 interface GeneralEntitiesInfo {
    [name: string]:
@@ -33,15 +48,34 @@ interface ParameterEntitiesInfo {
    [name: string]: ParameterEntityDeclarationPToken | undefined; // https://stackoverflow.com/questions/61493377/typescript-returned-type-when-accessing-undefined-key-on-object-is-wrong
 }
 
-interface CheckerConstructor {
-   new (checkState: CheckState, geContext: Array<string>): Checker;
+interface MarkupChecker {
+   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
+}
+
+interface ContentChecker {
+   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
+   isDone: boolean;
+}
+
+interface ContentCheckerConstructor {
+   new (
+      start: ContentStart,
+      ec: ErrorCollector,
+      checkState: CheckState,
+      geContext: Array<string>,
+   ): ContentChecker;
+}
+
+interface MarkupCheckerConstructor {
+   new (
+      start: MarkupStart,
+      ec: ErrorCollector,
+      checkState: CheckState,
+      geContext: Array<string>,
+   ): MarkupChecker;
 }
 
 const CHECKER_DONE = '**Checker Done**';
-
-interface Checker {
-   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
-}
 
 const WFID = WellFormedError.ID;
 const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
@@ -282,8 +316,12 @@ function isParamEntityExternal(
 }
 
 export {
-   Checker,
-   CheckerConstructor,
+   ContentChecker,
+   MarkupChecker,
+   ContentStart,
+   MarkupStart,
+   ContentCheckerConstructor,
+   MarkupCheckerConstructor,
    GeneralEntitiesInfo,
    ParameterEntitiesInfo,
    CheckState,

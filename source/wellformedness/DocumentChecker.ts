@@ -15,20 +15,22 @@ import { DOCTYPE_START_PTOKEN } from '../token/docTypeStart';
 import { DOCTYPE_END_PTOKEN } from '../token/docTypeEnd';
 import { COMMENT_PTOKEN } from '../token/comment';
 import { SPACE_PTOKEN } from '../token/space';
-import {
-   ElementEmptyPToken,
-   ElementStartPToken,
-   ELEMENT_EMPTY_PTOKEN,
-   ELEMENT_START_PTOKEN,
-} from '../token/elementStart';
+import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStart';
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
 import { getFirstSToken } from '../token/getFirstSToken';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
-import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
+import {
+   ContentChecker,
+   MarkupChecker,
+   ContentCheckerConstructor,
+   MarkupCheckerConstructor,
+   CheckState,
+   CHECKER_DONE,
+} from './checkUtils';
 import { checkMap } from './checkMap';
-import { CONDITIONAL_PTOKEN, GeneralEntityStartPToken } from 'token';
+import { CONDITIONAL_PTOKEN } from 'token';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
@@ -40,18 +42,9 @@ interface StateTable {
       | undefined;
 }
 
-interface ContentCheckerConstructor {
-   new (
-      start: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken,
-      ec: ErrorCollector,
-      checkState: CheckState,
-      geContext: Array<string>,
-   ): Checker;
-}
-
 interface CheckerMap {
    content: ContentCheckerConstructor;
-   dtd: CheckerConstructor;
+   dtd: MarkupCheckerConstructor;
 }
 
 enum State {
@@ -121,7 +114,7 @@ class DocumentChecker {
 
    private checkState: CheckState = new CheckState();
 
-   private subChecker?: Checker;
+   private subChecker?: ContentChecker | MarkupChecker;
 
    private checkers: CheckerMap;
 
@@ -143,6 +136,8 @@ class DocumentChecker {
          return;
       }
 
+      const mapped = checkMap[pToken.type];
+
       if (pToken.type === DOCTYPE_END_PTOKEN) {
          // Report errors with the starting context of the DOCTYPE start
          const specialErrorCollector = new ErrorCollector(
@@ -153,8 +148,8 @@ class DocumentChecker {
          errorCollector.appendFrom(specialErrorCollector);
       } else if (pToken.type === CONDITIONAL_PTOKEN) {
          checkConditionalStartWellFormed(pToken, errorCollector);
-      } else if (checkMap[pToken.type]) {
-         checkMap[pToken.type](pToken, errorCollector, this.checkState.confVer);
+      } else if (mapped) {
+         mapped(pToken, errorCollector, this.checkState.confVer);
       } else if ('checkWellFormed' in pToken) {
          pToken.checkWellFormed(errorCollector, this.checkState.confVer);
       }
@@ -200,8 +195,7 @@ class DocumentChecker {
             }
 
             if (this.state === State.PROLOG_DTD) {
-               this.subChecker = new this.checkers.dtd(this.checkState, []);
-               this.subChecker.check(pToken, errorCollector);
+               this.subChecker = new this.checkers.dtd(pToken, errorCollector, this.checkState, []);
             }
             return;
          case ELEMENT_START_PTOKEN:
@@ -216,7 +210,7 @@ class DocumentChecker {
                   [],
                );
 
-               if ((checker as any).isDone) {
+               if (checker.isDone) {
                   this.state = State.TRAILING_MISC;
                } else {
                   this.subChecker = checker;

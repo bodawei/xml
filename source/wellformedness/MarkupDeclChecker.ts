@@ -18,21 +18,16 @@ import {
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    ElidedEntityDeclarationPToken,
 } from '../token/ElidedEntityDeclarationPToken';
-import { CONDITIONAL_PTOKEN, ConditionalPToken } from '../token/conditional';
+import { CONDITIONAL_PTOKEN } from '../token/conditional';
 import { CONDITIONAL_CLOSE_PTOKEN } from '../token/conditionalClose';
 import { COMMENT_PTOKEN } from '../token/comment';
-import {
-   PARAMETER_ENTITY_START_PTOKEN,
-   ParameterEntityStartPToken,
-} from '../token/marker/parameterEntityStart';
+import { PARAMETER_ENTITY_START_PTOKEN } from '../token/marker/parameterEntityStart';
 import { PARAMETER_ENTITY_END_PTOKEN } from '../token/marker/parameterEntityEnd';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityReferencePToken,
 } from '../token/parameterEntityReference';
-import { ExternalSubsetStartToken } from '../token/marker/externalSubsetStart';
 import { EXTERNAL_SUBSET_END_TOKEN } from '../token/marker/externalSubsetEnd';
-import { InternalSubsetStartToken } from '../token/marker/internalSubsetStart';
 import { INTERNAL_SUBSET_END_TOKEN } from '../token/marker/internalSubsetEnd';
 import { getFirstSToken } from '../token/getFirstSToken';
 import { SPACE_PTOKEN } from '../token/space';
@@ -53,7 +48,8 @@ import {
 import {
    CHECKER_DONE,
    CheckState,
-   Checker,
+   MarkupStart,
+   MarkupChecker,
    scanAttributeValues,
    checkParameterEntity,
    isParamEntityExternal,
@@ -333,14 +329,10 @@ function checkDeclaration(
  *
  * This will process any embedded parameter entities without problems.
  */
-class MarkupDeclChecker implements Checker {
+class MarkupDeclChecker implements MarkupChecker {
    private state: States = States.PRE;
 
-   private start!:
-      | InternalSubsetStartToken
-      | ExternalSubsetStartToken
-      | ParameterEntityStartPToken
-      | ConditionalPToken;
+   private start: MarkupStart;
 
    private inExtSubset = false; // That is, in production 30. This can be either the external subset or the body of an external entity
 
@@ -352,35 +344,56 @@ class MarkupDeclChecker implements Checker {
 
    private declsSeen: DeclarationInfo;
 
-   public constructor(checkState: CheckState, peContext: Array<string>, inExternalSubset = false) {
+   public constructor(
+      start: MarkupStart,
+      ec: ErrorCollector,
+      checkState: CheckState,
+      peContext: Array<string>,
+      inExternalSubset = false,
+   ) {
       this.checkState = checkState;
       this.inExtSubset = inExternalSubset;
       this.peContext = peContext;
       this.declsSeen = {};
+      this.start = start;
+
+      if (start.type === INTERNAL_SUBSET_START_TOKEN) {
+         this.inExtSubset = false;
+         this.state = States.INTERNAL_SUBSET;
+      } else if (start.type === EXTERNAL_SUBSET_START_TOKEN) {
+         this.inExtSubset = true;
+         this.state = States.EXTERNAL_SUBSET_START;
+      } else if (start.type === PARAMETER_ENTITY_START_PTOKEN) {
+         const entityName = strOrBlank(start.referencePToken.name);
+         const decl = this.checkState.paramDecls[entityName];
+
+         if (decl?.externalId) {
+            this.inExtSubset = true;
+         }
+
+         this.checkPERef(start.referencePToken, ec, true);
+
+         if (isParamEntityExternal(start.referencePToken, this.checkState.paramDecls)) {
+            this.state = this.inExtSubset
+               ? States.PARAM_START_EXTERNAL_SUBSET
+               : States.PARAM_START_INTERNAL_SUBSET;
+         } else {
+            this.state = this.inExtSubset ? States.EXTERNAL_SUBSET : States.INTERNAL_SUBSET;
+         }
+      } else {
+         if (this.inExtSubset) {
+            this.state = States.INSIDE_CONDITIONAL;
+         } else {
+            ec.report(WFID.MARKUPDECL_INVALID_TOKEN, [start.type], getFirstSToken(start));
+         }
+      }
    }
 
    public check(
       pToken: ParseToken,
       errorCollector: ErrorCollector,
    ): undefined | typeof CHECKER_DONE {
-      if (this.state === States.PRE) {
-         if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
-            this.inExtSubset = false;
-            this.start = pToken;
-         } else if (pToken.type === EXTERNAL_SUBSET_START_TOKEN) {
-            this.inExtSubset = true;
-            this.start = pToken;
-         } else if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
-            this.start = pToken;
-            const name = strOrBlank(pToken.referencePToken.name);
-            const decl = this.checkState.paramDecls[name];
-            if (decl?.externalId) {
-               this.inExtSubset = true;
-            }
-         } else if (pToken.type === CONDITIONAL_PTOKEN) {
-            this.start = pToken;
-         }
-      } else if (this.state === States.DONE) {
+      if (this.state === States.DONE) {
          throw new Error(
             'Internal error: Passed a token to MarkupDeclChecker when it was already done.',
          );
@@ -413,74 +426,26 @@ class MarkupDeclChecker implements Checker {
             checkDeclaration(pToken, this.state, errorCollector);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            const refName = strOrBlank(pToken.name);
-
-            // §4.1.0: Well-formedness constraint: No Recursion
-            //    A parsed entity must not contain a recursive reference to itself,
-            //    either directly or indirectly.
-            errorCollector.check(
-               this.peContext.includes(refName),
-               WellFormedError.ID.REFERENCE_INVALID_RECURSION,
-               [refName],
-               pToken.open,
-            );
-
-            // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
-            checkParameterEntity(
-               pToken,
-               this.checkState.paramDecls,
-               this.checkState,
-               errorCollector,
-            );
-            this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
-            // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
+            this.checkPERef(pToken, errorCollector, false);
             break;
          case CONDITIONAL_PTOKEN:
-            if (this.state !== States.PRE) {
-               this.embeddedChecker = new MarkupDeclChecker(
-                  this.checkState,
-                  this.peContext,
-                  this.inExtSubset,
-               );
-               this.embeddedChecker.check(pToken, errorCollector);
-               return;
-            }
-            break;
+            this.embeddedChecker = new MarkupDeclChecker(
+               pToken,
+               errorCollector,
+               this.checkState,
+               this.peContext,
+               this.inExtSubset,
+            );
+            return;
          case PARAMETER_ENTITY_START_PTOKEN:
-            if (this.state === States.PRE) {
-               const entityName = strOrBlank(pToken.referencePToken.name);
-
-               // §4.1.0: Well-formedness constraint: No Recursion
-               //    A parsed entity must not contain a recursive reference to itself,
-               //    either directly or indirectly.
-               errorCollector.check(
-                  this.peContext.includes(entityName),
-                  WellFormedError.ID.REFERENCE_INVALID_RECURSION,
-                  [entityName],
-                  pToken.referencePToken.open,
-               );
-
-               this.peContext.push(entityName);
-
-               // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
-               checkParameterEntity(
-                  pToken.referencePToken,
-                  this.checkState.paramDecls,
-                  this.checkState,
-                  errorCollector,
-               );
-               this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
-               // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
-            } else {
-               this.embeddedChecker = new MarkupDeclChecker(
-                  this.checkState,
-                  this.peContext,
-                  this.inExtSubset,
-               );
-               this.embeddedChecker.check(pToken, errorCollector);
-               return;
-            }
-            break;
+            this.embeddedChecker = new MarkupDeclChecker(
+               pToken,
+               errorCollector,
+               this.checkState,
+               this.peContext,
+               this.inExtSubset,
+            );
+            return;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
             const inInternalSubset =
                this.state === States.PARAM_START_INTERNAL_SUBSET ||
@@ -517,6 +482,34 @@ class MarkupDeclChecker implements Checker {
       }
    }
 
+   private checkPERef(
+      pToken: ParameterEntityReferencePToken,
+      ec: ErrorCollector,
+      addToContext: boolean,
+   ): void {
+      const entityName = strOrBlank(pToken.name);
+
+      // §4.1.0: Well-formedness constraint: No Recursion
+      //    A parsed entity must not contain a recursive reference to itself,
+      //    either directly or indirectly.
+      ec.check(
+         this.peContext.includes(entityName),
+         WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         [entityName],
+         pToken.open,
+      );
+
+      if (addToContext) {
+         this.peContext.push(entityName);
+      }
+
+      // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
+      checkParameterEntity(pToken, this.checkState.paramDecls, this.checkState, ec);
+
+      this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
+      // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
+   }
+
    /*
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
@@ -524,28 +517,15 @@ class MarkupDeclChecker implements Checker {
    private transition(pToken: ParseToken, ec: ErrorCollector): boolean {
       let newState: States | typeof NO_CHANGE | undefined;
 
-      if (pToken.type === PARAMETER_ENTITY_START_PTOKEN && this.state === States.PRE) {
-         if (isParamEntityExternal(pToken.referencePToken, this.checkState.paramDecls)) {
-            newState = this.inExtSubset
-               ? States.PARAM_START_EXTERNAL_SUBSET
-               : States.PARAM_START_INTERNAL_SUBSET;
-         } else {
-            newState = this.inExtSubset ? States.EXTERNAL_SUBSET : States.INTERNAL_SUBSET;
-         }
-      } else if (pToken.type === CONDITIONAL_PTOKEN && this.state === States.PRE) {
-         newState = this.inExtSubset ? States.INSIDE_CONDITIONAL : undefined;
-      } else if (
-         (this.start &&
-            pToken.type === PARAMETER_ENTITY_END_PTOKEN &&
+      if (
+         (pToken.type === PARAMETER_ENTITY_END_PTOKEN &&
             this.start.type === PARAMETER_ENTITY_START_PTOKEN) ||
          (pToken.type === INTERNAL_SUBSET_END_TOKEN &&
             this.start.type === INTERNAL_SUBSET_START_TOKEN) ||
          (pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
             (this.start.type === EXTERNAL_SUBSET_START_TOKEN ||
                this.start.type === CONDITIONAL_PTOKEN)) ||
-         (pToken.type === CONDITIONAL_CLOSE_PTOKEN &&
-            this.start &&
-            this.start.type === CONDITIONAL_PTOKEN)
+         (pToken.type === CONDITIONAL_CLOSE_PTOKEN && this.start.type === CONDITIONAL_PTOKEN)
       ) {
          newState = States.DONE;
       }

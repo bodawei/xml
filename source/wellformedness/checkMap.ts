@@ -28,11 +28,9 @@ import { XMLDECL_PTOKEN } from '../pToken/token/xmlDeclaration';
 import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 
 interface CheckMap {
-   [type: string]: (
-      pToken: any,
-      errorCollector: ErrorCollector,
-      confVer: ConformanceVersion,
-   ) => void;
+   [type: string]:
+      | undefined
+      | ((pToken: any, errorCollector: ErrorCollector, confVer: ConformanceVersion) => void);
 }
 
 const checkMap: CheckMap = {

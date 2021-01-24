@@ -114,30 +114,14 @@ describe('MarkupDeclChecker (unit)', () => {
       it('can be started with a parameter entity start token', () => {
          checkState.paramDecls.entityName = parameterEntityDeclaration;
 
-         checker = new MarkupDeclChecker(checkState, []);
-
-         checker.check(parameterEntityStart, ec);
+         new MarkupDeclChecker(parameterEntityStart, ec, checkState, []);
 
          expect(ec.errors).toEqual([]);
       });
 
-      it('reports an error it is started with something other than an internal or external subset', () => {
-         checker = new MarkupDeclChecker(checkState, []);
-
-         checker.check(comment, ec);
-
-         // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.MARKUPDECL_INVALID_TOKEN,
-            params: [comment.type],
-            position: comment.open,
-         });
-      });
-
       it('closes a parameter entity', () => {
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(parameterEntityStart, ec, checkState, []);
 
-         checker.check(parameterEntityStart, ec);
          checker.check(parameterEntityEnd, ec);
 
          expect(() => checker.check(comment, ec)).toThrowError(
@@ -149,8 +133,7 @@ describe('MarkupDeclChecker (unit)', () => {
    describe('internal subset', () => {
       beforeEach(() => {
          ec = new MockErrorCollector();
-         checker = new MarkupDeclChecker(checkState, []);
-         checker.check(internalSubsetStart, ec);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, []);
       });
 
       it('can be started with an internal subset start token', () => {
@@ -158,9 +141,8 @@ describe('MarkupDeclChecker (unit)', () => {
       });
 
       it('reports an error if a textdecl appears after an internal subset start', () => {
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, []);
 
-         checker.check(internalSubsetStart, ec);
          checker.check(textDecl, ec);
 
          // @ts-expect-error 2329/matchers
@@ -270,10 +252,9 @@ describe('MarkupDeclChecker (unit)', () => {
          it('does not replace an parameter entity in the state with a second one', () => {
             const name = strOrBlank(parameterEntityDeclaration.name);
             checkState.paramDecls[name] = parameterEntityDeclaration;
-            checker = new MarkupDeclChecker(checkState, []);
+            checker = new MarkupDeclChecker(externalSubsetStart, ec, checkState, []);
             const secondDeclaration = makeParameterEntityDeclaration();
 
-            checker.check(externalSubsetStart, ec);
             checker.check(secondDeclaration, ec);
 
             expect(checkState.paramDecls[name]).toBe(parameterEntityDeclaration);
@@ -367,22 +348,18 @@ describe('MarkupDeclChecker (unit)', () => {
 
    describe('external subset', () => {
       beforeEach(() => {
-         checker = new MarkupDeclChecker(checkState, []);
-         checker.check(externalSubsetStart, ec);
+         checker = new MarkupDeclChecker(externalSubsetStart, ec, checkState, []);
       });
 
       it('can be started with an external subset start token', () => {
-         checker = new MarkupDeclChecker(checkState, []);
-
-         checker.check(externalSubsetStart, ec);
+         new MarkupDeclChecker(externalSubsetStart, ec, checkState, []);
 
          expect(ec.errors).toEqual([]);
       });
 
       it('reports no error if a textdecl appears after an external subset start', () => {
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(externalSubsetStart, ec, checkState, []);
 
-         checker.check(externalSubsetStart, ec);
          checker.check(textDecl, ec);
 
          expect(ec.errors).toEqual([]);
@@ -442,9 +419,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('an error if the conditional section appears before the start of an external subset', () => {
-            checker = new MarkupDeclChecker(checkState, []);
-
-            checker.check(conditionalSection, ec);
+            new MarkupDeclChecker(conditionalSection, ec, checkState, []);
 
             // @ts-expect-error 2329/matchers
             expect(ec).toReportWFError({
@@ -564,9 +539,8 @@ describe('MarkupDeclChecker (unit)', () => {
    describe('ATTLIST', () => {
       it('calls scanAttributeValues() on the attributes in the ATTLIST', () => {
          const spy = jest.spyOn(checkUtils, 'scanAttributeValues').mockImplementation();
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, []);
 
-         checker.check(internalSubsetStart, ec);
          checker.check(attributeListDeclaration, ec);
 
          expect(spy).toHaveBeenCalledWith(
@@ -594,9 +568,8 @@ describe('MarkupDeclChecker (unit)', () => {
                   },
                ],
             });
-            const checker = new MarkupDeclChecker(checkState, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
@@ -624,9 +597,8 @@ describe('MarkupDeclChecker (unit)', () => {
                   },
                ],
             });
-            const checker = new MarkupDeclChecker(checkState, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
@@ -650,9 +622,8 @@ describe('MarkupDeclChecker (unit)', () => {
                }),
                declaredInInternalSubset: true,
             };
-            const checker = new MarkupDeclChecker(state, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, state, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec.errors).toEqual([]);
@@ -669,9 +640,8 @@ describe('MarkupDeclChecker (unit)', () => {
                ],
             });
             const state = new CheckState();
-            const checker = new MarkupDeclChecker(state, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, state, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
@@ -694,9 +664,8 @@ describe('MarkupDeclChecker (unit)', () => {
             });
             const state = new CheckState();
             state.hasExternalDTD = true;
-            const checker = new MarkupDeclChecker(state, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, state, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec.errors).toEqual([]);
@@ -714,9 +683,8 @@ describe('MarkupDeclChecker (unit)', () => {
             });
             const state = new CheckState();
             state.peRefCount = 1;
-            const checker = new MarkupDeclChecker(state, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, state, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             expect(ec.errors).toEqual([]);
@@ -740,9 +708,8 @@ describe('MarkupDeclChecker (unit)', () => {
                }),
                declaredInInternalSubset: false,
             };
-            const checker = new MarkupDeclChecker(state, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, state, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
@@ -771,9 +738,8 @@ describe('MarkupDeclChecker (unit)', () => {
                }),
                declaredInInternalSubset: false,
             };
-            const checker = new MarkupDeclChecker(state, []);
+            const checker = new MarkupDeclChecker(internalSubsetStart, ec, state, []);
 
-            checker.check(internalSubsetStart, ec);
             checker.check(attList, ec);
 
             // @ts-expect-error 2329/matchers
@@ -788,9 +754,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
    describe('general entity declaration', () => {
       it('adds a general entity declaration to the generalDecls', () => {
-         checker = new MarkupDeclChecker(checkState, [], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], true);
 
-         checker.check(internalSubsetStart, ec);
          checker.check(generalEntityDeclaration, ec);
 
          expect(checkState.generalDecls.geDecl.token).toEqual(generalEntityDeclaration);
@@ -802,10 +767,9 @@ describe('MarkupDeclChecker (unit)', () => {
             token: generalEntityDeclaration,
             declaredInInternalSubset: true,
          };
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(externalSubsetStart, ec, checkState, []);
          const secondDeclaration = makeGeneralEntityDeclaration();
 
-         checker.check(externalSubsetStart, ec);
          checker.check(secondDeclaration, ec);
 
          expect(checkState.generalDecls[name].token).toBe(generalEntityDeclaration);
@@ -815,9 +779,8 @@ describe('MarkupDeclChecker (unit)', () => {
 
    describe('parameter entity reference', () => {
       it('marks that we do not have all declarations after encountering a PE ref in an internal subset', () => {
-         checker = new MarkupDeclChecker(checkState, [], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], true);
 
-         checker.check(internalSubsetStart, ec);
          checker.check(paramEntityRef, ec);
 
          expect(checkState.peRefCount).toEqual(1);
@@ -836,7 +799,7 @@ describe('MarkupDeclChecker (unit)', () => {
                new ParameterEntityEndPToken(peRefToTwo),
             ],
          });
-         checker = new MarkupDeclChecker(checkState, [], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], true);
 
          checker.check(peDecl2, ec);
 
@@ -866,7 +829,7 @@ describe('MarkupDeclChecker (unit)', () => {
                new ParameterEntityEndPToken(peRefToTwo),
             ],
          });
-         checker = new MarkupDeclChecker(checkState, [], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], true);
 
          checker.check(peDecl, ec);
          checker.check(geDecl, ec);
@@ -892,7 +855,7 @@ describe('MarkupDeclChecker (unit)', () => {
                new ParameterEntityEndPToken(refToTestEnity),
             ],
          });
-         checker = new MarkupDeclChecker(checkState, ['testEntity'], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, ['testEntity'], true);
 
          checker.check(peDecl, ec);
 
@@ -920,7 +883,7 @@ describe('MarkupDeclChecker (unit)', () => {
             new ParameterEntityStartPToken(refToTestEnity),
             new ParameterEntityEndPToken(refToTestEnity),
          ]);
-         checker = new MarkupDeclChecker(checkState, ['testEntity'], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, ['testEntity'], true);
 
          checker.check(peDecl, ec);
          checker.check(elided, ec);
@@ -936,8 +899,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
    describe('embedded parameter entity', () => {
       it('returns done after going through a parameter entity and then ending the subset', () => {
-         checker = new MarkupDeclChecker(checkState, []);
-         checker.check(externalSubsetStart, ec);
+         checker = new MarkupDeclChecker(externalSubsetStart, ec, checkState, []);
          checker.check(comment, ec);
          checker.check(parameterEntityStart, ec);
          checker.check(comment, ec);
@@ -950,8 +912,7 @@ describe('MarkupDeclChecker (unit)', () => {
       });
 
       it('returns done after going through an external param entity ref and then ending the subset', () => {
-         checker = new MarkupDeclChecker(checkState, []);
-         checker.check(externalSubsetStart, ec);
+         checker = new MarkupDeclChecker(externalSubsetStart, ec, checkState, []);
          checker.check(externalParamEntityDecl, ec);
          checker.check(comment, ec);
          checker.check(parameterEntityStart, ec);
@@ -970,9 +931,8 @@ describe('MarkupDeclChecker (unit)', () => {
             name: toSToken('entityName'),
          });
          const peStart2 = new ParameterEntityStartPToken(peRef2);
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(parameterEntityStart, ec, checkState, []);
 
-         checker.check(parameterEntityStart, ec);
          checker.check(peStart2, ec);
 
          // @ts-expect-error 2329/matchers
@@ -989,9 +949,8 @@ describe('MarkupDeclChecker (unit)', () => {
             name: toSToken('entityName2'),
          });
          const peStart2 = new ParameterEntityStartPToken(peRef2);
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(parameterEntityStart, ec, checkState, []);
 
-         checker.check(parameterEntityStart, ec);
          checker.check(peStart2, ec);
 
          // @ts-expect-error 2329/matchers
@@ -1007,9 +966,8 @@ describe('MarkupDeclChecker (unit)', () => {
             open: toSToken('%'),
             name: toSToken('entityName'),
          });
-         checker = new MarkupDeclChecker(checkState, []);
+         checker = new MarkupDeclChecker(parameterEntityStart, ec, checkState, []);
 
-         checker.check(parameterEntityStart, ec);
          checker.check(peRef2, ec);
 
          // @ts-expect-error 2329/matchers

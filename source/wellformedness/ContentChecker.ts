@@ -6,7 +6,8 @@ import { strOrBlank } from 'sToken';
 
 import {
    CHECKER_DONE,
-   Checker,
+   ContentStart,
+   ContentChecker as IContentChecker,
    CheckState,
    scanAttributeValues,
    checkGeneralEntity,
@@ -18,21 +19,13 @@ import { CDATA_PTOKEN } from '../token/cdata';
 import { CHARDATA_PTOKEN } from '../token/charData';
 import { COMMENT_PTOKEN } from '../token/comment';
 import { CHARREF_PTOKEN } from '../token/charRef';
-import {
-   ELEMENT_EMPTY_PTOKEN,
-   ELEMENT_START_PTOKEN,
-   ElementEmptyPToken,
-   ElementStartPToken,
-} from '../token/elementStart';
+import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStart';
 import { ELEMENT_END_PTOKEN } from '../token/elementEnd';
 import {
    GeneralEntityReferencePToken,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
 } from '../token/generalEntityReference';
-import {
-   GENERAL_ENTITY_START_PTOKEN,
-   GeneralEntityStartPToken,
-} from '../token/marker/generalEntityStart';
+import { GENERAL_ENTITY_START_PTOKEN } from '../token/marker/generalEntityStart';
 import { getFirstSToken } from '../token/getFirstSToken';
 import { GENERAL_ENTITY_END_PTOKEN } from '../token/marker/generalEntityEnd';
 import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
@@ -108,10 +101,10 @@ const transitionsByState: StateTable = {
  * - If a GeneralEntityStart is found, this will construct a new ContextChecker
  *   and then pass any tokens this is given to that until it indicates CHECKER_DONE
  */
-class ContentChecker implements Checker {
+class ContentChecker implements IContentChecker {
    private state: State;
 
-   private start: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
+   private start: ContentStart;
 
    private elementNameStack: Array<string> = [];
 
@@ -122,7 +115,7 @@ class ContentChecker implements Checker {
    private geContext: Array<string>;
 
    constructor(
-      start: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken,
+      start: ContentStart,
       ec: ErrorCollector,
       checkState: CheckState,
       geContext: Array<string>,
