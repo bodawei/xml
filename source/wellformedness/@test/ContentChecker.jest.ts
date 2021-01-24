@@ -57,23 +57,16 @@ describe('ContentChecker (unit)', () => {
       ec = new MockErrorCollector();
    });
 
-   function makeChecker(state: CheckState = new CheckState()) {
-      return new ContentChecker(state, []);
+   function makeChecker(
+      start: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken,
+      state: CheckState = new CheckState(),
+   ) {
+      return new ContentChecker(start, ec, state, []);
    }
 
    describe('misc', () => {
-      it('throws an error if called with something other than an entity or element start', () => {
-         const checker = makeChecker();
-
-         expect(() => checker.check(generalEntityReference, ec)).toThrowError(
-            /Must first call check/,
-         );
-      });
-
       it('throws an error if called after it is already done', () => {
-         const checker = makeChecker();
-
-         checker.check(elementEmpty, ec);
+         const checker = makeChecker(elementEmpty);
 
          expect(() => checker.check(generalEntityReference, ec)).toThrowError(
             /Passed a token to ContentChecker/,
@@ -83,26 +76,22 @@ describe('ContentChecker (unit)', () => {
 
    describe('stacking of elements', () => {
       it('reports done if the first token is an empty element', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(elementEmpty);
 
-         const result = checker.check(elementEmpty, ec);
-
-         expect(result).toEqual(CHECKER_DONE);
+         expect(checker.isDone).toEqual(true);
       });
 
       it('reports done if called with a start and then a matching end, and the start was an element start', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          const result = checker.check(elementEnd, ec);
 
          expect(result).toEqual(CHECKER_DONE);
       });
 
       it('does not report done if called with a start and then a matching end, and the start was a general entity', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(elementStart, ec);
          const result = checker.check(elementEnd, ec);
 
@@ -110,9 +99,8 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports no error if an empty element appears between start and end', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(elementEmpty, ec);
          checker.check(elementEnd, ec);
 
@@ -124,9 +112,8 @@ describe('ContentChecker (unit)', () => {
             open: toSToken('</'),
             name: toSToken('bogus'),
          });
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(unbalancedElement, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -146,9 +133,8 @@ describe('ContentChecker (unit)', () => {
             open: toSToken('</'),
             name: toSToken('bogus2'),
          });
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(unbalancedEnd, ec);
          checker.check(unbalancedEnd2, ec);
 
@@ -161,9 +147,8 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an unbalanced message if there is an end immediately after an opening general entity', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(elementEnd, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -183,9 +168,8 @@ describe('ContentChecker (unit)', () => {
             open: toSToken('</'),
             name: toSToken('bogus2'),
          });
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(unbalancedEnd, ec);
          checker.check(unbalancedEnd2, ec);
          const result = checker.check(elementEnd, ec);
@@ -199,9 +183,8 @@ describe('ContentChecker (unit)', () => {
             name: toSToken('testRef'),
          });
          const geStart2 = new GeneralEntityStartPToken(geRef2);
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(geStart2, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -217,9 +200,8 @@ describe('ContentChecker (unit)', () => {
             open: toSToken('&'),
          });
          const geStart2 = new GeneralEntityStartPToken(geRef2);
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(geStart2, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -232,9 +214,8 @@ describe('ContentChecker (unit)', () => {
             name: toSToken('testRef2'),
          });
          const geStart2 = new GeneralEntityStartPToken(geRef2);
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(geStart2, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -250,9 +231,8 @@ describe('ContentChecker (unit)', () => {
             open: toSToken('&'),
             name: toSToken('testRef'),
          });
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(geRef2, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -268,9 +248,8 @@ describe('ContentChecker (unit)', () => {
             open: toSToken('&'),
             name: undefined,
          });
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(geRef2, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -288,9 +267,8 @@ describe('ContentChecker (unit)', () => {
             }),
             declaredInInternalSubset: true,
          };
-         const checker = makeChecker(state);
+         const checker = makeChecker(generalEntityStart, state);
 
-         checker.check(generalEntityStart, ec);
          checker.check(textDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -306,9 +284,8 @@ describe('ContentChecker (unit)', () => {
             }),
             declaredInInternalSubset: true,
          };
-         const checker = makeChecker(state);
+         const checker = makeChecker(generalEntityStart, state);
 
-         checker.check(generalEntityStart, ec);
          checker.check(textDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -320,9 +297,8 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports no errors if a CData section is found after a general entity start', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(cdata, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -330,9 +306,8 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an error if a TextDecl is found after an a comment after a general entity start', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(comment, ec);
          checker.check(textDeclStart, ec);
 
@@ -345,9 +320,8 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('reports an error if a TextDecl is found after an element start', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(textDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -360,9 +334,8 @@ describe('ContentChecker (unit)', () => {
 
       it('reports an error if a non-content token is found in the content', () => {
          const notationDecl = new NotationDeclarationPToken({ open: toSToken('<!') });
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(notationDecl, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -375,9 +348,8 @@ describe('ContentChecker (unit)', () => {
 
       it('reports an error if a chardata token with "]]>" is found', () => {
          const charData = new CharDataPToken({ text: toSToken(']]>') });
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(charData, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -404,9 +376,8 @@ describe('ContentChecker (unit)', () => {
             token: entityDecl,
             declaredInInternalSubset: true,
          };
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(ref, ec);
 
          expect(ec.errors).toEqual([]);
@@ -426,7 +397,7 @@ describe('ContentChecker (unit)', () => {
             token: entityDecl,
             declaredInInternalSubset: true,
          };
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
          checker.check(elementStart, ec);
          checker.check(unparsedReference, ec);
@@ -447,9 +418,8 @@ describe('ContentChecker (unit)', () => {
          const state = new CheckState();
          state.isStandalone = false;
          state.peRefCount = 1;
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
          expect(ec.errors).toEqual([]);
@@ -462,9 +432,8 @@ describe('ContentChecker (unit)', () => {
          });
          const state = new CheckState();
          state.hasNoDTD = true;
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(badRef, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -482,9 +451,8 @@ describe('ContentChecker (unit)', () => {
          });
          const state = new CheckState();
          state.isStandalone = true;
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -497,9 +465,8 @@ describe('ContentChecker (unit)', () => {
 
       it('reports an error if a general entity end does not belong here', () => {
          const endityEnd = new GeneralEntityEndPToken(generalEntityReference);
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(endityEnd, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -516,9 +483,8 @@ describe('ContentChecker (unit)', () => {
             name: toSToken('noDecl'),
          });
          const noDeclStart = new GeneralEntityStartPToken(noDeclRef);
-         const checker = makeChecker();
+         const checker = makeChecker(elementStart);
 
-         checker.check(elementStart, ec);
          checker.check(noDeclStart, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -536,9 +502,8 @@ describe('ContentChecker (unit)', () => {
          });
          const state = new CheckState();
          state.peRefCount = 1;
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -552,9 +517,8 @@ describe('ContentChecker (unit)', () => {
          });
          const state = new CheckState();
          state.peRefCount = 0;
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -568,9 +532,8 @@ describe('ContentChecker (unit)', () => {
          });
          const state = new CheckState();
          state.hasExternalDTD = true;
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -584,9 +547,8 @@ describe('ContentChecker (unit)', () => {
          });
          const state = new CheckState();
          state.hasExternalDTD = false;
-         const checker = makeChecker(state);
+         const checker = makeChecker(elementStart, state);
 
-         checker.check(elementStart, ec);
          checker.check(noDeclRef, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -598,8 +560,7 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('handles an embedded general entity and still is done when expected', () => {
-         const checker = makeChecker();
-         checker.check(elementStart, ec);
+         const checker = makeChecker(elementStart);
          checker.check(comment, ec);
          checker.check(generalEntityStart, ec);
          checker.check(comment, ec);
@@ -612,26 +573,24 @@ describe('ContentChecker (unit)', () => {
       });
 
       it('does not return a sub-checker this is the first checker found', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         const result = checker.check(generalEntityStart, ec);
+         const result = checker.isDone;
 
-         expect(result).toEqual(undefined);
+         expect(result).toEqual(false);
       });
 
       it('reports done if an entity end is found that matches the start', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          const result = checker.check(generalEntityEnd, ec);
 
          expect(result).toEqual(CHECKER_DONE);
       });
 
       it('reports an error if all the start elements have not been closed by the end of the entity (§4.3.2)', () => {
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(elementStart, ec);
          checker.check(generalEntityEnd, ec);
 
@@ -649,9 +608,8 @@ describe('ContentChecker (unit)', () => {
             name: toSToken('other'),
          });
          const bogusEnd = new GeneralEntityEndPToken(badRef);
-         const checker = makeChecker();
+         const checker = makeChecker(generalEntityStart);
 
-         checker.check(generalEntityStart, ec);
          checker.check(bogusEnd, ec);
 
          // @ts-expect-error TS2339 - matchers
@@ -679,9 +637,7 @@ describe('ContentChecker (unit)', () => {
                },
             ],
          });
-         const checker = makeChecker();
-
-         checker.check(unbalancedElement, ec);
+         makeChecker(unbalancedElement);
 
          // @ts-expect-error TS2339 - matchers
          expect(ec).toReportWFError({
@@ -706,9 +662,7 @@ describe('ContentChecker (unit)', () => {
                },
             ],
          });
-         const checker = makeChecker();
-
-         checker.check(unbalancedElement, ec);
+         makeChecker(unbalancedElement);
 
          // @ts-expect-error TS2339 - matchers
          expect(ec).toNotReportError(WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED);
@@ -729,9 +683,7 @@ describe('ContentChecker (unit)', () => {
             token: new GeneralEntityDeclarationPToken({ open: toSToken('<!') }),
             declaredInInternalSubset: true,
          };
-         const checker = makeChecker(state);
-
-         checker.check(undeclaredRef, ec);
+         makeChecker(undeclaredRef, state);
 
          expect(ec.errors).toEqual([]);
       });
@@ -746,9 +698,8 @@ describe('ContentChecker (unit)', () => {
                },
             ],
          });
-         const checker = makeChecker();
 
-         checker.check(undeclaredRef, ec);
+         makeChecker(undeclaredRef);
 
          // @ts-expect-error TS2339 - matchers
          expect(ec).toReportWFError({
@@ -770,9 +721,8 @@ describe('ContentChecker (unit)', () => {
          });
          const state = new CheckState();
          state.hasExternalDTD = true;
-         const checker = makeChecker(state);
 
-         checker.check(undeclaredRef, ec);
+         makeChecker(undeclaredRef, state);
 
          expect(ec.errors).toEqual([]);
       });
@@ -795,9 +745,7 @@ describe('ContentChecker (unit)', () => {
             }),
             declaredInInternalSubset: true,
          };
-         const checker = makeChecker(state);
-
-         checker.check(withExternalRef, ec);
+         makeChecker(withExternalRef, state);
 
          // @ts-expect-error TS2339 - matchers
          expect(ec).toReportWFError({
@@ -825,9 +773,7 @@ describe('ContentChecker (unit)', () => {
             }),
             declaredInInternalSubset: true,
          };
-         const checker = makeChecker(state);
-
-         checker.check(withUnparsedRef, ec);
+         makeChecker(withUnparsedRef, state);
 
          // @ts-expect-error TS2339 - matchers
          expect(ec).toReportWFError({

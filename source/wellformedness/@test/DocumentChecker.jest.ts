@@ -5,6 +5,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { ErrorCollector, ConformanceVersion, EntityId } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
+   ParseToken,
    ProcessingInstructionPToken,
    TextDeclarationPToken,
    XmlDeclarationPToken,
@@ -90,7 +91,7 @@ describe('DocumentChecker (unit)', () => {
          subState = checkState;
       }
 
-      check(...args: Array<unknown>): void | typeof CHECKER_DONE {
+      check(...args: Array<unknown>): undefined | typeof CHECKER_DONE {
          subParams = args; // eslint-disable-line prefer-rest-params
          const pToken: PToken = args[0] as PToken;
          if (pToken.type === ELEMENT_EMPTY_PTOKEN) {
@@ -114,6 +115,44 @@ describe('DocumentChecker (unit)', () => {
       }
    }
 
+   class MockCheckerNew implements Checker {
+      lastSeen?: ParseToken;
+
+      allDone: boolean;
+
+      constructor(start: ParseToken, ec: ErrorCollector, checkState: CheckState) {
+         subParams = [start, ec];
+         subState = checkState;
+         this.lastSeen = start;
+         this.allDone = start.type === ELEMENT_EMPTY_PTOKEN;
+      }
+
+      get isDone() {
+         return this.allDone;
+      }
+
+      check(...args: Array<unknown>): undefined | typeof CHECKER_DONE {
+         subParams = args; // eslint-disable-line prefer-rest-params
+         const pToken: PToken = args[0] as PToken;
+
+         if (pToken.type === COMMENT_PTOKEN) {
+            return undefined;
+         }
+
+         if (
+            this.lastSeen &&
+            (this.lastSeen.type === INTERNAL_SUBSET_START_TOKEN ||
+               this.lastSeen.type === EXTERNAL_SUBSET_START_TOKEN ||
+               this.lastSeen.type === ELEMENT_START_PTOKEN)
+         ) {
+            this.allDone = true;
+            return CHECKER_DONE;
+         }
+
+         this.lastSeen = pToken;
+      }
+   }
+
    beforeEach(() => {
       jest.restoreAllMocks();
       jest.resetAllMocks();
@@ -121,7 +160,7 @@ describe('DocumentChecker (unit)', () => {
       subParams = [];
       ec = new MockErrorCollector();
       checker = new DocumentChecker({
-         content: MockChecker,
+         content: MockCheckerNew,
          dtd: MockChecker,
       });
 
@@ -161,7 +200,7 @@ describe('DocumentChecker (unit)', () => {
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN).mockImplementation();
+         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN).mockImplementation(() => {});
          checker.check(confVer, ec);
 
          checker.check(xmlDecl, ec);

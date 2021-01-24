@@ -15,7 +15,12 @@ import { DOCTYPE_START_PTOKEN } from '../token/docTypeStart';
 import { DOCTYPE_END_PTOKEN } from '../token/docTypeEnd';
 import { COMMENT_PTOKEN } from '../token/comment';
 import { SPACE_PTOKEN } from '../token/space';
-import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStart';
+import {
+   ElementEmptyPToken,
+   ElementStartPToken,
+   ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_START_PTOKEN,
+} from '../token/elementStart';
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
 import { getFirstSToken } from '../token/getFirstSToken';
@@ -23,18 +28,29 @@ import { getFirstSToken } from '../token/getFirstSToken';
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import { Checker, CheckerConstructor, CheckState, CHECKER_DONE } from './checkUtils';
 import { checkMap } from './checkMap';
-import { CONDITIONAL_PTOKEN } from 'token';
+import { CONDITIONAL_PTOKEN, GeneralEntityStartPToken } from 'token';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
 interface StateTable {
-   [startState: string]: {
-      [tokenType: string]: State | typeof NO_CHANGE;
-   };
+   [startState: string]:
+      | {
+           [tokenType: string]: State | typeof NO_CHANGE;
+        }
+      | undefined;
+}
+
+interface ContentCheckerConstructor {
+   new (
+      start: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken,
+      ec: ErrorCollector,
+      checkState: CheckState,
+      geContext: Array<string>,
+   ): Checker;
 }
 
 interface CheckerMap {
-   content: CheckerConstructor;
+   content: ContentCheckerConstructor;
    dtd: CheckerConstructor;
 }
 
@@ -117,7 +133,7 @@ class DocumentChecker {
       this.checkers = checkerMap;
    }
 
-   check(pToken: ParseToken, errorCollector: ErrorCollector): void | typeof CHECKER_DONE {
+   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE {
       if (pToken.type === CONFORMANCE_VERSION) {
          this.checkState.confVer = pToken;
          return;
@@ -193,10 +209,14 @@ class DocumentChecker {
             this.transition(pToken, errorCollector);
 
             if (this.state === State.ELEMENT) {
-               const checker = new this.checkers.content(this.checkState, []);
-               const result = checker.check(pToken, errorCollector);
+               const checker = new this.checkers.content(
+                  pToken,
+                  errorCollector,
+                  this.checkState,
+                  [],
+               );
 
-               if (result === CHECKER_DONE) {
+               if ((checker as any).isDone) {
                   this.state = State.TRAILING_MISC;
                } else {
                   this.subChecker = checker;
@@ -218,7 +238,7 @@ class DocumentChecker {
 
    private transition(pToken: ParseToken, ec: ErrorCollector): void {
       const transitions = transitionsByState[this.state];
-      const newState = transitions && transitions[pToken.type];
+      const newState = transitions?.[pToken.type];
       let badSubset = false;
 
       if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {

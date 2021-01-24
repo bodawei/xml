@@ -25,7 +25,10 @@ import {
    ElementStartPToken,
 } from '../token/elementStart';
 import { ELEMENT_END_PTOKEN } from '../token/elementEnd';
-import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference';
+import {
+   GeneralEntityReferencePToken,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+} from '../token/generalEntityReference';
 import {
    GENERAL_ENTITY_START_PTOKEN,
    GeneralEntityStartPToken,
@@ -45,9 +48,11 @@ enum State {
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
 interface StateTable {
-   [startState: string]: {
-      [tokenType: string]: State | typeof NO_CHANGE;
-   };
+   [startState: string]:
+      | {
+           [tokenType: string]: State | typeof NO_CHANGE;
+        }
+      | undefined;
 }
 
 const WFID = WellFormedError.ID;
@@ -106,7 +111,7 @@ const transitionsByState: StateTable = {
 class ContentChecker implements Checker {
    private state: State;
 
-   private start!: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
+   private start: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
 
    private elementNameStack: Array<string> = [];
 
@@ -116,26 +121,40 @@ class ContentChecker implements Checker {
 
    private geContext: Array<string>;
 
-   constructor(checkState: CheckState, geContext: Array<string>) {
+   constructor(
+      start: ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken,
+      ec: ErrorCollector,
+      checkState: CheckState,
+      geContext: Array<string>,
+   ) {
       this.checkState = checkState;
       this.state = State.PRE;
       this.geContext = [...geContext];
+      this.start = start;
+
+      if (start.type !== GENERAL_ENTITY_START_PTOKEN) {
+         this.check(start, ec);
+      } else {
+         const entityName = strOrBlank(start.referencePToken.name);
+
+         this.checkGERef(start.referencePToken, ec, true);
+
+         const genEntityDecl = this.checkState.generalDecls[entityName];
+
+         if (genEntityDecl?.token.externalId) {
+            this.state = State.ENTITY_START;
+         } else {
+            this.state = State.CONTENT;
+         }
+      }
+   }
+
+   get isDone(): boolean {
+      return this.state === State.DONE;
    }
 
    check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE {
-      if (this.state === State.PRE) {
-         if (
-            pToken.type !== ELEMENT_START_PTOKEN &&
-            pToken.type !== ELEMENT_EMPTY_PTOKEN &&
-            pToken.type !== GENERAL_ENTITY_START_PTOKEN
-         ) {
-            throw new Error(
-               'Must first call check() with an element start, empty element or general entity start.',
-            );
-         }
-
-         this.start = pToken;
-      } else if (this.state === State.DONE) {
+      if (this.state === State.DONE) {
          throw new Error(
             'Internal error: Passed a token to ContentChecker when it was already done.',
          );
@@ -206,35 +225,15 @@ class ContentChecker implements Checker {
             }
             break;
          case GENERAL_ENTITY_START_PTOKEN:
-            if (this.state !== State.PRE) {
-               this.embeddedChecker = new ContentChecker(this.checkState, this.geContext);
-               this.embeddedChecker.check(pToken, errorCollector);
-               return;
-            }
-
-            const entityName = strOrBlank(pToken.referencePToken.name);
-
-            if (entityName !== '') {
-               errorCollector.check(
-                  this.geContext.includes(entityName),
-                  WellFormedError.ID.REFERENCE_INVALID_RECURSION,
-                  [entityName],
-                  pToken.referencePToken.open,
-               );
-
-               this.geContext.push(entityName);
-            }
-
-            checkGeneralEntity(
-               pToken.referencePToken,
-               false,
-               this.checkState.generalDecls,
-               this.checkState,
+            this.embeddedChecker = new ContentChecker(
+               pToken,
                errorCollector,
+               this.checkState,
+               this.geContext,
             );
-            break;
+            return;
          case GENERAL_ENTITY_END_PTOKEN:
-            if (this.start && this.start.type === GENERAL_ENTITY_START_PTOKEN) {
+            if (this.start.type === GENERAL_ENTITY_START_PTOKEN) {
                const startReferenceName = strOrBlank(this.start.referencePToken.name);
                const endReferenceName = strOrBlank(pToken.referencePToken.name);
 
@@ -256,24 +255,7 @@ class ContentChecker implements Checker {
             }
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
-            const refName = strOrBlank(pToken.name);
-
-            if (refName !== '') {
-               errorCollector.check(
-                  this.geContext.includes(refName),
-                  WellFormedError.ID.REFERENCE_INVALID_RECURSION,
-                  [refName],
-                  pToken.open,
-               );
-            }
-
-            checkGeneralEntity(
-               pToken,
-               false,
-               this.checkState.generalDecls,
-               this.checkState,
-               errorCollector,
-            );
+            this.checkGERef(pToken, errorCollector, false);
             break;
          default:
             break;
@@ -287,27 +269,39 @@ class ContentChecker implements Checker {
       }
    }
 
+   checkGERef(
+      pToken: GeneralEntityReferencePToken,
+      ec: ErrorCollector,
+      addToContext: boolean,
+   ): void {
+      const refName = strOrBlank(pToken.name);
+
+      if (refName !== '') {
+         ec.check(
+            this.geContext.includes(refName),
+            WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            [refName],
+            pToken.open,
+         );
+
+         if (addToContext) {
+            this.geContext.push(refName);
+         }
+      }
+
+      checkGeneralEntity(pToken, false, this.checkState.generalDecls, this.checkState, ec);
+   }
+
    /*
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
    private transition(pToken: ParseToken, ec: ErrorCollector): boolean {
-      let newState: State | typeof NO_CHANGE = NO_CHANGE;
+      let newState: undefined | State | typeof NO_CHANGE = NO_CHANGE;
 
-      if (pToken.type === GENERAL_ENTITY_START_PTOKEN && this.state === State.PRE) {
-         const genEntityName = strOrBlank(pToken.referencePToken.name);
-         const genEntityDecl = this.checkState.generalDecls[genEntityName];
+      const transitions = transitionsByState[this.state];
 
-         if (genEntityDecl && genEntityDecl.token.externalId) {
-            newState = State.ENTITY_START;
-         } else {
-            newState = State.CONTENT;
-         }
-      } else {
-         const transitions = transitionsByState[this.state];
-
-         newState = transitions && transitions[pToken.type];
-      }
+      newState = transitions && transitions[pToken.type];
 
       if (newState) {
          this.state = newState === NO_CHANGE ? this.state : newState;
