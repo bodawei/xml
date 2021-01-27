@@ -340,6 +340,16 @@ describe('misc', () => {
          expect(mockErrorCollector.errors[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
       });
 
+      it('reports an error if there is a lone surrogate character in the input string', () => {
+         const sToken = makeSToken('bad\uD801x');
+
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
+            new ConformanceVersion(1.1, 2));
+
+         expect(mockErrorCollector.errors.length).toEqual(1);
+         expect(mockErrorCollector.errors[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+      });
+
    });
 
 });
