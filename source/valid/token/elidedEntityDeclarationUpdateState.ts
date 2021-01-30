@@ -26,7 +26,7 @@ function elidedEntityDeclarationUpdateState(
          ...state.parameterEntities,
          [elName]: {
             ...state.parameterEntities[elName],
-            replacementText: el,
+            replacementText: el.value,
          },
       },
    };

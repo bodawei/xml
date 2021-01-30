@@ -34,7 +34,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
                entityName: {
                   isInternal: true,
                   token: paramDecl,
-                  replacementText: elided,
+                  replacementText: paramDecl.value as any, // typehack
                },
             },
          }),
@@ -58,10 +58,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
                entityName: {
                   isInternal: true,
                   token: paramDecl,
-                  replacementText: new ElidedEntityDeclarationPToken(
-                     paramDecl,
-                     paramDecl.value as any,
-                  ), // typehack,
+                  replacementText: paramDecl.value as any, // typehack,
                },
             },
          }),

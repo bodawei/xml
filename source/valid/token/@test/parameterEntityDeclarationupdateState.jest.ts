@@ -26,7 +26,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
             parameterEntities: {
                entityName: {
                   isInternal: true,
-                  replacementText: new ElidedEntityDeclarationPToken(decl, decl.value as any),
+                  replacementText: decl.value as any,
                   token: decl,
                },
             },
@@ -46,7 +46,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
             parameterEntities: {
                entityName: {
                   isInternal: false,
-                  replacementText: new ElidedEntityDeclarationPToken(decl, decl.value as any),
+                  replacementText: decl.value as any,
                   token: decl,
                },
             },
@@ -68,7 +68,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
             parameterEntities: {
                entityName: {
                   isInternal: true,
-                  replacementText: new ElidedEntityDeclarationPToken(decl, decl.value as any),
+                  replacementText: decl.value as any,
                   token: decl,
                },
             },

@@ -100,7 +100,7 @@ function validateEntities(
          continue;
       }
 
-      const replacementText = pTokenArrayToString(details.replacementText.value);
+      const replacementText = pTokenArrayToString(details.replacementText);
       let depth = 0;
       let space = 0;
       let nonSpace = 0;

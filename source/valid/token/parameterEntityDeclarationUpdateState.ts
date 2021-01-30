@@ -17,7 +17,7 @@ function parameterEntityDeclarationUpdateState(
    }
 
    // Not sure this is right.
-   const replacementText = new ElidedEntityDeclarationPToken(el, el.value as EntityValuePToken); // typehack
+   const replacementText = el.value as EntityValuePToken; // typehack
 
    return {
       ...state,

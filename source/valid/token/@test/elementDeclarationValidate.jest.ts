@@ -73,32 +73,17 @@ describe('elementDeclarationValidate (unit)', () => {
             delimiter: {
                isInternal: true,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('|') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('|') })],
             },
             empty: {
                isInternal: true,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('') })],
             },
             close: {
                isInternal: true,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken(')') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken(')') })],
             },
          },
          elementContext: {
@@ -419,12 +404,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('(') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('(') })],
             },
          },
          elementDeclarations: {
@@ -459,12 +439,9 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: true,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('( foo | bar | ( baz | ginger))') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [
+                  new TextPToken({ text: toSToken('( foo | bar | ( baz | ginger))') }),
+               ],
             },
          },
       });
@@ -495,12 +472,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: true,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('( foo | ( bar )') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('( foo | ( bar )') })],
             },
          },
       });
@@ -538,15 +510,10 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: true,
                token: peDecl,
-               replacementText: {
-                  value: [
-                     new CharRefPToken({ open: toSToken('&#'), digits: toSToken('65') }),
-                     new TextPToken({ text: toSToken('|') }),
-                  ],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [
+                  new CharRefPToken({ open: toSToken('&#'), digits: toSToken('65') }),
+                  new TextPToken({ text: toSToken('|') }),
+               ],
             },
          },
          elementDeclarations: {
@@ -585,12 +552,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: true,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('   ') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('   ') })],
             },
          },
          elementDeclarations: {
@@ -625,12 +587,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('   ') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('   ') })],
             },
          },
          elementDeclarations: {
@@ -699,19 +656,14 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [
-                     new ParameterEntityReferencePToken({
-                        open: toSToken('&'),
-                     }),
-                     new ParameterEntityStartPToken(peRefX), // just a dummy peRef to make it happy
-                     new TextPToken({ text: toSToken('()') }),
-                     new ParameterEntityEndPToken(peRefX), // just a dummy peRef to make it happy
-                  ],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [
+                  new ParameterEntityReferencePToken({
+                     open: toSToken('&'),
+                  }),
+                  new ParameterEntityStartPToken(peRefX), // just a dummy peRef to make it happy
+                  new TextPToken({ text: toSToken('()') }),
+                  new ParameterEntityEndPToken(peRefX), // just a dummy peRef to make it happy
+               ],
             },
          },
          elementDeclarations: {
@@ -744,12 +696,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('()') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('()') })],
             },
          },
          elementDeclarations: {
@@ -804,12 +751,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('  ') })], // note this would be an error if in the content model
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('  ') })], // note this would be an error if in the content model
             },
          },
          elementDeclarations: {
@@ -842,12 +784,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken(')') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken(')') })],
             },
          },
          elementDeclarations: {
@@ -880,12 +817,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('foo') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('foo') })],
             },
          },
          elementDeclarations: {
@@ -918,12 +850,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('  ') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('  ') })],
             },
          },
          elementDeclarations: {
@@ -958,12 +885,7 @@ describe('elementDeclarationValidate (unit)', () => {
             x: {
                isInternal: false,
                token: peDecl,
-               replacementText: {
-                  value: [new TextPToken({ text: toSToken('  ') })],
-                  isPE: true,
-                  token: peDecl,
-                  type: ELIDED_ENTITY_DECLARATION_PTOKEN,
-               },
+               replacementText: [new TextPToken({ text: toSToken('  ') })],
             },
          },
          elementDeclarations: {

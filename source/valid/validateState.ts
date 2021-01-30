@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { AttDefinitionP, ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
-import { ElidedEntityDeclarationPToken } from 'token';
+import { EntityValuePToken } from 'token';
 import { CmGraph } from './contentModal/cmGraphTypes';
 
 enum ElDeclType {
@@ -39,7 +39,7 @@ type DeclarationDetails = AnyDetails | EmptyDetails | MixedDetails | ChildrenDet
 interface ParameterEntityDetails {
    isInternal: boolean;
    token: ParameterEntityDeclarationPToken;
-   replacementText?: ElidedEntityDeclarationPToken;
+   replacementText?: EntityValuePToken;
 }
 
 interface ElementContext {
