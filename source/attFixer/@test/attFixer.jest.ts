@@ -390,6 +390,62 @@ describe('AttFixer', () => {
          );
       });
 
+      it('modifies a non-CDATA attribute to normalize across multiple tokens in interior and exterior', () => {
+         const blankText = new TextPToken(toSToken('  '));
+         const ranges = toSToken(' ').ranges;
+         const normalizedText = new TextPToken(new SToken('', '  ', ranges));
+         const attList = makeAttListDeclaration('NMTOKENS');
+         fixAttributes.processPToken(attList);
+
+         const otherStart = new ElementStartPToken({
+            open: toSToken('<'),
+            name: toSToken('elStart'),
+            nameSpace: undefined,
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: [
+                     blankText,
+                     blankText,
+                     new TextPToken(toSToken(' one ')),
+                     blankText,
+                     blankText,
+                     new TextPToken(toSToken(' two ')),
+                     blankText,
+                     new TextPToken(toSToken('  ')), // last needs to be unique because we use this to identify the lat item in the list
+                  ],
+               },
+            ],
+         });
+
+         const result = fixAttributes.processPToken(otherStart);
+
+         expect(result).toEqual(
+            new ElementStartPToken({
+               open: toSToken('<'),
+               name: toSToken('elStart'),
+               nameSpace: undefined,
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [
+                        normalizedText,
+                        normalizedText,
+                        new TextPToken(new SToken('one ', ' one ', toSToken(' ').ranges)),
+                        normalizedText,
+                        normalizedText,
+                        new TextPToken(new SToken('two', ' two ', toSToken(' ').ranges)),
+                        normalizedText,
+                        normalizedText,
+                     ],
+                     normalized: true,
+                     dtdChangedNormalization: true,
+                  },
+               ],
+            }),
+         );
+      });
+
       it('modifies a non-CDATA attribute remove space, but not space the spans a charref', () => {
          const attList = makeAttListDeclaration('NMTOKENS');
          const elementStart = new ElementStartPToken({

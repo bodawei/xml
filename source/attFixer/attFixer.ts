@@ -172,9 +172,9 @@ function normalizeAttr(
                }
             }
 
-            const lastText = new TextPToken({
-               text: new SToken(newStr, val.text.originalStr, val.text.ranges),
-            });
+            const lastText = new TextPToken(
+               new SToken(newStr, val.text.originalStr, val.text.ranges),
+            );
 
             if (newStr !== val.text.str) {
                newValue.push(lastText);
