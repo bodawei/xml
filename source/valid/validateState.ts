@@ -83,17 +83,19 @@ interface ValidateStateProps {
 }
 
 interface AttributeDefs {
-   [attName: string]: {
-      readonly def: AttDefinitionP;
-      readonly isExternal: boolean;
-   };
+   [attName: string]:
+      | {
+           readonly def: AttDefinitionP;
+           readonly isExternal: boolean;
+        }
+      | undefined;
 }
 
 class ValidateState {
    readonly inExternalSubset: boolean;
 
    readonly attributeDefs: {
-      readonly [elementName: string]: AttributeDefs;
+      readonly [elementName: string]: AttributeDefs | undefined;
    };
 
    readonly generalEntities: {

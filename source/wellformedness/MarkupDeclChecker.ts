@@ -250,7 +250,9 @@ function checkForRecursionInValue(
    // errord for other reasons. It isn't clear to me that there is value in reporting
    // that here.
 
-   const descendentRefs = declsSeen[declName]?.referenceTokens || [];
+   // We always have something in referenceTokens by this point, because processDeclaration always sets that
+   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+   const descendentRefs = declsSeen[declName]?.referenceTokens!;
 
    for (const refToken of descendentRefs) {
       const refName = strOrBlank(refToken.name);
@@ -279,6 +281,7 @@ function checkDeclaration(
       | GeneralEntityDeclarationPToken
       | ParameterEntityDeclarationPToken,
    state: States,
+   inExpandedExternalEntity: boolean,
    ec: ErrorCollector,
 ): void {
    // §2.8.0: Well-formedness constraint: PEs in Internal Subset
@@ -286,7 +289,7 @@ function checkDeclaration(
    //     occur within markup declarations; they may occur where markup
    //     declarations can occur. (This does not apply to references that
    //     occur in external parameter entities or to the external subset.)
-   if (state === States.INTERNAL_SUBSET) {
+   if (state === States.INTERNAL_SUBSET && !inExpandedExternalEntity) {
       ec.check(
          pToken.unexpanded,
          WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
@@ -334,7 +337,9 @@ class MarkupDeclChecker implements MarkupChecker {
 
    private start: MarkupStart;
 
-   private inExtSubset = false; // That is, in production 30. This can be either the external subset or the body of an external entity
+   private inExternalParamEntity = false;
+
+   private inExtSubset = false;
 
    private checkState: CheckState;
 
@@ -350,9 +355,11 @@ class MarkupDeclChecker implements MarkupChecker {
       checkState: CheckState,
       peContext: Array<string>,
       inExternalSubset = false,
+      inExternalParamEntity = false,
    ) {
       this.checkState = checkState;
       this.inExtSubset = inExternalSubset;
+      this.inExternalParamEntity = inExternalParamEntity;
       this.peContext = peContext;
       this.declsSeen = {};
       this.start = start;
@@ -368,7 +375,7 @@ class MarkupDeclChecker implements MarkupChecker {
          const decl = this.checkState.paramDecls[entityName];
 
          if (decl?.externalId) {
-            this.inExtSubset = true;
+            this.inExternalParamEntity = true;
          }
 
          this.checkPERef(start.referencePToken, ec, true);
@@ -381,7 +388,7 @@ class MarkupDeclChecker implements MarkupChecker {
             this.state = this.inExtSubset ? States.EXTERNAL_SUBSET : States.INTERNAL_SUBSET;
          }
       } else {
-         if (this.inExtSubset) {
+         if (this.inExtSubset || this.inExternalParamEntity) {
             this.state = States.INSIDE_CONDITIONAL;
          } else {
             ec.report(WFID.MARKUPDECL_INVALID_TOKEN, [start.type], getFirstSToken(start));
@@ -417,13 +424,13 @@ class MarkupDeclChecker implements MarkupChecker {
                [], // not possible to have general entity context here
                errorCollector,
             );
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, this.inExternalParamEntity, errorCollector);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, this.inExternalParamEntity, errorCollector);
             break;
          case NOTATION_DECLARATION_PTOKEN:
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, this.inExternalParamEntity, errorCollector);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             this.checkPERef(pToken, errorCollector, false);
@@ -435,6 +442,7 @@ class MarkupDeclChecker implements MarkupChecker {
                this.checkState,
                this.peContext,
                this.inExtSubset,
+               this.inExternalParamEntity,
             );
             return;
          case PARAMETER_ENTITY_START_PTOKEN:
@@ -444,6 +452,7 @@ class MarkupDeclChecker implements MarkupChecker {
                this.checkState,
                this.peContext,
                this.inExtSubset,
+               this.inExternalParamEntity,
             );
             return;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
@@ -457,14 +466,14 @@ class MarkupDeclChecker implements MarkupChecker {
                   declaredInInternalSubset: inInternalSubset,
                };
             }
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, this.inExternalParamEntity, errorCollector);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
             if (!this.checkState.paramDecls[strOrBlank(pToken.name)]) {
                this.checkState.paramDecls[strOrBlank(pToken.name)] = pToken;
             }
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, this.inExternalParamEntity, errorCollector);
             break;
          case ELIDED_ENTITY_DECLARATION_PTOKEN:
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);

@@ -21,7 +21,7 @@ function checkAttributes(
 
    for (const attr of attributes) {
       const attName = strOrBlank(attr.name);
-      const details = state.attributeDefs?.[elName]?.[attName];
+      const details = state.attributeDefs[elName]?.[attName];
 
       if (!details) {
          continue;

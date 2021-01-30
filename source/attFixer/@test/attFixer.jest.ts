@@ -347,6 +347,49 @@ describe('AttFixer', () => {
          );
       });
 
+      it('modifies a non-CDATA attribute to remove trailing space across multiple text tokens', () => {
+         const attList = makeAttListDeclaration('NMTOKENS');
+         fixAttributes.processPToken(attList);
+
+         const otherStart = new ElementStartPToken({
+            open: toSToken('<'),
+            name: toSToken('elStart'),
+            nameSpace: undefined,
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: [
+                     new TextPToken(toSToken(' one ')),
+                     new TextPToken(toSToken('  ')),
+                     new TextPToken(toSToken('  ')),
+                  ],
+               },
+            ],
+         });
+
+         const result = fixAttributes.processPToken(otherStart);
+
+         expect(result).toEqual(
+            new ElementStartPToken({
+               open: toSToken('<'),
+               name: toSToken('elStart'),
+               nameSpace: undefined,
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [
+                        new TextPToken(new SToken('one', ' one ', toSToken(' ').ranges)),
+                        new TextPToken(new SToken('', '  ', toSToken(' ').ranges)),
+                        new TextPToken(new SToken('', '  ', toSToken(' ').ranges)),
+                     ],
+                     normalized: true,
+                     dtdChangedNormalization: true,
+                  },
+               ],
+            }),
+         );
+      });
+
       it('modifies a non-CDATA attribute remove space, but not space the spans a charref', () => {
          const attList = makeAttListDeclaration('NMTOKENS');
          const elementStart = new ElementStartPToken({

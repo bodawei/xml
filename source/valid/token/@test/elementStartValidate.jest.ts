@@ -403,4 +403,129 @@ describe('elementStartValidate (unit)', () => {
          expect(mockErrorCollector.errors).toEqual([]);
       });
    });
+
+   it('reports no error when an attribute has what is theoretically a validation error but there is no attribute definition', () => {
+      state = new ValidateState({
+         attributeDefs: {},
+         isStandalone: true,
+      });
+      elementStart = new ElementStartPToken({
+         open: toSToken('</'),
+         name: toSToken('elementName'),
+         attributes: [
+            {
+               name: toSToken('att1'),
+               value: [],
+               defaulted: true,
+            },
+         ],
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('reports an error if an attribute changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
+      state = new ValidateState({
+         attributeDefs: {
+            elementName: {
+               att1: {
+                  def: {
+                     name: toSToken('att1'),
+                     value: [],
+                  },
+                  isExternal: true,
+               },
+            },
+         },
+         isStandalone: true,
+      });
+      elementStart = new ElementStartPToken({
+         open: toSToken('</'),
+         name: toSToken('elementName'),
+         attributes: [
+            {
+               name: toSToken('att1'),
+               value: [],
+               normalized: true,
+               dtdChangedNormalization: true,
+            },
+         ],
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportValidityError({
+         id: ValidityError.ID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
+         params: ['elementName', 'att1'],
+         position: toSToken('att1'),
+         lastPosition: undefined,
+      });
+   });
+
+   it('reports no error if an attribute changed through normalization, but the declaration was not external and the document is standalone (§2.9.0)', () => {
+      state = new ValidateState({
+         attributeDefs: {
+            elementName: {
+               att1: {
+                  def: {
+                     name: toSToken('att1'),
+                     value: [],
+                  },
+                  isExternal: false,
+               },
+            },
+         },
+         isStandalone: true,
+      });
+      elementStart = new ElementStartPToken({
+         open: toSToken('</'),
+         name: toSToken('elementName'),
+         attributes: [
+            {
+               name: toSToken('att1'),
+               value: [],
+               normalized: true,
+               dtdChangedNormalization: true,
+            },
+         ],
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('reports no error if an attribute was not changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
+      state = new ValidateState({
+         attributeDefs: {
+            elementName: {
+               att1: {
+                  def: {
+                     name: toSToken('att1'),
+                     value: [],
+                  },
+                  isExternal: true,
+               },
+            },
+         },
+         isStandalone: true,
+      });
+      elementStart = new ElementStartPToken({
+         open: toSToken('</'),
+         name: toSToken('elementName'),
+         attributes: [
+            {
+               name: toSToken('att1'),
+               value: [],
+            },
+         ],
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
 });
