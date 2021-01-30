@@ -245,7 +245,7 @@ class PTokenStream extends Readable {
                   let terminators: Array<string> = [];
 
                   if (this.waitingForInternalClose) {
-                     terminators = [ '%' ];
+                     terminators = [ '%', ']' ];
                   }
 
                   parseCharData(this._sTokenSource, terminators, (result) => {

@@ -277,7 +277,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherStreamResults<ParseToken>(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toEqual([ '%' ]);
+         expect(parseSpy.calls.argsFor(0)[1]).toEqual([ '%' , ']' ]);
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
