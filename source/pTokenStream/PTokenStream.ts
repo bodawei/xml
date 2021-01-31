@@ -26,6 +26,8 @@ import {
    ConditionalPToken,
 
    ElementStartPToken,
+   InternalSubsetStartToken,
+   InternalSubsetEndToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { ContextType } from 'pToken';
@@ -214,6 +216,7 @@ class PTokenStream extends Readable {
                         deliverParse(conditionalClose);
                      } else if (this.waitingForInternalClose) {
                         this.waitingForInternalClose = false;
+                        deliverParse(new InternalSubsetEndToken());
                         this._parseClose(deliverParse);
                      } else {
                         parseCharData(this._sTokenSource, [], deliverParse);
@@ -221,6 +224,7 @@ class PTokenStream extends Readable {
                   });
                } else if (this.waitingForInternalClose) {
                   this.waitingForInternalClose = false;
+                  deliverParse(new InternalSubsetEndToken());
                   this._parseClose(deliverParse);
                } else {
                   this._sTokenSource.extract('match', ']]>', (sToken) => {
@@ -285,7 +289,12 @@ class PTokenStream extends Readable {
                      this.waitingForInternalClose = true;
                      this.startDocType = pToken;
                   }
+
                   deliverParse(pToken as any);
+
+                  if (pToken instanceof DocTypeStartPToken && pToken.openSubset) {
+                     deliverParse(new InternalSubsetStartToken());
+                  };
                });
                break;
             case '<![':

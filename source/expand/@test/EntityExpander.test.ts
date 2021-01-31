@@ -195,44 +195,6 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('adds an internal subset markers when there is an internal subset that is empty', (done) => {
-         docTypeStart = new DocTypeStartPToken({
-            open: toSToken('<!'),
-            name: toSToken('root'),
-            openSubset: toSToken('['),
-         });
-
-         doExpand([docTypeStart, docTypeEnd], true, (results) => {
-            expect(harvestTypes(results)).toEqual([
-               DOCTYPE_START_PTOKEN,
-               INTERNAL_SUBSET_START_TOKEN,
-               INTERNAL_SUBSET_END_TOKEN,
-               DOCTYPE_END_PTOKEN,
-            ]);
-            done();
-         });
-      });
-
-      it('adds an internal subset markers when there is a non-empty internal', (done) => {
-         docTypeStart = new DocTypeStartPToken({
-            open: toSToken('<!'),
-            name: toSToken('root'),
-            openSubset: toSToken('['),
-         });
-         const notation = new NotationDeclarationPToken({ open: toSToken('<!') });
-
-         doExpand([docTypeStart, notation, docTypeEnd], true, (results) => {
-            expect(harvestTypes(results)).toEqual([
-               DOCTYPE_START_PTOKEN,
-               INTERNAL_SUBSET_START_TOKEN,
-               NOTATION_DECLARATION_PTOKEN,
-               INTERNAL_SUBSET_END_TOKEN,
-               DOCTYPE_END_PTOKEN,
-            ]);
-            done();
-         });
-      });
-
       it('calls the streamParsedReplacementText() function with the subset token, prams and a callback', (done) => {
          docTypeStart = new DocTypeStartPToken({
             open: toSToken('<!'),
@@ -325,9 +287,7 @@ describe('EntityExpander (unit)', () => {
          doExpand([docTypeStart, notation, docTypeEnd], true, (results) => {
             expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
-               INTERNAL_SUBSET_START_TOKEN,
                NOTATION_DECLARATION_PTOKEN,
-               INTERNAL_SUBSET_END_TOKEN,
                ERROR_TYPE,
                DOCTYPE_END_PTOKEN,
             ]);
@@ -351,9 +311,7 @@ describe('EntityExpander (unit)', () => {
          doExpand([docTypeStart, notation, docTypeEnd], false, (results) => {
             expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
-               INTERNAL_SUBSET_START_TOKEN,
                NOTATION_DECLARATION_PTOKEN,
-               INTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
             done();
@@ -372,10 +330,8 @@ describe('EntityExpander (unit)', () => {
             doExpand([docTypeStart, condStart, condStart, docTypeEnd], false, (results) => {
                expect(harvestTypes(results)).toEqual([
                   DOCTYPE_START_PTOKEN,
-                  INTERNAL_SUBSET_START_TOKEN,
                   CONDITIONAL_PTOKEN,
                   CONDITIONAL_PTOKEN,
-                  INTERNAL_SUBSET_END_TOKEN,
                   DOCTYPE_END_PTOKEN,
                ]);
                done();
@@ -460,11 +416,9 @@ describe('EntityExpander (unit)', () => {
 
                expect(harvestTypes(results)).toEqual([
                   DOCTYPE_START_PTOKEN,
-                  INTERNAL_SUBSET_START_TOKEN,
                   CONDITIONAL_PTOKEN,
                   CONDITIONAL_PTOKEN,
                   CONDITIONAL_PTOKEN,
-                  INTERNAL_SUBSET_END_TOKEN,
                   DOCTYPE_END_PTOKEN,
                ]);
                done();

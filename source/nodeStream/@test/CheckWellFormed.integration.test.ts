@@ -9,20 +9,17 @@ import { ELEMENT_START_PTOKEN } from 'token';
 import { WellFormedError,  } from 'wellformedness';
 
 import CheckWellFormed from '../CheckWellFormed';
-import { EntityExpanderStream } from '../EntityExpanderStream';
 import { expectError } from './utils';
 
 describe('CheckWellFormed (integration)', () => {
    let pTokenStream: PTokenStream;
    let checker: CheckWellFormed;
-   let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
       pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
       checker = new CheckWellFormed();
-      entityExpander = new EntityExpanderStream(true);
 
-      pTokenStream.pipe(entityExpander).pipe(checker);
+      pTokenStream.pipe(checker);
    });
 
    function expectInputToProduce(input: string, error: WellFormedError, done: () => void) {
@@ -68,7 +65,7 @@ describe('CheckWellFormed (integration)', () => {
          ), done);
    });
 
-   xit('reports an error when the DOCTYPE type is a bad valud', (done) => {
+   it('reports an error when the DOCTYPE type is a bad valud', (done) => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE $badName SYSTEM "sys.xml"[]>',
          new WellFormedError(WellFormedError.ID.DOCTYPE_NAME_INVALID,
             [ '$badName' ],
@@ -77,7 +74,7 @@ describe('CheckWellFormed (integration)', () => {
          ), done);
    });
 
-   xit('reports an error when the DOCTYPE close is missing', (done) => {
+   it('reports an error when the DOCTYPE close is missing', (done) => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE goodName SYSTEM "sys.xml"[]',
          new WellFormedError(WellFormedError.ID.DOCTYPE_NO_CLOSE,
             undefined,

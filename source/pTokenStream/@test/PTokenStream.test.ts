@@ -13,7 +13,9 @@ import {
    ELEMENT_END_PTOKEN,
    DOCTYPE_END_PTOKEN,
    CHARDATA_PTOKEN,
-   CharDataPToken
+   CharDataPToken,
+   INTERNAL_SUBSET_START_TOKEN,
+   INTERNAL_SUBSET_END_TOKEN
 } from 'token';
 
 import * as tokenStuff from 'token';
@@ -613,11 +615,13 @@ describe('PTokenStream (unit)', () => {
                CONFORMANCE_VERSION,
                ENTITY_ID,
                DOCTYPE_START_PTOKEN,
+               INTERNAL_SUBSET_START_TOKEN,
                CONDITIONAL_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
                CONDITIONAL_PTOKEN,
                TEXT_PTOKEN,
                CONDITIONAL_CLOSE_PTOKEN,
+               INTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
                ELEMENT_START_PTOKEN,
                ELEMENT_END_PTOKEN,

@@ -35,7 +35,6 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
    GeneralEntityReferencePToken,
-   InternalSubsetStartToken,
    InternalSubsetEndToken,
    ParameterEntityReferencePToken,
    XmlError,
@@ -44,6 +43,8 @@ import {
    ConditionalPToken,
    CONDITIONAL_CLOSE_PTOKEN,
    ConditionalClosePToken,
+   INTERNAL_SUBSET_START_TOKEN,
+   INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
@@ -83,9 +84,7 @@ enum State {
  buffer any values that arrive on its doorstep before this has
  called the callback.
 
- This will introduce an InternalSubsetStartToken, and an
- InternalSubsetEndToken before and after the internal subset (only if
- it exists) as well as an ExternalSubsetStart/EndToken around the
+ This will introduce an ExternalSubsetStart/EndToken around the
  external subset.
 
  If validating (passed to the constructor) is false, this will not
@@ -98,6 +97,8 @@ class EntityExpander {
    private expandParams: ExpandParams;
 
    private state = State.AT_START;
+
+   private expandedExternalSubset = false;
 
    private entityContextStack: EntityContextStack = new EntityContextStack();
 
@@ -129,8 +130,22 @@ class EntityExpander {
          case DOCTYPE_START_PTOKEN:
             this.handleDocTypeStart(pToken, expanded);
             break;
+         case INTERNAL_SUBSET_START_TOKEN:
+            this.state = State.IN_INTERNAL_SUBSET;
+            this.deliverToken(pToken);
+            expanded();
+            break;
+         case INTERNAL_SUBSET_END_TOKEN:
+            this.handleAndExpandExternalSubset(pToken, expanded);
+            break;
          case DOCTYPE_END_PTOKEN:
-            this.handleDocTypeEnd(pToken, expanded);
+            if (!this.expandedExternalSubset) {
+               this.handleAndExpandExternalSubset(pToken, expanded);
+            } else {
+               this.state = State.IN_CONTENT;
+               this.deliverToken(pToken);
+               expanded();
+            }
             break;
          case CONDITIONAL_PTOKEN:
             this.handleConditional(pToken, expanded);
@@ -178,11 +193,6 @@ class EntityExpander {
    private handleDocTypeStart(pToken: DocTypeStartPToken, handled: PTokenExpanded): void {
       this.deliverToken(pToken);
 
-      if (pToken.openSubset) {
-         this.state = State.IN_INTERNAL_SUBSET;
-         this.deliverToken(new InternalSubsetStartToken());
-      }
-
       if (pToken.externalId) {
          this.expandParams.entityDetails.addExternalSubset(pToken.externalId);
       }
@@ -191,8 +201,8 @@ class EntityExpander {
    }
 
    /*
-    * When we reach the end of the DOCTYPE declaration, we've finished
-    * the interal subset, if any. So, send the end token if we were
+    * When we reach the end of the internal subset or the doc type declaration,
+    * send the end token if we were
     * delivering an internal subset. If there is an external subset,
     * introduce pseudo PTokens for the start and end, and retrieve the
     * contents and place between them. Notably, the external subset could
@@ -204,17 +214,23 @@ class EntityExpander {
     *
     * Declaration: §2.8.0 [28]
     */
-   private handleDocTypeEnd(pToken: DocTypeEndPToken, handled: PTokenExpanded): void {
+   private handleAndExpandExternalSubset(
+      pToken: InternalSubsetEndToken | DocTypeEndPToken,
+      handled: PTokenExpanded,
+   ): void {
       this.emptyConditionalStack(() => {
-         if (this.state === State.IN_INTERNAL_SUBSET) {
-            this.deliverToken(new InternalSubsetEndToken());
+         if (pToken.type === INTERNAL_SUBSET_END_TOKEN) {
+            this.deliverToken(pToken);
          }
 
          const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
+         this.expandedExternalSubset = true;
 
          if (!externalSubsetToken || !this.expandParams.loadExternalEntities) {
-            this.state = State.IN_CONTENT;
-            this.deliverToken(pToken);
+            if (pToken.type === DOCTYPE_END_PTOKEN) {
+               this.state = State.IN_CONTENT;
+               this.deliverToken(pToken);
+            }
             handled();
             return;
          }
@@ -232,8 +248,11 @@ class EntityExpander {
                }
 
                this.emptyConditionalStack(() => {
-                  this.state = State.IN_CONTENT;
-                  this.deliverToken(pToken);
+                  if (pToken.type === DOCTYPE_END_PTOKEN) {
+                     this.state = State.IN_CONTENT;
+                     this.deliverToken(pToken);
+                  }
+
                   nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
                   handled(); // and mark the end of processing of the DOCTYPE end token
                });
