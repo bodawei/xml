@@ -758,7 +758,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(generalEntityDeclaration, ec);
 
-         expect(checkState.generalDecls.geDecl.token).toEqual(generalEntityDeclaration);
+         expect(checkState.generalDecls.geDecl?.token).toEqual(generalEntityDeclaration);
       });
 
       it('does not replace an general entity in the state with a new one from the external subset', () => {
@@ -772,14 +772,14 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(secondDeclaration, ec);
 
-         expect(checkState.generalDecls[name].token).toBe(generalEntityDeclaration);
-         expect(checkState.generalDecls[name].declaredInInternalSubset).toEqual(true);
+         expect(checkState.generalDecls[name]?.token).toBe(generalEntityDeclaration);
+         expect(checkState.generalDecls[name]?.declaredInInternalSubset).toEqual(true);
       });
    });
 
    describe('parameter entity reference', () => {
       it('marks that we do not have all declarations after encountering a PE ref in an internal subset', () => {
-         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], false);
 
          checker.check(paramEntityRef, ec);
 
@@ -799,7 +799,7 @@ describe('MarkupDeclChecker (unit)', () => {
                new ParameterEntityEndPToken(peRefToTwo),
             ],
          });
-         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], false);
 
          checker.check(peDecl2, ec);
 
@@ -829,7 +829,7 @@ describe('MarkupDeclChecker (unit)', () => {
                new ParameterEntityEndPToken(peRefToTwo),
             ],
          });
-         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], true);
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, [], false);
 
          checker.check(peDecl, ec);
          checker.check(geDecl, ec);
@@ -855,7 +855,13 @@ describe('MarkupDeclChecker (unit)', () => {
                new ParameterEntityEndPToken(refToTestEnity),
             ],
          });
-         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, ['testEntity'], true);
+         checker = new MarkupDeclChecker(
+            internalSubsetStart,
+            ec,
+            checkState,
+            ['testEntity'],
+            false,
+         );
 
          checker.check(peDecl, ec);
 
@@ -883,7 +889,13 @@ describe('MarkupDeclChecker (unit)', () => {
             new ParameterEntityStartPToken(refToTestEnity),
             new ParameterEntityEndPToken(refToTestEnity),
          ]);
-         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, ['testEntity'], true);
+         checker = new MarkupDeclChecker(
+            internalSubsetStart,
+            ec,
+            checkState,
+            ['testEntity'],
+            false,
+         );
 
          checker.check(peDecl, ec);
          checker.check(elided, ec);
