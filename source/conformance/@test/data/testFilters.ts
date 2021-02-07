@@ -64,12 +64,6 @@ const testFilters: FilterData = {
       'utf16l', // Tests reading an invalid "little endian" UTF-16 document
 
       'o-p16fail1', // This is sorta working.  Might be nice to give a better message than TOKEN_INVALID_CONTEXT / XMLDECL_PTOKEN
-      'o-p01pass1', // : 'ANY_UNDECLARED_ELEMENT', // no prolog
-      'o-p01pass3', // : 'ANY_UNDECLARED_ELEMENT', // Misc items after the document
-      'o-p04pass1', // : 'ANY_UNDECLARED_ELEMENT', // names with all valid ASCII characters, and one from each other class in NameChar
-      'o-p05pass1', // : 'ANY_UNDECLARED_ELEMENT', // various valid Name constructions
-      'o-p10pass1', // : 'ANY_UNDECLARED_ELEMENT', // But this is not what it is trying to show -  valid attribute values
-      'o-p16pass1', // : 'PI_TARGET_HAS_XML', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
       'o-p69pass1', // misidentifying a recursive call
 
       'ibm-1-1-valid-P46-ibm46i01.xml', // An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
@@ -224,6 +218,9 @@ const testFilters: FilterData = {
       // ////////////
       // ////////////
       //
+
+      'o-p11pass1', // : 'none', // system literals may not contain URI fragments
+      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
 
       // Group: Japanese encodings
       'pr-xml-euc-jp', // Test support for the EUC-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must

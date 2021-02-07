@@ -104,7 +104,7 @@ describe('elementStartValidate (unit)', () => {
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
          params: ['parentName'],
-         position: elementStart.open,
+         position: elementStart.name,
          lastPosition: undefined,
       });
    });
@@ -132,8 +132,8 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.ANY_UNDECLARED_ELEMENT,
-         params: ['parentName', 'other'],
+         id: ValidityError.ID.UNDECLARED_ELEMENT,
+         params: ['other'],
          position: elementStart.name,
          lastPosition: undefined,
       });
@@ -160,7 +160,7 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
+         id: ValidityError.ID.INVALID_ELEMENT_IN_MIXED,
          params: ['parentName', 'elementName'],
          position: elementStart.name,
          lastPosition: undefined,
@@ -341,6 +341,7 @@ describe('elementStartValidate (unit)', () => {
 
       it('reports no error when an attribute is defaulted from an internal ATTLIST declaration, and the document is standalone', () => {
          state = new ValidateState({
+            elementDeclarations: state.elementDeclarations,
             attributeDefs: {
                elementName: {
                   att1: {
@@ -373,6 +374,7 @@ describe('elementStartValidate (unit)', () => {
 
       it('reports no error when an attribute is defaulted from an external ATTLIST declaration, and the document is not standalone', () => {
          state = new ValidateState({
+            elementDeclarations: state.elementDeclarations,
             attributeDefs: {
                elementName: {
                   att1: {
@@ -406,6 +408,7 @@ describe('elementStartValidate (unit)', () => {
 
    it('reports no error when an attribute has what is theoretically a validation error but there is no attribute definition', () => {
       state = new ValidateState({
+         elementDeclarations: state.elementDeclarations,
          attributeDefs: {},
          isStandalone: true,
       });
@@ -428,6 +431,7 @@ describe('elementStartValidate (unit)', () => {
 
    it('reports an error if an attribute changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
       state = new ValidateState({
+         elementDeclarations: state.elementDeclarations,
          attributeDefs: {
             elementName: {
                att1: {
@@ -467,6 +471,7 @@ describe('elementStartValidate (unit)', () => {
 
    it('reports no error if an attribute changed through normalization, but the declaration was not external and the document is standalone (§2.9.0)', () => {
       state = new ValidateState({
+         elementDeclarations: state.elementDeclarations,
          attributeDefs: {
             elementName: {
                att1: {
@@ -500,6 +505,7 @@ describe('elementStartValidate (unit)', () => {
 
    it('reports no error if an attribute was not changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
       state = new ValidateState({
+         elementDeclarations: state.elementDeclarations,
          attributeDefs: {
             elementName: {
                att1: {

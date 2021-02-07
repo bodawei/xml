@@ -69,7 +69,7 @@ interface ValidateStateProps {
    };
 
    elementDeclarations?: {
-      [name: string]: DeclarationDetails;
+      [name: string]: DeclarationDetails | undefined;
    };
 
    elementContext?: {

@@ -101,10 +101,6 @@ describe('XML Conformance tests', () => {
 
                if (testData.expectedError) {
                   expectedError = testData.expectedError[key] || testData.expectedError.default;
-
-                  if (expectedError?.id === 'none') {
-                     expectedError = undefined;
-                  }
                }
 
                // console.log(
@@ -136,7 +132,12 @@ describe('XML Conformance tests', () => {
             });
          });
 
+         const NOT_WF_INVALID = ['o-p16pass1'];
+
          if (testData.TYPE === 'invalid') {
+            if (NOT_WF_INVALID.includes(testData.ID)) {
+               return;
+            }
             it(`${testData.ID} (${testData.TYPE}:${ver}/${edition} Running WITHOUT validation) ${testData.description}`, (done) => {
                const verToUse = hasEdition ? ver : undefined;
                const revToUse = hasEdition ? edition : undefined;

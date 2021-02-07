@@ -46,7 +46,7 @@ There are, of course, other routines in this directory that assist in the work, 
    4. The jasmine test evaluates whether the expected errors (if any) were found, and whether the expected output (if any) matched.
 
 ## Appendix
-While I haven't combed over every one of the tests in close details, these are some odd things I've noticed:
+While I haven't combed over every one of the tests in close detail, these are some odd things I've noticed:
 
 These are valid, but the condition they say they are checking for is not entirely correctly described.
 
@@ -64,5 +64,14 @@ These are "wrong":
    * ibm-valid-P36-ibm36v01.xml: i-BS-ABCD
 
 These have errors:
+
 * ibm-invalid-P41-ibm41i02.xml : This has "PCDATA" when it should have "#PCDATA"
 
+These are just baffling:
+
+The oasis tests are a bit strange. They ostly come in two flavors: `o-.*pass.*.xml` and `o-.*fail.*.xml`  (there is one lone `e2.xml`).
+
+* The valid tests are all `o-.*pass.*.xml`.
+* The not-wf tests are all `o-.*fail.*.xml`
+* There is one error test which is labeled `o-.*pass.*.xml`, which is strange.
+* The invalid tests are, however, a mixture of `o-.*pass.*.xml` and `o-.*fail.*.xml`. The three fail ones all seem to be legitimate invalid cases.  However, the pass ones also fail, but usually for reasons other than what it seems to be testing, most often because it is missing a DTD. That is, if you ignore the lack of a DTD, they actually do seem to be passing tests.  There are exception to this, such as o-p16pass1 which has wellformed errors in it.  My interprettion is that these were written against a validator that was not enforcing the §3.0.0 Element Valid validity constraint (and in the case of p16pass, was not checking the target correctly), and thus they passed. Later, they were run with a processor that attended to the lack of a DTD and reported them as inalid, and so they were categorized as "invalid" tests. Maybe someone didn't notice that o-p16pass1 was failing due to a WF error.
