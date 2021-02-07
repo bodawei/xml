@@ -103,7 +103,7 @@ class ValidateState {
    };
 
    elementDeclarations: {
-      [name: string]: DeclarationDetails;
+      [name: string]: DeclarationDetails | undefined;
    };
 
    readonly parameterEntities: {

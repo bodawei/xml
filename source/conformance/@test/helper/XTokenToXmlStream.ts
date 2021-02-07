@@ -39,16 +39,20 @@ function formatExternalId(externalId?: ExternalIdX): string {
 
 // We should find out what the actual rules are for canonical XML rather than cherry picking each control character for xmlconf purposes
 function formatText(text: string): string {
-   return text
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\t/g, '&#9;')
-      .replace(/\n/g, '&#10;')
-      .replace(/\u000c/g, '&#12;') // eslint-disable-line no-control-regex
-      .replace(/\u008c/g, '&#140;') // eslint-disable-line no-control-regex
-      .replace(/\r/g, '&#13;');
+   // console.log('>>', text, text.replace(/\u008c/g, '&#140;'), text.charCodeAt(0));
+   return (
+      text
+         .replace(/&/g, '&amp;')
+         .replace(/"/g, '&quot;')
+         .replace(/</g, '&lt;')
+         .replace(/>/g, '&gt;')
+         .replace(/\t/g, '&#9;')
+         .replace(/\n/g, '&#10;')
+         .replace(/\u000c/g, '&#12;') // eslint-disable-line no-control-regex
+         // See differences in rmt-044 and rmt-045 mentioned in fixTest
+         .replace(/\u008c/g, '&#140;') // eslint-disable-line no-control-regex
+         .replace(/\r/g, '&#13;')
+   );
 }
 
 function formatAttrs(attrs?: ReadonlyArray<AttributeXToken>): string {

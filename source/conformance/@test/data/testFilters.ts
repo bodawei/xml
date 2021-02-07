@@ -37,12 +37,12 @@ const testFilters: FilterData = {
       'rmt-051', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
       'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
 
-      // Something wrong with attribute normalization
+      // We are normalizing across char references, but should not be.
       'valid-sa-110', // Basically an output test, this requires that a CDATA attribute with a CRLF be normalized to one space.
       'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
 
-      'rmt-040', // Unsure
-      'rmt-044', // Unsure
+      // This actually isn't wellformed either
+      'invalid--005', // 'ELEMENTDECL_NO_CLOSE', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
 
       //
       // ////////////
@@ -52,7 +52,6 @@ const testFilters: FilterData = {
       // ////////////
       //
 
-      'invalid--005', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
       'invalid-not-sa-022', // Good error, but does not format right
       'invalid--006', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
       'inv-required01', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
@@ -64,7 +63,7 @@ const testFilters: FilterData = {
       'utf16b', // Tests reading an invalid "big endian" UTF-16 document
       'utf16l', // Tests reading an invalid "little endian" UTF-16 document
 
-      'o-p16fail1',
+      'o-p16fail1', // This is sorta working.  Might be nice to give a better message than TOKEN_INVALID_CONTEXT / XMLDECL_PTOKEN
       'o-p01pass1', // : 'ANY_UNDECLARED_ELEMENT', // no prolog
       'o-p01pass3', // : 'ANY_UNDECLARED_ELEMENT', // Misc items after the document
       'o-p04pass1', // : 'ANY_UNDECLARED_ELEMENT', // names with all valid ASCII characters, and one from each other class in NameChar
@@ -265,6 +264,7 @@ const testFilters: FilterData = {
       'rmt-e2e-22', // Starts with a BOM
       // This not only is doing utf16, but may not be loading the entities correctly.
       'ext02', // Tests use of external parsed entities with different       encodings than the base document.
+      'rmt-040', // iso-8859-1 characters, with an 8 bit char
 
       // Valid namespaces
       'rmt-ns10-017', // Simple legal case: no namespaces
