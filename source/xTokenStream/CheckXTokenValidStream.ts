@@ -767,7 +767,7 @@ class CheckXTokenValidStream extends Transform {
 
    private validateAttrDef(attList: AttListDeclarationXToken, attDef: AttDefinitionXToken): void {
       const type = attDef.type.toUpperCase();
-      const defaultType = attDef.defaultType.toUpperCase();
+      const defaultType = (attDef.defaultType || '').toUpperCase();
       const pToken = attList.pToken || {} as AttListDeclarationPToken; // typeHack
       const oneDotZeroRev3OrHigher = this.confVer.version === 1.1 || (this.confVer.version === 1 && this.confVer.revision > 2);
       const defaultText = getAttributeValueText(attDef);
@@ -813,7 +813,7 @@ class CheckXTokenValidStream extends Transform {
       if (type === 'ID') {
          // §3.3.1: Validity constraint: ID Attribute Default
          //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
-         if (defaultType !== '#IMPLIED' && defaultType !== '#REQUIRED') {
+         if (defaultType !== 'IMPLIED' && defaultType !== 'REQUIRED') {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
                [ attList.elementName, attDef.name, defaultType ], pToken.open);
          }
@@ -1160,7 +1160,7 @@ class CheckXTokenValidStream extends Transform {
             const attrInfo = elemAttrDef.attributes[attDefName];
             const attDef = attrInfo.def;
 
-            if (attDef.defaultType === '#REQUIRED') {
+            if (attDef.defaultType === 'REQUIRED') {
                requiredNames.push(attDef.name);
             }
          }
@@ -1334,7 +1334,7 @@ class CheckXTokenValidStream extends Transform {
             //    If an attribute has a default value declared with the #FIXED keyword,
             //    instances of that attribute must match the default value.
             // §3.3.2 (text): the #FIXED keyword states that the attribute must always have the default value.
-            if (attrDef && attrDef.defaultType === '#FIXED') {
+            if (attrDef && attrDef.defaultType === 'FIXED') {
                const attrDefaultText = getAttributeValueText(attrDef);
                if (attrText !== attrDefaultText) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_FIXED_NOT_RIGHT,

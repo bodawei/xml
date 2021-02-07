@@ -6,7 +6,12 @@ import { toSToken } from 'sToken';
 import { TextXToken } from 'xToken';
 import { WordListPToken, WordListType } from 'token';
 
-import { ATTLIST_DECLARATION_XTOKEN, AttListDeclarationXToken } from '../attListDeclarationXToken';
+import {
+   ATTLIST_DECLARATION_XTOKEN,
+   AttListDeclarationXToken,
+   AttDefaultType,
+   AttDefinitionType,
+} from '../attListDeclarationXToken';
 
 describe('attListDeclarationXToken', () => {
    let aldPToken: AttListDeclarationPToken;
@@ -37,8 +42,8 @@ describe('attListDeclarationXToken', () => {
       const xToken = new AttListDeclarationXToken('theName', [
          {
             name: 'att1',
-            type: 'CDATA',
-            defaultType: '',
+            type: AttDefinitionType.CDATA,
+            defaultType: AttDefaultType.FIXED,
             value: [],
          },
       ]);
@@ -50,7 +55,7 @@ describe('attListDeclarationXToken', () => {
             {
                name: 'att1',
                type: 'CDATA',
-               defaultType: '',
+               defaultType: AttDefaultType.FIXED,
                value: [],
             },
          ],
@@ -104,13 +109,13 @@ describe('attListDeclarationXToken', () => {
                name: 'att1',
                type: 'CDATA',
                enumeration: undefined,
-               defaultType: '#REQUIRED',
+               defaultType: 'REQUIRED',
                value: [],
             },
             {
                name: 'attr2',
-               type: 'bogus',
-               defaultType: '#FIXED',
+               type: 'CDATA',
+               defaultType: 'FIXED',
                enumeration: undefined,
                value: [new TextXToken(new TextPToken({ text: toSToken('x') }))],
             },
@@ -148,7 +153,7 @@ describe('attListDeclarationXToken', () => {
                name: 'att1',
                type: 'CDATA',
                enumeration: [],
-               defaultType: '#REQUIRED',
+               defaultType: 'REQUIRED',
                value: [],
             },
          ],
@@ -184,7 +189,7 @@ describe('attListDeclarationXToken', () => {
                name: 'att1',
                type: 'ENUMERATION',
                enumeration: [],
-               defaultType: '#REQUIRED',
+               defaultType: 'REQUIRED',
                value: [],
             },
          ],
@@ -192,7 +197,7 @@ describe('attListDeclarationXToken', () => {
       });
    });
 
-   it('replaces a missing type and defaultType value with a space', () => {
+   it('replaces a missing type and defaultType value with a default value', () => {
       const testToken = new AttListDeclarationPToken(aldPToken, {
          attDefs: [
             {
@@ -213,9 +218,9 @@ describe('attListDeclarationXToken', () => {
          attDefs: [
             {
                name: 'att1',
-               type: '',
+               type: 'CDATA',
                enumeration: undefined,
-               defaultType: '#REQUIRED',
+               defaultType: 'REQUIRED',
                value: [],
             },
          ],

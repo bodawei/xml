@@ -23,6 +23,8 @@ describe('foo', () => {
         const threeTen = new Date(threeOClock.getTime() + 10 * 1000 * 60);
         
         let eta = climbingETA(threeOClock, 130);
+        const foo = expect(eta);
+
         expect(eta).toBeWithinOneMinuteOfTwo(threeTen);
       });      
 })

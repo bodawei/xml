@@ -20,7 +20,7 @@ interface ContentNameX {
    readonly repeat: CpRepeat;
 }
 
-const REPEAT_MAP: { [key: string]: CpRepeat } = {
+const REPEAT_MAP: { [key: string]: CpRepeat | undefined } = {
    '*': CpRepeat.ZEROPLUS,
    '+': CpRepeat.ONEPLUS,
    '?': CpRepeat.ZEROONE,

@@ -15,9 +15,10 @@ The intent is that if you do not need the detailed information about the origina
 1. XToken constructors do not do wellformed or validity checks on parameters.  Thus, if you construct one with an invalid XML name, for example, it will accept the value.
 2. Missing string values are represented as `""`, not as `undefined`
 * If an XToken is constructed from a PToken, that PToken is attached to the XToken as a `.pToken` property.
-* Except for the PToken, all XToken properties are readonly.
+* Except for the PToken property, all XToken properties are readonly.
 * Any kind of entity value is represented as a series of strings and (if they have not been expanded) ParemterEntityReferences.
 * Arrays are always present, with 0 elements. Thus, in some cases, it is ambiguous whether a literal was present and empty or was not present.
+* Properties with fixed value (e.g. the attribute type in AttListDeclarations) will be converted to an enumerated value. If an invalid value is present in a PToken, then a default value will be inserted into the XToken. No error will be generated (if you care about errors, the Wellformed system will have reported it)
 
 ## Open issues
 * Icks:

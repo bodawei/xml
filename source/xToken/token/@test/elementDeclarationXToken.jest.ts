@@ -4,7 +4,11 @@ import { describe, expect, it } from '@jest/globals';
 import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclaration';
 import { toSToken } from 'sToken';
 
-import { ELEMENT_DECLARATION_XTOKEN, ElementDeclarationXToken } from '../elementDeclarationXToken';
+import {
+   ELEMENT_DECLARATION_XTOKEN,
+   ContentSpecType,
+   ElementDeclarationXToken,
+} from '../elementDeclarationXToken';
 import { CpRepeat, CpType } from '../../common/contentModelX';
 import { ContentModelP } from 'pToken';
 
@@ -41,7 +45,7 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: '',
-         contentSpec: '',
+         contentSpec: 'ANY',
          contentModel: undefined,
          pToken: elementDeclaration,
       });
@@ -73,8 +77,48 @@ describe('ElementDeclarationXToken', () => {
       });
    });
 
-   it('returns a notation declaration when provided with specific parameters', () => {
-      const result = new ElementDeclarationXToken('one', 'FOO', {
+   it('returns an element declaration token with mixed type with an adjusted #PCDATA entry', () => {
+      const elementDeclaration = new ElementDeclarationPToken({
+         open: toSToken('<!'),
+         openSpace: undefined,
+         declType: toSToken('ELEMENT'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('elementName'),
+         nameSpace: toSToken(' '),
+         contentModel: new ContentModelP({
+            open: toSToken('('),
+            delimitedParticles: [
+               {
+                  particle: { name: toSToken('#pcdata') },
+               },
+               {
+                  particle: { name: toSToken('foo') },
+               },
+            ],
+            repeat: toSToken('+'),
+         }),
+         close: toSToken('>'),
+      });
+      const result = new ElementDeclarationXToken(elementDeclaration);
+
+      expect(result).toEqual({
+         type: ELEMENT_DECLARATION_XTOKEN,
+         name: 'elementName',
+         contentSpec: 'MIXED',
+         contentModel: {
+            listType: CpType.CHOICE,
+            particles: [
+               { name: '#PCDATA', repeat: 'ONE' },
+               { name: 'foo', repeat: 'ONE' },
+            ],
+            repeat: CpRepeat.ONEPLUS,
+         },
+         pToken: elementDeclaration,
+      });
+   });
+
+   it('returns an element declaration when provided with specific parameters', () => {
+      const result = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
          listType: CpType.CHOICE,
          particles: [],
          repeat: CpRepeat.ZEROPLUS,
@@ -83,7 +127,7 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'one',
-         contentSpec: 'FOO',
+         contentSpec: 'CHILDREN',
          contentModel: {
             listType: CpType.CHOICE,
             particles: [],
@@ -98,7 +142,7 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'one',
-         contentSpec: '',
+         contentSpec: 'ANY',
          contentModel: undefined,
       });
    });
