@@ -1,10 +1,10 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { doAsyncWhileLoop } from 'basic';
-import { TextPToken, parseText } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
-import { parseParameterEntityReference } from 'token';
 
+import { parseParameterEntityReference } from '../token/parameterEntityReference';
+import { TextPToken, parseText } from '../token/text';
 import { UnexpandedMarkupDetails, UnexpandedMarkupToken } from '../types';
 
 // This returns an array of textPTokens, some of which are quotes, others are runs of text.

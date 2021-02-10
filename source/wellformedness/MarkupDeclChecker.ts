@@ -26,7 +26,7 @@ import { PARAMETER_ENTITY_END_PTOKEN } from '../token/marker/parameterEntityEnd'
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityReferencePToken,
-} from '../token/parameterEntityReference';
+} from '../pToken/token/parameterEntityReference';
 import { EXTERNAL_SUBSET_END_TOKEN } from '../token/marker/externalSubsetEnd';
 import { INTERNAL_SUBSET_END_TOKEN } from '../token/marker/internalSubsetEnd';
 import { getFirstSToken } from '../token/getFirstSToken';

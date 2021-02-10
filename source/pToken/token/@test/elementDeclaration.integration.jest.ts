@@ -10,8 +10,7 @@ import {
    parseElementDeclaration,
    resumeParseElementDeclaration,
 } from '../elementDeclaration';
-
-import { ParameterEntityReferencePToken } from 'token';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('elementDeclaration', () => {
    describe('parseElementDeclaration()', () => {

@@ -7,6 +7,7 @@ import {
    AttListDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    TextDeclarationPToken,
 } from 'pToken';
 import { strOrBlank, toSToken } from 'sToken';
@@ -21,7 +22,6 @@ import {
    ExternalSubsetEndToken,
    InternalSubsetEndToken,
    ParameterEntityStartPToken,
-   ParameterEntityReferencePToken,
    ParameterEntityEndPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,

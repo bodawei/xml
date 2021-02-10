@@ -11,10 +11,10 @@ import {
    parseAttListDeclaration,
    resumeParseAttListDeclaration,
 } from '../attListDeclaration';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 // ick
 import { WordListPToken, WordListType } from '../../../token/common/wordList';
-import { ParameterEntityReferencePToken } from 'token';
 
 describe('attListDeclaration (integration)', () => {
    describe('parseAttListDeclaration()', () => {

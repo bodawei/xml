@@ -1,10 +1,14 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ContextType, externalIdToEntityId, ParseToken } from 'pToken';
+import {
+   ContextType,
+   ParameterEntityReferencePToken,
+   externalIdToEntityId,
+   ParseToken,
+} from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-   ParameterEntityReferencePToken,
    GeneralEntityReferencePToken,
    XmlError,
    ExternalSubsetStartToken,

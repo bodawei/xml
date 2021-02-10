@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { gatherStreamResults } from 'basic-test';
-import { AttListDeclarationXToken, ElementDeclarationXToken, CpRepeat, CpType } from 'xToken';
+import { AttListDeclarationXToken, AttDefinitionType, AttDefaultType, ContentSpecType, ElementDeclarationXToken, CpRepeat, CpType } from 'xToken';
 
 import { CommentXToken } from 'token';
 
@@ -35,8 +35,8 @@ describe('FixingStream (unit)', () => {
       it('capitalizes a type if it is not capitalized', (done) => {
          const before = new AttListDeclarationXToken('elName', [{
             name: 'one',
-            type: 'id',
-            defaultType: '#IMPLIED',
+            type: AttDefinitionType.ID,
+            defaultType: AttDefaultType.IMPLIED,
             value: [],
          }]);
 
@@ -49,64 +49,12 @@ describe('FixingStream (unit)', () => {
          });
       });
 
-      it('replaces an unknown type with CDATA', (done) => {
-         const before = new AttListDeclarationXToken('elName', [{
-            name: 'one',
-            type: 'BOGUS',
-            defaultType: '#IMPLIED',
-            value: [],
-         }]);
-
-         fs.write(before);
-         fs.end();
-
-         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].attDefs[0].type).toEqual('CDATA');
-            done();
-         });
-      });
-
-      it('replaces a missing type with CDATA', (done) => {
-         const value = {
-            name: 'one',
-            type: 'work around typescript',
-            defaultType: '#IMPLIED',
-            value: [],
-         };
-         delete (value as any).type;
-         const before = new AttListDeclarationXToken('elName', [value]);
-
-         fs.write(before);
-         fs.end();
-
-         gatherStreamResults<XToken>(fs, (tokens) => {
-            expect(tokens[0].attDefs[0].type).toEqual('CDATA');
-            done();
-         });
-      });
-
-      it('capitalizes a default type if it is not capitalized', (done) => {
-         const before = new AttListDeclarationXToken('elName', [{
-            name: 'one',
-            defaultType: '#required',
-            type: 'ID',
-            value: [],
-         }]);
-
-         fs.write(before);
-         fs.end();
-
-         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].attDefs[0].defaultType).toEqual('#REQUIRED');
-            done();
-         });
-      });
 
       it('replaces an unknown type with #IMPLIED', (done) => {
          const before = new AttListDeclarationXToken('elName', [{
             name: 'one',
-            defaultType: 'BOGUS',
-            type: 'ID',
+            defaultType: AttDefaultType.IMPLIED,
+            type: AttDefinitionType.ID,
             value: [],
          }]);
 
@@ -124,7 +72,7 @@ describe('FixingStream (unit)', () => {
    describe('ELEMENT', () => {
 
       it('capitalizes the type if it is not capitalized', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'any', undefined);
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.ANY, undefined);
 
          fs.write(before);
          fs.end();
@@ -136,7 +84,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('changes a missing type to ANY', (done) => {
-         const before = new ElementDeclarationXToken('elName', '', undefined);
+         const before = new ElementDeclarationXToken('elName', undefined, undefined);
 
          fs.write(before);
          fs.end();
@@ -148,7 +96,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('changes a bad type to ANY', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'bogus', undefined);
+         const before = new ElementDeclarationXToken('elName', undefined, undefined);
 
          fs.write(before);
          fs.end();
@@ -160,7 +108,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('changes a bad type to CHILDREN if there are indeed children', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'bogus', {
+         const before = new ElementDeclarationXToken('elName', undefined, {
             particles: [],
             listType: CpType.CHOICE,
             repeat: CpRepeat.ONE,
@@ -170,45 +118,46 @@ describe('FixingStream (unit)', () => {
          fs.end();
 
          gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentSpec).toEqual('CHILDREN');
+            expect(tokens[0].contentSpec).toEqual(ContentSpecType.CHILDREN);
             done();
          });
       });
 
-      it('removes contentModel if the type is ANY', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'ANY', {
-            particles: [],
-            listType: CpType.CHOICE,
-            repeat: CpRepeat.ONE,
-         });
+      // These are obsolete.
+      // it('removes contentModel if the type is ANY', (done) => {
+      //    const before = new ElementDeclarationXToken('elName', ContentSpecType.ANY, {
+      //       particles: [],
+      //       listType: CpType.CHOICE,
+      //       repeat: CpRepeat.ONE,
+      //    });
 
-         fs.write(before);
-         fs.end();
+      //    fs.write(before);
+      //    fs.end();
 
-         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentModel).toBeUndefined();
-            done();
-         });
-      });
+      //    gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
+      //       expect(tokens[0].contentModel).toBeUndefined();
+      //       done();
+      //    });
+      // });
 
-      it('removes contentModel if the type is EMPTY', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'EMPTY', {
-            particles: [],
-            listType: CpType.CHOICE,
-            repeat: CpRepeat.ONE,
-         });
+      // it('removes contentModel if the type is EMPTY', (done) => {
+      //    const before = new ElementDeclarationXToken('elName', ContentSpecType.EMPTY, {
+      //       particles: [],
+      //       listType: CpType.CHOICE,
+      //       repeat: CpRepeat.ONE,
+      //    });
 
-         fs.write(before);
-         fs.end();
+      //    fs.write(before);
+      //    fs.end();
 
-         gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentModel).toBeUndefined();
-            done();
-         });
-      });
+      //    gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
+      //       expect(tokens[0].contentModel).toBeUndefined();
+      //       done();
+      //    });
+      // });
 
       it('capitalizes #PCDATA', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
             particles: [{
                name: '#pcdata',
                repeat: CpRepeat.ZEROPLUS
@@ -230,7 +179,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('moves #PCDATA to the start', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
             particles: [{
                name: 'one',
                repeat: CpRepeat.ONEPLUS,
@@ -255,7 +204,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('moves #PCDATA to the start, even if in a sublist', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
             particles: [{
                name: 'one',
                repeat: CpRepeat.ONEPLUS,
@@ -284,7 +233,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('removes duplicate #PCDATA', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
             particles: [{
                name: '#pcdata',
                repeat: CpRepeat.ZEROPLUS
@@ -309,7 +258,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('flattens a Mixed list, removes duplicates and sets repeat correctly', (done) => {
-         const before = new ElementDeclarationXToken('elName', 'CHILDREN', {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
             particles: [{
                name: 'one',
                repeat: CpRepeat.ONEPLUS,

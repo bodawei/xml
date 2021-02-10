@@ -2,9 +2,9 @@
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { WellFormedError } from '../error/WellFormedError';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { nameCheck } from './util/nameCheck';
-import { ParameterEntityReferencePToken } from 'token';
 const WFEID = WellFormedError.ID;
 
 function parameterEntityReferenceCheck(

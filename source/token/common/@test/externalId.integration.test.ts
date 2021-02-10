@@ -4,10 +4,9 @@
 import { ErrorCollector } from 'basic';
 import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from 'extractor';
-import { TextPToken } from 'pToken';
+import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import { ParameterEntityReferencePToken,  } from 'token';
 
 import { UnassignedType } from '../unassigned';
 import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from '../externalId';

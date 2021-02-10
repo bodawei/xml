@@ -5,7 +5,8 @@ import { describe, expect, it } from '@jest/globals';
 import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
-import { ParameterEntityReferencePToken } from 'token';
+
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 import { DeclarationStart } from '../../../token/bridge/declaration';
 

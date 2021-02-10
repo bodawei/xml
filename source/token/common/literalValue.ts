@@ -6,11 +6,10 @@ import { SToken, STokenSource } from 'sToken';
 import { generalEntityReferenceToSTokens } from 'stringify';
 import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken } from 'xToken';
 
-import { TextPToken, isTextPToken } from 'pToken';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken, TextPToken, isTextPToken, parseParameterEntityReference } from 'pToken';
 import { TextXToken } from 'xToken';
 import misc from './misc';
 import { GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from '../generalEntityReference';
-import { parseParameterEntityReference, ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../parameterEntityReference';
 import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';

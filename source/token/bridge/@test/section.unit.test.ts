@@ -1,13 +1,13 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
-import { ParameterEntityReferencePToken } from 'token';
 
 import * as cdata from '../../cdata';
 import * as conditional from '../../conditional';
-import * as peReference from '../../parameterEntityReference';
+import * as peReference from '../../../pToken/token/parameterEntityReference';
 
 import { SectionStart, parseSection } from '../section';
 

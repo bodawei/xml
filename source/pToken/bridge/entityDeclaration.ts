@@ -1,10 +1,10 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { combineSTokens, SToken, STokenSource, strOrBlank } from 'sToken';
-import { ParameterEntityReferencePToken } from 'token';
 import literal from '../../token/common/literal';
 import { DeclarationStart } from '../../token/bridge/declaration';
 import { parseExternalId } from '../common/externalId';
+import { ParameterEntityReferencePToken } from '../token/parameterEntityReference';
 
 import { parseUnexpanded, parseUnexpandedAfterPeRef } from '../common/parseUnexpanded';
 import {

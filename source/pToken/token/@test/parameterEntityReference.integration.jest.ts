@@ -1,5 +1,4 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';

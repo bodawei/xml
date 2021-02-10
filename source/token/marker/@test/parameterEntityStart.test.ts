@@ -4,10 +4,10 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken } from 'sToken';
 import * as checks from '../../../wellformedness/token/parameterEntityReferenceCheck';
 
-import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../parameterEntityStart';
 
 describe('ParameterEntityStartPToken (unit)', () => {

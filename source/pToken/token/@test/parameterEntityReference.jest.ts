@@ -1,5 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { MockSTokenSource } from 'sToken-test';
 import { toSToken } from 'sToken';
@@ -45,10 +44,13 @@ describe('ParameterEntityReferencePToken (unit)', () => {
    });
 
    describe('paramParse()', () => {
-      let callback: jasmine.Spy;
+      let callback: (param: ParameterEntityReferencePToken | undefined) => void;
+      let result: ParameterEntityReferencePToken | undefined;
 
       beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
+         callback = (finalValue) => {
+            result = finalValue;
+         };
       });
 
       it('does a full parse', () => {
@@ -63,7 +65,7 @@ describe('ParameterEntityReferencePToken (unit)', () => {
          parseParameterEntityReference(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(pePToken);
+         expect(result).toEqualRangeless(pePToken);
       });
 
       it('copes with no reference at all', () => {
@@ -72,7 +74,7 @@ describe('ParameterEntityReferencePToken (unit)', () => {
          parseParameterEntityReference(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith(undefined);
+         expect(result).toEqual(undefined);
       });
 
       it('copes with eof mid-stream', () => {
@@ -87,7 +89,7 @@ describe('ParameterEntityReferencePToken (unit)', () => {
          parseParameterEntityReference(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless({
+         expect(result).toEqualRangeless({
             open: toSToken('%'),
             openSpace: undefined,
             name: undefined,

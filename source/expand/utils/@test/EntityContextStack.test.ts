@@ -2,7 +2,8 @@ import { EntityId } from 'basic';
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'sToken';
-import { EXTERNAL_ID, GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'token';
+import { ParameterEntityReferencePToken } from 'pToken';
+import { EXTERNAL_ID, GeneralEntityReferencePToken } from 'token';
 
 import { EntityContextStack } from '../EntityContextStack';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';

@@ -1,14 +1,17 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { doAsyncLoop } from 'basic';
-import { UnexpandedMarkupToken } from 'pToken';
+
+import {
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   ParameterEntityReferencePToken,
+   UnexpandedMarkupToken,
+} from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
    ElidedEntityDeclarationPToken,
-   ParameterEntityReferencePToken,
    XmlError,
    ParameterEntityStartPToken,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityEndPToken,
    EntityValueElement,
 } from 'token';

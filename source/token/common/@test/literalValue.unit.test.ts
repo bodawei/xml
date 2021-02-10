@@ -10,7 +10,7 @@ import { TextXToken } from 'xToken';
 
 import * as charRef from '../../charRef';
 import * as generalEntityReference from '../../generalEntityReference';
-import * as parameterEntityReference from '../../parameterEntityReference';
+import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 
 import misc from '../misc';

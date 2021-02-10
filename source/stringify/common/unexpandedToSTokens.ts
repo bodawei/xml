@@ -1,9 +1,8 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { STokenArrayBuilder, SToken } from 'sToken';
-import { TEXT_PTOKEN, UnexpandedMarkupDetails } from 'pToken';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN, UnexpandedMarkupDetails } from 'pToken';
 // ick
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
 import { parameterEntityReferenceToSTokens } from '../token/parameterEntityReferenceToSTokens';
 
 const DEFAULT: UnexpandedMarkupDetails = { propName: '', tokens: [] };

@@ -22,11 +22,14 @@ export { ExternalIdX } from './common/externalIdX';
 // Fully converted
 export {
    ATTLIST_DECLARATION_XTOKEN,
+   AttDefinitionType,
+   AttDefaultType,
    AttListDeclarationXToken,
    AttDefinitionXToken,
 } from './token/attListDeclarationXToken';
 export {
    ELEMENT_DECLARATION_XTOKEN,
+   ContentSpecType,
    ElementDeclarationXToken,
 } from './token/elementDeclarationXToken';
 export {

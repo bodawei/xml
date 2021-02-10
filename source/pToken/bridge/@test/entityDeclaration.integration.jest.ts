@@ -6,9 +6,10 @@ import { STokenSource, toSToken } from 'sToken';
 
 import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 
-import { DeclarationStart, ParameterEntityReferencePToken } from 'token';
+import { DeclarationStart } from 'token';
 import { GeneralEntityDeclarationPToken } from '../../token/generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDeclaration';
+import { ParameterEntityReferencePToken } from '../../token/parameterEntityReference';
 
 describe('parseEntityDeclaration (unit)', () => {
    let declarationStart: DeclarationStart;

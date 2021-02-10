@@ -3,7 +3,11 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
-import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import {
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
+} from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
@@ -22,7 +26,6 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
 } from 'token';
 
 describe('checkUtils (unit)', () => {

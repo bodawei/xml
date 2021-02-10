@@ -11,7 +11,7 @@ import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
 import * as text from '../../pToken/token/text';
 import * as instruction from '../../pToken/bridge/instruction';
-import * as peRef from '../../token/parameterEntityReference';
+import * as peRef from '../../pToken/token/parameterEntityReference';
 import * as charRef from '../../token/charRef';
 
 describe('PTokenFromLiteralStream (unit)', () => {

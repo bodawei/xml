@@ -1,7 +1,12 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ExternalIdP, ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
+import {
+   ExternalIdP,
+   ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
+   TextPToken,
+} from 'pToken';
 import { toSToken } from 'sToken';
 
 import {
@@ -10,12 +15,7 @@ import {
 } from '../parameterEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToken';
 
-import {
-   CharRefPToken,
-   ParameterEntityEndPToken,
-   ParameterEntityReferencePToken,
-   ParameterEntityStartPToken,
-} from 'token';
+import { CharRefPToken, ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 describe('ParameterEntityDeclarationXToken()', () => {
    let pToken: ParameterEntityDeclarationPToken;

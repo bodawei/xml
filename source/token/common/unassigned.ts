@@ -1,11 +1,10 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range, ErrorCollector } from 'basic';
-import { TextPToken } from 'pToken';
+import { ParameterEntityReferencePToken, TextPToken, parseParameterEntityReference } from 'pToken';
 import { SToken, STokenSource, strOrBlank } from 'sToken';
 import { parameterEntityReferenceToSTokens } from 'stringify';
 
-import { ParameterEntityReferencePToken, parseParameterEntityReference } from '../parameterEntityReference';
 import literal, { LiteralPToken } from '../common/literal';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];

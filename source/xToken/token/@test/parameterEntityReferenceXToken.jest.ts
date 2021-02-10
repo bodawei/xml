@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
-// ick
-import { ParameterEntityReferencePToken } from 'token';
 
 import {
    PARAMETER_ENTITY_REFERENCE_XTOKEN,

@@ -2,10 +2,10 @@
 
 import { describe, expect, it } from '@jest/globals';
 
+import { ParameterEntityReferencePToken } from 'pToken';
 import { UnexpandedMarkupDetails, TextPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 // ick1
-import { ParameterEntityReferencePToken } from 'token';
 
 import { unexpandedToSTokens } from '../unexpandedToSTokens';
 

@@ -1,9 +1,8 @@
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ElidedEntityDeclarationPToken,
    EntityValuePToken,
-   ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
    XmlError,

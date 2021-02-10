@@ -3,14 +3,13 @@
 import { ErrorCollector,  } from 'basic';
 import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from '../../../extractor';
-import {  TextPToken } from 'pToken';
+import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { TextXToken,  } from 'xToken';
 
 import literalValue from '../literalValue';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
-import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { CharRefPToken } from '../../charRef';
 import { GeneralEntityReferenceXToken } from 'xToken';
 import { ConformanceVersion } from 'basic';

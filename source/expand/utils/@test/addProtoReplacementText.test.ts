@@ -4,6 +4,7 @@ import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
@@ -12,7 +13,6 @@ import {
    ElidedEntityDeclarationPToken,
    EntityValuePToken,
    GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
    XmlError,
 } from 'token';
 

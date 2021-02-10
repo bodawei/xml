@@ -2,6 +2,7 @@
 
 import { ErrorCollector, ConformanceVersion, isSpace, XmlWarning } from 'basic';
 import {
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
    ContentModelP,
    ElementDeclarationPToken,
@@ -11,7 +12,6 @@ import {
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { WellFormedError } from 'wellformedness';
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
 
 import { ValidityError } from '../error/ValidityError';
 import { ElDeclType, ValidateState } from '../validateState';

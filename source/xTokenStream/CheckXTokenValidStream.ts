@@ -59,6 +59,7 @@ import {
 } from 'token';
 
 import { AttributeValueXToken } from '../token/common/attribute';
+import { ContentSpecType } from 'xToken';
 
 type XToken = {
    type: string;
@@ -640,7 +641,7 @@ class CheckXTokenValidStream extends Transform {
             } else {
                this.currentContext = {
                   declInfo: {
-                     token: new ElementDeclarationXToken(xToken.name, 'ANY', undefined),
+                     token: new ElementDeclarationXToken(xToken.name, ContentSpecType.ANY, undefined),
                      type: 'ANY_CONTENT',
                   },
                   stateId: 0,

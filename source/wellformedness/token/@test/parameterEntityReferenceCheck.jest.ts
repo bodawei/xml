@@ -2,8 +2,8 @@
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { ParameterEntityReferencePToken } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
 import * as util from '../util/nameCheck';

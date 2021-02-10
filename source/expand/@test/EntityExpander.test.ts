@@ -11,6 +11,7 @@ import {
    NotationDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
@@ -21,8 +22,6 @@ import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ERROR_TYPE,
-   INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
    CharRefPToken,
    ConditionalClosePToken,
    ConditionalPToken,
@@ -32,7 +31,6 @@ import {
    ElementEmptyPToken,
    GeneralEntityReferencePToken,
    XmlError,
-   ParameterEntityReferencePToken,
 } from 'token';
 
 import * as attListDecl from '../../pToken/token/attListDeclaration';

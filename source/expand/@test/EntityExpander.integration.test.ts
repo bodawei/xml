@@ -7,6 +7,7 @@ import {
    ContextType,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    TextPToken,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'pToken';
@@ -19,7 +20,6 @@ import {
    GeneralEntityReferencePToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   ParameterEntityReferencePToken,
    PToken,
    XmlError,
    PARAMETER_ENTITY_START_PTOKEN,

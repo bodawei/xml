@@ -6,6 +6,7 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import {
    AttListDeclarationXToken,
+   AttDefinitionType,
    GeneralEntityDeclarationXToken,
    ParameterEntityReferenceXToken,
    ProcessingInstructionXToken,
@@ -81,13 +82,13 @@ describe('PToXTokenStream (integration)', () => {
       expectInputToProduce('<!ATTLIST elementName atOne IDREF atTwo ENTITY>', [
          new AttListDeclarationXToken('elementName', [{
             name: 'atOne',
-            type: 'IDREF',
-            defaultType: '',
+            type: AttDefinitionType.IDREF,
+            defaultType: undefined,
             value: [],
          }, {
             name: 'atTwo',
-            type: 'ENTITY',
-            defaultType: '',
+            type: AttDefinitionType.ENTITY,
+            defaultType: undefined,
             value: [],
          }]),
       ], done);

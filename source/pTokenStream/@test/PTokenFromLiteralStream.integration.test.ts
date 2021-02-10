@@ -1,9 +1,8 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
-import { TEXTDECL_PTOKEN, TEXT_PTOKEN } from 'pToken';
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'token';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXTDECL_PTOKEN, TEXT_PTOKEN } from 'pToken';
 
 import * as xToken from 'token';
 

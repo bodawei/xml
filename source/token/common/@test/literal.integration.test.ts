@@ -6,11 +6,10 @@ import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from '../../../extractor';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import { TextPToken,  } from 'pToken';
+import { ParameterEntityReferencePToken, TextPToken,  } from 'pToken';
 import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
-import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 
 describe('literal (integration)', () => {

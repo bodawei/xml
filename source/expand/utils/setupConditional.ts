@@ -1,8 +1,11 @@
 import { defaultExtractors } from 'extractor';
-import { ContextType, ParseToken, pTokenArrayToString } from 'pToken';
+import {
+   ContextType,
+   ParameterEntityReferencePToken,
+   ParseToken,
+   pTokenArrayToString,
+} from 'pToken';
 import { strOrBlank, STokenSource, toSToken } from 'sToken';
-
-import { ParameterEntityReferencePToken } from 'token';
 
 import { ConditionalInfo, ExpandParams } from '../types';
 import { addProtoReplacementText } from './addProtoReplacementText';

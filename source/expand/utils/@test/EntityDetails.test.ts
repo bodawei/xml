@@ -4,9 +4,10 @@ import { toSToken } from 'sToken';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'token';
+import { GeneralEntityReferencePToken } from 'token';
 
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';

@@ -2,8 +2,9 @@
 /* eslint-env jasmine */
 
 import { defaultExtractors } from 'extractor';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
-import { CdataPToken, ConditionalPToken, ParameterEntityReferencePToken } from 'token';
+import { CdataPToken, ConditionalPToken,  } from 'token';
 
 import { parseSection } from '../section';
 

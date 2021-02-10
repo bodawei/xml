@@ -1,13 +1,12 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
 
-import { parseInstruction, TextPToken, parseText,} from 'pToken';
+import { parseInstruction, TextPToken, parseParameterEntityReference, parseText,} from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    parseCharRef,
    parseGeneralEntityReference,
-   parseParameterEntityReference,
 } from 'token';
 
 type Options = {

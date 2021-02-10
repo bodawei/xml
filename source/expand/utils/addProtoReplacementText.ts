@@ -1,9 +1,10 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { ParameterEntityReferencePToken } from 'pToken';
+
 import {
    ElidedEntityDeclarationPToken,
    EntityValuePToken,
-   ParameterEntityReferencePToken,
    GeneralEntityReferencePToken,
    XmlError,
 } from 'token';

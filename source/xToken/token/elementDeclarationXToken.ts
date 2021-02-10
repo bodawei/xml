@@ -88,9 +88,19 @@ class ElementDeclarationXToken {
       contentModel?: ContentModelX,
    ) {
       if (typeof nameOrPToken === 'string') {
+         let specType = contentSpec ?? ContentSpecType.ANY;
+         let model = contentModel;
+
+         if (contentModel) {
+            const [isMixed, finalContentModel] = adjustMixed(contentModel);
+
+            specType = isMixed ? ContentSpecType.MIXED : ContentSpecType.CHILDREN;
+            model = finalContentModel;
+         }
+
          this.name = nameOrPToken;
-         this.contentSpec = contentSpec ?? ContentSpecType.ANY;
-         this.contentModel = contentModel;
+         this.contentSpec = specType;
+         this.contentModel = model;
       } else {
          const ucSpecType = strOrBlank(nameOrPToken.contentSpec);
          const contentModelPreAdjustment = nameOrPToken.contentModel

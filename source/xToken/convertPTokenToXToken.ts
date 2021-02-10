@@ -1,4 +1,4 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import {
    ATTLIST_DECLARATION_PTOKEN,
@@ -6,6 +6,7 @@ import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    TEXT_PTOKEN,
    TEXTDECL_PTOKEN,
@@ -18,7 +19,6 @@ import {
    CONDITIONAL_CLOSE_PTOKEN,
    CONDITIONAL_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
 } from 'token';
 
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';

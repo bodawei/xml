@@ -1,12 +1,9 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 
 import { SectionStart } from './bridge/section';
-import {
-   ParameterEntityReferencePToken,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-} from './parameterEntityReference';
 
 const CONDITIONAL_PTOKEN = 'CONDITIONAL_PTOKEN';
 

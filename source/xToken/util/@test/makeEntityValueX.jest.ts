@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { TextPToken } from 'pToken';
+import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { ParameterEntityReferenceXToken } from '../../token/parameterEntityReferenceXToken';
@@ -8,12 +8,7 @@ import { ParameterEntityReferenceXToken } from '../../token/parameterEntityRefer
 import { makeEntityValueX } from '../makeEntityValueX';
 
 // ick
-import {
-   CharRefPToken,
-   ParameterEntityEndPToken,
-   ParameterEntityReferencePToken,
-   ParameterEntityStartPToken,
-} from 'token';
+import { CharRefPToken, ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 describe('GeneralEntityDeclarationXToken()', () => {
    it('convert an empty literal value to an empty array', () => {

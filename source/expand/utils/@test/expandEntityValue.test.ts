@@ -4,13 +4,13 @@ import { ENTITY_ID, ConformanceVersion } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
 import {
    ElidedEntityDeclarationPToken,
-   ParameterEntityReferencePToken,
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
    XmlError,

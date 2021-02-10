@@ -1,9 +1,7 @@
+import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
+
 import { TextPToken } from './token/text';
-import {
-   ParameterEntityEndPToken,
-   ParameterEntityReferencePToken,
-   ParameterEntityStartPToken,
-} from 'token';
+import { ParameterEntityReferencePToken } from './token/parameterEntityReference';
 
 type UnexpandedMarkupToken = TextPToken | ParameterEntityReferencePToken;
 type ExpandedMarkupToken =

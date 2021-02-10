@@ -3,7 +3,7 @@
 import { Transform } from 'stream';
 
 import { AttListDeclarationXToken } from 'xToken';
-import { ElementDeclarationXToken, isContentNameX, CpRepeat, CpType, ContentModelX, ContentNameX } from 'xToken';
+import { ElementDeclarationXToken, isContentNameX, ContentSpecType, CpRepeat, CpType, ContentModelX, ContentNameX } from 'xToken';
 
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
 const DEFAULT_TYPES = [ '#FIXED', '#REQUIRED', '#IMPLIED' ];
@@ -86,11 +86,27 @@ function adjustElementDeclaration(token: ElementDeclarationXToken): ElementDecla
 
    // should fix all the names somehow
 
+   // note: A bunch of this is not needed any longer.  
    if (ALLOWED_CONTENT_SPEC_TYPES.indexOf(capContentSpec) === -1) {
-      const newContentSpec = token.contentModel ? 'CHILDREN' : 'ANY';
+      const newContentSpec = token.contentModel ? ContentSpecType.CHILDREN : ContentSpecType.ANY;
       newToken = new ElementDeclarationXToken(token.name, newContentSpec, token.contentModel);
    } else if (contentSpec !== capContentSpec) {
-      newToken = new ElementDeclarationXToken(token.name, capContentSpec, token.contentModel);
+      let specType: ContentSpecType;
+
+      switch (capContentSpec) {
+         case 'CHILDREN':
+            specType = ContentSpecType.CHILDREN;
+            break;
+         default:
+         case 'ANY':
+            specType = ContentSpecType.ANY;
+            break;
+         case 'EMPTY':
+            specType = ContentSpecType.EMPTY;
+            break;
+      }
+
+      newToken = new ElementDeclarationXToken(token.name, specType, token.contentModel);
    }
 
    if (newToken.contentSpec === 'ANY' || token.contentSpec === 'EMPTY') {

@@ -35,6 +35,28 @@ describe('ElementDeclarationXToken', () => {
       });
    });
 
+   it('returns an element declaration token built from a PToken that is EMPTY', () => {
+      const elementDeclaration = new ElementDeclarationPToken({
+         open: toSToken('<!'),
+         openSpace: undefined,
+         declType: toSToken('ELEMENT'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('elementName'),
+         nameSpace: toSToken(' '),
+         contentSpec: toSToken('EMPTY'),
+         close: toSToken('>'),
+      });
+      const result = new ElementDeclarationXToken(elementDeclaration);
+
+      expect(result).toEqual({
+         type: ELEMENT_DECLARATION_XTOKEN,
+         name: 'elementName',
+         contentSpec: 'EMPTY',
+         contentModel: undefined,
+         pToken: elementDeclaration,
+      });
+   });
+
    it('returns an element declaration token with blank values if none in the PToken', () => {
       const elementDeclaration = new ElementDeclarationPToken({
          open: toSToken('<!'),
@@ -144,6 +166,54 @@ describe('ElementDeclarationXToken', () => {
          name: 'one',
          contentSpec: 'ANY',
          contentModel: undefined,
+      });
+   });
+
+   it('ignores the provided contentSpec type if there is a content model provided', () => {
+      const result = new ElementDeclarationXToken('one', ContentSpecType.ANY, {
+         listType: CpType.CHOICE,
+         particles: [],
+         repeat: CpRepeat.ZEROPLUS,
+      });
+
+      expect(result).toEqual({
+         type: ELEMENT_DECLARATION_XTOKEN,
+         name: 'one',
+         contentSpec: ContentSpecType.CHILDREN,
+         contentModel: {
+            listType: CpType.CHOICE,
+            particles: [],
+            repeat: CpRepeat.ZEROPLUS,
+         },
+      });
+   });
+
+   it('ignores the provided contentSpec type if there is a content model for a mixed type is provided', () => {
+      const result = new ElementDeclarationXToken('one', ContentSpecType.ANY, {
+         listType: CpType.CHOICE,
+         particles: [
+            {
+               name: '#PCDATA',
+               repeat: CpRepeat.ZEROPLUS,
+            },
+         ],
+         repeat: CpRepeat.ZEROPLUS,
+      });
+
+      expect(result).toEqual({
+         type: ELEMENT_DECLARATION_XTOKEN,
+         name: 'one',
+         contentSpec: ContentSpecType.MIXED,
+         contentModel: {
+            listType: CpType.CHOICE,
+            particles: [
+               {
+                  name: '#PCDATA',
+                  repeat: CpRepeat.ZEROPLUS,
+               },
+            ],
+            repeat: CpRepeat.ZEROPLUS,
+         },
       });
    });
 });

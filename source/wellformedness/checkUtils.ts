@@ -1,20 +1,20 @@
 import { ErrorCollector, ConformanceVersion } from 'basic';
 import { strOrBlank } from 'sToken';
 import {
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
    ParseToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
 } from 'pToken';
 import { WellFormedError } from './error/WellFormedError';
 import {
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    CHARREF_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
    GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    ElementEmptyPToken,

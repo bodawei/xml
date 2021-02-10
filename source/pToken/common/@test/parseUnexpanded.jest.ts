@@ -1,14 +1,14 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import * as peRefStuff from '../../../token/parameterEntityReference';
+import * as peRefStuff from '../../token/parameterEntityReference';
 import * as textStuff from '../../../pToken/token/text';
 
-import { ParameterEntityReferencePToken } from 'token';
+import { ParameterEntityReferencePToken } from '../../token/parameterEntityReference';
+import { TextPToken } from '../../token/text';
 
 import { parseUnexpanded, parseUnexpandedAfterPeRef } from '../parseUnexpanded';
 

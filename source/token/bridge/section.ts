@@ -1,22 +1,19 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
+import { parseParameterEntityReference, ParameterEntityReferencePToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
 import { parseCdata, CdataPToken } from '../cdata';
 import { parseConditional, ConditionalPToken } from '../conditional';
-import {
-   parseParameterEntityReference,
-   ParameterEntityReferencePToken,
-} from '../parameterEntityReference';
 
-type SectionStart = {
+interface SectionStart {
    open: SToken;
    openSpace?: SToken;
    sectionType?: SToken;
    peRef?: ParameterEntityReferencePToken;
    peRefPlus?: Array<ParameterEntityReferencePToken>;
    sectionTypeSpace?: SToken;
-};
+}
 type DeliverSection = (section: CdataPToken | ConditionalPToken) => void;
 
 function continueToContent(

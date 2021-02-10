@@ -5,12 +5,12 @@ import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
 } from 'pToken';
 import {
    EntityValuePToken,
    ExternalId,
    GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
    XmlError,
    ElidedEntityDeclarationPToken,
 } from 'token';

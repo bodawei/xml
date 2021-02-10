@@ -24,7 +24,7 @@ import * as instruction from '../../pToken/bridge/instruction';
 import * as section from '../../token/bridge/section';
 import * as space from '../../token/space';
 import * as geRef from '../../token/generalEntityReference';
-import * as peRef from '../../token/parameterEntityReference';
+import * as peRef from '../../pToken/token/parameterEntityReference';
 import * as elementEnd from '../../token/elementEnd';
 import * as elementStart from '../../token/elementStart';
 import * as comment from '../../token/comment';

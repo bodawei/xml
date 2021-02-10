@@ -1,16 +1,16 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { TextPToken } from 'pToken';
-import { toSToken, SToken, STokenSource } from 'sToken';
+import { toSToken, SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as unexpanded from '../../common/parseUnexpanded';
 import { UnexpandedMarkupDetails } from '../../common/parseUnexpanded';
 import * as externalId from '../../common/externalId';
 import { ParsedExternalId } from '../../common/externalId';
-import { ParameterEntityReferencePToken } from '../../../token/parameterEntityReference';
 import { GeneralEntityDeclarationPToken } from '../../token/generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDeclaration';
+import { ParameterEntityReferencePToken } from '../../token/parameterEntityReference';
 
 import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 
