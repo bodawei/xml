@@ -1,5 +1,5 @@
 import { ErrorCollector, ConformanceVersion } from 'basic';
-import { strOrBlank } from 'sToken';
+import { SToken, strOrBlank } from 'sToken';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
@@ -26,6 +26,8 @@ import {
    ConditionalPToken,
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
+import { LiteralValuePToken } from 'source/token/common/literal';
+import { parameterEntityDeclarationToSTokens } from 'source/stringify/token/parameterEntityDeclarationToSTokens';
 
 type ContentStart = ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
 
@@ -95,6 +97,38 @@ class CheckState {
    public hasNoDTD = false;
 
    public hasExternalDTD = false;
+}
+
+function checkForExternalEntity(
+   value: LiteralValuePToken,
+   paramDecls: ParameterEntitiesInfo,
+   ec: ErrorCollector,
+   open: SToken,
+): void {
+   for (const item of value) {
+      let ref: ParameterEntityReferencePToken | undefined;
+
+      if (item.type === PARAMETER_ENTITY_START_PTOKEN) {
+         ref = item.referencePToken;
+      } else if (item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+         ref = item;
+      }
+
+      if (!ref) {
+         continue;
+      }
+
+      const name = strOrBlank(ref.name);
+      const decl = paramDecls[name];
+
+      if (!decl) {
+         continue;
+      }
+
+      ec.check(decl.externalId, WFID.ATTRIBUTE_INVALID_REFERENCE, [name], open);
+
+      checkForExternalEntity(decl.value, paramDecls, ec, open);
+   }
 }
 
 /*
@@ -172,10 +206,8 @@ function checkGeneralEntity(
             [name],
             pToken.open,
          );
-         // @@@ Check parameter entities
-         // Now go over each peref in the value, check it and recurse.
-         // if any violation is external, return it, and the
-         // ATTRIBUTE_INVALID_REFERENCE should reference both this and and the attribute I think
+
+         checkForExternalEntity(genEntityDecl.token.value, state.paramDecls, ec, pToken.open);
       }
 
       // §4.1.0: Well-Formedness Constraint: Parsed Entity
@@ -185,11 +217,14 @@ function checkGeneralEntity(
       ec.check(genEntityDecl.token.nDataName, WFID.REFERENCE_UNPARSED_NO_USE, [name], pToken.open);
 
       // §4.1.0 Well-formedness constraint: Entity Declared
-      //     In a ... document wit "standalone='yes'", for an entity reference that
+      //     In a ... document with "standalone='yes'", for an entity reference that
       //     does not occur within the external subset or a parameter entity, the
       //     Name given in the entity reference must match that in an entity
       //     declaration that does not occur within the external subset...
-      // @@@ need to do this recursively.  IBM tests work fine with one level
+      // Translation: given a general entity reference (that appears in
+      // the content or an attribute list default in the internal subset
+      // but not in a parameter entity), there must be a declaration, and it
+      // must not be in the external subset
       ec.check(
          state.isStandalone && !genEntityDecl.declaredInInternalSubset,
          WFID.REFERENCE_INVALID_STANDALONE,

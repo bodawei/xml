@@ -26,7 +26,9 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    GeneralEntityReferencePToken,
+   ParameterEntityStartPToken,
 } from 'token';
+import { makeParameterExternalEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
 describe('checkUtils (unit)', () => {
    let state: CheckState;
@@ -466,7 +468,7 @@ describe('checkUtils (unit)', () => {
       it('reports an error if an attribute has a reference to an external entity (§3.1.0)', () => {
          checkGeneralEntity(
             generalEntityReference,
-            true,
+            true, // in an attribute
             {
                testRef: {
                   token: new GeneralEntityDeclarationPToken({
@@ -486,6 +488,144 @@ describe('checkUtils (unit)', () => {
             params: ['testRef'],
             position: generalEntityReference.open,
          });
+      });
+
+      it('reports an error if an attribute has a geref formed from an external parameter entity (§3.1.0)', () => {
+         const peRef = makeParameterEntityReference();
+         const peRefDecl = makeParameterExternalEntityDeclaration();
+
+         checkGeneralEntity(
+            generalEntityReference,
+            true, // in an attribute
+            {
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     value: [new ParameterEntityStartPToken(peRef)],
+                     externalId: {},
+                  }),
+                  declaredInInternalSubset: false,
+               },
+            },
+            {
+               ...state,
+               paramDecls: {
+                  entityName: peRefDecl,
+               },
+            },
+            ec,
+         );
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWFError({
+            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+            params: ['entityName'],
+            position: generalEntityReference.open,
+         });
+      });
+
+      it('reports an error if an attribute has a geref from a peref that is formed from a peref that is external  (§3.1.0)', () => {
+         const peRef = makeParameterEntityReference();
+         const externalRefDecl = makeParameterExternalEntityDeclaration();
+
+         checkGeneralEntity(
+            generalEntityReference,
+            true, // in an attribute
+            {
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     value: [
+                        new ParameterEntityReferencePToken({
+                           open: toSToken('%'),
+                           name: toSToken('intermediate'),
+                        }),
+                     ],
+                     externalId: {},
+                  }),
+                  declaredInInternalSubset: false,
+               },
+            },
+            {
+               ...state,
+               paramDecls: {
+                  intermediate: new ParameterEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     value: [peRef],
+                  }),
+                  entityName: externalRefDecl,
+               },
+            },
+            ec,
+         );
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWFError({
+            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+            params: ['entityName'],
+            position: generalEntityReference.open,
+         });
+      });
+
+      it('reports an error if an attribute has an unexpanded geref formed from an external parameter entity (§3.1.0)', () => {
+         const peRef = makeParameterEntityReference();
+         const peRefDecl = makeParameterExternalEntityDeclaration();
+
+         checkGeneralEntity(
+            generalEntityReference,
+            true, // in an attribute
+            {
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     value: [peRef],
+                     externalId: {},
+                  }),
+                  declaredInInternalSubset: false,
+               },
+            },
+            {
+               ...state,
+               paramDecls: {
+                  entityName: peRefDecl,
+               },
+            },
+            ec,
+         );
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWFError({
+            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+            params: ['entityName'],
+            position: generalEntityReference.open,
+         });
+      });
+
+      it('reports no error if an attribute has a geref formed from a parameter entity, but there is no declaration (§3.1.0)', () => {
+         const peRef = makeParameterEntityReference();
+
+         checkGeneralEntity(
+            generalEntityReference,
+            true, // in an attribute
+            {
+               testRef: {
+                  token: new GeneralEntityDeclarationPToken({
+                     open: toSToken('<!'),
+                     value: [new ParameterEntityStartPToken(peRef)],
+                     externalId: {},
+                  }),
+                  declaredInInternalSubset: false,
+               },
+            },
+            {
+               ...state,
+               paramDecls: {},
+            },
+            ec,
+         );
+
+         expect(ec.errors.length).toEqual(1);
+         expect(ec.errors[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE);
       });
 
       it('reports an error if the general entity is external but document is standalone (§4.1.0)', () => {
