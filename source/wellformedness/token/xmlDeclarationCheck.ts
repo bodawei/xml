@@ -84,6 +84,7 @@ function checkFields(
 
       switch (lcName) {
          case 'version':
+            ec.check(foundVersion, WFEID.XMLDECL_DUPLICATE_VERSION);
             foundVersion = true;
             ec.check(foundEncoding || foundStandalone, WFEID.XMLDECL_VERSION_INVALID_ORDER);
 
@@ -97,6 +98,7 @@ function checkFields(
             checkVersionString(valueText, ec, confVer);
             break;
          case 'encoding':
+            ec.check(foundEncoding, WFEID.XMLDECL_DUPLICATE_ENCODING);
             foundEncoding = true;
             ec.check(!foundVersion || foundStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
 
@@ -112,6 +114,7 @@ function checkFields(
             ]);
             break;
          case 'standalone':
+            ec.check(foundStandalone, WFEID.XMLDECL_DUPLICATE_STANDALONE);
             foundStandalone = true;
             ec.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER);
 

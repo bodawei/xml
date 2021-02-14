@@ -17,6 +17,7 @@ function checkFields(
    confVer: ConformanceVersion,
 ): void {
    let foundEncoding = false;
+   let foundVersion = false;
 
    for (const param of params) {
       const nameText = strOrBlank(param.name);
@@ -29,6 +30,8 @@ function checkFields(
 
       switch (lcName) {
          case 'version':
+            ec.check(foundVersion, WFEID.TEXTDECL_DUPLICATE_VERSION);
+            foundVersion = true;
             ec.check(foundEncoding, WFEID.TEXTDECL_VERSION_INVALID_ORDER);
 
             ec.setPos(param.nameSpace);
@@ -42,6 +45,7 @@ function checkFields(
             ]);
             break;
          case 'encoding':
+            ec.check(foundEncoding, WFEID.TEXTDECL_DUPLICATE_ENCODING);
             foundEncoding = true;
 
             ec.setPos(param.nameSpace);

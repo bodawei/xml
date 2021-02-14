@@ -413,212 +413,312 @@ describe('xmlDeclarationCheck() (unit)', () => {
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
          });
 
-         describe('encoding parameter', () => {
-            it('reports an error if a encoding is in the wrong order', () => {
-               xmlDeclPToken = new XmlDeclarationPToken({
-                  open: toSToken('<?'),
-                  openSpace: toSToken(' '),
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('encoding'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('ASCII'),
-                     },
-                     {
-                        name: toSToken('version'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('1.0'),
-                     },
-                  ],
-                  close: toSToken('?>'),
-               });
-
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
-
-               // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
-                  params: undefined,
-                  position: xmlDeclPToken.fields[0].name,
-               });
+         it('reports an error if the encoding is duplicated', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     equal: toSToken('='),
+                     value: toSToken('1.0'),
+                  },
+                  {
+                     name: toSToken('version'),
+                     equal: toSToken('='),
+                     value: toSToken('1.0'),
+                  },
+               ],
+               close: toSToken('?>'),
             });
 
-            it('reports an error if the encoding is not a legal value', () => {
-               xmlDeclPToken = new XmlDeclarationPToken({
-                  open: toSToken('<?'),
-                  openSpace: toSToken(' '),
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('version'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('1.0'),
-                     },
-                     {
-                        name: toSToken('encoding'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('$$BAD_ENCODING$$'),
-                     },
-                  ],
-                  close: toSToken('?>'),
-               });
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_DUPLICATE_VERSION,
+               params: undefined,
+               position: xmlDeclPToken.fields[1].name,
+            });
+         });
+      });
 
-               // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
-                  params: ['$$BAD_ENCODING$$'],
-                  position: xmlDeclPToken.fields[1].value,
-               });
+      describe('encoding parameter', () => {
+         it('reports an error if a encoding is in the wrong order', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               openSpace: toSToken(' '),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('encoding'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('ASCII'),
+                  },
+                  {
+                     name: toSToken('version'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('1.0'),
+                  },
+               ],
+               close: toSToken('?>'),
+            });
+
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
+               params: undefined,
+               position: xmlDeclPToken.fields[0].name,
             });
          });
 
-         describe('standalone parameter', () => {
-            it('reports an error if a standalone is in the wrong order', () => {
-               xmlDeclPToken = new XmlDeclarationPToken({
-                  open: toSToken('<?'),
-                  openSpace: toSToken(' '),
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('standalone'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('yes'),
-                     },
-                     {
-                        name: toSToken('version'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('1.0'),
-                     },
-                  ],
-                  close: toSToken('?>'),
-               });
-
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
-
-               // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
-                  params: undefined,
-                  position: xmlDeclPToken.fields[0].name,
-               });
+         it('reports an error if the encoding is not a legal value', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               openSpace: toSToken(' '),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('1.0'),
+                  },
+                  {
+                     name: toSToken('encoding'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('$$BAD_ENCODING$$'),
+                  },
+               ],
+               close: toSToken('?>'),
             });
 
-            it('reports an error if the standalone is neither "yes" or "no"', () => {
-               xmlDeclPToken = new XmlDeclarationPToken({
-                  open: toSToken('<?'),
-                  openSpace: toSToken(' '),
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('version'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('1.0'),
-                     },
-                     {
-                        name: toSToken('standalone'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('Maybe'),
-                     },
-                  ],
-                  close: toSToken('?>'),
-               });
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
-
-               // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
-                  params: ['Maybe'],
-                  position: xmlDeclPToken.fields[1].value,
-               });
-            });
-
-            it('reports an error if the standalone is the wrong case', () => {
-               xmlDeclPToken = new XmlDeclarationPToken({
-                  open: toSToken('<?'),
-                  openSpace: toSToken(' '),
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('version'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('1.0'),
-                     },
-                     {
-                        name: toSToken('standalone'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('YES'),
-                     },
-                  ],
-                  close: toSToken('?>'),
-               });
-
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
-
-               // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
-                  params: ['yes', 'YES'],
-                  position: xmlDeclPToken.fields[1].value,
-               });
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
+               params: ['$$BAD_ENCODING$$'],
+               position: xmlDeclPToken.fields[1].value,
             });
          });
 
-         describe('other parameter', () => {
-            it('reports an error if a an unknown parameter is found (parsing wont actually allow this)', () => {
-               xmlDeclPToken = new XmlDeclarationPToken({
-                  open: toSToken('<?'),
-                  openSpace: toSToken(' '),
-                  target: toSToken('xml'),
-                  targetSpace: toSToken(' '),
-                  fields: [
-                     {
-                        name: toSToken('bogus'),
-                        nameSpace: toSToken(' '),
-                        equal: toSToken('='),
-                        equalSpace: toSToken(' '),
-                        value: toSToken('1.0'),
-                     },
-                  ],
-                  close: toSToken('?>'),
-               });
+         it('reports an error if the encoding is duplicated', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     equal: toSToken('='),
+                     value: toSToken('1.0'),
+                  },
+                  {
+                     name: toSToken('encoding'),
+                     equal: toSToken('='),
+                     value: toSToken('usascii'),
+                  },
+                  {
+                     name: toSToken('encoding'),
+                     equal: toSToken('='),
+                     value: toSToken('usascii'),
+                  },
+               ],
+               close: toSToken('?>'),
+            });
 
-               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
 
-               // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,
-                  params: ['bogus'],
-                  position: xmlDeclPToken.fields[0].name,
-               });
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_DUPLICATE_ENCODING,
+               params: undefined,
+               position: xmlDeclPToken.fields[2].name,
+            });
+         });
+      });
+
+      describe('standalone parameter', () => {
+         it('reports an error if a standalone is in the wrong order', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               openSpace: toSToken(' '),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('standalone'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('yes'),
+                  },
+                  {
+                     name: toSToken('version'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('1.0'),
+                  },
+               ],
+               close: toSToken('?>'),
+            });
+
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
+               params: undefined,
+               position: xmlDeclPToken.fields[0].name,
+            });
+         });
+
+         it('reports an error if the standalone is neither "yes" or "no"', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               openSpace: toSToken(' '),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('1.0'),
+                  },
+                  {
+                     name: toSToken('standalone'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('Maybe'),
+                  },
+               ],
+               close: toSToken('?>'),
+            });
+
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
+               params: ['Maybe'],
+               position: xmlDeclPToken.fields[1].value,
+            });
+         });
+
+         it('reports an error if the standalone is the wrong case', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               openSpace: toSToken(' '),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('1.0'),
+                  },
+                  {
+                     name: toSToken('standalone'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('YES'),
+                  },
+               ],
+               close: toSToken('?>'),
+            });
+
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
+               params: ['yes', 'YES'],
+               position: xmlDeclPToken.fields[1].value,
+            });
+         });
+
+         it('reports an error if the standalone is duplicated', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     equal: toSToken('='),
+                     value: toSToken('1.0'),
+                  },
+                  {
+                     name: toSToken('standalone'),
+                     equal: toSToken('='),
+                     value: toSToken('yes'),
+                  },
+                  {
+                     name: toSToken('standalone'),
+                     equal: toSToken('='),
+                     value: toSToken('yes'),
+                  },
+               ],
+               close: toSToken('?>'),
+            });
+
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_DUPLICATE_STANDALONE,
+               params: undefined,
+               position: xmlDeclPToken.fields[2].name,
+            });
+         });
+      });
+
+      describe('other parameter', () => {
+         it('reports an error if a an unknown parameter is found (parsing wont actually allow this)', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               openSpace: toSToken(' '),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('bogus'),
+                     nameSpace: toSToken(' '),
+                     equal: toSToken('='),
+                     equalSpace: toSToken(' '),
+                     value: toSToken('1.0'),
+                  },
+               ],
+               close: toSToken('?>'),
+            });
+
+            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion());
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportWFError({
+               id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,
+               params: ['bogus'],
+               position: xmlDeclPToken.fields[0].name,
             });
          });
       });

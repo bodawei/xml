@@ -7,7 +7,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: ['not-wf-sa-098'],
    excludedIds: [
       'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
       /*
@@ -84,12 +84,6 @@ const testFilters: FilterData = {
       'rmt-053', // but output is bad 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       // Group: some BOM problems. But several of these should be dying and
-      'invalid-bo-1', // Byte order mark in general entity should go away (big-endian)
-      'invalid-bo-2', // Byte order mark in general entity should go away (little-endian)
-      'invalid-bo-3', // Byte order mark in general entity should go away (utf-8)
-      'invalid-bo-4', // Two byte order marks in general entity produce only one (big-endian)
-      'invalid-bo-5', // Two byte order marks in general entity produce only one (little-endian)
-      'invalid-bo-6', // Two byte order marks in general entity produce only one (utf-8)
       'invalid-sa-140', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
       'invalid-sa-141', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
       'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
@@ -117,7 +111,6 @@ const testFilters: FilterData = {
       'o-p31fail1', // CRASHES. SOME KIND OF ETERNAL HANG
       'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
       'not-wf-sa-054', // PUBLIC requires two literals.
-      'not-wf-sa-098', // Only one "version=..." string may appear in an XML declaration.
       'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
       'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
       'not-wf-sa-125', // Invalid syntax extra set of parenthesis not necessary.
@@ -262,6 +255,14 @@ const testFilters: FilterData = {
       // This not only is doing utf16, but may not be loading the entities correctly.
       'ext02', // Tests use of external parsed entities with different       encodings than the base document.
       'rmt-040', // iso-8859-1 characters, with an 8 bit char
+
+      // invalid
+      'invalid-bo-1', // Byte order mark in general entity should go away (big-endian)
+      'invalid-bo-2', // Byte order mark in general entity should go away (little-endian)
+      'invalid-bo-3', // Byte order mark in general entity should go away (utf-8)
+      'invalid-bo-4', // Two byte order marks in general entity produce only one (big-endian)
+      'invalid-bo-5', // Two byte order marks in general entity produce only one (little-endian)
+      'invalid-bo-6', // Two byte order marks in general entity produce only one (utf-8)
 
       // Valid namespaces
       'rmt-ns10-017', // Simple legal case: no namespaces

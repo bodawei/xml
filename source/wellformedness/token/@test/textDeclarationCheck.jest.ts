@@ -270,40 +270,100 @@ describe('textDeclaration (unit)', () => {
          });
       });
 
-      describe('encoding parameter', () => {
-         it('reports an error if the encoding is not a legal value', () => {
-            textDeclPToken = new TextDeclarationPToken({
-               open: SToken.fromString('<?'),
-               openSpace: SToken.fromString(' '),
-               target: SToken.fromString('xml'),
-               targetSpace: SToken.fromString(' '),
-               fields: [
-                  {
-                     name: SToken.fromString('version'),
-                     nameSpace: SToken.fromString(' '),
-                     equal: SToken.fromString('='),
-                     equalSpace: SToken.fromString(' '),
-                     value: SToken.fromString('1.0'),
-                  },
-                  {
-                     name: SToken.fromString('encoding'),
-                     nameSpace: SToken.fromString(' '),
-                     equal: SToken.fromString('='),
-                     equalSpace: SToken.fromString(' '),
-                     value: SToken.fromString('$$BAD_ENCODING$$'),
-                  },
-               ],
-               close: SToken.fromString('?>'),
-            });
+      it('reports an error if a there are two version paramters', () => {
+         textDeclPToken = new TextDeclarationPToken({
+            open: SToken.fromString('<?'),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            fields: [
+               {
+                  name: SToken.fromString('version'),
+                  equal: SToken.fromString('='),
+                  value: SToken.fromString('1.0'),
+               },
+               {
+                  name: SToken.fromString('version'),
+                  equal: SToken.fromString('='),
+                  value: SToken.fromString('1.0'),
+               },
+            ],
+            close: SToken.fromString('?>'),
+         });
 
-            textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
+         textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-            // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportWFError({
-               id: WellFormedError.ID.TEXTDECL_ENCODING_INVALID,
-               params: ['$$BAD_ENCODING$$'],
-               position: textDeclPToken.fields[1].value,
-            });
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.TEXTDECL_DUPLICATE_VERSION,
+            params: undefined,
+            position: textDeclPToken.fields[1].name,
+         });
+      });
+   });
+
+   describe('encoding parameter', () => {
+      it('reports an error if the encoding is not a legal value', () => {
+         textDeclPToken = new TextDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            fields: [
+               {
+                  name: SToken.fromString('version'),
+                  nameSpace: SToken.fromString(' '),
+                  equal: SToken.fromString('='),
+                  equalSpace: SToken.fromString(' '),
+                  value: SToken.fromString('1.0'),
+               },
+               {
+                  name: SToken.fromString('encoding'),
+                  nameSpace: SToken.fromString(' '),
+                  equal: SToken.fromString('='),
+                  equalSpace: SToken.fromString(' '),
+                  value: SToken.fromString('$$BAD_ENCODING$$'),
+               },
+            ],
+            close: SToken.fromString('?>'),
+         });
+
+         textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.TEXTDECL_ENCODING_INVALID,
+            params: ['$$BAD_ENCODING$$'],
+            position: textDeclPToken.fields[1].value,
+         });
+      });
+
+      it('reports an error if a there are two encoding paramters', () => {
+         textDeclPToken = new TextDeclarationPToken({
+            open: SToken.fromString('<?'),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            fields: [
+               {
+                  name: SToken.fromString('encoding'),
+                  equal: SToken.fromString('='),
+                  value: SToken.fromString('ascii'),
+               },
+               {
+                  name: SToken.fromString('encoding'),
+                  equal: SToken.fromString('='),
+                  value: SToken.fromString('ascii'),
+               },
+            ],
+            close: SToken.fromString('?>'),
+         });
+
+         textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.TEXTDECL_DUPLICATE_ENCODING,
+            params: undefined,
+            position: textDeclPToken.fields[1].name,
          });
       });
    });

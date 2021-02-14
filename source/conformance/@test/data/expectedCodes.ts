@@ -434,7 +434,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-095': 'XMLDECL_ENCODING_INVALID_ORDER', // great - VersionInfo must come before EncodingDecl.
    'not-wf-sa-096': 'XMLDECL_NO_SPACE_BETWEEN_PARAMS', // great - Space is required before the standalone declaration.
    'not-wf-sa-097': 'XMLDECL_VERSION_INVALD', // ok - Both quotes surrounding VersionNum must be the same.
-   'not-wf-sa-098': 'error', // Only one "version=..." string may appear in an XML declaration.
+   'not-wf-sa-098': 'XMLDECL_DUPLICATE_VERSION', // Only one "version=..." string may appear in an XML declaration.
    'not-wf-sa-099': 'XMLDECL_NO_CLOSE', // meh - Only three pseudo-attributes are in the XML declaration, and "valid=..." is not one of them.
    'not-wf-sa-100': 'XMLDECL_STANDALONE_INVALID_CASE', // great - Only "yes" and "no" are permitted as values of "standalone".
    'not-wf-sa-101': 'XMLDECL_ENCODING_INVALID', // ok - Space is not permitted in an encoding name.
