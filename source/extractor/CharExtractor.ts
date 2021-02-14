@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import Extractor, { SegmentInfo } from './Extractor';
-import Segment from './Segment';
+import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
 
 /**********************************************************************\
  Extract the next character from the specified segment. This seemingly
@@ -15,9 +15,18 @@ import Segment from './Segment';
 class CharExtractor extends Extractor {
    private foundCR = false;
 
-   process(segment: Segment): void {
+   process(segment: Segment  | PseudoSpace): void {
       const info = this.makeInfo(segment);
       this.segInfo.push(info);
+
+      if (segment.type === PSEUDO_SPACE) {
+         this.processPseudoText();
+         this.state = Extractor.STATE.SUCCESS;
+         info.segment = {
+            type: DONE_SEGMENT,
+         };
+         return;
+      }
 
       if (this.foundCR) {
          this._checkEOL(segment, info);
@@ -58,6 +67,7 @@ class CharExtractor extends Extractor {
 
       if (segment.atEnd()) {
          info.segment = {
+            type: DONE_SEGMENT,
             range: segment.range,
          };
       }

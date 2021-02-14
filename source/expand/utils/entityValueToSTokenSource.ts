@@ -24,11 +24,15 @@ function entityValueToSTokenSource(
    const source = new STokenSource(defaultExtractors, entityId);
    let depth = 0;
 
+   // §4.4.8 ... When a parameter-entity reference is recognized in
+   //    the DTD and included, its replacement text must be enlarged
+   //    by the attachment of one leading and one following space
+   //    (#x20) character;...
    for (const element of entityValue) {
       switch (element.type) {
          case PARAMETER_ENTITY_START_PTOKEN:
             if (depth === 0 && peRefsFormTokenBoundaries) {
-               source.addText(' ');
+               source.addPseudoSpace();
             }
 
             depth++;
@@ -36,13 +40,10 @@ function entityValueToSTokenSource(
          case PARAMETER_ENTITY_END_PTOKEN:
             depth--;
             if (depth === 0 && peRefsFormTokenBoundaries) {
-               source.addText(' ');
+               source.addPseudoSpace();
             }
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            if (depth === 0 && peRefsFormTokenBoundaries) {
-               source.addText(' ');
-            }
             break;
          case CHARREF_PTOKEN:
             source.addText(element.char);

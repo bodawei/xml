@@ -5,7 +5,7 @@ import { EntityId, Range } from 'basic';
 
 import Extractor from '../Extractor';
 import DigitExtractor from '../DigitExtractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('DigitExtractor', () => {
    let extractor: Extractor;
@@ -31,6 +31,12 @@ describe('DigitExtractor', () => {
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
 
+      it('reports failure when it encounters a pseudo space first', () => {
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
+      });
+
       it('delivers a set of decimal digits from the provided segment', () => {
          extractor.process(new Segment('012345', segmentRange));
 
@@ -42,9 +48,34 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 6,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
+         });
+      });
+
+      it('delivers a set of decimal digits terminated by a pseudo space', () => {
+         extractor.process(new Segment('012345', segmentRange));
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.finish()).toEqual({
+            text: '012345',
+            original: '012345',
+            segments: [ {
+               chars: 6,
+               rows: 0,
+               columns: 6,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: segmentRange,
+               },
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: new PseudoSpace(),
+            } ]
          });
       });
 
@@ -60,6 +91,7 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 12,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -101,6 +133,7 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 3,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -155,6 +188,7 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 3,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -162,6 +196,7 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 4,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -181,6 +216,7 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 3,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -188,6 +224,7 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 4,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -236,6 +273,7 @@ describe('DigitExtractor', () => {
                rows: 0,
                columns: 3,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],

@@ -5,7 +5,7 @@ import { EntityId, Range  } from 'basic';
 
 import Extractor from '../Extractor';
 import SpaceExtractor from '../SpaceExtractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('SpaceExtractor', () => {
    let extractor: Extractor;
@@ -42,12 +42,30 @@ describe('SpaceExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
          });
       });
 
+
+      it('delivers a pseudo space', () => {
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.finish()).toEqual({
+            text: ' ',
+            original: '',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+               },
+            } ],
+         });
+      });
    });
 
    describe('finish()', () => {
@@ -64,6 +82,7 @@ describe('SpaceExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -118,6 +137,7 @@ describe('SpaceExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -125,13 +145,49 @@ describe('SpaceExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
          });
       });
 
-      it('returns all spaces and ranges across multiple segments', () => {
+
+      it('returns all spaces and ranges across multiple segments including pseudo spaces', () => {
+         extractor.process(new Segment('  ', segmentRange));
+         extractor.process(new PseudoSpace());
+         extractor.process(new Segment('\t\t'));
+
+         expect(extractor.finish()).toEqual({
+            text: '   \t\t',
+            original: '  \t\t',
+            segments: [ {
+               chars: 2,
+               rows: 0,
+               columns: 2,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: segmentRange,
+               },
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+               },
+            }, {
+               chars: 2,
+               rows: 0,
+               columns: 2,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: undefined,
+               },
+            } ],
+         });
+      });
+            it('returns all spaces and ranges across multiple segments when spaces end on a segment boundary', () => {
          extractor.process(new Segment(' ', segmentRange));
          extractor.process(new Segment('"'));
 
@@ -143,6 +199,7 @@ describe('SpaceExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -167,6 +224,7 @@ describe('SpaceExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -199,6 +257,7 @@ describe('SpaceExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],

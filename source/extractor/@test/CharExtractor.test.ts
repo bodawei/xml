@@ -5,7 +5,7 @@ import { EntityId, Range } from 'basic';
 
 import CharExtractor from '../CharExtractor';
 import Extractor from '../Extractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('CharExtractor', () => {
    let extractor: Extractor;
@@ -42,7 +42,26 @@ describe('CharExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
+               },
+            } ],
+         });
+      });
+
+      it('delivers the a pseudo space when passed one', () => {
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+         expect(extractor.finish()).toEqual({
+            text: ' ',
+            original: '',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
                },
             } ],
          });
@@ -92,6 +111,7 @@ describe('CharExtractor', () => {
                rows: 0,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -118,6 +138,7 @@ describe('CharExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -194,6 +215,7 @@ describe('CharExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segment.range,
                },
             } ],
@@ -212,6 +234,7 @@ describe('CharExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -219,6 +242,7 @@ describe('CharExtractor', () => {
                rows: 0,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -238,6 +262,7 @@ describe('CharExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -263,6 +288,7 @@ describe('CharExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {

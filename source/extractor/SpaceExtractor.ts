@@ -1,7 +1,8 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
+import { Range } from 'basic';
 import Extractor from './Extractor';
-import Segment from './Segment';
+import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
 
 const SPACE_10_REGEX = /[ \t\n\r]+/g;
 const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
@@ -19,10 +20,20 @@ const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
 class SpaceExtractor extends Extractor {
    private foundSpace = false;
 
-   process(segment: Segment) {
+   process(segment: Segment | PseudoSpace) {
       const spaceRegexp = this.version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;
       const info = this.makeInfo(segment);
       this.segInfo.push(info);
+
+      if (segment.type === PSEUDO_SPACE) {
+         this.foundSpace = true;
+         this.processPseudoText();
+         info.segment = {
+            type: DONE_SEGMENT,
+         };
+
+         return;
+      }
 
       /*
        * Check if the next char is a space before doing the full-on search
@@ -35,7 +46,7 @@ class SpaceExtractor extends Extractor {
       const foundSpace = spaceRegexp.test(segment.text[segment.index]);
 
       if (!foundSpace) {
-            this.state = this.foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+         this.state = this.foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
          return;
       }
 
@@ -53,6 +64,7 @@ class SpaceExtractor extends Extractor {
          this.state = Extractor.STATE.SUCCESS;
       } else {
          info.segment = {
+            type: DONE_SEGMENT,
             range: segment.range,
          };
       }
@@ -60,7 +72,9 @@ class SpaceExtractor extends Extractor {
 
    finish() {
       this.state = this.foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
-      return this.innerFinish();
+      const result = this.innerFinish();
+
+      return result;
    }
 
 }

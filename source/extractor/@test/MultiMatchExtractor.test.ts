@@ -5,7 +5,7 @@ import { EntityId, Range} from 'basic';
 
 import Extractor from '../Extractor';
 import MultiMatchExtractor from '../MultiMatchExtractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('MultiMatchExtractor', () => {
    let extractor: Extractor;
@@ -58,6 +58,22 @@ describe('MultiMatchExtractor', () => {
          });
       });
 
+      it('delivers the match text with the right offsets and range when there is a pseudo space', () => {
+         extractor = new MultiMatchExtractor(1.0, [ ' ', 'xyzzy' ]);
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.finish()).toEqual({
+            text: ' ',
+            original: '',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: { type: DONE_SEGMENT },
+            } ],
+         });
+      });
+
    });
 
    describe('finish()', () => {
@@ -74,6 +90,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -143,6 +160,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -150,6 +168,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -157,8 +176,36 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
+            } ],
+         });
+      });
+
+
+      it('returns a complete match across multiple segments with a pseudo space', () => {
+         const partial = new Segment('  ');
+         partial.index = 1;
+         extractor = new MultiMatchExtractor(1.0, [ '  ' ]);
+         extractor.process(new PseudoSpace());
+         extractor.process(new Segment('  '));
+
+         expect(extractor.finish()).toEqual({
+            text: '  ',
+            original: ' ',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+               },
+            }, {
+               chars: 1,
+               rows: 0,
+               columns: 1,
+               segment: partial,
             } ],
          });
       });
@@ -177,6 +224,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 4,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -246,6 +294,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -264,6 +313,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -288,6 +338,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -295,6 +346,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -325,6 +377,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -332,6 +385,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -357,6 +411,7 @@ describe('MultiMatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],

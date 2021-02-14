@@ -3,7 +3,7 @@
 
 import Extractor, { ExtractResult, SegmentInfo } from '../Extractor';
 import PeekExtractor from '../PeekExtractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, PSEUDO_SPACE, Segment} from '../Segment';
 
 describe('PeekExtractor', () => {
    let extractor: Extractor;
@@ -163,7 +163,7 @@ describe('PeekExtractor', () => {
          const segment2 = new Segment('bb');
          const segment3 = new Segment('cc');
          segment1.index = 1;
-         const segments: Array<Segment> = [];
+         const segments: Array<Segment | PseudoSpace > = [];
          sub.process = function process(segment) {
             segments.push(segment);
          };
@@ -196,6 +196,9 @@ describe('PeekExtractor', () => {
       it('returns the unchanged segments from the subExtractor', () => {
          const text: Array<string> = [];
          sub.process = function process(segment) {
+            if (segment.type === PSEUDO_SPACE) {
+               return;
+            }
             text.push(segment.text + 'xx');
             segment.index = segment.text.length;
          };
@@ -208,6 +211,7 @@ describe('PeekExtractor', () => {
                   rows: 0,
                   columns: 3,
                   segment: {
+                     type: DONE_SEGMENT,
                      range: undefined,
                   },
                }, {
@@ -215,6 +219,7 @@ describe('PeekExtractor', () => {
                   rows: 0,
                   columns: 5,
                   segment: {
+                     type: DONE_SEGMENT,
                      range: undefined,
                   },
                } ],

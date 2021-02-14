@@ -9,11 +9,14 @@ import Extractor from './Extractor';
 import MatchExtractor from './MatchExtractor';
 import MultiMatchExtractor from './MultiMatchExtractor';
 import PeekExtractor from './PeekExtractor';
-import Segment from './Segment';
+import {DONE_SEGMENT, PSEUDO_SPACE, SEGMENT_TYPE, PseudoSpace, Segment} from './Segment';
 import SpaceExtractor from './SpaceExtractor';
 import WordExtractor from './WordExtractor';
 
 export {
+   DONE_SEGMENT,
+   PSEUDO_SPACE,
+   SEGMENT_TYPE,
    AllExtractor,
    CharExtractor,
    DigitExtractor,
@@ -21,6 +24,7 @@ export {
    MatchExtractor,
    MultiMatchExtractor,
    PeekExtractor,
+   PseudoSpace,
    Segment,
    SpaceExtractor,
    WordExtractor,

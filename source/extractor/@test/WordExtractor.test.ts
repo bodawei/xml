@@ -3,7 +3,7 @@
 import { Range, EntityId } from 'basic';
 
 import WordExtractor from '../WordExtractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('WordExtractor', () => {
    let segmentRange: Range;
@@ -26,6 +26,7 @@ describe('WordExtractor', () => {
                rows: 0,
                columns: 11,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -44,6 +45,7 @@ describe('WordExtractor', () => {
                rows: 0,
                columns: 6,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],

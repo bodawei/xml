@@ -5,7 +5,7 @@ import { EntityId, Range } from 'basic';
 
 import Extractor from '../Extractor';
 import MatchExtractor from '../MatchExtractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('MatchExtractor', () => {
    let extractor: Extractor;
@@ -31,6 +31,20 @@ describe('MatchExtractor', () => {
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
 
+      it('reports success when it has found a match with a pseudo space', () => {
+         extractor = new MatchExtractor(1.0, ' ');
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
+      it('reports failure when it has not found the match with a pseudo space', () => {
+         extractor = new MatchExtractor(1.0, 'x');
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
+      });
+
       it('delivers the match text with the right offsets and range', () => {
          extractor = new MatchExtractor(1.0, 'xyzzy');
          extractor.process(new Segment('xyzzy', segmentRange));
@@ -43,12 +57,60 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 5,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
          });
       });
 
+      it('delivers the match text for a pseudo space and real text', () => {
+         const segment = new Segment(' x', segmentRange);
+         segment.index = 1;
+         extractor = new MatchExtractor(1.0, '  ');
+         extractor.process(new PseudoSpace());
+         extractor.process(new Segment(' x', segmentRange));
+
+         expect(extractor.finish()).toEqual({
+            text: '  ',
+            original: ' ',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: { type: DONE_SEGMENT },
+            }, {
+               chars: 1,
+               rows: 0,
+               columns: 1,
+               segment,
+            } ],
+         });
+      });
+
+      it('delivers the match text for a pseudo space when the pseudo space ends the processing', () => {
+         const segment = new Segment(' x', segmentRange);
+         segment.index = 1;
+         extractor = new MatchExtractor(1.0, '  ');
+         extractor.process(new Segment(' ', segmentRange));
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.finish()).toEqual({
+            text: '  ',
+            original: ' ',
+            segments: [ {
+               chars: 1,
+               rows: 0,
+               columns: 1,
+               segment: { type: DONE_SEGMENT, range: segmentRange },
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: { type: DONE_SEGMENT },
+            } ],
+         });
+      });
    });
 
    describe('finish()', () => {
@@ -65,6 +127,7 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -141,6 +204,7 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -148,6 +212,7 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -155,6 +220,7 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -175,6 +241,7 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 4,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {

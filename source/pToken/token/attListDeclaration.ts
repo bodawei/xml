@@ -142,6 +142,7 @@ function parseElementName(
    source.extractToObject('word', ['>', '%'], protoToken, 'elementName');
    source.extractToObject('space', protoToken, 'elementNameSpace');
    source.check(() => {
+      // console.json(protoToken, source);
       done(protoToken);
    });
 }

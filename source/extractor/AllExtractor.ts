@@ -4,7 +4,7 @@ import { Extractor, SegmentInfo } from './Extractor';
 import MatchExtractor from './MatchExtractor';
 import MultiMatchExtractor from './MultiMatchExtractor';
 import PeekExtractor from './PeekExtractor';
-import Segment from './Segment';
+import {DONE_SEGMENT, PSEUDO_SPACE, PseudoSpace, Segment} from './Segment';
 
 const regexMemo: { [terminators: string]: RegExp } = {};
 
@@ -39,18 +39,34 @@ class AllExtractor extends Extractor {
       this.terminatorArray = terminators;
    }
 
-   process(segment: Segment) {
+   process(segment: Segment | PseudoSpace) {
       if (this._terminatorMatcher) {
          this._processTerminatorMatcher(segment);
          return;
       }
 
       const info = this.makeInfo(segment);
+      let result: RegExpExecArray | null;
+
       this.segInfo.push(info);
+
+      if (segment.type === PSEUDO_SPACE) {
+         this.terminatorRegEx.lastIndex = 0;
+         result = this.terminatorRegEx.exec(' ');
+
+         if (result && result[0].length > 0) {
+            this.processPseudoText()
+            info.segment = { type: DONE_SEGMENT };
+         } else {
+            this.setupTerminatorMatcher(' ', segment);
+         }
+
+         return;
+      }
 
       // Find all the text in the segment up to terminators or the end of the segment.
       this.terminatorRegEx.lastIndex = segment.index;
-      const result = this.terminatorRegEx.exec(segment.text);
+      result = this.terminatorRegEx.exec(segment.text);
 
       if (result && result[0].length > 0) {
          this.processText(result[0], info);
@@ -58,7 +74,7 @@ class AllExtractor extends Extractor {
 
          // If we've consumed the segment, update it to reflect that it is consumed
          if (segment.atEnd()) {
-            info.segment = { range: segment.range };
+            info.segment = { type: DONE_SEGMENT, range: segment.range };
          }
       }
 
@@ -66,27 +82,7 @@ class AllExtractor extends Extractor {
       if (!segment.atEnd()) {
          const nextChar = segment.text[segment.index];
 
-         // Figure out which possible terminators start with the next character
-         const terminators = this.terminatorArray.reduce((all, term) => {
-            if (term[0] === nextChar) {
-               all.push(term);
-            }
-            return all;
-         }, [] as Array<string>);
-
-         let matcher;
-
-         // Set up a sub-matcher to determine which terminator we matched.
-         if (terminators.length > 1) {
-            matcher = new MultiMatchExtractor(this.version, terminators);
-         } else {
-            matcher = new MatchExtractor(this.version, terminators[0]);
-         }
-
-         // And make this a peek so we don't consume it.
-         this._terminatorMatcher = new PeekExtractor(this.version, matcher);
-
-         this._processTerminatorMatcher(segment);
+         this.setupTerminatorMatcher(nextChar, segment);
       }
    }
 
@@ -114,6 +110,31 @@ class AllExtractor extends Extractor {
       return this.innerFinish();
    }
 
+
+   private setupTerminatorMatcher(start: string, segment: Segment | PseudoSpace): void {
+      // The space WAS a terminator
+      // Lots of duplicate code here....
+      const terminators = this.terminatorArray.reduce((all, term) => {
+         if (term[0] === start) {
+            all.push(term);
+         }
+         return all;
+      }, [] as Array<string>);
+
+      let matcher;
+
+      // Set up a sub-matcher to determine which terminator we matched.
+      if (terminators.length > 1) {
+         matcher = new MultiMatchExtractor(this.version, terminators);
+      } else {
+         matcher = new MatchExtractor(this.version, terminators[0]);
+      }
+
+      // And make this a peek so we don't consume it.
+      this._terminatorMatcher = new PeekExtractor(this.version, matcher);
+
+      this._processTerminatorMatcher(segment);
+   }
    private addRemainderOfSegment(info: SegmentInfo): void {
       const segment: Segment = info.segment as Segment;
       const remainderOfSegment = segment.text.substr(segment.index);
@@ -125,7 +146,7 @@ class AllExtractor extends Extractor {
    // Try to match the terminator, using the specified segment.
    // Remember, the terminator might span multiple segments, so it may take a couple
    // iterations to do this.
-   _processTerminatorMatcher(segment: Segment) {
+   _processTerminatorMatcher(segment: Segment | PseudoSpace) {
       this._terminatorMatcher!.process(segment); // typeHack
 
       switch (this._terminatorMatcher!.state) {

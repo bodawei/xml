@@ -4,7 +4,7 @@ import { EntityId, Range } from 'basic';
 
 import PeekDecl from '../PeekDecl';
 import Extractor from '../Extractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('PeekDecl', () => {
    let segmentRange: Range;
@@ -21,6 +21,15 @@ describe('PeekDecl', () => {
          extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
+      it('reports failure when a pseudo space is found', () => {
+         const extractor = new PeekDecl(1.1);
+         extractor.process(new PseudoSpace());
+         extractor.process(new Segment('<?xml version="1.1" ?>', segmentRange));
+         extractor.finish();
+
+         expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
 
       it('reports failure when it has not found the "<?" in the first 5 chars', () => {

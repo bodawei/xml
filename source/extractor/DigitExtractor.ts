@@ -1,7 +1,7 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
-import Segment from './Segment';
+import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
 
 const DIGITS_REGEX = /[0-9]+/g;
 const HEX_DIGITS_REGEX = /[0-9A-Fa-f]+/g;
@@ -22,10 +22,16 @@ class DigitExtractor extends Extractor {
       this.base = base;
    }
 
-   process(segment: Segment) {
+   process(segment: Segment | PseudoSpace) {
       const info = this.makeInfo(segment);
       this.segInfo.push(info);
       const regex = this.base === 10 ? DIGITS_REGEX : HEX_DIGITS_REGEX;
+
+      // Spaces never match digits, so terminate or fail
+      if (segment.type === PSEUDO_SPACE) {
+         this.state = this.foundDigit ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+         return;
+      }
 
       /*
        * First checks whether the next character is a digit.
@@ -58,6 +64,7 @@ class DigitExtractor extends Extractor {
          this.state = Extractor.STATE.SUCCESS;
       } else {
          info.segment = {
+            type: DONE_SEGMENT,
             range: segment.range,
          };
       }

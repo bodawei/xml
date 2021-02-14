@@ -2,7 +2,7 @@
 
 import Extractor from './Extractor';
 import MatchExtractor from './MatchExtractor';
-import Segment from './Segment';
+import {DONE_SEGMENT, PSEUDO_SPACE, PseudoSpace, Segment} from './Segment';
 
 type MatcherMap = {
    [candidate: string]: Extractor;
@@ -23,9 +23,9 @@ class MultiMatchExtractor extends Extractor {
    private _match: Extractor | void;
    private _matchLength: number;
    private _matchers: MatcherMap;
-   private _firstSegment?: Segment;
+   private _firstSegment?: Segment | PseudoSpace;
    private _firstIndex = 0;
-   private _lastSegment?: Segment;
+   private _lastSegment?: Segment | PseudoSpace;
    private _lastIndex = 0;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
@@ -43,7 +43,7 @@ class MultiMatchExtractor extends Extractor {
       this._matchLength = 0;
    }
 
-   process(segment: Segment) {
+   process(segment: Segment | PseudoSpace) {
       if (!this._firstSegment) {
          this._firstSegment = segment;
          this._firstIndex = segment.index;
@@ -80,8 +80,11 @@ class MultiMatchExtractor extends Extractor {
          segment.index = startIndex;
       }
 
+
       if (workingCount !== 0) {
-         segment.index = segment.text.length;
+         if (segment.type !== PSEUDO_SPACE) {
+            segment.index = segment.text.length;
+         }
       } else {
          this.state = this._match ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
       }

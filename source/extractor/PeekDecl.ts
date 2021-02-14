@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Extractor } from './Extractor';
-import Segment from './Segment';
+import {PseudoSpace, PSEUDO_SPACE, Segment} from './Segment';
 
 const HAS_START = /^\<\?/;
 const HAS_DECL10 = /\<\?[ \t\r\n]*[xXmMlL][^]*\?\>/;
@@ -21,10 +21,17 @@ class PeekDecl extends Extractor {
       super(version);
    }
 
-   process(segment: Segment) {
+   process(segment: Segment | PseudoSpace) {
       const info = this.makeInfo(segment);
       this.segInfo.push(info);
 
+      // We can't find "<?xml" in the first 5 character is if one of them is a space
+      if (segment.type === PSEUDO_SPACE) {
+         this.rawText += ' ';
+         this.state = Extractor.STATE.FAILURE;
+         return;
+      }
+      
       this.rawText += segment.text;
 
       if (this.rawText.length < 5) {
@@ -42,7 +49,7 @@ class PeekDecl extends Extractor {
       if (match) {
          this.state = Extractor.STATE.SUCCESS;
          // Include a dummy segment info.
-         this.processText(match[0], { chars: 0, rows: 0, columns: 0, segment: {} });
+         this.processText(match[0], { chars: 0, rows: 0, columns: 0, segment: new PseudoSpace() });
          return;
       }
 

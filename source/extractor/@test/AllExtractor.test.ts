@@ -5,7 +5,7 @@ import { EntityId, Range } from 'basic';
 
 import AllExtractor from '../AllExtractor';
 import Extractor from '../Extractor';
-import Segment from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
 
 describe('AllExtractor', () => {
    let segmentRange: Range;
@@ -43,6 +43,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 7,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -61,6 +62,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 7,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -211,6 +213,24 @@ describe('AllExtractor', () => {
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
       });
 
+      it('delivers a a match if given a pseudo space', () => {
+         const extractor = new AllExtractor(1.0, []);
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.finish()).toEqual({
+            text: ' ',
+            original: '',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+               },
+            } ],
+         });
+      });
+
    });
 
    describe('finish()', () => {
@@ -228,6 +248,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -287,6 +308,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 3,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -294,6 +316,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 5,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             } ],
@@ -314,6 +337,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 4,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             }, {
@@ -339,6 +363,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
+                  type: DONE_SEGMENT,
                   range: segmentRange,
                },
             } ],
@@ -366,6 +391,85 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 0,
                segment: new Segment('>'),
+            } ],
+         });
+      });
+
+      it('delivers a a match if given a pseudo space followed by other values', () => {
+         const extractor = new AllExtractor(1.0, []);
+         extractor.process(new PseudoSpace());
+         extractor.process(new Segment('xxx', segmentRange));
+
+         expect(extractor.finish()).toEqual({
+            text: ' xxx',
+            original: 'xxx',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+               },
+            }, {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: segmentRange
+               },
+            } ],
+         });
+      });
+
+      it('delivers a a match if given a segument followed by a pseudo space', () => {
+         const extractor = new AllExtractor(1.0, []);
+         extractor.process(new Segment('xxx', segmentRange));
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.finish()).toEqual({
+            text: 'xxx ',
+            original: 'xxx',
+            segments: [ {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: segmentRange
+               },
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+               },
+            } ],
+         });
+      });
+
+      it('delivers a a match if given a segument followed by a pseudo space and terminated by spaces', () => {
+         const extractor = new AllExtractor(1.0, [' ']);
+         extractor.process(new Segment('xxx', segmentRange));
+         extractor.process(new PseudoSpace());
+
+         expect(extractor.finish()).toEqual({
+            text: 'xxx',
+            original: 'xxx',
+            segments: [ {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: segmentRange
+               },
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: new PseudoSpace(),
             } ],
          });
       });
@@ -408,6 +512,7 @@ describe('AllExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -435,6 +540,7 @@ describe('AllExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -462,6 +568,7 @@ describe('AllExtractor', () => {
                rows: 1,
                columns: 0,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {
@@ -489,6 +596,7 @@ describe('AllExtractor', () => {
                rows: 0,
                columns: 5,
                segment: {
+                  type: DONE_SEGMENT,
                   range: undefined,
                },
             }, {

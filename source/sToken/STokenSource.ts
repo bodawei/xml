@@ -1,7 +1,14 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, EntityId, Offset, Range } from 'basic';
-import { Extractor, Segment, ExtractorConstructor, ExtractorMap } from 'extractor';
+import {
+   Extractor,
+   PSEUDO_SPACE,
+   PseudoSpace,
+   Segment,
+   ExtractorConstructor,
+   ExtractorMap,
+} from 'extractor';
 import { SegmentInfo } from '../extractor/Extractor'; // typeHack
 
 import SToken from './SToken';
@@ -105,7 +112,7 @@ class STokenSource {
 
    private _extractorInfo: ExtractorMap;
 
-   public _segments: Array<Segment>;
+   public _segments: Array<Segment | PseudoSpace>;
 
    public _extractors: Array<ExtractorContext>;
 
@@ -131,6 +138,15 @@ class STokenSource {
 
    setConfVer(version: ConformanceVersion): void {
       this.confVer = version;
+   }
+
+   addPseudoSpace(): void {
+      const pseudoSpace = new PseudoSpace();
+      this._segments.push(pseudoSpace);
+
+      if (!this._lastOffset) {
+         this._lastOffset = new Offset(pseudoSpace.range!.entityId, 0, 0, 0);
+      }
    }
 
    addText(text: string, range?: Range): void {
@@ -286,7 +302,7 @@ class STokenSource {
          const nextSegment = this._segments.shift();
 
          if (nextSegment) {
-            if (extContext.startIndex === undefined) {
+            if (extContext.startIndex === undefined && nextSegment.type !== PSEUDO_SPACE) {
                extContext.startIndex = nextSegment.index;
             }
             extractor.process(nextSegment);
@@ -299,7 +315,7 @@ class STokenSource {
          // Extractor has finished extraction (either through SUCCESS or FAILURE)
          this._extractors.shift();
          const results = extractor.finish();
-         const ranges = this._computeRanges(results.segments);
+         const ranges = this.computeRanges(results.segments);
 
          this._restorePartiallyAndUnusedSegments(results.segments);
 
@@ -337,7 +353,7 @@ class STokenSource {
       for (let index = 0; index < segInfos.length; index++) {
          const info = segInfos[index];
 
-         if ((info.segment as Segment).text) {
+         if ((info.segment as Segment).text || info.segment.type === PSEUDO_SPACE) {
             // typeHack
             returnedSegments.push(info.segment);
          }
@@ -346,7 +362,7 @@ class STokenSource {
       this._segments = returnedSegments.concat(this._segments) as Array<Segment>; // typeHack
    }
 
-   _computeRanges(segInfos: Array<SegmentInfo>): Array<Range> {
+   private computeRanges(segInfos: Array<SegmentInfo>): Array<Range> {
       if (segInfos.length === 0) {
          return [];
       }

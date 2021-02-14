@@ -27,7 +27,6 @@ import {
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
 import { LiteralValuePToken } from 'source/token/common/literal';
-import { parameterEntityDeclarationToSTokens } from 'source/stringify/token/parameterEntityDeclarationToSTokens';
 
 type ContentStart = ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
 
@@ -99,6 +98,9 @@ class CheckState {
    public hasExternalDTD = false;
 }
 
+// §3.1.0: Well-Formedness Constraint: No External Entity References
+//    Attribute values must not contain direct or indirect entity
+//    references to external entities.
 function checkForExternalEntity(
    value: LiteralValuePToken,
    paramDecls: ParameterEntitiesInfo,

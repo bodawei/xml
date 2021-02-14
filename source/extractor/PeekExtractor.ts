@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
-import Segment from './Segment';
+import {PseudoSpace, Segment} from './Segment';
 
 /**********************************************************************\
  A PeekExtractor "wraps" another extractor so it can do its work, but
@@ -29,7 +29,7 @@ class PeekExtractor extends Extractor {
       this._firstIndex = -1;
    }
 
-   process(segment: Segment) {
+   process(segment: Segment | PseudoSpace) {
       this.segInfo.push(this.makeInfo(segment));
 
       if (this._firstIndex === -1) {

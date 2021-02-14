@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
-import Segment from './Segment';
+import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
 
 /**********************************************************************\
  A MatchExtractor will look for the specified candidate string starting
@@ -20,7 +20,7 @@ import Segment from './Segment';
 class MatchExtractor extends Extractor {
    private _candidate: string;
    private _candIndex: number;
-   private _firstSegment: Segment | void;
+   private _firstSegment: Segment | PseudoSpace | undefined;
    private _firstIndex: number;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
@@ -28,16 +28,34 @@ class MatchExtractor extends Extractor {
       super(version);
 
       this._candidate = candidate;
+
       this._candIndex = 0;
       this._firstIndex = 0;
       this._firstSegment = undefined;
    }
 
-   process(segment: Segment) {
+   process(segment: Segment | PseudoSpace) {
       const info = this.makeInfo(segment);
       this._firstSegment = this._firstSegment || segment;
       this._firstIndex = this._firstIndex || segment.index;
       this.segInfo.push(info);
+
+      if (segment.type === PSEUDO_SPACE) {
+         const candText = this._candidate.substr(this._candIndex, 1);
+
+         if (candText === ' ') {
+            this.processPseudoText();
+            this._candIndex += 1;
+
+            if (this._candIndex >= this._candidate.length) {
+               this.cleanupOnSuccess();
+            }
+         } else {
+            this.state = Extractor.STATE.FAILURE;
+         }
+
+         return;
+      }
 
       const segmentRemainder = segment.text.length - segment.index;
       const candidateRemainder = this._candidate.length - this._candIndex;
@@ -54,15 +72,23 @@ class MatchExtractor extends Extractor {
          segment.index += lengthToCompare;
 
          if (this._candIndex >= this._candidate.length) {
-            // Remove the segments that we are now certain we have consumed.
-            this.segInfo.forEach((info) => {
-               if ((info.segment as Segment).atEnd()) { // typeHack
-                  info.segment = { range: info.segment.range };
-               }
-            });
-            this.state = Extractor.STATE.SUCCESS;
+            this.cleanupOnSuccess();
          }
       }
+   }
+
+   private cleanupOnSuccess() {
+      // Remove the segments that we are now certain we have consumed.
+      this.segInfo.forEach((info) => {
+         if (info.segment.type === PSEUDO_SPACE) {
+            info.segment = { type: DONE_SEGMENT };
+            return;
+         }
+         if ((info.segment as Segment).atEnd()) { // typeHack
+            info.segment = { type: DONE_SEGMENT, range: info.segment.range };
+         }
+      });
+      this.state = Extractor.STATE.SUCCESS;
    }
 
    finish() {

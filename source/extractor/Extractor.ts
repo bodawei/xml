@@ -1,17 +1,13 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { Range } from 'basic';
-import Segment from './Segment';
-
-type DoneSegment = {
-   range?: Range;
-};
+import {DoneSegment, PseudoSpace, PSEUDO_SPACE, Segment} from './Segment';
 
 type SegmentInfo = {
    chars: number;
    rows: number;
    columns: number;
-   segment: Segment | DoneSegment;
+   segment: Segment | DoneSegment | PseudoSpace;
 };
 
 type ExtractResult = {
@@ -54,7 +50,7 @@ class Extractor {
       this.state = Extractor.STATE.WORKING;
    }
 
-   process(segment: Segment): void {
+   process(segment: Segment | PseudoSpace): void {
       let typeHack = segment;
       typeHack = typeHack;
    }
@@ -65,6 +61,11 @@ class Extractor {
          text: '',
          original: '',
       };
+   }
+
+   protected processPseudoText(): void {
+      this.text.push('');
+      this.normalizedText.push(' ');
    }
 
    protected processText(originalText: string, info: SegmentInfo) {
@@ -112,7 +113,7 @@ class Extractor {
       info.columns += newColumns;
    }
 
-   protected makeInfo(segment: Segment): SegmentInfo {
+   protected makeInfo(segment: Segment | PseudoSpace): SegmentInfo {
       return {
          chars: 0,
          rows: 0,

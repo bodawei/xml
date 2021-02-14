@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Range, EntityId } from 'basic';
-import { defaultExtractors } from 'extractor';
+import { defaultExtractors, SEGMENT_TYPE } from 'extractor';
 
 import SToken from '../SToken';
 import STokenSource from '../STokenSource';
@@ -340,11 +340,13 @@ describe('STokenSource (integration)', () => {
             expect(sToken!.str).toEqual('foo');
             expect(source._segments as any).toEqualRangeless([
                {
+                  type: SEGMENT_TYPE,
                   text: 'foo/',
                   index: 3,
                   range: undefined,
                },
                {
+                  type: SEGMENT_TYPE,
                   text: '>',
                   index: 0,
                   range: undefined,

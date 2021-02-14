@@ -2,7 +2,16 @@
 /* eslint-env jasmine */
 
 import { Range, EntityId, CONFORMANCE_VERSION } from 'basic';
-import { Extractor, Segment, ExtractorMap, SegmentInfo } from 'extractor';
+import {
+   DONE_SEGMENT,
+   Extractor,
+   Segment,
+   ExtractorMap,
+   SegmentInfo,
+   PseudoSpace,
+   PSEUDO_SPACE,
+} from 'extractor';
+import { PSEUDO_SYSTEMID } from 'source/extractor/Segment';
 
 import SToken from '../SToken';
 import STokenSource from '../STokenSource';
@@ -13,14 +22,32 @@ describe('STokenSource (unit)', () => {
    let testExtractors: ExtractorMap;
 
    class AllExtractor extends Extractor {
-      process(segment: Segment) {
-         this.text.push(segment.text.substring(segment.index));
+      process(segment: Segment | PseudoSpace) {
+         if (segment.type === PSEUDO_SPACE) {
+            this.text.push('');
+            this.normalizedText.push(' ');
+            this.segInfo.push({
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: segment.range,
+               },
+            });
+            return;
+         }
+
+         const content = segment.text.substring(segment.index);
+         this.text.push(content);
+         this.normalizedText.push(content);
          segment.index = segment.text.length;
          this.segInfo.push({
             chars: segment.text.length,
             rows: 0,
             columns: segment.text.length,
             segment: {
+               type: DONE_SEGMENT,
                range: segment.range,
             },
          });
@@ -33,10 +60,9 @@ describe('STokenSource (unit)', () => {
             this.state = Extractor.STATE.FAILURE;
          }
 
-         const combinedText = this.text.join('');
          return {
-            text: combinedText,
-            original: combinedText,
+            text: this.normalizedText.join(''),
+            original: this.text.join(''),
             segments: this.segInfo,
          };
       }
@@ -47,10 +73,31 @@ describe('STokenSource (unit)', () => {
 
       constructor(version: number, param: string) {
          super(version);
+
          this.param = param || 'x';
+         this.normalizedText = [];
+
+         if (this.param.startsWith(' ')) {
+            throw new Error('not prepared to handle this');
+         }
       }
 
-      process(segment: Segment) {
+      process(segment: Segment | PseudoSpace) {
+         if (segment.type === PSEUDO_SPACE) {
+            this.text.push('');
+            this.normalizedText.push(' ');
+            this.segInfo.push({
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  type: DONE_SEGMENT,
+                  range: segment.range,
+               },
+            });
+            return;
+         }
+
          const index = segment.text.indexOf(this.param, segment.index + 1);
          let str;
 
@@ -65,17 +112,19 @@ describe('STokenSource (unit)', () => {
             chars: str.length,
             rows: 0,
             columns: str.length,
-         } as SegmentInfo; // typeHack
+         } as any; // typeHack
 
          segment.index = str.length;
 
          this.text.push(str);
+         this.normalizedText.push(str);
          this.segInfo.push(info);
 
          if (!segment.atEnd()) {
             info.segment = segment;
          } else {
             info.segment = {
+               type: DONE_SEGMENT,
                range: segment.range,
             };
          }
@@ -92,10 +141,9 @@ describe('STokenSource (unit)', () => {
             };
          }
 
-         const combinedText = this.text.join('');
          return {
-            text: combinedText,
-            original: combinedText,
+            text: this.normalizedText.join(''),
+            original: this.text.join(''),
             segments: this.segInfo,
          };
       }
@@ -242,10 +290,10 @@ describe('STokenSource (unit)', () => {
 
          source = new STokenSource(testExtractors);
          source.addText('1');
-         source.extract('peek', ['toXParam'], () => {});
+         source.extract('peek', 'toXParam', () => {});
 
          expect(version!).toEqual(1.0);
-         expect(params!).toEqual(['toXParam']);
+         expect(params!).toEqual('toXParam');
       });
    });
 
@@ -281,7 +329,7 @@ describe('STokenSource (unit)', () => {
          source.addText('', testRange);
          source.addText('333');
 
-         expect(source._segments[1].range).toEqual(testRange);
+         expect((source._segments[1] as any).range).toEqual(testRange);
       });
 
       it('ignores the range on an empty value if the next has a range (whitebox)', () => {
@@ -291,7 +339,7 @@ describe('STokenSource (unit)', () => {
          source.addText('', testRange1);
          source.addText('333', testRange2);
 
-         expect(source._segments[1].range).toEqual(testRange2);
+         expect((source._segments[1] as any).range).toEqual(testRange2);
       });
    });
 
@@ -524,6 +572,70 @@ describe('STokenSource (unit)', () => {
                   new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
                );
                expect(sToken!.firstRange).toEqual(new Range(new EntityId(), 4, 2, 2, 5, 2, 3));
+               done();
+            });
+         });
+
+         it('delivers a simple range when matching a pseudo space', (done) => {
+            source.addPseudoSpace();
+            source.endText();
+
+            source.extractNoParams('all', (sToken) => {
+               const expected = new SToken(' ', '', [
+                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+               ]);
+
+               expect(sToken).toEqual(expected);
+               done();
+            });
+         });
+
+         it('delivers ranges including that of the pseudo space and a following segment', (done) => {
+            source.addPseudoSpace();
+            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+            source.endText();
+
+            source.extractNoParams('all', (sToken) => {
+               const expected = new SToken(' 123', '123', [
+                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+               ]);
+
+               expect(sToken).toEqual(expected);
+               done();
+            });
+         });
+
+         it('delivers ranges including that of a segment followed by a pseudo space', (done) => {
+            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+            source.addPseudoSpace();
+            source.endText();
+
+            source.extractNoParams('all', (sToken) => {
+               const expected = new SToken('123 ', '123', [
+                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+               ]);
+
+               expect(sToken).toEqual(expected);
+               done();
+            });
+         });
+
+         it('delivers ranges including that of a segment followed by a pseudo space', (done) => {
+            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+            source.addPseudoSpace();
+            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+            source.endText();
+
+            source.extractNoParams('all', (sToken) => {
+               const expected = new SToken('123 123', '123123', [
+                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+               ]);
+
+               expect(sToken).toEqual(expected);
                done();
             });
          });

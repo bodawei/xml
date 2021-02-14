@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import Extractor from '../Extractor';
-import Segment from '../Segment';
+import {Segment} from '../Segment';
 
 describe('Extractor', () => {
    let extractor: Extractor;
