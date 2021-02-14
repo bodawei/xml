@@ -7,7 +7,7 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: ['not-wf-sa-125'],
+   includedIds: [],
    excludedIds: [
       'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
       /*
@@ -113,9 +113,6 @@ const testFilters: FilterData = {
       'not-wf-sa-054', // PUBLIC requires two literals.
       'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
       'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-125', // Invalid syntax extra set of parenthesis not necessary.
-      'not-wf-sa-126', // Invalid syntax Mixed-content must be defined as zero or more.
-      'not-wf-sa-127', // Invalid syntax Mixed-content must be defined as zero or more.
       'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
       'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
       'not-wf-sa-150',
@@ -143,13 +140,9 @@ const testFilters: FilterData = {
       'hst-bh-002', // hex charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
       'hst-bh-003', // decimal charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
       'hst-bh-004', // hex charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
-      'hst-lhs-007', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible
-      'hst-lhs-008', // UTF-16 BOM plus xml decl of utf-8 (using UTF-16 coding) incompatible
-      'hst-lhs-009', // UTF-16 BOM plus xml decl of utf-8 (using UTF-8 coding) incompatible
 
       // -------
 
-      'not-wf-not-sa-002', // Processing instruction target names may not be "XML" in any combination of cases.
       'not-wf-not-sa-007',
       'not-wf-sa-151',
       'not-wf-sa-153',
@@ -158,8 +151,6 @@ const testFilters: FilterData = {
       'o-p09fail2', // EntityValue excludes ''
       'o-p30fail1', // An XML declaration is not the same as a TextDecl
       'o-p31fail1', // external subset excludes doctypedecl
-      'o-p51fail1', // occurrence on #PCDATA group must be *
-      'o-p51fail2', // occurrence on #PCDATA group must be *
       'o-p66fail6', // no references to non-characters
       'o-p75fail6', // "PUBLIC" requires two literals (contrast with SGML)
 
@@ -212,30 +203,17 @@ const testFilters: FilterData = {
       // ////////////
       //
 
+      // URI Fragments
       'o-p11pass1', // : 'none', // system literals may not contain URI fragments
-      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
-
-      // Group: Japanese encodings
-      'pr-xml-euc-jp', // Test support for the EUC-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
-      'pr-xml-iso-2022-jp', // Test support for the ISO-2022-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
-      'pr-xml-shift_jis', // Test support for the Shift_JIS encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
-      'weekly-euc-jp', // Test support for EUC-JP encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
-      'weekly-iso-2022-jp', // Test support for ISO-2022-JP encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
-      'weekly-shift_jis', // Test support for Shift_JIS encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
-      // Group: Other errors
       'uri01', // SYSTEM ids may not have URI fragments
+      // Other
+      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
       'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
       'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
       'rmt-e2e-57', // A value other than preserve or default for xml:space is an error
-      'rmt-055', // wrong error?  Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
+      'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
       'rmt-057', // Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
-      'rmt-ns10-004', // Namespace name test: a relative URI (deprecated)
-      'rmt-ns10-005', // Namespace name test: a same-document relative URI (deprecated)
-      'rmt-ns10-006', // Namespace name test: an http IRI that is not a URI
-      'invalid-bo-7', // A byte order mark and a backwards one in general entity cause an illegal char. error (big-endian)
-      'invalid-bo-8', // A byte order mark and a backwards one in general entity cause an illegal char. error (little-endian)
-      'invalid-bo-9', // A byte order mark and a backwards one in general entity cause an illegal char. error (utf-8)
    ],
 
    futureFeatures: [
@@ -263,6 +241,11 @@ const testFilters: FilterData = {
       'invalid-bo-4', // Two byte order marks in general entity produce only one (big-endian)
       'invalid-bo-5', // Two byte order marks in general entity produce only one (little-endian)
       'invalid-bo-6', // Two byte order marks in general entity produce only one (utf-8)
+
+      // not-wellformed Characters:BOM
+      'hst-lhs-007', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible
+      'hst-lhs-008', // UTF-16 BOM plus xml decl of utf-8 (using UTF-16 coding) incompatible
+      'hst-lhs-009', // UTF-16 BOM plus xml decl of utf-8 (using UTF-8 coding) incompatible
 
       // Valid namespaces
       'rmt-ns10-017', // Simple legal case: no namespaces
@@ -312,6 +295,25 @@ const testFilters: FilterData = {
       'rmt-ns11-005', // Illegal use of prefix that has been unbound
       'ht-bh-ns11-007', // Attempt to unbind xmlns 'namespace'
       'ht-bh-ns11-008', // Attempt to unbind xml namespace
+
+      // ERROR
+      // Namespace
+      'rmt-ns10-004', // Namespace name test: a relative URI (deprecated)
+      'rmt-ns10-005', // Namespace name test: a same-document relative URI (deprecated)
+      'rmt-ns10-006', // Namespace name test: an http IRI that is not a URI
+
+      // Other character sets
+      'pr-xml-euc-jp', // Test support for the EUC-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
+      'pr-xml-iso-2022-jp', // Test support for the ISO-2022-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
+      'pr-xml-shift_jis', // Test support for the Shift_JIS encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
+      'weekly-euc-jp', // Test support for EUC-JP encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
+      'weekly-iso-2022-jp', // Test support for ISO-2022-JP encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
+      'weekly-shift_jis', // Test support for Shift_JIS encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
+
+      // BOM
+      'invalid-bo-7', // A byte order mark and a backwards one in general entity cause an illegal char. error (big-endian)
+      'invalid-bo-8', // A byte order mark and a backwards one in general entity cause an illegal char. error (little-endian)
+      'invalid-bo-9', // A byte order mark and a backwards one in general entity cause an illegal char. error (utf-8)
    ],
 };
 

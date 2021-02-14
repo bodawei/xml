@@ -118,9 +118,17 @@ function contentModelCheck(
 
    ec.setPos(cmToken.repeat);
    const repeatStr = strOrBlank(cmToken.repeat);
-   if (isMixedType && cmToken.delimitedParticles.length > 1 && repeatStr !== '*') {
-      ec.report(WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT, [repeatStr]);
+
+   if (isMixedType) {
+      if (cmToken.delimitedParticles.length > 1) {
+         ec.check(repeatStr !== '*', WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT, [repeatStr]);
+      } else {
+         ec.check(repeatStr !== '' && repeatStr !== '*', WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT, [
+            repeatStr,
+         ]);
+      }
    }
+
    ec.setPos(cmToken.repeatSpace);
 }
 

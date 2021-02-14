@@ -499,7 +499,7 @@ describe('contentModelCheck()', () => {
          });
       });
 
-      it('reports no error if there is a repeat indicator on a #PCDATA list of 1 item', () => {
+      it('reports no error if there is a * repeat indicator on a #PCDATA list of 1 item', () => {
          cmToken = new ContentModelP({
             open: toSToken('('),
             openSpace: undefined,
@@ -524,6 +524,48 @@ describe('contentModelCheck()', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if there is no repeat indicator on a #PCDATA list of 1 item', () => {
+         cmToken = new ContentModelP({
+            open: toSToken('('),
+            delimitedParticles: [
+               {
+                  particle: {
+                     name: toSToken('#PCDATA'),
+                  },
+               },
+            ],
+            close: toSToken(')'),
+         });
+
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports an error if there is a ? repeat indicator on a #PCDATA list of 1 item', () => {
+         cmToken = new ContentModelP({
+            open: toSToken('('),
+            delimitedParticles: [
+               {
+                  particle: {
+                     name: toSToken('#PCDATA'),
+                  },
+               },
+            ],
+            close: toSToken(')'),
+            repeat: toSToken('?'),
+         });
+
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.CONTENTMODEL_MIXED_INVALID_REPEAT,
+            params: ['?'],
+            position: cmToken.repeat,
+         });
       });
 
       it('reports an error if there is any non-* repeat indicator on a #PCDATA list of > 1 item', () => {

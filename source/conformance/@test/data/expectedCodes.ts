@@ -482,8 +482,8 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-123': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax mismatched parenthesis.
    'not-wf-sa-124': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
    'not-wf-sa-125': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid syntax extra set of parenthesis not necessary.
-   'not-wf-sa-126': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
-   'not-wf-sa-127': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
+   'not-wf-sa-126': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // good - Invalid syntax Mixed-content must be defined as zero or more.
+   'not-wf-sa-127': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // good - Invalid syntax Mixed-content must be defined as zero or more.
    'not-wf-sa-128': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid CDATA syntax.
    'not-wf-sa-129': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid syntax for Element Type Declaration.
    'not-wf-sa-130': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
@@ -573,7 +573,10 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-186': 'ATTRIBUTE_NO_SPACE_BEFORE_NAME', // great - Whitespace is required between attribute/value pairs.
 
    'not-wf-not-sa-001': 'CONDITIONAL_NO_CLOSE', // Conditional sections must be properly terminated ("]>" used instead of "]]>").
-   'not-wf-not-sa-002': 'error', // Processing instruction target names may not be "XML" in any combination of cases.
+   'not-wf-not-sa-002': {
+      id: 'MARKUPDECL_INVALID_TOKEN', // Processing instruction target names may not be "XML" in any combination of cases.
+      message: 'TEXTDECL_PTOKEN',
+   },
    'not-wf-not-sa-003': 'CONDITIONAL_NO_CLOSE', // Conditional sections must be properly terminated ("]]>" omitted).
    'not-wf-not-sa-004': 'CONDITIONAL_NO_CLOSE', // Conditional sections must be properly terminated ("]]>" omitted).
    'not-wf-not-sa-006': 'CONDITIONAL_NO_SECOND_BRACKET', // Conditional sections need a '[' after the INCLUDE or IGNORE.
@@ -857,8 +860,8 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p48fail2': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // Illegal space before optional character
    'o-p49fail1': 'CONTENTMODEL_NO_DELIM', // connectors must match
    'o-p50fail1': 'CONTENTMODEL_NO_DELIM', // connectors must match
-   'o-p51fail1': 'error', // occurrence on #PCDATA group must be *
-   'o-p51fail2': 'error', // occurrence on #PCDATA group must be *
+   'o-p51fail1': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // good - occurrence on #PCDATA group must be *
+   'o-p51fail2': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // good - occurrence on #PCDATA group must be *
    'o-p51fail3': 'CONTENTMODEL_NAME_INVALID', // #PCDATA must come first
    'o-p51fail4': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // occurrence on #PCDATA group must be *
    'o-p51fail5': 'CONTENTMODEL_NAME_INVALID', // only '|' connectors
