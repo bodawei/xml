@@ -196,7 +196,7 @@ describe('elementDeclarationCheck()', () => {
       });
    });
 
-   it('calls nameList.checkWellFormed() if there are contentModel', () => {
+   it('calls contentModelCheck() if there are contentModel', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
          contentModel: new ContentModelP({}),
       });
@@ -207,6 +207,7 @@ describe('elementDeclarationCheck()', () => {
          new ContentModelP({}),
          mockErrorCollector,
          confVer,
+         true,
       );
    });
 

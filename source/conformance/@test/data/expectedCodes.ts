@@ -481,7 +481,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-122': 'CONTENTMODEL_NO_DELIM', // meh - Invalid syntax mixed connectors are used.
    'not-wf-sa-123': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax mismatched parenthesis.
    'not-wf-sa-124': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
-   'not-wf-sa-125': 'error', // Invalid syntax extra set of parenthesis not necessary.
+   'not-wf-sa-125': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid syntax extra set of parenthesis not necessary.
    'not-wf-sa-126': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
    'not-wf-sa-127': 'error', // Invalid syntax Mixed-content must be defined as zero or more.
    'not-wf-sa-128': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid CDATA syntax.

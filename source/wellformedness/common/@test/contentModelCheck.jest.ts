@@ -62,7 +62,7 @@ describe('contentModelCheck()', () => {
       it('reports an error if no "(" present', () => {
          cmToken = new ContentModelP(cmToken, { open: undefined });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -76,7 +76,7 @@ describe('contentModelCheck()', () => {
       it('reports an error if no delimitedParticles are present', () => {
          cmToken = new ContentModelP(cmToken, { delimitedParticles: [] });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -106,7 +106,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -135,7 +135,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -170,7 +170,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -186,7 +186,7 @@ describe('contentModelCheck()', () => {
          });
          const particle: ContentNameP = cmToken.delimitedParticles[1].particle as ContentNameP;
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -199,7 +199,7 @@ describe('contentModelCheck()', () => {
 
    describe('non-mixed children', () => {
       it('checks if the name is valid', () => {
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
          const particle: ContentNameP = cmToken.delimitedParticles[0].particle as ContentNameP;
 
          expect(nameCheck).toHaveBeenCalledWith(
@@ -234,7 +234,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -268,7 +268,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -281,7 +281,7 @@ describe('contentModelCheck()', () => {
       it('reports an error if there is an extra space between the name and the repeat marker', () => {
          const particle: ContentNameP = cmToken.delimitedParticles[0].particle as ContentNameP;
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -297,7 +297,7 @@ describe('contentModelCheck()', () => {
             repeat: toSToken('*'),
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -346,7 +346,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -355,6 +355,37 @@ describe('contentModelCheck()', () => {
             position: ((cmToken.delimitedParticles[0].particle as ContentModelP)
                .delimitedParticles[1].particle as ContentModelP).closeSpace,
          });
+      });
+
+      it('reports an error if a #PCDATA is found in a sub-seq', () => {
+         const name = toSToken('#PCDATA');
+         cmToken = new ContentModelP(cmToken, {
+            open: toSToken('('),
+            delimitedParticles: [
+               {
+                  particle: {
+                     open: toSToken('('),
+                     delimitedParticles: [
+                        {
+                           particle: {
+                              name,
+                           },
+                        },
+                     ],
+                  },
+                  delimiter: toSToken(','),
+               },
+            ],
+         });
+
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
+
+         expect(nameCheck).toHaveBeenCalledWith(
+            name,
+            mockErrorCollector,
+            confVer,
+            WellFormedError.ID.CONTENTMODEL_NAME_INVALID,
+         );
       });
    });
 
@@ -370,7 +401,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -392,7 +423,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -431,7 +462,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -458,7 +489,7 @@ describe('contentModelCheck()', () => {
             ],
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -490,7 +521,7 @@ describe('contentModelCheck()', () => {
             repeatSpace: undefined,
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -518,7 +549,7 @@ describe('contentModelCheck()', () => {
             repeatSpace: undefined,
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -551,7 +582,7 @@ describe('contentModelCheck()', () => {
             repeatSpace: undefined,
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
@@ -578,7 +609,7 @@ describe('contentModelCheck()', () => {
             repeatSpace: undefined,
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -600,7 +631,7 @@ describe('contentModelCheck()', () => {
             repeatSpace: undefined,
          });
 
-         contentModelCheck(cmToken, mockErrorCollector, confVer);
+         contentModelCheck(cmToken, mockErrorCollector, confVer, true);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });

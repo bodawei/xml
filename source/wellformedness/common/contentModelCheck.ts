@@ -17,6 +17,7 @@ function contentModelCheck(
    cmToken: ContentModelP,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
+   isTopLevel: boolean,
 ): void {
    let delimType: DelimiterType | undefined;
    let isMixedType = false;
@@ -46,7 +47,7 @@ function contentModelCheck(
                ec.report(WFEID.CONTENTMODEL_MIXED_INVALID_SUBPARTICLE, [indexStr]);
             }
 
-            contentModelCheck(theParticle, ec, confVer);
+            contentModelCheck(theParticle, ec, confVer, false);
          } else {
             ec.setPos(theParticle.name);
             ec.check(!theParticle.name, WFEID.CONTENTMODEL_NO_NAME, [indexStr]);
@@ -54,7 +55,7 @@ function contentModelCheck(
             const nameStr = strOrBlank(theParticle.name);
             const ucName = nameStr.toUpperCase();
 
-            if (index === 0 && !isMixedType && ucName === PCDATA) {
+            if (index === 0 && !isMixedType && ucName === PCDATA && isTopLevel) {
                ec.check(ucName !== nameStr, WFEID.CONTENTMODEL_PCDATA_INVALID_CASE, [nameStr]);
                isMixedType = true;
                delimType = 'CHOICE';

@@ -50,7 +50,7 @@ function elementDeclarationCheck(
    ec.check(!pToken.nameSpace, WFEID.ELEMENTDECL_NAME_NO_SPACE, [nameText]);
 
    if (pToken.contentModel) {
-      contentModelCheck(pToken.contentModel, ec, confVer);
+      contentModelCheck(pToken.contentModel, ec, confVer, true);
    } else {
       const contentSpec: string = strOrBlank(pToken.contentSpec);
       const upperContentSpec = contentSpec.toLocaleUpperCase();
