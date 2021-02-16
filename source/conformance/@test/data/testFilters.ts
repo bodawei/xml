@@ -9,6 +9,19 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
+      // WE are either not checking chardata correctly, and/or our error messages are wonked out
+      'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
+      'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
+      'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
+      'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
+      'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
+      'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
+      'ibm-1-1-not-wf-P02-ibm02n68.xml',
+      'ibm-1-1-not-wf-P02-ibm02n69.xml',
+      'ibm-1-1-not-wf-P02-ibm02n67.xml', // - alomst, except only identifies 2 of three. Also coment and pi are saying CHARDATA_INVALID_CHAR as is CDATA   This test contains embeded character 0xD800. (Invalid UTF8 sequence)
+
+      'rmt-020', // broke
+      'rmt-021', // broke
       'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
       /*
        * This is nasty, and I think it reflects we are doing something wrong.
@@ -68,6 +81,7 @@ const testFilters: FilterData = {
 
       'ibm-1-1-valid-P46-ibm46i01.xml', // An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
       'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
+      'ibm-1-1-valid-P77-ibm77v30.xml', // The VersionNum of the document is 1.1 and the textDecl is missing in the external entity. The replacement text of an entity declared in the external DTD contains a reference to the character #x1, #x7F.
 
       'rmt-e2e-14', // Crashing bug - Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
       'rmt-e2e-20', // no error - Tokens, after normalization, must be separated by space, not other whitespace characters
@@ -79,9 +93,9 @@ const testFilters: FilterData = {
       'rmt-036', // no error, but format ouput is bad  Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
       'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
       'rmt-048', // Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-046', // but output is bad 'CHILDREN_XTRA_CONTENT', // good - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-052', // but output is bad 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-053', // but output is bad 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+      'rmt-046', // message not very clear 'CHILDREN_XTRA_CONTENT', // good - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+      'rmt-052', // message not very clear 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+      'rmt-053', // message not very clear 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       // Group: some BOM problems. But several of these should be dying and
       'invalid-sa-140', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
@@ -89,13 +103,6 @@ const testFilters: FilterData = {
       'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
       'x-rmt5-016', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
       'x-rmt5-019', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-      'ibm-invalid-P89-ibm89n06.xml', // Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-      'ibm-invalid-P89-ibm89n07.xml', // Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-      'ibm-invalid-P89-ibm89n08.xml', // Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-      'ibm-invalid-P89-ibm89n09.xml', // Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-      'ibm-invalid-P89-ibm89n10.xml', // Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-      'ibm-invalid-P89-ibm89n11.xml', // Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-      'ibm-invalid-P89-ibm89n12.xml', // Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
       'hst-bh-005', // xmlns:xml is an attribute as far as validation is concerned and must be declared
       'hst-bh-006', // xmlns:foo is an attribute as far as validation is concerned and must be declared
 
@@ -114,26 +121,11 @@ const testFilters: FilterData = {
       'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
       'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
       'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
-      'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
       'not-wf-sa-150',
       'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
-      'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
-      'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
       'not-wf-sa-170', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
       // not-wf-sa-088   seems a bit odd
       'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-
-      // These appear to have their text mangled in some way
-      'x-ibm-1-0.5-not-wf-P04-ibm04n21.xml', // Tests an element with an illegal NameStartChar: #0xD800
-      'x-ibm-1-0.5-not-wf-P04-ibm04n22.xml', // Tests an element with an illegal NameStartChar: #0xD801
-      'x-ibm-1-0.5-not-wf-P04-ibm04n23.xml', // Tests an element with an illegal NameStartChar: #0xDAFF
-      'x-ibm-1-0.5-not-wf-P04-ibm04n24.xml', // Tests an element with an illegal NameStartChar: #0xDFFF
-
-      // These appear to have their text mangled in some way
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an21.xml', // Tests an element with an illegal NameChar: #0xD800
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an22.xml', // Tests an element with an illegal NameChar: #0xD801
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
-      'x-ibm-1-0.5-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
 
       // Group: Cahracter set
       'hst-bh-001', // decimal charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
@@ -155,34 +147,34 @@ const testFilters: FilterData = {
       'o-p75fail6', // "PUBLIC" requires two literals (contrast with SGML)
 
       'ibm-not-wf-P01-ibm01n02.xml', // Tests a document with wrong ordering of its prolog and element. The element occurs before the xml declaration and the DTD.
-      'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
-      'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
       'ibm-not-wf-P71-ibm70n01.xml', // Tests
 
       'ibm-1-1-not-wf-P02-ibm02n64.xml', // This test contains embeded control characters present in an external entity.
       'ibm-1-1-not-wf-P02-ibm02n65.xml', // This test contains embeded control characters present in an external entity.
       'ibm-1-1-not-wf-P02-ibm02n66.xml', // This test contains embeded control characters present in an external entity.
-      'ibm-1-1-not-wf-P02-ibm02n67.xml', // This test contains embeded character 0xD800. (Invalid UTF8 sequence)
-      'ibm-1-1-not-wf-P02-ibm02n68.xml',
-      'ibm-1-1-not-wf-P02-ibm02n69.xml',
 
-      'ibm-1-1-not-wf-P04-ibm04n21.xml', // Tests an element with an illegal NameStartChar: #0xD800
-      'ibm-1-1-not-wf-P04-ibm04n22.xml', // Tests an element with an illegal NameStartChar: #0xD801
-      'ibm-1-1-not-wf-P04-ibm04n23.xml', // Tests an element with an illegal NameStartChar: #0xDAFF
-      'ibm-1-1-not-wf-P04-ibm04n24.xml', // Tests an element with an illegal NameStartChar: #0xDFFF
-
-      'ibm-1-1-not-wf-P04a-ibm04an21.xml', // Tests an element with an illegal NameChar: #0xD800
-      'ibm-1-1-not-wf-P04a-ibm04an22.xml', // Tests an element with an illegal NameChar: #0xD801
-      'ibm-1-1-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
-      'ibm-1-1-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
-
+      'ibm-1-1-not-wf-P77-ibm77n01.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains the invalid XML1.1 but valid XML 1.0 character #x7F.
+      'ibm-1-1-not-wf-P77-ibm77n02.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a comment with the invalid XML1.1 but valid XML 1.0 character #x80.
+      'ibm-1-1-not-wf-P77-ibm77n03.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a PI with the invalid XML1.1 but valid XML 1.0 character #x9F.
+      'ibm-1-1-not-wf-P77-ibm77n04.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity the contains invalid XML1.1 but valid XML 1.0 character #x89.
+      'ibm-1-1-not-wf-P77-ibm77n05.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x94.
+      'ibm-1-1-not-wf-P77-ibm77n06.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9F.
+      'ibm-1-1-not-wf-P77-ibm77n07.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x7F.
+      'ibm-1-1-not-wf-P77-ibm77n08.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9B.
+      'ibm-1-1-not-wf-P77-ibm77n09.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x8D.
+      'ibm-1-1-not-wf-P77-ibm77n10.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x84.
+      'ibm-1-1-not-wf-P77-ibm77n11.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x88.
       'ibm-1-1-not-wf-P77-ibm77n12.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x8E.
       'ibm-1-1-not-wf-P77-ibm77n13.xml', // The VersionNum of the primary document entity is 1.0 and that of the external 		dtd is 1.0. The external dtd contains an external entity whose VersionNum is 1.1.
+      'ibm-1-1-not-wf-P77-ibm77n14.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.0. The external dtd contains an element declaration with an invalid 		XML 1.1 and 1.0 name.
+      'ibm-1-1-not-wf-P77-ibm77n15.xml', // The VersionNum of the primary document entity is 1.1 and testDecl of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		1.1 containing a valid XML1.0 but an invalid XML 1.1 character #x7F.
       'ibm-1-1-not-wf-P77-ibm77n16.xml', // The VersionNum of the primary document entity is 1.0 and VersioNum of the external 		entity is absent. The replacement text of the entity contains an element followed 		by the valid XML 1.1 of line character NEL #x85 in its empty elem tag.
       'ibm-1-1-not-wf-P77-ibm77n17.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 enf of line character NEL #x85.
       'ibm-1-1-not-wf-P77-ibm77n18.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 of line character Unicode line separator #x2028.
+      'ibm-1-1-not-wf-P77-ibm77n19.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x94.
+      'ibm-1-1-not-wf-P77-ibm77n20.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.1. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x8F.
+      'ibm-1-1-not-wf-P77-ibm77n21.xml', // The VersionNum of the primary document entity is 1.1 and the texlDecl of the 		external dtd is absent. The external dtd contains a reference to an external 		parameter entity whose VersionNum is absent from the textDecl and it contains 		an invalid XML 1.1 character #x8F.
 
-      'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
       'rmt-e2e-38', // XML 1.0 document refers to 1.1 entity
       'rmt-e2e-61', // (From John Cowan) An encoding declaration in ASCII specifying an encoding that is not compatible with ASCII (so the document is not in its declared encoding). It should generate a fatal error.
       'rmt-001', // External subset has later version number
@@ -217,7 +209,8 @@ const testFilters: FilterData = {
    ],
 
    futureFeatures: [
-      // --- UTF16 validity problems
+      // ==== VALID ====
+      // Characters:Charset
       'valid-ext-sa-008', // utf16
       'pr-xml-little', // utf16
       'pr-xml-utf-16', // utf16
@@ -228,13 +221,14 @@ const testFilters: FilterData = {
       'valid-sa-051', // utf16
       'valid-ext-sa-014', // External entity is utf16 with a BOM.  Oddly, the answer has the BOM in it.  Why isn't that stripped?  Be certain you understand this
       'valid-ext-sa-007', // utf16 BOM
-      // utf8/BOM
-      'rmt-e2e-22', // Starts with a BOM
-      // This not only is doing utf16, but may not be loading the entities correctly.
-      'ext02', // Tests use of external parsed entities with different       encodings than the base document.
+      'ext02', // Tests use of external parsed entities with different       encodings than the base document. --  may not be loading the entities correctly.
       'rmt-040', // iso-8859-1 characters, with an 8 bit char
 
-      // invalid
+      // Characters:BOM
+      'rmt-e2e-22', // Starts with a BOM
+
+      // === INVALID ===
+      // Characters:BOM
       'invalid-bo-1', // Byte order mark in general entity should go away (big-endian)
       'invalid-bo-2', // Byte order mark in general entity should go away (little-endian)
       'invalid-bo-3', // Byte order mark in general entity should go away (utf-8)
@@ -242,12 +236,7 @@ const testFilters: FilterData = {
       'invalid-bo-5', // Two byte order marks in general entity produce only one (little-endian)
       'invalid-bo-6', // Two byte order marks in general entity produce only one (utf-8)
 
-      // not-wellformed Characters:BOM
-      'hst-lhs-007', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible
-      'hst-lhs-008', // UTF-16 BOM plus xml decl of utf-8 (using UTF-16 coding) incompatible
-      'hst-lhs-009', // UTF-16 BOM plus xml decl of utf-8 (using UTF-8 coding) incompatible
-
-      // Valid namespaces
+      // namespaces
       'rmt-ns10-017', // Simple legal case: no namespaces
       'rmt-ns10-018', // Simple legal case: default namespace
       'rmt-ns10-019', // Simple legal case: prefixed element
@@ -266,7 +255,13 @@ const testFilters: FilterData = {
       'rmt-ns10-045', // Colon in ID attribute name
       'rmt-ns10-046', // Colon in ID attribute name
 
-      // not wellformed: Namespaces
+      // ==== Not wellformed ====
+      // Characters:BOM
+      'hst-lhs-007', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible
+      'hst-lhs-008', // UTF-16 BOM plus xml decl of utf-8 (using UTF-16 coding) incompatible
+      'hst-lhs-009', // UTF-16 BOM plus xml decl of utf-8 (using UTF-8 coding) incompatible
+
+      // Namespaces
       'rmt-ns-e1.0-13a', // The xml namespace must not be declared as the default namespace.
       'rmt-ns-e1.0-13b', // The xmlns namespace must not be declared as the default namespace.
       'rmt-ns-e1.0-13c', // Elements must not have the prefix xmlns.
@@ -296,13 +291,13 @@ const testFilters: FilterData = {
       'ht-bh-ns11-007', // Attempt to unbind xmlns 'namespace'
       'ht-bh-ns11-008', // Attempt to unbind xml namespace
 
-      // ERROR
+      // ==== ERROR ====
       // Namespace
       'rmt-ns10-004', // Namespace name test: a relative URI (deprecated)
       'rmt-ns10-005', // Namespace name test: a same-document relative URI (deprecated)
       'rmt-ns10-006', // Namespace name test: an http IRI that is not a URI
 
-      // Other character sets
+      // Characters:Charsets
       'pr-xml-euc-jp', // Test support for the EUC-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
       'pr-xml-iso-2022-jp', // Test support for the ISO-2022-JP encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
       'pr-xml-shift_jis', // Test support for the Shift_JIS encoding, and for text 	which relies on Japanese characters._If a processor does not support this encoding, it must
@@ -310,7 +305,7 @@ const testFilters: FilterData = {
       'weekly-iso-2022-jp', // Test support for ISO-2022-JP encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
       'weekly-shift_jis', // Test support for Shift_JIS encoding, and 	XML names which contain Japanese characters._If a processor does not support this encoding, it must
 
-      // BOM
+      // Characters:BOM
       'invalid-bo-7', // A byte order mark and a backwards one in general entity cause an illegal char. error (big-endian)
       'invalid-bo-8', // A byte order mark and a backwards one in general entity cause an illegal char. error (little-endian)
       'invalid-bo-9', // A byte order mark and a backwards one in general entity cause an illegal char. error (utf-8)

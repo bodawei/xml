@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.234.3",
+   "version": "0.234.4",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -8,7 +8,7 @@
    "private": true,
    "scripts": {
       "build:locale": "node ./build/tool/doDerive.js",
-      "build:xmlconf": "ts-node -r tsconfig-paths/register ./build/tool/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json",
+      "build:xmlconf": "ts-node -r tsconfig-paths/register ./source/conformance/@test/build/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json",
       "check": "prettier --write  'source/attFixer/**/*.ts' 'source/conformance/**/*.ts' 'source/expand/**/*.ts' 'source/pToken/**/*.ts' 'source/wellformedness/**/*.ts' 'source/stringify/**/*.ts' 'source/xToken/**/*.ts'",
       "check:types": "./node_modules/typescript/bin/tsc",
       "lint": "eslint --fix --config ./.eslintrc.json source/**/*.ts",

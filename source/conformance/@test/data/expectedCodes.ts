@@ -211,6 +211,13 @@ const expectedInvalidCodes: IdToErrorMap = {
    },
    'ibm-invalid-P69-ibm-not-wf-P69-ibm69i04.xml': 'PEREF_UNDEFINED',
    'ibm-invalid-P76-ibm76i01.xml': 'ENTITYDECL_UNDECLARED_NOTATION',
+   'ibm-invalid-P89-ibm89n06.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n07.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n08.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n09.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n10.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n11.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n12.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
 
    'ibm-1-1-valid-P46-ibm46i01.xml': 'error', // An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
    'ibm-1-1-valid-P46-ibm46i02.xml': 'error', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
@@ -281,13 +288,6 @@ const expectedInvalidCodes: IdToErrorMap = {
    'x-rmt5-014': 'error', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
    'x-rmt5-016': 'error', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
    'x-rmt5-019': 'error', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-   'ibm-invalid-P89-ibm89n06.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n07.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n08.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n09.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n10.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n11.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n12.xml': 'error', // Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
    'hst-bh-005': 'error', // xmlns:xml is an attribute as far as validation is concerned and must be declared
    'hst-bh-006': 'error', // xmlns:foo is an attribute as far as validation is concerned and must be declared
 };
@@ -2063,10 +2063,10 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-1-1-not-wf-P04-ibm04n18.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04-ibm04n19.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04-ibm04n20.xml': 'ELEMENT_NAME_INVALID',
-   'ibm-1-1-not-wf-P04-ibm04n21.xml': 'error',
-   'ibm-1-1-not-wf-P04-ibm04n22.xml': 'error',
-   'ibm-1-1-not-wf-P04-ibm04n23.xml': 'error',
-   'ibm-1-1-not-wf-P04-ibm04n24.xml': 'error',
+   'ibm-1-1-not-wf-P04-ibm04n21.xml': 'DOCTYPE_NAME_INVALID', // good - Tests an element with an illegal NameStartChar: #0xD800
+   'ibm-1-1-not-wf-P04-ibm04n22.xml': 'DOCTYPE_NAME_INVALID', // good - Tests an element with an illegal NameStartChar: #0xD801
+   'ibm-1-1-not-wf-P04-ibm04n23.xml': 'DOCTYPE_NAME_INVALID', // good - Tests an element with an illegal NameStartChar: #0xDAFF
+   'ibm-1-1-not-wf-P04-ibm04n24.xml': 'DOCTYPE_NAME_INVALID', // good - Tests an element with an illegal NameStartChar: #0xDFFF
    'ibm-1-1-not-wf-P04-ibm04n25.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04-ibm04n26.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04-ibm04n27.xml': 'ELEMENT_NAME_INVALID',
@@ -2091,10 +2091,10 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-1-1-not-wf-P04a-ibm04an18.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04a-ibm04an19.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04a-ibm04an20.xml': 'ELEMENT_NAME_INVALID',
-   'ibm-1-1-not-wf-P04a-ibm04an21.xml': 'error',
-   'ibm-1-1-not-wf-P04a-ibm04an22.xml': 'error',
-   'ibm-1-1-not-wf-P04a-ibm04an23.xml': 'error',
-   'ibm-1-1-not-wf-P04a-ibm04an24.xml': 'error',
+   'ibm-1-1-not-wf-P04a-ibm04an21.xml': 'DOCTYPE_NAME_INVALID', // good -  Tests an element with an illegal NameChar: #0xD800
+   'ibm-1-1-not-wf-P04a-ibm04an22.xml': 'DOCTYPE_NAME_INVALID', // good -  Tests an element with an illegal NameChar: #0xD801
+   'ibm-1-1-not-wf-P04a-ibm04an23.xml': 'DOCTYPE_NAME_INVALID', // good -  Tests an element with an illegal NameChar: #0xDAFF
+   'ibm-1-1-not-wf-P04a-ibm04an24.xml': 'DOCTYPE_NAME_INVALID', // good -  Tests an element with an illegal NameChar: #0xDFFF
    'ibm-1-1-not-wf-P04a-ibm04an25.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04a-ibm04an26.xml': 'ELEMENT_NAME_INVALID',
    'ibm-1-1-not-wf-P04a-ibm04an27.xml': 'ELEMENT_NAME_INVALID',

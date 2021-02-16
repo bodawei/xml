@@ -67,14 +67,27 @@ These have errors:
 
 * ibm-invalid-P41-ibm41i02.xml : This has "PCDATA" when it should have "#PCDATA"
 
-These are just baffling:
-
-The oasis tests are a bit strange. They ostly come in two flavors: `o-.*pass.*.xml` and `o-.*fail.*.xml`  (there is one lone `e2.xml`).
-
-* The valid tests are all `o-.*pass.*.xml`.
-* The not-wf tests are all `o-.*fail.*.xml`
-* There is one error test which is labeled `o-.*pass.*.xml`, which is strange.
-* The invalid tests are, however, a mixture of `o-.*pass.*.xml` and `o-.*fail.*.xml`. The three fail ones all seem to be legitimate invalid cases.  However, the pass ones also fail, but usually for reasons other than what it seems to be testing, most often because it is missing a DTD. That is, if you ignore the lack of a DTD, they actually do seem to be passing tests.  There are exception to this, such as o-p16pass1 which has wellformed errors in it.  My interprettion is that these were written against a validator that was not enforcing the §3.0.0 Element Valid validity constraint (and in the case of p16pass, was not checking the target correctly), and thus they passed. Later, they were run with a processor that attended to the lack of a DTD and reported them as inalid, and so they were categorized as "invalid" tests. Maybe someone didn't notice that o-p16pass1 was failing due to a WF error.
-
 ### Commentary
 * not-wf-sa-125 - The description for this is "Invalid syntax extra set of parenthesis not necessary." because the content model has `((#PCDATA))`.  You can interpret this as invalid because a mixed content model may not have nested parentheses. On the other hand, this also looks like a perfectly good `children` content model (a `seq` nested in a `seq`) with an invalid name. The implementation currently views this as the latter.
+
+* The oasis tests are a bit strange. They mostly come in two flavors: `o-.*pass.*.xml` and `o-.*fail.*.xml`  (there is one lone `e2.xml`).
+   * The valid tests are all `o-.*pass.*.xml`.
+   * The not-wf tests are all `o-.*fail.*.xml`
+   * There is one error test which is labeled `o-.*pass.*.xml`, which is strange.
+   * The invalid tests are, however, a mixture of `o-.*pass.*.xml` and `o-.*fail.*.xml`. The three fail ones all seem to be legitimate invalid cases.  However, the pass ones also fail, but usually for reasons other than what it seems to be testing, most often because it is missing a DTD. That is, if you ignore the lack of a DTD, they actually do seem to be passing tests.  There are exception to this, such as o-p16pass1 which has wellformed errors in it.  My interprettion is that these were written against a validator that was not enforcing the §3.0.0 Element Valid validity constraint (and in the case of p16pass, was not checking the target correctly), and thus they passed. Later, they were run with a processor that attended to the lack of a DTD and reported them as inalid, and so they were categorized as "invalid" tests. Maybe someone didn't notice that o-p16pass1 was failing due to a WF error.
+
+* The ibm texts ibm-invalid-P89-ibm89n06.xml through ibm-invalid-P89-ibm89n12.xml all are invalid because they have not declared the element used in the documents.  However, what they claim to be testing is that particular characters are legal to use in 1.0/5.  That is they ARE invalid tests, but it does not seem to be what they are looking to test, and I suspect it would be easy to overlook if they were failing for other reasons.
+
+* Several tests contain lone high and low surrogte half. I haven't read the standards, but the wikipedia entries make it sound like a lone surrogate half is illegal but found in practice. More importanly, the node.js utf8 decoder used when converting a utf8 string into an internal representation converts lone surrogate halves into 0xFFFD ("replacement character"). This makes it impossible to run these tests in a straightforward way (read in the characters and run the test).  However, JavaScript (as noted in the reference below) is one of those things that allows lone surrogate halves.  Our solution to this is when we construct the test code, we do some ugly gyrations to ultimately insert the surrogate halves back in to the text atthe right place.  See also [ths Wikipedia page about UTF-8](https://en.wikipedia.org/wiki/UTF-8#Invalid_sequences_and_error_handling), [the wikipedia page about UTF-16](https://en.wikipedia.org/wiki/UTF-16#U+D800_to_U+DFFF), and [the JavaScript standard](https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type). Affected tests are:
+   * 'x-ibm-1-0.5-not-wf-P04-ibm04n21.xml', // Tests an element with an illegal NameStartChar: #0xD800
+   * 'x-ibm-1-0.5-not-wf-P04-ibm04n22.xml', // Tests an element with an illegal NameStartChar: #0xD801
+   * 'x-ibm-1-0.5-not-wf-P04-ibm04n23.xml', // Tests an element with an illegal NameStartChar: #0xDAFF
+   * 'x-ibm-1-0.5-not-wf-P04-ibm04n24.xml', // Tests an element with an illegal NameStartChar: #0xDFFF
+   * 'x-ibm-1-0.5-not-wf-P04a-ibm04an21.xml', // Tests an element with an illegal NameChar: #0xD800
+   * 'x-ibm-1-0.5-not-wf-P04a-ibm04an22.xml', // Tests an element with an illegal NameChar: #0xD801
+   * 'x-ibm-1-0.5-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
+   * 'x-ibm-1-0.5-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
+
+
+
+

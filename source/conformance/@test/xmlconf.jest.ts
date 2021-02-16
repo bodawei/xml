@@ -12,7 +12,7 @@ import { STokenSource } from 'sToken';
 import { PToXTokenStream, CheckXTokenValidStream } from 'xTokenStream';
 
 import metadata from './data/xmlconf.json';
-import { TestDetails, buildTestDetails } from './helper/buildTestDetails';
+import { TestDetails, prepareTestDetails } from './helper/prepareTestDetails';
 import { installMatchers } from './helper/customMatchers';
 import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
@@ -62,7 +62,7 @@ function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlRevision): T
 }
 
 describe('XML Conformance tests', () => {
-   const allDetails = buildTestDetails(metadata as TestSuite);
+   const allDetails = prepareTestDetails(metadata as TestSuite);
 
    allDetails.forEach((testData) => {
       const ver = testData.VERSION ? (Number.parseFloat(testData.VERSION) as XmlVersion) : 1.0;
@@ -81,7 +81,7 @@ describe('XML Conformance tests', () => {
             const verToUse = hasEdition ? ver : undefined;
             const revToUse = hasEdition ? edition : undefined;
             const testStream = setUpStreams(testData, verToUse, revToUse);
-            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done!);
+            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
 
             // If the test details includes output, then we should test that the output matches
             if (hasOutput) {

@@ -18,7 +18,7 @@ import {
 } from 'token';
 
 import { TestCases } from './types';
-import { TestDetails } from './buildTestDetails';
+import { TestDetails } from './prepareTestDetails';
 
 interface ResolvedInfo {
    testDetails: TestDetails;

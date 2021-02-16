@@ -136,7 +136,7 @@ function walkSuite(testSuite: TestSuite, groups: TestGroups): TestGroups {
    );
 }
 
-function buildTestDetails(testData: TestSuite): Array<TestDetails> {
+function prepareTestDetails(testData: TestSuite): Array<TestDetails> {
    const results = walkSuite(testData, {
       error: [],
       invalid: [],
@@ -147,4 +147,4 @@ function buildTestDetails(testData: TestSuite): Array<TestDetails> {
    return [...results.valid, ...results.invalid, ...results.notWf, ...results.error];
 }
 
-export { TestDetails, TestGroups, buildTestDetails };
+export { TestDetails, TestGroups, prepareTestDetails };
