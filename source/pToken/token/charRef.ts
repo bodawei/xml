@@ -1,14 +1,14 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
 import { extractSurrogatePair } from 'basic';
-import { SToken, STokenSource } from '../sToken';
+import { SToken, STokenSource } from 'sToken';
 
 const CHARREF_PTOKEN = 'CHARREF_PTOKEN';
 
 type DeliverPToken = (pToken?: CharRefPToken) => void;
 
-interface MutableCharRefPToken {
-   open: SToken;
+interface RawCharRefProps {
+   open?: SToken;
    openSpace?: SToken;
    hexMarker?: SToken;
    hexMarkerSpace?: SToken;
@@ -17,6 +17,10 @@ interface MutableCharRefPToken {
    close?: SToken;
    charCode?: number;
    char?: string;
+}
+
+interface CharRefProps extends RawCharRefProps {
+   open: SToken;
 }
 
 class CharRefPToken {
@@ -40,30 +44,30 @@ class CharRefPToken {
 
    public readonly char: string;
 
-   constructor(basePToken: CharRefPToken | MutableCharRefPToken, extras?: MutableCharRefPToken) {
-      this.type = CHARREF_PTOKEN;
-      this.open = extras?.open || basePToken.open;
-      this.openSpace = extras?.openSpace || basePToken.openSpace;
-      this.hexMarker = extras?.hexMarker || basePToken.hexMarker;
-      this.hexMarkerSpace = extras?.hexMarkerSpace || basePToken.hexMarkerSpace;
-      this.digits = extras?.digits || basePToken.digits;
-      this.digitsSpace = extras?.digitsSpace || basePToken.digitsSpace;
-      this.close = extras?.close || basePToken.close;
+   constructor(basePToken: CharRefPToken | CharRefProps, other: RawCharRefProps = {}) {
+      this.open = other.open || basePToken.open;
+      this.openSpace = 'openSpace' in other ? other.openSpace : basePToken.openSpace;
+      this.hexMarker = 'hexMarker' in other ? other.hexMarker : basePToken.hexMarker;
+      this.hexMarkerSpace =
+         'hexMarkerSpace' in other ? other.hexMarkerSpace : basePToken.hexMarkerSpace;
+      this.digits = 'digits' in other ? other.digits : basePToken.digits;
+      this.digitsSpace = 'digitsSpace' in other ? other.digitsSpace : basePToken.digitsSpace;
+      this.close = 'close' in other ? other.close : basePToken.close;
 
       this.charCode = 0;
       this.char = '';
 
-      if (this.digits) {
-         this.charCode = this.hexMarker
-            ? parseInt(this.digits.str, 16)
-            : parseInt(this.digits.str, 10);
+      if (!this.digits) {
+         return;
+      }
 
-         if (this.charCode > 0xffff) {
-            const [high, low] = extractSurrogatePair(this.charCode);
-            this.char = String.fromCharCode(high) + String.fromCharCode(low);
-         } else {
-            this.char = String.fromCharCode(this.charCode);
-         }
+      this.charCode = parseInt(this.digits.str, this.hexMarker ? 16 : 10);
+      this.char = String.fromCharCode(this.charCode);
+
+      if (this.charCode > 0xffff) {
+         const [high, low] = extractSurrogatePair(this.charCode);
+
+         this.char = String.fromCharCode(high) + String.fromCharCode(low);
       }
    }
 }
@@ -89,19 +93,16 @@ function parseCharRef(
    openSToken: SToken,
    deliverPToken: DeliverPToken,
 ): void {
-   const pre: MutableCharRefPToken = { open: openSToken };
+   const pre: CharRefProps = { open: openSToken };
 
-   source.extractToObjectNoParams('space', pre, 'openSpace');
-   source.extract('multi', ['x', 'X'], (hexMarker) => {
-      pre.hexMarker = hexMarker;
-
-      source.extractToObjectNoParams('space', pre, 'hexMarkerSpace');
-      source.extractToObject('digit', hexMarker ? 16 : 10, pre, 'digits');
-      source.extractToObjectNoParams('space', pre, 'digitsSpace');
-
-      source.extract('match', ';', (closeSToken) => {
-         pre.close = closeSToken;
-
+   source.extractToObject('space', pre, 'openSpace');
+   source.extractToObject('multi', ['x', 'X'], pre, 'hexMarker');
+   source.check(() => {
+      source.extractToObject('space', pre, 'hexMarkerSpace');
+      source.extractToObject('digit', pre.hexMarker ? 16 : 10, pre, 'digits');
+      source.extractToObject('space', pre, 'digitsSpace');
+      source.extractToObject('match', ';', pre, 'close');
+      source.check(() => {
          deliverPToken(new CharRefPToken(pre));
       });
    });

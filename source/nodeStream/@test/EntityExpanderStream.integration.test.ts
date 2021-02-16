@@ -5,6 +5,7 @@ import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion,  } from '
 import { defaultExtractors } from 'extractor';
 import {
    ATTLIST_DECLARATION_PTOKEN,
+   CHARREF_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
@@ -17,7 +18,6 @@ import {
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import {
-   CHARREF_PTOKEN,
    DOCTYPE_START_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,

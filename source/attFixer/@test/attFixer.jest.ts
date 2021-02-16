@@ -3,6 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import {
    AttListDeclarationPToken,
+   CharRefPToken,
    ExternalIdP,
    GeneralEntityDeclarationPToken,
    NotationDeclarationPToken,
@@ -29,7 +30,6 @@ import {
    GeneralEntityReferencePToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
-   CharRefPToken,
 } from 'token';
 import { AttributePToken, AttrValue } from '../../token/common/attribute';
 

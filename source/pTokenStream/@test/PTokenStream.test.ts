@@ -18,17 +18,17 @@ import {
    INTERNAL_SUBSET_END_TOKEN
 } from 'token';
 
+import * as peRef from '../../pToken/token/parameterEntityReference';
+import * as charRef from '../../pToken/token/charRef';
 import * as tokenStuff from 'token';
 import * as declaration from '../../token/bridge/declaration';
 import * as instruction from '../../pToken/bridge/instruction';
 import * as section from '../../token/bridge/section';
 import * as space from '../../token/space';
 import * as geRef from '../../token/generalEntityReference';
-import * as peRef from '../../pToken/token/parameterEntityReference';
 import * as elementEnd from '../../token/elementEnd';
 import * as elementStart from '../../token/elementStart';
 import * as comment from '../../token/comment';
-import * as charRef from '../../token/charRef';
 import * as charData from '../../token/charData';
 
 import PTokenStream from '../PTokenStream';

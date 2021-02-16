@@ -6,7 +6,7 @@ import { ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { makeParameterEntityDeclaration } from 'token-test';
 
-import { ElidedEntityDeclarationPToken } from 'token';
+import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
 
 import { ValidateState } from '../../validateState';
 import { elidedEntityDeclarationUpdateState } from '../elidedEntityDeclarationUpdateState';
@@ -23,7 +23,10 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
    });
 
    it('adds a elided token to the state', () => {
-      const elided = new ElidedEntityDeclarationPToken(paramDecl, paramDecl.value as any); // typehack
+      const elided = new ElidedEntityDeclarationPToken(
+         paramDecl,
+         paramDecl.value as EntityValuePToken,
+      ); // typehack
       const nextState = parameterEntityDeclarationUpdateState(paramDecl, state);
 
       const result = elidedEntityDeclarationUpdateState(elided, nextState);
@@ -34,7 +37,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
                entityName: {
                   isInternal: true,
                   token: paramDecl,
-                  replacementText: paramDecl.value as any, // typehack
+                  replacementText: paramDecl.value as EntityValuePToken, // typehack
                },
             },
          }),
@@ -47,7 +50,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
          name: toSToken('entityName'),
          externalId: {},
       });
-      const elided = new ElidedEntityDeclarationPToken(other, paramDecl.value as any); // typehack
+      const elided = new ElidedEntityDeclarationPToken(other, paramDecl.value as EntityValuePToken); // typehack
       const nextState = parameterEntityDeclarationUpdateState(paramDecl, state);
 
       const result = elidedEntityDeclarationUpdateState(elided, nextState);
@@ -58,7 +61,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
                entityName: {
                   isInternal: true,
                   token: paramDecl,
-                  replacementText: paramDecl.value as any, // typehack,
+                  replacementText: paramDecl.value as EntityValuePToken, // typehack,
                },
             },
          }),

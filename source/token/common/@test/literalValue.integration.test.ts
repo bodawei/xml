@@ -1,18 +1,15 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector,  } from 'basic';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
-import { defaultExtractors } from '../../../extractor';
-import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
+import { ConformanceVersion, ErrorCollector,  } from 'basic';
+import { WellFormedError } from 'wellformedness';
+import { defaultExtractors } from 'extractor';
+import { CharRefPToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import { TextXToken,  } from 'xToken';
+import { GeneralEntityReferenceXToken, TextXToken,  } from 'xToken';
 
 import literalValue from '../literalValue';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
-import { CharRefPToken } from '../../charRef';
-import { GeneralEntityReferenceXToken } from 'xToken';
-import { ConformanceVersion } from 'basic';
 
 describe('literalValue (integration)', () => {
    let source: STokenSource;

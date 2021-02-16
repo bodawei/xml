@@ -1,10 +1,11 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { BaseToken } from 'basic';
 import { PToken as PTokenClassic } from 'token';
 
 import { InstructionStart } from './bridge/instruction';
 import { AttListDeclarationPToken } from './token/attListDeclaration';
+import { CharRefPToken } from './token/charRef';
 import { ElementDeclarationPToken } from './token/elementDeclaration';
 import { GeneralEntityDeclarationPToken } from './token/generalEntityDeclaration';
 import { NotationDeclarationPToken } from './token/notationDeclaration';
@@ -22,6 +23,7 @@ export * from './common/contentModel';
 export * from './common/externalId';
 export * from './common/fieldedInstruction';
 export * from './token/attListDeclaration';
+export * from './token/charRef';
 export * from './token/elementDeclaration';
 export * from './token/generalEntityDeclaration';
 export * from './token/notationDeclaration';
@@ -38,6 +40,7 @@ type PToken = PTokenClassic;
 type ParseToken =
    | BaseToken
    | PToken
+   | CharRefPToken
    | AttListDeclarationPToken
    | ElementDeclarationPToken
    | GeneralEntityDeclarationPToken

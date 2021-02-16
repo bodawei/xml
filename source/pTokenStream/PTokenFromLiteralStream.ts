@@ -2,10 +2,9 @@
 
 import { Transform } from 'stream';
 
-import { parseInstruction, TextPToken, parseParameterEntityReference, parseText,} from 'pToken';
+import { parseCharRef, parseInstruction, TextPToken, parseParameterEntityReference, parseText,} from 'pToken';
 import { STokenSource } from 'sToken';
 import {
-   parseCharRef,
    parseGeneralEntityReference,
 } from 'token';
 

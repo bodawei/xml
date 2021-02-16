@@ -2,17 +2,16 @@
 /* eslint-env jasmine */
 
 import { Range, EntityId } from 'basic';
-import { TextPToken } from 'pToken';
+import { CharRefPToken, TextPToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import { CharRefPToken,  } from 'token';
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
 import * as text from '../../pToken/token/text';
 import * as instruction from '../../pToken/bridge/instruction';
 import * as peRef from '../../pToken/token/parameterEntityReference';
-import * as charRef from '../../token/charRef';
+import * as charRef from '../../pToken/token/charRef';
 
 describe('PTokenFromLiteralStream (unit)', () => {
 

@@ -1,6 +1,7 @@
 import { ErrorCollector, ConformanceVersion } from 'basic';
 import { SToken, strOrBlank } from 'sToken';
 import {
+   CHARREF_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
    ParseToken,
@@ -10,7 +11,6 @@ import {
 } from 'pToken';
 import { WellFormedError } from './error/WellFormedError';
 import {
-   CHARREF_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,

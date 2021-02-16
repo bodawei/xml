@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
+import { CharRefPToken } from 'pToken';
 import { STokenArrayBuilder, SToken } from 'sToken';
-import { CharRefPToken } from 'token';
 
 function charRefToSTokens(pToken: CharRefPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

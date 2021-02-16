@@ -1,7 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-// ick
-import { CharRefPToken } from 'token';
+import { CharRefPToken } from 'pToken';
 
 const CHARREF_XTOKEN = 'CHARREF_XTOKEN';
 

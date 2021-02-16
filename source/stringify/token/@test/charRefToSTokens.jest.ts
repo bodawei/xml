@@ -2,8 +2,8 @@
 
 import { describe, expect, it } from '@jest/globals';
 
+import { CharRefPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
-import { CharRefPToken } from 'token';
 
 import { charRefToSTokens } from '../charRefToSTokens';
 

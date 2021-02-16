@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ParameterEntityDeclarationPToken } from 'pToken';
-import { ElidedEntityDeclarationPToken } from 'token';
+import { EntityValuePToken } from 'token';
 import { makeParameterEntityDeclaration } from 'token-test';
 
 import { ValidateState } from '../../validateState';
@@ -26,7 +26,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
             parameterEntities: {
                entityName: {
                   isInternal: true,
-                  replacementText: decl.value as any,
+                  replacementText: decl.value as EntityValuePToken, // typehack
                   token: decl,
                },
             },
@@ -46,7 +46,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
             parameterEntities: {
                entityName: {
                   isInternal: false,
-                  replacementText: decl.value as any,
+                  replacementText: decl.value as EntityValuePToken, // typehack
                   token: decl,
                },
             },
@@ -68,7 +68,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
             parameterEntities: {
                entityName: {
                   isInternal: true,
-                  replacementText: decl.value as any,
+                  replacementText: decl.value as EntityValuePToken, // typehack
                   token: decl,
                },
             },

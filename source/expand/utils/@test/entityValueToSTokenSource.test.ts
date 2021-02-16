@@ -1,9 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { EntityId } from 'basic';
-import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
+import { CharRefPToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { CharRefPToken, ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
+import { ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
 
 import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
 

@@ -3,6 +3,7 @@
 import { EntityId, Range } from 'basic';
 import {
    AttListDeclarationPToken,
+   CharRefPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    NotationDeclarationPToken,
@@ -34,7 +35,6 @@ import {
    ParameterEntityStartPToken,
    SpacePToken,
    CharDataPToken,
-   CharRefPToken,
 } from 'token';
 import { AttrValue } from '../../token/common/attribute';
 

@@ -2,13 +2,14 @@
 
 import { ENTITY_ID, ConformanceVersion } from 'basic';
 import {
+   CharRefPToken,
    ContextType,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { CharRefPToken, EntityValuePToken } from 'token';
+import { EntityValuePToken } from 'token';
 
 import { ExpandParams } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';

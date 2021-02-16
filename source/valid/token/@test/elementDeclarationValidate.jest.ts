@@ -5,6 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
+   CharRefPToken,
    ElementDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
@@ -16,7 +17,7 @@ import { WellFormedError } from 'wellformedness';
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
 import { ValidityError } from '../../error/ValidityError';
 import { DeclarationDetails, ElDeclType, ValidateState } from '../../validateState';
-import { CharRefPToken, ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
+import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 describe('elementDeclarationValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;

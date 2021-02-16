@@ -2,8 +2,8 @@
 
 import { ConformanceVersion, extractSurrogatePair, isChar } from 'basic';
 import { MockErrorCollector } from 'basic-test';
+import { CharRefPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { CharRefPToken } from 'token';
 import { makeCharRef } from 'token-test';
 
 import { WellFormedError } from '../../error/WellFormedError';

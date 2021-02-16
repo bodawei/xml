@@ -61,7 +61,15 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('calls misc.checkCharWellFormed() on the version value', () => {
-         (xmlDeclPToken.fields[0].value as any) = toSToken('\u0001');
+         xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
+            fields: [
+               {
+                  name: toSToken('version'),
+                  equal: toSToken('='),
+                  value: toSToken('\u0001'),
+               },
+            ],
+         });
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
@@ -73,8 +81,15 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('calls misc.checkCharWellFormed() on the encoding value', () => {
-         (xmlDeclPToken.fields[0].name as any) = toSToken('encoding');
-         (xmlDeclPToken.fields[0].value as any) = toSToken('\u0001');
+         xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
+            fields: [
+               {
+                  name: toSToken('encoding'),
+                  equal: toSToken('='),
+                  value: toSToken('\u0001'),
+               },
+            ],
+         });
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
@@ -86,8 +101,15 @@ describe('xmlDeclarationCheck() (unit)', () => {
       });
 
       it('calls misc.checkCharWellFormed() on the standalone value', () => {
-         (xmlDeclPToken.fields[0].name as any) = toSToken('standalone');
-         (xmlDeclPToken.fields[0].value as any) = toSToken('\u0001');
+         xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
+            fields: [
+               {
+                  name: toSToken('standalone'),
+                  equal: toSToken('='),
+                  value: toSToken('\u0001'),
+               },
+            ],
+         });
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 

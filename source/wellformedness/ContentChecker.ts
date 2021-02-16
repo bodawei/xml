@@ -18,7 +18,7 @@ import { WellFormedError } from './error/WellFormedError';
 import { CDATA_PTOKEN } from '../token/cdata';
 import { CHARDATA_PTOKEN } from '../token/charData';
 import { COMMENT_PTOKEN } from '../token/comment';
-import { CHARREF_PTOKEN } from '../token/charRef';
+import { CHARREF_PTOKEN } from '../pToken/token/charRef';
 import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStart';
 import { ELEMENT_END_PTOKEN } from '../token/elementEnd';
 import {

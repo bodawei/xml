@@ -1,10 +1,8 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { defaultExtractors } from 'extractor';
+import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXTDECL_PTOKEN, TEXT_PTOKEN } from 'pToken';
 import { STokenSource } from 'sToken';
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXTDECL_PTOKEN, TEXT_PTOKEN } from 'pToken';
-
-import * as xToken from 'token';
 
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
@@ -41,7 +39,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
          TEXT_PTOKEN,
          TEXT_PTOKEN,
          TEXT_PTOKEN,
-         xToken.CHARREF_PTOKEN,
+         CHARREF_PTOKEN,
          TEXT_PTOKEN,
       ], done);
    });
@@ -51,7 +49,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
          TEXT_PTOKEN,
          PARAMETER_ENTITY_REFERENCE_PTOKEN,
          TEXT_PTOKEN,
-         xToken.CHARREF_PTOKEN,
+         CHARREF_PTOKEN,
          TEXT_PTOKEN,
       ], done);
    });
@@ -62,7 +60,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
          TEXT_PTOKEN,
          PARAMETER_ENTITY_REFERENCE_PTOKEN,
          TEXT_PTOKEN,
-         xToken.CHARREF_PTOKEN,
+         CHARREF_PTOKEN,
          TEXT_PTOKEN,
       ], done);
    });
@@ -72,7 +70,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
          TEXT_PTOKEN,
          PARAMETER_ENTITY_REFERENCE_PTOKEN,
          TEXT_PTOKEN,
-         xToken.CHARREF_PTOKEN,
+         CHARREF_PTOKEN,
          TEXT_PTOKEN,
       ], done);
    });

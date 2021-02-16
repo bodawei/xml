@@ -28,7 +28,7 @@ describe('processingInstructionCheck() (integration)', () => {
       source.addText('blah blah?>');
       source.endText();
 
-      parseProcessingInstruction(source, piPToken as any, (pToken) => {
+      parseProcessingInstruction(source, piPToken, (pToken) => {
          const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
          processingInstructionCheck(pToken, ec, new ConformanceVersion());

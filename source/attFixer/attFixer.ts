@@ -1,14 +1,15 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import {
-   AttListDeclarationPToken,
    ATTLIST_DECLARATION_PTOKEN,
-   ParseToken,
-   TEXT_PTOKEN,
-   TextPToken,
-   NOTATION_DECLARATION_PTOKEN,
+   CHARREF_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   TEXT_PTOKEN,
+   AttListDeclarationPToken,
+   ParseToken,
+   TextPToken,
 } from 'pToken';
 import { strOrBlank, toSToken, SToken } from 'sToken';
 
@@ -18,7 +19,6 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    ElementStartPToken,
    ElementEmptyPToken,
-   CHARREF_PTOKEN,
 } from 'token';
 import { LiteralValuePToken } from '../token/common/literal';
 import { AttributePToken } from '../token/common/attribute';

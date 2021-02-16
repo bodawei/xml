@@ -1,8 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { TextPToken } from 'pToken';
+import { CharRefPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { CharRefPToken, EntityValuePToken } from 'token';
+import { EntityValuePToken } from 'token';
 
 interface NameToEntityValue {
    [entityName: string]: EntityValuePToken;

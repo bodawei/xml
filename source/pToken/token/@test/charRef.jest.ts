@@ -1,5 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
@@ -21,12 +20,48 @@ describe('charRef (unit)', () => {
       });
    });
 
-   describe('parseCharRef()', () => {
-      let callback: jasmine.Spy;
+   describe('cnostruction', () => {
+      it('will override all properties on the source', () => {
+         const source = new CharRefPToken({
+            open: openSToken,
+            openSpace: toSToken(' '),
+            hexMarker: toSToken('x'),
+            hexMarkerSpace: toSToken(' '),
+            digits: toSToken('1f2'),
+            digitsSpace: toSToken(' '),
+            close: toSToken(';'),
+         });
 
-      beforeEach(() => {
-         callback = jasmine.createSpy('callbackSpy');
+         const result = new CharRefPToken(source, {
+            open: undefined,
+            openSpace: undefined,
+            hexMarker: undefined,
+            hexMarkerSpace: undefined,
+            digits: undefined,
+            digitsSpace: undefined,
+            close: undefined,
+         });
+
+         expect(result).toEqualRangeless({
+            open: openSToken,
+            openSpace: undefined,
+            hexMarker: undefined,
+            hexMarkerSpace: undefined,
+            digits: undefined,
+            digitsSpace: undefined,
+            close: undefined,
+            charCode: 0,
+            char: '',
+         });
       });
+   });
+
+   describe('parseCharRef()', () => {
+      let result: CharRefPToken | undefined;
+
+      function getResult(output: CharRefPToken | undefined): void {
+         result = output;
+      }
 
       it('extracts properties of a decimal character reference', () => {
          const mockSource = new MockSTokenSource([
@@ -38,10 +73,10 @@ describe('charRef (unit)', () => {
             [';', 'match', ';'],
          ]);
 
-         parseCharRef(mockSource, openSToken, callback);
+         parseCharRef(mockSource, openSToken, getResult);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(charRefPToken);
+         expect(result).toEqualRangeless(charRefPToken);
       });
 
       it('extracts properties of a hexadecimal character reference', () => {
@@ -54,10 +89,10 @@ describe('charRef (unit)', () => {
             [';', 'match', ';'],
          ]);
 
-         parseCharRef(mockSource, openSToken, callback);
+         parseCharRef(mockSource, openSToken, getResult);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new CharRefPToken({
                open: openSToken,
                hexMarker: toSToken('x'),
@@ -86,10 +121,10 @@ describe('charRef (unit)', () => {
             close: toSToken(';'),
          });
 
-         parseCharRef(mockSource, openSToken, callback);
+         parseCharRef(mockSource, openSToken, getResult);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(charRefPToken);
+         expect(result).toEqualRangeless(charRefPToken);
       });
 
       it('extracts a character in the astral plane', () => {
@@ -111,10 +146,35 @@ describe('charRef (unit)', () => {
             close: toSToken(';'),
          });
 
-         parseCharRef(mockSource, openSToken, callback);
+         parseCharRef(mockSource, openSToken, getResult);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(charRefPToken);
+         expect(result).toEqualRangeless(charRefPToken);
+      });
+
+      it('sets charCode and char even when digits is undefined', () => {
+         const mockSource = new MockSTokenSource([
+            [' ', 'space'],
+            ['x', 'multi', ['x', 'X']],
+            [' ', 'space'],
+            [undefined, 'digit', 16],
+            [' ', 'space'],
+            [';', 'match', ';'],
+         ]);
+
+         parseCharRef(mockSource, openSToken, getResult);
+         mockSource.respondInAsyncTime();
+
+         expect(result).toEqualRangeless(
+            new CharRefPToken({
+               open: openSToken,
+               openSpace: toSToken(' '),
+               hexMarker: toSToken('x'),
+               hexMarkerSpace: toSToken(' '),
+               digitsSpace: toSToken(' '),
+               close: toSToken(';'),
+            }),
+         );
       });
    });
 });

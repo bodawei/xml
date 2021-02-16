@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import {
+   CharRefPToken,
    ExternalIdP,
    GeneralEntityDeclarationPToken,
    ParameterEntityReferencePToken,
@@ -15,7 +16,7 @@ import {
 } from '../GeneralEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToken';
 
-import { CharRefPToken, ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
+import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 describe('GeneralEntityDeclarationXToken()', () => {
    let pToken: GeneralEntityDeclarationPToken;

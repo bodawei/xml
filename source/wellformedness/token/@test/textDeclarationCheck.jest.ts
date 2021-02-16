@@ -58,7 +58,15 @@ describe('textDeclaration (unit)', () => {
    });
 
    it('calls misc.checkCharWellFormed() on the version value', () => {
-      (textDeclPToken.fields[0].value as any) = SToken.fromString('\u0001');
+      textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
+         fields: [
+            {
+               name: SToken.fromString('version'),
+               equal: SToken.fromString('='),
+               value: SToken.fromString('\u0001'),
+            },
+         ],
+      });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
@@ -70,8 +78,15 @@ describe('textDeclaration (unit)', () => {
    });
 
    it('calls misc.checkCharWellFormed() on the encoding value', () => {
-      (textDeclPToken.fields[0].name as any) = SToken.fromString('encoding');
-      (textDeclPToken.fields[0].value as any) = SToken.fromString('\u0001');
+      textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
+         fields: [
+            {
+               name: SToken.fromString('encoding'),
+               equal: SToken.fromString('='),
+               value: SToken.fromString('\u0001'),
+            },
+         ],
+      });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 

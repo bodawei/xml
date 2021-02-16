@@ -157,14 +157,12 @@ describe('xmlDeclaration (unit)', () => {
       });
 
       it('returns an XmlDeclaration', () => {
-         fieldedSpy.mockImplementation(
-            (_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
-               cb({
-                  open: toSToken('testing'),
-                  fields: [],
-               });
-            },
-         );
+         fieldedSpy.mockImplementation((_1, _2, _params, cb: (result?: any) => void) => {
+            cb({
+               open: toSToken('testing'),
+               fields: [],
+            });
+         });
          const mockSource = new MockSTokenSource([]);
 
          parseXmlDeclaration(mockSource, start, callback);

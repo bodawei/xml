@@ -34,7 +34,7 @@ import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityD
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 import { ConformanceVersion } from 'basic';
-import { ElidedEntityDeclarationPToken } from 'token';
+import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
 
 jest.mock('../token/attListDeclarationUpdateState');
 jest.mock('../token/elementDeclarationUpdateState');
@@ -162,7 +162,7 @@ describe('ValidityChecker (unit)', () => {
 
    it('updates the state when passed an elided entity declaration', () => {
       const peDecl = makeParameterEntityDeclaration();
-      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value as any);
+      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value as EntityValuePToken); // typehack
 
       checker.checkPToken(elided, ec);
 

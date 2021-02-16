@@ -8,9 +8,9 @@ import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { TextXToken } from 'xToken';
 
-import * as charRef from '../../charRef';
-import * as generalEntityReference from '../../generalEntityReference';
 import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
+import * as charRef from '../../../pToken/token/charRef';
+import * as generalEntityReference from '../../generalEntityReference';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 
 import misc from '../misc';

@@ -1,12 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { EntityId } from 'basic';
-import { TEXT_PTOKEN } from 'pToken';
+import { CHARREF_PTOKEN, TEXT_PTOKEN } from 'pToken';
 
 import { ExternalIdP } from '../common/externalId';
 
 //ick
-import { CHARREF_PTOKEN } from 'token';
 import { LiteralValuePToken } from '../../token/common/literal';
 
 function valueToString(value: LiteralValuePToken = []): string {

@@ -3,7 +3,6 @@
 import { ErrorCollector, ConformanceVersion } from 'basic';
 
 import { GENERAL_ENTITY_REFERENCE_PTOKEN } from '../token/generalEntityReference'; // WTF?
-import { CHARREF_PTOKEN } from '../token/charRef'; // WTF?
 
 import { charRefCheck } from './token/charRefCheck';
 import { attListDeclarationCheck } from './token/attListDeclarationCheck';
@@ -17,6 +16,7 @@ import { textDeclarationCheck } from './token/textDeclarationCheck';
 import { xmlDeclarationCheck } from './token/xmlDeclarationCheck';
 
 // we have a circular dependency somewhere.
+import { CHARREF_PTOKEN } from '../pToken/token/charRef'; // WTF?
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../pToken/token/parameterEntityReference';
 import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
 import { ELEMENT_DECLARATION_PTOKEN } from '../pToken/token/elementDeclaration';
