@@ -1,12 +1,7 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
 import { ERROR_TYPE, ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
-import {
-   PROCESSING_INSTRUCTION_PTOKEN,
-   XMLDECL_PTOKEN,
-   ParseToken,
-   isXmlDeclStandalone,
-} from 'pToken';
+import { ParseToken, isXmlDeclStandalone } from 'pToken';
 
 import { WellFormedError } from './error/WellFormedError';
 
@@ -15,10 +10,16 @@ import { DOCTYPE_START_PTOKEN } from '../token/docTypeStart';
 import { DOCTYPE_END_PTOKEN } from '../token/docTypeEnd';
 import { COMMENT_PTOKEN } from '../token/comment';
 import { SPACE_PTOKEN } from '../token/space';
-import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStart';
+// import { ELEMENT_EMPTY_PTOKEN, ELEMENT_START_PTOKEN } from '../token/elementStart';
 import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
 import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
+import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
+// import { XMLDECL_PTOKEN } from '../pToken/token/xmlDeclaration';
 import { getFirstSToken } from '../token/getFirstSToken';
+
+const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';
+const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
+const XMLDECL_PTOKEN = 'XMLDECL_PTOKEN';
 
 import checkConditionalStartWellFormed from './token/conditionalStart';
 import {

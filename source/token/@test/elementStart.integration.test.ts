@@ -4,13 +4,12 @@
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from 'extractor';
-import { TextPToken } from 'pToken';
+import {GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { TextXToken } from 'xToken';
 
 import { ElementStartPToken, ElementStartXToken, parseElementStart } from '../elementStart';
-import { GeneralEntityReferencePToken } from '../generalEntityReference';
 
 describe('elementStart (integration)', () => {
    let elementStartPToken: ElementStartPToken;

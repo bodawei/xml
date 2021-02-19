@@ -1,10 +1,10 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
+import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { generalEntityReferenceCheck } from '../../wellformedness/token/generalEntityReferenceCheck';
 
-import { GeneralEntityReferencePToken } from '../generalEntityReference';
 import { EntityValuePToken } from '../EntityValuePToken';
 
 /**********************************************************************\

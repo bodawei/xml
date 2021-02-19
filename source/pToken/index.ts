@@ -8,6 +8,7 @@ import { AttListDeclarationPToken } from './token/attListDeclaration';
 import { CharRefPToken } from './token/charRef';
 import { ElementDeclarationPToken } from './token/elementDeclaration';
 import { GeneralEntityDeclarationPToken } from './token/generalEntityDeclaration';
+import { GeneralEntityReferencePToken } from './token/generalEntityReference';
 import { NotationDeclarationPToken } from './token/notationDeclaration';
 import { ParameterEntityDeclarationPToken } from './token/parameterEntityDeclaration';
 import { ParameterEntityReferencePToken } from './token/parameterEntityReference';
@@ -26,6 +27,7 @@ export * from './token/attListDeclaration';
 export * from './token/charRef';
 export * from './token/elementDeclaration';
 export * from './token/generalEntityDeclaration';
+export * from './token/generalEntityReference';
 export * from './token/notationDeclaration';
 export * from './token/parameterEntityDeclaration';
 export * from './token/parameterEntityReference';
@@ -44,6 +46,7 @@ type ParseToken =
    | AttListDeclarationPToken
    | ElementDeclarationPToken
    | GeneralEntityDeclarationPToken
+   | GeneralEntityReferencePToken
    | NotationDeclarationPToken
    | ParameterEntityDeclarationPToken
    | ParameterEntityReferencePToken

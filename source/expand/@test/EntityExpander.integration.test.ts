@@ -6,6 +6,7 @@ import { defaultExtractors } from 'extractor';
 import {
    ContextType,
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
@@ -17,7 +18,6 @@ import {
    AttributeValuePToken,
    ElementStartPToken,
    EntityValuePToken,
-   GeneralEntityReferencePToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    PToken,

@@ -1,6 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import {
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   GeneralEntityReferencePToken,
    ContextType,
    ParameterEntityReferencePToken,
    externalIdToEntityId,
@@ -8,8 +10,6 @@ import {
 } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
-   GeneralEntityReferencePToken,
    XmlError,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,

@@ -1,5 +1,8 @@
-import { GeneralEntityReferencePToken, GENERAL_ENTITY_REFERENCE_PTOKEN } from 'token';
-import { ParameterEntityReferencePToken } from 'pToken';
+import {
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
+} from 'pToken';
 import { strOrBlank } from 'sToken';
 import { OpaqueEntityLoc } from '../types';
 import { EntityId } from 'basic';

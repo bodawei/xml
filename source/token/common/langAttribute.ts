@@ -1,13 +1,11 @@
 import { pattern as BCP47_REGEX } from 'bcp47-validate';
 import { ConformanceVersion, ErrorCollector } from "basic";
-import { WellFormedError } from '../../wellformedness/error/WellFormedError';
-import { isTextPToken } from "pToken";
+import { GENERAL_ENTITY_REFERENCE_PTOKEN, isTextPToken } from "pToken";
 import { SToken } from "sToken";
-import { isTextXToken } from "xToken";
+import { WellFormedError } from 'wellformedness';
+import { GENERAL_ENTITY_REFERENCE_XTOKEN, isTextXToken } from "xToken";
 
 import { AttributeValuePToken, AttributeValueXToken } from '../common/attribute';
-import { GENERAL_ENTITY_REFERENCE_PTOKEN } from "../generalEntityReference";
-import { GENERAL_ENTITY_REFERENCE_XTOKEN } from 'xToken';
 
 const WFID = WellFormedError.ID;
 const ONE_DOT_ZERO_REV1_REGEX = /^[a-z][a-z](?:-[a-z]+)*$|^[xi](?:-[a-z]+)+$/i;

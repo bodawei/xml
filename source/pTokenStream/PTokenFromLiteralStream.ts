@@ -2,11 +2,8 @@
 
 import { Transform } from 'stream';
 
-import { parseCharRef, parseInstruction, TextPToken, parseParameterEntityReference, parseText,} from 'pToken';
+import { parseCharRef, parseGeneralEntityReference,parseInstruction, TextPToken, parseParameterEntityReference, parseText,} from 'pToken';
 import { STokenSource } from 'sToken';
-import {
-   parseGeneralEntityReference,
-} from 'token';
 
 type Options = {
    peRef?: boolean;

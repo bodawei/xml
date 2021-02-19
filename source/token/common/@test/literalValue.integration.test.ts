@@ -3,13 +3,12 @@
 import { ConformanceVersion, ErrorCollector,  } from 'basic';
 import { WellFormedError } from 'wellformedness';
 import { defaultExtractors } from 'extractor';
-import { CharRefPToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
+import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { GeneralEntityReferenceXToken, TextXToken,  } from 'xToken';
 
 import literalValue from '../literalValue';
-import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 
 describe('literalValue (integration)', () => {
    let source: STokenSource;

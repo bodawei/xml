@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { WellFormedError } from '../../wellformedness/error/WellFormedError';
-import { isTextPToken, CharRefPToken, TextPToken } from 'pToken';
+import { isTextPToken, CharRefPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import { TextXToken } from 'xToken';
 
@@ -14,7 +14,6 @@ import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/genera
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStart';
-import { GeneralEntityReferencePToken } from '../generalEntityReference';
 import { CharRefXToken, ParameterEntityReferenceXToken, GeneralEntityReferenceXToken } from 'xToken';
 
 type ParseOptions = {

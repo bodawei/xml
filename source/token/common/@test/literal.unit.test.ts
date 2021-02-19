@@ -4,10 +4,9 @@
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
-import { TextPToken } from 'pToken';
+import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { GeneralEntityReferencePToken } from 'token';
 import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';

@@ -3,18 +3,14 @@
 import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
-import {
-   ElidedEntityDeclarationPToken,
-   EntityValuePToken,
-   GeneralEntityReferencePToken,
-   XmlError,
-} from 'token';
+import { ElidedEntityDeclarationPToken, EntityValuePToken, XmlError } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';

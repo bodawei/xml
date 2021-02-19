@@ -6,6 +6,7 @@ import {
    CharRefPToken,
    ExternalIdP,
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
    TextPToken,
@@ -25,12 +26,7 @@ import {
 } from 'token-test';
 
 // ick
-import {
-   ElementStartPToken,
-   GeneralEntityReferencePToken,
-   GeneralEntityStartPToken,
-   GeneralEntityEndPToken,
-} from 'token';
+import { ElementStartPToken, GeneralEntityStartPToken, GeneralEntityEndPToken } from 'token';
 import { AttributePToken, AttrValue } from '../../token/common/attribute';
 
 import { isAugmentedAttribute, AttFixer, AugmentedAttributePToken } from '../AttFixer';

@@ -5,6 +5,7 @@ import {
    AttListDeclarationPToken,
    CharRefPToken,
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    NotationDeclarationPToken,
    ParameterEntityReferencePToken,
@@ -24,7 +25,6 @@ import {
    DocTypeEndPToken,
    DocTypeStartPToken,
    GeneralEntityEndPToken,
-   GeneralEntityReferencePToken,
    GeneralEntityStartPToken,
    
    InternalSubsetStartToken,

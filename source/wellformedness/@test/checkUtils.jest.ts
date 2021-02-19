@@ -5,6 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 import {
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
@@ -25,7 +26,6 @@ import {
    ElementEmptyPToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   GeneralEntityReferencePToken,
    ParameterEntityStartPToken,
 } from 'token';
 import { makeParameterExternalEntityDeclaration, makeParameterEntityReference } from 'token-test';

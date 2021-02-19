@@ -24,7 +24,7 @@ import { ELEMENT_END_PTOKEN } from '../token/elementEnd';
 import {
    GeneralEntityReferencePToken,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
-} from '../token/generalEntityReference';
+} from '../pToken/token/generalEntityReference';
 import { GENERAL_ENTITY_START_PTOKEN } from '../token/marker/generalEntityStart';
 import { getFirstSToken } from '../token/getFirstSToken';
 import { GENERAL_ENTITY_END_PTOKEN } from '../token/marker/generalEntityEnd';

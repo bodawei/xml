@@ -2,12 +2,11 @@
 /* eslint-env jasmine */
 
 import { ErrorCollector, ConformanceVersion } from 'basic';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
-import { TextPToken } from 'pToken';
+import { WellFormedError } from 'wellformedness';
+import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import {  TextXToken } from 'xToken';
 
-import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { GeneralEntityEndPToken } from '../../marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from '../../marker/generalEntityStart';
 

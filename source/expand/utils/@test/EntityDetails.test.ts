@@ -3,11 +3,11 @@
 import { toSToken } from 'sToken';
 import {
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { GeneralEntityReferencePToken } from 'token';
 
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';

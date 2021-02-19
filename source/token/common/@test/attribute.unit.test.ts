@@ -3,11 +3,10 @@
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
-import { TextPToken } from 'pToken';
+import { WellFormedError } from 'wellformedness';
+import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { SToken } from 'sToken';
-import { GeneralEntityReferencePToken } from 'token';
 
 import * as langAttribute from '../langAttribute';
 import attribute from '../attribute';

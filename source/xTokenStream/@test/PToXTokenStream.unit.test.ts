@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import {    ParameterEntityReferencePToken,  } from 'pToken';
+import { GeneralEntityReferencePToken, ParameterEntityReferencePToken,  } from 'pToken';
 import { SToken } from 'sToken';
 import {
    declaration,
@@ -10,7 +10,6 @@ import {
    CharDataPToken,
    ElementEndPToken,
    
-   GeneralEntityReferencePToken,
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
    InternalSubsetStartToken,

@@ -6,6 +6,7 @@ import { MockErrorCollector } from 'basic-test';
 import {
    AttListDeclarationPToken,
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextDeclarationPToken,
@@ -16,7 +17,6 @@ import { WellFormedError } from '../error/WellFormedError';
 
 import {
    CommentPToken,
-   GeneralEntityReferencePToken,
    InternalSubsetStartToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,

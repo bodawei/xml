@@ -1,12 +1,10 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { CharRefPToken, TextPToken } from 'pToken';
+import { CharRefPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { externalIdToEntityId } from '../externalIdToEntityId';
 
-// ick
-import { GeneralEntityReferencePToken } from 'token';
+import { externalIdToEntityId } from '../externalIdToEntityId';
 
 describe('externalIdToEntityId', () => {
    it('converts to an EntityId', () => {

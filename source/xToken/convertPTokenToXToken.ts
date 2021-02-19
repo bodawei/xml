@@ -5,6 +5,7 @@ import {
    CHARREF_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
@@ -15,11 +16,7 @@ import {
    ParseToken,
 } from 'pToken';
 
-import {
-   CONDITIONAL_CLOSE_PTOKEN,
-   CONDITIONAL_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
-} from 'token';
+import { CONDITIONAL_CLOSE_PTOKEN, CONDITIONAL_PTOKEN } from 'token';
 
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';

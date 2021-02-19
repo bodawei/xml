@@ -3,8 +3,8 @@
 import { describe, expect, it } from '@jest/globals';
 import { XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
+import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { GeneralEntityReferencePToken } from 'token';
 import { makeGeneralEntityReference } from 'token-test';
 
 import { generalEntityReferenceValidate } from '../generalEntityReferenceValidate';

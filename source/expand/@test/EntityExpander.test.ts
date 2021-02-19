@@ -9,6 +9,7 @@ import {
    AttListDeclarationPToken,
    CharRefPToken,
    ElementDeclarationPToken,
+   GeneralEntityReferencePToken,
    NotationDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
@@ -29,7 +30,6 @@ import {
    DocTypeStartPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   GeneralEntityReferencePToken,
    XmlError,
 } from 'token';
 

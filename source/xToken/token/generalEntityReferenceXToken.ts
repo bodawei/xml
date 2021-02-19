@@ -1,8 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-// ick
-import { GeneralEntityReferencePToken } from '../../token/generalEntityReference';
 
 const GENERAL_ENTITY_REFERENCE_XTOKEN = 'GENERAL_ENTITY_REFERENCE_XTOKEN';
 

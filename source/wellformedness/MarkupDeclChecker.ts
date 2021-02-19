@@ -39,11 +39,15 @@ import { ELEMENT_DECLARATION_PTOKEN } from '../pToken/token/elementDeclaration';
 import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
 import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
 import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
-import {
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
-   TEXT_PTOKEN,
-} from 'pToken';
+// import {
+//    GENERAL_ENTITY_DECLARATION_PTOKEN,
+//    PARAMETER_ENTITY_DECLARATION_PTOKEN,
+//    TEXT_PTOKEN,
+// } from 'pToken';
+
+const TEXT_PTOKEN = 'TEXT_PTOKEN';
+const GENERAL_ENTITY_DECLARATION_PTOKEN = 'GENERAL_ENTITY_DECLARATION_PTOKEN';
+const PARAMETER_ENTITY_DECLARATION_PTOKEN = 'PARAMETER_ENTITY_DECLARATION_PTOKEN';
 
 import {
    CHECKER_DONE,

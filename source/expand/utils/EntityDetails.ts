@@ -4,16 +4,11 @@ import { strOrBlank, toSToken } from 'sToken';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import {
-   EntityValuePToken,
-   ExternalId,
-   GeneralEntityReferencePToken,
-   XmlError,
-   ElidedEntityDeclarationPToken,
-} from 'token';
+import { EntityValuePToken, ExternalId, XmlError, ElidedEntityDeclarationPToken } from 'token';
 
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';

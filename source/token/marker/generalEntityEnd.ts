@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
+import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { EntityValuePToken } from '../EntityValuePToken';
-import { GeneralEntityReferencePToken } from '../generalEntityReference';
 
 /**********************************************************************\
  Defines a simple token that tracks the end of an entity expansion.

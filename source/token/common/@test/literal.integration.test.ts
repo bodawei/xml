@@ -2,15 +2,14 @@
 /* eslint-env jasmine */
 
 import { ErrorCollector, ConformanceVersion } from 'basic';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
-import { defaultExtractors } from '../../../extractor';
+import { WellFormedError } from 'wellformedness';
+import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import { ParameterEntityReferencePToken, TextPToken,  } from 'pToken';
+import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken,  } from 'pToken';
 import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
-import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 
 describe('literal (integration)', () => {
    let confVer: ConformanceVersion;

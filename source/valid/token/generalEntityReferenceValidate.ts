@@ -1,9 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector, XmlWarning } from 'basic';
+import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-
-import { GeneralEntityReferencePToken } from 'token';
 
 import { ValidityError } from '../error/ValidityError';
 import { ValidateState } from '../validateState';

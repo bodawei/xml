@@ -8,6 +8,7 @@ import {
    CHARREF_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    TEXT_PTOKEN,
    TEXTDECL_PTOKEN,
@@ -36,7 +37,6 @@ import {
    CharDataPToken,
    CONDITIONAL_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { gatherStream } from './helpers';

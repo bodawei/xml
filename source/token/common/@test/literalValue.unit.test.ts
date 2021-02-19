@@ -3,15 +3,14 @@
 
 import { ConformanceVersion, Range, EntityId } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { TextPToken } from 'pToken';
+import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { TextXToken } from 'xToken';
 
 import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
 import * as charRef from '../../../pToken/token/charRef';
-import * as generalEntityReference from '../../generalEntityReference';
-import { GeneralEntityReferencePToken } from '../../generalEntityReference';
+import * as generalEntityReference from '../../../pToken/token/generalEntityReference';
 
 import misc from '../misc';
 import literalValue, { LiteralValuePToken } from '../literalValue';

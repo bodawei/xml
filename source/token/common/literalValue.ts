@@ -1,14 +1,13 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { CharRefPToken, parseCharRef, CHARREF_PTOKEN } from 'pToken';
+import { CharRefPToken, parseCharRef, CHARREF_PTOKEN, GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { generalEntityReferenceToSTokens } from 'stringify';
 import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken, TextXToken } from 'xToken';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken, TextPToken, isTextPToken, parseParameterEntityReference } from 'pToken';
 import misc from './misc';
-import { GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from '../generalEntityReference';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { PARAMETER_ENTITY_END_PTOKEN, ParameterEntityEndPToken, ParameterEntityEndXToken } from '../marker/parameterEntityEnd';

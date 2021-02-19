@@ -5,6 +5,7 @@ import { MockErrorCollector } from 'basic-test';
 import {
    NOTATION_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    NotationDeclarationPToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
@@ -19,7 +20,6 @@ import {
    ElementEmptyPToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   GeneralEntityReferencePToken,
    CharDataPToken,
 } from 'token';
 

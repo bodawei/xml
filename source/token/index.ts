@@ -20,7 +20,6 @@ import { CommentPToken } from './comment';
 import { ConditionalPToken } from './conditional';
 import { ConditionalClosePToken } from './conditionalClose';
 import { ElidedEntityDeclarationPToken } from './ElidedEntityDeclarationPToken';
-import { GeneralEntityReferencePToken } from './generalEntityReference';
 import { GeneralEntityStartPToken, GENERAL_ENTITY_START_PTOKEN } from './marker/generalEntityStart';
 import { GeneralEntityEndPToken, GENERAL_ENTITY_END_PTOKEN } from './marker/generalEntityEnd';
 import { ParameterEntityStartPToken, PARAMETER_ENTITY_START_PTOKEN } from './marker/parameterEntityStart';
@@ -52,7 +51,6 @@ export * from './docTypeEnd';
 export * from './docTypeStart';
 export * from './elementEnd';
 export * from './elementStart';
-export * from './generalEntityReference';
 export * from './space';
 
 import { EXTERNAL_ID, ExternalId, parseExternalId } from './common/externalId';
@@ -82,7 +80,6 @@ type PToken =
    | ExternalSubsetStartToken
    | ExternalSubsetEndToken
    | GeneralEntityEndPToken
-   | GeneralEntityReferencePToken
    | GeneralEntityStartPToken
    | InternalSubsetStartToken
    | InternalSubsetEndToken

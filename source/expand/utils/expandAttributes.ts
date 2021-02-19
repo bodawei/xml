@@ -1,14 +1,13 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { doAsyncLoop } from 'basic';
+import { GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank, STokenSource } from 'sToken';
 import {
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
    AttributeValuePToken,
    ElidedEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
-   GeneralEntityReferencePToken,
    XmlError,
 } from 'token';
 

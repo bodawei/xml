@@ -25,7 +25,7 @@ import * as declaration from '../../token/bridge/declaration';
 import * as instruction from '../../pToken/bridge/instruction';
 import * as section from '../../token/bridge/section';
 import * as space from '../../token/space';
-import * as geRef from '../../token/generalEntityReference';
+import * as geRef from '../../pToken/token/generalEntityReference';
 import * as elementEnd from '../../token/elementEnd';
 import * as elementStart from '../../token/elementStart';
 import * as comment from '../../token/comment';

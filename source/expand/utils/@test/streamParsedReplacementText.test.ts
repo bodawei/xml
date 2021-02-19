@@ -3,6 +3,7 @@
 import { ENTITY_ID, ConformanceVersion, EntityId } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
@@ -11,7 +12,6 @@ import {
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
 import {
-   GeneralEntityReferencePToken,
    XmlError,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
