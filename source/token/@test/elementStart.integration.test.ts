@@ -106,51 +106,6 @@ describe('elementStart (integration)', () => {
 
    });
 
-   describe('checkWellFormed()', () => {
-
-      it('reports an error when name starts with "xml" (check misc.check...Recommendation)', (done) => {
-         source.addText('xmlElementName>');
-         source.endText();
-
-         parseElementStart(source, elementStartPToken.open, (pToken) => {
-            const ec = new ErrorCollector(pToken!.open, WellFormedError);
-
-            pToken!.checkWellFormed(ec, confVer);
-
-            expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
-            done();
-         });
-      });
-
-      it('reports an error when name starts with "$" (check misc.checkName)', (done) => {
-         source.addText('$elementName>');
-         source.endText();
-
-         parseElementStart(source, elementStartPToken.open, (pToken) => {
-            const ec = new ErrorCollector(pToken!.open, WellFormedError);
-
-            pToken!.checkWellFormed(ec, confVer);
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
-            done();
-         });
-      });
-
-      it('reports an error when an attribute is malformed (check attribute.checkWellFormed())', (done) => {
-         source.addText('foo blah "value">');
-
-         parseElementStart(source, elementStartPToken.open, (pToken) => {
-            const ec = new ErrorCollector(pToken!.open, WellFormedError);
-
-            pToken!.checkWellFormed(ec, confVer);
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
-            done();
-         });
-      });
-
-   });
-
    describe('pTokenToXToken()', () => {
 
       it('generates a full token with attributes', (done) => {

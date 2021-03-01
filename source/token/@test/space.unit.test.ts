@@ -68,12 +68,6 @@ describe('space (unit)', () => {
          confVer = new ConformanceVersion();
       });
 
-      it('reports no errors when checking a good PToken', () => {
-         spacePToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(mockErrorCollector.errors.length).toEqual(0);
-      });
-
    });
 
    describe('pTokenToXToken()', () => {

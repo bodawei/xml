@@ -3,7 +3,6 @@
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { generalEntityReferenceCheck } from '../../wellformedness/token/generalEntityReferenceCheck';
 
 import { EntityValuePToken } from '../EntityValuePToken';
 
@@ -20,10 +19,6 @@ class GeneralEntityStartPToken {
 
    constructor(geReferencePToken: GeneralEntityReferencePToken, preparsedValue?: EntityValuePToken | void) {
       this.referencePToken = geReferencePToken;
-   }
-
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
-      generalEntityReferenceCheck(this.referencePToken, ec, confVer);
    }
 
    toXToken() {

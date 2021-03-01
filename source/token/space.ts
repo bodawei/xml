@@ -1,6 +1,5 @@
-/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion } from 'basic';
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 const SPACE_PTOKEN = 'SPACE_PTOKEN';
@@ -28,10 +27,6 @@ class SpacePToken {
 
    constructor(props: { text: SToken }) {
       this.text = props.text;
-   }
-
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
-      checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -64,15 +59,6 @@ function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|vo
 
       deliverPToken(new SpacePToken({ text: sToken }));
    });
-}
-
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-// eslint-disable-next-line no-unused-vars
-function checkWellFormed(pToken: SpacePToken, ec: ErrorCollector, confVer: ConformanceVersion) {
-   ec.setPos(pToken.text);
 }
 
 /**********************************************************************\

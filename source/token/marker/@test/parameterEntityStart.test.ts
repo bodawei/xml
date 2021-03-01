@@ -6,20 +6,16 @@ import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken } from 'sToken';
-import * as checks from '../../../wellformedness/token/parameterEntityReferenceCheck';
 
 import { ParameterEntityStartPToken, ParameterEntityStartXToken } from '../parameterEntityStart';
 
 describe('ParameterEntityStartPToken (unit)', () => {
    let confVer: ConformanceVersion;
    let mockErrorCollector: MockErrorCollector;
-   let checkSpy: jasmine.Spy;
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-
-      checkSpy = spyOn(checks, 'parameterEntityReferenceCheck');
    });
 
    it('is constructed with the specified name', () => {
@@ -28,14 +24,6 @@ describe('ParameterEntityStartPToken (unit)', () => {
       expect(token.referencePToken).toEqual(new ParameterEntityReferencePToken({ open: SToken.fromString('%') }));
    });
 
-   it('calls checkWellFormed() in the related parameterEntityReferencePToken', () => {
-      const reference = new ParameterEntityReferencePToken({ open: SToken.fromString('%') });
-      const token = new ParameterEntityStartPToken(reference);
-
-      token.checkWellFormed(mockErrorCollector, confVer);
-
-      expect(checkSpy).toHaveBeenCalledWith(reference, mockErrorCollector, confVer);
-   });
 
    it('will create an xToken', () => {
       const token = new ParameterEntityStartPToken(new ParameterEntityReferencePToken({
