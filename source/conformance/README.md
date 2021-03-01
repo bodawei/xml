@@ -78,7 +78,7 @@ These have errors:
 
 * The ibm texts ibm-invalid-P89-ibm89n06.xml through ibm-invalid-P89-ibm89n12.xml all are invalid because they have not declared the element used in the documents.  However, what they claim to be testing is that particular characters are legal to use in 1.0/5.  That is they ARE invalid tests, but it does not seem to be what they are looking to test, and I suspect it would be easy to overlook if they were failing for other reasons.
 
-* Several tests contain lone high and low surrogte half. I haven't read the standards, but the wikipedia entries make it sound like a lone surrogate half is illegal but found in practice. More importanly, the node.js utf8 decoder used when converting a utf8 string into an internal representation converts lone surrogate halves into 0xFFFD ("replacement character"). This makes it impossible to run these tests in a straightforward way (read in the characters and run the test).  However, JavaScript (as noted in the reference below) is one of those things that allows lone surrogate halves.  Our solution to this is when we construct the test code, we do some ugly gyrations to ultimately insert the surrogate halves back in to the text atthe right place.  See also [ths Wikipedia page about UTF-8](https://en.wikipedia.org/wiki/UTF-8#Invalid_sequences_and_error_handling), [the wikipedia page about UTF-16](https://en.wikipedia.org/wiki/UTF-16#U+D800_to_U+DFFF), and [the JavaScript standard](https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type). Affected tests are:
+* Several tests contain lone high and low surrogate half. I haven't read the standards, but the wikipedia entries make it sound like a lone surrogate half is illegal but found in practice. More importanly, the node.js utf8 decoder used when converting a utf8 string into an internal representation converts lone surrogate halves into 0xFFFD ("replacement character"). This makes it impossible to run these tests in a straightforward way (read in the characters and run the test).  However, JavaScript (as noted in the reference below) is one of those things that allows lone surrogate halves.  Our solution to this is when we construct the test code, we do some ugly gyrations to ultimately insert the surrogate halves back in to the text atthe right place.  See also [ths Wikipedia page about UTF-8](https://en.wikipedia.org/wiki/UTF-8#Invalid_sequences_and_error_handling), [the wikipedia page about UTF-16](https://en.wikipedia.org/wiki/UTF-16#U+D800_to_U+DFFF), and [the JavaScript standard](https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type). Affected tests are:
    * 'x-ibm-1-0.5-not-wf-P04-ibm04n21.xml', // Tests an element with an illegal NameStartChar: #0xD800
    * 'x-ibm-1-0.5-not-wf-P04-ibm04n22.xml', // Tests an element with an illegal NameStartChar: #0xD801
    * 'x-ibm-1-0.5-not-wf-P04-ibm04n23.xml', // Tests an element with an illegal NameStartChar: #0xDAFF
@@ -88,6 +88,11 @@ These have errors:
    * 'x-ibm-1-0.5-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
    * 'x-ibm-1-0.5-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
 
+* These tests are in the "invalid" category.  But, they appear to be failing beause of wellformed errors. You'll note that both of these tests, which apply to revision 5 of the XML 1.0 standard, and their descriptin say these names should be valid.
+      * 'invalid-sa-140', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
+      * 'invalid-sa-141', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
+* These are the same as the previous, but these are for 1.1
+      * 'rmt-015' // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
 
 
 

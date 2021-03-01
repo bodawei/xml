@@ -244,7 +244,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-e2e-15g': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain character reference to whitespace
    'rmt-e2e-15h': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain entity reference if replacement text is character reference to whitespace
    'rmt-e2e-20': 'error', // no error - Tokens, after normalization, must be separated by space, not other whitespace characters
-   'rmt-015': 'error', // no error - Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-015': 'UNDECLARED_ELEMENT', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-017': 'error', // no error - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-018': 'error', // no error - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-030': 'error', // no error, but format ouput is bad Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
@@ -529,7 +529,10 @@ const expectedNotWfCodes: IdToErrorMap = {
       message: 'XMLDECL_PTOKEN',
    },
    'not-wf-sa-152': 'XMLDECL_ENCODING_INVALID_ORDER', // great - XML declarations must include the "version=..." string.
-   'not-wf-sa-153': 'CONTENT_INVALID_TOKEN', // ok - Text declarations may not begin internal parsed entities; they may only appear at the beginning of external parsed (parameter or general) entities.
+   'not-wf-sa-153': {
+      id: 'CONTENT_INVALID_TOKEN', // ok - Text declarations may not begin internal parsed entities; they may only appear at the beginning of external parsed (parameter or general) entities.
+      message: 'TEXTDECL_PTOKEN',
+   },
    'not-wf-sa-154': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?XML ...?>' is neither an XML declaration nor a legal processing instruction target name.
    'not-wf-sa-155': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is neither an XML declaration nor a legal processing instruction target name.
    'not-wf-sa-156': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name.
@@ -948,7 +951,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-not-wf-P01-ibm01n01.xml': 'DOC_END_EARLY',
    'ibm-not-wf-P01-ibm01n02.xml': {
       id: 'TOKEN_INVALID_CONTEXT',
-      message: /ELEMENT_START_PTOKEN/,
+      message: /XMLDECL_PTOKEN/,
    },
    'ibm-not-wf-P01-ibm01n03.xml': 'TOKEN_INVALID_CONTEXT',
    'ibm-not-wf-P02-ibm02n01.xml': 'CHARDATA_INVALID_CHAR',
@@ -1522,7 +1525,10 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
 
    // §4.2.0 GEDecl
-   'ibm-not-wf-P71-ibm70n01.xml': 'error', // Tests
+   'ibm-not-wf-P71-ibm70n01.xml': {
+      id: 'MARKUPDECL_INVALID_TOKEN', // Tests putting an element reference in the DTS
+      message: /ELEMENT_EMPTY_PTOKEN/,
+   },
    'ibm-not-wf-P71-ibm71n01.xml': {
       id: 'MARKUPDECL_INVALID_TOKEN', // ok - better to notice a bad entity declaration
       message: /UNKNOWNDECL/,
@@ -2035,9 +2041,9 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-1-1-not-wf-P02-ibm02n61.xml': 'CHARDATA_INVALID_CHAR',
    'ibm-1-1-not-wf-P02-ibm02n62.xml': 'CHARDATA_INVALID_CHAR',
    'ibm-1-1-not-wf-P02-ibm02n63.xml': 'CHARDATA_INVALID_CHAR',
-   'ibm-1-1-not-wf-P02-ibm02n64.xml': 'error', // This test contains embeded control characters present in an external entity.
-   'ibm-1-1-not-wf-P02-ibm02n65.xml': 'error', // This test contains embeded control characters present in an external entity.
-   'ibm-1-1-not-wf-P02-ibm02n66.xml': 'error', // This test contains embeded control characters present in an external entity.
+   'ibm-1-1-not-wf-P02-ibm02n64.xml': 'CHARDATA_INVALID_CHAR', // This test contains embeded control characters present in an external entity.
+   'ibm-1-1-not-wf-P02-ibm02n65.xml': 'CHARDATA_INVALID_CHAR', // This test contains embeded control characters present in an external entity.
+   'ibm-1-1-not-wf-P02-ibm02n66.xml': 'CHARDATA_INVALID_CHAR', // This test contains embeded control characters present in an external entity.
    'ibm-1-1-not-wf-P02-ibm02n67.xml': 'error', // This test contains embeded character 0xD800. (Invalid UTF8 sequence)
    'ibm-1-1-not-wf-P02-ibm02n68.xml': 'error', // This test contains embeded character 0xFFFE.
    'ibm-1-1-not-wf-P02-ibm02n69.xml': 'error', // This test contains embeded character 0xFFFF.
@@ -2116,7 +2122,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-1-1-not-wf-P77-ibm77n09.xml': 'CHARDATA_INVALID_CHAR', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x8D.
    'ibm-1-1-not-wf-P77-ibm77n10.xml': 'CHARDATA_INVALID_CHAR', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x84.
    'ibm-1-1-not-wf-P77-ibm77n11.xml': 'CHARDATA_INVALID_CHAR', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x88.
-   'ibm-1-1-not-wf-P77-ibm77n12.xml': 'error', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x8E.
+   'ibm-1-1-not-wf-P77-ibm77n12.xml': 'CHARDATA_INVALID_CHAR', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x8E.
    'ibm-1-1-not-wf-P77-ibm77n13.xml': 'error', // The VersionNum of the primary document entity is 1.0 and that of the external 		dtd is 1.0. The external dtd contains an external entity whose VersionNum is 1.1.
    'ibm-1-1-not-wf-P77-ibm77n14.xml': 'ELEMENTDECL_NAME_INVALID', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.0. The external dtd contains an element declaration with an invalid 		XML 1.1 and 1.0 name.
    'ibm-1-1-not-wf-P77-ibm77n15.xml': 'CHARDATA_INVALID_CHAR', // The VersionNum of the primary document entity is 1.1 and testDecl of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		1.1 containing a valid XML1.0 but an invalid XML 1.1 character #x7F.
@@ -2134,7 +2140,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'rmt-003': 'error', // External general entity has later version number
    'rmt-004': 'error', // External general entity has later version number (no decl means 1.0)
    'rmt-005': 'error', // Indirect external general entity has later version number
-   'rmt-011': 'error', // Contains a C1 control, legal in XML 1.0, illegal in XML 1.1
+   'rmt-011': 'CHARDATA_INVALID_CHAR', // Contains a C1 control, legal in XML 1.0, illegal in XML 1.1
    'rmt-013': 'CHARDATA_INVALID_CHAR', // Contains a DEL, legal in XML 1.0, illegal in XML 1.1
    'rmt-014': 'ELEMENT_NAME_INVALID', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-016': 'ELEMENT_NAME_INVALID', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
@@ -2143,8 +2149,8 @@ const expectedNotWfCodes: IdToErrorMap = {
    'rmt-021': 'ELEMENT_NAME_INVALID', // Has the first character after the last legal namechar in XML 1.1, illegal in both XML 1.0 and 1.1
    'rmt-038': 'CHARDATA_INVALID_CHAR', // Contains a C0 control character (form-feed), illegal in both XML 1.0 and 1.1
    'rmt-039': 'CHARDATA_INVALID_CHAR', // Contains a C0 control character (form-feed), illegal in both XML 1.0 and 1.1
-   'rmt-041': 'error', // Contains a C1 control character (partial line up), legal in XML 1.0 but not 1.1
-   'rmt-042': 'error', // Contains a character reference to a C0 control character (form-feed), legal in XML 1.1 but not 1.0
+   'rmt-041': 'CHARDATA_INVALID_CHAR', // Contains a C1 control character (partial line up), legal in XML 1.0 but not 1.1
+   'rmt-042': 'CHARREF_INVALID_CHAR', // Contains a character reference to a C0 control character (form-feed), legal in XML 1.1 but not 1.0
    'rmt-ns10-009': 'error', // Namespace equality test: plain repetition
    'rmt-ns10-010': 'error', // Namespace equality test: use of character reference
    'rmt-ns10-011': 'error', // Namespace equality test: use of entity reference
