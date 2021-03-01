@@ -2,7 +2,7 @@
 
 import { Readable } from 'stream';
 
-import { CONFORMANCE_VERSION, ConformanceVersion, XmlVersion, XmlRevision, EntityId } from 'basic';
+import { ConformanceVersion, EntityId } from 'basic';
 import { ParseToken,   parseInstruction,    parseParameterEntityReference,      parseGeneralEntityReference,   TextPToken,    parseCharRef, } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
@@ -44,6 +44,7 @@ interface PTokenOptions {
 }
 
 const VERSION_REGEXP = /version=("([^"]*)"|'([^']*)')/i;
+const ALL_QUOTES_REGEXP = /['"]/g;
 const WHITESPACE_REGEXP = /[\n\t ]+/g;
 
 class PTokenStream extends Readable {
@@ -329,7 +330,7 @@ class PTokenStream extends Readable {
             const match = VERSION_REGEXP.exec(processedString);
 
             if (match) {
-               const versionNumber = match[2];
+               const versionNumber = match[1].replace(ALL_QUOTES_REGEXP, '');
 
                this.confVer = new ConformanceVersion(versionNumber === '1.1' ? 1.1 : 1);
                this._sTokenSource.setConfVer(this.confVer);

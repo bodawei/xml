@@ -85,6 +85,27 @@ describe('PTokenStream (unit)', () => {
          });
       });
 
+
+      it('delivers a default version of 1.0/5 when that value is in single quotes', (done) => {
+         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+            context: ContextType.DOCUMENT,
+         });
+         pTokenStream.addText("<?xml version='1.0'?>");
+         pTokenStream.endText();
+
+         gatherStreamResults<ParseToken>(pTokenStream, (results) => {
+            const result = findToken(results, CONFORMANCE_VERSION);
+
+            expect(result).toEqual(
+               jasmine.objectContaining({
+               type: CONFORMANCE_VERSION,
+               version: 1,
+               revision: 5,
+            }));
+            done();
+         });
+      });
+
       it('delivers a default version of 1.1/2 if nothing specified and XML Declaration is 1.1', (done) => {
          pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
          pTokenStream.addText('<?xml version="1.1"?>');

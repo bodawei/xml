@@ -7,7 +7,30 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      'ibm-1-1-not-wf-P77-ibm77n01.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains the invalid XML1.1 but valid XML 1.0 character #x7F.
+      'ibm-1-1-not-wf-P77-ibm77n02.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a comment with the invalid XML1.1 but valid XML 1.0 character #x80.
+      'ibm-1-1-not-wf-P77-ibm77n03.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a PI with the invalid XML1.1 but valid XML 1.0 character #x9F.
+      'ibm-1-1-not-wf-P77-ibm77n04.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity the contains invalid XML1.1 but valid XML 1.0 character #x89.
+      'ibm-1-1-not-wf-P77-ibm77n05.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x94.
+      'ibm-1-1-not-wf-P77-ibm77n06.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9F.
+      'ibm-1-1-not-wf-P77-ibm77n07.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x7F.
+      'ibm-1-1-not-wf-P77-ibm77n08.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9B.
+      'ibm-1-1-not-wf-P77-ibm77n09.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x8D.
+      'ibm-1-1-not-wf-P77-ibm77n10.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x84.
+      'ibm-1-1-not-wf-P77-ibm77n11.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x88.
+      'ibm-1-1-not-wf-P77-ibm77n14.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.0. The external dtd contains an element declaration with an invalid 		XML 1.1 and 1.0 name.
+      'ibm-1-1-not-wf-P77-ibm77n15.xml', // The VersionNum of the primary document entity is 1.1 and testDecl of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		1.1 containing a valid XML1.0 but an invalid XML 1.1 character #x7F.
+      'ibm-1-1-not-wf-P77-ibm77n19.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x94.
+      'ibm-1-1-not-wf-P77-ibm77n20.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.1. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x8F.
+      'ibm-1-1-not-wf-P77-ibm77n21.xml', // The VersionNum of the primary document entity is 1.1 and the texlDecl of the 		external dtd is absent. The external dtd contains a reference to an external 		parameter entity whose VersionNum is absent from the textDecl and it contains 		an invalid XML 1.1 character #x8F.
+
+      // 'ibm-1-1-not-wf-P77-ibm77n12.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x8E.
+      // 'ibm-1-1-not-wf-P77-ibm77n13.xml', // The VersionNum of the primary document entity is 1.0 and that of the external 		dtd is 1.0. The external dtd contains an external entity whose VersionNum is 1.1.
+      // 'ibm-1-1-not-wf-P77-ibm77n16.xml', // The VersionNum of the primary document entity is 1.0 and VersioNum of the external 		entity is absent. The replacement text of the entity contains an element followed 		by the valid XML 1.1 of line character NEL #x85 in its empty elem tag.
+      // 'ibm-1-1-not-wf-P77-ibm77n17.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 enf of line character NEL #x85.
+      // 'ibm-1-1-not-wf-P77-ibm77n18.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 of line character Unicode line separator #x2028.
+   ],
    excludedIds: [
       // WE are either not checking chardata correctly, and/or our error messages are wonked out
       'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
@@ -153,27 +176,11 @@ const testFilters: FilterData = {
       'ibm-1-1-not-wf-P02-ibm02n65.xml', // This test contains embeded control characters present in an external entity.
       'ibm-1-1-not-wf-P02-ibm02n66.xml', // This test contains embeded control characters present in an external entity.
 
-      'ibm-1-1-not-wf-P77-ibm77n01.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains the invalid XML1.1 but valid XML 1.0 character #x7F.
-      'ibm-1-1-not-wf-P77-ibm77n02.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a comment with the invalid XML1.1 but valid XML 1.0 character #x80.
-      'ibm-1-1-not-wf-P77-ibm77n03.xml', // The VersionNum of the document entity is 1.1 and that of the external dtd 1.0. The external dtd contains a PI with the invalid XML1.1 but valid XML 1.0 character #x9F.
-      'ibm-1-1-not-wf-P77-ibm77n04.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity the contains invalid XML1.1 but valid XML 1.0 character #x89.
-      'ibm-1-1-not-wf-P77-ibm77n05.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x94.
-      'ibm-1-1-not-wf-P77-ibm77n06.xml', // The VersionNum of the document entity is 1.1 and that of the external entity 1.0. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9F.
-      'ibm-1-1-not-wf-P77-ibm77n07.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x7F.
-      'ibm-1-1-not-wf-P77-ibm77n08.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x9B.
-      'ibm-1-1-not-wf-P77-ibm77n09.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML1.1 but valid XML 1.0 character #x8D.
-      'ibm-1-1-not-wf-P77-ibm77n10.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a VersionNum in the textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x84.
-      'ibm-1-1-not-wf-P77-ibm77n11.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x88.
       'ibm-1-1-not-wf-P77-ibm77n12.xml', // The VersionNum of the document entity is 1.1 and the external dtd does not contain a textDecl. The external entity contains the invalid XML 1.1 but valid XML 1.0 character #x8E.
       'ibm-1-1-not-wf-P77-ibm77n13.xml', // The VersionNum of the primary document entity is 1.0 and that of the external 		dtd is 1.0. The external dtd contains an external entity whose VersionNum is 1.1.
-      'ibm-1-1-not-wf-P77-ibm77n14.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.0. The external dtd contains an element declaration with an invalid 		XML 1.1 and 1.0 name.
-      'ibm-1-1-not-wf-P77-ibm77n15.xml', // The VersionNum of the primary document entity is 1.1 and testDecl of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		1.1 containing a valid XML1.0 but an invalid XML 1.1 character #x7F.
       'ibm-1-1-not-wf-P77-ibm77n16.xml', // The VersionNum of the primary document entity is 1.0 and VersioNum of the external 		entity is absent. The replacement text of the entity contains an element followed 		by the valid XML 1.1 of line character NEL #x85 in its empty elem tag.
       'ibm-1-1-not-wf-P77-ibm77n17.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 enf of line character NEL #x85.
       'ibm-1-1-not-wf-P77-ibm77n18.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 of line character Unicode line separator #x2028.
-      'ibm-1-1-not-wf-P77-ibm77n19.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is absent. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x94.
-      'ibm-1-1-not-wf-P77-ibm77n20.xml', // The VersionNum of the primary document entity is 1.1 and that of the external 		dtd is 1.1. The external dtd contains an external entity whose VersionNum is 		absent and it contains a valid XML 1.0 but an invalid XML 1.1 character #x8F.
-      'ibm-1-1-not-wf-P77-ibm77n21.xml', // The VersionNum of the primary document entity is 1.1 and the texlDecl of the 		external dtd is absent. The external dtd contains a reference to an external 		parameter entity whose VersionNum is absent from the textDecl and it contains 		an invalid XML 1.1 character #x8F.
 
       'rmt-e2e-38', // XML 1.0 document refers to 1.1 entity
       'rmt-e2e-61', // (From John Cowan) An encoding declaration in ASCII specifying an encoding that is not compatible with ASCII (so the document is not in its declared encoding). It should generate a fatal error.
