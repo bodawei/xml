@@ -3,7 +3,7 @@ import { ConditionalPToken } from 'token';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import checkConditionalStartWellFormed from '../conditionalStart';
+import { conditionalStartCheck } from '../conditionalStartCheck';
 
 describe('checkWellFormed()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -20,7 +20,7 @@ describe('checkWellFormed()', () => {
    });
 
    it('reports no errors if no pToken is provided', () => {
-      checkConditionalStartWellFormed(undefined, mockErrorCollector);
+      conditionalStartCheck(undefined, mockErrorCollector);
 
       expect(mockErrorCollector.errors).toEqual([]);
    });
@@ -30,7 +30,7 @@ describe('checkWellFormed()', () => {
          sectionType: toSToken('bogus'),
       });
 
-      checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector);
+      conditionalStartCheck(conditionalPToken, mockErrorCollector);
 
       expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CONDITIONAL_UNKNOWN,
@@ -45,7 +45,7 @@ describe('checkWellFormed()', () => {
          sectionType: toSToken('ignore'),
       });
 
-      checkConditionalStartWellFormed(conditionalPToken, mockErrorCollector);
+      conditionalStartCheck(conditionalPToken, mockErrorCollector);
 
       expect(mockErrorCollector).toReportWFError({
          id: WellFormedError.ID.CONDITIONAL_INVALID_CASE,

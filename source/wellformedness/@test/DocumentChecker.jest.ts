@@ -56,9 +56,9 @@ import {
 import { DocumentChecker } from '../DocumentChecker';
 import { CHECKER_DONE, CheckState, MarkupChecker, ContentChecker } from '../checkUtils';
 import { checkMap } from '../checkMap';
-import checkConditionalStartWellFormed from '../token/conditionalStart';
+import { conditionalStartCheck } from '../token/conditionalStartCheck';
 
-jest.mock('../token/conditionalStart');
+jest.mock('../token/conditionalStartCheck');
 
 describe('DocumentChecker (unit)', () => {
    let checker: DocumentChecker;
@@ -223,7 +223,7 @@ describe('DocumentChecker (unit)', () => {
 
          checker.check(conditional, ec);
 
-         expect(checkConditionalStartWellFormed).toHaveBeenCalledWith(conditional, ec);
+         expect(conditionalStartCheck).toHaveBeenCalledWith(conditional, ec);
       });
 
       describe('dtd subchecker', () => {

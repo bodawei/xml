@@ -5,10 +5,7 @@ import { ConditionalPToken } from 'token';
 
 const WFEID = WellFormedError.ID;
 
-function checkConditionalStartWellFormed(
-   pToken: ConditionalPToken | undefined,
-   ec: ErrorCollector,
-): void {
+function conditionalStartCheck(pToken: ConditionalPToken | undefined, ec: ErrorCollector): void {
    if (!pToken) {
       return;
    }
@@ -33,4 +30,4 @@ function checkConditionalStartWellFormed(
    ec.check(!pToken.bracket, WFEID.CONDITIONAL_NO_SECOND_BRACKET);
 }
 
-export default checkConditionalStartWellFormed;
+export { conditionalStartCheck };

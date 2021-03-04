@@ -21,7 +21,7 @@ const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';
 const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
 const XMLDECL_PTOKEN = 'XMLDECL_PTOKEN';
 
-import checkConditionalStartWellFormed from './token/conditionalStart';
+import { conditionalStartCheck } from './token/conditionalStartCheck';
 import {
    ContentChecker,
    MarkupChecker,
@@ -148,7 +148,7 @@ class DocumentChecker {
          pToken.checkWellFormed(specialErrorCollector, this.checkState.confVer);
          errorCollector.appendFrom(specialErrorCollector);
       } else if (pToken.type === CONDITIONAL_PTOKEN) {
-         checkConditionalStartWellFormed(pToken, errorCollector);
+         conditionalStartCheck(pToken, errorCollector);
       } else if (mapped) {
          mapped(pToken, errorCollector, this.checkState.confVer);
       } else if ('checkWellFormed' in pToken) {

@@ -61,23 +61,4 @@ describe('comment (integration)', () => {
 
    });
 
-   describe('checkWellFormed()', () => {
-
-      it('reports on invalid characters in the comment', (done) => {
-         const source = new STokenSource(defaultExtractors);
-         source.addText('x\u0000y-->');
-         source.endText();
-
-         parseComment(source, commentPToken.open, (parsing) => {
-            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
-
-            parsing.checkWellFormed(ec, confVer);
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-            done();
-         });
-      });
-
-   });
-
 });
