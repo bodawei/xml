@@ -5,6 +5,7 @@ import { ErrorCollector, ConformanceVersion } from 'basic';
 import { charRefCheck } from './token/charRefCheck';
 import { attListDeclarationCheck } from './token/attListDeclarationCheck';
 import { elementDeclarationCheck } from './token/elementDeclarationCheck';
+import { elementEndCheck } from './token/elementEndCheck';
 import { elementStartCheck } from './token/elementStartCheck';
 import { notationDeclarationCheck } from './token/notationDeclarationCheck';
 import { parameterEntityReferenceCheck } from './token/parameterEntityReferenceCheck';
@@ -32,6 +33,7 @@ import { generalEntityStartCheck } from './marker/generalEntityStartCheck';
 import { parameterEntityStartCheck } from './marker/parameterEntityStartCheck';
 
 const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';
+const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
 const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
 const GENERAL_ENTITY_START_PTOKEN = 'GENERAL_ENTITY_START_PTOKEN';
 const GENERAL_ENTITY_END_PTOKEN = 'GENERAL_ENTITY_END_PTOKEN';
@@ -56,6 +58,7 @@ const checkMap: CheckMap = {
    [CHARREF_PTOKEN]: charRefCheck,
    [ELEMENT_DECLARATION_PTOKEN]: elementDeclarationCheck,
    [ELEMENT_EMPTY_PTOKEN]: elementStartCheck,
+   [ELEMENT_END_PTOKEN]: elementEndCheck,
    [ELEMENT_START_PTOKEN]: elementStartCheck,
    [GENERAL_ENTITY_DECLARATION_PTOKEN]: entityDeclarationCheck,
    [GENERAL_ENTITY_REFERENCE_PTOKEN]: generalEntityReferenceCheck,

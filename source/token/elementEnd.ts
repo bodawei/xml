@@ -27,10 +27,6 @@ class ElementEndPToken {
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
-      return checkWellFormed(this, ec, confVer);
-   }
-
    toXToken() {
       return pTokenToXToken(this);
    }
@@ -80,27 +76,6 @@ function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (res
       pToken.close = sToken;
       deliverPToken(new ElementEndPToken(pToken));
    });
-}
-
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
-
-   ec.setPos(pToken.name);
-   ec.check(!pToken.name, WFEID.ELEMENT_NO_NAME);
-   misc.checkName(pToken.name, ec, confVer, WFEID.ELEMENT_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(pToken.name, ec, confVer, 'ELEMENT',
-      WARN.ELEMENT_NAME_XMLCOLON_RESERVED,
-      WARN.ELEMENT_NAME_XML_RESERVED);
-
-   ec.setPos(pToken.nameSpace);
-
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.ELEMENT_NO_CLOSE);
 }
 
 /**********************************************************************\
