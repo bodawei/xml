@@ -188,21 +188,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectNoErrorsOrWarnings(validator, done);
          });
 
-         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', (done) => {
-            const startToken = new ElementStartXToken('one', [{
-               name: 'notPresent',
-               value: []
-            }]);
-
-            validator.write(attListDecl);
-            validator.write(startToken);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-               ['one', 'notPresent']);
-            expectStream(validator, expected, done);
-         });
-
          it('allows for the start token to have no attributes', (done) => {
             const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ANY);
             const startToken = new ElementStartXToken('one', []);
@@ -225,21 +210,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.end();
 
             expectNoErrorsOrWarnings(validator, done);
-         });
-
-         it('allows for an empty pToken', (done) => {
-            const startToken = new ElementStartXToken('one', [{
-               name: 'notPresent',
-               value: []
-            }]);
-
-            validator.write(attListDecl);
-            validator.write(startToken);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-               ['one', 'notPresent']);
-            expectStream(validator, expected, done);
          });
 
          it('reports a warning if an empty element tag is used for an element not declared to be empty', (done) => {
@@ -1255,21 +1225,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                value: [],
                defaultType: undefined,
             }]);
-         });
-
-         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', (done) => {
-            const startToken = new ElementEmptyXToken('one', [{
-               name: 'notPresent',
-               value: []
-            }]);
-
-            validator.write(attlist);
-            validator.write(startToken);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-               ['one', 'notPresent']);
-            expectStream(validator, expected, done);
          });
 
          it('reports a warning if the ELEMENT declaration indicates that this element does not need to be EMPTY', (done) => {

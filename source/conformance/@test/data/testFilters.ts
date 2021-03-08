@@ -18,10 +18,6 @@ const testFilters: FilterData = {
       'x-rmt5-016', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
       'x-rmt5-019', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
 
-      // easy: valid: Not reporting attributes that are not declared?
-      'hst-bh-005', // xmlns:xml is an attribute as far as validation is concerned and must be declared
-      'hst-bh-006', // xmlns:foo is an attribute as far as validation is concerned and must be declared
-
       // hangs
       'not-wf-not-sa-007', // "A<!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
 

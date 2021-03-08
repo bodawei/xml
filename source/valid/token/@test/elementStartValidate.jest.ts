@@ -223,6 +223,36 @@ describe('elementStartValidate (unit)', () => {
    });
 
    describe('attributes', () => {
+      it('reports an error when an attribute has not been declared (§3.1.0)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {},
+            },
+         });
+         elementStart = new ElementStartPToken({
+            open: toSToken('</'),
+            name: toSToken('elementName'),
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  openQuote: toSToken('"'),
+                  value: [],
+                  defaulted: true,
+               },
+            ],
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+            params: ['elementName', 'att1'],
+            position: toSToken('att1'),
+            lastPosition: undefined,
+         });
+      });
+
       it('reports an error when a NMTOKEN value is empty (§3.3.1)', () => {
          state = new ValidateState({
             attributeDefs: {
@@ -404,29 +434,6 @@ describe('elementStartValidate (unit)', () => {
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
-   });
-
-   it('reports no error when an attribute has what is theoretically a validation error but there is no attribute definition', () => {
-      state = new ValidateState({
-         elementDeclarations: state.elementDeclarations,
-         attributeDefs: {},
-         isStandalone: true,
-      });
-      elementStart = new ElementStartPToken({
-         open: toSToken('</'),
-         name: toSToken('elementName'),
-         attributes: [
-            {
-               name: toSToken('att1'),
-               value: [],
-               defaulted: true,
-            },
-         ],
-      });
-
-      elementStartValidate(elementStart, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
    });
 
    it('reports an error if an attribute changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {

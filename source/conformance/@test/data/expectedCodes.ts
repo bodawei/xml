@@ -288,8 +288,8 @@ const expectedInvalidCodes: IdToErrorMap = {
    'x-rmt5-014': 'error', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
    'x-rmt5-016': 'error', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
    'x-rmt5-019': 'error', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-   'hst-bh-005': 'error', // xmlns:xml is an attribute as far as validation is concerned and must be declared
-   'hst-bh-006': 'error', // xmlns:foo is an attribute as far as validation is concerned and must be declared
+   'hst-bh-005': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:xml is an attribute as far as validation is concerned and must be declared
+   'hst-bh-006': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:foo is an attribute as far as validation is concerned and must be declared
 };
 
 const expectedNotWfCodes: IdToErrorMap = {

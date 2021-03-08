@@ -1178,8 +1178,7 @@ class CheckXTokenValidStream extends Transform {
             attributeNames.push(attrName); // for use further below.
 
             if (!attrDef) {
-               this.pushValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ elStart.name, attrName ], pTokenOpen);
+               // do nothing
             } else if (attrDef.type === 'ID') {
                // §3.3.1: Validity constraint: ID
                //    Values of type ID must match the Name production.  ...

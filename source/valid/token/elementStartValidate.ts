@@ -24,6 +24,9 @@ function checkAttributes(
       const details = state.attributeDefs[elName]?.[attName];
 
       if (!details) {
+         // §3.1.0: Validity constraint: Attribute Value Type
+         //    The attribute must have been declared; ...
+         ec.report(VID.ELEMENTSTART_UNDECLARED_ATTRIBUTE, [elName, attName], attr.name);
          continue;
       }
 
