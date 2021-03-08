@@ -996,21 +996,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                }]);
             });
 
-            it('it calls util.isNmToken() with the entity meta data (whitebox)', (done) => {
-               spyOn(chars, 'isNmToken');
-
-               validator.write(new ConformanceVersion(1.1, 2));
-               validator.write(elDecl);
-               validator.write(attListDecl);
-               validator.write(startToken);
-               validator.end();
-
-               gatherStreamResults<any>(validator, () => {
-                  expect(basic.isNmToken).toHaveBeenCalledWith('goodName', 1.1, 2);
-                  done();
-               });
-            });
-
             it('reports no error when an the attribute is valid', (done) => {
                validator.write(elDecl);
                validator.write(attListDecl);
@@ -1019,49 +1004,6 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                expectNoErrorsOrWarnings(validator, done);
             });
-
-            it('reports an error if a the attribute value is not an Nmtoken', (done) => {
-               startToken = new ElementStartXToken('testElement', [{
-                  name: 'nmTokenAttr',
-                  value: [
-                     new TextXToken('$badName')
-                  ]
-               }]);
-
-               validator.write(elDecl);
-               validator.write(attListDecl);
-               validator.write(startToken);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
-                  ['$badName', 'testElement', 'nmTokenAttr']);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports an error if an NMTOKENS attribute has values that are not all Nmtokens', (done) => {
-               attListDecl = new AttListDeclarationXToken('testElement', [{
-                  name: 'nmTokenAttr',
-                  type: AttDefinitionType.NMTOKENS,
-                  value: [],
-                  defaultType: AttDefaultType.REQUIRED,
-               }]);
-               startToken = new ElementStartXToken('testElement', [{
-                  name: 'nmTokenAttr',
-                  value: [
-                     new TextXToken('goodName $badName         $anotherBadName')
-                  ]
-               }]);
-
-               validator.write(elDecl);
-               validator.write(attListDecl);
-               validator.write(startToken);
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
-                  ['$badName, $anotherBadName', 'testElement', 'nmTokenAttr']);
-               expectStream(validator, expected, done);
-            });
-
          });
 
          describe('NOTATION attribute', () => {

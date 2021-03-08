@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { isAugmentedAttribute } from 'attFixer';
-import { ErrorCollector } from 'basic';
+import { ErrorCollector, isNmToken } from 'basic';
 import { pTokenArrayToString } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
@@ -10,6 +10,40 @@ import { ValidityError } from '../error/ValidityError';
 import { ElDeclType, ValidateState } from '../validateState';
 
 const VID = ValidityError.ID;
+
+function nmtokenCheck(
+   elName: string,
+   attName: string,
+   attType: string,
+   attValue: string,
+   ec: ErrorCollector,
+   state: ValidateState,
+): void {
+   let names: Array<string> = [];
+   const badNames: Array<string> = [];
+   let code: string;
+
+   if (attType === 'NMTOKEN') {
+      names.push(attValue);
+      code = ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN;
+   } else {
+      names = attValue.split(/ +/);
+      code = ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
+   }
+
+   // §3.3.1: Validity Constraint: Name Token
+   //    Values of type NMTOKEN must match the Nmtoken production;
+   //    values of type NMTOKENS must match Nmtokens.
+   for (let index = 0; index < names.length; index++) {
+      if (!isNmToken(names[index], state.confVer.version, state.confVer.revision)) {
+         badNames.push(names[index]);
+      }
+   }
+
+   if (badNames.length > 0) {
+      ec.report(code, [badNames.join(', '), elName, attName]);
+   }
+}
 
 function checkAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
@@ -67,19 +101,12 @@ function checkAttributes(
 
       ec.setPos(attr.openQuote);
 
-      // §3.3.1 Validity Constraint: Name Token
-      //    Values of type NMTOKEN must match the Nmtoken production;
-      //    values of type **NMTOKENS** must match Nmtokens.
-      ec.check(
-         type === 'NMTOKENS' && attrValue.trim() === '',
-         VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
-         [attrValue, elName, attName],
-      );
-      ec.check(
-         type === 'NMTOKEN' && attrValue.trim() === '',
-         VID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
-         [attrValue, elName, attName],
-      );
+      switch (type) {
+         case 'NMTOKEN':
+         case 'NMTOKENS':
+            nmtokenCheck(elName, attName, type, attrValue, ec, state);
+            break;
+      }
    }
 }
 

@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { ConformanceVersion } from 'basic';
 import { AttDefinitionP, ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { EntityValuePToken } from 'token';
 import { CmGraph } from './contentModal/cmGraphTypes';
@@ -80,6 +81,7 @@ interface ValidateStateProps {
 
    inExternalSubset?: boolean;
    isStandalone?: boolean;
+   confVer?: ConformanceVersion;
 }
 
 interface AttributeDefs {
@@ -118,6 +120,8 @@ class ValidateState {
 
    readonly isStandalone: boolean;
 
+   confVer: ConformanceVersion;
+
    constructor(otherState?: ValidateStateProps) {
       this.attributeDefs = otherState?.attributeDefs || {};
       this.elementDeclarations = otherState?.elementDeclarations || {};
@@ -133,6 +137,7 @@ class ValidateState {
       };
       this.isStandalone = otherState?.isStandalone ?? false;
       this.inExternalSubset = otherState?.inExternalSubset ?? false;
+      this.confVer = otherState?.confVer ?? new ConformanceVersion(1, 5);
    }
 }
 

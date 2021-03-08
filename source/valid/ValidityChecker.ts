@@ -59,6 +59,7 @@ class ValidityChecker {
             if (!this.seenVersion) {
                this.version = token;
                this.seenVersion = true;
+               this.state.confVer = token;
             }
             break;
          case ATTLIST_DECLARATION_PTOKEN:

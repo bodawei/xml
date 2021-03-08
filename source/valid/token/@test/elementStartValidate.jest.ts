@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
-import { ElementDeclarationPToken } from 'pToken';
+import { ElementDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { elementStartValidate } from '../elementStartValidate';
@@ -326,6 +326,50 @@ describe('elementStartValidate (unit)', () => {
          expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
             params: ['', 'elementName', 'att1'],
+            position: toSToken('"'),
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports an error when a NMTOKENS value is not a name token (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {
+                  att1: {
+                     def: {
+                        name: toSToken('att1'),
+                        type: toSToken('NMTOKENS'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+         elementStart = new ElementStartPToken({
+            open: toSToken('</'),
+            name: toSToken('elementName'),
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  openQuote: toSToken('"'),
+                  value: [
+                     new TextPToken(toSToken('fooo$$bar')),
+                     new TextPToken(toSToken(' ')),
+                     new TextPToken(toSToken('good')),
+                     new TextPToken(toSToken(' foo\nbar')),
+                  ],
+                  defaulted: true,
+               },
+            ],
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            params: ['fooo$$bar, foo\nbar', 'elementName', 'att1'],
             position: toSToken('"'),
             lastPosition: undefined,
          });

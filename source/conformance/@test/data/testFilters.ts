@@ -9,7 +9,18 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
-      // There are a bunch of tests that seem to be about message formatting. Good to do when you need a break.
+      // 672
+      // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
+      // Doc must mention this aspect of what %foo; in a markup declaration can carry
+      // This changes setupConditional()
+      // - Minmally, we need a resumeParseConditionalStart() which pulls out the first word and possibly [ and then
+      //    - defers to parseBody()
+      // - But a related problem is taht we assume we can read in the whle PE value into memory, which isn't strictly true
+      //    - so we need to investigate a steaming support here.
+      'invalid-not-sa-022', // Good error, but does not format right
+
+      // 673 -hangs
+      'not-wf-not-sa-007', // "A<!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
 
       // Easy: We are probably swallowing these text declarations before we do a check on them.
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
@@ -17,9 +28,6 @@ const testFilters: FilterData = {
       // Looks like the characters are still getting mangled?
       'x-rmt5-016', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
       'x-rmt5-019', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-
-      // hangs
-      'not-wf-not-sa-007', // "A<!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
 
       // CharRefs that are too big
       'not-wf-sa-170', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
@@ -90,6 +98,7 @@ const testFilters: FilterData = {
       'rmt-003', // External general entity has later version number
       'rmt-004', // External general entity has later version number (no decl means 1.0)
       'rmt-005', // Indirect external general entity has later version number
+      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       //
       // ////////////
@@ -99,14 +108,9 @@ const testFilters: FilterData = {
       // ////////////
       //
 
-      'invalid-not-sa-022', // Good error, but does not format right
+      // DOC: Interestingly we get the output in invalid-not-sa-022 but not in this one.  What does that tell us about the tests.
+      // It does tell you this considers this one is not wellformed.
       'invalid--006', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-      'inv-required01', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
-      'inv-required02', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
-
-      // While this does find the right error, ir reports several others that are not right
-      'attr03', // Tests the "Notation Attributes" VC for the NOTATION attribute type, first clause: value must be one of the ones that's declared.
-      'attr04', // Tests the "Notation Attributes" VC for the NOTATION attribute type, second clause: the names in the declaration must all be declared.
 
       'o-p16fail1', // This is sorta working.  Might be nice to give a better message than TOKEN_INVALID_CONTEXT / XMLDECL_PTOKEN
       'o-p69pass1', // misidentifying a recursive call
@@ -116,10 +120,6 @@ const testFilters: FilterData = {
       'rmt-e2e-20', // no error - Tokens, after normalization, must be separated by space, not other whitespace characters
       'rmt-017', // no error - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
       'rmt-018', // no error - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
-      'rmt-030', // no error, but format ouput is bad Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-032', // no error, but format ouput is bad  Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-036', // no error, but format ouput is bad  Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
       'rmt-048', // Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
       'rmt-046', // message not very clear 'CHILDREN_XTRA_CONTENT', // good - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
       'rmt-052', // message not very clear 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.

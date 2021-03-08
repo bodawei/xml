@@ -1294,24 +1294,7 @@ class CheckXTokenValidStream extends Transform {
                   this.pushValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pTokenOpen);
                }
             } else if (attrDef.type === 'NMTOKEN' || attrDef.type === 'NMTOKENS') {
-               const names = attrDef.type === 'NMTOKEN' ? [ attrText ] : attrText.split(/ +/).map(name => name.trim()).filter(name => name !== '');
-               const badNames = [];
-
-               // §3.3.1: Validity Constraint: Name Token
-               //    Values of type NMTOKEN must match the Nmtoken production;
-               //    values of type NMTOKENS must match Nmtokens.
-               for (let index = 0; index < names.length; index++) {
-                  if (!isNmToken(names[index], this.confVer.version, this.confVer.revision)) {
-                     badNames.push(names[index]);
-                  }
-               }
-
-               if (badNames.length > 0) {
-                  const code = attrDef.type === 'NMTOKEN' ?
-                     ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN :
-                     ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
-                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pTokenOpen);
-               }
+               // obsolete
             } else if (attrDef.type === 'NOTATION' || attrDef.type === 'ENUMERATION') {
                const declaredNames = attrDef.enumeration || [];
 

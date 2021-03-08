@@ -64,14 +64,14 @@ const expectedInvalidCodes: IdToErrorMap = {
    optional24: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a tenth construction of that model).
    optional25: 'CHILDREN_XTRA_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing text content where one or more elements are required.
    'inv-required00': 'ELEMENTSTART_NO_REQUIRED', // Tests the Required Attribute VC.
-   'inv-required01': 'error', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
-   'inv-required02': 'error', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
+   'inv-required01': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
+   'inv-required02': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
 
    root: 'MISMATCH_ROOT_ELEMENT_TYPE', // Tests the Root Element Type VC
    attr01: 'ELEMENTSTART_ENTITY_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITY attribute type.
    attr02: 'ELEMENTSTART_ENTITIES_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITIES attribute type.
-   attr03: 'error', // Tests the "Notation Attributes" VC for the NOTATION attribute type, first clause: value must be one of the ones that's declared.
-   attr04: 'error', // Tests the "Notation Attributes" VC for the NOTATION attribute type, second clause: the names in the declaration must all be declared.
+   attr03: 'ELEMENTSTART_NOTATION_NOT_DECLARED', // ok - Tests the "Notation Attributes" VC for the NOTATION attribute type, first clause: value must be one of the ones that's declared.
+   attr04: 'ATTLISTDECL_BAD_NOTATION', // ok - Tests the "Notation Attributes" VC for the NOTATION attribute type, second clause: the names in the declaration must all be declared.
    attr05: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great - Tests the "Name Token" VC for the NMTOKEN attribute type.
    attr06: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great Tests the "Name Token" VC for the NMTOKENS attribute type.
    attr07: 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great Tests the "Enumeration" VC by providing a value which wasn't one of the choices.
@@ -247,9 +247,9 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-015': 'UNDECLARED_ELEMENT', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-017': 'error', // no error - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-018': 'error', // no error - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-030': 'error', // no error, but format ouput is bad Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-032': 'error', // no error, but format ouput is bad  Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-036': 'error', // no error, but format ouput is bad  Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-030': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-032': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-036': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
    'rmt-037': 'error', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
    'rmt-048': 'error', // Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-046': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // good - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
