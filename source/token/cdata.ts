@@ -1,15 +1,11 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
-import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 
 import { SectionStart } from './bridge/section';
-import misc from './common/misc';
 
 const CDATA_PTOKEN = 'CDATA_PTOKEN';
 const CDATA_XTOKEN = 'CDATA_XTOKEN';
-const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken: CdataPToken) => void;
 
@@ -42,10 +38,6 @@ class CdataPToken {
    constructor(param: CdataPToken | SectionStart) {
       Object.assign(this, param);
       this.open = param.open;
-   }
-
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion): void {
-      checkWellFormed(this, ec, confVer);
    }
 
    toXToken(): CdataXToken {
@@ -83,43 +75,6 @@ function parseCdata(source: STokenSource, sectionStart: SectionStart, deliverPTo
       props.close = sToken;
       deliverPToken(new CdataPToken(props));
    });
-}
-
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, confVer: ConformanceVersion): void {
-   const typeText = strOrBlank(pToken.sectionType);
-
-   ec.setPos(pToken.open);
-
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.CDATA_XTRA_SPACE_AFTER_OPEN, [ typeText ]);
-
-   ec.setPos(pToken.sectionType);
-
-   if (pToken.sectionType) {
-      const upperType = typeText.toLocaleUpperCase();
-
-      ec.check(upperType !== 'CDATA', WFEID.CDATA_UNKNOWN, [ typeText ]);
-      ec.check(typeText !== upperType, WFEID.CDATA_INVALID_CASE, [ upperType, typeText ]);
-   } else {
-      ec.report(WFEID.CDATA_NO_TYPE);
-   }
-
-   ec.setPos(pToken.sectionTypeSpace);
-
-   ec.check(pToken.sectionTypeSpace, WFEID.CDATA_XTRA_SPACE_AFTER_TYPE, [ typeText ]);
-
-   ec.setPos(pToken.bracket);
-   ec.check(!pToken.bracket, WFEID.CDATA_NO_SECOND_BRACKET, [ typeText ]);
-
-   ec.setPos(pToken.text);
-   misc.checkCharWellFormed(pToken.text, ec, confVer);
-
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.CDATA_NO_CLOSE);
 }
 
 /**********************************************************************\

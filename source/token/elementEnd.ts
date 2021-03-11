@@ -1,13 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
-import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 
-import misc from './common/misc';
-
-const WFEID = WellFormedError.ID;
-const WARN = XmlWarning.ID;
 const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
 const ELEMENT_END_XTOKEN = 'ELEMENT_END_XTOKEN';
 

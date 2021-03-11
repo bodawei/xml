@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from 'extractor';
 import {GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { STokenSource } from 'sToken';

@@ -2,13 +2,9 @@
 
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from'basic-test';
-import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
-import misc from '../common/misc';
 import { SectionStart } from '../bridge/section';
 import { parseCdata, CdataXToken, CdataPToken } from '../cdata';
 
@@ -65,97 +61,6 @@ describe('cdata (unit)', () => {
          expect(callback).toContainPTokenProps({
             text: undefined,
             close: undefined,
-         });
-      });
-
-   });
-
-   describe('pToken.checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-      let confVer: ConformanceVersion;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-         confVer = new ConformanceVersion();
-         spyOn(misc, 'checkCharWellFormed');
-      });
-
-      it('checks the text is well formed', () => {
-         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(cDataPToken.text, mockErrorCollector, confVer);
-      });
-
-      it('reports an error if there is no section type provided', () => {
-         delete (cDataPToken as any).sectionType;
-
-         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.CDATA_NO_TYPE,
-            params: undefined,
-            position: undefined,
-            lastPosition: cDataPToken.open,
-         });
-      });
-
-      it('reports an error if the type is not capitalized', () => {
-         (cDataPToken as any).sectionType.str = 'cdata';
-
-         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.CDATA_INVALID_CASE,
-            params: [ 'CDATA', 'cdata' ],
-            position: cDataPToken.sectionType,
-         });
-      });
-
-      it('reports an error if there is a no bracket after the type', () => {
-         delete (cDataPToken as any).bracket;
-
-         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.CDATA_NO_SECOND_BRACKET,
-            params: [ 'CDATA' ],
-            lastPosition: cDataPToken.sectionType,
-         });
-      });
-
-      it('reports an error if there is a space after the <![', () => {
-         (cDataPToken as any).openSpace = SToken.fromString(' ');
-
-         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_OPEN,
-            params: [ 'CDATA' ],
-            position: cDataPToken.openSpace,
-         });
-      });
-
-      it('reports an error if there is a space after the section type', () => {
-         (cDataPToken as any).sectionTypeSpace = SToken.fromString(' ');
-
-         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_TYPE,
-            params: [ 'CDATA' ],
-            position: cDataPToken.sectionTypeSpace,
-         });
-      });
-
-      it('reports an error if there is no close', () => {
-         delete (cDataPToken as any).close;
-
-         cDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.CDATA_NO_CLOSE,
-            params: undefined,
-            lastPosition: cDataPToken.text,
          });
       });
 

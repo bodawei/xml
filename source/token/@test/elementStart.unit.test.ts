@@ -5,7 +5,6 @@
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from'basic-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 
 import attribute from '../common/attribute';
 import misc from '../common/misc';

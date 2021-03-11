@@ -1,13 +1,9 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, Offset } from 'basic';
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
-import {  WellFormedError } from '../wellformedness/error/WellFormedError';
-import misc from './common/misc';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';
 const COMMENT_XTOKEN = 'COMMENT_XTOKEN';
-const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken: CommentPToken) => void;
 
@@ -46,10 +42,6 @@ class CommentPToken {
       });
 
       this.open = param.open;
-   }
-
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
-      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -111,44 +103,6 @@ function extractCommentContent(source: STokenSource, pToken: { open: SToken; [ke
          });
       });
    });
-}
-
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
-   ec.setPos(pToken.open);
-
-   if (!pToken.text || pToken.text.length === 0) {
-      ec.setPos(undefined);
-   } else for (let index = 0; index < pToken.text.length; index++) {
-      const textSToken = pToken.text[index];
-      const lastCharIsHyphen = textSToken.str[textSToken.str.length - 1] === '-';
-      const isLastElement = index === pToken.text.length - 1;
-      const isDoubleHyphenPiece = textSToken.str === '--';
-
-      ec.setPos(textSToken);
-      misc.checkCharWellFormed(textSToken, ec, confVer);
-
-      if (isDoubleHyphenPiece) {
-         ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);
-      } else if (lastCharIsHyphen && isLastElement) {
-         const range = textSToken.lastRange;
-         let offset;
-
-         if (range) {
-            const originsl = range.getEndOffset();
-            // Adjust to the location of the hyphen
-            offset = new Offset(originsl.entityId, originsl.index - 1, originsl.row, originsl.column - 1);
-         }
-
-         ec.report(WFEID.COMMENT_ENDS_WITH_HYPHEN, undefined, offset);
-      }
-   }
-
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.COMMENT_NO_CLOSE);
 }
 
 /**********************************************************************\
