@@ -54,6 +54,16 @@ These are valid, but the condition they say they are checking for is not entirel
 * Same for ibm-1-1-valid-P77-ibm77v05.xml concerning 0x01FF
 * ibm-1-1-valid-P77-ibm77v07.xml which concerns 0xD8
 * ibm-1-1-valid-P77-ibm77v10.xml which again concerns 0xF6
+* hst-bh-001 says it is testing a decimal charref, but is testing a hex
+* hst-bh-002 says it is testing a hex charref, but is testing a decimal
+* hst-bh-003 says it is testing a decimal charref, but is testing a hex
+* hst-bh-004 says it is testing a hex charref, but is testing a decimal
+
+### Marked as inalid, but actually not wellformed
+* rmt-017 - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   * This is a test of a 1.1 document. Even by the description this sounds like it is actually a test of validity that should pass. Howeveer, the element with this "kratimata" character is not declared.
+* rmt-018 - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
+   * This is a test of a 1.1 document. Even by the description this sounds like it is actually a test of validity that should pass. The character is 0xEFFFF (0xf3 af bf bf). However, this test fails because the element is not declared.
 
 These are "wrong":
 
@@ -94,5 +104,9 @@ These have errors:
 * These are the same as the previous, but these are for 1.1
       * 'rmt-015' // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
 
+These two tests have genuine validity problem, but they also have other validity problems which probably mask the one being asked about
+
+* rmt-052 - the content model only allows elements, but there is PCDATA in the value
+* rmt-053 - the content model only allows elements, but there is PCDATA in the value
 
 

@@ -236,23 +236,23 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-e2e-9b': 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // great - An attribute default must be syntactically correct even if unused
    'rmt-e3e-13': 'GEREF_UNDEFINED', // good - Even internal parameter entity references are enough to make undeclared entities into mere validity errors rather than well-formedness errors.
 
-   'rmt-e2e-14': 'error', // Crashing bug - Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
+   'rmt-e2e-14': 'error', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
    'rmt-e2e-15a': 'CONTENT_IN_EMPTY_ELEMENT', // OK (but twice) Empty content can't contain an entity reference
    'rmt-e2e-15b': 'CONTENT_IN_EMPTY_ELEMENT', // meh - Empty content can't contain a comment
    'rmt-e2e-15c': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain a PI
    'rmt-e2e-15d': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain whitespace
    'rmt-e2e-15g': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain character reference to whitespace
    'rmt-e2e-15h': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain entity reference if replacement text is character reference to whitespace
-   'rmt-e2e-20': 'error', // no error - Tokens, after normalization, must be separated by space, not other whitespace characters
+   'rmt-e2e-20': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // Tokens, after normalization, must be separated by space, not other whitespace characters
    'rmt-015': 'UNDECLARED_ELEMENT', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-017': 'error', // no error - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-018': 'error', // no error - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-017': 'UNDECLARED_ELEMENT', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-018': 'UNDECLARED_ELEMENT', // ok - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-030': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-032': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-036': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
    'rmt-037': 'error', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-   'rmt-048': 'error', // Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-046': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // good - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-048': 'CHILDREN_XTRA_CONTENT', // meh - Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-046': 'CHILDREN_XTRA_CONTENT', // meh - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-052': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
    'rmt-053': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
@@ -775,7 +775,11 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p15fail2': 'COMMENT_DOUBLE_HYPHEN', // one comment per comment (contrasted with SGML)
    'o-p15fail3': 'COMMENT_DOUBLE_HYPHEN', // can't include 2 or more adjacent '-'s
 
-   'o-p16fail1': 'error',
+   'o-p16fail1': {
+      // meh - someday we could give these better messages
+      id: 'TOKEN_INVALID_CONTEXT',
+      message: 'XMLDECL_PTOKEN',
+   },
    'o-p16fail2': 'PI_NO_TARGET', // a PITarget must be present
    'o-p16fail3': 'PI_TARGET_NAME_INVALID', // S after PITarget is required
    'o-p18fail1': 'CDATA_XTRA_SPACE_AFTER_OPEN', // no space before "CDATA"
@@ -2244,10 +2248,10 @@ const expectedNotWfCodes: IdToErrorMap = {
    'rmt-ns-e1.0-13a': 'error', // The xml namespace must not be declared as the default namespace.
    'rmt-ns-e1.0-13b': 'error', // The xmlns namespace must not be declared as the default namespace.
    'rmt-ns-e1.0-13c': 'error', // Elements must not have the prefix xmlns.
-   'hst-bh-001': 'error', // decimal charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
-   'hst-bh-002': 'error', // hex charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
-   'hst-bh-003': 'error', // decimal charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
-   'hst-bh-004': 'error', // hex charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
+   'hst-bh-001': 'CHARREF_INVALID_CHAR', // ok - decimal charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
+   'hst-bh-002': 'CHARREF_INVALID_CHAR', // ok - hex charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
+   'hst-bh-003': 'CHARREF_INVALID_CHAR', // ok - decimal charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
+   'hst-bh-004': 'CHARREF_INVALID_CHAR', // ok - hex charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
    'hst-lhs-007': 'error', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible
    'hst-lhs-008': 'error', // UTF-16 BOM plus xml decl of utf-8 (using UTF-16 coding) incompatible
    'hst-lhs-009': 'error', // UTF-16 BOM plus xml decl of utf-8 (using UTF-8 coding) incompatible

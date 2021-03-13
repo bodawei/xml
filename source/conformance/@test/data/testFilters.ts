@@ -7,10 +7,12 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [
-      'not-wf-not-sa-007', // "A<!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
-   ],
+   includedIds: [],
    excludedIds: [
+      // 675 - Validity constraint: Proper Declaration/PE Nesting - A trailing > is a violation of this.
+      'rmt-e2e-14', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
+      'invalid--006', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
+
       // 672
       // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
       // Doc must mention this aspect of what %foo; in a markup declaration can carry
@@ -21,22 +23,12 @@ const testFilters: FilterData = {
       //    - so we need to investigate a steaming support here.
       'invalid-not-sa-022', // Good error, but does not format right
 
-      // 673 -hangs
-      'not-wf-not-sa-007', // "A<!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
-
       // Easy: We are probably swallowing these text declarations before we do a check on them.
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
 
       // Looks like the characters are still getting mangled?
       'x-rmt5-016', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
       'x-rmt5-019', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-
-      // CharRefs that are too big
-      'not-wf-sa-170', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
-      'hst-bh-001', // decimal charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
-      'hst-bh-002', // hex charref > 10FFFF, indeed > max 32 bit integer, checking for recovery from possible overflow
-      'hst-bh-003', // decimal charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
-      'hst-bh-004', // hex charref > 10FFFF, indeed > max 64 bit integer, checking for recovery from possible overflow
 
       // WE are either not checking chardata correctly, and/or our error messages are wonked out
       'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
@@ -81,6 +73,8 @@ const testFilters: FilterData = {
       'rmt-050', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
       'rmt-051', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
       'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
+      'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+      'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       // We are normalizing across char references, but should not be.
       'valid-sa-110', // Basically an output test, this requires that a CDATA attribute with a CRLF be normalized to one space.
@@ -109,23 +103,9 @@ const testFilters: FilterData = {
       // ////////////
       // ////////////
       //
-
-      // DOC: Interestingly we get the output in invalid-not-sa-022 but not in this one.  What does that tell us about the tests.
-      // It does tell you this considers this one is not wellformed.
-      'invalid--006', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-
-      'o-p16fail1', // This is sorta working.  Might be nice to give a better message than TOKEN_INVALID_CONTEXT / XMLDECL_PTOKEN
       'o-p69pass1', // misidentifying a recursive call
       'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
       'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
-      'rmt-e2e-14', // Crashing bug - Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
-      'rmt-e2e-20', // no error - Tokens, after normalization, must be separated by space, not other whitespace characters
-      'rmt-017', // no error - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-      'rmt-018', // no error - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
-      'rmt-048', // Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-046', // message not very clear 'CHILDREN_XTRA_CONTENT', // good - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-      'rmt-052', // message not very clear 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-053', // message not very clear 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       //
       // ////////////
@@ -225,6 +205,15 @@ const testFilters: FilterData = {
       'rmt-ns10-046', // Colon in ID attribute name
 
       // ==== Not wellformed ====
+      // Characters:Charsets
+      // This is tricky. The file contains 0xf7 0x80 0x8 0x80 which is 0x1c0000 or 1835008
+      // This is not a valid unicode character, and there is no way to force it into a JavaScript string.
+      // That is, all the JS processors either read it in as four invalid character (ef bf bd four times)
+      // or if you try to force the utf decoding and then pass 0x1c0000 to fromCharCode(), you'll get
+      // back 0. Unsurprisingy \u1c0000 treats the first 4 chars as the character and the following 0's as string.
+      // Thus, without building our own utf8 decoder, it is not clear to me how to test this.
+      'not-wf-sa-170', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
+
       // Characters:BOM
       'hst-lhs-007', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible
       'hst-lhs-008', // UTF-16 BOM plus xml decl of utf-8 (using UTF-16 coding) incompatible

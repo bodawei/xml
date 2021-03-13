@@ -50,6 +50,7 @@ function formatText(text: string): string {
          .replace(/\n/g, '&#10;')
          .replace(/\u000c/g, '&#12;') // eslint-disable-line no-control-regex
          // See differences in rmt-044 and rmt-045 mentioned in fixTest
+         // .replace(/\u0085/g, '&#133;') // this is maybe only true for v1.1 eslint-disable-line no-control-regex
          .replace(/\u008c/g, '&#140;') // eslint-disable-line no-control-regex
          .replace(/\r/g, '&#13;')
    );
