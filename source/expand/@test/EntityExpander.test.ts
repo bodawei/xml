@@ -31,6 +31,10 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
    XmlError,
+   InternalSubsetStartToken,
+   InternalSubsetEndToken,
+   INTERNAL_SUBSET_START_TOKEN,
+   INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
 import * as attListDecl from '../../pToken/token/attListDeclaration';
@@ -421,6 +425,43 @@ describe('EntityExpander (unit)', () => {
                ]);
                done();
             });
+         });
+
+         it('can accept a doctype incorrectly in the internal subset', (done) => {
+            docTypeStart = new DocTypeStartPToken({
+               open: toSToken('<!'),
+               name: toSToken('root'),
+               openSubset: toSToken('['),
+            });
+            const results: Array<ParseToken> = [];
+            const entityExpander = new EntityExpander(false, results.push.bind(results), {
+               parseBody: (): void => {},
+               parseEntityValue: (): void => {},
+               resolveEntityId: () => '',
+               retrieveExternalEntity,
+               parseAttributeValue,
+            });
+
+            entityExpander.expandPToken(docTypeStart, () => {});
+            entityExpander.expandPToken(new InternalSubsetStartToken(), () => {});
+            entityExpander.expandPToken(docTypeStart, () => {});
+            entityExpander.expandPToken(new InternalSubsetStartToken(), () => {});
+            entityExpander.expandPToken(new InternalSubsetEndToken(), () => {});
+            entityExpander.expandPToken(docTypeEnd, () => {});
+            entityExpander.expandPToken(new InternalSubsetEndToken(), () => {});
+            entityExpander.expandPToken(docTypeEnd, () => {});
+
+            expect(harvestTypes(results)).toEqual([
+               DOCTYPE_START_PTOKEN,
+               INTERNAL_SUBSET_START_TOKEN,
+               DOCTYPE_START_PTOKEN,
+               INTERNAL_SUBSET_START_TOKEN,
+               INTERNAL_SUBSET_END_TOKEN,
+               DOCTYPE_END_PTOKEN,
+               INTERNAL_SUBSET_END_TOKEN,
+               DOCTYPE_END_PTOKEN,
+            ]);
+            done();
          });
       });
    });

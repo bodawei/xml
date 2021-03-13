@@ -100,6 +100,10 @@ class EntityExpander {
 
    private expandedExternalSubset = false;
 
+   private docTypeDepth = 0;
+
+   private skipEndDepth = 0;
+
    private entityContextStack: EntityContextStack = new EntityContextStack();
 
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
@@ -128,17 +132,37 @@ class EntityExpander {
             expanded();
             break;
          case DOCTYPE_START_PTOKEN:
+            if (this.docTypeDepth > 0) {
+               this.skipEndDepth++;
+               this.deliverToken(pToken);
+               expanded();
+               return;
+            }
+            this.docTypeDepth++;
             this.handleDocTypeStart(pToken, expanded);
             break;
          case INTERNAL_SUBSET_START_TOKEN:
-            this.state = State.IN_INTERNAL_SUBSET;
+            if (!this.expandedExternalSubset && this.docTypeDepth === 1) {
+               this.state = State.IN_INTERNAL_SUBSET;
+            }
             this.deliverToken(pToken);
             expanded();
             break;
          case INTERNAL_SUBSET_END_TOKEN:
-            this.handleAndExpandExternalSubset(pToken, expanded);
+            if (!this.expandedExternalSubset && this.docTypeDepth === 1) {
+               this.handleAndExpandExternalSubset(pToken, expanded);
+            } else {
+               this.deliverToken(pToken);
+               expanded();
+            }
             break;
          case DOCTYPE_END_PTOKEN:
+            if (this.docTypeDepth !== 1) {
+               this.docTypeDepth--;
+               this.deliverToken(pToken);
+               expanded();
+               return;
+            }
             if (!this.expandedExternalSubset) {
                this.handleAndExpandExternalSubset(pToken, expanded);
             } else {

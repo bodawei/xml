@@ -583,7 +583,10 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-not-sa-003': 'CONDITIONAL_NO_CLOSE', // Conditional sections must be properly terminated ("]]>" omitted).
    'not-wf-not-sa-004': 'CONDITIONAL_NO_CLOSE', // Conditional sections must be properly terminated ("]]>" omitted).
    'not-wf-not-sa-006': 'CONDITIONAL_NO_SECOND_BRACKET', // Conditional sections need a '[' after the INCLUDE or IGNORE.
-   'not-wf-not-sa-007': 'error', // A!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity.
+   'not-wf-not-sa-007': {
+      id: 'MARKUPDECL_INVALID_TOKEN', // A!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity.
+      message: 'DOCTYPE_START_PTOKEN',
+   },
    'not-wf-not-sa-008': 'PEREF_NAME_INVALID', // In DTDs, the '%' character must be part of a parameter entity reference.
    'not-wf-not-sa-009': 'COMMENT_NO_CLOSE', // This test violates WFC:PE Between Declarations in Production 28a. The last character of a markup declaration is not contained in the same parameter-entity text replacement.
    'not-wf-ext-sa-001': 'REFERENCE_INVALID_RECURSION', // Tests the_No Recursion_WFC by having an external general entity be self-recursive.

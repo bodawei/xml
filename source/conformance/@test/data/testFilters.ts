@@ -7,7 +7,9 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      'not-wf-not-sa-007', // "A<!DOCTYPE ...>declaration may not begin any external entity; it's only found once, in the document entity."
+   ],
    excludedIds: [
       // 672
       // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
