@@ -10,6 +10,7 @@ import { InstructionField } from 'pToken';
 
 const WFEID = WellFormedError.ID;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
+const VERSION_10_1_REGEXP = /^[-a-zA-Z0-9_.:]+$/;
 
 function checkFields(
    params: ReadonlyArray<InstructionField>,
@@ -40,9 +41,22 @@ function checkFields(
             ec.setPos(param.openQuote);
             ec.setPos(value);
             checkCharWellFormed(value, ec, confVer);
-            ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.TEXTDECL_VERSION_INVALD, [
-               valueText,
-            ]);
+
+            // See §2.8 in 1.0/* and §4.3.4 in 1.1/*
+            //    And then see interpretations,
+            if (confVer.version === 1 && confVer.revision <= 2) {
+               ec.check(!VERSION_10_1_REGEXP.test(valueText), WFEID.TEXTDECL_VERSION_INVALD, [
+                  "([a-zA-Z0-9_.:] | '-')+",
+                  valueText,
+               ]);
+            } else if (confVer.version === 1 && confVer.revision > 2) {
+               ec.check(valueText !== '1.0', WFEID.TEXTDECL_VERSION_INVALD, ['1.0', valueText]);
+            } else if (confVer.version === 1.1) {
+               ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.TEXTDECL_VERSION_INVALD, [
+                  '1.0/1.1',
+                  valueText,
+               ]);
+            }
             break;
          case 'encoding':
             ec.check(foundEncoding, WFEID.TEXTDECL_DUPLICATE_ENCODING);

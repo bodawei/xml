@@ -303,7 +303,6 @@ describe('xmlDeclarationCheck() (unit)', () => {
          it('reports an error if a version is in the wrong order', () => {
             xmlDeclPToken = new XmlDeclarationPToken({
                open: toSToken('<?'),
-               openSpace: toSToken(' '),
                target: toSToken('xml'),
                targetSpace: toSToken(' '),
                fields: [
@@ -335,31 +334,77 @@ describe('xmlDeclarationCheck() (unit)', () => {
             });
          });
 
-         it('reports an error if the version is not a legal value', () => {
-            xmlDeclPToken = new XmlDeclarationPToken({
-               open: toSToken('<?'),
-               openSpace: toSToken(' '),
-               target: toSToken('xml'),
-               targetSpace: toSToken(' '),
-               fields: [
-                  {
-                     name: toSToken('version'),
-                     nameSpace: toSToken(' '),
-                     equal: toSToken('='),
-                     equalSpace: toSToken(' '),
-                     value: toSToken('1.2'),
-                  },
-               ],
-               close: toSToken('?>'),
-            });
+         const cases: Array<[ConformanceVersion, string, boolean, string?]> = [
+            [new ConformanceVersion(1, 1), '1.0', false],
+            [new ConformanceVersion(1, 2), '1.0', false],
+            [new ConformanceVersion(1, 3), '1.0', false],
+            [new ConformanceVersion(1, 4), '1.0', false],
+            [new ConformanceVersion(1, 5), '1.0', false],
+            [new ConformanceVersion(1, 6), '1.0', false],
+            [new ConformanceVersion(1.1, 1), '1.0', true, '1.1'],
+            [new ConformanceVersion(1.1, 2), '1.0', true, '1.1'],
+            [new ConformanceVersion(1.1, 3), '1.0', true, '1.1'],
+            [new ConformanceVersion(1, 1), '1.1', false],
+            [new ConformanceVersion(1, 2), '1.1', false],
+            [new ConformanceVersion(1, 3), '1.1', true, '1.0'],
+            [new ConformanceVersion(1, 4), '1.1', true, '1.0'],
+            [new ConformanceVersion(1, 5), '1.1', false],
+            [new ConformanceVersion(1, 6), '1.1', false],
+            [new ConformanceVersion(1.1, 1), '1.1', false],
+            [new ConformanceVersion(1.1, 2), '1.1', false],
+            [new ConformanceVersion(1.1, 3), '1.1', false],
+            [new ConformanceVersion(1, 1), '1.3', false],
+            [new ConformanceVersion(1, 2), '1.3', false],
+            [new ConformanceVersion(1, 3), '1.3', true, '1.0'],
+            [new ConformanceVersion(1, 4), '1.3', true, '1.0'],
+            [new ConformanceVersion(1, 5), '1.3', false],
+            [new ConformanceVersion(1, 6), '1.3', false],
+            [new ConformanceVersion(1.1, 1), '1.3', true, '1.1'],
+            [new ConformanceVersion(1.1, 2), '1.3', true, '1.1'],
+            [new ConformanceVersion(1.1, 3), '1.3', true, '1.1'],
+            [new ConformanceVersion(1, 1), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
+            [new ConformanceVersion(1, 2), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
+            [new ConformanceVersion(1, 3), '^bad^', true, '1.0'],
+            [new ConformanceVersion(1, 4), '^bad^', true, '1.0'],
+            [new ConformanceVersion(1, 5), '^bad^', true, '1.[0-9]+'],
+            [new ConformanceVersion(1, 6), '^bad^', true, '1.[0-9]+'],
+            [new ConformanceVersion(1.1, 1), '^bad^', true, '1.1'],
+            [new ConformanceVersion(1.1, 2), '^bad^', true, '1.1'],
+            [new ConformanceVersion(1.1, 3), '^bad^', true, '1.1'],
+         ];
+         cases.forEach((details) => {
+            const [confVer, version, isError, expected] = details;
+            it(`reports ${
+               isError ? 'an' : 'no'
+            } error when the value is ${version} and the conf version is ${
+               confVer.version === 1.0 ? '1.0' : 1.1
+            }/${confVer.revision} (§2.8.0 and §4.3.4)`, () => {
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: toSToken('<?'),
+                  target: toSToken('xml'),
+                  targetSpace: toSToken(' '),
+                  fields: [
+                     {
+                        name: toSToken('version'),
+                        equal: toSToken('='),
+                        value: toSToken(version),
+                     },
+                  ],
+                  close: toSToken('?>'),
+               });
 
-            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 4));
+               xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
-            // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportWFError({
-               id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
-               params: ['1.2'],
-               position: xmlDeclPToken.fields[0].value,
+               if (isError) {
+                  // @ts-expect-error 2329/matchers
+                  expect(mockErrorCollector).toReportWFError({
+                     id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
+                     params: [expected, version],
+                     position: xmlDeclPToken.fields[0].value,
+                  });
+               } else {
+                  expect(mockErrorCollector.errors).toEqual([]);
+               }
             });
          });
 
@@ -406,30 +451,6 @@ describe('xmlDeclarationCheck() (unit)', () => {
             });
 
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.1, 1));
-
-            // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);
-         });
-
-         it('reports no error when provided 1.9 with a processing version of 1.0/5', () => {
-            xmlDeclPToken = new XmlDeclarationPToken({
-               open: toSToken('<?'),
-               openSpace: toSToken(' '),
-               target: toSToken('xml'),
-               targetSpace: toSToken(' '),
-               fields: [
-                  {
-                     name: toSToken('version'),
-                     nameSpace: toSToken(' '),
-                     equal: toSToken('='),
-                     equalSpace: toSToken(' '),
-                     value: toSToken('1.9'),
-                  },
-               ],
-               close: toSToken('?>'),
-            });
-
-            xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, new ConformanceVersion(1.0, 5));
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toNotReportError(WellFormedError.ID.XMLDECL_VERSION_INVALD);

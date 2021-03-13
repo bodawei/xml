@@ -11,32 +11,22 @@ import { InstructionField } from 'pToken';
 const WFEID = WellFormedError.ID;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 const PARAM_NAMES = ['version', 'encoding', 'standalone'];
-const VERSION_11_1_REGEXP = /^[-a-zA-Z0-9_.:]+$/;
-const VERSION_11_5_REGEXP = /^1.[0-9]$/;
+const VERSION_10_1_REGEXP = /^[-a-zA-Z0-9_.:]+$/;
+const VERSION_10_5_REGEXP = /^1.[0-9]+$/;
+
 /*
- * Check the value of the vesion="1.0" text.
- * This is a bit more complex/not-obvious than you might expect.
- * First, the ConformanceVersion instance determines what version of the document we think
- * we are parsing. That is often set by this very XML Declaration earlier in parsing,
- * so very often this devolves to checking x === x. However, in some cases someone has
- * enforced that we want to process this as a 1.x document, regardless of what the document
- * says.  Note also that the EnitityMetaData will not support processing at a version number
- * beyond what the whole tiramisu system can support.  So, if the version comes in as
- * 1.7 but the user is parsing as 1.0/5, this will not produce an error, but any 1.7
- * features will result in errors.
+ * Check the value of the vesion="X" text.  See Interpretations.md for full details.
+ * Recall that the ConformanceVersion specifies how we are to be interpreting the
+ * document. It may, conceivably, not match the version in the XML Declaration.
  *
  * §2.8.0
- *    Process as 1.0/1: The version number could be is [-a-zA-Z0-9_.:]+
- *    Process as 1.0/[2-4]: The version number can only be 1.0
+ *    Process as 1.0/[1-2]: The version number could be is [-a-zA-Z0-9_.:]+
+ *    Process as 1.0/[3-4]: The version number can only be 1.0
  *    Process as 1.0/[5-6]: The version number can be 1.[0-9]
  *       Even though the VersionNum production matches any version number of
  *       the form '1.x', XML 1.0 documents should not specify a version number
  *       other than '1.0'.
- *       When an XML 1.0 processor encounters a document that specifies a 1.x
- *       version number other than '1.0', it will process it as a 1.0 document.
- *       This means that an XML 1.0 processor will accept 1.x documents provided
- *       they do not use any non-1.0 features.
- *    Process as 1.1/[1-3]: The version number can be 1.1
+ *    Process as 1.1/[1-3]: The version number can only be 1.1
  */
 
 function checkVersionString(
@@ -44,14 +34,20 @@ function checkVersionString(
    ec: ErrorCollector,
    confVer: ConformanceVersion,
 ): void {
-   if (confVer.version === 1 && confVer.revision === 1) {
-      ec.check(!VERSION_11_1_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [versionText]);
+   if (confVer.version === 1 && confVer.revision <= 2) {
+      ec.check(!VERSION_10_1_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [
+         "([a-zA-Z0-9_.:] | '-')+",
+         versionText,
+      ]);
    } else if (confVer.version === 1 && confVer.revision < 5) {
-      ec.check(versionText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [versionText]);
-   } else if (confVer.version === 1.1) {
-      ec.check(versionText !== '1.1', WFEID.XMLDECL_VERSION_INVALD, [versionText]);
+      ec.check(versionText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, ['1.0', versionText]);
+   } else if (confVer.version === 1 && confVer.revision >= 5) {
+      ec.check(!VERSION_10_5_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [
+         '1.[0-9]+',
+         versionText,
+      ]);
    } else {
-      ec.check(!VERSION_11_5_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [versionText]);
+      ec.check(versionText !== '1.1', WFEID.XMLDECL_VERSION_INVALD, ['1.1', versionText]);
    }
 }
 

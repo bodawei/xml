@@ -519,7 +519,28 @@ There are 8 kinds of entity declarations.
 In conclusion:
 - When we use an enternal entity, we must do the charref and peref resolution, but then we can dump the results into a parser and it is juse fine.  
 
+# Mixed versions
+How should this processor respond if it encounters different xml versions while processing a document (e.g. the XML Declaration is 1.0, but some Text Declaration is 1.1, or vice versa)?
 
+This varies across revisions of the XML standard.  As a background, note that version 1.1 didn't formally exist until early 2004 (though drafts of it were being worked on in 2002).  Also note that all the text for the 1.0/* cases is from §2.8.0, while that for 1.1/* is from §4.3.4
+
+* 1.0/1 and 1.0/2: Pretty silent about what happens if a 1.0 document references a version other than 1.0 (though, it does allow a very wide syntax for version numbers).  This is syntactically allowed, but behavior is not specified that I can see.  Thus, this processor will not consider this an error (it will, however, nonetheless process the non 1.0 document As a 1.0 document, so if it fails some other WF or validity constraint, it will produce an error)
+* 1.0/3 and 1.0/4: These changed the syntax for `VersionNum` to only allow `1.0`. (this is interesting, since 1.0/3 was released the same time 1.1 was) (note that the eratta that produced this change is at https://www.w3.org/XML/xml-V10-2e-errata.html#E38 ) Thus, this processor considers the presence in an XML Declaration or Text Declaration of a version value that is not 1.0 to be a well formed error. It will then process the contents as 1.0, regardless of the specified version.
+* 1.0/5: This allows versions other than 1.0 (`/1.[0-9]+/`) in both the XML and Text Declarations.  However, then it gets very murky. The spec says that it should process a 1.x document as a 1.0 (it does not explicitly say what should happen with external entities).  Left at this, I would think any 1.x version would not be an error. The spec does say "should not specify a version number other than '1.0'.", which might be interpreted as any non 1.0 value is not OK. Given that the syntax allows non 1.0 versions, I would take that as a warning. But, then the xmlconf tests make this more complex. The tests `ibm-1-1-not-wf-P77-ibm77n13.xml`, `rmt-e2e-38` and `rmt-001` (among others) consider a 1.0 document referencing a 1.1 entity to be not well formed.  However, `x-rmt-008b` allows the XML Declaration to contain 1.7.  At this point, I personally think that the xmlconf tests are in contradiction.  But, if we go with the assumption that they are not, then there are several models we can construct for why they are not.  This implementation states that the XML Declaration can have a version of 1.[0-9]+, and it will be interpreted as 1.0. However, external entities must be 1.0, or a wellformedness error will be reported.
+* 1.1/1 and 1.1/2: Here we have a problem. Going by the pattern established in 1.0/3, above, then any reference to a 1.0 document is in error, since the syntax only allows 1.1 as a version number. Yet, §4.3.4 explicitly allows external entities with a version 1.0 to be processed (with the stipulation that they are processed as 1.1 documents). This processor will not report an error if a 1.1 document tries to import a 1.0 entity, unless that entity has some other portion of its syntax which is not correct.
+
+Added notes:
+
+* Since 1.0/1, the absence of an XML Declaration implies 1.0
+* ConformanceVersion: This processor has the ability for the user to force a particular version interpretation (that is, regardless of what is in the XML or Text declarations, the user can insist the document be processed as, say, 1.0/4 or 1.1/2). If the user doesn't specify a particular conformance version (the normal case), the conformance version is derived from the XML Declaration (or inferred to be 1.0).
+
+In summary:
+
+* In all cases, external entities will always be processed according to the syntax, wellformedness and validity rules of the ConformanceVersion.
+* If the ConformanceVersion is 1.0/1-1.0/2, the version numbers in the XML And Text declarations will not report errors (unless they don't match the very generous rules)
+* If the ConformanceVersion is 1.0/3-1.0/4, then if the version numbers in the XML and Text Declarations are not 1.0, an error will be produced.
+* If the ConformanceVersion is 1.0/5, then if the version numbers in the XML Declarations are not 1.[0-9]+, an error will be produced. The version number in Text Declarations must be 1.0.
+* If the ConformanceVersion is 1.1/*, then if the version number in the XML Declartion is not 1.1, it will report an error, and if the version number in the Text Declaration is not 1.1. or 1.0, an error will be produced.
 
 
 <!--

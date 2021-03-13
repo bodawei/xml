@@ -256,32 +256,77 @@ describe('textDeclaration (unit)', () => {
             position: textDeclPToken.fields[1].name,
          });
       });
+      const cases: Array<[ConformanceVersion, string, boolean, string?]> = [
+         [new ConformanceVersion(1, 1), '1.0', false],
+         [new ConformanceVersion(1, 2), '1.0', false],
+         [new ConformanceVersion(1, 3), '1.0', false],
+         [new ConformanceVersion(1, 4), '1.0', false],
+         [new ConformanceVersion(1, 5), '1.0', false],
+         [new ConformanceVersion(1, 6), '1.0', false],
+         [new ConformanceVersion(1.1, 1), '1.0', false],
+         [new ConformanceVersion(1.1, 2), '1.0', false],
+         [new ConformanceVersion(1.1, 3), '1.0', false],
+         [new ConformanceVersion(1, 1), '1.1', false],
+         [new ConformanceVersion(1, 2), '1.1', false],
+         [new ConformanceVersion(1, 3), '1.1', true, '1.0'],
+         [new ConformanceVersion(1, 4), '1.1', true, '1.0'],
+         [new ConformanceVersion(1, 5), '1.1', true, '1.0'],
+         [new ConformanceVersion(1, 6), '1.1', true, '1.0'],
+         [new ConformanceVersion(1.1, 1), '1.1', false],
+         [new ConformanceVersion(1.1, 2), '1.1', false],
+         [new ConformanceVersion(1.1, 3), '1.1', false],
+         [new ConformanceVersion(1, 1), '1.3', false],
+         [new ConformanceVersion(1, 2), '1.3', false],
+         [new ConformanceVersion(1, 3), '1.3', true, '1.0'],
+         [new ConformanceVersion(1, 4), '1.3', true, '1.0'],
+         [new ConformanceVersion(1, 5), '1.3', true, '1.0'],
+         [new ConformanceVersion(1, 6), '1.3', true, '1.0'],
+         [new ConformanceVersion(1.1, 1), '1.3', true, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 2), '1.3', true, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 3), '1.3', true, '1.0/1.1'],
+         [new ConformanceVersion(1, 1), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
+         [new ConformanceVersion(1, 2), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
+         [new ConformanceVersion(1, 3), '^bad^', true, '1.0'],
+         [new ConformanceVersion(1, 4), '^bad^', true, '1.0'],
+         [new ConformanceVersion(1, 5), '^bad^', true, '1.0'],
+         [new ConformanceVersion(1, 6), '^bad^', true, '1.0'],
+         [new ConformanceVersion(1.1, 1), '^bad^', true, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 2), '^bad^', true, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 3), '^bad^', true, '1.0/1.1'],
+      ];
+      cases.forEach((details) => {
+         const [confVer, version, isError, expected] = details;
+         it(`reports ${
+            isError ? 'an' : 'no'
+         } error when the value is ${version} and the conf version is ${
+            confVer.version === 1.0 ? '1.0' : 1.1
+         }/${confVer.revision} (§2.8.0 and §4.3.4)`, () => {
+            textDeclPToken = new TextDeclarationPToken({
+               open: SToken.fromString('<?'),
+               target: SToken.fromString('xml'),
+               targetSpace: SToken.fromString(' '),
+               fields: [
+                  {
+                     name: SToken.fromString('version'),
+                     equal: SToken.fromString('='),
+                     value: SToken.fromString(version),
+                  },
+               ],
+               close: SToken.fromString('?>'),
+            });
 
-      it('reports an error if the version is not a legal value', () => {
-         textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-            fields: [
-               {
-                  name: SToken.fromString('version'),
-                  nameSpace: SToken.fromString(' '),
-                  equal: SToken.fromString('='),
-                  equalSpace: SToken.fromString(' '),
-                  value: SToken.fromString('1.2'),
-               },
-            ],
-            close: SToken.fromString('?>'),
-         });
+            textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-         textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
-
-         // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.TEXTDECL_VERSION_INVALD,
-            params: ['1.2'],
-            position: textDeclPToken.fields[0].value,
+            if (isError) {
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportWFError({
+                  id: WellFormedError.ID.TEXTDECL_VERSION_INVALD,
+                  params: [expected, version],
+                  position: textDeclPToken.fields[0].value,
+               });
+            } else {
+               expect(mockErrorCollector.errors).toEqual([]);
+            }
          });
       });
 

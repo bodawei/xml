@@ -359,6 +359,22 @@ function makeXmlDecl(): XmlDeclarationPToken {
    });
 }
 
+function makeXmlDecl10(): XmlDeclarationPToken {
+   return new XmlDeclarationPToken({
+      open: toSToken('<?'),
+      target: toSToken('xml'),
+      targetSpace: toSToken(' '),
+      fields: [
+         {
+            name: toSToken('version'),
+            equal: toSToken('='),
+            value: toSToken('1.0'),
+         },
+      ],
+      close: toSToken('?>'),
+   });
+}
+
 
 const helper = {
    BLANK_ORIGIN,
@@ -403,4 +419,5 @@ export {
    makeTextPToken,
    makeTextDecl,
    makeXmlDecl,
+   makeXmlDecl10,
 };

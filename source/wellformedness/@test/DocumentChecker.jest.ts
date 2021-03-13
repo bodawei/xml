@@ -42,6 +42,7 @@ import {
    makeDocTypeStart,
    makeDocTypeEnd,
    makeXmlDecl,
+   makeXmlDecl10,
    makeComment,
    makeCdata,
    makeExternalSubsetEnd,
@@ -170,7 +171,7 @@ describe('DocumentChecker (unit)', () => {
       processingInstruction = makeProcessingInstruction();
       space = makeSpace();
       textDecl = makeTextDecl();
-      xmlDecl = makeXmlDecl();
+      xmlDecl = makeXmlDecl10();
       elementStart = makeElementStart();
       elementEnd = makeElementEnd();
       elementEmpty = makeElementEmpty();

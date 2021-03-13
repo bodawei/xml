@@ -21,7 +21,7 @@ const testFilters: FilterData = {
       //    - defers to parseBody()
       // - But a related problem is taht we assume we can read in the whle PE value into memory, which isn't strictly true
       //    - so we need to investigate a steaming support here.
-      'invalid-not-sa-022', // Good error, but does not format right
+      'invalid-not-sa-022',
 
       // Easy: We are probably swallowing these text declarations before we do a check on them.
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
@@ -46,6 +46,7 @@ const testFilters: FilterData = {
 
       'rmt-020', // broke
       'rmt-021', // broke
+      // 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
       'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
       /*
        * This is nasty, and I think it reflects we are doing something wrong.
@@ -65,11 +66,13 @@ const testFilters: FilterData = {
        * I think we need to remove the check from CharData and do this check in ContentChecker if not in a general entity.
        * Review uses of misc.checkCharWellFormed()
        */
+      // 638 'rmt-054' - checking on valid characters in already-processed chardata
       'rmt-054',
       /*
        * We are processing newliens in internal entities inappropriately.
        * once we have processed input once, we no longer convert new liness to \n
        */
+      // 658 rmt-050+ improper repeated processing of internal entities
       'rmt-050', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
       'rmt-051', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
       'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
@@ -77,24 +80,12 @@ const testFilters: FilterData = {
       'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       // We are normalizing across char references, but should not be.
+      //    659 Normalizing across char references but should not be happening
       'valid-sa-110', // Basically an output test, this requires that a CDATA attribute with a CRLF be normalized to one space.
       'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
 
       // This actually isn't wellformed either
       'invalid--005', // 'ELEMENTDECL_NO_CLOSE', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-
-      // WellFormed: These all are concerned, it seems, that a 1.0 document refers to a > 1.0.  But I am puzzled because I do not read the spec as saying this is an erro
-      'ibm-1-1-not-wf-P77-ibm77n13.xml', // The VersionNum of the primary document entity is 1.0 and that of the external 		dtd is 1.0. The external dtd contains an external entity whose VersionNum is 1.1.
-      'ibm-1-1-not-wf-P77-ibm77n16.xml', // The VersionNum of the primary document entity is 1.0 and VersioNum of the external 		entity is absent. The replacement text of the entity contains an element followed 		by the valid XML 1.1 of line character NEL #x85 in its empty elem tag.
-      'ibm-1-1-not-wf-P77-ibm77n17.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 enf of line character NEL #x85.
-      'ibm-1-1-not-wf-P77-ibm77n18.xml', // The VersionNum of the primary document entity is absent and that of the external 		entity is 1.0. The textDecl in the external entity contains an invalid XML1.0 		but valid XML 1.1 of line character Unicode line separator #x2028.
-      'rmt-e2e-38', // XML 1.0 document refers to 1.1 entity
-      'rmt-001', // External subset has later version number
-      'rmt-002', // External PE has later version number
-      'rmt-003', // External general entity has later version number
-      'rmt-004', // External general entity has later version number (no decl means 1.0)
-      'rmt-005', // Indirect external general entity has later version number
-      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       //
       // ////////////
@@ -106,6 +97,7 @@ const testFilters: FilterData = {
       'o-p69pass1', // misidentifying a recursive call
       'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
       'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
+      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       //
       // ////////////
