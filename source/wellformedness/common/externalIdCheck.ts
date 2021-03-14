@@ -22,6 +22,7 @@ const PUBID_CHARS = /^[- \n'()+,./:=?;!*#@$_%a-zA-Z0-9]*/;
 
 function externalIdCheck(
    externalId: ExternalIdP | undefined,
+   isNotation: boolean,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
 ): void {
@@ -41,7 +42,8 @@ function externalIdCheck(
    if (capitalType === 'PUBLIC') {
       // This is very fragile if there is no value.
       literal.checkWellFormed(externalId.public, ec, confVer, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
-         if (!externalId.public || !externalId.public.value) {
+         if (!externalId.public) {
+            ec.report(WFEID.EXTERNALID_MISSING_PUBLIC_VALUE, []);
             return;
          }
 
@@ -59,8 +61,13 @@ function externalIdCheck(
       });
    }
 
-   if (capitalType === 'SYSTEM' || externalId.system) {
-      if (externalId.public && externalId.public.value) {
+   if (!externalId.system) {
+      if (capitalType === 'SYSTEM' || (capitalType === 'PUBLIC' && !isNotation)) {
+         ec.setPos(externalId.publicSpace);
+         ec.report(WFEID.EXTERNALID_MISSING_SYSTEM_VALUE, []);
+      }
+   } else {
+      if (externalId.public) {
          ec.setPos(externalId.publicSpace);
          ec.check(!externalId.publicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }

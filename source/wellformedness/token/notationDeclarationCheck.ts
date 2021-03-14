@@ -45,7 +45,7 @@ function notationDeclarationCheck(
    ec.check(!pToken.nameSpace, WFEID.NOTATIONDECL_NAME_NO_SPACE, [nameText]);
 
    ec.check(!pToken.externalId, WFEID.NOTATIONDECL_NO_EXTERNALID);
-   externalIdCheck(pToken.externalId, ec, confVer);
+   externalIdCheck(pToken.externalId, true, ec, confVer);
 
    ec.setPos(pToken.externalIdSpace);
 

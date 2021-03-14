@@ -7,15 +7,8 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [
-      'rmt-e2e-57', // A value other than preserve or default for xml:space is an error
-   ],
+   includedIds: ['dtd05'],
    excludedIds: [
-      // 690 Add an error type. Right now it seems like it can go in wellformedness
-
-      // 691 - report an error if xml:space is not correct
-      'rmt-e2e-57', // A value other than preserve or default for xml:space is an error
-
       // 692 error - certain characters not allowed in the xml declaration
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
@@ -49,11 +42,6 @@ const testFilters: FilterData = {
       'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
       // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
       'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-
-      // 682 easy. validity checking should identify the lack of a second litral
-      'not-wf-sa-054', // PUBLIC requires two literals.
-      'pubid05', // SGML-ism: public ID without system ID
-      'o-p75fail6', // "PUBLIC" requires two literals (contrast with SGML)
 
       // 681 - easy  should recognize a / as the temination of an empty element
       'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace

@@ -381,8 +381,8 @@ const expectedNotWfCodes: IdToErrorMap = {
       id: 'TOKEN_INVALID_CONTEXT',
       message: 'CHARREF_PTOKEN',
    },
-   'not-wf-sa-053': 'ELEMENT_UNBALANCED', // great - End tag does not match start tag.
-   'not-wf-sa-054': 'error', // PUBLIC requires two literals.
+   'not-wf-sa-053': 'ELEMENT_UNBALANCED', // ok - End tag does not match start tag.
+   'not-wf-sa-054': 'EXTERNALID_MISSING_SYSTEM_VALUE', // ok - PUBLIC requires two literals.
    'not-wf-sa-055': {
       // ok - Invalid Document Type Definition format.
       id: 'MARKUPDECL_INVALID_TOKEN',
@@ -626,7 +626,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    dtd02: 'PEREF_XTRA_SPACE', // PE name immediately after "%"
    dtd03: 'PEREF_XTRA_TRAILING_SPACE', // PE name immediately followed by ";"
    dtd04: 'LITERAL_NO_OPEN_QUOTE', // PUBLIC literal must be quoted
-   dtd05: 'LITERAL_NO_OPEN_QUOTE', // SYSTEM identifier must be quoted
+   dtd05: 'EXTERNALID_MISSING_SYSTEM_VALUE', // meh - SYSTEM identifier must be quoted
    dtd07: 'error', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
    element00: 'ELEMENT_NO_CLOSE', // EOF in middle of incomplete ETAG
    element01: 'ELEMENT_NO_CLOSE', // EOF in middle of incomplete ETAG
@@ -649,7 +649,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    pubid02: 'EXTERNALID_PUBLIC_INVALID_CHARS', // Illegal characters in public ID
    pubid03: 'EXTERNALID_PUBLIC_INVALID_CHARS', // Illegal characters in public ID
    pubid04: 'EXTERNALID_PUBLIC_INVALID_CHARS', // Illegal characters in public ID
-   pubid05: 'error', // SGML-ism: public ID without system ID
+   pubid05: 'EXTERNALID_MISSING_SYSTEM_VALUE', // ok - SGML-ism: public ID without system ID
    sgml01: 'CONTENT_IN_EMPTY_ELEMENT', // SGML-ism: omitted end tag for EMPTY content
    sgml02: {
       // XML declaration must be at the very beginning of a document; it"s not a processing instruction
@@ -952,7 +952,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p75fail3': 'EXTERNALID_SYSTEM_NO_LEADING_SPACE', // good S required between literals
    'o-p75fail4': 'ENTITYDECL_NO_CLOSE', // good "SYSTEM" implies only one literal
    'o-p75fail5': 'ENTITYDECL_NO_CLOSE', // good only one keyword
-   'o-p75fail6': 'error', // "PUBLIC" requires two literals (contrast with SGML)
+   'o-p75fail6': 'EXTERNALID_MISSING_SYSTEM_VALUE', // ok - "PUBLIC" requires two literals (contrast with SGML)
    'o-p76fail1': 'ENTITYDECL_EXTERNALID_NO_SPACE', // S is required before "NDATA"
    'o-p76fail2': 'ENTITYDECL_NDATA_INVALID_CASE', // good "NDATA" is upper-case
    'o-p76fail3': 'ENTITYDECL_NDATA_NO_NAME', // good notation name is required
@@ -1578,7 +1578,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-not-wf-P75-ibm75n03.xml': 'EXTERNALID_INVALID_CASE', // great
    'ibm-not-wf-P75-ibm75n04.xml': 'DOCTYPE_NO_CLOSE', // ok.
    'ibm-not-wf-P75-ibm75n05.xml': 'EXTERNALID_EXTERNALTYPE_NO_SPACE', // great
-   'ibm-not-wf-P75-ibm75n06.xml': 'LITERAL_NO_OPEN_QUOTE', // ok. All these "no opn quotes" would be better as saying "no literal"
+   'ibm-not-wf-P75-ibm75n06.xml': 'EXTERNALID_MISSING_SYSTEM_VALUE', // ok
    'ibm-not-wf-P75-ibm75n07.xml': 'EXTERNALID_SYSTEM_NO_LEADING_SPACE', // great
    'ibm-not-wf-P75-ibm75n08.xml': 'DOCTYPE_NO_CLOSE', // ok a lack of PUBLIC would be better
    'ibm-not-wf-P75-ibm75n09.xml': 'EXTERNALID_EXTERNALTYPE_NO_SPACE', // great

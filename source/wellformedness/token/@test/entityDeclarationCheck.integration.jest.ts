@@ -12,7 +12,7 @@ import { parseEntityDeclaration } from '../../../pToken/bridge/entityDeclaration
 // ick
 import { DeclarationStart } from 'token';
 
-describe('checkWellFormed()', () => {
+describe('entityDeclarationCheck() (integration)', () => {
    let declarationStart: DeclarationStart;
    let confVer: ConformanceVersion;
    let source: STokenSource;
@@ -71,7 +71,7 @@ describe('checkWellFormed()', () => {
 
          entityDeclarationCheck(result, ec, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_OPEN_QUOTE);
+         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_MISSING_SYSTEM_VALUE);
          done();
       });
    });

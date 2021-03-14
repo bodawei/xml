@@ -157,7 +157,12 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, confVer);
 
-      expect(externalIdSpy).toHaveBeenCalledWith(pToken.externalId, mockErrorCollector, confVer);
+      expect(externalIdSpy).toHaveBeenCalledWith(
+         pToken.externalId,
+         false,
+         mockErrorCollector,
+         confVer,
+      );
    });
 
    it('reports an error if NDATA is the wrong case', () => {

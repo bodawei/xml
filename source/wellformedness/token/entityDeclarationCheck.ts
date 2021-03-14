@@ -65,7 +65,7 @@ function entityDeclarationCheck(
    ec.check(!pToken.nameSpace, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [enNameText]);
 
    if (pToken.externalId) {
-      externalIdCheck(pToken.externalId, ec, confVer);
+      externalIdCheck(pToken.externalId, false, ec, confVer);
 
       if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN && pToken.nData) {
          ec.setPos(pToken.externalIdSpace);

@@ -43,7 +43,7 @@ describe('externalIdCheck()', () => {
 
    it('calls literal.checkWellFormed() to check the PUBLIC value', () => {
       const confVer = new ConformanceVersion();
-      externalIdCheck(externalId, mockErrorCollector, confVer);
+      externalIdCheck(externalId, false, mockErrorCollector, confVer);
 
       expect(literal.checkWellFormed).toHaveBeenCalledWith(
          externalId.public,
@@ -56,7 +56,7 @@ describe('externalIdCheck()', () => {
 
    it('calls literal.checkWellFormed() to check the SYSTEM value', () => {
       const confVer = new ConformanceVersion();
-      externalIdCheck(externalId, mockErrorCollector, confVer);
+      externalIdCheck(externalId, false, mockErrorCollector, confVer);
 
       expect(literal.checkWellFormed).toHaveBeenCalledWith(
          externalId.system,
@@ -72,7 +72,7 @@ describe('externalIdCheck()', () => {
             value: [new TextPToken({ text: toSToken('bad&chars') })],
          },
       });
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // invoke the callback function
       const cb: () => void = (literal.checkWellFormed as jest.Mock).mock.calls[0][4]; // eslint-disable-line
@@ -87,13 +87,13 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports no errors when no PToken part is passed in', () => {
-      externalIdCheck(undefined, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(undefined, false, mockErrorCollector, new ConformanceVersion());
 
       expect(mockErrorCollector.errors.length).toEqual(0);
    });
 
    it('reports an error if the public value contains invalid characters', () => {
-      litWell.mockImplementation((_1: any, _2: any, _3: any, _4: any, callback: () => void) => {
+      litWell.mockImplementation((_1, _2, _3, _4, callback) => {
          if (callback) {
             callback();
          }
@@ -104,7 +104,7 @@ describe('externalIdCheck()', () => {
          },
       });
 
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
@@ -115,7 +115,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('does not blow up if the public value has no text when we are checking for invalid characters', () => {
-      litWell.mockImplementation((_1: any, _2: any, _3: any, _4: any, callback: () => void) => {
+      litWell.mockImplementation((_1, _2, _3, _4, callback) => {
          if (callback) {
             callback();
          }
@@ -126,7 +126,7 @@ describe('externalIdCheck()', () => {
          },
       });
 
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).not.toReportWFError({
@@ -141,7 +141,7 @@ describe('externalIdCheck()', () => {
          externalType: toSToken('Bogus'),
       });
 
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
@@ -156,7 +156,7 @@ describe('externalIdCheck()', () => {
          externalType: toSToken('public'),
       });
 
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
@@ -171,7 +171,7 @@ describe('externalIdCheck()', () => {
          externalTypeSpace: undefined,
       });
 
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
@@ -186,7 +186,7 @@ describe('externalIdCheck()', () => {
          publicSpace: undefined,
       });
 
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
@@ -196,30 +196,58 @@ describe('externalIdCheck()', () => {
       });
    });
 
-   it('reports no error if there is no system part', () => {
-      externalId = new ExternalIdP(externalId, {
-         system: undefined,
+   it('reports an error if there is no public part', () => {
+      litWell.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
+         if (callback && !publicOrSystem) {
+            callback();
+         }
       });
-
-      externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
-
-      expect(mockErrorCollector.errors.length).toEqual(0);
-   });
-
-   it('throws no errors if there is no public part', () => {
-      litWell.mockImplementation(
-         (publicOrSystem: any, _2: any, _3: any, _4: any, callback: () => void) => {
-            if (callback && !publicOrSystem) {
-               callback();
-            }
-         },
-      );
       externalId = new ExternalIdP(externalId, {
          public: undefined,
       });
 
-      expect(() => {
-         externalIdCheck(externalId, mockErrorCollector, new ConformanceVersion());
-      }).not.toThrow();
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportWFError({
+         id: WellFormedError.ID.EXTERNALID_MISSING_PUBLIC_VALUE,
+         params: [],
+         position: toSToken(' '),
+      });
+   });
+
+   it('reports an error if there is no system part', () => {
+      litWell.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
+         if (callback && !publicOrSystem) {
+            callback();
+         }
+      });
+      externalId = new ExternalIdP(externalId, {
+         system: undefined,
+      });
+
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportWFError({
+         id: WellFormedError.ID.EXTERNALID_MISSING_SYSTEM_VALUE,
+         params: [],
+         position: toSToken(' '),
+      });
+   });
+
+   it('reports no error if there is no system part and this is a PublicID on a notation', () => {
+      litWell.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
+         if (callback && !publicOrSystem) {
+            callback();
+         }
+      });
+      externalId = new ExternalIdP(externalId, {
+         system: undefined,
+      });
+
+      externalIdCheck(externalId, true, mockErrorCollector, new ConformanceVersion());
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

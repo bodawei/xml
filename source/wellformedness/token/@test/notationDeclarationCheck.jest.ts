@@ -42,6 +42,7 @@ describe('notationdeDeclaration (unit)', () => {
 
       expect(externalId.externalIdCheck).toHaveBeenCalledWith(
          notationPToken.externalId,
+         true,
          mockErrorCollector,
          confVer,
       );
