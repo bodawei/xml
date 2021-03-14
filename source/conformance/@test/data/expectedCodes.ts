@@ -810,8 +810,11 @@ const expectedNotWfCodes: IdToErrorMap = {
       message: 'ELEMENT_EMPTY_PTOKEN',
    },
    'o-p29fail1': 'MARKUPDECL_INVALID_TOKEN', // A processor must not pass unknown declaration types.
-   'o-p30fail1': 'error', // An XML declaration is not the same as a TextDecl
-   'o-p31fail1': 'error', // external subset excludes doctypedecl
+   'o-p30fail1': 'TEXTDECL_NO_CLOSE', // meh - An XML declaration is not the same as a TextDecl
+   'o-p31fail1': {
+      id: 'MARKUPDECL_INVALID_TOKEN', // external subset excludes doctypedecl
+      message: 'DOCTYPE_START_PTOKEN',
+   },
    'o-p32fail1': 'XMLDECL_STANDALONE_INVALID', // quote types must match
    'o-p32fail2': 'XMLDECL_STANDALONE_INVALID', // quote types must match
    'o-p32fail3': 'XMLDECL_NO_SPACE_BETWEEN_PARAMS', // initial S is required

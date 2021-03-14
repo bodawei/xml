@@ -9,9 +9,63 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
+      // 690 Add an error type. Right now it seems like it can go in wellformedness
+
+      // 691 - report an error if xml:space is not correct
+      'rmt-e2e-57', // A value other than preserve or default for xml:space is an error
+
+      // 692 error - certain characters not allowed in the xml declaration
+      'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
+      'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
+      'rmt-057', // Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
+
+      // 687 - need a new kind of error. Reported also by WF system, I think. Maybe defined in basic?
+      'uri01', // SYSTEM ids may not have URI fragments
+      // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
+      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
+
+      // 688 need an error for this. We need to scan content models. e34 in https://www.w3.org/XML/xml-V10-2e-errata
+      'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
+
+      // 689 - error - another case of scanning entity values even if not referenced
+      'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
+
+      // 686 - easy - char refs should be rejecting surrogate halves
+      'o-p66fail6', // no references to non-characters
+
+      // 685 - easy - why are we not checking that a text decl has an encoding?
+      'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+
+      // 684 - we could extend the content model wellformedness check in some way to report this better
+      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
+
+      // 683 easy. Extend pe decl value validation to make sure that general entities syntax is reasonably
+      // constructed.  This is even for non-referenced entities, which is weird
+      'o-p09fail2', // EntityValue excludes '&'
+      'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
+      'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
+      'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
+      // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
+      'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
+
+      // 682 easy. validity checking should identify the lack of a second litral
+      'not-wf-sa-054', // PUBLIC requires two literals.
+      'pubid05', // SGML-ism: public ID without system ID
+      'o-p75fail6', // "PUBLIC" requires two literals (contrast with SGML)
+
+      // 681 - easy  should recognize a / as the temination of an empty element
+      'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
+
+      // 680 thinks pe is a recursive call. Not clear hy (or which)
+      'o-p69pass1', // misidentifying a recursive call
+
       // 675 - Validity constraint: Proper Declaration/PE Nesting - A trailing > is a violation of this.
       'rmt-e2e-14', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
       'invalid--006', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
+
+      // 679 - not processing the whitespace in children content correctly
+      'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
+      'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
       // 672
       // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
@@ -78,6 +132,7 @@ const testFilters: FilterData = {
       'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
       'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
       'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       // We are normalizing across char references, but should not be.
       //    659 Normalizing across char references but should not be happening
@@ -86,63 +141,6 @@ const testFilters: FilterData = {
 
       // This actually isn't wellformed either
       'invalid--005', // 'ELEMENTDECL_NO_CLOSE', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-
-      //
-      // ////////////
-      // ////////////
-      // INVALID
-      // ////////////
-      // ////////////
-      //
-      'o-p69pass1', // misidentifying a recursive call
-      'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
-      'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
-      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-
-      //
-      // ////////////
-      // ////////////
-      // NOT WELL FORMED
-      // ////////////
-      // ////////////
-      //
-
-      'o-p31fail1', // CRASHES. SOME KIND OF ETERNAL HANG
-      'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
-      'not-wf-sa-054', // PUBLIC requires two literals.
-      'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
-      'not-wf-sa-150',
-      'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
-      'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-      'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
-      'pubid05', // SGML-ism: public ID without system ID
-      'o-p09fail2', // EntityValue excludes ''
-      'o-p30fail1', // An XML declaration is not the same as a TextDecl
-      'o-p31fail1', // external subset excludes doctypedecl
-      'o-p66fail6', // no references to non-characters
-      'o-p75fail6', // "PUBLIC" requires two literals (contrast with SGML)
-
-      //
-      // ////////////
-      // ////////////
-      // ERRORS
-      // ////////////
-      // ////////////
-      //
-
-      // URI Fragments
-      'o-p11pass1', // : 'none', // system literals may not contain URI fragments
-      'uri01', // SYSTEM ids may not have URI fragments
-      // Other
-      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
-      'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
-      'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
-      'rmt-e2e-57', // A value other than preserve or default for xml:space is an error
-      'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
-      'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
-      'rmt-057', // Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
    ],
 
    futureFeatures: [
