@@ -12,7 +12,7 @@ import {
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
 import {
-   XmlError,
+   ErrorToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    GeneralEntityStartPToken,
@@ -69,7 +69,7 @@ describe('streamParsedReplacementText() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
-                  getErrors: (): Array<XmlError> => [],
+                  getErrors: (): Array<ErrorToken> => [],
                };
             },
             parseAttributeValue: noopFunction,
@@ -164,7 +164,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource({}),
-            getErrors: (): Array<XmlError> => [error1, error2],
+            getErrors: (): Array<ErrorToken> => [error1, error2],
          };
       };
 
@@ -309,7 +309,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       const retrieveSpy = spyOn(params.utils, 'retrieveExternalEntity');
       retrieveSpy.and.returnValue({
          sTokenSource,
-         getErrors: (): Array<XmlError> => [],
+         getErrors: (): Array<ErrorToken> => [],
       });
 
       streamParsedReplacementText(peRef, params, stack, (value, cb) => {

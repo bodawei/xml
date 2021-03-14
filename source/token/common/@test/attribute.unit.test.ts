@@ -1,12 +1,12 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, XmlError, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { WellFormedError } from 'wellformedness';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 
 import * as langAttribute from '../langAttribute';
 import attribute from '../attribute';
@@ -227,6 +227,25 @@ describe('attribute (unit)', () => {
 
          expect(langAttribute.checkXmlLangWellFormed)
             .toHaveBeenCalledWith(attributesPChunk[0].value, mockErrorCollector, confVer);
+      });
+
+      it('reports an error if an xml:space attribute has a value other than preserve or default', () => {
+         litCheck.and.callFake((_2: any, _3: any, _4: any, _5: any, callback: Function) => {
+            callback();
+         });
+
+         attribute.checkWellFormed([ {
+            name: toSToken('xml:space'),
+            equal: toSToken('='),
+            value: [new TextPToken(toSToken('bogus'))],
+         }], mockErrorCollector, confVer, undefined as any, WellFormedError.ID.NOUN_ATTRIBUTE);
+
+         expect(mockErrorCollector).toReportXmlError({
+            id: XmlError.ID.XMLSPACE_INVALID_VALUE,
+            params: [ 'bogus' ],
+            position: undefined,
+            lastPosition: toSToken('='),
+         });
       });
 
       it('asks the literal module to look for problems in the declaration part', () => {

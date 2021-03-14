@@ -2,7 +2,7 @@
 
 import { expect } from '@jest/globals';
 import { ERROR_TYPE } from 'basic';
-import { PToken, XmlError } from 'token';
+import { PToken, ErrorToken } from 'token';
 
 import { ErrorDetails } from './types';
 
@@ -46,9 +46,9 @@ function toHaveXmlConfErrors(
    let message;
 
    const errorsExpected = expected.length > 0;
-   const actualErrors: Array<XmlError> = actual.filter(
+   const actualErrors: Array<ErrorToken> = actual.filter(
       (token) => token.type === ERROR_TYPE && token.subtype !== 'WARNING',
-   ) as Array<XmlError>;
+   ) as Array<ErrorToken>;
    const hasAllExpectedErrors = expected.reduce((foundAll, expectedId) => {
       if (!expectedId) {
          return false;

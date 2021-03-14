@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityId, Range } from 'basic';
+import { EntityId } from '../basic/EntityId';
+import Range from '../basic/Range';
 
 function canFuseRanges(range1: Range, range2: Range): boolean {
    const locationsSame = range1.entityId === range2.entityId;

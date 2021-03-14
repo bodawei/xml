@@ -2276,6 +2276,7 @@ const expectedErrorCodes: IdToErrorMap = {
    'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
    'x-rmt-008--V1R1': 'none', // This input is actually just fine for 1.0/1
    'x-rmt-008--V1R5': 'none', // This input is actually just fine for 1.0/5
+   'rmt-e2e-57': 'XMLSPACE_INVALID_VALUE', // ok - A value other than preserve or default for xml:space is an error
 };
 
 export { IdToErrorMap, expectedErrorCodes, expectedNotWfCodes, expectedInvalidCodes };

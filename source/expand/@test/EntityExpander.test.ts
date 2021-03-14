@@ -30,7 +30,7 @@ import {
    DocTypeStartPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   XmlError,
+   ErrorToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
    INTERNAL_SUBSET_START_TOKEN,
@@ -72,7 +72,7 @@ describe('EntityExpander (unit)', () => {
 
       return {
          sTokenSource,
-         getErrors(): Array<XmlError> {
+         getErrors(): Array<ErrorToken> {
             return [];
          },
       };

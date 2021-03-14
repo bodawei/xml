@@ -38,4 +38,5 @@ export * from './chars';
 export * from './doAsyncLoop';
 export * from './doAsyncWhileLoop';
 export * from './extractSurrogatePair';
+export * from './XmlError';
 export { XmlVersion, XmlRevision };

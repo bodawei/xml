@@ -10,7 +10,7 @@ import {
 import { strOrBlank } from 'sToken';
 import {
    ElidedEntityDeclarationPToken,
-   XmlError,
+   ErrorToken,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
    EntityValueElement,
@@ -21,7 +21,7 @@ import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
 
 interface ExpandResults {
-   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
    expandedTokens: Array<EntityValueElement> | undefined;
 }
 
@@ -88,7 +88,7 @@ function expandMarkupUnexpanded(
 
    // Process expand all the peRefs potentially very asynchronously.
    doAsyncLoop(peRefs, expandRef, (results) => {
-      const allByproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
+      const allByproducts: Array<ErrorToken | ElidedEntityDeclarationPToken> = [];
       const newValue: Array<EntityValueElement> = [];
       let peRefIndex = 0;
 

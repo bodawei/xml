@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, XmlError, XmlWarning } from 'basic';
 import { WellFormedError } from '../../wellformedness/error/WellFormedError';
-import { isTextPToken, CharRefPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
+import { isTextPToken, CharRefPToken, GeneralEntityReferencePToken, TextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import { TextXToken } from 'xToken';
 
@@ -197,6 +197,22 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, conf
 
          if (checkValue) {
             checkValue(attr.name, attr.value, ec, confVer);
+         }
+
+         //
+         // §2.10
+         // This specification does not give meaning to any value of `xml:space` other than
+         // "default" and "preserve". It is an error for other values to be specified;
+         // the XML processor may report the error or may recover by ignoring the attribute
+         // specification or by reporting the (erroneous) value to the application.
+         //
+         if (attr.name.str.toLowerCase() === 'xml:space') {
+            const valueString = pTokenArrayToString(attr.value);
+            const position = attr.openQuote?.ranges?.[0];
+
+            if (valueString !== 'preserve' && valueString !== 'default') {
+               ec.reportError(XmlError.ID.XMLSPACE_INVALID_VALUE, XmlError, [valueString], position?.getStartOffset());
+            }
          }
       });
    }

@@ -9,7 +9,7 @@ import {
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
-import { XmlError, ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
+import { ErrorToken, ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';
@@ -69,7 +69,7 @@ describe('expandMarkupUnexpanded() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
-                  getErrors: (): Array<XmlError> => [],
+                  getErrors: (): Array<ErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},

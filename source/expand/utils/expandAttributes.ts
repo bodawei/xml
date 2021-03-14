@@ -8,7 +8,7 @@ import {
    ElidedEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
-   XmlError,
+   ErrorToken,
 } from 'token';
 
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
@@ -22,14 +22,14 @@ interface AttrValueObj {
 }
 
 interface ExpandAttrResult {
-   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
    newValue: AttributeValuePToken;
 }
 type AttrExpanded = (result: ExpandAttrResult) => void;
 
 interface ParseResults {
    expandedFragment: AttributeValuePToken | void;
-   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
 }
 
 /*
@@ -41,7 +41,7 @@ function parseEntityValueAsAttributeValue(
    geDetails: GEDetails,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
-   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>,
+   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>,
    callback: (result: ParseResults) => void,
 ): void {
    const entityValue = geDetails.protoReplacementText;
@@ -171,7 +171,7 @@ function expandOneAttribute(
       geRefs,
       expandGeRef.bind(undefined, expandParams, entityContextStack),
       (expandedDetails) => {
-         const allByproducts: Array<XmlError | ElidedEntityDeclarationPToken> = [];
+         const allByproducts: Array<ErrorToken | ElidedEntityDeclarationPToken> = [];
          const newValue: AttributeValuePToken = [];
          let geRefIndex = 0;
 

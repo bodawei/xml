@@ -10,7 +10,7 @@ import {
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
-import { ElidedEntityDeclarationPToken, EntityValuePToken, XmlError } from 'token';
+import { ElidedEntityDeclarationPToken, EntityValuePToken, ErrorToken } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
@@ -75,7 +75,7 @@ describe('addProtoReplacementText() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
-                  getErrors: (): Array<XmlError> => [],
+                  getErrors: (): Array<ErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -226,13 +226,13 @@ describe('addProtoReplacementText() (unit)', () => {
          done1 = localDone;
       };
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
-         const errors: Array<XmlError> = [];
+         const errors: Array<ErrorToken> = [];
          for (let index = 0; index < callCount; index++) {
             errors.push(new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS));
          }
          return {
             sTokenSource: new STokenSource({}),
-            getErrors: (): Array<XmlError> => errors,
+            getErrors: (): Array<ErrorToken> => errors,
          };
       };
 
@@ -266,7 +266,7 @@ describe('addProtoReplacementText() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource({}),
-            getErrors: (): Array<XmlError> => [
+            getErrors: (): Array<ErrorToken> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],
          };

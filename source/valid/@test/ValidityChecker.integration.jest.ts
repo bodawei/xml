@@ -15,7 +15,7 @@ import { ValidityError } from '../error/ValidityError';
 
 // ick
 import { PTokenStream } from '../../pTokenStream';
-import { XmlError } from 'token';
+import { ErrorToken } from 'token';
 
 describe('ValidityChecker (integration)', () => {
    let ec: ErrorCollector;
@@ -27,7 +27,7 @@ describe('ValidityChecker (integration)', () => {
    });
 
    function expectError(input: string, errorCode: string, done: () => void): void {
-      const finalResults: Array<XmlError> = [];
+      const finalResults: Array<ErrorToken> = [];
 
       pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
          context: ContextType.DOCUMENT,

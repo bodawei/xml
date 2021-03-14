@@ -3,6 +3,7 @@
 /* eslint-env jasmine */
 
 import { BaseError } from '../../BaseError';
+import { XmlError } from '../../XmlError';
 import { XmlWarning } from '../../XmlWarning';
 import { MockErrorCollector } from './helper';
 import { makeJasmineErrorMatcher } from './makeJasmineErrorMatcher';
@@ -99,9 +100,9 @@ function toBeErrorFree() {
          });
 
          if (!error!) {
-            message = 'Expected to find one or more XmlErrors.';
+            message = 'Expected to find one or more ErrorToken.';
          } else {
-            message = `Expected to find no XmlErrors, but found ${(error as any).message}. (${
+            message = `Expected to find no ErrorToken, but found ${(error as any).message}. (${
                (error as any).id
             })`; // typeHack
          }
@@ -127,9 +128,9 @@ function toBeErrorAndWarningFree() {
          });
 
          if (!error!) {
-            message = 'Expected to find one or more XmlErrors.';
+            message = 'Expected to find one or more ErrorToken.';
          } else {
-            message = `Expected to find no XmlErrors, but found ${(error as any).message}. (${
+            message = `Expected to find no ErrorToken, but found ${(error as any).message}. (${
                (error as any).id
             })`; // typeHack
          }
@@ -174,6 +175,10 @@ function toReportWarning(util: any) {
    return makeJasmineErrorMatcher(util, XmlWarning);
 }
 
+function toReportXmlError(util: any) {
+   return makeJasmineErrorMatcher(util, XmlError);
+}
+
 if (typeof jest === 'undefined') {
    beforeEach(() => {
       jasmine.addMatchers({
@@ -182,6 +187,7 @@ if (typeof jest === 'undefined') {
          toBeErrorFree,
          toBeErrorAndWarningFree,
          toNotReportError,
+         toReportXmlError,
          toReportWarning,
       });
    });
@@ -198,14 +204,15 @@ declare global {
    namespace jasmine {
       interface Matchers<T> {
          toBeInstanceOf(anObject: Object): void;
-         toHaveError(expectedXmlErrorInstance: any): void; // given tokens: Array<any>,
+         toHaveError(expectedErrorTokenInstance: any): void; // given tokens: Array<any>,
          toBeErrorFree(): void; // given tokens: Array<any>
          toBeErrorAndWarningFree(): void; // given tokens: Array<any>
          toNotReportError(id: string): void;
          toReportWarning(errorProps: ErrorProps): void;
          toReportWFError(errorProps: ErrorProps): void; // not sure why this isn't picked up from wf
+         toReportXmlError(errorProps: ErrorProps): void; // not sure why this isn't picked up from wf
       }
    }
 }
 
-export { toBeInstanceOf, toReportWarning };
+export { toBeInstanceOf, toReportWarning, toReportXmlError };

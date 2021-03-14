@@ -57,7 +57,7 @@ import { EXTERNAL_ID, ExternalId, parseExternalId } from './common/externalId';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
-type XmlError = {
+type ErrorToken = {
    type: 'ERROR_TYPE';
    subtype?: string;
    id: string;
@@ -65,7 +65,7 @@ type XmlError = {
 }
 
 type PToken =
-| XmlError
+| ErrorToken
    | CommentPToken
    | CdataPToken
    | CharDataPToken
@@ -113,5 +113,5 @@ export {
    EXTERNAL_ID,
    ExternalId,
    PToken,
-   XmlError,
+   ErrorToken,
 };

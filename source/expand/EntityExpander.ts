@@ -37,7 +37,7 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
    InternalSubsetEndToken,
-   XmlError,
+   ErrorToken,
    ElidedEntityDeclarationPToken,
    CONDITIONAL_PTOKEN,
    ConditionalPToken,
@@ -647,7 +647,7 @@ class EntityExpander {
       );
    }
 
-   private deliverByproducts(byproducts: Array<XmlError | ElidedEntityDeclarationPToken>): void {
+   private deliverByproducts(byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>): void {
       for (const err of byproducts) {
          this.deliverToken(err);
       }

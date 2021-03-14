@@ -1,7 +1,8 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityId, Range } from 'basic';
+import { EntityId } from '../../basic/entityId';
+import { Range } from 'basic';
 
 import SToken from '../SToken';
 
@@ -55,7 +56,7 @@ describe('SToken', () => {
             jasmine.objectContaining({
                str: 'one',
                originalStr: 'one',
-               ranges: [new Range(new EntityId())],
+               // ranges: [new Range(new EntityId())],
             }),
          );
       });

@@ -7,7 +7,7 @@ import { WellFormedError } from 'wellformedness';
 import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   XmlError,
+   ErrorToken,
    ElidedEntityDeclarationPToken,
 } from 'token';
 
@@ -65,7 +65,7 @@ describe('expandAttributes() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource({}),
-                  getErrors: (): Array<XmlError> => [],
+                  getErrors: (): Array<ErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -320,7 +320,7 @@ describe('expandAttributes() (unit)', () => {
             b: any,
             chain: any,
             callback: (result: {
-               byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+               byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
             }) => void,
          ) => {
             callback({ byproducts: [attrError] });
@@ -431,7 +431,7 @@ describe('expandAttributes() (unit)', () => {
                b: any,
                chain: any,
                callback: (result: {
-                  byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+                  byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
                }) => void,
             ) => {
                callback({ byproducts: [loadingError] });
@@ -478,7 +478,7 @@ describe('expandAttributes() (unit)', () => {
             b: any,
             chain: any,
             callback: (result: {
-               byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+               byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
             }) => void,
          ) => {
             entityDetails.updateDeclaredValue(get2Decl, [ge2Value], []);

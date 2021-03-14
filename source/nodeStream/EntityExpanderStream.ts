@@ -8,7 +8,7 @@ import { defaultExtractors } from 'extractor';
 import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
-import { AttributeValuePToken, EntityValuePToken, PToken, XmlError } from 'token';
+import { AttributeValuePToken, EntityValuePToken, PToken, ErrorToken } from 'token';
 
 import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../expand/types';
 import { ContextType } from 'pToken';
@@ -64,7 +64,7 @@ function retrieveExternalEntity(
 
    return {
       sTokenSource,
-      getErrors: (): Array<XmlError> => [],
+      getErrors: (): Array<ErrorToken> => [],
    };
 }
 

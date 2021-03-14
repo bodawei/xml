@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Offset, StringBundle } from 'basic';
-import { SToken } from 'sToken';
+import Offset from './Offset';
+import { StringBundle } from './StringBundle';
+import SToken from '../sToken/sToken';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
@@ -10,6 +11,10 @@ type Position = SToken | Offset | undefined;
 interface MessageCache {
    code: { [id: string]: number };
    message: StringBundle;
+}
+
+function isSToken(candidate: Position): candidate is SToken {
+   return !!candidate && 'originalStr' in candidate;
 }
 
 /**********************************************************************\
@@ -71,14 +76,14 @@ class BaseError {
 
       params = params || [];
 
-      if (place instanceof SToken) {
+      if (isSToken(place)) {
          place = place.ranges[0].getEndOffset();
       } else if (place instanceof Offset) {
          place = place.clone();
       }
 
       if (contextOffset) {
-         if (contextOffset instanceof SToken) {
+         if (isSToken(contextOffset)) {
             contextOffset = contextOffset.ranges[0].getStartOffset();
          } else {
             // offset

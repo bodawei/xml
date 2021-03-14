@@ -8,15 +8,15 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { EntityValuePToken, ExternalId, XmlError, ElidedEntityDeclarationPToken } from 'token';
+import { EntityValuePToken, ExternalId, ErrorToken, ElidedEntityDeclarationPToken } from 'token';
 
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
 import { OpaqueEntityLoc } from '../types';
 
 interface LoadingResult {
-   details: PrivateGEDetails | PrivatePEDetails | void;
-   byproducts: Array<XmlError | ElidedEntityDeclarationPToken>;
+   details: PrivateGEDetails | PrivatePEDetails | undefined;
+   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
 }
 type LoadingCallback = (result: LoadingResult) => void;
 
@@ -136,13 +136,13 @@ class EntityDetails {
       return this.getInternalGEDetails(name);
    }
 
-   public getPEDetails(name: string): PEDetails | void {
+   public getPEDetails(name: string): PEDetails | undefined {
       return this.getInternalPEDetails(name);
    }
 
    public getReferencedDetails(
       reference: ParameterEntityReferencePToken | GeneralEntityReferencePToken,
-   ): GEDetails | PEDetails | void {
+   ): GEDetails | PEDetails | undefined {
       const isPERef = reference instanceof ParameterEntityReferencePToken;
       const entityName = strOrBlank(reference.name);
 
@@ -153,7 +153,7 @@ class EntityDetails {
       this.externalSubset = new ExternalDtdSubsetPseudoToken(externalId);
    }
 
-   public getExternalSubsetReference(): ExternalDtdSubsetPseudoToken | void {
+   public getExternalSubsetReference(): ExternalDtdSubsetPseudoToken | undefined {
       return this.externalSubset;
    }
 
@@ -187,8 +187,8 @@ class EntityDetails {
 
    public updateDeclaredValue(
       declaration: ParameterEntityDeclarationPToken | GeneralEntityDeclarationPToken,
-      newValue: EntityValuePToken | void,
-      byproducts: Array<XmlError | ElidedEntityDeclarationPToken>,
+      newValue: EntityValuePToken | undefined,
+      byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>,
    ): void {
       const details = this.getDeclarationDetails(declaration);
 
@@ -245,7 +245,7 @@ class EntityDetails {
       return result;
    }
 
-   private getInternalPEDetails(name: string): PrivatePEDetails | void {
+   private getInternalPEDetails(name: string): PrivatePEDetails | undefined {
       // Recall that !'' is the same as !undefined
       if (!name) {
          return;
@@ -256,7 +256,7 @@ class EntityDetails {
 
    private getDeclarationDetails(
       reference: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-   ): PrivateGEDetails | PrivatePEDetails | void {
+   ): PrivateGEDetails | PrivatePEDetails | undefined {
       const isPERef = reference instanceof ParameterEntityDeclarationPToken;
       const entityName = strOrBlank(reference.name);
 

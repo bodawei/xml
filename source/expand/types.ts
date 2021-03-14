@@ -1,7 +1,7 @@
 import { EntityId, ConformanceVersion } from 'basic';
 import { ContextType, ParseToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
-import { AttributeValuePToken, EntityValuePToken, XmlError } from 'token';
+import { AttributeValuePToken, EntityValuePToken, ErrorToken } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
 
@@ -16,11 +16,11 @@ interface ConditionalInfo {
 
 interface RetrieveResults {
    sTokenSource: STokenSource;
-   getErrors: () => Array<XmlError>;
+   getErrors: () => Array<ErrorToken>;
 }
 interface AttributeValueResults {
    newValue: AttributeValuePToken | undefined;
-   errors: Array<XmlError>;
+   errors: Array<ErrorToken>;
 }
 
 type OpaqueEntityLoc = string | EntityId | any;

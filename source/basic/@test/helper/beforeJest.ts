@@ -43,10 +43,10 @@ function toBeErrorFree(actual: any) {
    });
 
    if (!error!) {
-      message = 'Expected to find one or more XmlErrors.';
+      message = 'Expected to find one or more ErrorTokens.';
    } else {
-      message = `Expected to find no XmlErrors, but found ${(error! as any).message}. (${
-         (error! as any).id
+      message = `Expected to find no ErrorTokens, but found ${(error as any).message}. (${
+         (error as any).id
       })`; // typeHack
    }
 
@@ -67,10 +67,10 @@ function toBeErrorAndWarningFree(actual: any) {
    });
 
    if (!error!) {
-      message = 'Expected to find one or more XmlErrors.';
+      message = 'Expected to find one or more ErrorTokens.';
    } else {
-      message = `Expected to find no XmlErrors, but found ${(error! as any).message}. (${
-         (error! as any).id
+      message = `Expected to find no ErrorTokens, but found ${(error as any).message}. (${
+         (error as any).id
       })`; // typeHack
    }
 

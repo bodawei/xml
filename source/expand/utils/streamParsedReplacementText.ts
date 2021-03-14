@@ -10,7 +10,7 @@ import {
 } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
-   XmlError,
+   ErrorToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    GeneralEntityStartPToken,
@@ -66,7 +66,7 @@ function streamParsedReplacementText(
 ): void {
    const { entityDetails, utils } = expandParams;
    let sTokenSource: STokenSource;
-   let getErrors: () => Array<XmlError>;
+   let getErrors: () => Array<ErrorToken>;
    let context = ContextType.DOCUMENT;
    let start: ParseToken;
    let end: ParseToken;
@@ -114,7 +114,7 @@ function streamParsedReplacementText(
             details.protoReplacementText,
             expandParams.entityId,
          );
-         getErrors = (): Array<XmlError> => [];
+         getErrors = (): Array<ErrorToken> => [];
       } else {
          ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(entityLoc));
       }

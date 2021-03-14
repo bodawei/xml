@@ -202,7 +202,7 @@ describe('DocumentChecker (unit)', () => {
          expect(cwfSpy).toHaveBeenCalledWith(xmlDecl, expect.any(ErrorCollector), confVer);
       });
 
-      it('handles an XmlError with no problems', () => {
+      it('handles an error token with no problems', () => {
          const error = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS);
 
          checker.check(error, ec);

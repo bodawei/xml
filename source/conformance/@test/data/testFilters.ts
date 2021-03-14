@@ -7,7 +7,9 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      'rmt-e2e-57', // A value other than preserve or default for xml:space is an error
+   ],
    excludedIds: [
       // 690 Add an error type. Right now it seems like it can go in wellformedness
 

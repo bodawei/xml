@@ -21,7 +21,7 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    PToken,
-   XmlError,
+   ErrorToken,
    PARAMETER_ENTITY_START_PTOKEN,
    COMMENT_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
@@ -97,7 +97,7 @@ describe('EntityExpander (integration)', () => {
 
       return {
          sTokenSource,
-         getErrors(): Array<XmlError> {
+         getErrors(): Array<ErrorToken> {
             return [];
          },
       };
