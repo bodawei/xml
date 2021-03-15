@@ -2,11 +2,8 @@
 
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from'basic-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
-import misc from '../common/misc';
 import { CharDataPToken, CharDataXToken, parseCharData } from '../charData';
 
 describe('charData', () => {
@@ -70,24 +67,6 @@ describe('charData', () => {
          expect(callback.calls.argsFor(0)[0].toSTokenArray()).toEqual([
             charDataPToken.text,
          ]);
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-         spyOn(misc, 'checkCharWellFormed');
-      });
-
-      it('asks the checks the text is well formed', () => {
-         const confVer = new ConformanceVersion();
-
-         charDataPToken.checkWellFormed(mockErrorCollector, confVer);
-
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, confVer);
       });
 
    });

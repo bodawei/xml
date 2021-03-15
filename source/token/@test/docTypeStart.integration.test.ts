@@ -1,8 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
-import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
@@ -48,50 +46,6 @@ describe('docTypeStart (integration)', () => {
 
          parseDocTypeStart(source, { open: SToken.fromString('<!'), } as any, (parsing) => {
             expect(parsing).toContainPTokenProps(docTypeStartPToken);
-            done();
-         });
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-      let declaration: DeclarationPToken;
-
-      beforeEach(() => {
-         const makeSToken = makeSTokenMaker();
-         declaration = new DeclarationPToken('FOO', {
-            open: makeSToken('<!'),
-            declType: makeSToken('DOCTYPE'),
-         });
-      });
-
-      it('asks the declaration module to report if there is no type', (done) => {
-         const source = new STokenSource(defaultExtractors);
-         source.addText('rootElement system "sys.dtd" [');
-         source.endText();
-         delete declaration.declType;
-
-         parseDocTypeStart(source, declaration, (parsing) => {
-            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
-
-            parsing.checkWellFormed(ec, new ConformanceVersion());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_NO_DECLTYPE);
-            done();
-         });
-      });
-
-      it('asks the externalId module to look for well formed problems', (done) => {
-         const source = new STokenSource(defaultExtractors);
-         source.addText('rootElement system "sys.dtd" [');
-         source.endText();
-
-         parseDocTypeStart(source, declaration, (parsing) => {
-            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
-
-            parsing.checkWellFormed(ec, new ConformanceVersion());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
             done();
          });
       });

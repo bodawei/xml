@@ -2,8 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
@@ -79,72 +77,6 @@ describe('declaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(declarationPToken);
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-         delete declarationPToken.postOpenSpace;
-      });
-
-      it('returns an an error collector', () => {
-         const errors = declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
-
-         expect(errors).toEqual(mockErrorCollector);
-      });
-
-      it('reports an error if there is a space after the opening <!', () => {
-         const makeSToken = makeSTokenMaker();
-         declarationPToken.postOpenSpace = makeSToken(' ');
-
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
-            params: undefined,
-            position: declarationPToken.postOpenSpace,
-         });
-      });
-
-      it('reports an error if there is no declaration type provided', () => {
-         delete declarationPToken.declType;
-
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.DECL_NO_DECLTYPE,
-            params: undefined,
-            position: undefined,
-            lastPosition: declarationPToken.open,
-         });
-      });
-
-      it('reports an error if the type is not capitalized', () => {
-         (declarationPToken as any).declType.str = 'docType';
-
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
-            params: [ 'DOCTYPE', 'docType' ],
-            position: declarationPToken.declType,
-         });
-      });
-
-      it('reports an error if the type is not a valid type', () => {
-         (declarationPToken as any).declType.str = 'BOGUSTYPE';
-
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, confVer);
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.DECL_UNKNOWN,
-            params: [ 'BOGUSTYPE' ],
-            position: declarationPToken.declType,
-         });
       });
 
    });

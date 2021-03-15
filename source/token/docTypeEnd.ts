@@ -1,8 +1,6 @@
 /* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
 import { STokenSource, STokenArrayBuilder, SToken } from 'sToken';
-import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 
 import { DocTypeStartPToken } from './docTypeStart';
 
@@ -13,7 +11,6 @@ import { DocTypeStartPToken } from './docTypeStart';
  See docTypeStart for more details
 \**********************************************************************/
 
-const WFEID = WellFormedError.ID;
 const DOCTYPE_END_PTOKEN = 'DOCTYPE_END_PTOKEN';
 const DOCTYPE_END_XTOKEN = 'DOCTYPE_END_XTOKEN';
 
@@ -31,10 +28,6 @@ class DocTypeEndPToken {
 
       this.docTypeStartPToken = basePToken.docTypeStartPToken; // Make sure type system knows we always assign open
       this.type = DOCTYPE_END_PTOKEN;
-   }
-
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
-      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -81,22 +74,6 @@ function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken,
       pToken.close = sToken;
       deliverPToken(new DocTypeEndPToken(pToken));
    });
-}
-
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: DocTypeEndPToken, ec: ErrorCollector, confVer: ConformanceVersion) { // eslint-disable-line no-unused-vars
-   ec.setPos(pToken.closeSubset);
-
-   if (!pToken.docTypeStartPToken || !pToken.docTypeStartPToken.openSubset) {
-      ec.check(pToken.closeSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
-   }
-
-   // If there is no close, and no closeInternalSubset, this won't get a very good position.
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.DOCTYPE_NO_CLOSE);
 }
 
 /**********************************************************************\

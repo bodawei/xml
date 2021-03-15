@@ -1,17 +1,13 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
-import { TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import unassigned from '../unassigned';
 import { UnassignedArray } from '../unassigned';
 
 import literal from '../literal';
-import { EXTERNAL_ID, parseExternalId, getSTokens, checkExternalIdWellFormed } from '../externalId';
+import { EXTERNAL_ID, parseExternalId, getSTokens } from '../externalId';
 
 describe('externalId (unit)', () => {
    describe('parse()', () => {
@@ -396,172 +392,6 @@ describe('externalId (unit)', () => {
             expect(unCheck.calls.argsFor(2)[3]).toBeInstanceOf(Function);
             expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
-      });
-   });
-
-   describe('checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-      let pTokenPart: any;
-      let litWell: jasmine.Spy;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-
-         const expectedSToken = makeSTokenMaker();
-         pTokenPart = {
-            type: EXTERNAL_ID,
-            peRefPlus: [],
-            externalType: expectedSToken('PUBLIC'),
-            externalTypeSpace: expectedSToken(' '),
-            public: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('pub.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-            publicSpace: expectedSToken(' '),
-            system: {
-               openQuote: expectedSToken('"'),
-               value: [new TextPToken({ text: expectedSToken('sys.xml') })],
-               closeQuote: expectedSToken('"'),
-            },
-         };
-         litWell = spyOn(literal, 'checkWellFormed');
-      });
-
-      it('calls literal.checkWellFormed() to check the PUBLIC value', () => {
-         const confVer = new ConformanceVersion();
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, confVer);
-
-         expect(litWell.calls.argsFor(0)[0]).toEqual(pTokenPart.public);
-         expect(litWell.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
-         expect(litWell.calls.argsFor(0)[2]).toEqual(confVer);
-         expect(litWell.calls.argsFor(0)[3]).toEqual(WellFormedError.ID.NOUN_EXTERNALID_PUBLIC);
-         expect(litWell.calls.argsFor(0)[4] instanceof Function).toEqual(true);
-      });
-
-      it('calls literal.checkWellFormed() to check the SYSTEM value', () => {
-         const confVer = new ConformanceVersion();
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, confVer);
-
-         expect(litWell.calls.argsFor(1)[0]).toEqual(pTokenPart.system);
-         expect(litWell.calls.argsFor(1)[1]).toEqual(mockErrorCollector);
-         expect(litWell.calls.argsFor(1)[2]).toEqual(confVer);
-         expect(litWell.calls.argsFor(1)[3]).toEqual(WellFormedError.ID.NOUN_EXTERNALID_SYSTEM);
-         expect(litWell.calls.argsFor(1)[4]).toEqual(undefined);
-      });
-
-      it('reports an error if the PUBLIC value has illegal characters', () => {
-         pTokenPart.public.value[0].text.str = 'bad&chars';
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         // invoke the callback function
-         litWell.calls.argsFor(0)[4]();
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
-            params: ['&'],
-            position: pTokenPart.publicSpace, // This is only because we call the callback after
-         });
-      });
-
-      it('reports no errors when no PToken part is passed in', () => {
-         checkExternalIdWellFormed(undefined, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector.report).not.toHaveBeenCalled();
-      });
-
-      it('reports no errors if the public value is undefined (this can not happen naturally)', () => {
-         litWell.and.callFake((_1: any, _2: any, _3: any, _4: any, callback: Function) => {
-            return callback ? callback() : undefined;
-         });
-         delete pTokenPart.public.value;
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector.report).not.toHaveBeenCalled();
-      });
-
-      it('reports an error if the public value contains invalid characters', () => {
-         litWell.and.callFake((_1: any, _2: any, _3: any, _4: any, callback: Function) => {
-            return callback ? callback() : undefined;
-         });
-         pTokenPart.public.value[0].text.str = '{}{}{}{}';
-
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
-            params: ['{'],
-            position: pTokenPart.externalTypeSpace, // wrong due to mocking
-         });
-      });
-
-      it('reports an error if type is neither PUBLIC or SYSTEM', () => {
-         pTokenPart.externalType.str = 'Bogus';
-
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.EXTERNALID_UNKNOWN,
-            params: ['Bogus'],
-            position: pTokenPart.externalType,
-         });
-      });
-
-      it('reports an error if type is the wrong case', () => {
-         pTokenPart.externalType.str = 'public';
-
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
-            params: ['PUBLIC', 'public'],
-            position: pTokenPart.externalType,
-         });
-      });
-
-      it('reports an error if there is no space after the id type', () => {
-         delete pTokenPart.externalTypeSpace;
-
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.EXTERNALID_EXTERNALTYPE_NO_SPACE,
-            params: undefined,
-            lastPosition: pTokenPart.externalType,
-         });
-      });
-
-      it('reports an error if there is no space after a PUBLIC part', () => {
-         delete pTokenPart.publicSpace;
-
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
-            params: undefined,
-            lastPosition: pTokenPart.externalTypeSpace, // beccause we are mocking out the quotes call
-         });
-      });
-
-      it('reports no error if there is no system part', () => {
-         delete pTokenPart.system;
-
-         checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector.errors.length).toEqual(0);
-      });
-
-      it('throws no errors if there is no public part', () => {
-         litWell.and.callFake((publicOrSystem, _2, _3, _4, callback: Function) => {
-            if (!publicOrSystem) {
-               callback();
-            }
-         });
-         delete pTokenPart.public;
-
-         expect(() => {
-            checkExternalIdWellFormed(pTokenPart, mockErrorCollector, new ConformanceVersion());
-         }).not.toThrow();
       });
    });
 

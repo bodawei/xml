@@ -1,0 +1,36 @@
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+
+import { describe, expect, it } from '@jest/globals';
+import { ConformanceVersion, ErrorCollector } from 'basic';
+import { defaultExtractors } from 'extractor';
+import { STokenSource } from 'sToken';
+
+import { charDataCheck } from '../charDataCheck';
+
+import { parseCharData } from 'token';
+
+import { WellFormedError } from '../../error/WellFormedError';
+
+describe('charDataCheck()', () => {
+   let confVer: ConformanceVersion;
+   let source: STokenSource;
+
+   beforeEach(() => {
+      confVer = new ConformanceVersion();
+      source = new STokenSource(defaultExtractors);
+   });
+
+   it('reports an error a bad character is in the text', (done) => {
+      source.addText('bad\u0000&');
+      source.endText();
+
+      parseCharData(source, [], (result) => {
+         const ec = new ErrorCollector(result!.text, WellFormedError);
+
+         charDataCheck(result!, ec, confVer);
+
+         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         done?.();
+      });
+   });
+});

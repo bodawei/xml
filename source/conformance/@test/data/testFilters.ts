@@ -9,27 +9,41 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: ['dtd05'],
    excludedIds: [
-      // 692 error - certain characters not allowed in the xml declaration
+      // PUT TOGETHER A DESIGN PLAN FOR THIS:
+      // WE are either not checking chardata correctly, and/or our error messages are wonked out
+      'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
+      'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
+      'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
+      'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
+      'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
+      'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
+      'ibm-1-1-not-wf-P02-ibm02n68.xml',
+      'ibm-1-1-not-wf-P02-ibm02n69.xml',
+      'ibm-1-1-not-wf-P02-ibm02n67.xml', // - alomst, except only identifies 2 of three. Also coment and pi are saying CHARDATA_INVALID_CHAR as is CDATA   This test contains embeded character 0xD800. (Invalid UTF8 sequence)
+
+      // easy 692 error - certain characters not allowed in the xml declaration
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
       'rmt-057', // Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
 
-      // 687 - need a new kind of error. Reported also by WF system, I think. Maybe defined in basic?
+      // easy 687 - need a new kind of error. Reported also by WF system, I think. Maybe defined in basic?
       'uri01', // SYSTEM ids may not have URI fragments
       // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
       'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
-
-      // 688 need an error for this. We need to scan content models. e34 in https://www.w3.org/XML/xml-V10-2e-errata
-      'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
-
-      // 689 - error - another case of scanning entity values even if not referenced
-      'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
 
       // 686 - easy - char refs should be rejecting surrogate halves
       'o-p66fail6', // no references to non-characters
 
       // 685 - easy - why are we not checking that a text decl has an encoding?
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+
+      // ------- Unsorted ---------------------------------------------
+
+      // 688 need an error for this. We need to scan content models. e34 in https://www.w3.org/XML/xml-V10-2e-errata
+      'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
+
+      // 689 - error - another case of scanning entity values even if not referenced
+      'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
 
       // 684 - we could extend the content model wellformedness check in some way to report this better
       'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
@@ -73,17 +87,6 @@ const testFilters: FilterData = {
       // Looks like the characters are still getting mangled?
       'x-rmt5-016', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
       'x-rmt5-019', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-
-      // WE are either not checking chardata correctly, and/or our error messages are wonked out
-      'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
-      'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
-      'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
-      'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
-      'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
-      'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
-      'ibm-1-1-not-wf-P02-ibm02n68.xml',
-      'ibm-1-1-not-wf-P02-ibm02n69.xml',
-      'ibm-1-1-not-wf-P02-ibm02n67.xml', // - alomst, except only identifies 2 of three. Also coment and pi are saying CHARDATA_INVALID_CHAR as is CDATA   This test contains embeded character 0xD800. (Invalid UTF8 sequence)
 
       // not checking characters and versions correctly for element names
       'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition

@@ -1,16 +1,13 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ErrorCollector } from 'basic';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { defaultExtractors } from 'extractor';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import { UnassignedType } from '../unassigned';
-import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from '../externalId';
-import { ConformanceVersion } from 'basic';
+import { ExternalId, parseExternalId, getSTokens } from '../externalId';
 
 describe('externalId (integration)', () => {
    describe('parse()', () => {
@@ -79,27 +76,6 @@ describe('externalId (integration)', () => {
                ],
                nextPropName: 'system',
             });
-            done();
-         });
-      });
-   });
-
-   describe('checkWellFormed()', () => {
-      let source: STokenSource;
-
-      beforeEach(() => {
-         source = new STokenSource(defaultExtractors);
-      });
-
-      it('reports an error when the SYSTEM is missing a quote (check literal.checkCharWellFormed())', (done) => {
-         source.addText('SYSTEM "bad');
-         source.endText();
-         parseExternalId(source, [], true, (result) => {
-            const ec = new ErrorCollector(toSToken('x'), WellFormedError);
-
-            checkExternalIdWellFormed(result.externalId, ec, new ConformanceVersion());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
             done();
          });
       });

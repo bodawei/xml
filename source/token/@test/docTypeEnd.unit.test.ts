@@ -2,11 +2,8 @@
 
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from'basic-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
 
 import { DocTypeEndPToken, DocTypeEndXToken, parseDocTypeEnd } from '../docTypeEnd';
 import { DocTypeStartPToken } from '../docTypeStart';
@@ -76,61 +73,6 @@ describe('docTypeEnd (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(docTypeEndPToken);
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-      let docTypeStartPToken: DocTypeStartPToken;
-
-      beforeEach(() => {
-         const makeSToken = makeSTokenMaker();
-         mockErrorCollector = new MockErrorCollector();
-
-         docTypeStartPToken = {
-            startInternalSubset: makeSToken('['),
-         } as any;
-      });
-
-      it('returns no errors if no problems ', () => {
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector.report).not.toHaveBeenCalled();
-      });
-
-      it('reports an error if there is no close', () => {
-         (docTypeEndPToken as any).close = undefined;
-
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).not.toReportWFError({
-            id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
-            params: undefined,
-            position: docTypeEndPToken.closeSubsetSpace,
-         });
-      });
-
-      it('reports an error if there is a "]", but there was no opening "["', () => {
-         delete (docTypeStartPToken as any).startInternalSubset;
-
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).not.toReportWFError({
-            id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
-            params: undefined,
-            position: docTypeEndPToken.closeSubsetSpace,
-         });
-      });
-
-      it('reports an error if there is a "]", but there was no start token', () => {
-         docTypeEndPToken.checkWellFormed(mockErrorCollector, new ConformanceVersion());
-
-         expect(mockErrorCollector).not.toReportWFError({
-            id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
-            params: undefined,
-            position: docTypeEndPToken.closeSubsetSpace,
-         });
       });
 
    });

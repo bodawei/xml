@@ -2,11 +2,14 @@
 
 import { ErrorCollector, ConformanceVersion } from 'basic';
 
+import { attListDeclarationCheck } from './token/attListDeclarationCheck';
 import { cdataCheck } from './token/cdataCheck';
 import { charRefCheck } from './token/charRefCheck';
-import { attListDeclarationCheck } from './token/attListDeclarationCheck';
+import { charDataCheck } from './token/charDataCheck';
 import { commentCheck } from './token/commentCheck';
 import { conditionalStartCheck } from './token/conditionalStartCheck';
+import { docTypeEndCheck } from './token/docTypeEndCheck';
+import { docTypeStartCheck } from './token/docTypeStartCheck';
 import { elementDeclarationCheck } from './token/elementDeclarationCheck';
 import { elementEndCheck } from './token/elementEndCheck';
 import { elementStartCheck } from './token/elementStartCheck';
@@ -37,7 +40,10 @@ import { parameterEntityStartCheck } from './marker/parameterEntityStartCheck';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';
 const CDATA_PTOKEN = 'CDATA_PTOKEN';
+const CHARDATA_PTOKEN = 'CHARDATA_PTOKEN';
 const CONDITIONAL_PTOKEN = 'CONDITIONAL_PTOKEN';
+const DOCTYPE_END_PTOKEN = 'DOCTYPE_END_PTOKEN';
+const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
 const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';
 const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
 const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
@@ -63,8 +69,11 @@ const checkMap: CheckMap = {
    [ATTLIST_DECLARATION_PTOKEN]: attListDeclarationCheck,
    [CDATA_PTOKEN]: cdataCheck,
    [CHARREF_PTOKEN]: charRefCheck,
+   [CHARDATA_PTOKEN]: charDataCheck,
    [COMMENT_PTOKEN]: commentCheck,
    [CONDITIONAL_PTOKEN]: conditionalStartCheck,
+   [DOCTYPE_END_PTOKEN]: docTypeEndCheck,
+   [DOCTYPE_START_PTOKEN]: docTypeStartCheck,
    [ELEMENT_DECLARATION_PTOKEN]: elementDeclarationCheck,
    [ELEMENT_EMPTY_PTOKEN]: elementStartCheck,
    [ELEMENT_END_PTOKEN]: elementEndCheck,

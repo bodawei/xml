@@ -1,9 +1,7 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
-import misc from './common/misc';
 
 const CHARDATA_PTOKEN = 'CHARDATA_PTOKEN';
 const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';
@@ -31,10 +29,6 @@ class CharDataPToken {
 
    constructor(props: { text: SToken }) {
       this.text = props.text;
-   }
-
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
-      return checkWellFormed(this, ec, confVer);
    }
 
    toXToken() {
@@ -71,15 +65,6 @@ function parseCharData(source: STokenSource, otherTerminators: Array<string>, de
 
       deliverPToken(new CharDataPToken({ text: sToken }));
    });
-}
-
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: CharDataPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
-   ec.setPos(pToken.text);
-   misc.checkCharWellFormed(pToken.text, ec, confVer);
 }
 
 /**********************************************************************\

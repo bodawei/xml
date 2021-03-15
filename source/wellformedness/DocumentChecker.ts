@@ -32,6 +32,7 @@ import {
 } from './checkUtils';
 import { checkMap } from './checkMap';
 import { CONDITIONAL_PTOKEN } from 'token';
+import { docTypeEndCheck } from './token/docTypeEndCheck';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
@@ -145,14 +146,12 @@ class DocumentChecker {
             pToken.docTypeStartPToken.open,
             WellFormedError,
          );
-         pToken.checkWellFormed(specialErrorCollector, this.checkState.confVer);
+         docTypeEndCheck(pToken, specialErrorCollector);
          errorCollector.appendFrom(specialErrorCollector);
       } else if (pToken.type === CONDITIONAL_PTOKEN) {
          conditionalStartCheck(pToken, errorCollector);
       } else if (mapped) {
          mapped(pToken, errorCollector, this.checkState.confVer);
-      } else if ('checkWellFormed' in pToken) {
-         pToken.checkWellFormed(errorCollector, this.checkState.confVer);
       }
 
       if (this.subChecker) {

@@ -1,15 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
 import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
-import {  WellFormedError } from '../wellformedness/error/WellFormedError';
 
-import { ExternalId, parseExternalId, checkExternalIdWellFormed, getSTokens } from './common/externalId';
+import { ExternalId, parseExternalId, getSTokens } from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
-import misc from './common/misc';
 import { ExternalIdX } from 'xToken';
 
-const WFEID = WellFormedError.ID;
 const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
 const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 
@@ -67,10 +63,6 @@ class DocTypeStartPToken {
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   checkWellFormed(ec: ErrorCollector, confVer: ConformanceVersion) {
-      return checkWellFormed(this, ec, confVer);
-   }
-
    toXToken() {
       return pTokenToXToken(this);
    }
@@ -115,21 +107,6 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
    });
 }
 
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
-   declaration.checkWellFormed(pToken as any, ec, confVer); // typeHack
-
-   ec.setPos(pToken.name);
-   ec.check(!pToken.name, WFEID.DOCTYPE_NO_NAME);
-   misc.checkName(pToken.name, ec, confVer, WFEID.DOCTYPE_NAME_INVALID);
-
-   checkExternalIdWellFormed(pToken.externalId, ec, confVer);
-
-   ec.setPos(pToken.openSubset);
-}
 
 /**********************************************************************\
  pTokenToXToken() converts a PToken into an XToken.

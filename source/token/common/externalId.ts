@@ -1,8 +1,5 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../../wellformedness/error/WellFormedError';
-import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank, STokenSource, SToken } from 'sToken';
 
 import literal, { LiteralPToken } from './literal';
@@ -17,7 +14,6 @@ import { UnassignedArray } from './unassigned';
  insertion into a token.
 \**********************************************************************/
 
-const WFEID = WellFormedError.ID;
 const EXTERNAL_ID = 'EXTERNAL_ID';
 const ALLOWED_TYPES = ['PUBLIC', 'SYSTEM'];
 const TYPE_TERMINATORS = ['"', "'"];
@@ -201,68 +197,6 @@ function parseExternalId(
    unassigned.checkForPERef(source, callback);
 }
 
-/**********************************************************************\
- checkWellFormed() does a well formed check on the pTokenPart value, and
- reports any error through the error collector.
-
- PARAM
-   pTokenPart: A PToken-compatible externalId as produced, above
-   ec: An ErrorCollector instance.
-\**********************************************************************/
-
-function checkWellFormed(
-   pTokenPart: ExternalId | void,
-   ec: ErrorCollector,
-   confVer: ConformanceVersion,
-): void {
-   if (!pTokenPart) {
-      return;
-   }
-
-   ec.setPos(pTokenPart.externalType);
-   const typeText = strOrBlank(pTokenPart.externalType);
-   const capitalType = typeText.toLocaleUpperCase();
-   ec.check(ALLOWED_TYPES.indexOf(capitalType) === -1, WFEID.EXTERNALID_UNKNOWN, [typeText]);
-   ec.check(typeText !== capitalType, WFEID.EXTERNALID_INVALID_CASE, [capitalType, typeText]);
-
-   ec.setPos(pTokenPart.externalTypeSpace);
-   ec.check(!pTokenPart.externalTypeSpace, WFEID.EXTERNALID_EXTERNALTYPE_NO_SPACE);
-
-   if (capitalType === 'PUBLIC') {
-      // This is very fragile if there is no value.
-      literal.checkWellFormed(pTokenPart.public, ec, confVer, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
-         if (!pTokenPart.public || !pTokenPart.public.value) {
-            return;
-         }
-         let sToken;
-
-         // we are so confused
-         if (pTokenPart.public.value.length > 0) {
-            if (pTokenPart.public.value[0].type === TEXT_PTOKEN) {
-               sToken = (pTokenPart.public.value[0] as any).text; //typeHack
-            } else {
-               sToken = (pTokenPart.public.value[0] as any).str;
-            }
-
-            const match = PUBID_CHARS.exec(sToken.str);
-
-            ec.check(!match || match[0] !== sToken.str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS, [
-               sToken.str[match![0].length],
-            ]);
-         }
-      });
-   }
-
-   if (capitalType === 'SYSTEM' || pTokenPart.system) {
-      if (pTokenPart.public && pTokenPart.public.value) {
-         ec.setPos(pTokenPart.publicSpace);
-         ec.check(!pTokenPart.publicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
-      }
-
-      literal.checkWellFormed(pTokenPart.system, ec, confVer, WFEID.NOUN_EXTERNALID_SYSTEM);
-   }
-}
-
 function getSTokens(pTokenPart?: ExternalId): Array<SToken> {
    let results: Array<SToken | undefined> = [];
    if (!pTokenPart) {
@@ -279,6 +213,4 @@ function getSTokens(pTokenPart?: ExternalId): Array<SToken> {
    return results.filter((item) => item) as Array<SToken>;
 }
 
-const checkExternalIdWellFormed = checkWellFormed;
-
-export { EXTERNAL_ID, ExternalId, parseExternalId, getSTokens, checkExternalIdWellFormed };
+export { EXTERNAL_ID, ExternalId, parseExternalId, getSTokens };

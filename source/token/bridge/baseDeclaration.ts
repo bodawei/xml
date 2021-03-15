@@ -1,7 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import base, { STokenArray } from '../base';
 
@@ -14,7 +13,6 @@ import base, { STokenArray } from '../base';
 
 const UNKNOWNDECL = 'UNKNOWNDECL';
 const UNKNOWNDECL_XTOKEN = 'UNKNOWNDECL_XTOKEN';
-const WFEID = WellFormedError.ID;
 
 class UnknownDeclaration {
    public readonly type = UNKNOWNDECL_XTOKEN;
@@ -83,32 +81,6 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: 
 }
 
 /**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
-
-function checkWellFormed(pToken: DeclarationPToken, ec: ErrorCollector, confVer: ConformanceVersion) {
-   ec.setPos(pToken.open);
-
-
-   ec.setPos(pToken.postOpenSpace);
-   ec.check(pToken.postOpenSpace, WFEID.DECL_OPEN_XTRA_SPACE_AFTER);
-
-   ec.setPos(pToken.declType);
-
-   if (pToken.declType) {
-      const upperCase = pToken.declType.str.toLocaleUpperCase();
-      ec.check(pToken.declType.str !== upperCase,
-         WFEID.DECL_DECLTYPE_INVALID_CASE, [ upperCase, pToken.declType.str ]);
-   } else {
-      ec.report(WFEID.DECL_NO_DECLTYPE);
-   }
-
-   ec.check(pToken.declType && pToken.type === UNKNOWNDECL, WFEID.DECL_UNKNOWN, [ strOrBlank(pToken.declType) ]);
-
-   return ec;
-}
-
-/**********************************************************************\
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
@@ -122,7 +94,6 @@ const declaration = {
    XToken: UnknownDeclaration,
    PToken: DeclarationPToken,
    parse,
-   checkWellFormed,
    pTokenToXToken,
 };
 

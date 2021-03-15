@@ -1,8 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, ErrorCollector,  } from 'basic';
-import {  WellFormedError } from '../../wellformedness/error/WellFormedError';
+import { ConformanceVersion,  } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -45,25 +44,6 @@ describe('charData (integration)', () => {
             done();
          });
       });
-   });
-
-   describe('checkWellFormed()', () => {
-
-      it('reports an error a bad character is in the text', (done) => {
-         source.addText('bad\u0000&');
-         source.endText();
-
-         parseCharData(source, [], (result) => {
-            const pToken = result as CharDataPToken;
-            const ec = new ErrorCollector(pToken!.text, WellFormedError);
-
-            pToken!.checkWellFormed(ec, confVer);
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-            done();
-         });
-      });
-
    });
 
 });
