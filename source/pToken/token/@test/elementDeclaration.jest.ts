@@ -261,7 +261,7 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
-      it('sets up to let unassigned handle checking for a PE Reference instead of the name', () => {
+      it('sets up to let unexpanded handle checking for a PE Reference instead of the name', () => {
          parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
             cb({
                propName,
@@ -291,7 +291,7 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
-      it('sets up to let unassigned handle checking for a PE Reference instead of the contentSpec', () => {
+      it('sets up to let unexpanded handle checking for a PE Reference instead of the contentSpec', () => {
          const calls = [
             undefined,
             {
@@ -329,7 +329,7 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
-      it('sets up to let unassigned handle checking for a PE Reference after the contentSpec', () => {
+      it('sets up to let unexpanded handle checking for a PE Reference after the contentSpec', () => {
          const calls = [
             undefined,
             undefined,
@@ -370,7 +370,7 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
-      it('sets up to let unassigned handle checking for a PE Reference after a content spec', () => {
+      it('sets up to let unexpanded handle checking for a PE Reference after a content spec', () => {
          const calls = [
             undefined,
             undefined,
@@ -627,7 +627,7 @@ describe('elementDeclaration (unit)', () => {
          );
       });
 
-      it('returns an element declaration when unassigned starts at the name', () => {
+      it('returns an element declaration when unexpanded starts at the name', () => {
          const elementDecl = new ElementDeclarationPToken({
             open: toSToken('<!'),
             unexpanded: {

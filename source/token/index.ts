@@ -2,10 +2,7 @@
 
 import declaration from './bridge/baseDeclaration';
 
-import { AttributeValuePToken, AttributeValueElement } from './common/attribute';
-import unassigned from './common/unassigned';
-import { parseAllUnassignedValues } from './common/unassigned';
-import { UnassignedArray, UnassignedType, UnassignedValue, spaceFromSToken, wordFromSToken } from './common/unassigned';
+import { AttributePToken, AttributeValuePToken, AttributeValueElement } from './common/attribute';
 import literalValue from './common/literalValue';
 import { WordListPToken, WordListType, WordListEntryPToken, parseWordList } from './common/wordList';
 import { DocTypeStartPToken } from './docTypeStart';
@@ -93,21 +90,16 @@ type PToken =
 export {
    ERROR_TYPE,
 
+   AttributePToken,
    AttributeValueElement,
-   UnassignedArray, UnassignedType,
-   UnassignedValue,
    WordListPToken,
    WordListType,
    WordListEntryPToken,
-   spaceFromSToken,
-   wordFromSToken,
    parseExternalId,
-   parseAllUnassignedValues,
    parseWordList,
 
    declaration,
 
-   unassigned,
    literalValue,
    AttributeValuePToken,
    EXTERNAL_ID,

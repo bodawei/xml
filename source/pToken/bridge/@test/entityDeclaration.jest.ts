@@ -460,7 +460,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       describe('parameter entity reference', () => {
-         it('returns an unassigned value when finding a PE Ref at the starting position', () => {
+         it('returns an unexpanded value when finding a PE Ref at the starting position', () => {
             parseUnexpandedAfterPeRef.mockImplementation(
                (_1, propName, handler: (result?: UnexpandedMarkupDetails) => void) => {
                   handler({ propName, tokens: [new TextPToken({ text: toSToken('x') })] });
@@ -498,7 +498,7 @@ describe('entityDeclaration (unit)', () => {
             });
          });
 
-         it('returns an unassigned value when finding a PE Ref at the starting position when there is nothing after the peref', () => {
+         it('returns an unexpanded value when finding a PE Ref at the starting position when there is nothing after the peref', () => {
             parseUnexpandedAfterPeRef.mockImplementation(
                (_1, propName, handler: (result?: UnexpandedMarkupDetails) => void) => {
                   handler(undefined);

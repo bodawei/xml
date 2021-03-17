@@ -11,7 +11,7 @@ import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
 import * as externalId from '../../common/externalIdCheck';
-import { nameCheck } from '../util/nameCheck';
+import { nameCheck } from '../../common/nameCheck';
 
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
@@ -19,7 +19,7 @@ import { entityDeclarationCheck } from '../entityDeclarationCheck';
 import literal from '../../../token/common/literal';
 import * as misc from '../../../token/common/misc';
 
-jest.mock('../util/nameCheck');
+jest.mock('../../common/nameCheck');
 
 describe('entityDeclarationCheck (unit)', () => {
    let genEntityDeclarationPToken: GeneralEntityDeclarationPToken;

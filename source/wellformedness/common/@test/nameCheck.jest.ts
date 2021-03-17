@@ -4,6 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
+
 import { nameCheck } from '../nameCheck';
 
 jest.mock('basic', () => {

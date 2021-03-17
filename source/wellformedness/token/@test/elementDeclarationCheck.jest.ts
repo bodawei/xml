@@ -6,7 +6,7 @@ import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclarati
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import { nameCheck } from '../util/nameCheck';
+import { nameCheck } from '../../common/nameCheck';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
 import { contentModelCheck } from '../../common/contentModelCheck';
@@ -17,7 +17,7 @@ import { ContentModelP } from 'pToken';
 
 jest.mock('../../../token/common/misc');
 jest.mock('../../common/contentModelCheck');
-jest.mock('../util/nameCheck');
+jest.mock('../../common/nameCheck');
 
 describe('elementDeclarationCheck()', () => {
    let mockErrorCollector: MockErrorCollector;

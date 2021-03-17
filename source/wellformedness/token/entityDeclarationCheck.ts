@@ -9,7 +9,7 @@ import {
 } from '../../pToken/token/GeneralEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../pToken/token/parameterEntityDeclaration';
 
-import { nameCheck } from './util/nameCheck';
+import { nameCheck } from '../common/nameCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
 
 // ick

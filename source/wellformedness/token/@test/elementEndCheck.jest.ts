@@ -7,14 +7,12 @@ import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import { nameCheck } from '../util/nameCheck';
+import { nameCheck } from '../../common/nameCheck';
 import { elementEndCheck } from '../elementEndCheck';
 
 import misc from '../../../token/common/misc';
-import attribute from '../../../token/common/attribute';
 
-jest.mock('../util/nameCheck');
-jest.mock('../../../token/common/attribute');
+jest.mock('../../common/nameCheck');
 jest.mock('../../../token/common/misc');
 
 describe('elementEndCheck()', () => {
@@ -36,7 +34,6 @@ describe('elementEndCheck()', () => {
 
       jest.spyOn(misc, 'checkName');
       jest.spyOn(misc, 'checkWellFormedNameRecommendation');
-      jest.spyOn(attribute, 'checkWellFormed');
    });
 
    it('asks the misc module to look for errors in the name', () => {

@@ -56,7 +56,7 @@ describe('elementStartCheck() (integration)', () => {
       });
    });
 
-   it('reports an error when an attribute is malformed (check attribute.checkWellFormed())', (done) => {
+   it('reports an error when an attribute is malformed (check checkWellFormed())', (done) => {
       source.addText('foo blah "value">');
 
       parseElementStart(source, elementStartPToken.open, (pToken) => {

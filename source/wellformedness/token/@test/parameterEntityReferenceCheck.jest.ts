@@ -6,7 +6,7 @@ import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import * as util from '../util/nameCheck';
+import * as util from '../../common/nameCheck';
 import { parameterEntityReferenceCheck } from '../parameterEntityReferenceCheck';
 
 describe('parameterEntityReferenceCheck()', () => {

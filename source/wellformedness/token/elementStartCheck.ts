@@ -2,11 +2,12 @@
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { WellFormedError } from '../error/WellFormedError';
-import { nameCheck } from './util/nameCheck';
+import { nameCheck } from '../common/nameCheck';
 
 import { ElementEmptyPToken, ElementStartPToken } from 'token';
 import misc from '../../token/common/misc';
-import attribute from '../../token/common/attribute';
+
+import { attributeCheck } from '../common/attributeCheck';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
@@ -34,7 +35,7 @@ function elementStartCheck(
    ec.setPos(pToken.nameSpace);
 
    const attribs = pToken.attributes;
-   attribute.checkWellFormed(attribs, ec, confVer, pToken.nameSpace, WFEID.NOUN_ATTRIBUTE);
+   attributeCheck(attribs, ec, confVer, pToken.nameSpace, WFEID.NOUN_ATTRIBUTE);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.ELEMENT_NO_CLOSE);

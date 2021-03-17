@@ -10,9 +10,9 @@ import { toSToken } from 'sToken';
 import { WellFormedError } from '../../error/WellFormedError';
 import misc from '../../../token/common/misc';
 import { contentModelCheck } from '../contentModelCheck';
-import { nameCheck } from '../../token/util/nameCheck';
+import { nameCheck } from '../nameCheck';
 
-jest.mock('../../token/util/nameCheck');
+jest.mock('../nameCheck');
 
 describe('contentModelCheck()', () => {
    let mockErrorCollector: MockErrorCollector;

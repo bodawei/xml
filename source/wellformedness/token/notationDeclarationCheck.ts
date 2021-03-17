@@ -5,7 +5,7 @@ import { WellFormedError } from '../error/WellFormedError';
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { nameCheck } from './util/nameCheck';
+import { nameCheck } from '../common/nameCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
 
 import misc from '../../token/common/misc'; // ick

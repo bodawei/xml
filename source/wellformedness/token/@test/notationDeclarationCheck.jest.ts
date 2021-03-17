@@ -6,7 +6,7 @@ import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import * as nameCheck from '../util/nameCheck'; // ick
+import * as nameCheck from '../../common/nameCheck';
 import misc from '../../../token/common/misc'; // ick
 
 import * as externalId from '../../common/externalIdCheck';

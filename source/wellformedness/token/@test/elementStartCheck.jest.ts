@@ -7,14 +7,14 @@ import { toSToken } from 'sToken';
 import { ElementStartPToken } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import { nameCheck } from '../util/nameCheck';
+import { attributeCheck } from '../../common/attributeCheck';
+import { nameCheck } from '../../common/nameCheck';
 import { elementStartCheck } from '../elementStartCheck';
 
 import misc from '../../../token/common/misc';
-import attribute from '../../../token/common/attribute';
 
-jest.mock('../util/nameCheck');
-jest.mock('../../../token/common/attribute');
+jest.mock('../../common/nameCheck');
+jest.mock('../../common/attributeCheck');
 jest.mock('../../../token/common/misc');
 
 describe('elementStartCheck()', () => {
@@ -44,7 +44,6 @@ describe('elementStartCheck()', () => {
 
       jest.spyOn(misc, 'checkName');
       jest.spyOn(misc, 'checkWellFormedNameRecommendation');
-      jest.spyOn(attribute, 'checkWellFormed');
    });
 
    it('asks the misc module to look for errors in the name', () => {
@@ -71,11 +70,11 @@ describe('elementStartCheck()', () => {
       );
    });
 
-   it('calls attribute.checkWellFormed', () => {
+   it('calls attributeCheck', () => {
       const confVer = new ConformanceVersion();
       elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
 
-      expect(attribute.checkWellFormed).toHaveBeenCalledWith(
+      expect(attributeCheck).toHaveBeenCalledWith(
          elementStartPToken.attributes,
          mockErrorCollector,
          confVer,

@@ -6,7 +6,7 @@ import { strOrBlank } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
 
-import { nameCheck } from '../token/util/nameCheck';
+import { nameCheck } from './nameCheck';
 
 const WFEID = WellFormedError.ID;
 const PCDATA = '#PCDATA';

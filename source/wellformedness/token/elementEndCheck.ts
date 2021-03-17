@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { WellFormedError } from '../error/WellFormedError';
-import { nameCheck } from './util/nameCheck';
+import { nameCheck } from '../common/nameCheck';
 
 import { ElementEndPToken } from 'token';
 import misc from '../../token/common/misc';

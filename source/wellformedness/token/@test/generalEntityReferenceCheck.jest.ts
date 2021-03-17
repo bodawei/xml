@@ -6,7 +6,7 @@ import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import * as util from '../util/nameCheck';
+import * as util from '../../common/nameCheck';
 import { generalEntityReferenceCheck } from '../generalEntityReferenceCheck';
 
 describe('generalEntityReferenceCheck()', () => {

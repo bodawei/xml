@@ -4,7 +4,7 @@ import { ConformanceVersion, ErrorCollector } from 'basic';
 import { WellFormedError } from '../error/WellFormedError';
 
 import { DocTypeStartPToken } from 'token';
-import { nameCheck } from './util/nameCheck';
+import { nameCheck } from '../common/nameCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
 
 const WFEID = WellFormedError.ID;

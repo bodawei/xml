@@ -5,7 +5,7 @@ import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
-import { nameCheck } from './util/nameCheck';
+import { nameCheck } from '../common/nameCheck';
 const WFEID = WellFormedError.ID;
 
 function generalEntityReferenceCheck(

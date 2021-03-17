@@ -2,7 +2,7 @@ import { pattern as BCP47_REGEX } from 'bcp47-validate';
 import { ConformanceVersion, ErrorCollector } from "basic";
 import { GENERAL_ENTITY_REFERENCE_PTOKEN, isTextPToken } from "pToken";
 import { SToken } from "sToken";
-import { WellFormedError } from 'wellformedness';
+import { WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { GENERAL_ENTITY_REFERENCE_XTOKEN, isTextXToken } from "xToken";
 
 import { AttributeValuePToken, AttributeValueXToken } from '../common/attribute';

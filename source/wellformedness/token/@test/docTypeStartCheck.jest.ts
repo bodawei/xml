@@ -9,9 +9,9 @@ import { DocTypeStartPToken } from 'token';
 import { externalIdCheck } from '../../common/externalIdCheck';
 import { WellFormedError } from '../../error/WellFormedError';
 import { docTypeStartCheck } from '../docTypeStartCheck';
-import { nameCheck } from '../util/nameCheck';
+import { nameCheck } from '../../common/nameCheck';
 
-jest.mock('../util/nameCheck');
+jest.mock('../../common/nameCheck');
 jest.mock('../../common/externalIdCheck');
 
 describe('docTypeStartCheck()', () => {
