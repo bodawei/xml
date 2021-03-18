@@ -26,10 +26,6 @@ describe('docTypeEndCheck()', () => {
          closeSubsetSpace: undefined,
          close: toSToken('>'),
       });
-
-      jest.spyOn(misc, 'checkName');
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
-      jest.spyOn(misc, 'checkCharWellFormed');
    });
 
    it('returns no errors if no problems ', () => {

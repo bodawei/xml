@@ -33,7 +33,7 @@ describe('docTypeStartCheck()', () => {
       mockErrorCollector = new MockErrorCollector();
    });
 
-   it('asks the misc.checkName() to validate the name', () => {
+   it('asks the nameCheck() to validate the name', () => {
       docTypeStartCheck(docTypeStartPToken, mockErrorCollector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(

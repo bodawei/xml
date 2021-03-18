@@ -8,7 +8,6 @@ import { ContentModelP, ContentNameP } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import misc from '../../../token/common/misc';
 import { contentModelCheck } from '../contentModelCheck';
 import { nameCheck } from '../nameCheck';
 
@@ -53,9 +52,6 @@ describe('contentModelCheck()', () => {
          repeat: undefined,
          repeatSpace: undefined,
       });
-
-      jest.spyOn(misc, 'checkName').mockImplementation();
-      jest.spyOn(misc, 'checkNMToken').mockImplementation();
    });
 
    describe('universal', () => {

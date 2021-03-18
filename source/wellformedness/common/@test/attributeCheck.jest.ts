@@ -5,17 +5,18 @@ import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { SToken, toSToken } from 'sToken';
+import { AttributePToken } from 'token';
 
-import * as langAttribute from '../../../token/common/langAttribute';
 import misc from '../../../token/common/misc';
 import literal from '../../../token/common/literal';
 
 import { WellFormedError } from '../../error/WellFormedError';
 
+import { attributeLangCheck } from '../attributeLangCheck';
 import { nameCheck } from '../nameCheck';
 import { attributeCheck } from '../attributeCheck';
-import { AttributePToken } from 'token';
 
+jest.mock('../attributeLangCheck');
 jest.mock('../nameCheck');
 
 describe('attributeCheck (unit)', () => {
@@ -53,10 +54,9 @@ describe('attributeCheck (unit)', () => {
       litCheck = jest.spyOn(literal, 'checkWellFormed') as jest.MockedFunction<
          typeof literal.checkWellFormed
       >;
-      jest.spyOn(langAttribute, 'checkXmlLangWellFormed');
    });
 
-   it('calls the misc.checkName() routine', () => {
+   it('calls the nameCheck() routine', () => {
       attributeCheck(attributesPChunk, mockErrorCollector, confVer, previousSpace, '');
 
       expect(nameCheck).toHaveBeenCalledWith(
@@ -67,7 +67,7 @@ describe('attributeCheck (unit)', () => {
       );
    });
 
-   it('calls the langAttribute.checkXmlLangWellFormed() routine', () => {
+   it('calls the attributeLangCheck() routine', () => {
       attributesPChunk[0].name.str = 'xml:lang';
       attributeCheck(
          attributesPChunk,
@@ -77,7 +77,7 @@ describe('attributeCheck (unit)', () => {
          WellFormedError.ID.NOUN_ATTRIBUTE,
       );
 
-      expect(langAttribute.checkXmlLangWellFormed).toHaveBeenCalledWith(
+      expect(attributeLangCheck).toHaveBeenCalledWith(
          attributesPChunk[0].value,
          mockErrorCollector,
          confVer,
@@ -227,7 +227,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('calls the checkName function, if provided', () => {
-      const checkName = jasmine.createSpy('checkName spy');
+      const checkName = jest.fn();
 
       attributeCheck(
          attributesPChunk,
@@ -247,7 +247,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('calls the checkValue function, if provided', () => {
-      const checkValue = jasmine.createSpy('checkValue spy');
+      const checkValue = jest.fn();
       litCheck.mockImplementation((_2, _3, _4, _5, callback) => {
          callback?.();
       });

@@ -6,9 +6,13 @@ import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import * as misc from '../../../token/common/misc';
+import { nameCheck } from '../../common/nameCheck';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
+
+import * as misc from '../../../token/common/misc';
+
+jest.mock('../../common/nameCheck');
 
 describe('processingInstructionCheck() (unit)', () => {
    let piPToken: ProcessingInstructionPToken;
@@ -34,11 +38,10 @@ describe('processingInstructionCheck() (unit)', () => {
       jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
    });
 
-   it('calls misc.checkName() on the target', () => {
-      jest.spyOn(misc, 'checkName').mockImplementation();
+   it('calls nameCheck() on the target', () => {
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkName).toHaveBeenCalledWith(
+      expect(nameCheck).toHaveBeenCalledWith(
          piPToken.target,
          mockErrorCollector,
          confVer,

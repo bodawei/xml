@@ -9,11 +9,16 @@ import { SToken, toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
+import { nameCheck } from '../../common/nameCheck';
+import { wordListCheck } from '../../common/wordListCheck';
 
 //ick
 import literal from '../../../token/common/literal';
 import misc from '../../../token/common/misc';
 import { WordListPToken, WordListType } from 'token';
+
+jest.mock('../../common/nameCheck');
+jest.mock('../../common/wordListCheck');
 
 describe('attListDeclarationCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -44,7 +49,6 @@ describe('attListDeclarationCheck()', () => {
       confVer = new ConformanceVersion();
 
       jest.spyOn(literal, 'checkWellFormed').mockImplementation();
-      jest.spyOn(misc, 'checkName').mockImplementation();
       jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
    });
 
@@ -117,10 +121,10 @@ describe('attListDeclarationCheck()', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('calls misc.checkName() to report on name validity', () => {
+   it('calls nameCheck() to report on name validity', () => {
       attListDeclarationCheck(aldPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkName).toHaveBeenCalledWith(
+      expect(nameCheck).toHaveBeenCalledWith(
          aldPToken.elementName,
          mockErrorCollector,
          confVer,
@@ -128,10 +132,10 @@ describe('attListDeclarationCheck()', () => {
       );
    });
 
-   it('calls misc.checkName() to report on attribute name validity', () => {
+   it('calls nameCheck() to report on attribute name validity', () => {
       attListDeclarationCheck(aldPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkName).toHaveBeenCalledWith(
+      expect(nameCheck).toHaveBeenCalledWith(
          aldPToken.attDefs[0].name,
          mockErrorCollector,
          confVer,
@@ -463,12 +467,10 @@ describe('attListDeclarationCheck()', () => {
       });
    });
 
-   it('calls enumeration.checkWellFormed() if this is an enumerated type', () => {
-      const cwfSpy = jest.fn();
+   it('calls wordListCheck() if this is an enumerated type', () => {
       const enumeration = new WordListPToken(WordListType.ENUMERATION, {
          open: toSToken(' '),
       });
-      enumeration.checkWellFormed = cwfSpy;
       const testToken = new AttListDeclarationPToken(aldPToken, {
          attDefs: [
             {
@@ -486,14 +488,13 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
-      expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, confVer);
+      expect(wordListCheck).toHaveBeenCalledWith(enumeration, mockErrorCollector, confVer);
    });
 
    it('reports an error the enumeration does not end with a space', () => {
       const enumeration = new WordListPToken(WordListType.ENUMERATION, {
          open: toSToken(' '),
       });
-      enumeration.checkWellFormed = () => {};
       const testToken = new AttListDeclarationPToken(aldPToken, {
          attDefs: [
             {
@@ -544,12 +545,10 @@ describe('attListDeclarationCheck()', () => {
       });
    });
 
-   it('calls enumeration.checkWellFormed() if this is an NOTATION type', () => {
-      const cwfSpy = jest.fn();
+   it('calls wordListCheck() if this is an NOTATION type', () => {
       const enumeration = new WordListPToken(WordListType.NOTATION, {
          open: toSToken(' '),
       });
-      enumeration.checkWellFormed = cwfSpy;
       const testToken = new AttListDeclarationPToken(aldPToken, {
          attDefs: [
             {
@@ -567,14 +566,13 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
-      expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, confVer);
+      expect(wordListCheck).toHaveBeenCalledWith(enumeration, mockErrorCollector, confVer);
    });
 
    it('reports an error the NOTATION list does not end with a space', () => {
       const enumeration = new WordListPToken(WordListType.NOTATION, {
          open: toSToken(' '),
       });
-      enumeration.checkWellFormed = () => {};
       const testToken = new AttListDeclarationPToken(aldPToken, {
          attDefs: [
             {

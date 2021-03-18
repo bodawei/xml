@@ -3,7 +3,7 @@
 import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
 
 import { ExternalId, parseExternalId, getSTokens } from './common/externalId';
-import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
+import { DeclarationPToken } from './bridge/baseDeclaration';
 import { ExternalIdX } from 'xToken';
 
 const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';

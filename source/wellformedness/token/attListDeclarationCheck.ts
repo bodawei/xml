@@ -4,6 +4,8 @@ import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
+import { nameCheck } from '../common/nameCheck';
+import { wordListCheck } from '../common/wordListCheck';
 import { WellFormedError } from '../error/WellFormedError';
 
 // ick
@@ -47,7 +49,7 @@ function attListDeclarationCheck(
 
    ec.setPos(pToken.elementName);
    ec.check(!pToken.elementName, WFEID.ATTLISTDECL_NO_ELEMENT_NAME);
-   misc.checkName(pToken.elementName, ec, confVer, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+   nameCheck(pToken.elementName, ec, confVer, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
 
    ec.setPos(pToken.elementNameSpace);
    if (pToken.attDefs.length > 0) {
@@ -59,7 +61,7 @@ function attListDeclarationCheck(
       const attName = strOrBlank(attDef.name);
 
       ec.setPos(attDef.name);
-      misc.checkName(attDef.name, ec, confVer, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
+      nameCheck(attDef.name, ec, confVer, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
       misc.checkWellFormedNameRecommendation(
          attDef.name,
          ec,
@@ -95,7 +97,7 @@ function attListDeclarationCheck(
          if (!attDef.enumeration) {
             ec.report(WFEID.ATTLISTDECL_ATTR_NO_ATTTYPE, [attName, elNameText]);
          } else {
-            attDef.enumeration.checkWellFormed(ec, confVer);
+            wordListCheck(attDef.enumeration, ec, confVer);
             ec.check(!attDef.enumeration.closeSpace, WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE, [
                attName,
                elNameText,
@@ -114,7 +116,7 @@ function attListDeclarationCheck(
             if (!attDef.enumeration) {
                ec.report(WFEID.ATTLISTDECL_ATTR_NO_NOTATION, [attName, elNameText]);
             } else {
-               attDef.enumeration.checkWellFormed(ec, confVer);
+               wordListCheck(attDef.enumeration, ec, confVer);
                ec.check(!attDef.enumeration.closeSpace, WFEID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE, [
                   attName,
                   elNameText,

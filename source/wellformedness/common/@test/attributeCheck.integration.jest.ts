@@ -23,7 +23,7 @@ describe('attributeCheck (integration)', () => {
       ec = new ErrorCollector(toSToken('x'), WellFormedError);
    });
 
-   it('asks misc.checkName() to complain if the name is bad', (done) => {
+   it('asks nameCheck() to complain if the name is bad', (done) => {
       source.addText('na\u0000me="value">');
       source.endText();
 
@@ -83,7 +83,7 @@ describe('attributeCheck (integration)', () => {
       source.endText();
 
       parseAttribute(source, { terminators: ['>'] }, (parsing) => {
-         attributeCheck(parsing, ec, new ConformanceVersion(), preSpace, 'x');
+         attributeCheck(parsing!, ec, new ConformanceVersion(), preSpace, 'x');
 
          expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
          done();

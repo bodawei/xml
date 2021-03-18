@@ -40,7 +40,7 @@ describe('entityDeclarationCheck() (integration)', () => {
       });
    });
 
-   it('reports an error when name used an invalid char(check misc.checkName())', (done) => {
+   it('reports an error when name used an invalid char(check nameCheck())', (done) => {
       source.addText('$foo "frog">');
       parseEntityDeclaration(source, declarationStart, (result) => {
          const ec = new ErrorCollector(declarationStart.open, WellFormedError);

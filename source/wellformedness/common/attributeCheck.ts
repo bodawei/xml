@@ -5,10 +5,10 @@ import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import { AttributePToken } from 'token';
 
+import { attributeLangCheck } from './attributeLangCheck';
 import { nameCheck } from './nameCheck';
 import { WellFormedError } from '../error/WellFormedError';
 
-import { checkXmlLangWellFormed } from '../../token/common/langAttribute';
 import misc from '../../token/common/misc';
 import literal from '../../token/common/literal';
 import { LiteralValuePToken } from '../../token/common/literalValue';
@@ -76,7 +76,7 @@ function attributeCheck(
          // has entity references, this won't do any checking.
          //
          if (attr.name.str.toLowerCase() === 'xml:lang') {
-            checkXmlLangWellFormed(attr.value, ec, confVer); // TypeHack
+            attributeLangCheck(attr.value, ec, confVer); // TypeHack
          }
 
          seenAttrNames[nameText] = true;

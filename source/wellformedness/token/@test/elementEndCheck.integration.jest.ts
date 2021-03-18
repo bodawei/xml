@@ -32,7 +32,7 @@ describe('elementEndCheck() (integration)', () => {
       });
    });
 
-   it('reports an error when name starts with "$" (check misc.checkName)', (done) => {
+   it('reports an error when name starts with "$" (check nameCheck)', (done) => {
       source.addText('$elementName>');
       source.endText();
       parseElementEnd(source, toSToken('</'), (pToken) => {

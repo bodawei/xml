@@ -21,7 +21,7 @@ describe('elementDeclarationCheck()', () => {
       };
    });
 
-   it('calls misc.checkName() to report on invalid names', (done) => {
+   it('calls checName() to report on invalid names', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('$foo ANY>');
       source.endText();

@@ -41,7 +41,7 @@ describe('checkWellFormed()', () => {
    //    });
    // });
 
-   it('calls misc.checkName() to report on invalid names', (done) => {
+   it('calls nameCheck() to report on invalid names', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('$foo>');
       source.endText();
@@ -53,7 +53,7 @@ describe('checkWellFormed()', () => {
       });
    });
 
-   it('calls misc.checkName() to report on invalid attribute names', (done) => {
+   it('calls nameCheck() to report on invalid attribute names', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('elName $foo>');
       source.endText();

@@ -5,11 +5,9 @@ import { WellFormedError } from '../error/WellFormedError';
 import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import {
-   checkName,
-   checkCharWellFormed,
-   checkWellFormedNameRecommendation,
-} from '../../token/common/misc';
+import { nameCheck } from '../common/nameCheck';
+
+import { checkCharWellFormed, checkWellFormedNameRecommendation } from '../../token/common/misc';
 
 const WFEID = WellFormedError.ID;
 
@@ -28,7 +26,7 @@ function processingInstructionCheck(
 
    ec.setPos(pToken.target);
    ec.check(!pToken.target, WFEID.PI_NO_TARGET);
-   checkName(pToken.target, ec, confVer, WFEID.PI_TARGET_NAME_INVALID);
+   nameCheck(pToken.target, ec, confVer, WFEID.PI_TARGET_NAME_INVALID);
    // Note that while §2.3.0 disallows any name that STARTS with xml, §2.6.0
    // Seems to disallow XML anywhere in the name of a PI target.
    ec.check(hasXml, WFEID.PI_TARGET_HAS_XML, [targetName]);

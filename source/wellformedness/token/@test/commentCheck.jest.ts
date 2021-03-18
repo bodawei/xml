@@ -28,7 +28,6 @@ describe('commentCheck()', () => {
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
 
-      jest.spyOn(misc, 'checkName');
       jest.spyOn(misc, 'checkWellFormedNameRecommendation');
       jest.spyOn(misc, 'checkCharWellFormed');
    });
