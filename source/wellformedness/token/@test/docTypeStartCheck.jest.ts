@@ -7,9 +7,10 @@ import { toSToken, SToken } from 'sToken';
 import { DocTypeStartPToken } from 'token';
 
 import { externalIdCheck } from '../../common/externalIdCheck';
-import { WellFormedError } from '../../error/WellFormedError';
-import { docTypeStartCheck } from '../docTypeStartCheck';
 import { nameCheck } from '../../common/nameCheck';
+import { WellFormedError } from '../../error/WellFormedError';
+
+import { docTypeStartCheck } from '../docTypeStartCheck';
 
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/externalIdCheck');

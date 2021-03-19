@@ -8,10 +8,6 @@ import { DocTypeEndPToken, DocTypeStartPToken } from 'token';
 import { WellFormedError } from '../../error/WellFormedError';
 import { docTypeEndCheck } from '../docTypeEndCheck';
 
-import misc from '../../../token/common/misc';
-
-jest.mock('../../../token/common/misc');
-
 describe('docTypeEndCheck()', () => {
    let startPToken: DocTypeStartPToken;
    let docTypeEndPToken: DocTypeEndPToken;

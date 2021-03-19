@@ -3,7 +3,7 @@
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { CharDataPToken } from 'token';
 
-import misc from '../../token/common/misc';
+import { charCheck } from '../common/charCheck';
 
 function charDataCheck(
    pToken: CharDataPToken,
@@ -11,7 +11,7 @@ function charDataCheck(
    confVer: ConformanceVersion,
 ): void {
    ec.setPos(pToken.text);
-   misc.checkCharWellFormed(pToken.text, ec, confVer);
+   charCheck(pToken.text, ec, confVer);
 }
 
 export { charDataCheck };

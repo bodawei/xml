@@ -5,10 +5,12 @@ import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { CdataPToken } from 'token';
 
+import { charCheck } from '../../common/charCheck';
 import { WellFormedError } from '../../error/WellFormedError';
-import * as misc from '../../../token/common/misc';
 
 import { cdataCheck } from '../cdataCheck';
+
+jest.mock('../../common/charCheck');
 
 describe('cdataCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -25,17 +27,12 @@ describe('cdataCheck()', () => {
       });
       mockErrorCollector = new MockErrorCollector();
       confVer = new ConformanceVersion();
-      jest.spyOn(misc, 'checkCharWellFormed');
    });
 
    it('checks the text is well formed', () => {
       cdataCheck(cdataPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         cdataPToken.text,
-         mockErrorCollector,
-         confVer,
-      );
+      expect(charCheck).toHaveBeenCalledWith(cdataPToken.text, mockErrorCollector, confVer);
    });
 
    it('reports an error if there is no section type provided', () => {

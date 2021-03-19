@@ -12,9 +12,6 @@ import {
    TextDeclarationPToken,
 } from 'pToken';
 import { strOrBlank, toSToken } from 'sToken';
-
-import { WellFormedError } from '../error/WellFormedError';
-
 import {
    CommentPToken,
    InternalSubsetStartToken,
@@ -30,6 +27,7 @@ import {
    ConditionalClosePToken,
 } from 'token';
 
+import { WellFormedError } from '../error/WellFormedError';
 import { MarkupDeclChecker } from '../MarkupDeclChecker';
 import * as checkUtils from '../checkUtils';
 import { CheckState, CHECKER_DONE } from '../checkUtils';

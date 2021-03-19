@@ -4,8 +4,8 @@ import { ConformanceVersion, ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { CdataPToken } from 'token';
 
+import { charCheck } from '../common/charCheck';
 import { WellFormedError } from '../error/WellFormedError';
-import { checkCharWellFormed } from '../../token/common/misc';
 
 const WFEID = WellFormedError.ID;
 
@@ -36,7 +36,7 @@ function cdataCheck(pToken: CdataPToken, ec: ErrorCollector, confVer: Conformanc
    ec.check(!pToken.bracket, WFEID.CDATA_NO_SECOND_BRACKET, [typeText]);
 
    ec.setPos(pToken.text);
-   checkCharWellFormed(pToken.text, ec, confVer);
+   charCheck(pToken.text, ec, confVer);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.CDATA_NO_CLOSE);

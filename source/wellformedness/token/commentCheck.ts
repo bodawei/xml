@@ -1,10 +1,10 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, Offset } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
-
 import { CommentPToken } from 'token';
-import misc from '../../token/common/misc';
+
+import { charCheck } from '../common/charCheck';
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 
@@ -25,7 +25,7 @@ function commentCheck(
          const isDoubleHyphenPiece = textSToken.str === '--';
 
          ec.setPos(textSToken);
-         misc.checkCharWellFormed(textSToken, ec, confVer);
+         charCheck(textSToken, ec, confVer);
 
          if (isDoubleHyphenPiece) {
             ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);

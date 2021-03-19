@@ -4,8 +4,9 @@ import { ConformanceVersion, ErrorCollector } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { WellFormedError } from '../error/WellFormedError';
 import { nameCheck } from '../common/nameCheck';
+import { WellFormedError } from '../error/WellFormedError';
+
 const WFEID = WellFormedError.ID;
 
 function generalEntityReferenceCheck(

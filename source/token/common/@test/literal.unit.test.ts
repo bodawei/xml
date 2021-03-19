@@ -1,9 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
-import { WellFormedError } from '../../../wellformedness/error/WellFormedError';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -150,51 +147,6 @@ describe('literal (unit)', () => {
             openQuote: expectedSToken('"'),
             value: [ ],
             closeQuote: expectedSToken('"'),
-         });
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-      let confVer: ConformanceVersion;
-      let litValCheckWFSpy: jasmine.Spy;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-         confVer = new ConformanceVersion();
-         litValCheckWFSpy = spyOn(literalValue, 'checkWellFormed');
-      });
-
-      it('calls literalValue.checkWellFormed() to check the value', () => {
-         literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'foo');
-
-         expect(litValCheckWFSpy.calls.argsFor(0)[0]).toEqual(literalPToken.value);
-         expect(litValCheckWFSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
-         expect(litValCheckWFSpy.calls.argsFor(0)[2]).toEqual(confVer);
-      });
-
-      it('reports an error if there is no opening quote', () => {
-         delete literalPToken.openQuote;
-
-         literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'aType');
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.LITERAL_NO_OPEN_QUOTE,
-            params: [ 'aType' ],
-            lastPosition: undefined,
-         });
-      });
-
-      it('reports an error if there is no close quote', () => {
-         delete literalPToken.closeQuote;
-
-         literal.checkWellFormed(literalPToken, mockErrorCollector, confVer, 'aType');
-
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE,
-            params: [ 'aType' ],
-            lastPosition: literalPToken.openQuote,
          });
       });
 

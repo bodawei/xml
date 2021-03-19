@@ -2,12 +2,12 @@
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { parseXmlDeclaration } from 'pToken';
+import { InstructionStart, parseXmlDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
+
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
-import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 describe('xmlDeclarationCheck (integration)', () => {
    let start: InstructionStart;
@@ -25,7 +25,7 @@ describe('xmlDeclarationCheck (integration)', () => {
       source = new STokenSource(defaultExtractors);
    });
 
-   it('reports an error when the target text is malformed (check misc.checkCharWellFormed())', (done) => {
+   it('reports an error when the target text is malformed (check charCheck())', (done) => {
       source.addText('version "1.0" encoding="usascii"?>');
       start.target = SToken.fromString('\u0001xml');
 
@@ -39,7 +39,7 @@ describe('xmlDeclarationCheck (integration)', () => {
       });
    });
 
-   it('reports an error when the param value is malformed (check misc.checkCharWellFormed())', (done) => {
+   it('reports an error when the param value is malformed (check charCheck())', (done) => {
       source.addText('version="\u00011.0" encoding="usascii"?>');
 
       parseXmlDeclaration(source, start, (result) => {

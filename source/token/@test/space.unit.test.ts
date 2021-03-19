@@ -1,8 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from'basic-test';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import { SpacePToken, parseSpace } from '../space';
@@ -55,17 +53,6 @@ describe('space (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)).toEqual([ undefined ]);
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-      let confVer: ConformanceVersion;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-         confVer = new ConformanceVersion();
       });
 
    });

@@ -1,11 +1,12 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector, isNmToken } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
+
 import { nmTokenCheck } from '../nmTokenCheck';
 
 jest.mock('basic', () => {

@@ -5,12 +5,11 @@ import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { parseAttListDeclaration } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
+import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
-// ick
-import { DeclarationStart } from 'token';
+import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
 describe('checkWellFormed()', () => {
    let ec: ErrorCollector;
@@ -65,7 +64,7 @@ describe('checkWellFormed()', () => {
       });
    });
 
-   it('calls misc.checkWellFormedNameRecommendation() to report on invalid attribute names', (done) => {
+   it('calls nameXmlCheck() to report on invalid attribute names', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('elName xml:foo>');
       source.endText();

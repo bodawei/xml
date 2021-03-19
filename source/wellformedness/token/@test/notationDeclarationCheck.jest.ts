@@ -1,16 +1,20 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { nameCheck } from '../../common/nameCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
+import { externalIdCheck } from '../../common/externalIdCheck';
 import { WellFormedError } from '../../error/WellFormedError';
-import * as nameCheck from '../../common/nameCheck';
-import misc from '../../../token/common/misc'; // ick
 
-import * as externalId from '../../common/externalIdCheck';
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
+
+jest.mock('../../common/nameCheck');
+jest.mock('../../common/nameXmlCheck');
+jest.mock('../../common/externalIdCheck');
 
 describe('notationdeDeclaration (unit)', () => {
    let notationPToken: NotationDeclarationPToken;
@@ -32,15 +36,12 @@ describe('notationdeDeclaration (unit)', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-      jest.spyOn(externalId, 'externalIdCheck').mockImplementation();
-      jest.spyOn(nameCheck, 'nameCheck').mockImplementation();
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
    });
 
    it('asks the externalId module to look for well formed problems', () => {
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(externalId.externalIdCheck).toHaveBeenCalledWith(
+      expect(externalIdCheck).toHaveBeenCalledWith(
          notationPToken.externalId,
          true,
          mockErrorCollector,
@@ -51,7 +52,7 @@ describe('notationdeDeclaration (unit)', () => {
    it('calls nameCheck() to report on bad names', () => {
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(nameCheck.nameCheck).toHaveBeenCalledWith(
+      expect(nameCheck).toHaveBeenCalledWith(
          notationPToken.name,
          mockErrorCollector,
          confVer,
@@ -59,10 +60,10 @@ describe('notationdeDeclaration (unit)', () => {
       );
    });
 
-   it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
+   it('calls nameXmlCheck() to report on bad names', () => {
       notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          notationPToken.name,
          mockErrorCollector,
          confVer,

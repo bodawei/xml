@@ -2,13 +2,13 @@
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { parseElementDeclaration } from '../../../pToken/token/elementDeclaration';
+import { parseElementDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
+import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
-import { DeclarationStart } from 'token';
+import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
 describe('elementDeclarationCheck()', () => {
    let declarationStart: DeclarationStart;
@@ -36,7 +36,7 @@ describe('elementDeclarationCheck()', () => {
       });
    });
 
-   it('calls misc.checkWellFormedNameRecommendation() to report on bad names', (done) => {
+   it('calls nameXmlCheck() to report on bad names', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('xmlOne ANY>');
       source.endText();

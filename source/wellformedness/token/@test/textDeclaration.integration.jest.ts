@@ -27,7 +27,7 @@ describe('textDeclaration (integration)', () => {
       source = new STokenSource(defaultExtractors);
    });
 
-   it('reports an error when the target text is malformed (check misc.checkCharWellFormed())', (done) => {
+   it('reports an error when the target text is malformed (check charCheck())', (done) => {
       source.addText('version "1.0" encoding="usascii"?>');
       start.target = SToken.fromString('\u0001xml');
 
@@ -41,7 +41,7 @@ describe('textDeclaration (integration)', () => {
       });
    });
 
-   it('reports an error when the param value is malformed (check misc.checkCharWellFormed())', (done) => {
+   it('reports an error when the param value is malformed (check charCheck())', (done) => {
       source.addText('version="\u00011.0" encoding="usascii"?>');
 
       parseTextDeclaration(source, start, (result) => {

@@ -6,9 +6,9 @@ import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { parseNotationDeclaration } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
+import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
-import { DeclarationStart } from '../../../token/bridge/declaration'; // ick
 
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
 
@@ -53,7 +53,7 @@ describe('notationDeclarationCheck() (integration)', () => {
       });
    });
 
-   it('calls misc.checkWellFormedNameRecommendation() to report on bad names', (done) => {
+   it('calls nameXmlCheck() to report on bad names', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('xmlOne system "sys.dtd">');
       source.endText();

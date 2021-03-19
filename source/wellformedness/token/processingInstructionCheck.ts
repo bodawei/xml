@@ -1,13 +1,13 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
 import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
+import { charCheck } from '../common/charCheck';
+import { nameXmlCheck } from '../common/nameXmlCheck';
 import { nameCheck } from '../common/nameCheck';
-
-import { checkCharWellFormed, checkWellFormedNameRecommendation } from '../../token/common/misc';
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 
@@ -30,7 +30,7 @@ function processingInstructionCheck(
    // Note that while §2.3.0 disallows any name that STARTS with xml, §2.6.0
    // Seems to disallow XML anywhere in the name of a PI target.
    ec.check(hasXml, WFEID.PI_TARGET_HAS_XML, [targetName]);
-   checkWellFormedNameRecommendation(
+   nameXmlCheck(
       pToken.target,
       ec,
       confVer,
@@ -45,7 +45,7 @@ function processingInstructionCheck(
    }
 
    ec.setPos(pToken.instruction);
-   checkCharWellFormed(pToken.instruction, ec, confVer);
+   charCheck(pToken.instruction, ec, confVer);
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.PI_NO_CLOSE, [targetName]);
 }

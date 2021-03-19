@@ -4,7 +4,6 @@
 
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
-import misc from '../common/misc';
 import { ElementEndPToken, parseElementEnd } from '../elementEnd';
 
 describe('elementEnd', () => {

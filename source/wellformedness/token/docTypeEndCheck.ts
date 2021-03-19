@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
-
 import { DocTypeEndPToken } from 'token';
+
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 

@@ -8,9 +8,9 @@ import { makeCharRef } from 'token-test';
 
 import { WellFormedError } from '../../error/WellFormedError';
 
-jest.mock('basic');
-
 import { charRefCheck } from '../charRefCheck';
+
+jest.mock('basic');
 
 describe('charRefCheck()', () => {
    let mockErrorCollector: MockErrorCollector;

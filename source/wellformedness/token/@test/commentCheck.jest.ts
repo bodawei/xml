@@ -6,12 +6,12 @@ import { MockErrorCollector } from 'basic-test';
 import { toSToken, SToken } from 'sToken';
 import { CommentPToken } from 'token';
 
+import { charCheck } from '../../common/charCheck';
 import { WellFormedError } from '../../error/WellFormedError';
+
 import { commentCheck } from '../commentCheck';
 
-import misc from '../../../token/common/misc';
-
-jest.mock('../../../token/common/misc');
+jest.mock('../../common/charCheck');
 
 describe('commentCheck()', () => {
    let confVer: ConformanceVersion;
@@ -27,12 +27,9 @@ describe('commentCheck()', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
-      jest.spyOn(misc, 'checkCharWellFormed');
    });
 
-   it('asks the misc.checkCharWellFormed() to validate the text', () => {
+   it('asks the charCheck() to validate the text', () => {
       commentPToken = new CommentPToken({
          ...commentPToken,
          text: [toSToken('blah'), toSToken('commentText')],
@@ -40,16 +37,8 @@ describe('commentCheck()', () => {
 
       commentCheck(commentPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         commentPToken.text[0],
-         mockErrorCollector,
-         confVer,
-      );
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         commentPToken.text[1],
-         mockErrorCollector,
-         confVer,
-      );
+      expect(charCheck).toHaveBeenCalledWith(commentPToken.text[0], mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(commentPToken.text[1], mockErrorCollector, confVer);
    });
 
    it('reports an error when the content ends with a hyphen', () => {

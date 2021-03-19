@@ -3,15 +3,13 @@
 import { ConformanceVersion, ErrorCollector, XmlError, XmlWarning } from 'basic';
 import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
-import { AttributePToken } from 'token';
+import { AttributePToken, LiteralValuePToken } from 'token';
 
 import { attributeLangCheck } from './attributeLangCheck';
+import { literalCheck } from './literalCheck';
 import { nameCheck } from './nameCheck';
+import { nameXmlCheck } from '../common/nameXmlCheck';
 import { WellFormedError } from '../error/WellFormedError';
-
-import misc from '../../token/common/misc';
-import literal from '../../token/common/literal';
-import { LiteralValuePToken } from '../../token/common/literalValue';
 
 type CheckAttValue = (
    name: SToken,
@@ -60,7 +58,7 @@ function attributeCheck(
          // Well-formedness constraint: §3.1: Unique Att Spec
          //    An attribute name must not appear more than once in the same start-tag or empty-element tag.
          ec.check(seenAttrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [nameText]);
-         misc.checkWellFormedNameRecommendation(
+         nameXmlCheck(
             attr.name,
             ec,
             confVer,
@@ -93,7 +91,7 @@ function attributeCheck(
       ec.check(!attr.equal, WFEID.ATTRIBUTE_NO_EQUAL, [nameText]);
       ec.setPos(attr.postEqualSpace);
 
-      literal.checkWellFormed(attr, ec, confVer, type, () => {
+      literalCheck(attr, ec, confVer, type, () => {
          // Well-formedness constraint: §3.1: No < in Attribute Values
          //   The replacement text of any entity referred to directly or indirectly
          //   in an attribute value must not contain a <.

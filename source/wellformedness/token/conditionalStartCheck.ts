@@ -1,7 +1,8 @@
 import { ErrorCollector } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
 import { strOrBlank } from 'sToken';
 import { ConditionalPToken } from 'token';
+
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 

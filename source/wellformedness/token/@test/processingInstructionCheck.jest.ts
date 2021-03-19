@@ -5,13 +5,15 @@ import { MockErrorCollector } from 'basic-test';
 import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { charCheck } from '../../common/charCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { nameCheck } from '../../common/nameCheck';
+import { WellFormedError } from '../../error/WellFormedError';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
-import * as misc from '../../../token/common/misc';
-
+jest.mock('../../common/charCheck');
+jest.mock('../../common/nameXmlCheck');
 jest.mock('../../common/nameCheck');
 
 describe('processingInstructionCheck() (unit)', () => {
@@ -33,9 +35,6 @@ describe('processingInstructionCheck() (unit)', () => {
       mockErrorCollector = new MockErrorCollector();
       confVer = new ConformanceVersion();
       piPToken = new ProcessingInstructionPToken(protoPToken);
-
-      jest.spyOn(misc, 'checkCharWellFormed').mockImplementation();
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
    });
 
    it('calls nameCheck() on the target', () => {
@@ -49,20 +48,16 @@ describe('processingInstructionCheck() (unit)', () => {
       );
    });
 
-   it('calls misc.checkCharWellFormed() on the instruction data', () => {
+   it('calls charCheck() on the instruction data', () => {
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         piPToken.instruction,
-         mockErrorCollector,
-         confVer,
-      );
+      expect(charCheck).toHaveBeenCalledWith(piPToken.instruction, mockErrorCollector, confVer);
    });
 
-   it('calls misc.checkWellFormedNameRecommendation()', () => {
+   it('calls nameXmlCheck()', () => {
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          piPToken.target,
          mockErrorCollector,
          confVer,

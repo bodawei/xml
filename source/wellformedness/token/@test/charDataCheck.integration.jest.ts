@@ -4,12 +4,11 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
-
-import { charDataCheck } from '../charDataCheck';
-
 import { parseCharData } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+
+import { charDataCheck } from '../charDataCheck';
 
 describe('charDataCheck()', () => {
    let confVer: ConformanceVersion;

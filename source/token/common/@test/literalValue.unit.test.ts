@@ -1,8 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, Range, EntityId } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { Range, EntityId } from 'basic';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -12,7 +11,6 @@ import * as parameterEntityReference from '../../../pToken/token/parameterEntity
 import * as charRef from '../../../pToken/token/charRef';
 import * as generalEntityReference from '../../../pToken/token/generalEntityReference';
 
-import misc from '../misc';
 import literalValue, { LiteralValuePToken } from '../literalValue';
 
 describe('literalValue (unit)', () => {
@@ -169,57 +167,6 @@ describe('literalValue (unit)', () => {
 
    });
 
-   describe('checkWellFormed()', () => {
-      let miscCheckWellFormedSpy: jasmine.Spy;
-      let mockErrorCollector: MockErrorCollector;
-      let confVer: ConformanceVersion;
-      let valuePToken: LiteralValuePToken;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-         confVer = new ConformanceVersion();
-
-         valuePToken = [ new TextPToken({ text: SToken.fromString('xxx') }) ];
-
-         miscCheckWellFormedSpy = spyOn(misc, 'checkCharWellFormed');
-      });
-
-      it('calls misc.checkCharWellFormed() to check the value', () => {
-         literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
-
-         expect(miscCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
-         expect(miscCheckWellFormedSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
-         expect(miscCheckWellFormedSpy.calls.argsFor(0)[2]).toEqual(confVer);
-      });
-
-      it('sets the position before calling misc.checkWellFormed', () => {
-         const spy: jasmine.Spy = mockErrorCollector.setPos as jasmine.Spy;
-         literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
-
-         expect(spy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
-      });
-
-      // it('calls reference.checkWellFormed if an entity reference PToken is found', () => {
-      //    const geRef = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
-      //    refCheckWellFormedSpy = spyOn(geRef, 'checkWellFormed');
-      //    valuePToken.push(geRef);
-
-      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
-
-      //    expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(mockErrorCollector);
-      // });
-
-      // it('calls charRef.checkWellFormed when there is a charRef in the value', () => {
-      //    const ref = new charRef.CharRefPToken({ open: SToken.fromString('&#') });
-      //    const spy = spyOn(ref, 'checkWellFormed');
-      //    valuePToken.push(ref);
-
-      //    literalValue.checkWellFormed(valuePToken, mockErrorCollector, confVer);
-
-      //    expect(spy).toHaveBeenCalledWith(mockErrorCollector, confVer);
-      // });
-
-   });
 
    describe('makeTokenXCompatible()', () => {
 

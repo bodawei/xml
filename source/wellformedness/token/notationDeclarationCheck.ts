@@ -1,14 +1,13 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { nameCheck } from '../common/nameCheck';
+import { nameXmlCheck } from '../common/nameXmlCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
-
-import misc from '../../token/common/misc'; // ick
+import { WellFormedError } from '../error/WellFormedError';
 
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
@@ -32,7 +31,7 @@ function notationDeclarationCheck(
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.NOTATIONDECL_NO_NAME);
    nameCheck(pToken.name, ec, confVer, WFEID.NOTATIONDECL_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(
+   nameXmlCheck(
       pToken.name,
       ec,
       confVer,

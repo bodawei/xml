@@ -184,8 +184,11 @@ function getSTokens(attributes: AttributesPToken = []) {
    return results.filter(item => item);
 }
 
+const parseAttribute = parse;
+
 const attribute = {
    parse,
+   parseAttribute,
    makeTokenCompatible,
    makeOneTokenCompatible,
    getSTokens,
@@ -200,4 +203,5 @@ export {
    AttributeValuePToken,
    AttributeValueXToken,
    AttributeValueElement,
+   parseAttribute,
 };

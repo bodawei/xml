@@ -1,7 +1,5 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { SToken, STokenSource } from 'sToken';
 import { isTextXToken } from 'xToken';
 
@@ -10,8 +8,6 @@ import literalValue, {
    Terminators as LiteralValueTerminators,
    LiteralValueXToken,
 } from './literalValue';
-
-const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (foundLiteral?: LiteralPToken) => void;
 type ParseOptions = {
@@ -80,24 +76,6 @@ function parse(source: STokenSource, options: ParseOptions | undefined, done: De
    });
 }
 
-function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, confVer: ConformanceVersion, type: string, checkValue?: () => void) {
-   const pToken: LiteralPToken = pTokenPart || { value: [] };
-
-   ec.setPos(pToken.openQuote);
-   ec.check(!pToken.openQuote, WFEID.LITERAL_NO_OPEN_QUOTE, [ type ]);
-
-   const pieces = pToken.value;
-   literalValue.checkWellFormed(pieces, ec, confVer);
-
-   if (checkValue) {
-      checkValue();
-   }
-
-   ec.setPos(pToken.closeQuote);
-
-   ec.check(!pToken.closeQuote, WFEID.LITERAL_NO_CLOSE_QUOTE, [ type ]);
-}
-
 function makeTokenCompatible(pToken?: LiteralPToken): LiteralValueXToken | void {
    const pieces = pToken?.value ?? [];
 
@@ -140,9 +118,11 @@ function getSTokens(pToken: LiteralPToken | void): Array<SToken> {
    return results;
 }
 
+const parseLiteral = parse;
+
 const literal = {
    parse,
-   checkWellFormed,
+   parseLiteral,
    makeTokenCompatible,
    makeOneTokenCompatible,
    getSTokens,
@@ -150,6 +130,7 @@ const literal = {
 
 export default literal;
 export {
+   parseLiteral,
    LiteralPToken,
    LiteralValuePToken,
    LiteralValueXToken,

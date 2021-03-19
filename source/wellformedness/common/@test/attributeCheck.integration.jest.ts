@@ -3,14 +3,11 @@
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource, toSToken } from 'sToken';
-
-import attribute from '../../../token/common/attribute';
+import { parseAttribute } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
 
 import { attributeCheck } from '../attributeCheck';
-
-const { parse: parseAttribute } = attribute;
 
 describe('attributeCheck (integration)', () => {
    let source: STokenSource;
@@ -53,7 +50,7 @@ describe('attributeCheck (integration)', () => {
       });
    });
 
-   it('asks misc.checkWellFormedNameRecommendation() to complain if the name is bad', (done) => {
+   it('asks nameXmlCheck() to complain if the name is bad', (done) => {
       const confVer = new ConformanceVersion(1.0, 6);
       source.addText('xml:foo="value">');
       source.endText();
@@ -78,7 +75,7 @@ describe('attributeCheck (integration)', () => {
       });
    });
 
-   it('asks misc.checkCharWellFormed() to complain if the value has an illegal value', (done) => {
+   it('asks charCheck() to complain if the value has an illegal value', (done) => {
       source.addText('name="v\u0000alue">');
       source.endText();
 

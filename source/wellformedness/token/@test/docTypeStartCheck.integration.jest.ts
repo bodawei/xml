@@ -4,10 +4,10 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
-import { parseDocTypeStart } from 'token';
-import { DeclarationPToken } from '../../../token/bridge/baseDeclaration';
+import { DeclarationPToken, parseDocTypeStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+
 import { docTypeStartCheck } from '../docTypeStartCheck';
 
 describe('docTypeStartCheck()', () => {

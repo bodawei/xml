@@ -68,7 +68,6 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
          case 'ELEMENT':
             parseElementDeclaration(source, start, deliverPToken);
             return;
-         // When you finish this, need to do checkWellFormed on unknown types
       }
 
 

@@ -6,14 +6,14 @@ import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
 import { nameCheck } from '../../common/nameCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
+import { WellFormedError } from '../../error/WellFormedError';
+
 import { elementEndCheck } from '../elementEndCheck';
 
-import misc from '../../../token/common/misc';
-
 jest.mock('../../common/nameCheck');
-jest.mock('../../../token/common/misc');
+jest.mock('../../common/nameXmlCheck');
 
 describe('elementEndCheck()', () => {
    let confVer: ConformanceVersion;
@@ -31,8 +31,6 @@ describe('elementEndCheck()', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
    });
 
    it('asks the misc module to look for errors in the name', () => {
@@ -49,7 +47,7 @@ describe('elementEndCheck()', () => {
    it('asks the misc module to look for warnings in the name', () => {
       elementEndCheck(elementEndPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          elementEndPToken.name,
          mockErrorCollector,
          confVer,

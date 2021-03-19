@@ -1,12 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
-import { XmlDeclarationPToken } from 'pToken';
+import { InstructionField, XmlDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { checkCharWellFormed } from '../../token/common/misc';
-import { InstructionField } from 'pToken';
+import { charCheck } from '../common/charCheck';
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
@@ -89,7 +88,7 @@ function checkFields(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, confVer);
+            charCheck(value, ec, confVer);
 
             checkVersionString(valueText, ec, confVer);
             break;
@@ -104,10 +103,8 @@ function checkFields(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, confVer);
-            ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [
-               valueText,
-            ]);
+            charCheck(value, ec, confVer);
+            ec.check(!ENCODING_REGEXP.exec(valueText), WFEID.XMLDECL_ENCODING_INVALID, [valueText]);
             break;
          case 'standalone':
             ec.check(foundStandalone, WFEID.XMLDECL_DUPLICATE_STANDALONE);
@@ -119,7 +116,7 @@ function checkFields(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, confVer);
+            charCheck(value, ec, confVer);
             ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [
                valueText,
             ]);
@@ -149,7 +146,7 @@ function xmlDeclarationCheck(
    ec.check(pToken.openSpace, WFEID.XMLDECL_SPACE_AFTER_OPEN);
 
    ec.setPos(pToken.target);
-   checkCharWellFormed(pToken.target, ec, confVer);
+   charCheck(pToken.target, ec, confVer);
    if (pToken.target) {
       const target = strOrBlank(pToken.target);
       const lcTarget = target.toLowerCase();

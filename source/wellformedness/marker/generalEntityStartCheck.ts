@@ -1,10 +1,9 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
+import { GeneralEntityStartPToken } from 'token';
 
 import { generalEntityReferenceCheck } from '../token/generalEntityReferenceCheck';
-
-import { GeneralEntityStartPToken } from '../../token/marker/generalEntityStart';
 
 function generalEntityStartCheck(
    pToken: GeneralEntityStartPToken,

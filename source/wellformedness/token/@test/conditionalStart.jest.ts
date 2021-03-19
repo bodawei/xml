@@ -1,6 +1,6 @@
 import { MockErrorCollector } from 'basic-test';
-import { ConditionalPToken } from 'token';
 import { toSToken } from 'sToken';
+import { ConditionalPToken } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
 import { conditionalStartCheck } from '../conditionalStartCheck';

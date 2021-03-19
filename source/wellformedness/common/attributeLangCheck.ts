@@ -2,9 +2,9 @@ import { pattern as BCP47_REGEX } from 'bcp47-validate';
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { GENERAL_ENTITY_REFERENCE_PTOKEN, isTextPToken } from 'pToken';
 import { SToken } from 'sToken';
-import { WellFormedError } from '../../wellformedness/error/WellFormedError';
-
 import { AttributeValuePToken } from 'token';
+
+import { WellFormedError } from '..//error/WellFormedError';
 
 const WFID = WellFormedError.ID;
 const ONE_DOT_ZERO_REV1_REGEX = /^[a-z][a-z](?:-[a-z]+)*$|^[xi](?:-[a-z]+)+$/i;

@@ -4,21 +4,20 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { TextPToken } from 'pToken';
-
-import { WellFormedError } from '../../error/WellFormedError';
-import literal from '../../../token/common/literal';
-
-import { ExternalIdP } from '../../../pToken/common/externalId';
-import { externalIdCheck } from '../externalIdCheck';
+import { ExternalIdP, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-jest.mock('../../../token/common/literal');
+import { WellFormedError } from '../../error/WellFormedError';
+
+import { literalCheck } from '../literalCheck';
+import { externalIdCheck } from '../externalIdCheck';
+
+jest.mock('../literalCheck');
 
 describe('externalIdCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
    let externalId: ExternalIdP;
-   let litWell: jest.Mock;
+   let mockLiteralCheck: jest.MockedFunction<typeof literalCheck>;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
@@ -38,14 +37,14 @@ describe('externalIdCheck()', () => {
             closeQuote: toSToken('"'),
          },
       };
-      litWell = literal.checkWellFormed as jest.Mock;
+      mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
    });
 
-   it('calls literal.checkWellFormed() to check the PUBLIC value', () => {
+   it('calls literalCheck() to check the PUBLIC value', () => {
       const confVer = new ConformanceVersion();
       externalIdCheck(externalId, false, mockErrorCollector, confVer);
 
-      expect(literal.checkWellFormed).toHaveBeenCalledWith(
+      expect(literalCheck).toHaveBeenCalledWith(
          externalId.public,
          mockErrorCollector,
          confVer,
@@ -54,11 +53,11 @@ describe('externalIdCheck()', () => {
       );
    });
 
-   it('calls literal.checkWellFormed() to check the SYSTEM value', () => {
+   it('calls literalCheck() to check the SYSTEM value', () => {
       const confVer = new ConformanceVersion();
       externalIdCheck(externalId, false, mockErrorCollector, confVer);
 
-      expect(literal.checkWellFormed).toHaveBeenCalledWith(
+      expect(literalCheck).toHaveBeenCalledWith(
          externalId.system,
          mockErrorCollector,
          confVer,
@@ -75,8 +74,9 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
 
       // invoke the callback function
-      const cb: () => void = (literal.checkWellFormed as jest.Mock).mock.calls[0][4]; // eslint-disable-line
-      cb();
+      const mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
+      const cb = mockLiteralCheck.mock.calls[0][4]; // eslint-disable-line
+      cb?.();
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
@@ -93,7 +93,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports an error if the public value contains invalid characters', () => {
-      litWell.mockImplementation((_1, _2, _3, _4, callback) => {
+      mockLiteralCheck.mockImplementation((_1, _2, _3, _4, callback) => {
          if (callback) {
             callback();
          }
@@ -115,7 +115,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('does not blow up if the public value has no text when we are checking for invalid characters', () => {
-      litWell.mockImplementation((_1, _2, _3, _4, callback) => {
+      mockLiteralCheck.mockImplementation((_1, _2, _3, _4, callback) => {
          if (callback) {
             callback();
          }
@@ -197,7 +197,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports an error if there is no public part', () => {
-      litWell.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
+      mockLiteralCheck.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
          if (callback && !publicOrSystem) {
             callback();
          }
@@ -217,7 +217,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports an error if there is no system part', () => {
-      litWell.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
+      mockLiteralCheck.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
          if (callback && !publicOrSystem) {
             callback();
          }
@@ -237,7 +237,7 @@ describe('externalIdCheck()', () => {
    });
 
    it('reports no error if there is no system part and this is a PublicID on a notation', () => {
-      litWell.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
+      mockLiteralCheck.mockImplementation((publicOrSystem, _2, _3, _4, callback) => {
          if (callback && !publicOrSystem) {
             callback();
          }

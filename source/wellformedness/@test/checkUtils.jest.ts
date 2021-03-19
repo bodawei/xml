@@ -10,6 +10,14 @@ import {
    ParameterEntityReferencePToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
+import {
+   ElementStartPToken,
+   ElementEmptyPToken,
+   GeneralEntityEndPToken,
+   GeneralEntityStartPToken,
+   ParameterEntityStartPToken,
+} from 'token';
+import { makeParameterExternalEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { WellFormedError } from '../error/WellFormedError';
 import {
@@ -19,16 +27,6 @@ import {
    isParamEntityExternal,
    CheckState,
 } from '../checkUtils';
-
-// ick
-import {
-   ElementStartPToken,
-   ElementEmptyPToken,
-   GeneralEntityEndPToken,
-   GeneralEntityStartPToken,
-   ParameterEntityStartPToken,
-} from 'token';
-import { makeParameterExternalEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
 describe('checkUtils (unit)', () => {
    let state: CheckState;

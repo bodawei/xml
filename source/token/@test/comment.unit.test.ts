@@ -8,7 +8,6 @@ import {
    CommentXToken,
    parseComment,
 } from '../comment';
-import misc from '../common/misc';
 
 describe('comment (unit)', () => {
    let commentPToken: CommentPToken;

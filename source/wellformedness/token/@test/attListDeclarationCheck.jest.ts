@@ -6,24 +6,26 @@ import { ConformanceVersion, Range, EntityId, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
-
-import { WellFormedError } from '../../error/WellFormedError';
-import { attListDeclarationCheck } from '../attListDeclarationCheck';
-import { nameCheck } from '../../common/nameCheck';
-import { wordListCheck } from '../../common/wordListCheck';
-
-//ick
-import literal from '../../../token/common/literal';
-import misc from '../../../token/common/misc';
 import { WordListPToken, WordListType } from 'token';
 
+import { literalCheck } from '../../common/literalCheck';
+import { nameCheck } from '../../common/nameCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
+import { wordListCheck } from '../../common/wordListCheck';
+import { WellFormedError } from '../../error/WellFormedError';
+
+import { attListDeclarationCheck } from '../attListDeclarationCheck';
+
+jest.mock('../../common/literalCheck');
 jest.mock('../../common/nameCheck');
+jest.mock('../../common/nameXmlCheck');
 jest.mock('../../common/wordListCheck');
 
 describe('attListDeclarationCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
    let confVer: ConformanceVersion;
    let aldPToken: AttListDeclarationPToken;
+   let mockLiteralCheck: jest.MockedFunction<typeof literalCheck>;
 
    beforeEach(() => {
       aldPToken = new AttListDeclarationPToken({
@@ -48,8 +50,7 @@ describe('attListDeclarationCheck()', () => {
       mockErrorCollector = new MockErrorCollector();
       confVer = new ConformanceVersion();
 
-      jest.spyOn(literal, 'checkWellFormed').mockImplementation();
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation').mockImplementation();
+      mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
    });
 
    it('reports an error if the declaration type is not all caps', () => {
@@ -143,10 +144,10 @@ describe('attListDeclarationCheck()', () => {
       );
    });
 
-   it('calls misc.checkWellFormedNameRecommendation() to report on attribute name conformance', () => {
+   it('calls nameXmlCheck() to report on attribute name conformance', () => {
       attListDeclarationCheck(aldPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          aldPToken.attDefs[0].name,
          mockErrorCollector,
          confVer,
@@ -814,7 +815,7 @@ describe('attListDeclarationCheck()', () => {
       });
    });
 
-   it('calls literal.checkWellFormed() with the attribute data', () => {
+   it('calls mockLiteralCheck() with the attribute data', () => {
       const testToken = new AttListDeclarationPToken(aldPToken, {
          attDefs: [
             {
@@ -831,7 +832,7 @@ describe('attListDeclarationCheck()', () => {
 
       attListDeclarationCheck(testToken, mockErrorCollector, confVer);
 
-      expect(literal.checkWellFormed).toHaveBeenCalledWith(
+      expect(mockLiteralCheck).toHaveBeenCalledWith(
          testToken.attDefs[0],
          mockErrorCollector,
          confVer,

@@ -6,11 +6,11 @@ import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { CharDataPToken } from 'token';
 
+import { charCheck } from '../../common/charCheck';
+
 import { charDataCheck } from '../charDataCheck';
 
-import misc from '../../../token/common/misc';
-
-jest.mock('../../../token/common/misc');
+jest.mock('../../common/charCheck');
 
 describe('commentCheck()', () => {
    let confVer: ConformanceVersion;
@@ -24,17 +24,11 @@ describe('commentCheck()', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
    });
 
    it('asks the checks the text is well formed', () => {
       charDataCheck(charDataPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         charDataPToken.text,
-         mockErrorCollector,
-         confVer,
-      );
+      expect(charCheck).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, confVer);
    });
 });

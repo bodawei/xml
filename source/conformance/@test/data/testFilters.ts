@@ -7,8 +7,9 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: ['dtd05'],
+   includedIds: [],
    excludedIds: [
+      'dtd05',
       // PUT TOGETHER A DESIGN PLAN FOR THIS:
       // WE are either not checking chardata correctly, and/or our error messages are wonked out
       'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)

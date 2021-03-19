@@ -12,7 +12,6 @@ import {
    XMLDECL_PTOKEN,
 } from 'pToken';
 import { toSToken } from 'sToken';
-import { WellFormedError } from '../error/WellFormedError';
 import {
    CDATA_PTOKEN,
    COMMENT_PTOKEN,
@@ -54,6 +53,7 @@ import {
    makeElementEmpty,
 } from 'token-test';
 
+import { WellFormedError } from '../error/WellFormedError';
 import { DocumentChecker } from '../DocumentChecker';
 import { CHECKER_DONE, CheckState, MarkupChecker, ContentChecker } from '../checkUtils';
 import { checkMap } from '../checkMap';
@@ -194,7 +194,7 @@ describe('DocumentChecker (unit)', () => {
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = jest.spyOn(checkMap, XMLDECL_PTOKEN).mockImplementation(() => {});
+         const cwfSpy = jest.spyOn(checkMap, 'XMLDECL_PTOKEN').mockImplementation(() => {});
          checker.check(confVer, ec);
 
          checker.check(xmlDecl, ec);

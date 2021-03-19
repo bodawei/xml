@@ -2,15 +2,12 @@
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { defaultExtractors } from 'extractor';
+import { parseEntityDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
+import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
-
-import { parseEntityDeclaration } from '../../../pToken/bridge/entityDeclaration';
-
-// ick
-import { DeclarationStart } from 'token';
 
 describe('entityDeclarationCheck() (integration)', () => {
    let declarationStart: DeclarationStart;
@@ -27,7 +24,7 @@ describe('entityDeclarationCheck() (integration)', () => {
       source = new STokenSource(defaultExtractors);
    });
 
-   it('reports errors in the literal value (literal.checkWellFormed())', (done) => {
+   it('reports errors in the literal value (literalCheck())', (done) => {
       source.addText('entityName "entityValue'); // missing closing quote
       source.endText();
       parseEntityDeclaration(source, declarationStart, (result) => {
@@ -52,7 +49,7 @@ describe('entityDeclarationCheck() (integration)', () => {
       });
    });
 
-   it('reports an error when name starts with "xml" (check misc.checkWellFormedNameRecommendation())', (done) => {
+   it('reports an error when name starts with "xml" (check nameXmlCheck())', (done) => {
       source.addText('xmlFoo "frog">');
       parseEntityDeclaration(source, declarationStart, (result) => {
          const ec = new ErrorCollector(declarationStart.open, WellFormedError);
@@ -76,7 +73,7 @@ describe('entityDeclarationCheck() (integration)', () => {
       });
    });
 
-   it('reports an error when NDATA value has a bad char (check misc.checkCharWellFormed())', (done) => {
+   it('reports an error when NDATA value has a bad char (check charCheck())', (done) => {
       source.addText('entityName SYSTEM "sys.xml" NDATA bad\u0000>');
       parseEntityDeclaration(source, declarationStart, (result) => {
          const ec = new ErrorCollector(declarationStart.open, WellFormedError);

@@ -8,6 +8,7 @@ import { ContentModelP, ContentNameP } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
+
 import { contentModelCheck } from '../contentModelCheck';
 import { nameCheck } from '../nameCheck';
 

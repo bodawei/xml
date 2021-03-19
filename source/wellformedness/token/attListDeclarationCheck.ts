@@ -4,13 +4,11 @@ import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
+import { literalCheck } from '../common/literalCheck';
 import { nameCheck } from '../common/nameCheck';
+import { nameXmlCheck } from '../common/nameXmlCheck';
 import { wordListCheck } from '../common/wordListCheck';
 import { WellFormedError } from '../error/WellFormedError';
-
-// ick
-import literal from '../../token/common/literal';
-import misc from '../../token/common/misc';
 
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
@@ -62,7 +60,7 @@ function attListDeclarationCheck(
 
       ec.setPos(attDef.name);
       nameCheck(attDef.name, ec, confVer, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
-      misc.checkWellFormedNameRecommendation(
+      nameXmlCheck(
          attDef.name,
          ec,
          confVer,
@@ -167,7 +165,7 @@ function attListDeclarationCheck(
             [attName, elNameText],
          );
          // @@@ need to check and complain if any entity refs are to external entities (general or parameter)
-         literal.checkWellFormed(attDef, ec, confVer, WFEID.NOUN_ATTRIBUTE);
+         literalCheck(attDef, ec, confVer, WFEID.NOUN_ATTRIBUTE);
       } else {
          ec.check(attDef.openQuote, WFEID.ATTLISTDECL_ATTR_EXTRA_VALUE, [attName, elNameText]);
       }

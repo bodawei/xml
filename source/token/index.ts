@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import declaration from './bridge/baseDeclaration';
+import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 
-import { AttributePToken, AttributeValuePToken, AttributeValueElement } from './common/attribute';
-import literalValue from './common/literalValue';
+import { AttributePToken, AttributeValuePToken, AttributeValueElement, parseAttribute } from './common/attribute';
+import { LiteralPToken, parseLiteral } from './common/literal';
+import literalValue, { LiteralValuePToken, parseLiteralValue } from './common/literalValue';
 import { WordListPToken, WordListType, WordListEntryPToken, parseWordList } from './common/wordList';
-import { DocTypeStartPToken } from './docTypeStart';
 import { InternalSubsetStartToken } from './marker/internalSubsetStart';
 import { InternalSubsetEndToken } from './marker/internalSubsetEnd';
 import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
@@ -21,6 +21,7 @@ import { GeneralEntityStartPToken, GENERAL_ENTITY_START_PTOKEN } from './marker/
 import { GeneralEntityEndPToken, GENERAL_ENTITY_END_PTOKEN } from './marker/generalEntityEnd';
 import { ParameterEntityStartPToken, PARAMETER_ENTITY_START_PTOKEN } from './marker/parameterEntityStart';
 import { SpacePToken } from './space';
+import { DocTypeStartPToken } from './docTypeStart';
 import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
 import { ElementEndPToken } from './elementEnd';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
@@ -90,12 +91,18 @@ type PToken =
 export {
    ERROR_TYPE,
 
+   DeclarationPToken,
    AttributePToken,
    AttributeValueElement,
+   LiteralPToken,
+   LiteralValuePToken,
    WordListPToken,
    WordListType,
    WordListEntryPToken,
+   parseAttribute,
    parseExternalId,
+   parseLiteral,
+   parseLiteralValue,
    parseWordList,
 
    declaration,

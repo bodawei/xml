@@ -5,8 +5,8 @@ import { ExternalIdP, TextPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
-//ik
-import literal from '../../token/common/literal'; // ick
+
+import { literalCheck } from './literalCheck';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -41,7 +41,7 @@ function externalIdCheck(
 
    if (capitalType === 'PUBLIC') {
       // This is very fragile if there is no value.
-      literal.checkWellFormed(externalId.public, ec, confVer, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
+      literalCheck(externalId.public, ec, confVer, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
          if (!externalId.public) {
             ec.report(WFEID.EXTERNALID_MISSING_PUBLIC_VALUE, []);
             return;
@@ -72,7 +72,7 @@ function externalIdCheck(
          ec.check(!externalId.publicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
-      literal.checkWellFormed(externalId.system, ec, confVer, WFEID.NOUN_EXTERNALID_SYSTEM);
+      literalCheck(externalId.system, ec, confVer, WFEID.NOUN_EXTERNALID_SYSTEM);
    }
 }
 

@@ -2,22 +2,20 @@
 
 import { ConformanceVersion, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclaration';
+import { ContentModelP, ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { contentModelCheck } from '../../common/contentModelCheck';
 import { nameCheck } from '../../common/nameCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
+import { WellFormedError } from '../../error/WellFormedError';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
-import { contentModelCheck } from '../../common/contentModelCheck';
 
-// ick
-import misc from '../../../token/common/misc';
-import { ContentModelP } from 'pToken';
-
-jest.mock('../../../token/common/misc');
 jest.mock('../../common/contentModelCheck');
 jest.mock('../../common/nameCheck');
+jest.mock('../../common/nameXmlCheck');
+jest.mock('../../common/nameXmlCheck');
 
 describe('elementDeclarationCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -109,10 +107,10 @@ describe('elementDeclarationCheck()', () => {
       );
    });
 
-   it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
+   it('calls nameXmlCheck() to report on bad names', () => {
       elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
 
-      expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          elementDeclaration.name,
          mockErrorCollector,
          confVer,

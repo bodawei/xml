@@ -1,15 +1,13 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
+import { ElementDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { ElementDeclarationPToken } from '../../pToken/token/ElementDeclaration';
 
-import { nameCheck } from '../common/nameCheck';
 import { contentModelCheck } from '../common/contentModelCheck';
-
-// ick
-import misc from '../../token/common/misc';
+import { nameCheck } from '../common/nameCheck';
+import { nameXmlCheck } from '../common/nameXmlCheck';
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
@@ -37,7 +35,7 @@ function elementDeclarationCheck(
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ELEMENTDECL_NO_NAME);
    nameCheck(pToken.name, ec, confVer, WFEID.ELEMENTDECL_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(
+   nameXmlCheck(
       pToken.name,
       ec,
       confVer,

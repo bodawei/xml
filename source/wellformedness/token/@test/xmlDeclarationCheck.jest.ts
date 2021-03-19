@@ -1,15 +1,17 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { XmlDeclarationPToken } from 'pToken';
+import { XmlDeclarationPToken, InstructionStart } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { charCheck } from '../../common/charCheck';
 import { WellFormedError } from '../../error/WellFormedError';
-import * as misc from '../../../token/common/misc';
+
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
-import { InstructionStart } from '../../../pToken/bridge/instruction';
-import { ConformanceVersion } from 'basic';
+
+jest.mock('../../common/charCheck');
 
 describe('xmlDeclarationCheck() (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
@@ -47,20 +49,15 @@ describe('xmlDeclarationCheck() (unit)', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          confVer = new ConformanceVersion();
-         jest.spyOn(misc, 'checkCharWellFormed').mockImplementation();
       });
 
-      it('calls misc.checkCharWellFormed() on the target value', () => {
+      it('calls charCheck() on the target value', () => {
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-            xmlDeclPToken.target,
-            mockErrorCollector,
-            confVer,
-         );
+         expect(charCheck).toHaveBeenCalledWith(xmlDeclPToken.target, mockErrorCollector, confVer);
       });
 
-      it('calls misc.checkCharWellFormed() on the version value', () => {
+      it('calls charCheck() on the version value', () => {
          xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
             fields: [
                {
@@ -73,14 +70,14 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
+         expect(charCheck).toHaveBeenCalledWith(
             xmlDeclPToken.fields[0].value,
             mockErrorCollector,
             confVer,
          );
       });
 
-      it('calls misc.checkCharWellFormed() on the encoding value', () => {
+      it('calls charCheck() on the encoding value', () => {
          xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
             fields: [
                {
@@ -93,14 +90,14 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
+         expect(charCheck).toHaveBeenCalledWith(
             xmlDeclPToken.fields[0].value,
             mockErrorCollector,
             confVer,
          );
       });
 
-      it('calls misc.checkCharWellFormed() on the standalone value', () => {
+      it('calls charCheck() on the standalone value', () => {
          xmlDeclPToken = new XmlDeclarationPToken(xmlDeclPToken, {
             fields: [
                {
@@ -113,7 +110,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
-         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
+         expect(charCheck).toHaveBeenCalledWith(
             xmlDeclPToken.fields[0].value,
             mockErrorCollector,
             confVer,

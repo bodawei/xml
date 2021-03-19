@@ -1,8 +1,9 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../../wellformedness/error/WellFormedError';
 import { WordListPToken } from 'token';
+
+import { WellFormedError } from '../error/WellFormedError';
 
 import { nmTokenCheck } from './nmTokenCheck';
 import { nameCheck } from './nameCheck';

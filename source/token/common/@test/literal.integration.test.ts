@@ -1,10 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ErrorCollector, ConformanceVersion } from 'basic';
-import { WellFormedError } from 'wellformedness';
+import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { SToken, STokenSource } from 'sToken';
+import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken,  } from 'pToken';
 import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
@@ -83,43 +82,6 @@ describe('literal (integration)', () => {
                ],
                closeQuote: makeSToken('"'),
             });
-            done();
-         });
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-
-      it('reports an error if the value has a bad character (misc.checkCharWellFormed())', (done) => {
-         const pToken: LiteralPToken = {} as  LiteralPToken;
-         source.addText('"b\u0000d"');
-         source.endText();
-         literal.parse(source, {
-            pToken: pToken,
-         }, () => {
-            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
-
-            literal.checkWellFormed(pToken, ec, confVer, 'aType');
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-            done();
-         });
-      });
-
-      it('reports an error if an entity reference is malformed', (done) => {
-         const pToken: LiteralPToken = {} as  LiteralPToken;
-         source.addText('"good& bad;"');
-         source.endText();
-         literal.parse(source, {
-            pToken: pToken,
-            geRef: true,
-         }, () => {
-            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
-
-            literal.checkWellFormed(pToken, ec, confVer, 'aType');
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.REFERENCE_XTRA_SPACE);
             done();
          });
       });

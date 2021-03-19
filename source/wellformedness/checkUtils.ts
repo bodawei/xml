@@ -1,5 +1,4 @@
 import { ErrorCollector, ConformanceVersion } from 'basic';
-import { SToken, strOrBlank } from 'sToken';
 import {
    CHARREF_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -11,7 +10,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { WellFormedError } from './error/WellFormedError';
+import { SToken, strOrBlank } from 'sToken';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
@@ -26,7 +25,8 @@ import {
    ConditionalPToken,
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
-import { LiteralValuePToken } from 'source/token/common/literal';
+import { LiteralValuePToken } from '../token/common/literal';
+import { WellFormedError } from './error/WellFormedError';
 
 type ContentStart = ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
 

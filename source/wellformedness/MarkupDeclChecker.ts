@@ -2,52 +2,41 @@
 
 import { ErrorCollector } from 'basic';
 import {
+   ATTLIST_DECLARATION_PTOKEN,
+   PROCESSING_INSTRUCTION_PTOKEN,
+   ELEMENT_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   TEXTDECL_PTOKEN,
+   TEXT_PTOKEN,
    AttListDeclarationPToken,
    ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
    ParseToken,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
+import {
+   COMMENT_PTOKEN,
+   CONDITIONAL_PTOKEN,
+   CONDITIONAL_CLOSE_PTOKEN,
+   ELIDED_ENTITY_DECLARATION_PTOKEN,
+   EXTERNAL_SUBSET_END_TOKEN,
+   EXTERNAL_SUBSET_START_TOKEN,
+   INTERNAL_SUBSET_END_TOKEN,
+   INTERNAL_SUBSET_START_TOKEN,
+   PARAMETER_ENTITY_END_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
+   SPACE_PTOKEN,
+   ElidedEntityDeclarationPToken,
+   getFirstSToken,
+} from 'token';
 
 import { WellFormedError } from './error/WellFormedError';
-
-// circular dependency problem
-import {
-   ELIDED_ENTITY_DECLARATION_PTOKEN,
-   ElidedEntityDeclarationPToken,
-} from '../token/ElidedEntityDeclarationPToken';
-import { CONDITIONAL_PTOKEN } from '../token/conditional';
-import { CONDITIONAL_CLOSE_PTOKEN } from '../token/conditionalClose';
-import { COMMENT_PTOKEN } from '../token/comment';
-import { PARAMETER_ENTITY_START_PTOKEN } from '../token/marker/parameterEntityStart';
-import { PARAMETER_ENTITY_END_PTOKEN } from '../token/marker/parameterEntityEnd';
-import {
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   ParameterEntityReferencePToken,
-} from '../pToken/token/parameterEntityReference';
-import { EXTERNAL_SUBSET_END_TOKEN } from '../token/marker/externalSubsetEnd';
-import { INTERNAL_SUBSET_END_TOKEN } from '../token/marker/internalSubsetEnd';
-import { getFirstSToken } from '../token/getFirstSToken';
-import { SPACE_PTOKEN } from '../token/space';
-import { INTERNAL_SUBSET_START_TOKEN } from '../token/marker/internalSubsetStart';
-import { EXTERNAL_SUBSET_START_TOKEN } from '../token/marker/externalSubsetStart';
-
-import { PROCESSING_INSTRUCTION_PTOKEN } from '../pToken/token/processingInstruction';
-import { ELEMENT_DECLARATION_PTOKEN } from '../pToken/token/elementDeclaration';
-import { NOTATION_DECLARATION_PTOKEN } from '../pToken/token/notationDeclaration';
-import { TEXTDECL_PTOKEN } from '../pToken/token/textDeclaration';
-import { ATTLIST_DECLARATION_PTOKEN } from '../pToken/token/attListDeclaration';
-// import {
-//    GENERAL_ENTITY_DECLARATION_PTOKEN,
-//    PARAMETER_ENTITY_DECLARATION_PTOKEN,
-//    TEXT_PTOKEN,
-// } from 'pToken';
-
-const TEXT_PTOKEN = 'TEXT_PTOKEN';
-const GENERAL_ENTITY_DECLARATION_PTOKEN = 'GENERAL_ENTITY_DECLARATION_PTOKEN';
-const PARAMETER_ENTITY_DECLARATION_PTOKEN = 'PARAMETER_ENTITY_DECLARATION_PTOKEN';
 
 import {
    CHECKER_DONE,

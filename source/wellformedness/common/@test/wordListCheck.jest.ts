@@ -6,6 +6,7 @@ import { SToken } from 'sToken';
 import { WordListPToken, WordListType } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+
 import { nameCheck } from '../nameCheck';
 import { nmTokenCheck } from '../nmTokenCheck';
 import { wordListCheck } from '../wordListCheck';

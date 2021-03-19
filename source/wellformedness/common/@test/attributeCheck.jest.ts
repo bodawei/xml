@@ -7,24 +7,24 @@ import { makeSTokenMaker } from 'sToken-test';
 import { SToken, toSToken } from 'sToken';
 import { AttributePToken } from 'token';
 
-import misc from '../../../token/common/misc';
-import literal from '../../../token/common/literal';
-
+import { attributeLangCheck } from '../attributeLangCheck';
+import { literalCheck } from '../literalCheck';
+import { nameCheck } from '../nameCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
+import { attributeCheck } from '../attributeCheck';
 import { WellFormedError } from '../../error/WellFormedError';
 
-import { attributeLangCheck } from '../attributeLangCheck';
-import { nameCheck } from '../nameCheck';
-import { attributeCheck } from '../attributeCheck';
-
 jest.mock('../attributeLangCheck');
+jest.mock('../literalCheck');
 jest.mock('../nameCheck');
+jest.mock('../../common/nameXmlCheck');
 
 describe('attributeCheck (unit)', () => {
    let attributesPChunk: Array<AttributePToken>;
    let confVer: ConformanceVersion;
    let mockErrorCollector: MockErrorCollector;
    let previousSpace: SToken;
-   let litCheck: jest.MockedFunction<typeof literal.checkWellFormed>;
+   let mockLiteralCheck: jest.MockedFunction<typeof literalCheck>;
 
    beforeEach(() => {
       attributesPChunk = [
@@ -50,10 +50,7 @@ describe('attributeCheck (unit)', () => {
       const makeToken = makeSTokenMaker();
       previousSpace = makeToken(' ');
       mockErrorCollector = new MockErrorCollector();
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
-      litCheck = jest.spyOn(literal, 'checkWellFormed') as jest.MockedFunction<
-         typeof literal.checkWellFormed
-      >;
+      mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
    });
 
    it('calls the nameCheck() routine', () => {
@@ -85,7 +82,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('reports an error if an xml:space attribute has a value other than preserve or default', () => {
-      litCheck.mockImplementation((_2, _3, _4, _5, callback) => {
+      mockLiteralCheck.mockImplementation((_2, _3, _4, _5, callback) => {
          callback?.();
       });
 
@@ -112,7 +109,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('reports no error if an xml:space attribute has a of default', () => {
-      litCheck.mockImplementation((_2, _3, _4, _5, callback) => {
+      mockLiteralCheck.mockImplementation((_2, _3, _4, _5, callback) => {
          callback?.();
       });
 
@@ -134,7 +131,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('reports no error if an xml:space attribute has a of preserve', () => {
-      litCheck.mockImplementation((_2, _3, _4, _5, callback) => {
+      mockLiteralCheck.mockImplementation((_2, _3, _4, _5, callback) => {
          callback?.();
       });
 
@@ -164,7 +161,7 @@ describe('attributeCheck (unit)', () => {
          WellFormedError.ID.NOUN_ATTRIBUTE,
       );
 
-      const params = litCheck.mock.calls[0];
+      const params = mockLiteralCheck.mock.calls[0];
       expect(params[0]).toEqual(attributesPChunk[0]);
       expect(params[1]).toEqual(mockErrorCollector);
       expect(params[2]).toEqual(confVer);
@@ -206,7 +203,7 @@ describe('attributeCheck (unit)', () => {
       });
    });
 
-   it('calls the checkWellFormedNameRecommendation() function', () => {
+   it('calls the nameXmlCheck() function', () => {
       attributeCheck(
          attributesPChunk,
          mockErrorCollector,
@@ -216,7 +213,7 @@ describe('attributeCheck (unit)', () => {
          () => {},
       );
 
-      expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          attributesPChunk[0].name,
          mockErrorCollector,
          confVer,
@@ -248,7 +245,7 @@ describe('attributeCheck (unit)', () => {
 
    it('calls the checkValue function, if provided', () => {
       const checkValue = jest.fn();
-      litCheck.mockImplementation((_2, _3, _4, _5, callback) => {
+      mockLiteralCheck.mockImplementation((_2, _3, _4, _5, callback) => {
          callback?.();
       });
 
@@ -315,7 +312,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('reports an error if there is a "<" in the attribute value', () => {
-      litCheck.mockImplementation((_2, _3, _4, _5, callback) => {
+      mockLiteralCheck.mockImplementation((_2, _3, _4, _5, callback) => {
          callback?.();
       });
 

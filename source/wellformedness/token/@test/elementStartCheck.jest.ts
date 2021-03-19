@@ -6,16 +6,15 @@ import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ElementStartPToken } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
 import { attributeCheck } from '../../common/attributeCheck';
 import { nameCheck } from '../../common/nameCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { elementStartCheck } from '../elementStartCheck';
+import { WellFormedError } from '../../error/WellFormedError';
 
-import misc from '../../../token/common/misc';
-
-jest.mock('../../common/nameCheck');
 jest.mock('../../common/attributeCheck');
-jest.mock('../../../token/common/misc');
+jest.mock('../../common/nameCheck');
+jest.mock('../../common/nameXmlCheck');
 
 describe('elementStartCheck()', () => {
    let confVer: ConformanceVersion;
@@ -41,8 +40,6 @@ describe('elementStartCheck()', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-
-      jest.spyOn(misc, 'checkWellFormedNameRecommendation');
    });
 
    it('asks the misc module to look for errors in the name', () => {
@@ -59,7 +56,7 @@ describe('elementStartCheck()', () => {
    it('asks the misc module to look for warning problems in the name', () => {
       elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          elementStartPToken.name,
          mockErrorCollector,
          confVer,

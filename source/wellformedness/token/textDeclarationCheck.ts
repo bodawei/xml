@@ -1,12 +1,11 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
-import { TextDeclarationPToken } from 'pToken';
+import { InstructionField, TextDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { checkCharWellFormed } from '../../token/common/misc';
-import { InstructionField } from 'pToken';
+import { charCheck } from '../common/charCheck';
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
@@ -40,7 +39,7 @@ function checkFields(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, confVer);
+            charCheck(value, ec, confVer);
 
             // See §2.8 in 1.0/* and §4.3.4 in 1.1/*
             //    And then see interpretations,
@@ -67,7 +66,7 @@ function checkFields(
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkCharWellFormed(value, ec, confVer);
+            charCheck(value, ec, confVer);
             ec.check(!ENCODING_REGEXP.test(valueText), WFEID.TEXTDECL_ENCODING_INVALID, [
                valueText,
             ]);
@@ -86,7 +85,7 @@ function textDeclarationCheck(
    ec.check(pToken.openSpace, WFEID.TEXTDECL_SPACE_AFTER_OPEN);
 
    ec.setPos(pToken.target);
-   checkCharWellFormed(pToken.target, ec, confVer);
+   charCheck(pToken.target, ec, confVer);
 
    if (pToken.target) {
       const target = strOrBlank(pToken.target);

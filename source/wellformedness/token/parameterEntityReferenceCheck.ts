@@ -1,10 +1,12 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
+
 import { nameCheck } from '../common/nameCheck';
+import { WellFormedError } from '../error/WellFormedError';
+
 const WFEID = WellFormedError.ID;
 
 function parameterEntityReferenceCheck(

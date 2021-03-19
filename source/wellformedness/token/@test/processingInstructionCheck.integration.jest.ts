@@ -6,6 +6,7 @@ import { ProcessingInstructionPToken, parseProcessingInstruction } from 'pToken'
 import { SToken, STokenSource, toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
+
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
 describe('processingInstructionCheck() (integration)', () => {

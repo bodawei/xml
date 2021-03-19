@@ -4,13 +4,13 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 import {
    NOTATION_DECLARATION_PTOKEN,
+   TEXTDECL_PTOKEN,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    NotationDeclarationPToken,
+   TextDeclarationPToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
-
-import { WellFormedError } from '../error/WellFormedError';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    CdataPToken,
@@ -23,8 +23,7 @@ import {
    CharDataPToken,
 } from 'token';
 
-import { TEXTDECL_PTOKEN, TextDeclarationPToken } from '../../pToken/token/textDeclaration';
-
+import { WellFormedError } from '../error/WellFormedError';
 import { ContentChecker } from '../ContentChecker';
 import { CheckState, CHECKER_DONE } from '../checkUtils';
 

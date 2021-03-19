@@ -1,20 +1,19 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
-import { strOrBlank } from 'sToken';
 import {
-   GeneralEntityDeclarationPToken,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
-} from '../../pToken/token/GeneralEntityDeclaration';
-import { ParameterEntityDeclarationPToken } from '../../pToken/token/parameterEntityDeclaration';
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+} from 'pToken';
+import { strOrBlank } from 'sToken';
 
-import { nameCheck } from '../common/nameCheck';
+import { charCheck } from '../common/charCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
-
-// ick
-import literal from '../../token/common/literal';
-import * as misc from '../../token/common/misc';
+import { literalCheck } from '../common/literalCheck';
+import { nameCheck } from '../common/nameCheck';
+import { nameXmlCheck } from '../common/nameXmlCheck';
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
@@ -53,7 +52,7 @@ function entityDeclarationCheck(
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ENTITYDECL_NO_NAME);
    nameCheck(pToken.name, ec, confVer, WFEID.ENTITYDECL_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(
+   nameXmlCheck(
       pToken.name,
       ec,
       confVer,
@@ -78,10 +77,10 @@ function entityDeclarationCheck(
          ]);
          ec.setPos(pToken.nDataName);
          ec.check(!pToken.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [enNameText]);
-         misc.checkCharWellFormed(pToken.nDataName, ec, confVer);
+         charCheck(pToken.nDataName, ec, confVer);
       }
    } else {
-      literal.checkWellFormed(pToken, ec, confVer, WFEID.NOUN_ENTITYVALUE);
+      literalCheck(pToken, ec, confVer, WFEID.NOUN_ENTITYVALUE);
    }
 
    if (pToken.extra) {

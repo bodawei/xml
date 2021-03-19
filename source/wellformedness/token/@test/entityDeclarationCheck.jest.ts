@@ -9,26 +9,26 @@ import {
 } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { WellFormedError } from '../../error/WellFormedError';
-import * as externalId from '../../common/externalIdCheck';
+import { charCheck } from '../../common/charCheck';
+import { externalIdCheck } from '../../common/externalIdCheck';
+import { literalCheck } from '../../common/literalCheck';
 import { nameCheck } from '../../common/nameCheck';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
+import { WellFormedError } from '../../error/WellFormedError';
 
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
-// ick
-import literal from '../../../token/common/literal';
-import * as misc from '../../../token/common/misc';
-
+jest.mock('../../common/charCheck');
+jest.mock('../../common/externalIdCheck');
+jest.mock('../../common/literalCheck');
 jest.mock('../../common/nameCheck');
+jest.mock('../../common/nameXmlCheck');
 
 describe('entityDeclarationCheck (unit)', () => {
    let genEntityDeclarationPToken: GeneralEntityDeclarationPToken;
    let paramEntityDeclarationPToken: ParameterEntityDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
    let confVer: ConformanceVersion;
-   let miscWellFormedSpy: jest.MockedFunction<typeof misc.checkCharWellFormed>;
-   let miscSpy: jest.MockedFunction<typeof misc.checkWellFormedNameRecommendation>;
-   let externalIdSpy: jest.MockedFunction<typeof externalId.externalIdCheck>;
 
    beforeEach(() => {
       genEntityDeclarationPToken = new GeneralEntityDeclarationPToken({
@@ -50,30 +50,16 @@ describe('entityDeclarationCheck (unit)', () => {
 
       confVer = new ConformanceVersion();
       mockErrorCollector = new MockErrorCollector();
-      miscSpy = jest.spyOn(misc, 'checkWellFormedNameRecommendation') as jest.MockedFunction<
-         typeof misc.checkWellFormedNameRecommendation
-      >;
-      miscSpy.mockImplementation(() => []);
-      miscWellFormedSpy = jest.spyOn(misc, 'checkCharWellFormed') as jest.MockedFunction<
-         typeof misc.checkCharWellFormed
-      >;
-      miscWellFormedSpy.mockImplementation(() => []);
-      externalIdSpy = jest.spyOn(externalId, 'externalIdCheck') as jest.MockedFunction<
-         typeof externalId.externalIdCheck
-      >;
-      externalIdSpy.mockImplementation(() => []);
    });
 
    it('asks the literal module to look for problems in the declaration part', () => {
-      const literalSpy = jest.spyOn(literal, 'checkWellFormed').mockImplementation();
-
       const pToken = new ParameterEntityDeclarationPToken(paramEntityDeclarationPToken, {
          value: [new TextPToken({ text: toSToken('yipes') })],
       });
 
       entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
 
-      expect(literalSpy).toHaveBeenCalledWith(
+      expect(literalCheck).toHaveBeenCalledWith(
          pToken,
          mockErrorCollector,
          confVer,
@@ -122,10 +108,10 @@ describe('entityDeclarationCheck (unit)', () => {
       );
    });
 
-   it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
+   it('calls nameXmlCheck() to report on bad names', () => {
       entityDeclarationCheck(paramEntityDeclarationPToken, mockErrorCollector, confVer);
 
-      expect(miscSpy).toHaveBeenCalledWith(
+      expect(nameXmlCheck).toHaveBeenCalledWith(
          paramEntityDeclarationPToken.name,
          mockErrorCollector,
          confVer,
@@ -157,7 +143,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, confVer);
 
-      expect(externalIdSpy).toHaveBeenCalledWith(
+      expect(externalIdCheck).toHaveBeenCalledWith(
          pToken.externalId,
          false,
          mockErrorCollector,
@@ -196,7 +182,7 @@ describe('entityDeclarationCheck (unit)', () => {
       });
    });
 
-   it('calls checkCharWellFormed() to check on the ndata value', () => {
+   it('calls charCheck() to check on the ndata value', () => {
       const pToken = new GeneralEntityDeclarationPToken(genEntityDeclarationPToken, {
          externalId: {},
          nData: toSToken('nData'),
@@ -205,7 +191,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, confVer);
 
-      expect(miscWellFormedSpy).toHaveBeenCalledWith(pToken.nDataName, mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(pToken.nDataName, mockErrorCollector, confVer);
    });
 
    it('reports an error if there was no closing', () => {

@@ -7,7 +7,6 @@ import { MockErrorCollector } from'basic-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import attribute from '../common/attribute';
-import misc from '../common/misc';
 import { ELEMENT_EMPTY_PTOKEN, ElementEmptyPToken, ElementEmptyXToken, ElementStartPToken, ElementStartXToken, parseElementStart } from '../elementStart';
 import { SToken } from 'sToken';
 

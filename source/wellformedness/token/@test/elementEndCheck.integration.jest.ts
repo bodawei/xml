@@ -19,7 +19,7 @@ describe('elementEndCheck() (integration)', () => {
       source = new STokenSource(defaultExtractors);
    });
 
-   it('reports an error with "xml" in name (check misc.checkWellFormedNameRecommendation)', (done) => {
+   it('reports an error with "xml" in name (check nameXmlCheck)', (done) => {
       source.addText('xmlElementName>');
       source.endText();
       parseElementEnd(source, toSToken('</'), (pToken) => {

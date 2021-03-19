@@ -7,7 +7,6 @@ import { generalEntityReferenceToSTokens } from 'stringify';
 import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken, TextXToken } from 'xToken';
 
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken, TextPToken, isTextPToken, parseParameterEntityReference } from 'pToken';
-import misc from './misc';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 import { PARAMETER_ENTITY_END_PTOKEN, ParameterEntityEndPToken, ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
@@ -105,28 +104,6 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
 }
 
 /**********************************************************************\
- Checks that the PToken is well-formed.
-\**********************************************************************/
-
-function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, confVer: ConformanceVersion) {
-   if (!checkMap) {
-      ({ checkMap } = require('../../wellformedness/checkMap'));
-   }
-
-   for (let index = 0; index < pToken.length; index++) {
-      const item = pToken[index];
-
-      if (isTextPToken(item)) {
-         ec.setPos(item.text);
-         misc.checkCharWellFormed(item.text, ec, confVer);
-      } else if (item.type === CHARREF_PTOKEN || item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN || item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-        // Why not checking reference in start and end?
-         checkMap[item.type](item, ec, confVer);
-      }
-   }
-}
-
-/**********************************************************************\
  Builds a value which can be put in an XToken
 \**********************************************************************/
 
@@ -181,20 +158,20 @@ function getSTokens(pToken: LiteralValuePToken) {
 }
 
 
+const parseLiteralValue = parse;
 export {
    LiteralValuePToken,
    LiteralValueXToken,
    Terminators,
 
    parse,
-   checkWellFormed,
+   parseLiteralValue,
    makeXTokenCompatible,
    getSTokens,
 }
 
 export default {
    parse,
-   checkWellFormed,
    makeXTokenCompatible,
    getSTokens,
 };

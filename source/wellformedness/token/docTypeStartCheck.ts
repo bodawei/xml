@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from '../error/WellFormedError';
-
 import { DocTypeStartPToken } from 'token';
+
 import { nameCheck } from '../common/nameCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
+import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 

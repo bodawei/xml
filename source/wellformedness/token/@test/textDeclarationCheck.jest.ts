@@ -4,14 +4,15 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { TextDeclarationPToken } from 'pToken';
+import { TextDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 
+import { charCheck } from '../../common/charCheck';
 import { WellFormedError } from '../../error/WellFormedError';
-import * as misc from '../../../token/common/misc';
-import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 import { textDeclarationCheck } from '../textDeclarationCheck';
+
+jest.mock('../../common/charCheck');
 
 describe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;
@@ -44,20 +45,15 @@ describe('textDeclaration (unit)', () => {
       };
       mockErrorCollector = new MockErrorCollector();
       confVer = new ConformanceVersion();
-      jest.spyOn(misc, 'checkCharWellFormed').mockImplementation();
    });
 
-   it('calls misc.checkCharWellFormed() on the target value', () => {
+   it('calls charCheck() on the target value', () => {
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
-         textDeclPToken.target,
-         mockErrorCollector,
-         confVer,
-      );
+      expect(charCheck).toHaveBeenCalledWith(textDeclPToken.target, mockErrorCollector, confVer);
    });
 
-   it('calls misc.checkCharWellFormed() on the version value', () => {
+   it('calls charCheck() on the version value', () => {
       textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
          fields: [
             {
@@ -70,14 +66,14 @@ describe('textDeclaration (unit)', () => {
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
+      expect(charCheck).toHaveBeenCalledWith(
          textDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
       );
    });
 
-   it('calls misc.checkCharWellFormed() on the encoding value', () => {
+   it('calls charCheck() on the encoding value', () => {
       textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
          fields: [
             {
@@ -90,7 +86,7 @@ describe('textDeclaration (unit)', () => {
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-      expect(misc.checkCharWellFormed).toHaveBeenCalledWith(
+      expect(charCheck).toHaveBeenCalledWith(
          textDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,

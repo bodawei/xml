@@ -34,7 +34,7 @@ describe('cdataCheck() (integration)', () => {
       });
    });
 
-   it('reports an error a bad character is in the text (checks misc.checkCharWellFormed())', (done) => {
+   it('reports an error a bad character is in the text (checks charCheck())', (done) => {
       const source = new STokenSource(defaultExtractors);
       source.addText('[bad\u0000&]]>');
       source.endText();

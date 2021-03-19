@@ -1,10 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector,  } from 'basic';
-import { WellFormedError } from 'wellformedness';
 import { defaultExtractors } from 'extractor';
 import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { SToken, STokenSource } from 'sToken';
+import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { GeneralEntityReferenceXToken, TextXToken,  } from 'xToken';
 
@@ -73,36 +71,6 @@ describe('literalValue (integration)', () => {
                }),
                new TextPToken({ text: makeSToken('three') }),
             ]);
-            done();
-         });
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-
-      it('reports an error if the value has a bad character (misc.checkCharWellFormed())', (done) => {
-         source.addText('b\u0000d"');
-         source.endText();
-         literalValue.parse(source, ['"'], (pToken) => {
-            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
-
-            literalValue.checkWellFormed(pToken, ec, new ConformanceVersion());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-            done();
-         });
-      });
-
-      it('reports an error if an entity reference is malformed', (done) => {
-         source.addText('good& bad;"');
-         source.endText();
-         literalValue.parse(source, ['"', '&'], (pToken) => {
-            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
-
-            literalValue.checkWellFormed(pToken, ec, new ConformanceVersion());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.REFERENCE_XTRA_SPACE);
             done();
          });
       });

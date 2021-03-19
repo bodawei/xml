@@ -5,8 +5,9 @@ import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { WellFormedError } from '../../error/WellFormedError';
 import * as util from '../../common/nameCheck';
+import { WellFormedError } from '../../error/WellFormedError';
+
 import { generalEntityReferenceCheck } from '../generalEntityReferenceCheck';
 
 describe('generalEntityReferenceCheck()', () => {
