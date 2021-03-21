@@ -7,21 +7,18 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
-   excludedIds: [
-      'dtd05',
-      // PUT TOGETHER A DESIGN PLAN FOR THIS:
+   includedIds: [
       // WE are either not checking chardata correctly, and/or our error messages are wonked out
-      'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
-      'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
-      'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
-      'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
-      'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
-      'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
-      'ibm-1-1-not-wf-P02-ibm02n68.xml',
-      'ibm-1-1-not-wf-P02-ibm02n69.xml',
-      'ibm-1-1-not-wf-P02-ibm02n67.xml', // - alomst, except only identifies 2 of three. Also coment and pi are saying CHARDATA_INVALID_CHAR as is CDATA   This test contains embeded character 0xD800. (Invalid UTF8 sequence)
-
+      // 'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
+      // 'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
+      // 'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
+      // 'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
+      // 'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
+      // 'ibm-1-1-not-wf-P02-ibm02n68.xml',
+      // 'ibm-1-1-not-wf-P02-ibm02n69.xml',
+      // 'ibm-1-1-not-wf-P02-ibm02n67.xml', // - alomst, except only identifies 2 of three. Also coment and pi are saying CHARDATA_INVALID_CHAR as is CDATA   This test contains embeded character 0xD800. (Invalid UTF8 sequence)
+   ],
+   excludedIds: [
       // easy 692 error - certain characters not allowed in the xml declaration
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
@@ -197,6 +194,14 @@ const testFilters: FilterData = {
       // back 0. Unsurprisingy \u1c0000 treats the first 4 chars as the character and the following 0's as string.
       // Thus, without building our own utf8 decoder, it is not clear to me how to test this.
       'not-wf-sa-170', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
+      // This is really tricky. For a utf8 sequence, this is illegal. We can represent astral characters
+      // in utf8 directly, without surrogate pairs.  the surrogate pairs are used in utf16 (and the js
+      // representation of characters in memory). However, by the time this gets into our processor
+      // we have "forgotten" whether this is a utf8 or utf16 stream, and so we can not distingusih
+      // whether this is correct. This is a serious problem.  right now, all I can figure is
+      // that the SToken system needs to produce some kind of error if it encuonters any
+      // surrogate pair in a utf8 stream.
+      'rmt-e2e-27', // Contains an irregular UTF-8 sequence (i.e. a surrogate pair)
 
       // Characters:BOM
       'hst-lhs-007', // UTF-8 BOM plus xml decl of iso-8859-1 incompatible

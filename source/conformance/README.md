@@ -59,6 +59,10 @@ These are valid, but the condition they say they are checking for is not entirel
 * hst-bh-003 says it is testing a decimal charref, but is testing a hex
 * hst-bh-004 says it is testing a hex charref, but is testing a decimal
 
+### Not testing what they think they are testing
+* ibm-1-1-not-wf-P02-ibm02n67.xml and ibm-1-1-not-wf-P02-ibm02n68.xml and thinks they are testing a surrogate half in a CDATA section, but that character is not included in the test data (unlike ibm-1-1-not-wf-P02-ibm02n69.xml)
+* valid-sa-064 says the character references expand into surrogate pairs.  this isn't necessarily true (if your language environment has an internal representation of utf16, then that is true).
+
 ### Marked as inalid, but actually not wellformed
 * rmt-017 - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    * This is a test of a 1.1 document. Even by the description this sounds like it is actually a test of validity that should pass. Howeveer, the element with this "kratimata" character is not declared.

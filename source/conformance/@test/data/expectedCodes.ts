@@ -501,7 +501,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-142': 'CHARREF_INVALID_CHAR', // good - Character #x0000 is not legal anywhere in an XML document.
    'not-wf-sa-143': 'CHARREF_INVALID_CHAR', // good - Character #x001F is not legal anywhere in an XML document.
    'not-wf-sa-144': 'CHARREF_INVALID_CHAR', // good - Character #xFFFF is not legal anywhere in an XML document.
-   'not-wf-sa-145': 'error', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
+   'not-wf-sa-145': 'CHARDATA_INVALID_CHAR', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
    'not-wf-sa-146': 'CHARREF_INVALID_CHAR', // good - Character references must also refer to legal XML characters; #x00110000 is one more than the largest legal character.
    'not-wf-sa-147': {
       // good - XML Declaration may not be preceded by whitespace.
@@ -555,8 +555,8 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-165': 'ENTITYDECL_DECLTYPE_NO_SPACE_AFTER', // OK - Parameter entity declarations must have a space before the '%'.
    'not-wf-sa-166': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
    'not-wf-sa-167': 'CHARDATA_INVALID_CHAR', // good - Character FFFE is not legal anywhere in an XML document.
-   'not-wf-sa-168': 'error', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
-   'not-wf-sa-169': 'error', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
+   'not-wf-sa-168': 'CHARDATA_INVALID_CHAR', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
+   'not-wf-sa-169': 'CHARDATA_INVALID_CHAR', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
    'not-wf-sa-170': 'error', // Four byte UTF-8 encodings can encode UCS-4 characters which are beyond the range of legal XML characters (and can't be expressed in Unicode surrogate pairs). This document holds such a character.
    'not-wf-sa-171': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
    'not-wf-sa-172': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.
@@ -2054,9 +2054,9 @@ const expectedNotWfCodes: IdToErrorMap = {
    'ibm-1-1-not-wf-P02-ibm02n64.xml': 'CHARDATA_INVALID_CHAR', // This test contains embeded control characters present in an external entity.
    'ibm-1-1-not-wf-P02-ibm02n65.xml': 'CHARDATA_INVALID_CHAR', // This test contains embeded control characters present in an external entity.
    'ibm-1-1-not-wf-P02-ibm02n66.xml': 'CHARDATA_INVALID_CHAR', // This test contains embeded control characters present in an external entity.
-   'ibm-1-1-not-wf-P02-ibm02n67.xml': 'error', // This test contains embeded character 0xD800. (Invalid UTF8 sequence)
-   'ibm-1-1-not-wf-P02-ibm02n68.xml': 'error', // This test contains embeded character 0xFFFE.
-   'ibm-1-1-not-wf-P02-ibm02n69.xml': 'error', // This test contains embeded character 0xFFFF.
+   'ibm-1-1-not-wf-P02-ibm02n67.xml': 'CHARDATA_INVALID_CHAR', // ok - This test contains embeded character 0xD800. (Invalid UTF8 sequence)
+   'ibm-1-1-not-wf-P02-ibm02n68.xml': 'CHARDATA_INVALID_CHAR', // ok - This test contains embeded character 0xFFFE.
+   'ibm-1-1-not-wf-P02-ibm02n69.xml': 'CHARDATA_INVALID_CHAR', // ok - This test contains embeded character 0xFFFF.
    'ibm-1-1-not-wf-P02-ibm02n70.xml': 'CHARREF_INVALID_CHAR', // This test contains a reference to character 0xFFFE.
    'ibm-1-1-not-wf-P02-ibm02n71.xml': 'CHARREF_INVALID_CHAR', // This test contains a reference to character 0xFFFF.
    'ibm-1-1-not-wf-P04-ibm04n01.xml': 'ELEMENT_NAME_INVALID',

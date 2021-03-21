@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, isChar } from 'basic';
 import { CharRefPToken } from 'pToken';
@@ -39,18 +39,17 @@ function charRefCheck(
       const char = pToken.char;
       let charInfo = strOrBlank(pToken.digits);
 
-      // if (charNumber > 0xffff) {
-      //    const chars = extractSurrogatePair(charNumber);
-      //    char = String.fromCharCode(chars[0]) + String.fromCharCode(chars[1]);
-      // } else {
-      //    char = String.fromCharCode(charNumber);
-      // }
-
       if (pToken.hexMarker) {
          charInfo = `x${charInfo}`;
       }
 
       ec.check(!isChar(char, confVer.version), WFEID.CHARREF_INVALID_CHAR, [charInfo]);
+
+      ec.check(
+         pToken.charCode >= 0xd800 && pToken.charCode <= 0xdfff,
+         WFEID.CHARDATA_INVALID_CHAR,
+         [String(pToken.digits.ranges[0]?.startIndex - 1)],
+      );
    }
 
    ec.setPos(pToken.digitsSpace);
