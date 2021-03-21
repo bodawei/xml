@@ -1947,6 +1947,55 @@ describe('cmToCmGraph()', () => {
    });
 
    describe('other', () => {
+      it('converts a duplicate name in a choice sequence into a comma separated ref value', () => {
+         const srcList: ContentModelP = {
+            delimitedParticles: [
+               {
+                  particle: {
+                     name: toSToken('first'),
+                  },
+                  delimiter: toSToken('|'),
+               },
+               {
+                  particle: {
+                     name: toSToken('first'),
+                  },
+                  delimiter: toSToken('|'),
+               },
+               {
+                  particle: {
+                     name: toSToken('first'),
+                  },
+               },
+            ],
+         };
+
+         const result = cmToCmGraph(srcList);
+
+         expect(result).toEqual({
+            startId: 0,
+            endId: 1,
+            states: {
+               0: {
+                  id: 0,
+                  autoTrans: [],
+                  trans: {
+                     first: {
+                        ref: '/1,/2,/3',
+                        stateId: 1,
+                     },
+                  },
+               },
+               1: {
+                  id: 1,
+                  autoTrans: [],
+                  trans: {},
+                  done: true,
+               },
+            },
+         });
+      });
+
       it('is not bothered when a delimited particle has an empty particle in a sequence (this should not be able to happen)', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [{ delimiter: toSToken(',') }],

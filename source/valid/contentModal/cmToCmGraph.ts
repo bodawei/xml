@@ -2,7 +2,7 @@
 
 import { ContentModelP, ContentNameP, isContentModelP } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
-import { CmState, CmStateIdToCmStateMap, CmGraph } from './cmGraphTypes';
+import { CmState, CmGraph } from './cmGraphTypes';
 
 type StateMaker = (graph?: CmGraph) => CmState;
 
@@ -20,8 +20,15 @@ function addTrans(
    transName: SToken | undefined,
    transRef: string,
 ): void {
+   const entry = sourceState.trans[strOrBlank(transName)];
+   let actualTransRef = transRef;
+
+   if (entry) {
+      actualTransRef = `${entry.ref},${transRef}`;
+   }
+
    sourceState.trans[strOrBlank(transName)] = {
-      ref: transRef,
+      ref: actualTransRef,
       stateId: destState.id,
    };
 }
@@ -163,7 +170,7 @@ function processContentModelInChoice(
             makeState,
          );
 
-         graph.states = Object.assign(graph.states, innerGraph.states) as CmStateIdToCmStateMap;
+         graph.states = Object.assign(graph.states, innerGraph.states);
          addAutoTrans(start, innerGraph.states[innerGraph.startId]);
          addAutoTrans(innerGraph.states[innerGraph.endId], end);
       } else {

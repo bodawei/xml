@@ -2273,6 +2273,7 @@ const expectedErrorCodes: IdToErrorMap = {
    'ibm-not-wf-P69-ibm69n05.xml': 'REFERENCE_NO_DECLARATION', // good - Based on E29 substantial source: minutes XML-Syntax 1999-02-24 E38 in XML 1.0 Errata, this WFC does not apply to P69, but the VC Entity declared still apply. Tests PEReference which is against P69 WFC: Entity Declared. The PE with the name "paaa" is referred before declared in the DTD.
    'rmt-008': 'XMLDECL_VERSION_INVALD', // an implausibly-versioned document
    'rmt-009': 'TEXTDECL_VERSION_INVALD', // External general entity has implausible version number
+   'rmt-e2e-34': 'ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC', // A non-deterministic content model is an error even if the element type is not used.
    'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
    'x-rmt-008--V1R1': 'none', // This input is actually just fine for 1.0/1
    'x-rmt-008--V1R5': 'none', // This input is actually just fine for 1.0/5

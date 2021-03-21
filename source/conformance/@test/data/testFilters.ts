@@ -8,15 +8,8 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      // WE are either not checking chardata correctly, and/or our error messages are wonked out
-      // 'ibm-not-wf-P02-ibm02n30.xml', // Tests a comment which contains an illegal Char: #xD800
-      // 'ibm-not-wf-P02-ibm02n31.xml', // Tests a comment which contains an illegal Char: #xDFFF
-      // 'not-wf-sa-145', // Character #xD800 is not legal anywhere in an XML document. (If it appeared in a UTF-16 surrogate pair, it'd represent half of a UCS-4 character and so wouldn't really be in the document.)
-      // 'not-wf-sa-168', // An unpaired surrogate (D800) is not legal anywhere in an XML document.
-      // 'not-wf-sa-169', // An unpaired surrogate (DC00) is not legal anywhere in an XML document.
-      // 'ibm-1-1-not-wf-P02-ibm02n68.xml',
-      // 'ibm-1-1-not-wf-P02-ibm02n69.xml',
-      // 'ibm-1-1-not-wf-P02-ibm02n67.xml', // - alomst, except only identifies 2 of three. Also coment and pi are saying CHARDATA_INVALID_CHAR as is CDATA   This test contains embeded character 0xD800. (Invalid UTF8 sequence)
+      // 688 need an error for this. We need to scan content models. e34 in https://www.w3.org/XML/xml-V10-2e-errata
+      'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
    ],
    excludedIds: [
       // easy 692 error - certain characters not allowed in the xml declaration
@@ -36,9 +29,6 @@ const testFilters: FilterData = {
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
 
       // ------- Unsorted ---------------------------------------------
-
-      // 688 need an error for this. We need to scan content models. e34 in https://www.w3.org/XML/xml-V10-2e-errata
-      'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
 
       // 689 - error - another case of scanning entity values even if not referenced
       'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)

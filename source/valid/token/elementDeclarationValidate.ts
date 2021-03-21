@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion, isSpace, XmlWarning } from 'basic';
+import { ErrorCollector, ConformanceVersion, isSpace, XmlError, XmlWarning } from 'basic';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
@@ -11,7 +11,6 @@ import {
    pTokenArrayToString,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { WellFormedError } from 'wellformedness';
 
 import { ValidityError } from '../error/ValidityError';
 import { ElDeclType, ValidateState } from '../validateState';
@@ -234,11 +233,10 @@ function elementDeclarationValidate(
       }
 
       if (cases.length > 0) {
-         ec.reportError(
-            WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
-            WellFormedError,
-            [elName, cases.join(',')],
-         );
+         ec.reportError(XmlError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC, XmlError, [
+            elName,
+            cases.join(','),
+         ]);
       }
    }
 

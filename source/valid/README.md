@@ -11,7 +11,7 @@ In an effort to cut down on complex "global" logic, this is experimenting with d
 
 
 ## ContentModelGraphs
-In order to validate whether the elements in a particular model conform to the cnotent model description in an element declaration, this converts a content model in to a graph representation.  
+In order to validate whether the elements in a particular model conform to the content model description in an element declaration, this converts a content model in to a graph representation.  
 
 Content models are described by the `children` production in §3.2.1:
 
@@ -47,11 +47,11 @@ interface CmState {
    done?: boolean; // true if you can stop when you reach this Cmstate.
 }
 ```
-Each state can be thought of as a position "between" a content particle (`cp` in the productions above, minus the repetition indicator). Thus, the produced graph has a state at the start before we have processed any elements, and a state after all.
+Each state can be thought of as a position "between" a sequenced content particle (`cp` in the productions above, minus the repetition indicator). Choice cp's happen within a state and are captured in the `trans` property of the state. Thus, the produced graph has a state at the start before we have processed any elements, and a state after all.
 
 We trandition (`trans`) through the graph by encountering an element name, looking that element up in the `trans` map and following to the state with the specified id.  If there is no transition, then we are in error.  If we finish reading elements and our current state is not marked `done`, then we are also in error.
 
-The `ref` property is used to keep track of where this transition was in the content model, for reporting to any errors to the user.  Thus, in the `(head, (p | list | note)*, div2*)`, the transition when encountering `head` is `/1`, the transition with `(p | list | note)` is `/2` etc.  The `ref`s are hierarchical, representing the hierarchy in a content model. Thus, the transition for `p` is `/2/1`
+The `ref` property is used to keep track of where this transition was in the content model, for reporting to any errors to the user.  Thus, in the `(head, (p | list | note)*, div2*)`, the transition when encountering `head` is `/1`, the transition with `(p | list | note)` is `/2` etc.  The `ref`s are hierarchical, representing the hierarchy in a content model. Thus, the transition for `p` is `/2/1` Note that if a choice `cp` has multiple of the same name, we represent this in the `ref` property as `/1,/3` (in the case of `(foo|bar|foo)`).
 
 ### Autotrans
 
