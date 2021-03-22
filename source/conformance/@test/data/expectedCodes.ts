@@ -286,8 +286,8 @@ const expectedInvalidCodes: IdToErrorMap = {
    'invalid-sa-140': 'UNDECLARED_ELEMENT', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
    'invalid-sa-141': 'UNDECLARED_ELEMENT', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
    'x-rmt5-014': 'error', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-   'x-rmt5-016': 'error', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-   'x-rmt5-019': 'error', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-016': 'UNDECLARED_ELEMENT', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-019': 'UNDECLARED_ELEMENT', // ok - Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
    'hst-bh-005': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:xml is an attribute as far as validation is concerned and must be declared
    'hst-bh-006': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:foo is an attribute as far as validation is concerned and must be declared
 };

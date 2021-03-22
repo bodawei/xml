@@ -8,10 +8,23 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      // 688 need an error for this. We need to scan content models. e34 in https://www.w3.org/XML/xml-V10-2e-errata
-      'rmt-e2e-34', // A non-deterministic content model is an error even if the element type is not used.
+      // easy-ish - isName (and isNmToken, no doubt) allow surrogate pairs, but doesn't check that the resulting character is in range.
+      // 'rmt-020', // broke
+      // 'rmt-021', // broke
    ],
    excludedIds: [
+      // medium - 658 -- do an analysis as this could be nasty -- improper repeated processing of internal entities
+      /*
+       * We are processing newliens in internal entities inappropriately.
+       * once we have processed input once, we no longer convert new liness to \n
+       */
+      'rmt-050', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
+      'rmt-051', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
+      'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
+      'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+      'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+
       // easy 692 error - certain characters not allowed in the xml declaration
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
@@ -28,7 +41,44 @@ const testFilters: FilterData = {
       // 685 - easy - why are we not checking that a text decl has an encoding?
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
 
+      // medium - 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
+      'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
+
+      // nasty - 672
+      // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
+      // Doc must mention this aspect of what %foo; in a markup declaration can carry
+      // This changes setupConditional()
+      // - Minmally, we need a resumeParseConditionalStart() which pulls out the first word and possibly [ and then
+      //    - defers to parseBody()
+      // - But a related problem is taht we assume we can read in the whle PE value into memory, which isn't strictly true
+      //    - so we need to investigate a steaming support here.
+      'invalid-not-sa-022',
+
+      // nasty - 638 'rmt-054' - checking on valid characters in already-processed chardata
+      /*
+       * This is nasty, and I think it reflects we are doing something wrong.
+       * an internal GE has "&#x0c" which is a form feed char. The replacement text has \f in it.
+       *    So far, this is ok, as the replacement text has to match `content`, which it does.
+       * We have parsed the "\f" as CharData. which is OK
+       * But then when we do a checkWellFormed on CharData, we barf, because it is wrong.
+       * But, that isn't true. CharData allows any char.  The trouble is we are mixing two things.
+       * raw CharData in any entity may not have \f or other chars. But stuff passed through
+       * into replacement text may. And indeed the logical document may too:
+       *    Encoded document: Must be content - restrictedChar
+       *    Logical document: any
+       * The trouble is we do not make this distinction in the code. CharData is CharData.
+       * We can detect this as we go through the check well formed and notice if we are in a general entity,
+       * and process differently.
+       *
+       * I think we need to remove the check from CharData and do this check in ContentChecker if not in a general entity.
+       * Review uses of misc.checkCharWellFormed()
+       */
+      'rmt-054',
+
       // ------- Unsorted ---------------------------------------------
+
+      // not checking characters and versions correctly for element names
+      'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
 
       // 689 - error - another case of scanning entity values even if not referenced
       'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
@@ -59,61 +109,8 @@ const testFilters: FilterData = {
       'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
       'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
-      // 672
-      // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
-      // Doc must mention this aspect of what %foo; in a markup declaration can carry
-      // This changes setupConditional()
-      // - Minmally, we need a resumeParseConditionalStart() which pulls out the first word and possibly [ and then
-      //    - defers to parseBody()
-      // - But a related problem is taht we assume we can read in the whle PE value into memory, which isn't strictly true
-      //    - so we need to investigate a steaming support here.
-      'invalid-not-sa-022',
-
       // Easy: We are probably swallowing these text declarations before we do a check on them.
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
-
-      // Looks like the characters are still getting mangled?
-      'x-rmt5-016', // Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-      'x-rmt5-019', // Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-
-      // not checking characters and versions correctly for element names
-      'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-
-      'rmt-020', // broke
-      'rmt-021', // broke
-      // 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
-      'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
-      /*
-       * This is nasty, and I think it reflects we are doing something wrong.
-       * an internal GE has "&#x0c" which is a form feed char. The replacement text has \f in it.
-       *    So far, this is ok, as the replacement text has to match `content`, which it does.
-       * We have parsed the "\f" as CharData. which is OK
-       * But then when we do a checkWellFormed on CharData, we barf, because it is wrong.
-       * But, that isn't true. CharData allows any char.  The trouble is we are mixing two things.
-       * raw CharData in any entity may not have \f or other chars. But stuff passed through
-       * into replacement text may. And indeed the logical document may too:
-       *    Encoded document: Must be content - restrictedChar
-       *    Logical document: any
-       * The trouble is we do not make this distinction in the code. CharData is CharData.
-       * We can detect this as we go through the check well formed and notice if we are in a general entity,
-       * and process differently.
-       *
-       * I think we need to remove the check from CharData and do this check in ContentChecker if not in a general entity.
-       * Review uses of misc.checkCharWellFormed()
-       */
-      // 638 'rmt-054' - checking on valid characters in already-processed chardata
-      'rmt-054',
-      /*
-       * We are processing newliens in internal entities inappropriately.
-       * once we have processed input once, we no longer convert new liness to \n
-       */
-      // 658 rmt-050+ improper repeated processing of internal entities
-      'rmt-050', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
-      'rmt-051', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
-      'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
-      'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       // We are normalizing across char references, but should not be.
       //    659 Normalizing across char references but should not be happening

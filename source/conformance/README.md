@@ -63,11 +63,14 @@ These are valid, but the condition they say they are checking for is not entirel
 * ibm-1-1-not-wf-P02-ibm02n67.xml and ibm-1-1-not-wf-P02-ibm02n68.xml and thinks they are testing a surrogate half in a CDATA section, but that character is not included in the test data (unlike ibm-1-1-not-wf-P02-ibm02n69.xml)
 * valid-sa-064 says the character references expand into surrogate pairs.  this isn't necessarily true (if your language environment has an internal representation of utf16, then that is true).
 
-### Marked as inalid, but actually not wellformed
-* rmt-017 - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+### Marked as invalid, but for the wrong reasons
+* `x-rmt5-016`: This is confused. Note that it is marked as vesion 1.0 and edition 5. The description says Has a ... symbol .. in a name, legal in XML 1.1, legal in XML 1.0 5th edition", but test data it self says "...illegal in XML 1.0". The character has utf8 bytes 0xf0 0x9d 0x80 0xb2, which is character 0x1D032. This IS, in fact, an allowed character as of 1.0/5. So this character is not a problem. The test, however IS invalid, because it has an undeclared element type.
+* `x-rmt5-019`: This is identical to the previous, except that the character is 0xF3 0xAF 0xBF 0xBF which is character 0xEFFFF, which is ok as of 1.0/5.  But, this test IS, in fact, invalid because it has an undeclared element type.
+* `rmt-017` - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    * This is a test of a 1.1 document. Even by the description this sounds like it is actually a test of validity that should pass. Howeveer, the element with this "kratimata" character is not declared.
-* rmt-018 - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
+* `rmt-018` - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
    * This is a test of a 1.1 document. Even by the description this sounds like it is actually a test of validity that should pass. The character is 0xEFFFF (0xf3 af bf bf). However, this test fails because the element is not declared.
+
 
 These are "wrong":
 

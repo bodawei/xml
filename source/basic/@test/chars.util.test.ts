@@ -171,6 +171,13 @@ describe('util', () => {
             revision: 5,
             result: false,
          },
+         {
+            description: 'disallows surrogate pair out of range for names',
+            text: 'b\uDBC0\uDC00ooo',
+            version: 1.0,
+            revision: 5,
+            result: false,
+         },
       ] as Data).forEach((data) => {
          it(data.description, () => {
             expect(isName(data.text, data.version, data.revision)).toEqual(data.result);
@@ -337,6 +344,13 @@ describe('util', () => {
          {
             description: 'disallows a single surrogate half after the name start',
             text: 'b\uD83Dooo',
+            version: 1.0,
+            revision: 5,
+            result: false,
+         },
+         {
+            description: 'disallows surrogate pair out of range for nmtokens',
+            text: 'b\uDBC0\uDC00ooo',
             version: 1.0,
             revision: 5,
             result: false,
