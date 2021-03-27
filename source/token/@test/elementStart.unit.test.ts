@@ -7,7 +7,7 @@ import { MockErrorCollector } from'basic-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import attribute from '../common/attribute';
-import { ELEMENT_EMPTY_PTOKEN, ElementEmptyPToken, ElementEmptyXToken, ElementStartPToken, ElementStartXToken, parseElementStart } from '../elementStart';
+import { ElementEmptyPToken, ElementStartPToken, parseElementStart } from '../elementStart';
 import { SToken } from 'sToken';
 
 describe('elementStart (unit)', () => {
@@ -180,59 +180,6 @@ describe('elementStart (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(elementStartPToken);
-      });
-
-   });
-
-   describe('toXToken()', () => {
-      let mtc: jasmine.Spy;
-
-      beforeEach(() => {
-         mtc = spyOn(attribute, 'makeTokenCompatible');
-      });
-
-      it('asks the attribute to provide the attributes', () => {
-         (elementStartPToken as any).attributes = [ {} ];
-
-         elementStartPToken.toXToken();
-
-         expect(attribute.makeTokenCompatible).toHaveBeenCalledWith(elementStartPToken.attributes);
-      });
-
-      it('returns a token with the expected fields defined', () => {
-         mtc.and.returnValue([ { attributes: true } ]);
-
-         const token = elementStartPTokenWithLeading.toXToken();
-
-         expect(token).toEqual(new ElementStartXToken('elemName',
-            [ { attributes: true } ] as any,
-            elementStartPTokenWithLeading));
-      });
-
-      it('returns an empty elment XToken if an empty element was provided', () => {
-         mtc.and.returnValue([ { attributes: true } ]);
-         const elementEmptyPToken = new ElementEmptyPToken({
-            open: SToken.fromString('<'),
-            openSpace: undefined,
-            name: SToken.fromString('elemName'),
-            nameSpace: SToken.fromString(' '),
-            attributes: [],
-            close: SToken.fromString('>'),
-         });
-
-         const token = elementEmptyPToken.toXToken();
-
-         expect(token).toEqual(new ElementEmptyXToken('elemName',
-            [ { attributes: true } ] as any,
-            elementEmptyPToken));
-      });
-
-      it('returns a token with an empty string if no name was found', () => {
-         (elementStartPToken as any).name = undefined;
-
-         const token = elementStartPToken.toXToken();
-
-         expect(token.name).toEqual('');
       });
 
    });

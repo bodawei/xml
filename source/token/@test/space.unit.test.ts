@@ -57,14 +57,4 @@ describe('space (unit)', () => {
 
    });
 
-   describe('pTokenToXToken()', () => {
-
-      it('returns space token with the whitespace', () => {
-         const token = spacePToken.toXToken();
-
-         expect(token.text).toEqual(' ');
-      });
-
-   });
-
 });

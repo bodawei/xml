@@ -11,36 +11,36 @@ import {
    AttDefinitionType,
    AttDefaultType,
    AttListDeclarationXToken,
+   SPACE_XTOKEN,
    CharRefXToken,
    ContentSpecType,
    CpRepeat,
    CpType,
    ElementDeclarationXToken,
+   ElementEmptyXToken,
+   ElementStartXToken,
    NotationDeclarationXToken,
+   GeneralEntityDeclarationXToken,
+   ParameterEntityDeclarationXToken,
    ParameterEntityReferenceXToken,
    GeneralEntityReferenceXToken,
    ProcessingInstructionXToken,
    XmlDeclarationXToken,
+   SpaceXToken,
    TextXToken,
-   GeneralEntityDeclarationXToken,
-   ParameterEntityDeclarationXToken,
 } from 'xToken';
 
 import * as chars from '../../basic/chars'
 
 import {
-   SPACE_XTOKEN,
 
    CdataXToken,
    CharDataXToken,
    CommentXToken,
    DocTypeEndXToken,
    DocTypeStartXToken,
-   ElementEmptyXToken,
    ElementEndXToken,
    ElementStartPToken,
-   ElementStartXToken,
-   SpaceXToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    GeneralEntityEndXToken,
@@ -776,7 +776,6 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an IDREFS references an ID that is never found', (done) => {
                const elDecl2 = new ElementDeclarationXToken('testEl2', ContentSpecType.ANY, undefined);
-               const openSToken = SToken.fromString('<');
                const attListDecl2 = new AttListDeclarationXToken('testEl2', [{
                   name: 'idRefsAttr',
                   type: AttDefinitionType.IDREFS,
@@ -788,9 +787,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   value: [
                      new TextXToken('goodName second third')
                   ]
-               }], new ElementStartPToken({
-                  open: openSToken,
-               }));
+               }]);
 
                validator.write(elDecl);
                validator.write(elDecl2);
@@ -803,7 +800,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
-                  ['second', 'testEl2', 'idRefsAttr'], openSToken, openSToken);
+                  ['second', 'testEl2', 'idRefsAttr']);
                expectStream(validator, expected, done);
             });
 
@@ -2620,7 +2617,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('ignores Errors when doing overall contextual checking', (done) => {
             const elDecl1 = new ElementDeclarationXToken('one', ContentSpecType.ANY, undefined);
-            const startToken = new ElementStartXToken('one', [], new ElementStartPToken({ open: SToken.fromString('foo') }));
+            const startToken = new ElementStartXToken('one', []);
 
             validator.write(elDecl1);
             validator.write(startToken);

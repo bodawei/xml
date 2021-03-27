@@ -7,12 +7,13 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [
-      // easy-ish - isName (and isNmToken, no doubt) allow surrogate pairs, but doesn't check that the resulting character is in range.
-      // 'rmt-020', // broke
-      // 'rmt-021', // broke
-   ],
+   includedIds: [],
    excludedIds: [
+      // easy 687 - need a new kind of error. Reported also by WF system, I think. Maybe defined in basic?
+      'uri01', // SYSTEM ids may not have URI fragments
+      // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
+      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
+
       // medium - 658 -- do an analysis as this could be nasty -- improper repeated processing of internal entities
       /*
        * We are processing newliens in internal entities inappropriately.
@@ -29,11 +30,6 @@ const testFilters: FilterData = {
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
       'rmt-057', // Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
-
-      // easy 687 - need a new kind of error. Reported also by WF system, I think. Maybe defined in basic?
-      'uri01', // SYSTEM ids may not have URI fragments
-      // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
-      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
 
       // 686 - easy - char refs should be rejecting surrogate halves
       'o-p66fail6', // no references to non-characters

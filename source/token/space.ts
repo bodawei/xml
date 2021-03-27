@@ -3,34 +3,17 @@
 import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 const SPACE_PTOKEN = 'SPACE_PTOKEN';
-const SPACE_XTOKEN = 'SPACE_XTOKEN';
 
 /**********************************************************************\
  The comment namespace contains the usual tools for processing XML
  comments
 \**********************************************************************/
-
-class SpaceXToken {
-   public readonly type: typeof SPACE_XTOKEN = SPACE_XTOKEN;
-   public readonly text: string;
-   public pToken?: SpacePToken;
-
-   constructor(text: string, pToken?: SpacePToken) {
-      this.text = text;
-      this.pToken = pToken;
-   }
-}
-
 class SpacePToken {
    public readonly type: typeof SPACE_PTOKEN = SPACE_PTOKEN;
    public readonly text: SToken;
 
    constructor(props: { text: SToken }) {
       this.text = props.text;
-   }
-
-   toXToken() {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray(): Array<SToken> {
@@ -62,14 +45,6 @@ function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|vo
 }
 
 /**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: SpacePToken) {
-   return new SpaceXToken(strOrBlank(pToken.text), pToken);
-}
-
-/**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the STokens
 \**********************************************************************/
 
@@ -83,9 +58,7 @@ function sTokensFromPToken(pToken: SpacePToken): Array<SToken> {
 
 export {
    SPACE_PTOKEN,
-   SPACE_XTOKEN,
    SpacePToken,
-   SpaceXToken,
 
    parseSpace,
 };

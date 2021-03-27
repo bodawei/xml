@@ -27,6 +27,8 @@ export {
    AttListDeclarationXToken,
    AttDefinitionXToken,
 } from './token/attListDeclarationXToken';
+export { ELEMENT_EMPTY_XTOKEN, ElementEmptyXToken } from './token/elementEmptyXToken';
+export { ELEMENT_START_XTOKEN, ElementStartXToken } from './token/elementStartXToken';
 export {
    ELEMENT_DECLARATION_XTOKEN,
    ContentSpecType,
@@ -48,6 +50,7 @@ export {
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionXToken,
 } from './token/processingInstructionXToken';
+export { SPACE_XTOKEN, SpaceXToken } from './token/spaceXToken';
 export { TEXT_XTOKEN, TextXToken, isTextXToken } from './token/textXToken';
 export {
    ContentModelX,

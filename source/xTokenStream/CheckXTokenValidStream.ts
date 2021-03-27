@@ -7,9 +7,12 @@ import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
    CHARREF_XTOKEN,
+   ELEMENT_EMPTY_XTOKEN,
+   ELEMENT_START_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
+   SPACE_XTOKEN,
    TEXTDECL_XTOKEN,
    XMLDECL_XTOKEN,
    AttListDeclarationXToken,
@@ -18,9 +21,12 @@ import {
    CpRepeat,
    CpType,
    ElementDeclarationXToken,
+   ElementEmptyXToken,
+   ElementStartXToken,
    GeneralEntityDeclarationXToken,
    isContentNameX,
    NotationDeclarationXToken,
+   SpaceXToken,
    ParameterEntityDeclarationXToken,
    isTextXToken,
    TextXToken,
@@ -31,10 +37,7 @@ import {
 import {
    DocTypeEndXToken,
    DocTypeStartXToken,
-   ElementEmptyXToken,
    ElementEndXToken,
-   ElementStartXToken,
-   SpaceXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    ParameterEntityEndXToken,
@@ -50,12 +53,7 @@ import {
    CDATA_XTOKEN,
    CHARDATA_XTOKEN,
    COMMENT_XTOKEN,
-   ELEMENT_EMPTY_XTOKEN,
    ELEMENT_END_XTOKEN,
-   ELEMENT_START_XTOKEN,
-
-   SPACE_XTOKEN,
-
 } from 'token';
 
 import { AttributeValueXToken } from '../token/common/attribute';
@@ -542,7 +540,7 @@ class CheckXTokenValidStream extends Transform {
           */
          if (xToken.type === CHARDATA_XTOKEN && context && context.declInfo.type === 'ELEMENT_CONTENT') {
             if (isSpace(xToken.text, this.confVer.version)) {
-               xToken = new SpaceXToken(xToken.text, xToken.pToken);
+               xToken = new SpaceXToken(xToken.text);
             }
          }
 

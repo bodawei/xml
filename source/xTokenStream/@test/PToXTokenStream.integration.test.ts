@@ -7,13 +7,16 @@ import { STokenSource, toSToken } from 'sToken';
 import {
    AttListDeclarationXToken,
    AttDefinitionType,
+   ElementEmptyXToken,
+   ElementStartXToken,
+   ExternalIdX,
    GeneralEntityDeclarationXToken,
    ParameterEntityReferenceXToken,
    ProcessingInstructionXToken,
    XmlDeclarationXToken,
-   ExternalIdX,
    NotationDeclarationXToken,
    GeneralEntityReferenceXToken,
+   SpaceXToken,
    TextXToken,
 } from 'xToken';
 import { stripPTokens } from 'xToken-test';
@@ -26,9 +29,6 @@ import {
    DocTypeEndXToken,
    DocTypeStartXToken,
    ElementEndXToken,
-   ElementStartXToken,
-   ElementEmptyXToken,
-   SpaceXToken,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';

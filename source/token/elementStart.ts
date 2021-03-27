@@ -6,44 +6,10 @@ import attribute, { AttributePToken, AttributeXToken } from './common/attribute'
 
 const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
 const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';
-const ELEMENT_START_XTOKEN = 'ELEMENT_START_XTOKEN';
-const ELEMENT_EMPTY_XTOKEN = 'ELEMENT_EMPTY_XTOKEN';
 
 type DeliverElementStartPToken = (pToken?: ElementStartPToken|ElementEmptyPToken) => void;
 type ProtoToken = { open: SToken; [ any: string]: any };
 
-/**********************************************************************\
- The elementStart namespace contains the usual tools for processing
- an element start tag.
-\**********************************************************************/
-
-class ElementStartXToken {
-   public readonly type: typeof ELEMENT_START_XTOKEN = ELEMENT_START_XTOKEN;
-   public readonly name: string;
-   public readonly attributes: ReadonlyArray<AttributeXToken>;
-   public pToken?: ElementStartPToken;
-
-   constructor(name: string, attributes: Array<AttributeXToken>, pToken?: ElementStartPToken) {
-      this.name = name;
-      this.attributes = attributes;
-      this.pToken = pToken;
-   }
-
-}
-
-class ElementEmptyXToken {
-   public readonly type: typeof ELEMENT_EMPTY_XTOKEN = ELEMENT_EMPTY_XTOKEN;
-   public readonly name: string;
-   public readonly attributes: ReadonlyArray<AttributeXToken>;
-   public pToken?: ElementEmptyPToken;
-
-   constructor(name: string, attributes: Array<AttributeXToken>, pToken?: ElementEmptyPToken) {
-      this.name = name;
-      this.attributes = attributes;
-      this.pToken = pToken;
-   }
-
-}
 
 class ElementStartPToken {
    public readonly type: typeof ELEMENT_START_PTOKEN = ELEMENT_START_PTOKEN;
@@ -60,10 +26,6 @@ class ElementStartPToken {
 
       this.type = ELEMENT_START_PTOKEN;
       this.open = basePToken.open; // Make sure type system knows we always assign open
-   }
-
-   toXToken() {
-      return pTokenToXTokenStart(this);
    }
 
    toSTokenArray() {
@@ -86,10 +48,6 @@ class ElementEmptyPToken {
 
       this.type = ELEMENT_EMPTY_PTOKEN;
       this.open = basePToken.open; // Make sure type system knows we always assign open
-   }
-
-   toXToken() {
-      return pTokenToXTokenEmpty(this);
    }
 
    toSTokenArray() {
@@ -151,20 +109,6 @@ function parseElementStart(source: STokenSource, open: SToken, deliverPToken: De
 }
 
 /**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXTokenEmpty(pToken: ElementEmptyPToken) {
-   return new ElementEmptyXToken(strOrBlank(pToken.name),
-      attribute.makeTokenCompatible(pToken.attributes), pToken);
-}
-
-function pTokenToXTokenStart(pToken: ElementStartPToken) {
-   return new ElementStartXToken(strOrBlank(pToken.name),
-      attribute.makeTokenCompatible(pToken.attributes), pToken);
-}
-
-/**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the component STokens
 \**********************************************************************/
 
@@ -185,14 +129,10 @@ function sTokensFromPToken(pToken: ElementStartPToken | ElementEmptyPToken): Arr
 
 export {
    ELEMENT_EMPTY_PTOKEN,
-   ELEMENT_EMPTY_XTOKEN,
    ELEMENT_START_PTOKEN,
-   ELEMENT_START_XTOKEN,
 
    ElementEmptyPToken,
-   ElementEmptyXToken,
    ElementStartPToken,
-   ElementStartXToken,
 
    parseElementStart,
 };

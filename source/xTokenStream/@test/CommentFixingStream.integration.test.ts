@@ -8,11 +8,10 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import {
    COMMENT_XTOKEN,
-   ELEMENT_START_XTOKEN,
    CHARDATA_XTOKEN,
    ELEMENT_END_XTOKEN
 } from 'token';
-import { XmlDeclarationXToken, XMLDECL_XTOKEN } from 'xToken';
+import {    ELEMENT_START_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';

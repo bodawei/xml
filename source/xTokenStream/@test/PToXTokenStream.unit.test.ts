@@ -17,11 +17,8 @@ import {
    ExternalSubsetEndToken,
    ExternalSubsetStartToken,
    CommentPToken,
-   ElementStartPToken,
-   ElementEmptyPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
-   SpacePToken,
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
@@ -113,25 +110,25 @@ describe('PToXTokenStream (unit)', () => {
    //    expect(convertSpy).toHaveBeenCalledWith(pToken);
    // });
 
-   it('calls ElementStartPToken.toXToken()', () => {
-      const pToken = new ElementStartPToken({ open: SToken.fromString('<') });
-      spyOn(pToken, 'toXToken');
+   // it('calls ElementStartPToken.toXToken()', () => {
+   //    const pToken = new ElementStartPToken({ open: SToken.fromString('<') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
-   it('calls pToken.toXToken() with an empty element', () => {
-      const pToken = new ElementEmptyPToken({ open: SToken.fromString('<') });
-      spyOn(pToken, 'toXToken');
+   // it('calls pToken.toXToken() with an empty element', () => {
+   //    const pToken = new ElementEmptyPToken({ open: SToken.fromString('<') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    it('calls elementEnd.toXToken()', () => {
       const pToken = new ElementEndPToken({ open: SToken.fromString('<') });
@@ -233,15 +230,15 @@ describe('PToXTokenStream (unit)', () => {
    //    expect(pToken.toXToken).toHaveBeenCalledWith();
    // });
 
-   it('calls spacePToken.toXToken()', () => {
-      const pToken = new SpacePToken({ text: SToken.fromString(' ') });
-      spyOn(pToken, 'toXToken');
+   // it('calls spacePToken.toXToken()', () => {
+   //    const pToken = new SpacePToken({ text: SToken.fromString(' ') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalled();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalled();
+   // });
 
    // it('calls text.toXToken()', () => {
    //    const pToken = new TextPToken({ text: SToken.fromString('x') });

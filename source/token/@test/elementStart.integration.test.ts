@@ -8,7 +8,7 @@ import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { TextXToken } from 'xToken';
 
-import { ElementStartPToken, ElementStartXToken, parseElementStart } from '../elementStart';
+import { ElementStartPToken, parseElementStart } from '../elementStart';
 
 describe('elementStart (integration)', () => {
    let elementStartPToken: ElementStartPToken;
@@ -99,31 +99,6 @@ describe('elementStart (integration)', () => {
                } ],
                close: makeSToken('>'),
             }));
-            done();
-         });
-      });
-
-   });
-
-   describe('pTokenToXToken()', () => {
-
-      it('generates a full token with attributes', (done) => {
-         source.addText(' aName attr1="value1" attr2="value two">');
-         source.endText();
-
-         parseElementStart(source, elementStartPToken.open, (pToken) => {
-            const token = pToken!.toXToken();
-            token.pToken = undefined;
-            delete (token.attributes[0].value[0] as any).pToken;
-            delete (token.attributes[1].value[0] as any).pToken;
-
-            expect(token).toEqual(new ElementStartXToken('aName', [ {
-               name: 'attr1',
-               value: [ new TextXToken('value1') ],
-            }, {
-               name: 'attr2',
-               value: [ new TextXToken('value two') ],
-            } ]));
             done();
          });
       });

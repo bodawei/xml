@@ -64,27 +64,27 @@ class PToXTokenStream extends Transform {
          case COMMENT_PTOKEN:
          case DOCTYPE_END_PTOKEN:
          case DOCTYPE_START_PTOKEN:
-         case ELEMENT_EMPTY_PTOKEN:
          case ELEMENT_END_PTOKEN:
-         case ELEMENT_START_PTOKEN:
          case GENERAL_ENTITY_START_PTOKEN:
          case GENERAL_ENTITY_END_PTOKEN:
          case PARAMETER_ENTITY_END_PTOKEN:
          case PARAMETER_ENTITY_START_PTOKEN:
-         case SPACE_PTOKEN:
             this.push(pToken.toXToken());
             break;
          case CONDITIONAL_CLOSE_PTOKEN:
          case CONDITIONAL_PTOKEN:
          case ATTLIST_DECLARATION_PTOKEN:
-         case ELEMENT_DECLARATION_PTOKEN:
          case CHARREF_PTOKEN:
+         case ELEMENT_DECLARATION_PTOKEN:
+         case ELEMENT_EMPTY_PTOKEN:
+         case ELEMENT_START_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
          case NOTATION_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          case PROCESSING_INSTRUCTION_PTOKEN:
+         case SPACE_PTOKEN:
          case TEXT_PTOKEN:
          case TEXTDECL_PTOKEN:
          case XMLDECL_PTOKEN:

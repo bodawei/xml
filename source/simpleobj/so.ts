@@ -6,9 +6,8 @@ import {
    CdataXToken,
    CharDataXToken,
    ElementEndXToken,
-   ElementStartXToken,
 } from '../token';
-import { TEXT_XTOKEN,CHARREF_XTOKEN, CharRefXToken, XToken } from 'xToken';
+import { TEXT_XTOKEN,CHARREF_XTOKEN,    ElementStartXToken   , XToken } from 'xToken';
 
 type Token = { type: string };
 

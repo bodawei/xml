@@ -16,7 +16,13 @@ import {
    ParseToken,
 } from 'pToken';
 
-import { CONDITIONAL_CLOSE_PTOKEN, CONDITIONAL_PTOKEN } from 'token';
+import {
+   CONDITIONAL_CLOSE_PTOKEN,
+   CONDITIONAL_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   SPACE_PTOKEN,
+} from 'token';
 
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
@@ -25,11 +31,14 @@ import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXTok
 import { NotationDeclarationXToken } from './index';
 import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
 import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
+import { ElementEmptyXToken } from './token/elementEmptyXToken';
+import { ElementStartXToken } from './token/elementStartXToken';
 import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
 import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
+import { SpaceXToken } from './token/spaceXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { TextXToken } from './token/textXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
@@ -45,6 +54,10 @@ function convertPTokenToXToken(pToken: ParseToken): XToken {
          return new ConditionalSectionEndXToken(pToken);
       case CHARREF_PTOKEN:
          return new CharRefXToken(pToken);
+      case ELEMENT_EMPTY_PTOKEN:
+         return new ElementEmptyXToken(pToken);
+      case ELEMENT_START_PTOKEN:
+         return new ElementStartXToken(pToken);
       case ELEMENT_DECLARATION_PTOKEN:
          return new ElementDeclarationXToken(pToken);
       case GENERAL_ENTITY_DECLARATION_PTOKEN:
@@ -59,6 +72,8 @@ function convertPTokenToXToken(pToken: ParseToken): XToken {
          return new ParameterEntityReferenceXToken(pToken);
       case PROCESSING_INSTRUCTION_PTOKEN:
          return new ProcessingInstructionXToken(pToken);
+      case SPACE_PTOKEN:
+         return new SpaceXToken(pToken);
       case TEXT_PTOKEN:
          return new TextXToken(pToken);
       case TEXTDECL_PTOKEN:
