@@ -1,7 +1,6 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 import { parseLiteral, LiteralPToken } from 'token';
 
@@ -13,7 +12,7 @@ describe('literalCheck() (integration)', () => {
    let source: STokenSource;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('reports an error if the value has a bad character (charCheck())', (done) => {

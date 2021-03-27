@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { parseAttribute } from 'token';
 
@@ -15,7 +14,7 @@ describe('attributeCheck (integration)', () => {
    let ec: ErrorCollector;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       preSpace = toSToken(' ');
       ec = new ErrorCollector(toSToken('x'), WellFormedError);
    });

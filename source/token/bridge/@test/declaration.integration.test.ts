@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 import { STokenSource, SToken, toSToken } from 'sToken';
 
@@ -17,12 +16,12 @@ describe('declaration (integration)', () => {
 
       beforeEach(() => {
          confVer = new ConformanceVersion();
-         source = new STokenSource(defaultExtractors);
+         source = new STokenSource();
          start = toSToken('<!');
       });
 
       it('parses an Entity declaration', (done) => {
-         source = new STokenSource(defaultExtractors);
+         source = new STokenSource();
          source.addText('ENTITY foo "theValue">');
          source.endText();
 

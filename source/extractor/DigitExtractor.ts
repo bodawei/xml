@@ -16,8 +16,8 @@ class DigitExtractor extends Extractor {
    private foundDigit = false;
    private base: 10 | 16;
 
-   constructor(version: number, base: 10 | 16) {
-      super(version);
+   constructor(version: number, processLineEndings: boolean, base: 10 | 16) {
+      super(version, processLineEndings);
 
       this.base = base;
    }

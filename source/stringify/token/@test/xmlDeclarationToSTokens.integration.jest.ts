@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { parseXmlDeclaration } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 
@@ -16,7 +15,7 @@ describe('xmlDeclarationToSTokens (unit)', () => {
          target: toSToken('xml'),
          targetSpace: toSToken(' '),
       };
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('version="1.0" encoding="ascii" ?>');
       source.endText();
 

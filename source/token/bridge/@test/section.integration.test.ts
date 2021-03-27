@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { defaultExtractors } from 'extractor';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { CdataPToken, ConditionalPToken,  } from 'token';
@@ -13,7 +12,7 @@ describe('section (integration)', () => {
    describe('parse()', () => {
 
       it('produces a full CDATA PToken', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText(' CDATA [ FOO ]]>');
          source.endText();
 
@@ -34,7 +33,7 @@ describe('section (integration)', () => {
       });
 
       it('produces a full other valued PToken', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText(' INCLUDE [ FOO ]]>');
          source.endText();
 
@@ -53,7 +52,7 @@ describe('section (integration)', () => {
       });
 
       it('produces a full token with a parameter entity reference', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          const peRef = new ParameterEntityReferencePToken({
             open: toSToken('%'),
             openSpace: toSToken(' '),

@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -40,7 +39,7 @@ describe('docTypeStart (integration)', () => {
    describe('parse()', () => {
 
       it('parses the doctype start', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 
@@ -64,7 +63,7 @@ describe('docTypeStart (integration)', () => {
       });
 
       it('populates the token with data from the PToken', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 

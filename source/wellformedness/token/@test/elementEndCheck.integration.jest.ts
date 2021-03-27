@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import { parseElementEnd } from 'token';
 
@@ -16,7 +15,7 @@ describe('elementEndCheck() (integration)', () => {
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('reports an error with "xml" in name (check nameXmlCheck)', (done) => {

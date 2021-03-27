@@ -35,6 +35,7 @@ enum ExtractorState {
 class Extractor {
    private lastProcessSawCr = false;
    protected version: number;
+   protected processLineEndings: boolean;
    protected text: Array<string>;
    protected normalizedText: Array<string>;
    protected segInfo: Array<SegmentInfo>;
@@ -42,8 +43,9 @@ class Extractor {
 
    public static STATE = ExtractorState;
 
-   constructor(version: number) {
+   constructor(version: number, processLineEndings: boolean = true) {
       this.version = version;
+      this.processLineEndings = processLineEndings;
       this.text = [];
       this.normalizedText = [];
       this.segInfo = [];
@@ -69,10 +71,12 @@ class Extractor {
    }
 
    protected processText(originalText: string, info: SegmentInfo) {
+      let newText = originalText;
+
       // §2.11 This section does converson of line endings of various
       // sorts into a single \n.
       const LINE_ENDING_REGEX = this.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
-      let newText = originalText.replace(LINE_ENDING_REGEX, '\n');
+      newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
       if (this.lastProcessSawCr) {
          if (originalText[0] === '\n' ||
@@ -82,6 +86,7 @@ class Extractor {
       }
 
       this.lastProcessSawCr = false;
+
       const newChars = originalText.length;
       let newColumns = originalText.length;
       let newRows = 0;
@@ -102,7 +107,12 @@ class Extractor {
       }
 
       this.text.push(originalText);
-      this.normalizedText.push(newText);
+
+      if (this.processLineEndings) {
+         this.normalizedText.push(newText);
+      } else {
+         this.normalizedText.push(originalText);
+      }
 
       if (originalText[originalText.length - 1] === '\r') {
          this.lastProcessSawCr = true;

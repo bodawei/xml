@@ -1,6 +1,5 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { defaultExtractors } from 'extractor';
 import { ProcessingInstructionPToken, TextDeclarationPToken, XmlDeclarationPToken } from 'pToken';
 import { STokenSource, SToken, toSToken } from 'sToken';
 
@@ -11,12 +10,12 @@ describe('parseInstruction (integration)', () => {
    let start: SToken;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       start = toSToken('<?');
    });
 
    it('parses an XML Declaration', (done) => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       source.addText('xml version="1.0" encoding="ascii"?>');
       source.endText();
 
@@ -56,7 +55,7 @@ describe('parseInstruction (integration)', () => {
    });
 
    it('parses a Text Declaration', (done) => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       source.addText('xml encoding="ascii"?>');
       source.endText();
 
@@ -86,7 +85,7 @@ describe('parseInstruction (integration)', () => {
    });
 
    it('parses a ProcessingInstruction', (done) => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       source.addText('foo blah?blah?>');
       source.endText();
 

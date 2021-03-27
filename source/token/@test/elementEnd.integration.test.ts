@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
@@ -25,7 +24,7 @@ describe('elementEnd (integration)', () => {
    describe('parse()', () => {
 
       it('parses the end of the element when called', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elemName >');
          source.endText();
 

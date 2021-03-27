@@ -43,7 +43,7 @@ class CharExtractor extends Extractor {
 
       this.processText(currentChar, info);
 
-      if (currentChar === '\r') {
+      if (currentChar === '\r' && this.processLineEndings) {
          if (segment.atEnd()) {
             this.foundCR = true;
             return; // We don't know if we're done, so just bail out.

@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationPToken, parseDocTypeStart } from 'token';
 
@@ -21,7 +20,7 @@ describe('docTypeStartCheck()', () => {
    });
 
    it('asks the declaration module to report if there is no type', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('rootElement system "sys.dtd" [');
       source.endText();
       delete declaration.declType;
@@ -37,7 +36,7 @@ describe('docTypeStartCheck()', () => {
    });
 
    it('asks the externalId module to look for well formed problems', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('rootElement system "sys.dtd" [');
       source.endText();
 

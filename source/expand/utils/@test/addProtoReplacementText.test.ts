@@ -74,7 +74,7 @@ describe('addProtoReplacementText() (unit)', () => {
             resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}),
+                  sTokenSource: new STokenSource(),
                   getErrors: (): Array<ErrorToken> => [],
                };
             },
@@ -231,7 +231,7 @@ describe('addProtoReplacementText() (unit)', () => {
             errors.push(new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS));
          }
          return {
-            sTokenSource: new STokenSource({}),
+            sTokenSource: new STokenSource(),
             getErrors: (): Array<ErrorToken> => errors,
          };
       };
@@ -265,7 +265,7 @@ describe('addProtoReplacementText() (unit)', () => {
    it('does not do any further processing when the entity can not be parsed', (done) => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}),
+            sTokenSource: new STokenSource(),
             getErrors: (): Array<ErrorToken> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],

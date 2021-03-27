@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { parseTextDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
@@ -24,7 +23,7 @@ describe('textDeclaration (integration)', () => {
          targetSpace: SToken.fromString(' '),
       };
       confVer = new ConformanceVersion();
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('reports an error when the target text is malformed (check charCheck())', (done) => {

@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion,  } from 'basic';
-import { defaultExtractors } from 'extractor';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -46,7 +45,7 @@ describe('EntityExpanderStream (integration)', () => {
    let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+      pTokenStream = new PTokenStream(new STokenSource(), {
          context: ContextType.DOCUMENT,
          confVer: new ConformanceVersion(1.0),
          entityId: new EntityId(__filename)

@@ -4,7 +4,6 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ErrorCollector } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { defaultExtractors } from 'extractor';
 import { ContextType, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
@@ -29,7 +28,7 @@ describe('ValidityChecker (integration)', () => {
    function expectError(input: string, errorCode: string, done: () => void): void {
       const finalResults: Array<ErrorToken> = [];
 
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+      pTokenStream = new PTokenStream(new STokenSource(), {
          context: ContextType.DOCUMENT,
       });
       pTokenStream.addText(input);

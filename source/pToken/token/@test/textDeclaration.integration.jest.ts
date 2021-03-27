@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import { InstructionStart } from '../../bridge/instruction';
@@ -22,7 +21,7 @@ describe('textDeclaration (integration)', () => {
 
    describe('parseXmlDeclaration()', () => {
       it('parses the input, including the parameters which use literal.parse()', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
@@ -33,7 +32,7 @@ describe('textDeclaration (integration)', () => {
       });
 
       it('converts the value from literal.parse() to a single SToken', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 

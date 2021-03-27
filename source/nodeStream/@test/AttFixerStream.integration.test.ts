@@ -7,14 +7,13 @@ import { XmlDeclarationPToken, XMLDECL_PTOKEN, TextPToken, ParseToken } from 'pT
 import { ElementStartPToken } from 'token';
 
 import { AttFixerStream } from '../AttFixerStream';
-import { defaultExtractors } from 'extractor';
 
 describe('AttFixerStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let fixer: AttFixerStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+      pTokenStream = new PTokenStream(new STokenSource());
       fixer = new AttFixerStream();
       pTokenStream.pipe(fixer);
    });

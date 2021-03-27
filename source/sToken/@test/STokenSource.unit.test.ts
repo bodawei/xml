@@ -71,8 +71,8 @@ describe('STokenSource (unit)', () => {
    class ToXExtractor extends Extractor {
       public param: string;
 
-      constructor(version: number, param: string) {
-         super(version);
+      constructor(version: number, processLineEndings: boolean, param: string) {
+         super(version, processLineEndings);
 
          this.param = param || 'x';
          this.normalizedText = [];
@@ -152,8 +152,8 @@ describe('STokenSource (unit)', () => {
    class PassThrough extends Extractor {
       public sub: Extractor;
 
-      constructor(version: number, sub: Extractor) {
-         super(version);
+      constructor(version: number, processLineEndings: boolean, sub: Extractor) {
+         super(version, processLineEndings);
          this.sub = sub;
       }
 
@@ -174,7 +174,7 @@ describe('STokenSource (unit)', () => {
          tox: ToXExtractor,
       };
 
-      source = new STokenSource(testExtractors);
+      source = new STokenSource(undefined, undefined, testExtractors);
       sTokenSpy = jasmine.createSpy('sTokenSpy');
    });
 
@@ -187,7 +187,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors);
+         source = new STokenSource(undefined, undefined, testExtractors);
          source.addText('this is yours');
          source.extractNoParams('toy', (sToken) => {
             expect(sToken!.str).toEqual('this is ');
@@ -204,7 +204,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors);
+         source = new STokenSource(undefined, undefined, testExtractors);
          source.addText('the lorax');
          source.extractNoParams('pass', (sToken) => {
             expect(sToken!.str).toEqual('the lora');
@@ -219,8 +219,8 @@ describe('STokenSource (unit)', () => {
             test: class testExtractor extends Extractor {
                public _infos: Array<any>;
 
-               constructor(constructedVersion: number) {
-                  super(constructedVersion);
+               constructor(constructedVersion: number, processLineEndings: boolean) {
+                  super(constructedVersion, processLineEndings);
                   this._infos = [];
                   version = constructedVersion;
                   this.state = Extractor.STATE.SUCCESS;
@@ -238,7 +238,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors);
+         source = new STokenSource(undefined, undefined, testExtractors);
          source.addText('1');
          source.extractNoParams('test', () => {});
 
@@ -251,8 +251,8 @@ describe('STokenSource (unit)', () => {
          class testExtractor extends Extractor {
             public _infos: Array<any> = [];
 
-            constructor(version: number) {
-               super(version);
+            constructor(version: number, processLineEndings: boolean) {
+               super(version, processLineEndings);
                this.state = Extractor.STATE.SUCCESS;
             }
 
@@ -272,8 +272,8 @@ describe('STokenSource (unit)', () => {
          class SubExtractor extends ToXExtractor {
             public _infos: Array<any> = [];
 
-            constructor(theVersion: number, theParam: string) {
-               super(version, theParam);
+            constructor(theVersion: number, processLineEndings: boolean, theParam: string) {
+               super(version, processLineEndings, theParam);
                version = theVersion;
                params = theParam;
             }
@@ -288,7 +288,7 @@ describe('STokenSource (unit)', () => {
             },
          };
 
-         source = new STokenSource(testExtractors);
+         source = new STokenSource(undefined, undefined, testExtractors);
          source.addText('1');
          source.extract('peek', 'toXParam', () => {});
 
@@ -394,15 +394,15 @@ describe('STokenSource (unit)', () => {
 
          source.extract('foo', 55, () => {});
 
-         expect(testExtractors.foo).toHaveBeenCalledWith(1.1, 55);
+         expect(testExtractors.foo).toHaveBeenCalledWith(1.1, true, 55);
       });
 
       it('enqueues the specified extractors (whitebox)', () => {
          class FooExtractor extends Extractor {
             public params: any;
 
-            constructor(version: number, params: any) {
-               super(version);
+            constructor(version: number, processLineEndings: boolean, params: any) {
+               super(version, processLineEndings);
                this.params = params;
             }
          }

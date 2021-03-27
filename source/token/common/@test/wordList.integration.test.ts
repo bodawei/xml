@@ -37,7 +37,7 @@ describe('wordList (integration)', () => {
    describe('parseWordList()', () => {
 
       it('parses a simple wordList', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('( one| two) ');
          source.endText();
 
@@ -48,7 +48,7 @@ describe('wordList (integration)', () => {
       });
 
       it('parses a malformed wordList', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('( | two three |');
          source.endText();
 

@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion, ErrorCollector, Range, EntityId } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
@@ -17,7 +16,7 @@ describe('cdata (integration)', () => {
    beforeEach(() => {
       const expectedSToken = makeSTokenMaker();
 
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
 
       sectionStart =  {
          open: expectedSToken('<!['),

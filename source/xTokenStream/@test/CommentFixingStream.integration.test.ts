@@ -4,7 +4,6 @@ import { Transform } from 'stream';
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import {
    COMMENT_XTOKEN,
@@ -16,7 +15,6 @@ import {    ELEMENT_START_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import CommentFixingStream from '../CommentFixingStream';
-import { XToken } from 'source/xToken/types';
 
 describe('CommentFixingStream (integration)', () => {
    let pTokenStream: PTokenStream;
@@ -24,7 +22,7 @@ describe('CommentFixingStream (integration)', () => {
 
    function testTransformation(before: string, after: string, done: () => void) {
       const cf = new CommentFixingStream();
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+      pTokenStream = new PTokenStream(new STokenSource());
       xTokenStream = new PToXTokenStream();
 
       pTokenStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
@@ -70,7 +68,7 @@ describe('CommentFixingStream (integration)', () => {
    describe('passthrough', () => {
 
       it('passes all tokens through', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+         pTokenStream = new PTokenStream(new STokenSource());
          xTokenStream = new PToXTokenStream();
 
          pTokenStream.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');

@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -19,7 +18,7 @@ import { WordListPToken, WordListType } from '../../../token/common/wordList';
 describe('attListDeclaration (integration)', () => {
    describe('parseAttListDeclaration()', () => {
       it('parses an ATTLIST with a couple attributes', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one CDATA two IDREFS #IMPLICIT>');
          source.endText();
 
@@ -66,7 +65,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses an ATTLIST with a couple attributes with default values', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one CDATA "1"    two CDATA \'2\'three CDATA "3"    >');
          source.endText();
 
@@ -126,7 +125,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses an ATTLIST with a NOTATION by calling parseWordList()', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one NOTATION ( one | two) >');
          source.endText();
 
@@ -179,7 +178,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses an ATTLIST with an ENUMERATION by calling wordList.parse()', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one ( one ) >');
          source.endText();
 
@@ -226,7 +225,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the intial position (check unexpanded calls)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('%foo;>');
          source.endText();
 
@@ -255,7 +254,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the attribute name definition (check unexpanded calls)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one CDATA #IMPLICIT %foo;>');
          source.endText();
 
@@ -301,7 +300,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the attribute type location (check unexpanded calls)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one CDATA #IMPLICIT two%foo;>');
          source.endText();
 
@@ -360,7 +359,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the attribute default type location (check unexpanded calls)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one CDATA #IMPLICIT two ID %foo;>');
          source.endText();
 
@@ -419,7 +418,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('parses a PERef in the trailing position (could be just blank spaces)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName one ID "value" %foo; >');
          source.endText();
 
@@ -468,7 +467,7 @@ describe('attListDeclaration (integration)', () => {
 
    describe('resumeParseAttListDeclaration()', () => {
       it('inserts the remainder of one attdef, and adds a second', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText("\tCDATA #IMPLICIT two IDREFS #FIXED ''");
          source.endText();
          const attListDecl = new AttListDeclarationPToken({
@@ -544,7 +543,7 @@ describe('attListDeclaration (integration)', () => {
       });
 
       it('insets trailing space after the last attribute', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('\t');
          source.endText();
          const attListDecl = new AttListDeclarationPToken({

@@ -14,18 +14,6 @@ const testFilters: FilterData = {
       // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
       'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
 
-      // medium - 658 -- do an analysis as this could be nasty -- improper repeated processing of internal entities
-      /*
-       * We are processing newliens in internal entities inappropriately.
-       * once we have processed input once, we no longer convert new liness to \n
-       */
-      'rmt-050', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
-      'rmt-051', // Has element content whitespace containing a CR character that comes from a character reference in an internal entity. Because CR is in the S production, this is valid in both XML 1.0 and 1.1.
-      'valid-sa-068', // Tests definition of an internal entity holding a carriage return character reference, which must not be normalized before reporting to the application. Line break normalization only occurs when parsing external parsed entities.
-      'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-037', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-
       // easy 692 error - certain characters not allowed in the xml declaration
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
@@ -72,6 +60,11 @@ const testFilters: FilterData = {
       'rmt-054',
 
       // ------- Unsorted ---------------------------------------------
+
+      // Questions
+      // Are we allowed to have PCData in an element declared with only elements as children?
+      'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+      'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
       // not checking characters and versions correctly for element names
       'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition

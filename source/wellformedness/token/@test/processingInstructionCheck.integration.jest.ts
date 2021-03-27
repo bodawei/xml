@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { ProcessingInstructionPToken, parseProcessingInstruction } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 
@@ -25,7 +24,7 @@ describe('processingInstructionCheck() (integration)', () => {
       piPToken = new ProcessingInstructionPToken(piPToken, {
          openSpace: toSToken(' '),
       });
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('blah blah?>');
       source.endText();
 

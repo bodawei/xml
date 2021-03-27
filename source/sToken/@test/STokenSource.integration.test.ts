@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Range, EntityId } from 'basic';
-import { defaultExtractors, SEGMENT_TYPE } from 'extractor';
+import { SEGMENT_TYPE } from 'extractor';
 
 import SToken from '../SToken';
 import STokenSource from '../STokenSource';
@@ -11,7 +11,7 @@ describe('STokenSource (integration)', () => {
    let source: STokenSource;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors, undefined);
+      source = new STokenSource();
    });
 
    describe('extract("all")', () => {

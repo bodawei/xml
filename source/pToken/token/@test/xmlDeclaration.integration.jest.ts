@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import { parseXmlDeclaration } from '../xmlDeclaration';
@@ -21,7 +20,7 @@ describe('xmlDeclaration (integration)', () => {
 
    describe('parseXmlDeclaration()', () => {
       it('parses the input, including the parameters which use literal.parse()', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
@@ -32,7 +31,7 @@ describe('xmlDeclaration (integration)', () => {
       });
 
       it('converts the value from literal.parse() to a single SToken', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 

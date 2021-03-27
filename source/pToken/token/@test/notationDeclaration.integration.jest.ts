@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -31,7 +30,7 @@ describe('notationDeclaration (integration)', () => {
 
    describe('parseNotationDeclaration()', () => {
       it('produces an externalID when called', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 
@@ -42,7 +41,7 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('parses a trailing PE Reference if there is one after the end of content', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('foo SYSTEM "sys.dtd" %other;>');
          source.endText();
 
@@ -63,7 +62,7 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('parses a PERef (check unexpanded calls)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('%foo;>');
          source.endText();
 
@@ -92,7 +91,7 @@ describe('notationDeclaration (integration)', () => {
       });
 
       it('copes with a PERef in the externalId (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('notationName %foo;>');
          source.endText();
 
@@ -138,7 +137,7 @@ describe('notationDeclaration (integration)', () => {
             close: toSToken('>'),
          });
 
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elName   PUBLIC "blah - " "sys.dtd"\tjunk');
          source.endText();
 
@@ -197,7 +196,7 @@ describe('notationDeclaration (integration)', () => {
             close: toSToken('>'),
          });
 
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText(' "blah - " "sys.dtd"\t');
          source.endText();
 

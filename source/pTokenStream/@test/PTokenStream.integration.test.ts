@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
-import { defaultExtractors } from 'extractor';
 import {   GENERAL_ENTITY_DECLARATION_PTOKEN, GENERAL_ENTITY_REFERENCE_PTOKEN,  PROCESSING_INSTRUCTION_PTOKEN,    NOTATION_DECLARATION_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, } from 'pToken';
 import { STokenSource } from 'sToken';
 
@@ -27,7 +26,7 @@ describe('PTokenStream (integration)', () => {
    let pTokenStream: PTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+      pTokenStream = new PTokenStream(new STokenSource());
    });
 
    function gatherTokens(stream: PTokenStream, input: string | void, done: (tokens: TokenArray) => void) {
@@ -69,7 +68,7 @@ describe('PTokenStream (integration)', () => {
    describe('construction', () => {
 
       it('uses the provided STokenSource', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          pTokenStream = new PTokenStream(source);
 
          source.addText('blah<elementName>');

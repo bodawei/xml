@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { Token, Range, EntityId, ENTITY_ID } from 'basic';
-import { defaultExtractors } from 'extractor';
 import {
    ContextType,
    GeneralEntityDeclarationPToken,
@@ -89,7 +88,7 @@ describe('EntityExpander (integration)', () => {
    }
 
    function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors, entityLoc.relativeEntity);
+      const sTokenSource = new STokenSource(entityLoc.relativeEntity);
 
       const str = externalMap[entityLoc];
       sTokenSource.addText(str);

@@ -23,8 +23,8 @@ class AllExtractor extends Extractor {
    private _terminatorMatcher?: PeekExtractor;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(version: number, terminators: Array<string> = []) {
-      super(version);
+   constructor(version: number, processLineEndings: boolean, terminators: Array<string> = []) {
+      super(version, processLineEndings);
 
       let terminatorChars = terminators.map((term) => term[0]).join('');
       this.terminatorRegEx = regexMemo[terminatorChars];
@@ -125,13 +125,13 @@ class AllExtractor extends Extractor {
 
       // Set up a sub-matcher to determine which terminator we matched.
       if (terminators.length > 1) {
-         matcher = new MultiMatchExtractor(this.version, terminators);
+         matcher = new MultiMatchExtractor(this.version, this.processLineEndings, terminators);
       } else {
-         matcher = new MatchExtractor(this.version, terminators[0]);
+         matcher = new MatchExtractor(this.version, this.processLineEndings, terminators[0]);
       }
 
       // And make this a peek so we don't consume it.
-      this._terminatorMatcher = new PeekExtractor(this.version, matcher);
+      this._terminatorMatcher = new PeekExtractor(this.version, this.processLineEndings, matcher);
 
       this._processTerminatorMatcher(segment);
    }

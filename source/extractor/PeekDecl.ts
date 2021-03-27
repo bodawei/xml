@@ -17,10 +17,6 @@ const HAS_DECL11 = /\<\?[ \t\r\n\u0085\u2028]*[xXmMlL][^]*\?\>/;
 class PeekDecl extends Extractor {
    private rawText = '';
 
-   constructor(version: number) {
-      super(version);
-   }
-
    process(segment: Segment | PseudoSpace) {
       const info = this.makeInfo(segment);
       this.segInfo.push(info);

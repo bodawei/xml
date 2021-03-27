@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
 import {
@@ -13,13 +12,13 @@ import {
 describe('ProcessingInstructionPToken (integration)', () => {
    describe('parseProcessingInstruction()', () => {
       it('asks the instruction module to include a type in the PToken', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('blah blahx?>');
          source.endText();
 
          parseProcessingInstruction(source, { open: toSToken('<?') }, (parsing) => {
             // @ts-expect-error 2329/matchers
-                        expect(parsing).toEqualRangeless({
+            expect(parsing).toEqualRangeless({
                type: PROCESSING_INSTRUCTION_PTOKEN,
                open: toSToken('<?'),
                instruction: toSToken('blah blahx'),

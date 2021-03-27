@@ -3,7 +3,6 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, Range } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { defaultExtractors } from 'extractor';
 import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ContextType } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import {
@@ -39,7 +38,7 @@ describe('PTokenStream (unit)', () => {
    let pTokenStream: PTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+      pTokenStream = new PTokenStream(new STokenSource(), {
          context: ContextType.DOCUMENT,
       });
    });
@@ -66,7 +65,7 @@ describe('PTokenStream (unit)', () => {
    describe('ConformanceVersion', () => {
 
       it('delivers a default version of 1.0/5 if nothing else is specified', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+         pTokenStream = new PTokenStream(new STokenSource(), {
             context: ContextType.DOCUMENT,
          });
          pTokenStream.addText('<?xml version="1.0"?>');
@@ -87,7 +86,7 @@ describe('PTokenStream (unit)', () => {
 
 
       it('delivers a default version of 1.0/5 when that value is in single quotes', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+         pTokenStream = new PTokenStream(new STokenSource(), {
             context: ContextType.DOCUMENT,
          });
          pTokenStream.addText("<?xml version='1.0'?>");
@@ -107,7 +106,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers a default version of 1.1/2 if nothing specified and XML Declaration is 1.1', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+         pTokenStream = new PTokenStream(new STokenSource());
          pTokenStream.addText('<?xml version="1.1"?>');
          pTokenStream.endText();
 
@@ -125,7 +124,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers a conformance version using the version specified in the options, regardless of what is in the document', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+         pTokenStream = new PTokenStream(new STokenSource(), {
             confVer: {
                type: CONFORMANCE_VERSION,
                version: 1.0,
@@ -148,7 +147,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers a conformance version using the default version when neither dor not options set', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+         pTokenStream = new PTokenStream(new STokenSource());
          pTokenStream.addText('<one></one>');
          pTokenStream.endText();
 
@@ -165,7 +164,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('does not deliver a conformance version when the contxt is not document', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+         pTokenStream = new PTokenStream(new STokenSource(), {
             context: ContextType.EXTERNAL_SUBSET,
          });
          pTokenStream.addText('<one></one>');
@@ -200,7 +199,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers an EntityId with the option specified in the construction options', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+         pTokenStream = new PTokenStream(new STokenSource(), {
             context: ContextType.DOCUMENT,
             entityId: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
          });
@@ -222,7 +221,7 @@ describe('PTokenStream (unit)', () => {
       });
 
       it('delivers no EntityId when this is not a document type', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+         pTokenStream = new PTokenStream(new STokenSource(), {
             context: ContextType.EXTERNAL_SUBSET,
             entityId: new EntityId('http://foo.com/bar.xml', 'baz - boo'),
          });
@@ -489,7 +488,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('does not call space.parse() after the topmost element start and end have been found in a general entity (whitebox)', (done) => {
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+      pTokenStream = new PTokenStream(new STokenSource(), {
          context: ContextType.GENERAL_ENTITY,
       });
       const parseSpy = spyOn(space, 'parseSpace').and.callThrough();

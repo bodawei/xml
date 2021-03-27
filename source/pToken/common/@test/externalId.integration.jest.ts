@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -11,7 +10,7 @@ describe('parseExternalId()', () => {
    let source: STokenSource;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('parses the public and system value (check literal.parse())', (done) => {
@@ -19,7 +18,7 @@ describe('parseExternalId()', () => {
 
       parseExternalId(source, [], (result) => {
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless({
+         expect(result).toEqualRangeless({
             externalId: {
                externalType: toSToken('PUBLIC'),
                externalTypeSpace: toSToken(' '),
@@ -57,7 +56,7 @@ describe('parseExternalId()', () => {
          };
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless({
+         expect(result).toEqualRangeless({
             externalId,
             nextPropName: 'system',
          });

@@ -5,7 +5,6 @@ import { Transform } from 'stream';
 
 import { EntityId, ENTITY_ID } from 'basic';
 import { EntityExpander, OpaqueEntityLoc, RetrieveResults, AttributeValueResults } from 'expand';
-import { defaultExtractors } from 'extractor';
 import { ContextType } from 'pToken';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
@@ -161,7 +160,7 @@ function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
    // console.log('entityText', entityText, '\n');
    // Throw an error if we can't find the entity?
 
-   const source = new STokenSource(defaultExtractors, castEntity.entityId);
+   const source = new STokenSource(castEntity.entityId);
    source.addText(entityText);
    source.endText();
 

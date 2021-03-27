@@ -11,17 +11,18 @@ interface JestResult {
    message: () => string;
 }
 function toEqualNormalized(actual: Array<string>, expected = ''): JestResult {
-   const actualJoined = actual.join('');
+   const actualJoined = actual.join('').replace(/\u0085/g, '&#133;');
+   const expectedModified = expected.replace(/\u0085/g, '&#133;');
    const humanActual = actualJoined
       .replace(/&#10;/g, '\n')
       .replace(/&#9;/g, '\t')
       .replace(/&#13;/g, '\r');
-   const humanExpected = expected
+   const humanExpected = expectedModified
       .replace(/&#10;/g, '\n')
       .replace(/&#9;/g, '\t')
       .replace(/&#13;/g, '\r');
 
-   if (actualJoined === expected) {
+   if (actualJoined === expectedModified) {
       return {
          pass: true,
          message: () => `EXPECTED\n${humanActual}\n\nNOT TO EQUAL\n${humanExpected}\n`,

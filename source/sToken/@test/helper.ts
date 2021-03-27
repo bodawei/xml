@@ -122,7 +122,7 @@ class MockSTokenSource extends STokenSource {
     *  - An array with a PEEK in the first element: [ SToken(next str) ]
     */
    constructor(expectedValues: MockValues, index = 0, row = 0, column = 0) {
-      super({}, new EntityId());
+      super(new EntityId());
       const makeToken = makeSTokenMaker(undefined, index, row, column);
 
       this.expectedValues = expectedValues.map((entry) => {

@@ -67,7 +67,7 @@ describe('expandEntityValue() (unit)', () => {
             resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}),
+                  sTokenSource: new STokenSource(),
                   getErrors: (): Array<ErrorToken> => [],
                };
             },
@@ -137,7 +137,7 @@ describe('expandEntityValue() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}),
+            sTokenSource: new STokenSource(),
             getErrors: (): Array<ErrorToken> => [],
          };
       };
@@ -161,7 +161,7 @@ describe('expandEntityValue() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}),
+            sTokenSource: new STokenSource(),
             getErrors: (): Array<ErrorToken> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],
@@ -248,7 +248,7 @@ describe('expandEntityValue() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}),
+            sTokenSource: new STokenSource(),
             getErrors: (): Array<ErrorToken> => [],
          };
       };

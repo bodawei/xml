@@ -1,6 +1,5 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { defaultExtractors } from 'extractor';
 import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -21,7 +20,7 @@ describe('parseEntityDeclaration (unit)', () => {
          declType: toSToken('ENTITY'),
          declTypeSpace: toSToken('\t'),
       };
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('parses an enty declaration with a PEReference after the value', (done) => {
@@ -289,7 +288,7 @@ describe('parseEntityDeclaration (unit)', () => {
       source.endText();
 
       parseEntityDeclaration(source, declarationStart, (pToken) => {
-         const tokensExpanded = new STokenSource(defaultExtractors);
+         const tokensExpanded = new STokenSource();
 
          tokensExpanded.addText('\t');
          tokensExpanded.endText();

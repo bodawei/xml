@@ -4,7 +4,6 @@ import fs from 'fs';
 import { resolve } from 'path';
 import { Transform } from 'stream';
 import { EntityId } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
 import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
@@ -55,7 +54,7 @@ function resolveEntityId(
 function retrieveExternalEntity(
    entityLoc: OpaqueEntityLoc,
 ): RetrieveResults {
-   const sTokenSource = new STokenSource(defaultExtractors);
+   const sTokenSource = new STokenSource();
 
    const data = fs.readFileSync(entityLoc as string, { encoding: 'utf8' });
 

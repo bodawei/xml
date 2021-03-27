@@ -14,7 +14,7 @@ describe('DigitExtractor', () => {
    beforeEach(() => {
       segmentRange = new Range(new EntityId());
 
-      extractor = new DigitExtractor(1.0, 10);
+      extractor = new DigitExtractor(1.0, true, 10);
    });
 
    describe('basic behavior', () => {
@@ -80,7 +80,7 @@ describe('DigitExtractor', () => {
       });
 
       it('delivers a set of hexidecimal digits from the provided segment', () => {
-         extractor = new DigitExtractor(1.0, 16);
+         extractor = new DigitExtractor(1.0, true, 16);
          extractor.process(new Segment('012345ABcdef', segmentRange));
 
          expect(extractor.finish()).toEqual({

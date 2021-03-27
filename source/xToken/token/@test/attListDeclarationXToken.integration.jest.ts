@@ -1,7 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { defaultExtractors } from 'extractor';
 import { parseAttListDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -22,7 +21,7 @@ describe('attListDeclarationXToken (integration)', () => {
    });
 
    it('converts to the expected xtoken', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('foo>');
       source.endText();
 
@@ -44,7 +43,7 @@ describe('attListDeclarationXToken (integration)', () => {
    });
 
    it('includes an ENUMERATED type', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('elName attrName ( one | two ) #REQUIRED>');
       source.endText();
 
@@ -71,7 +70,7 @@ describe('attListDeclarationXToken (integration)', () => {
    });
 
    it('includes an NOTATION type', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('elName attrName NOTATION ( one | two ) #REQUIRED>');
       source.endText();
 

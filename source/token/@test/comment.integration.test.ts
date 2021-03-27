@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
@@ -26,7 +25,7 @@ describe('comment (integration)', () => {
    describe('parse()', () => {
 
       it('produces a full PToken result', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('my comment-->');
          source.endText();
 
@@ -37,7 +36,7 @@ describe('comment (integration)', () => {
       });
 
       it('parses a comment with double hyphens in it that ends early', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          const expectedSToken = makeSTokenMaker();
          const pToken = new CommentPToken({
             open: commentPToken.open,

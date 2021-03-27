@@ -1,6 +1,5 @@
 /* Copyright ® 2018-201 by 柏大衛. All rights reserved. */
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
 import {
@@ -11,7 +10,7 @@ import {
 describe('generalEntityReference (integration)', () => {
    describe('parseGeneralEntityReference()', () => {
       it('parses the input', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText(' foo ;');
          source.endText();
 

@@ -3,7 +3,6 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { parseNotationDeclaration } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { DeclarationStart } from 'token';
@@ -25,7 +24,7 @@ describe('notationDeclarationCheck() (integration)', () => {
    });
 
    it('asks the externalId module to look for well formed problems', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('foo system "sys.dtd">');
       source.endText();
 
@@ -40,7 +39,7 @@ describe('notationDeclarationCheck() (integration)', () => {
    });
 
    it('calls nameCheck() to report on invalid names', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('$foo system "sys.dtd">');
       source.endText();
       parseNotationDeclaration(source, declarationStart, (result) => {
@@ -54,7 +53,7 @@ describe('notationDeclarationCheck() (integration)', () => {
    });
 
    it('calls nameXmlCheck() to report on bad names', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('xmlOne system "sys.dtd">');
       source.endText();
 

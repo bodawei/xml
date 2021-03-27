@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import {GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -17,7 +16,7 @@ describe('elementStart (integration)', () => {
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       const makeSToken = makeSTokenMaker();
       elementStartPToken = new ElementStartPToken({
          open: makeSToken('<'),

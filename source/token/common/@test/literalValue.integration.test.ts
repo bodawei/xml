@@ -1,6 +1,5 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { defaultExtractors } from 'extractor';
 import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -12,7 +11,7 @@ describe('literalValue (integration)', () => {
    let source: STokenSource;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    describe('parse()', () => {

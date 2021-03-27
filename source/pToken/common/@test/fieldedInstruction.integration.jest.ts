@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
 import { parseFieldedInstruction } from '../fieldedInstruction';
@@ -10,7 +9,7 @@ import { parseFieldedInstruction } from '../fieldedInstruction';
 describe('entityInstruction (integration)', () => {
    describe('parseFieldedInstruction()', () => {
       it('parses the input, including the parameters which use literal.parse()', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
@@ -26,7 +25,7 @@ describe('entityInstruction (integration)', () => {
       });
 
       it('converts the value from literal.parse() to a single SToken', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('fish="1.0" frog="ascii" ?>');
          source.endText();
 

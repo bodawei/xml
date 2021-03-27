@@ -8,7 +8,7 @@ describe('Extractor', () => {
    let extractor: Extractor;
 
    beforeEach(() => {
-      extractor = new Extractor(2.0);
+      extractor = new Extractor(2.0, true);
    });
 
    it('provides a no-op process() function', () => {

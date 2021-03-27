@@ -13,7 +13,7 @@ describe('PeekExtractor', () => {
       sub = jasmine.createSpyObj('subSpy', [ 'process', 'finish' ]);
       sub.state = Extractor.STATE.WORKING;
 
-      extractor = new PeekExtractor(1.0, sub);
+      extractor = new PeekExtractor(1.0, true, sub);
    });
 
    describe('constructor', () => {
@@ -106,7 +106,7 @@ describe('PeekExtractor', () => {
          }
          const testExtractor = new TestExtractor(1);
          testExtractor.state = Extractor.STATE.SUCCESS
-         extractor = new PeekExtractor(1.0, testExtractor);
+         extractor = new PeekExtractor(1.0, true,  testExtractor);
 
          extractor.process(new Segment('one'));
          extractor.process(new Segment('two'));
@@ -136,7 +136,7 @@ describe('PeekExtractor', () => {
          }
          const testExtractor = new TestExtractor(1);
          testExtractor.state = Extractor.STATE.SUCCESS
-         extractor = new PeekExtractor(1.0, testExtractor);
+         extractor = new PeekExtractor(1.0, true,  testExtractor);
 
          extractor.process(new Segment('one'));
          extractor.process(new Segment('two'));

@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import { ElementStartPToken, parseElementStart } from 'token';
 
@@ -16,7 +15,7 @@ describe('elementStartCheck() (integration)', () => {
    let elementStartPToken: ElementStartPToken;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       elementStartPToken = new ElementStartPToken({
          open: toSToken('<'),
          openSpace: undefined,

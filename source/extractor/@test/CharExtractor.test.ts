@@ -5,7 +5,7 @@ import { EntityId, Range } from 'basic';
 
 import CharExtractor from '../CharExtractor';
 import Extractor from '../Extractor';
-import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
+import {DONE_SEGMENT, PseudoSpace, Segment, SEGMENT_TYPE} from '../Segment';
 
 describe('CharExtractor', () => {
    let extractor: Extractor;
@@ -14,7 +14,7 @@ describe('CharExtractor', () => {
    beforeEach(() => {
       segmentRange = new Range(new EntityId());
 
-      extractor = new CharExtractor(1.0);
+      extractor = new CharExtractor(1.0, true);
    });
 
    describe('basic behavior', () => {
@@ -380,6 +380,25 @@ describe('CharExtractor', () => {
                rows: 1,
                columns: 0,
                segment: segment,
+            } ],
+         });
+      });
+
+      it('extracts a CR from a CRLF when we are not doing newline expansion', () => {
+         extractor = new CharExtractor(1.0, false);
+         const processedSegment = new Segment('\r\n');
+         processedSegment.index = 1;
+
+         extractor.process(new Segment('\r\n'));
+
+         expect(extractor.finish()).toEqual({
+            text: '\r',
+            original: '\r',
+            segments: [ {
+               chars: 1,
+               rows: 1,
+               columns: 0,
+               segment: processedSegment,
             } ],
          });
       });

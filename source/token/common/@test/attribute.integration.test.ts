@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { defaultExtractors } from 'extractor';
 import { TextPToken, } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -16,7 +15,7 @@ describe('attribute (integration)', () => {
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
 
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       attributesPToken = [ {
          name: makeSToken('one'),
          postNameSpace: undefined,

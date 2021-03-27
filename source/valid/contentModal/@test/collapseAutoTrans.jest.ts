@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { parseContentModel } from 'pToken';
 import { STokenSource } from 'sToken';
 
@@ -12,7 +11,7 @@ import { collapseAutoTrans } from '../collapseAutoTrans';
 
 describe('collapseAutoTrans()', () => {
    function prepForDeAuto(input: string, cb: (graph: CmGraph) => void) {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText(input);
       source.endText();
       parseContentModel(source, (result) => {

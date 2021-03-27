@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { parseCharData } from 'token';
 
@@ -16,7 +15,7 @@ describe('charDataCheck()', () => {
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('reports an error a bad character is in the text', (done) => {

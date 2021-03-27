@@ -1,4 +1,3 @@
-import { defaultExtractors } from 'extractor';
 import {
    ContextType,
    ParameterEntityReferencePToken,
@@ -41,7 +40,7 @@ function setupConditional(
          return;
       }
 
-      const sTokenSource = new STokenSource(defaultExtractors, expandParams.entityId);
+      const sTokenSource = new STokenSource(expandParams.entityId);
       sTokenSource.setConfVer(expandParams.confVer);
       const result: ConditionalInfo = {
          source: sTokenSource,

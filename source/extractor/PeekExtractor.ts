@@ -18,8 +18,8 @@ class PeekExtractor extends Extractor {
    private _firstIndex: number;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(version: number, subExtractor: Extractor) {
-      super(version);
+   constructor(version: number, processLineEndings: boolean, subExtractor: Extractor) {
+      super(version, processLineEndings);
 
       if (!subExtractor.process || !subExtractor.finish) {
          throw new Error('Must pass an object with process() and finish() methods.');

@@ -2,7 +2,6 @@
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { WellFormedError } from 'wellformedness';
-import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 import { parseLiteralValue } from 'token';
 
@@ -12,7 +11,7 @@ describe('literalValueCheck()', () => {
    let source: STokenSource;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('reports an error if the value has a bad character (charCheck())', (done) => {

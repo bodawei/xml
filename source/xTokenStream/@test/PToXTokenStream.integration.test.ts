@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { gatherStreamResults } from 'basic-test';
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import {
    AttListDeclarationXToken,
@@ -42,7 +41,7 @@ describe('PToXTokenStream (integration)', () => {
    let tokenStream: PToXTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+      pTokenStream = new PTokenStream(new STokenSource());
       tokenStream = new PToXTokenStream();
       pTokenStream.pipe(tokenStream);
    });

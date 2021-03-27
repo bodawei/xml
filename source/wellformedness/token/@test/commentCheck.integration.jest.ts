@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import { parseComment } from 'token';
 
@@ -18,7 +17,7 @@ describe('commentCheck() (integration)', () => {
    });
 
    it('reports on invalid characters in the comment', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('x\u0000y-->');
       source.endText();
 

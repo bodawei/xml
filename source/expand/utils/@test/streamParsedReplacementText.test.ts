@@ -68,7 +68,7 @@ describe('streamParsedReplacementText() (unit)', () => {
             resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}),
+                  sTokenSource: new STokenSource(),
                   getErrors: (): Array<ErrorToken> => [],
                };
             },
@@ -163,7 +163,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       };
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
-            sTokenSource: new STokenSource({}),
+            sTokenSource: new STokenSource(),
             getErrors: (): Array<ErrorToken> => [error1, error2],
          };
       };

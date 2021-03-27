@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { InstructionStart, parseXmlDeclaration } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 
@@ -22,7 +21,7 @@ describe('xmlDeclarationCheck (integration)', () => {
          targetSpace: SToken.fromString(' '),
       };
       confVer = new ConformanceVersion();
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('reports an error when the target text is malformed (check charCheck())', (done) => {

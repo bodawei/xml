@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { EntityId } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
@@ -20,7 +19,7 @@ function entityValueToSTokenSource(
    entityId: EntityId,
    peRefsFormTokenBoundaries = false,
 ): STokenSource {
-   const source = new STokenSource(defaultExtractors, entityId);
+   const source = new STokenSource(entityId, false);
    let depth = 0;
 
    // §4.4.8 ... When a parameter-entity reference is recognized in

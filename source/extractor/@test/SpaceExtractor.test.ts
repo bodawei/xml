@@ -14,7 +14,7 @@ describe('SpaceExtractor', () => {
    beforeEach(() => {
       segmentRange = new Range(new EntityId());
 
-      extractor = new SpaceExtractor(1.0);
+      extractor = new SpaceExtractor(1.0, true);
    });
 
    describe('basic behavior', () => {
@@ -438,6 +438,25 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\u0085',
+            segments: [ {
+               chars: 2,
+               rows: 1,
+               columns: 0,
+               segment: segment,
+            } ],
+         });
+      });
+
+
+      it('extracts a \\r\\n as a \\r\n when processLineEndings is false', () => {
+         extractor = new SpaceExtractor(1.0, false);
+         const segment = new Segment('\r\nx');
+
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: '\r\n',
+            original: '\r\n',
             segments: [ {
                chars: 2,
                rows: 1,

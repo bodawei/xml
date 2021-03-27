@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken,  } from 'pToken';
@@ -16,7 +15,7 @@ describe('literal (integration)', () => {
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    describe('parse()', () => {

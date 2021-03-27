@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
 import { ContentModelP, parseContentModel } from '../contentModel';
@@ -45,7 +44,7 @@ describe('ContentModel (integration)', () => {
 
    describe('parseContentModel()', () => {
       it('parses a basic content spec', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('( one+ | two)* ');
          source.endText();
 
@@ -56,7 +55,7 @@ describe('ContentModel (integration)', () => {
       });
 
       it('parses content spec with a PE Ref in it', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('( one+ | %fred;');
          source.endText();
 
@@ -88,13 +87,13 @@ describe('ContentModel (integration)', () => {
       });
 
       it('parses a nested content spec with various delimiters', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('( one+ | ( ( two | three)+ , four)? | five)');
          source.endText();
 
          parseContentModel(source, (result) => {
             // @ts-expect-error matcher not recognized
-                        expect(result).toMatchInlineSnapshot(`
+            expect(result).toMatchInlineSnapshot(`
                ContentModelP {
                  "close": SToken {
                    "originalStr": ")",

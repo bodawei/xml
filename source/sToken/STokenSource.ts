@@ -8,6 +8,7 @@ import {
    Segment,
    ExtractorConstructor,
    ExtractorMap,
+   defaultExtractors,
 } from 'extractor';
 import { SegmentInfo } from '../extractor/Extractor'; // typeHack
 
@@ -110,6 +111,8 @@ class STokenSource {
 
    private entityId: EntityId;
 
+   private processLineEndings: boolean;
+
    private _extractorInfo: ExtractorMap;
 
    public _segments: Array<Segment | PseudoSpace>;
@@ -124,10 +127,15 @@ class STokenSource {
 
    private _resuming?: boolean;
 
-   constructor(extractorInfo: ExtractorMap, entityId?: EntityId) {
+   constructor(
+      entityId: EntityId = new EntityId(),
+      processLineEndings = true,
+      extractorInfo: ExtractorMap = defaultExtractors,
+   ) {
       this.errors = [];
-      this.entityId = entityId || new EntityId();
+      this.entityId = entityId;
       this.confVer = new ConformanceVersion();
+      this.processLineEndings = processLineEndings;
       this._extractorInfo = extractorInfo;
 
       this._segments = [];
@@ -248,6 +256,7 @@ class STokenSource {
             // @ts-expect-error fixme
             paramsToUse = new extractorDefinition.params.extractorConstructor(
                this.confVer.version,
+               this.processLineEndings,
                params,
             );
          } else {
@@ -263,7 +272,7 @@ class STokenSource {
       }
 
       const typeHack = extractorConstructor as any;
-      const instance = new typeHack(this.confVer.version, paramsToUse);
+      const instance = new typeHack(this.confVer.version, this.processLineEndings, paramsToUse);
 
       this._extractors.push({
          extractor: instance,

@@ -15,7 +15,7 @@ describe('WordExtractor', () => {
    describe('basic behavior', () => {
 
       it('extracts to end of last segment if no other terminators', () => {
-         const extractor = new WordExtractor(1.0, []);
+         const extractor = new WordExtractor(1.0, true, []);
          extractor.process(new Segment('onetwothree', segmentRange));
 
          expect(extractor.finish()).toEqual({
@@ -34,7 +34,7 @@ describe('WordExtractor', () => {
       });
 
       it('can omit terminators if no added needed', () => {
-         const extractor = new WordExtractor(1.0);
+         const extractor = new WordExtractor(1.0, true);
          extractor.process(new Segment('noterm', segmentRange));
 
          expect(extractor.finish()).toEqual({
@@ -53,7 +53,7 @@ describe('WordExtractor', () => {
       });
 
       it('will stop at a provided terminator', () => {
-         const extractor = new WordExtractor(1.0, [ 'xyzzy' ]);
+         const extractor = new WordExtractor(1.0, true, [ 'xyzzy' ]);
          const segment = new Segment('txtxyzzy', segmentRange);
          extractor.process(segment);
 
@@ -74,7 +74,7 @@ describe('WordExtractor', () => {
    describe('whitspace terminator', () => {
 
       it('extracts to the first space', () => {
-         const extractor = new WordExtractor(1.0, []);
+         const extractor = new WordExtractor(1.0, true, []);
          const segment = new Segment('space    ', segmentRange);
          extractor.process(segment);
 
@@ -91,7 +91,7 @@ describe('WordExtractor', () => {
       });
 
       it('extracts to the first tab', () => {
-         const extractor = new WordExtractor(1.0, []);
+         const extractor = new WordExtractor(1.0, true, []);
          const segment = new Segment('tab\t  ', segmentRange);
          extractor.process(segment);
 
@@ -108,7 +108,7 @@ describe('WordExtractor', () => {
       });
 
       it('extracts to the first newline', () => {
-         const extractor = new WordExtractor(1.0, []);
+         const extractor = new WordExtractor(1.0, true, []);
          const segment = new Segment('newline\n\t  ', segmentRange);
          extractor.process(segment);
 
@@ -125,7 +125,7 @@ describe('WordExtractor', () => {
       });
 
       it('extracts to the first carriage return', () => {
-         const extractor = new WordExtractor(1.0, []);
+         const extractor = new WordExtractor(1.0, true, []);
          const segment = new Segment('cr\r  ', segmentRange);
          extractor.process(segment);
 
@@ -142,7 +142,7 @@ describe('WordExtractor', () => {
       });
 
       it('ignores \\u0085 in 1.0', () => {
-         const extractor = new WordExtractor(1.0, []);
+         const extractor = new WordExtractor(1.0, true, []);
          const segment = new Segment('85\u0085foo  ', segmentRange);
          extractor.process(segment);
 
@@ -159,7 +159,7 @@ describe('WordExtractor', () => {
       });
 
       it('stops at \\u0085 in 1.1', () => {
-         const extractor = new WordExtractor(1.1, []);
+         const extractor = new WordExtractor(1.1, true, []);
          const segment = new Segment('85\u0085foo  ', segmentRange);
          extractor.process(segment);
 
@@ -176,7 +176,7 @@ describe('WordExtractor', () => {
       });
 
       it('ignores \\u2028 in 1.0', () => {
-         const extractor = new WordExtractor(1.0, []);
+         const extractor = new WordExtractor(1.0, true, []);
          const segment = new Segment('22\u2028foo  ', segmentRange);
          extractor.process(segment);
 
@@ -193,7 +193,7 @@ describe('WordExtractor', () => {
       });
 
       it('stops at \\u2028 in 1.1', () => {
-         const extractor = new WordExtractor(1.1, []);
+         const extractor = new WordExtractor(1.1, true, []);
          const segment = new Segment('22\u2028foo  ', segmentRange);
          extractor.process(segment);
 

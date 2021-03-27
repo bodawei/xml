@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { defaultExtractors } from 'extractor';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -14,7 +13,7 @@ describe('externalId (integration)', () => {
       let source: STokenSource;
 
       beforeEach(() => {
-         source = new STokenSource(defaultExtractors);
+         source = new STokenSource();
       });
 
       it('parses the public and system value (check literal.parse())', (done) => {
@@ -85,7 +84,7 @@ describe('externalId (integration)', () => {
       let source: STokenSource;
 
       beforeEach(() => {
-         source = new STokenSource(defaultExtractors);
+         source = new STokenSource();
       });
 
       it('adds all tokens (check literal.getSTokens())', (done) => {

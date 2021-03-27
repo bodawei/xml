@@ -1,7 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { parseElementDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
@@ -22,7 +21,7 @@ describe('elementDeclarationCheck()', () => {
    });
 
    it('calls checName() to report on invalid names', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('$foo ANY>');
       source.endText();
 
@@ -37,7 +36,7 @@ describe('elementDeclarationCheck()', () => {
    });
 
    it('calls nameXmlCheck() to report on bad names', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('xmlOne ANY>');
       source.endText();
 

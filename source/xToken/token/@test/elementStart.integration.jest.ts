@@ -1,6 +1,5 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 import { ELEMENT_START_PTOKEN, parseElementStart } from 'token';
 
@@ -11,7 +10,7 @@ describe('ElementStartXToken (integration)', () => {
    let source: STokenSource;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('generates a full token with attributes', (done) => {

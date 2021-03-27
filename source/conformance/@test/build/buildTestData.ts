@@ -10,7 +10,6 @@ import { EntityExpanderStream } from 'nodeStream';
 import { PToXTokenStream } from 'xTokenStream';
 import SimpleObj from '../../../simpleobj/so';
 import { STokenSource } from 'sToken';
-import { defaultExtractors } from 'extractor';
 
 import { convertToStringWithSurrogateHalves } from './surrogateUtils';
 
@@ -383,7 +382,7 @@ class RefineObject extends Transform {
  */
 function convertTestData(pathName: string, ouputDir: string) {
    const docPath = resolve(pathName, 'xmlconf.xml');
-   const pTokenStream = new PTokenStream(new STokenSource(defaultExtractors), {
+   const pTokenStream = new PTokenStream(new STokenSource(), {
       confVer: new ConformanceVersion(1.0, 5),
       entityId: new EntityId(docPath),
    });

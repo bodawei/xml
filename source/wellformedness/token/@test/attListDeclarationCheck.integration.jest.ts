@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { parseAttListDeclaration } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
@@ -28,7 +27,7 @@ describe('checkWellFormed()', () => {
 
    // it('asks the declaration module to look for problems in the declaration part', (done) => {
    //    declarationStart.openSpace = toSToken(' ');
-   //    const source = new STokenSource(defaultExtractors);
+   //    const source = new STokenSource();
    //    source.addText('foo>');
    //    source.endText();
 
@@ -41,7 +40,7 @@ describe('checkWellFormed()', () => {
    // });
 
    it('calls nameCheck() to report on invalid names', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('$foo>');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
@@ -53,7 +52,7 @@ describe('checkWellFormed()', () => {
    });
 
    it('calls nameCheck() to report on invalid attribute names', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('elName $foo>');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
@@ -65,7 +64,7 @@ describe('checkWellFormed()', () => {
    });
 
    it('calls nameXmlCheck() to report on invalid attribute names', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('elName xml:foo>');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
@@ -77,7 +76,7 @@ describe('checkWellFormed()', () => {
    });
 
    it('calls wordList.checkWellFormed() on an enumerated list', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('elName attr ( $badName ) >');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
@@ -89,7 +88,7 @@ describe('checkWellFormed()', () => {
    });
 
    it('calls wordList.checkWellFormed() on a NOTATION list', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('elName attr2 NOTATION ( goodName | $badName ) >');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {

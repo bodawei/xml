@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { Offset, EntityId, } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { ELEMENT_START_PTOKEN } from 'token';
@@ -16,7 +15,7 @@ describe('CheckWellFormed (integration)', () => {
    let checker: CheckWellFormed;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource(defaultExtractors));
+      pTokenStream = new PTokenStream(new STokenSource());
       checker = new CheckWellFormed();
 
       pTokenStream.pipe(checker);

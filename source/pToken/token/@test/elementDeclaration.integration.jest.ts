@@ -2,7 +2,6 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, toSToken } from 'sToken';
 
 import {
@@ -15,7 +14,7 @@ import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 describe('elementDeclaration', () => {
    describe('parseElementDeclaration()', () => {
       it('parses a PERef (check unsasigned calls)', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('%foo;>');
          source.endText();
 
@@ -44,7 +43,7 @@ describe('elementDeclaration', () => {
       });
 
       it('parses an empty PERef after a simple content model', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('elementName ANY %foo;>');
          source.endText();
 
@@ -77,7 +76,7 @@ describe('elementDeclaration', () => {
       });
 
       it('parses a complex content model', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText(
             'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? >',
          );
@@ -1047,7 +1046,7 @@ describe('elementDeclaration', () => {
       });
 
       it('parses an empty PERef after a complex content model', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText(
             'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? %foo;>',
          );
@@ -1074,7 +1073,7 @@ describe('elementDeclaration', () => {
 
    describe('resumeParseElementDeclaration()', () => {
       it('resumes an entity declaration from the start', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('foobar ANY');
          source.endText();
 
@@ -1109,7 +1108,7 @@ describe('elementDeclaration', () => {
       });
 
       it('resumes an entity declaration from the start', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('\ta | ( c, d ))');
          source.endText();
 
@@ -1199,7 +1198,7 @@ describe('elementDeclaration', () => {
       });
 
       it('resumes an entity declaration with a simple content spec and a trailing empty peref', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('\t');
          source.endText();
 
@@ -1235,7 +1234,7 @@ describe('elementDeclaration', () => {
       });
 
       it('resumes an entity declaration with a complex content model and a trailing empty peref', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('\t');
          source.endText();
 

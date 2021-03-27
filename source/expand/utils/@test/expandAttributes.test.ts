@@ -64,7 +64,7 @@ describe('expandAttributes() (unit)', () => {
             resolveEntityId: () => '',
             retrieveExternalEntity: (): RetrieveResults => {
                return {
-                  sTokenSource: new STokenSource({}),
+                  sTokenSource: new STokenSource(),
                   getErrors: (): Array<ErrorToken> => [],
                };
             },

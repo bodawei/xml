@@ -1,6 +1,5 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import {
@@ -11,7 +10,7 @@ import {
 describe('ParameterEntityReferencePToken (integration)', () => {
    describe('parseParameterEntityReference()', () => {
       it('constructs a PToken from the input', (done) => {
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText('% foo ;');
          source.endText();
 

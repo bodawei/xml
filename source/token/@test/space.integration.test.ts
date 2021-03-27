@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { EntityId, Range } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 
 import { parseSpace } from '../space';
@@ -16,7 +15,7 @@ describe('space (integration)', () => {
             type: 'SPACE_PTOKEN',
             text: new SToken(' \t\n\n', ' \t\n\r\n', new Range(new EntityId(), 0, 0, 0, 5, 2, 0)),
          };
-         const source = new STokenSource(defaultExtractors);
+         const source = new STokenSource();
          source.addText(' \t\n\r\n');
          source.endText();
 

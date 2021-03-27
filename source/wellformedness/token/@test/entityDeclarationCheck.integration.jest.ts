@@ -1,7 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { parseEntityDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
@@ -21,7 +20,7 @@ describe('entityDeclarationCheck() (integration)', () => {
          declTypeSpace: toSToken('\t'),
       };
       confVer = new ConformanceVersion();
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
    });
 
    it('reports errors in the literal value (literalCheck())', (done) => {

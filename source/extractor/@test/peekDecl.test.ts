@@ -16,7 +16,7 @@ describe('PeekDecl', () => {
    describe('process()', () => {
 
       it('reports success when it has found the declaration', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment('<?xml version="1.1" ?>', segmentRange));
          extractor.finish();
 
@@ -24,7 +24,7 @@ describe('PeekDecl', () => {
       });
 
       it('reports failure when a pseudo space is found', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new PseudoSpace());
          extractor.process(new Segment('<?xml version="1.1" ?>', segmentRange));
          extractor.finish();
@@ -33,7 +33,7 @@ describe('PeekDecl', () => {
       });
 
       it('reports failure when it has not found the "<?" in the first 5 chars', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment('      <?xml version="1.1" ?>', segmentRange));
          extractor.finish();
 
@@ -41,7 +41,7 @@ describe('PeekDecl', () => {
       });
 
       it('reports failure when it was given no segments', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
@@ -56,7 +56,7 @@ describe('PeekDecl', () => {
 
          text += '<?xml version="1.1" ?>';
 
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment(text, segmentRange));
          extractor.finish();
 
@@ -64,7 +64,7 @@ describe('PeekDecl', () => {
       });
 
       it('reports success when it finds the declaration', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment('<?xml version="1.1" ?>', segmentRange));
 
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
@@ -73,7 +73,7 @@ describe('PeekDecl', () => {
 
    describe('finish()', () => {
       it('delivers the desired string and the segment when data fits in a single segment', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment('<?xml version="1.1" ?>', new Range(new EntityId(), 0, 0, 0, 0, 22, 0)));
 
          expect(extractor.finish()).toEqual({
@@ -91,7 +91,7 @@ describe('PeekDecl', () => {
       });
 
       it('delivers the desired string and no more and the segment when data fits in a single segment', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment('<?xml version="1.1" ?>x', new Range(new EntityId(), 0, 0, 0, 0, 23, 0)));
 
          expect(extractor.finish()).toEqual({
@@ -109,7 +109,7 @@ describe('PeekDecl', () => {
       });
 
       it('delivers nothing and unchanged segments on failure', () => {
-         const extractor = new PeekDecl(1.1);
+         const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment('         <?xml version="1.1" ?>', new Range(new EntityId(), 0, 0, 0, 0, 30, 0)));
 
          expect(extractor.finish()).toEqual({
@@ -128,7 +128,7 @@ describe('PeekDecl', () => {
 
       describe('segment spanning', () => {
          it('delivers the desired string and all segments, unchanged, on success', () => {
-            const extractor = new PeekDecl(1.1);
+            const extractor = new PeekDecl(1.1, true);
             extractor.process(new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)));
             extractor.process(new Segment('ion="1.1" ?>', new Range(new EntityId(), 0, 10, 0, 0, 22, 0)));
 
@@ -153,7 +153,7 @@ describe('PeekDecl', () => {
          });
 
          it('delivers only the declaration, and no text that comes after it', () => {
-            const extractor = new PeekDecl(1.1);
+            const extractor = new PeekDecl(1.1, true);
             extractor.process(new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)));
             extractor.process(new Segment('ion="1.1" ?> Hello', new Range(new EntityId(), 0, 10, 0, 0, 28, 0)));
 
@@ -181,7 +181,7 @@ describe('PeekDecl', () => {
       describe('newlines', () => {
 
          it('adjusts line breaks and counts', () => {
-            const extractor = new PeekDecl(1.1);
+            const extractor = new PeekDecl(1.1, true);
             const segment = new Segment('<?xml\n \rversion="1.1"\r\n ?>');
             extractor.process(segment);
 
@@ -198,7 +198,7 @@ describe('PeekDecl', () => {
          });
 
          it('copes with CR/LF on segment boundaries', () => {
-            const extractor = new PeekDecl(1.1);
+            const extractor = new PeekDecl(1.1, true);
             const segment1 = new Segment('<?xml\n \rversion="1.1"\r');
             const segment2 = new Segment('\n ?>');
             extractor.process(segment1);
@@ -222,7 +222,7 @@ describe('PeekDecl', () => {
          });
 
          it('copes with CR/\\u0085 on segment boundaries in 1.1', () => {
-            const extractor = new PeekDecl(1.1);
+            const extractor = new PeekDecl(1.1, true);
             const segment1 = new Segment('<?xml\n \rversion="1.1"\r');
             const segment2 = new Segment('\u0085 ?>');
             extractor.process(segment1);

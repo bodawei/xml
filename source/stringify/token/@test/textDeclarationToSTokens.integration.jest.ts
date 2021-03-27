@@ -1,7 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { defaultExtractors } from 'extractor';
 import { InstructionStart, parseTextDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 
@@ -20,7 +19,7 @@ describe('textDeclarationToSTokens() (integration)', () => {
    });
 
    it('returns the STokens', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('version="1.0" encoding="ascii" ?>');
       source.endText();
 

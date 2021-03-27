@@ -1,6 +1,5 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { defaultExtractors } from 'extractor';
 import {
    ParseToken,
    ContextType,
@@ -68,7 +67,7 @@ describe('EntityExpander (unit)', () => {
    }
 
    function retrieveExternalEntity(): RetrieveResults {
-      const sTokenSource = new STokenSource(defaultExtractors);
+      const sTokenSource = new STokenSource();
 
       return {
          sTokenSource,
@@ -392,7 +391,7 @@ describe('EntityExpander (unit)', () => {
             });
             setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
                done({
-                  source: new STokenSource(defaultExtractors),
+                  source: new STokenSource(),
                });
             });
             const results: Array<ParseToken> = [];
@@ -1067,7 +1066,7 @@ describe('EntityExpander (unit)', () => {
             peRef,
          });
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            done({ source: new STokenSource(defaultExtractors) });
+            done({ source: new STokenSource() });
 
             deliver(new TextPToken({ text: toSToken('foo') }), () => {});
          });
@@ -1091,7 +1090,7 @@ describe('EntityExpander (unit)', () => {
          });
          let count = 0;
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            done({ source: new STokenSource(defaultExtractors) });
+            done({ source: new STokenSource() });
             count++;
             if (count === 1) {
                deliver(condStart, () => {});
@@ -1118,7 +1117,7 @@ describe('EntityExpander (unit)', () => {
          let sourceSpy: jasmine.Spy;
 
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            const source = new STokenSource(defaultExtractors);
+            const source = new STokenSource();
             sourceSpy = spyOn(source, 'addText');
             done({ source });
          });
@@ -1141,7 +1140,7 @@ describe('EntityExpander (unit)', () => {
          });
          let sourceSpy: jasmine.Spy;
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            const source = new STokenSource(defaultExtractors);
+            const source = new STokenSource();
             sourceSpy = spyOn(source, 'endText');
             done({ source });
          });
@@ -1174,7 +1173,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          setupConditionalSpy.and.callFake((peref, params, stack, incontent, deliver, done) => {
-            const source = new STokenSource(defaultExtractors);
+            const source = new STokenSource();
             done({ source });
          });
          const results: Array<ParseToken> = [];

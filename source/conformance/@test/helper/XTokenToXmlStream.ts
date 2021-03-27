@@ -49,8 +49,8 @@ function formatText(text: string): string {
          .replace(/\t/g, '&#9;')
          .replace(/\n/g, '&#10;')
          .replace(/\u000c/g, '&#12;') // eslint-disable-line no-control-regex
-         // See differences in rmt-044 and rmt-045 mentioned in fixTest
-         // .replace(/\u0085/g, '&#133;') // this is maybe only true for v1.1 eslint-disable-line no-control-regex
+         // Puzzling. Some tests \u0085 literally in their output, some have the text &#133;.  I don't detect a pattern for which is which. See differences in rmt-037, rmt-044 and rmt-045 mentioned in fixTest
+         .replace(/\u0085/g, '&#133;') // this is maybe only true for v1.1 eslint-disable-line no-control-regex
          .replace(/\u008c/g, '&#140;') // eslint-disable-line no-control-regex
          .replace(/\r/g, '&#13;')
    );

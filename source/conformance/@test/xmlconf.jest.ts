@@ -4,7 +4,6 @@ import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
 import { ConformanceVersion, XmlRevision, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { defaultExtractors } from 'extractor';
 import { AttFixerStream, CheckWellFormed } from 'nodeStream';
 import { ContextType, ParseToken } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
@@ -30,7 +29,7 @@ function setupWellFormedStream(
    pTokenStream: PTokenStream;
    wellFormedStream: CheckWellFormed;
 } {
-   const sTokenSource = new STokenSource(defaultExtractors);
+   const sTokenSource = new STokenSource();
    const pTokenStream = new PTokenStream(sTokenSource, {
       context: ContextType.DOCUMENT,
       confVer: ver && rev ? new ConformanceVersion(ver, rev) : undefined,

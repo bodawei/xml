@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource } from 'sToken';
 import { parseCdata, SectionStart } from 'token';
 
@@ -20,7 +19,7 @@ describe('cdataCheck() (integration)', () => {
    });
 
    it('reports error if type has an invalid character type', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('[F\u0000xx[');
       source.endText();
 
@@ -35,7 +34,7 @@ describe('cdataCheck() (integration)', () => {
    });
 
    it('reports an error a bad character is in the text (checks charCheck())', (done) => {
-      const source = new STokenSource(defaultExtractors);
+      const source = new STokenSource();
       source.addText('[bad\u0000&]]>');
       source.endText();
 

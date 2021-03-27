@@ -24,8 +24,8 @@ class MatchExtractor extends Extractor {
    private _firstIndex: number;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(version: number, candidate: string) {
-      super(version);
+   constructor(version: number, processLineEndings: boolean, candidate: string) {
+      super(version, processLineEndings);
 
       this._candidate = candidate;
 

@@ -29,14 +29,14 @@ class MultiMatchExtractor extends Extractor {
    private _lastIndex = 0;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(version: number, candidates: Array<string>) {
-      super(version);
+   constructor(version: number, processLineEndings: boolean, candidates: Array<string>) {
+      super(version, processLineEndings);
 
       this._matchers = candidates.reduce((matchers, candidate: string) => {
          if (matchers[candidate]) {
             throw new Error(`"${candidate}" was specified twice.`);
          }
-         matchers[candidate] = new MatchExtractor(this.version, candidate);
+         matchers[candidate] = new MatchExtractor(this.version, processLineEndings, candidate);
          return matchers;
       }, {} as MatcherMap);
       this._match = undefined;

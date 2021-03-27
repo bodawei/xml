@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 
 import { ConditionalPToken, parseConditional } from '../conditional';
@@ -14,7 +13,7 @@ describe('conditional (integration)', () => {
    let sectionStart: SectionStart;
 
    beforeEach(() => {
-      source = new STokenSource(defaultExtractors);
+      source = new STokenSource();
       sectionStart = {
          open: fromString('<!['),
          sectionType: fromString('IGNORE'),

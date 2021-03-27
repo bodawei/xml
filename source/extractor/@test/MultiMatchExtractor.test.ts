@@ -19,7 +19,7 @@ describe('MultiMatchExtractor', () => {
 
       it('throws an error if called with the same candidate twice', () => {
          expect(() => {
-            new MultiMatchExtractor(1.0, [ 'w', 'w' ]);
+            new MultiMatchExtractor(1.0, true, [ 'w', 'w' ]);
          }).toThrowError('"w" was specified twice.');
       });
 
@@ -28,21 +28,21 @@ describe('MultiMatchExtractor', () => {
    describe('basic behavior', () => {
 
       it('reports success when it has found one of the desired matches', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'x', 'y' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'x', 'y' ]);
          extractor.process(new Segment('yw '));
 
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
       });
 
       it('reports failure when it has not found the match at the current point', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'x', 'w' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'x', 'w' ]);
          extractor.process(new Segment('yx'));
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
 
       it('delivers the match text with the right offsets and range', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'noise', 'xyzzy' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'noise', 'xyzzy' ]);
          const segment = new Segment('xyzzyfoo', segmentRange);
          extractor.process(segment);
 
@@ -59,7 +59,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('delivers the match text with the right offsets and range when there is a pseudo space', () => {
-         extractor = new MultiMatchExtractor(1.0, [ ' ', 'xyzzy' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ ' ', 'xyzzy' ]);
          extractor.process(new PseudoSpace());
 
          expect(extractor.finish()).toEqual({
@@ -79,7 +79,7 @@ describe('MultiMatchExtractor', () => {
    describe('finish()', () => {
 
       it('returns the match, if fully found at end of segment', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'w', 'x' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'w', 'x' ]);
          extractor.process(new Segment('w'));
 
          expect(extractor.finish()).toEqual({
@@ -102,7 +102,7 @@ describe('MultiMatchExtractor', () => {
    describe('segment treatment', () => {
 
       it('correctly changes segment index after processing', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'one', 'two' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'one', 'two' ]);
          const segment = new Segment('onetwo');
          extractor.process(segment);
          extractor.finish();
@@ -123,21 +123,21 @@ describe('MultiMatchExtractor', () => {
    describe('segment spanning', () => {
 
       it('reports failure state if no segments provided', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'one' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'one' ]);
          extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
 
       it('reports working state when the part of match has been matched', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'one' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'one' ]);
          extractor.process(new Segment('on'));
 
          expect(extractor.state).toEqual(Extractor.STATE.WORKING);
       });
 
       it('returns no data when a only given eof', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'x' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'x' ]);
 
          expect(extractor.finish()).toEqual({
             text: '',
@@ -147,7 +147,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns a complete match across multiple segments', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'abcdef' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'abcdef' ]);
          extractor.process(new Segment('ab', segmentRange));
          extractor.process(new Segment('cd'));
          extractor.process(new Segment('ef'));
@@ -187,7 +187,7 @@ describe('MultiMatchExtractor', () => {
       it('returns a complete match across multiple segments with a pseudo space', () => {
          const partial = new Segment('  ');
          partial.index = 1;
-         extractor = new MultiMatchExtractor(1.0, [ '  ' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ '  ' ]);
          extractor.process(new PseudoSpace());
          extractor.process(new Segment('  '));
 
@@ -211,7 +211,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns match across multiple segments and is terminated by non-match char', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'lukesky' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'lukesky' ]);
          extractor.process(new Segment('luke', segmentRange));
          const segment = new Segment('skywalker');
          extractor.process(segment);
@@ -237,7 +237,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns no data when a match proves to not be true on a subsequent segment', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'foo', 'hansel' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'foo', 'hansel' ]);
          const segment1 = new Segment('han');
          const segment2 = new Segment('solo');
          extractor.process(segment1);
@@ -261,7 +261,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns the match when picking up in mid-segment', () => {
-         extractor = new MultiMatchExtractor(1.0, [ 'trunp', 'xy' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ 'trunp', 'xy' ]);
          const segment = new Segment('wxyz', segmentRange);
          segment.index = 1;
          extractor.process(segment);
@@ -283,7 +283,7 @@ describe('MultiMatchExtractor', () => {
    describe('multiple matches', () => {
 
       it('returns the first candidate when that matches', () => {
-         extractor = new MultiMatchExtractor(1.0, [ '<', '!', '>' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ '<', '!', '>' ]);
          extractor.process(new Segment('<'));
 
          expect(extractor.finish()).toEqual({
@@ -302,7 +302,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns the second candidate when that matches', () => {
-         extractor = new MultiMatchExtractor(1.0, [ '<', '!', '>' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ '<', '!', '>' ]);
          extractor.process(new Segment('!'));
 
          expect(extractor.finish()).toEqual({
@@ -321,7 +321,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns the longest match', () => {
-         extractor = new MultiMatchExtractor(1.0, [ '<!', '<!--', '<!-' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ '<!', '<!--', '<!-' ]);
          extractor.process(new Segment('<'));
          expect(extractor.state).toEqual(Extractor.STATE.WORKING);
          extractor.process(new Segment('!'));
@@ -359,7 +359,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns the a shorter match when the longest candidate can not be matched', () => {
-         extractor = new MultiMatchExtractor(1.0, [ '<!', '<!--', '<--' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ '<!', '<!--', '<--' ]);
 
          extractor.process(new Segment('<'));
          expect(extractor.state).toEqual(Extractor.STATE.WORKING);
@@ -399,7 +399,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('returns a shorter match when EOF is encountered and that shorter is fully matched', () => {
-         extractor = new MultiMatchExtractor(1.0, [ '<!', '<!--', '<--' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ '<!', '<!--', '<--' ]);
 
          extractor.process(new Segment('<!'));
 
@@ -419,7 +419,7 @@ describe('MultiMatchExtractor', () => {
       });
 
       it('sets a success state when there is a shorter match at EOF', () => {
-         extractor = new MultiMatchExtractor(1.0, [ '<!', '<!--', '<--' ]);
+         extractor = new MultiMatchExtractor(1.0, true, [ '<!', '<!--', '<--' ]);
 
          extractor.process(new Segment('<!'));
          extractor.finish();
