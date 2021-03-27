@@ -9,8 +9,6 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
-      // easy 687 - need a new kind of error. Reported also by WF system, I think. Maybe defined in basic?
-      'uri01', // SYSTEM ids may not have URI fragments
       // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
       'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
 
@@ -18,6 +16,9 @@ const testFilters: FilterData = {
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
       'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
       'rmt-057', // Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
+
+      // 680 thinks pe is a recursive call. Not clear hy (or which)
+      'o-p69pass1', // misidentifying a recursive call
 
       // 686 - easy - char refs should be rejecting surrogate halves
       'o-p66fail6', // no references to non-characters
@@ -66,6 +67,10 @@ const testFilters: FilterData = {
       'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
       'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
+      // 679 - not processing the whitespace in children content correctly
+      'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
+      'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
+
       // not checking characters and versions correctly for element names
       'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
 
@@ -87,16 +92,9 @@ const testFilters: FilterData = {
       // 681 - easy  should recognize a / as the temination of an empty element
       'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
 
-      // 680 thinks pe is a recursive call. Not clear hy (or which)
-      'o-p69pass1', // misidentifying a recursive call
-
       // 675 - Validity constraint: Proper Declaration/PE Nesting - A trailing > is a violation of this.
       'rmt-e2e-14', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
       'invalid--006', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-
-      // 679 - not processing the whitespace in children content correctly
-      'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
-      'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
       // Easy: We are probably swallowing these text declarations before we do a check on them.
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".

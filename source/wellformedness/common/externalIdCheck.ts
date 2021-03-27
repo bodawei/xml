@@ -1,7 +1,7 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
-import { ExternalIdP, TextPToken } from 'pToken';
+import { ConformanceVersion, ErrorCollector, XmlError } from 'basic';
+import { ExternalIdP, pTokenArrayToString, TextPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
@@ -72,7 +72,15 @@ function externalIdCheck(
          ec.check(!externalId.publicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
-      literalCheck(externalId.system, ec, confVer, WFEID.NOUN_EXTERNALID_SYSTEM);
+      literalCheck(externalId.system, ec, confVer, WFEID.NOUN_EXTERNALID_SYSTEM, () => {
+         // §4.2.2 It is an error for a fragment identifier (beginning with a # character)
+         //    to be part of a system identifier
+         const literalString = pTokenArrayToString(externalId.system?.value);
+
+         if (literalString.indexOf('#') !== -1) {
+            ec.reportError(XmlError.ID.SYSTEMLITERAL_NO_FRAGMENT, XmlError, [literalString]);
+         }
+      });
    }
 }
 

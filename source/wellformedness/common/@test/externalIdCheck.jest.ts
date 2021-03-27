@@ -2,9 +2,9 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, XmlError } from 'basic';
 import { MockErrorCollector } from 'basic-test';
-import { ExternalIdP, TextPToken } from 'pToken';
+import { CharRefPToken, ExternalIdP, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
@@ -62,7 +62,36 @@ describe('externalIdCheck()', () => {
          mockErrorCollector,
          confVer,
          WellFormedError.ID.NOUN_EXTERNALID_SYSTEM,
+         expect.any(Function),
       );
+   });
+
+   it('reports an error if there is a fragment identifier (#) in the system literal', () => {
+      externalId = new ExternalIdP(externalId, {
+         system: {
+            value: [
+               new TextPToken({ text: toSToken('stuff') }),
+               new CharRefPToken({
+                  open: toSToken('&'),
+                  digits: toSToken('35'),
+               }),
+            ],
+         },
+      });
+
+      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+
+      // invoke the callback function
+      const mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
+      const cb = mockLiteralCheck.mock.calls[1][4]; // eslint-disable-line
+      cb?.();
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportXmlError({
+         id: XmlError.ID.SYSTEMLITERAL_NO_FRAGMENT,
+         params: ['stuff#'],
+         position: externalId.publicSpace, // This is only because we call the callback after
+      });
    });
 
    it('reports an error if the PUBLIC value has illegal characters', () => {

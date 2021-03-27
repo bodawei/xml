@@ -379,7 +379,7 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(elementDeclaration, state, mockErrorCollector, version);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
+      expect(mockErrorCollector).toReportXmlError({
          id: XmlError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
          params: ['elementName', 'last (/4,/99),first (/2/1,/3)'],
          position: elementDeclaration.contentModel?.open,
