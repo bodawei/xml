@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, XmlFatalError } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -214,6 +214,53 @@ describe('textDeclaration (unit)', () => {
          id: WellFormedError.ID.TEXTDECL_NO_CLOSE,
          params: undefined,
          lastPosition: textDeclPToken.targetSpace,
+      });
+   });
+
+   const data: Array<[boolean, 1.0 | 1.1]> = [
+      [true, 1.0],
+      [false, 1.1],
+   ];
+   data.forEach(([pass, version]) => {
+      it(`does${
+         pass ? '' : ' not'
+      } report a fatal error in a version ${version} document if there are 0x85 or 0x2028 characters in any of the spaces in a text declaration`, () => {
+         const x85 = new SToken('\n', '\u0085', []);
+         const x2028 = new SToken('\n', '\u2028', []);
+         textDeclPToken = new TextDeclarationPToken({
+            open: toSToken('<?'),
+            target: toSToken('xml'),
+            targetSpace: x2028,
+            fields: [
+               {
+                  name: toSToken('version'),
+                  nameSpace: x85,
+                  equal: toSToken('='),
+                  equalSpace: x2028,
+                  value: toSToken('1.1'),
+                  valueSpace: x85,
+               },
+               {
+                  name: toSToken('encoding'),
+                  nameSpace: x85,
+                  equal: toSToken('='),
+                  equalSpace: x2028,
+                  value: toSToken('usascii'),
+                  valueSpace: x85,
+               },
+            ],
+            close: toSToken('?>'),
+         });
+
+         textDeclarationCheck(textDeclPToken, mockErrorCollector, new ConformanceVersion(version));
+
+         const expected = pass ? 1 : 7;
+         const nonSpaceError = mockErrorCollector.errors.reduce((prev, error) => {
+            return prev || error.id !== XmlFatalError.ID.TEXTDECL_INVALID_SPACE;
+         }, false);
+
+         expect(mockErrorCollector.errors.length).toEqual(expected);
+         expect(nonSpaceError).toEqual(pass ? true : false);
       });
    });
 

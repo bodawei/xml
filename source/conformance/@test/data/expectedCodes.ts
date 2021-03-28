@@ -2280,6 +2280,9 @@ const expectedErrorCodes: IdToErrorMap = {
    'rmt-e2e-57': 'XMLSPACE_INVALID_VALUE', // ok - A value other than preserve or default for xml:space is an error
    uri01: 'SYSTEMLITERAL_NO_FRAGMENT', // ok - The system literal may not contain fragments (§4.2.2). Found "foo#bar".
    'o-p11pass1': 'SYSTEMLITERAL_NO_FRAGMENT',
+   'rmt-055': 'XMLDECL_INVALID_SPACE', // ok - Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
+   'rmt-056': 'XMLDECL_INVALID_SPACE', // ok - Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
+   'rmt-057': 'XMLDECL_INVALID_SPACE', // ok - Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
 };
 
 export { IdToErrorMap, expectedErrorCodes, expectedNotWfCodes, expectedInvalidCodes };

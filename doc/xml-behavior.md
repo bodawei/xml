@@ -374,3 +374,4 @@ Answer: Yes
 ## Order of parsing:
 * Attribute defaults are parsed for General Entity references when they are first encountered in the DTD.
    * This means an ATTLIST declared in the internal subset can not reference an enty, in any of its default values, that is declared after it or in the external subset.
+* Note that the spec describes the input after line ending processing has been handled. (justification: S does not include 0x85 in 1.1, but that is legal in the file in most places S occurs)

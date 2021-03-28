@@ -1,10 +1,11 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ErrorCollector, XmlFatalError } from 'basic';
 import { InstructionField, XmlDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { charCheck } from '../common/charCheck';
+import { checkSpaceProblems, checkSpaces } from '../common/xmlTextDeclUtils';
 import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
@@ -83,10 +84,7 @@ function checkFields(
             foundVersion = true;
             ec.check(foundEncoding || foundStandalone, WFEID.XMLDECL_VERSION_INVALID_ORDER);
 
-            ec.setPos(param.nameSpace);
-            ec.setPos(param.equal);
-            ec.setPos(param.equalSpace);
-            ec.setPos(param.openQuote);
+            checkSpaces(param, XmlFatalError.ID.XMLDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
             charCheck(value, ec, confVer);
 
@@ -97,11 +95,13 @@ function checkFields(
             foundEncoding = true;
             ec.check(!foundVersion || foundStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
 
-            ec.setPos(param.nameSpace);
-            ec.setPos(param.equal);
-            ec.check(!param.equal, WFEID.XMLDECL_ENCODING_NO_EQUAL);
-            ec.setPos(param.equalSpace);
-            ec.setPos(param.openQuote);
+            checkSpaces(
+               param,
+               XmlFatalError.ID.XMLDECL_INVALID_SPACE,
+               WFEID.XMLDECL_ENCODING_NO_EQUAL,
+               ec,
+               confVer,
+            );
             ec.setPos(value);
             charCheck(value, ec, confVer);
             ec.check(!ENCODING_REGEXP.exec(valueText), WFEID.XMLDECL_ENCODING_INVALID, [valueText]);
@@ -111,10 +111,7 @@ function checkFields(
             foundStandalone = true;
             ec.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER);
 
-            ec.setPos(param.nameSpace);
-            ec.setPos(param.equal);
-            ec.setPos(param.equalSpace);
-            ec.setPos(param.openQuote);
+            checkSpaces(param, XmlFatalError.ID.XMLDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
             charCheck(value, ec, confVer);
             ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [
@@ -130,6 +127,10 @@ function checkFields(
       }
 
       prevParam = param;
+
+      ec.setPos(param.valueSpace);
+
+      checkSpaceProblems(param.valueSpace, XmlFatalError.ID.XMLDECL_INVALID_SPACE, ec, confVer);
    }
 
    // No need to test if version was found. Either have encoding or standalone (error) or no params.
@@ -144,6 +145,7 @@ function xmlDeclarationCheck(
    ec.setPos(pToken.open);
    ec.setPos(pToken.openSpace);
    ec.check(pToken.openSpace, WFEID.XMLDECL_SPACE_AFTER_OPEN);
+   checkSpaceProblems(pToken.openSpace, XmlFatalError.ID.XMLDECL_INVALID_SPACE, ec, confVer);
 
    ec.setPos(pToken.target);
    charCheck(pToken.target, ec, confVer);
@@ -157,6 +159,7 @@ function xmlDeclarationCheck(
 
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.XMLDECL_NO_SPACE_AFTER_TARGET);
+   checkSpaceProblems(pToken.targetSpace, XmlFatalError.ID.XMLDECL_INVALID_SPACE, ec, confVer);
 
    checkFields(pToken.fields, ec, confVer);
 

@@ -8,10 +8,7 @@ interface FilterData {
 
 // 675 - Validity constraint: Proper Declaration/PE Nesting - A trailing > is a violation of this.
 const testFilters: FilterData = {
-   includedIds: [
-      // 680 thinks pe is a recursive call. Not clear hy (or which)
-      'o-p69pass1', // misidentifying a recursive call
-   ],
+   includedIds: [],
    excludedIds: [
       // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
       'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
@@ -22,14 +19,6 @@ const testFilters: FilterData = {
       // easy - 679 - just needs to check that any space tokens in an element are correct. not processing the whitespace in children content correctly
       'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
       'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
-
-      // easy 692 error - certain characters not allowed in the xml declaration
-      'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
-      'rmt-056', // Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
-      'rmt-057', // Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
-
-      // 680 thinks pe is a recursive call. Not clear hy (or which)
-      'o-p69pass1', // misidentifying a recursive call
 
       // 686 - easy - char refs should be rejecting surrogate halves
       'o-p66fail6', // no references to non-characters
