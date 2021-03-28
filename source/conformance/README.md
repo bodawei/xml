@@ -59,6 +59,10 @@ These are valid, but the condition they say they are checking for is not entirel
 * hst-bh-003 says it is testing a decimal charref, but is testing a hex
 * hst-bh-004 says it is testing a hex charref, but is testing a decimal
 
+### Misleading descriptions
+* `x-rmt5-014a`: Has a \"long s\" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   * Comment in the test itself says 'Has a "long s" in an ID, legal in XML 1.1, illegal in XML 1.0'. The comment is accurate in that the "long s" is in an ID.  The test is confined, however, to 1.0/5.
+
 ### Not testing what they think they are testing
 * ibm-1-1-not-wf-P02-ibm02n67.xml and ibm-1-1-not-wf-P02-ibm02n68.xml and thinks they are testing a surrogate half in a CDATA section, but that character is not included in the test data (unlike ibm-1-1-not-wf-P02-ibm02n69.xml)
 * valid-sa-064 says the character references expand into surrogate pairs.  this isn't necessarily true (if your language environment has an internal representation of utf16, then that is true).
@@ -70,7 +74,22 @@ These are valid, but the condition they say they are checking for is not entirel
    * This is a test of a 1.1 document. Even by the description this sounds like it is actually a test of validity that should pass. Howeveer, the element with this "kratimata" character is not declared.
 * `rmt-018` - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
    * This is a test of a 1.1 document. Even by the description this sounds like it is actually a test of validity that should pass. The character is 0xEFFFF (0xf3 af bf bf). However, this test fails because the element is not declared.
+* `rmt-052`: Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   * While there is a 0x0085 character in the element's content which is invalid, there is other PCDATA in the content as well. The element content model is "children" (only allows elements). Thus, even if the 0x85 was not there, this test would still be invalid.
+* `rmt-053`: Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   * While there is a 0x0085 character in the element's content which is invalid, there is other PCDATA in the content as well. The element content model is "children" (only allows elements). Thus, even if the 0x85 was not there, this test would still be invalid.
+* `x-rmt5-014`: Has a \"long s\" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   * Another case where the invalidity is happening because an element type was not declared. Aside from that, this test is both valid and wellformed, which of course is what the test description implies.
 
+### Marked as invalid, but also not wellformed
+For these, note that the xmlconf `testcases.dtd` file says "Nonvalidating parsers must also accept "invalid" testcases, but validating ones must reject them"
+
+* `invalid--005`: Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities
+   * This is an "invalid" test.  But it is also not wellformed. It contains `<!ELEMENT doc (#PCDATA) %e;` (without the closing `>`).
+* `invalid--006`: Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities
+   * This is an "invalid" test.  But it is also not wellformed. It contains `<!ELEMENT doc %e;` (without the closing `>`).
+* `rmt-e2e-14`: Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
+   * This is an "invalid" test.  But it is also not wellformed. It contains `<!ATTLIST foo %e;` (without the closing `>`).
 
 These are "wrong":
 
@@ -110,10 +129,5 @@ These have errors:
       * 'invalid-sa-141', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
 * These are the same as the previous, but these are for 1.1
       * 'rmt-015' // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-
-These two tests have genuine validity problem, but they also have other validity problems which probably mask the one being asked about
-
-* rmt-052 - the content model only allows elements, but there is PCDATA in the value
-* rmt-053 - the content model only allows elements, but there is PCDATA in the value
 
 

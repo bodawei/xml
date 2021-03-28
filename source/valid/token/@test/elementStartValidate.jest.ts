@@ -375,6 +375,45 @@ describe('elementStartValidate (unit)', () => {
          });
       });
 
+      it('reports an error when a NMTOKENS value is not a name token, but trims leading and trailing whitespace when calculating that (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {
+                  att1: {
+                     def: {
+                        name: toSToken('att1'),
+                        type: toSToken('NMTOKENS'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+         elementStart = new ElementStartPToken({
+            open: toSToken('</'),
+            name: toSToken('elementName'),
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken(toSToken('  fooo$$bar good '))],
+                  defaulted: true,
+               },
+            ],
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            params: ['fooo$$bar', 'elementName', 'att1'],
+            position: toSToken('"'),
+            lastPosition: undefined,
+         });
+      });
+
       it('reports an error when an attribute is defaulted from an external ATTLIST declaration, and the document is standalone', () => {
          state = new ValidateState({
             attributeDefs: {

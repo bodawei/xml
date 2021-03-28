@@ -131,7 +131,7 @@ describe('XML Conformance tests', () => {
             });
          });
 
-         const NOT_WF_INVALID = ['o-p16pass1', 'rmt-e2e-14'];
+         const NOT_WF_INVALID = ['o-p16pass1', 'rmt-e2e-14', 'invalid--005', 'invalid--006'];
 
          if (testData.TYPE === 'invalid') {
             if (NOT_WF_INVALID.includes(testData.ID)) {

@@ -478,7 +478,7 @@ class CheckXTokenValidStream extends Transform {
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
                if (isNoSpaceAtEndsVersion || isSpaceAtEndsVersion) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
+                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [...notAllowedParams, xToken.type], sToken);
                }
 
                if (xToken.type === GENERAL_ENTITY_START_XTOKEN) {
@@ -515,7 +515,7 @@ class CheckXTokenValidStream extends Transform {
                // We don't care if there is a TEXTDECL in here.
                break;
             default:
-               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
+               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [...notAllowedParams, xToken.type], sToken);
                break;
          }
 

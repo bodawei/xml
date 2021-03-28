@@ -8,8 +8,8 @@ interface IdToErrorMap {
 
 const expectedInvalidCodes: IdToErrorMap = {
    'invalid--002': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // Tests the "Proper Group/PE Nesting" validity constraint by fragmenting a content model between two parameter entities.
-   'invalid--005': 'error', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-   'invalid--006': 'error', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
+   'invalid--005': 'ELEMENTDECL_EXTRA_TEXT', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
+   'invalid--006': 'ELEMENTDECL_EXTRA_TEXT', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
    'invalid-not-sa-022': 'CONDITIONAL_UNKNOWN', // Test the "Proper Conditional Section/ PE Nesting" validity constraint.
    'inv-dtd01': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC
    'inv-dtd02': 'ENTITYDECL_UNDECLARED_NOTATION', // Tests the "Notation Declared" VC by using an undeclared notation name.
@@ -236,7 +236,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-e2e-9b': 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // great - An attribute default must be syntactically correct even if unused
    'rmt-e3e-13': 'GEREF_UNDEFINED', // good - Even internal parameter entity references are enough to make undeclared entities into mere validity errors rather than well-formedness errors.
 
-   'rmt-e2e-14': 'error', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
+   'rmt-e2e-14': 'ATTLISTDECL_EXTRA_TEXT', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
    'rmt-e2e-15a': 'CONTENT_IN_EMPTY_ELEMENT', // OK (but twice) Empty content can't contain an entity reference
    'rmt-e2e-15b': 'CONTENT_IN_EMPTY_ELEMENT', // meh - Empty content can't contain a comment
    'rmt-e2e-15c': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain a PI
@@ -253,8 +253,8 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-037': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
    'rmt-048': 'CHILDREN_XTRA_CONTENT', // meh - Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-046': 'CHILDREN_XTRA_CONTENT', // meh - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-052': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-   'rmt-053': 'error', // but output is bad 'CHILDREN_XTRA_CONTENT': 'error', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-052': 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-053': 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
    // Group namespaces
    'rmt-ns10-017': 'error', // Simple legal case: no namespaces
@@ -285,7 +285,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    // These are not inalid as of the specified version, but they are not well formed. Why i nthis list?
    'invalid-sa-140': 'UNDECLARED_ELEMENT', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
    'invalid-sa-141': 'UNDECLARED_ELEMENT', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
-   'x-rmt5-014': 'error', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-014': 'UNDECLARED_ELEMENT', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
    'x-rmt5-016': 'UNDECLARED_ELEMENT', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
    'x-rmt5-019': 'UNDECLARED_ELEMENT', // ok - Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
    'hst-bh-005': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:xml is an attribute as far as validation is concerned and must be declared
@@ -2279,6 +2279,7 @@ const expectedErrorCodes: IdToErrorMap = {
    'x-rmt-008--V1R5': 'none', // This input is actually just fine for 1.0/5
    'rmt-e2e-57': 'XMLSPACE_INVALID_VALUE', // ok - A value other than preserve or default for xml:space is an error
    uri01: 'SYSTEMLITERAL_NO_FRAGMENT', // ok - The system literal may not contain fragments (§4.2.2). Found "foo#bar".
+   'o-p11pass1': 'SYSTEMLITERAL_NO_FRAGMENT',
 };
 
 export { IdToErrorMap, expectedErrorCodes, expectedNotWfCodes, expectedInvalidCodes };

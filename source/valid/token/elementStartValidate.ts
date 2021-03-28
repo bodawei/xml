@@ -27,7 +27,7 @@ function nmtokenCheck(
       names.push(attValue);
       code = ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN;
    } else {
-      names = attValue.split(/ +/);
+      names = attValue.trim().split(/ +/);
       code = ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
    }
 

@@ -6,11 +6,22 @@ interface FilterData {
    futureFeatures: Array<string>;
 }
 
+// 675 - Validity constraint: Proper Declaration/PE Nesting - A trailing > is a violation of this.
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      // 680 thinks pe is a recursive call. Not clear hy (or which)
+      'o-p69pass1', // misidentifying a recursive call
+   ],
    excludedIds: [
       // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
       'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
+
+      // easy - 659  We are NOT normalizing across char references
+      'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
+
+      // easy - 679 - just needs to check that any space tokens in an element are correct. not processing the whitespace in children content correctly
+      'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
+      'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
       // easy 692 error - certain characters not allowed in the xml declaration
       'rmt-055', // Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
@@ -25,6 +36,26 @@ const testFilters: FilterData = {
 
       // 685 - easy - why are we not checking that a text decl has an encoding?
       'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+
+      // 681 - easy  should recognize a / as the temination of an empty element
+      'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
+
+      // easyish 684 - we could extend the content model wellformedness check in some way to report this better
+      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
+
+      // pretty-easy Scanning entity values
+      // 689 - error - another case of scanning entity values even if not referenced
+      // https://www.w3.org/XML/xml-V10-2e-errata
+      // This requires that we scan all entitiy values for general entity references. We need to do this at the end of the dtd, i think.  We could keep a table of references as we go, and then report any we found that turned out to be unparsed
+      'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
+      // 683 easy. Extend entity decl value validation to make sure that general entities syntax is reasonably
+      // constructed.  This is even for non-referenced entities, which is weird
+      'o-p09fail2', // EntityValue excludes '&'
+      'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
+      'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
+      'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
+      // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
+      'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
 
       // medium - 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
       'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
@@ -59,53 +90,6 @@ const testFilters: FilterData = {
        * Review uses of misc.checkCharWellFormed()
        */
       'rmt-054',
-
-      // ------- Unsorted ---------------------------------------------
-
-      // Questions
-      // Are we allowed to have PCData in an element declared with only elements as children?
-      'rmt-052', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n  // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-      'rmt-053', // this should ultimately fail for other reasons, too. but the output does not match because we are convering 0x85 into \n // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-
-      // 679 - not processing the whitespace in children content correctly
-      'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
-      'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
-
-      // not checking characters and versions correctly for element names
-      'x-rmt5-014', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-
-      // 689 - error - another case of scanning entity values even if not referenced
-      'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
-
-      // 684 - we could extend the content model wellformedness check in some way to report this better
-      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
-
-      // 683 easy. Extend pe decl value validation to make sure that general entities syntax is reasonably
-      // constructed.  This is even for non-referenced entities, which is weird
-      'o-p09fail2', // EntityValue excludes '&'
-      'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
-      // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
-      'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-
-      // 681 - easy  should recognize a / as the temination of an empty element
-      'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
-
-      // 675 - Validity constraint: Proper Declaration/PE Nesting - A trailing > is a violation of this.
-      'rmt-e2e-14', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
-      'invalid--006', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-
-      // Easy: We are probably swallowing these text declarations before we do a check on them.
-      'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
-
-      // We are normalizing across char references, but should not be.
-      //    659 Normalizing across char references but should not be happening
-      'valid-sa-110', // Basically an output test, this requires that a CDATA attribute with a CRLF be normalized to one space.
-      'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
-
-      // This actually isn't wellformed either
-      'invalid--005', // 'ELEMENTDECL_NO_CLOSE', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
    ],
 
    futureFeatures: [
