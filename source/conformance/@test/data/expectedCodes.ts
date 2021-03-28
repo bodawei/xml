@@ -219,8 +219,8 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P89-ibm89n11.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
    'ibm-invalid-P89-ibm89n12.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
 
-   'ibm-1-1-valid-P46-ibm46i01.xml': 'error', // An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
-   'ibm-1-1-valid-P46-ibm46i02.xml': 'error', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
+   'ibm-1-1-valid-P46-ibm46i01.xml': 'CHILDREN_BAD_SPACE', // ok - An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
+   'ibm-1-1-valid-P46-ibm46i02.xml': 'CHILDREN_BAD_SPACE', // ok - An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
    'rmt-e2e-2a': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Duplicate token in enumerated attribute declaration
    'rmt-e2e-2b': 'ATTLISTDECL_DUPLICATE_NOTATION', // great - Duplicate token in NOTATION attribute declaration

@@ -12,6 +12,7 @@ import {
 
 import { ValidateState } from './validateState';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
+import { charDataValidate } from './token/charDataValidate';
 import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
 import { elementDeclarationValidate } from './token/elementDeclarationValidate';
 import { elementStartUpdateState } from './token/elementStartUpdateState';
@@ -25,6 +26,7 @@ import { generalEntityDeclarationUpdateState } from './token/generalEntityDeclar
 import { generalEntityReferenceValidate } from './token/generalEntityReferenceValidate';
 import { parameterEntityReferenceValidate } from './token/parameterEntityReferenceValidate';
 import { parameterEntityDeclarationUpdateState } from './token/parameterEntityDeclarationUpdateState';
+import { spaceValidate } from './token/spaceValidate';
 import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
 
 // ick
@@ -35,6 +37,8 @@ import {
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
    EXTERNAL_SUBSET_END_TOKEN,
+   SPACE_PTOKEN,
+   CHARDATA_PTOKEN,
 } from 'token';
 
 class ValidityChecker {
@@ -64,6 +68,9 @@ class ValidityChecker {
             break;
          case ATTLIST_DECLARATION_PTOKEN:
             this.state = attListDeclarationUpdateState(token, this.state);
+            break;
+         case CHARDATA_PTOKEN:
+            charDataValidate(token, this.state, ec);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             this.state = elementDeclarationUpdateState(token, this.state);
@@ -98,6 +105,9 @@ class ValidityChecker {
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             parameterEntityReferenceValidate(token, this.state, ec);
+            break;
+         case SPACE_PTOKEN:
+            spaceValidate(token, this.state, ec);
             break;
          case XMLDECL_PTOKEN:
             if (!this.seenXmlDecl) {

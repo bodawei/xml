@@ -6,7 +6,6 @@ interface FilterData {
    futureFeatures: Array<string>;
 }
 
-// 675 - Validity constraint: Proper Declaration/PE Nesting - A trailing > is a violation of this.
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
@@ -15,10 +14,6 @@ const testFilters: FilterData = {
 
       // easy - 659  We are NOT normalizing across char references
       'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
-
-      // easy - 679 - just needs to check that any space tokens in an element are correct. not processing the whitespace in children content correctly
-      'ibm-1-1-valid-P46-ibm46i01.xml', // does not fail -  An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
-      'ibm-1-1-valid-P46-ibm46i02.xml', // An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
       // 686 - easy - char refs should be rejecting surrogate halves
       'o-p66fail6', // no references to non-characters
