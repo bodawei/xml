@@ -953,6 +953,29 @@ describe('MarkupDeclChecker (unit)', () => {
          });
       });
 
+      it('cleans up the peContext after a parameter entity end (that is, starting a new pe after ending one does not leave the state corrupted) (§4.1.0)', () => {
+         const localCheckState = {
+            ...checkState,
+            paramDecls: {
+               entityName: parameterEntityDeclaration,
+               foo: parameterEntityDeclaration,
+            },
+         };
+         const peStart2 = new ParameterEntityStartPToken(
+            new ParameterEntityReferencePToken({
+               open: toSToken('%'),
+               name: toSToken('foo'),
+            }),
+         );
+         checker = new MarkupDeclChecker(peStart2, ec, localCheckState, []);
+
+         checker.check(parameterEntityStart, ec);
+         checker.check(parameterEntityEnd, ec);
+         checker.check(parameterEntityStart, ec);
+
+         expect(ec.errors.length).toEqual(0);
+      });
+
       it('does not report a recursive error if a parameter entity start does not match the name of this checker start (§4.1.0)', () => {
          const peRef2 = new ParameterEntityReferencePToken({
             open: toSToken('%'),

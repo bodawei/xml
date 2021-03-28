@@ -3117,7 +3117,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   } else if (token === piToken) {
                      errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_PI, ['one', version.toString(), rev.toString()]);
                   } else {
-                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, ['one', version.toString(), rev.toString()]);
+                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, ['one', version.toString(), rev.toString(), token.type]);
                   }
                }
 

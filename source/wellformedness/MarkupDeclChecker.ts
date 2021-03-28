@@ -517,6 +517,10 @@ class MarkupDeclChecker implements MarkupChecker {
          newState = States.DONE;
       }
 
+      if (pToken.type === PARAMETER_ENTITY_END_PTOKEN) {
+         this.peContext.pop();
+      }
+
       if (pToken.type === EXTERNAL_SUBSET_END_TOKEN && this.start.type === CONDITIONAL_PTOKEN) {
          ec.report(WFID.CONDITIONAL_NO_CLOSE, [], getFirstSToken(this.start));
       }
