@@ -7,16 +7,16 @@ interface FilterData {
 }
 
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: [
+      // 685 - easy - why are we not checking that a text decl has an encoding?
+      'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+   ],
    excludedIds: [
-      // easy - 659  We are NOT normalizing across char references
-      'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
-
       // 686 - easy - char refs should be rejecting surrogate halves
       'o-p66fail6', // no references to non-characters
 
-      // 685 - easy - why are we not checking that a text decl has an encoding?
-      'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+      // easy - 659  We are NOT normalizing across char references
+      'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
 
       // 681 - easy  should recognize a / as the temination of an empty element
       'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace

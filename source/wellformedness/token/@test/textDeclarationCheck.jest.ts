@@ -25,19 +25,19 @@ fdescribe('textDeclaration (unit)', () => {
 
    beforeEach(() => {
       textDeclPToken = new TextDeclarationPToken({
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
          fields: [
             {
-               name: SToken.fromString('version'),
+               name: toSToken('version'),
                nameSpace: undefined,
-               equal: SToken.fromString('='),
+               equal: toSToken('='),
                equalSpace: undefined,
             },
          ],
-         close: SToken.fromString('?>'),
+         close: toSToken('?>'),
       });
 
       start = {
@@ -60,9 +60,9 @@ fdescribe('textDeclaration (unit)', () => {
       textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
          fields: [
             {
-               name: SToken.fromString('version'),
-               equal: SToken.fromString('='),
-               value: SToken.fromString('\u0001'),
+               name: toSToken('version'),
+               equal: toSToken('='),
+               value: toSToken('\u0001'),
             },
          ],
       });
@@ -80,9 +80,9 @@ fdescribe('textDeclaration (unit)', () => {
       textDeclPToken = new TextDeclarationPToken(textDeclPToken, {
          fields: [
             {
-               name: SToken.fromString('encoding'),
-               equal: SToken.fromString('='),
-               value: SToken.fromString('\u0001'),
+               name: toSToken('encoding'),
+               equal: toSToken('='),
+               value: toSToken('\u0001'),
             },
          ],
       });
@@ -143,20 +143,20 @@ fdescribe('textDeclaration (unit)', () => {
 
    it('reports no errors with ordinary parameters', () => {
       textDeclPToken = new TextDeclarationPToken({
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
          fields: [
             {
-               name: SToken.fromString('encoding'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('usascii'),
+               name: toSToken('encoding'),
+               nameSpace: toSToken(' '),
+               equal: toSToken('='),
+               equalSpace: toSToken(' '),
+               value: toSToken('usascii'),
             },
          ],
-         close: SToken.fromString('?>'),
+         close: toSToken('?>'),
       });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
@@ -164,37 +164,42 @@ fdescribe('textDeclaration (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports no errors if there are no parameters in the declaration', () => {
+   it('reports an error if there is no "encoding"', () => {
       textDeclPToken = new TextDeclarationPToken({
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
          fields: [],
-         close: SToken.fromString('?>'),
+         close: toSToken('?>'),
       });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-      expect(mockErrorCollector.errors.length).toEqual(0);
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportWFError({
+         id: WFEID.TEXTDECL_ENCODING_MISSING,
+         params: undefined,
+         position: textDeclPToken.targetSpace,
+      });
    });
 
    it('reports an error if a parameter is in the wrong case', () => {
       textDeclPToken = new TextDeclarationPToken({
-         open: SToken.fromString('<?'),
-         openSpace: SToken.fromString(' '),
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         open: toSToken('<?'),
+         openSpace: toSToken(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
          fields: [
             {
-               name: SToken.fromString('VERSION'),
-               nameSpace: SToken.fromString(' '),
-               equal: SToken.fromString('='),
-               equalSpace: SToken.fromString(' '),
-               value: SToken.fromString('1.0'),
+               name: toSToken('VERSION'),
+               nameSpace: toSToken(' '),
+               equal: toSToken('='),
+               equalSpace: toSToken(' '),
+               value: toSToken('1.0'),
             },
          ],
-         close: SToken.fromString('?>'),
+         close: toSToken('?>'),
       });
 
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
@@ -270,27 +275,27 @@ fdescribe('textDeclaration (unit)', () => {
    describe('version parameter', () => {
       it('reports an error if a version is in the wrong order', () => {
          textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
+            open: toSToken('<?'),
+            openSpace: toSToken(' '),
+            target: toSToken('xml'),
+            targetSpace: toSToken(' '),
             fields: [
                {
-                  name: SToken.fromString('encoding'),
-                  nameSpace: SToken.fromString(' '),
-                  equal: SToken.fromString('='),
-                  equalSpace: SToken.fromString(' '),
-                  value: SToken.fromString('ASCII'),
+                  name: toSToken('encoding'),
+                  nameSpace: toSToken(' '),
+                  equal: toSToken('='),
+                  equalSpace: toSToken(' '),
+                  value: toSToken('ASCII'),
                },
                {
-                  name: SToken.fromString('version'),
-                  nameSpace: SToken.fromString(' '),
-                  equal: SToken.fromString('='),
-                  equalSpace: SToken.fromString(' '),
-                  value: SToken.fromString('1.0'),
+                  name: toSToken('version'),
+                  nameSpace: toSToken(' '),
+                  equal: toSToken('='),
+                  equalSpace: toSToken(' '),
+                  value: toSToken('1.0'),
                },
             ],
-            close: SToken.fromString('?>'),
+            close: toSToken('?>'),
          });
 
          textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
@@ -361,17 +366,22 @@ fdescribe('textDeclaration (unit)', () => {
             confVer.version === 1.0 ? '1.0' : 1.1
          }/${confVer.revision} (§2.8.0 and §4.3.4)`, () => {
             textDeclPToken = new TextDeclarationPToken({
-               open: SToken.fromString('<?'),
-               target: SToken.fromString('xml'),
-               targetSpace: SToken.fromString(' '),
+               open: toSToken('<?'),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
                fields: [
                   {
-                     name: SToken.fromString('version'),
-                     equal: SToken.fromString('='),
-                     value: SToken.fromString(version),
+                     name: toSToken('version'),
+                     equal: toSToken('='),
+                     value: toSToken(version),
+                  },
+                  {
+                     name: toSToken('encoding'),
+                     equal: toSToken('='),
+                     value: toSToken('usascii'),
                   },
                ],
-               close: SToken.fromString('?>'),
+               close: toSToken('?>'),
             });
 
             textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
@@ -398,22 +408,22 @@ fdescribe('textDeclaration (unit)', () => {
 
       it('reports an error if a there are two version paramters', () => {
          textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
+            open: toSToken('<?'),
+            target: toSToken('xml'),
+            targetSpace: toSToken(' '),
             fields: [
                {
-                  name: SToken.fromString('version'),
-                  equal: SToken.fromString('='),
-                  value: SToken.fromString('1.0'),
+                  name: toSToken('version'),
+                  equal: toSToken('='),
+                  value: toSToken('1.0'),
                },
                {
-                  name: SToken.fromString('version'),
-                  equal: SToken.fromString('='),
-                  value: SToken.fromString('1.0'),
+                  name: toSToken('version'),
+                  equal: toSToken('='),
+                  value: toSToken('1.0'),
                },
             ],
-            close: SToken.fromString('?>'),
+            close: toSToken('?>'),
          });
 
          textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
@@ -430,27 +440,27 @@ fdescribe('textDeclaration (unit)', () => {
    describe('encoding parameter', () => {
       it('reports an error if the encoding is not a legal value', () => {
          textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            openSpace: SToken.fromString(' '),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
+            open: toSToken('<?'),
+            openSpace: toSToken(' '),
+            target: toSToken('xml'),
+            targetSpace: toSToken(' '),
             fields: [
                {
-                  name: SToken.fromString('version'),
-                  nameSpace: SToken.fromString(' '),
-                  equal: SToken.fromString('='),
-                  equalSpace: SToken.fromString(' '),
-                  value: SToken.fromString('1.0'),
+                  name: toSToken('version'),
+                  nameSpace: toSToken(' '),
+                  equal: toSToken('='),
+                  equalSpace: toSToken(' '),
+                  value: toSToken('1.0'),
                },
                {
-                  name: SToken.fromString('encoding'),
-                  nameSpace: SToken.fromString(' '),
-                  equal: SToken.fromString('='),
-                  equalSpace: SToken.fromString(' '),
-                  value: SToken.fromString('$$BAD_ENCODING$$'),
+                  name: toSToken('encoding'),
+                  nameSpace: toSToken(' '),
+                  equal: toSToken('='),
+                  equalSpace: toSToken(' '),
+                  value: toSToken('$$BAD_ENCODING$$'),
                },
             ],
-            close: SToken.fromString('?>'),
+            close: toSToken('?>'),
          });
 
          textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
@@ -465,22 +475,22 @@ fdescribe('textDeclaration (unit)', () => {
 
       it('reports an error if a there are two encoding paramters', () => {
          textDeclPToken = new TextDeclarationPToken({
-            open: SToken.fromString('<?'),
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
+            open: toSToken('<?'),
+            target: toSToken('xml'),
+            targetSpace: toSToken(' '),
             fields: [
                {
-                  name: SToken.fromString('encoding'),
-                  equal: SToken.fromString('='),
-                  value: SToken.fromString('ascii'),
+                  name: toSToken('encoding'),
+                  equal: toSToken('='),
+                  value: toSToken('ascii'),
                },
                {
-                  name: SToken.fromString('encoding'),
-                  equal: SToken.fromString('='),
-                  value: SToken.fromString('ascii'),
+                  name: toSToken('encoding'),
+                  equal: toSToken('='),
+                  value: toSToken('ascii'),
                },
             ],
-            close: SToken.fromString('?>'),
+            close: toSToken('?>'),
          });
 
          textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);

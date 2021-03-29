@@ -627,7 +627,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    dtd03: 'PEREF_XTRA_TRAILING_SPACE', // PE name immediately followed by ";"
    dtd04: 'LITERAL_NO_OPEN_QUOTE', // PUBLIC literal must be quoted
    dtd05: 'EXTERNALID_MISSING_SYSTEM_VALUE', // meh - SYSTEM identifier must be quoted
-   dtd07: 'error', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+   dtd07: 'TEXTDECL_ENCODING_MISSING', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
    element00: 'ELEMENT_NO_CLOSE', // EOF in middle of incomplete ETAG
    element01: 'ELEMENT_NO_CLOSE', // EOF in middle of incomplete ETAG
    element02: 'ATTRIBUTE_INVALID_NAME', // Illegal markup (... %>)

@@ -56,6 +56,8 @@ function checkFields(
       ec.setPos(param.valueSpace);
       checkSpaceProblems(param.valueSpace, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, ec, confVer);
    }
+
+   ec.check(!foundEncoding, WFEID.TEXTDECL_ENCODING_MISSING);
 }
 
 function textDeclarationCheck(
