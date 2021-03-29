@@ -273,6 +273,40 @@ describe('parseUnexpanded (unit)', () => {
       mockSource.respondInAsyncTime();
    });
 
+   it('returns a series of perefs followed by text but stops when the next char is ]', (done) => {
+      const peRefResults = [peRef];
+      const textResults = [textPToken];
+      jest
+         .spyOn(peRefStuff, 'parseParameterEntityReference')
+         .mockImplementation(
+            (src: STokenSource, cb: (x: ParameterEntityReferencePToken | undefined) => void) => {
+               cb(peRefResults.shift());
+            },
+         );
+      jest
+         .spyOn(textStuff, 'parseText')
+         .mockImplementation(
+            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+               cb(textResults.shift());
+            },
+         );
+      const mockSource: MockSTokenSource = new MockSTokenSource([
+         ['%', 'peekChar'],
+         [']', 'peekChar'],
+         ['>', 'peekChar'],
+      ]);
+
+      parseUnexpanded(mockSource, 'foo', (result) => {
+         expect(result).toEqualRangeless({
+            propName: 'foo',
+            tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') }), textPToken],
+         });
+         done?.();
+      });
+
+      mockSource.respondInAsyncTime();
+   });
+
    it('returns a peref followed by a quote and then another quote', (done) => {
       const peRefResults = [peRef];
       const textResults: Array<TextPToken> = [];

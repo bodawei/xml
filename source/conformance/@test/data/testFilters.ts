@@ -8,8 +8,14 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      // easy - 659  We are NOT normalizing across char references
-      // 'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
+      // medium - 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
+      'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
+
+      // 681 - easy  should recognize a / as the temination of an empty element
+      'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
+
+      // easyish 684 - we could extend the content model wellformedness check in some way to report this better
+      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
    ],
    excludedIds: [
       // medium - 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
