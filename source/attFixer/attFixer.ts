@@ -93,7 +93,7 @@ function normalizeAttr(
       if (val.type === TEXT_PTOKEN) {
          lastItem = val;
       } else if (val.type === CHARREF_PTOKEN) {
-         lastItem = undefined;
+         lastItem = val;
       }
    }
    /*
@@ -198,8 +198,23 @@ function normalizeAttr(
             }
             break;
          case CHARREF_PTOKEN:
-            lastWasSpace = false;
-            newValue.push(val);
+            // This is all not cdata
+            if (val.char === ' ') {
+               if (details.isCData || (!lastWasSpace && !isLast)) {
+                  newValue.push(val);
+               }
+
+               if (isLast) {
+                  const prev = newValue[newValue.length - 1];
+                  if (prev && prev.type === CHARREF_PTOKEN && prev.char === ' ') {
+                     newValue.pop();
+                  }
+               }
+               lastWasSpace = true;
+            } else {
+               lastWasSpace = false;
+               newValue.push(val);
+            }
             break;
          default:
             newValue.push(val);

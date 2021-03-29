@@ -8,21 +8,21 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      // 685 - easy - why are we not checking that a text decl has an encoding?
-      'dtd07', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+      // easy - 659  We are NOT normalizing across char references
+      // 'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
    ],
    excludedIds: [
-      // 686 - easy - char refs should be rejecting surrogate halves
-      'o-p66fail6', // no references to non-characters
-
-      // easy - 659  We are NOT normalizing across char references
-      'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
+      // medium - 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
+      'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
 
       // 681 - easy  should recognize a / as the temination of an empty element
       'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
 
       // easyish 684 - we could extend the content model wellformedness check in some way to report this better
       'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
+
+      // 686 - easy - char refs should be rejecting surrogate halves
+      'o-p66fail6', // no references to non-characters
 
       // pretty-easy Scanning entity values
       // 689 - error - another case of scanning entity values even if not referenced
@@ -37,9 +37,6 @@ const testFilters: FilterData = {
       'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
       // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
       'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-
-      // medium - 639 'ibm-not-wf-P72-ibm72n08.xml' ] should mark termination of unexpanded parsing
-      'ibm-not-wf-P72-ibm72n08.xml', // we have broken this in that entity (and maybe all declarations) should be stopping in parseUnexpanded if they encounter a ], at least in the internal subset.  maybe all
 
       // nasty - 672
       // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
