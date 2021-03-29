@@ -9,9 +9,6 @@ interface FilterData {
 const testFilters: FilterData = {
    includedIds: [],
    excludedIds: [
-      // And this should be an error in 1.0/1 & 2 and wf in 3 & 4
-      'x-rmt-008', // : 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
-
       // easy - 659  We are NOT normalizing across char references
       'valid-sa-111', // Character references expanding to spaces doesn't affect treatment of attributes.
 

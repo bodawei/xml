@@ -4,7 +4,6 @@ import { WellFormedError } from '../../error/WellFormedError';
 function toReportWFError(util: any) {
    return makeJasmineErrorMatcher(util, WellFormedError);
 }
-
 if (typeof jest === 'undefined') {
    beforeEach(() => {
       jasmine.addMatchers({

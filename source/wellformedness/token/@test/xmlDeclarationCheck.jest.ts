@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, XmlFatalError } from 'basic';
+import { ConformanceVersion, XmlError, XmlFatalError, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { XmlDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -12,6 +12,10 @@ import { WellFormedError } from '../../error/WellFormedError';
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 
 jest.mock('../../common/charCheck');
+
+const WFEID = WellFormedError.ID;
+const XEID = XmlError.ID;
+const XWID = XmlWarning.ID;
 
 describe('xmlDeclarationCheck() (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
@@ -311,7 +315,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   nameSpace: x85,
                   equal: toSToken('='),
                   equalSpace: x2028,
-                  value: toSToken('1.1'),
+                  value: toSToken(version == 1 ? '1.0' : '1.1'),
                   valueSpace: x85,
                },
                {
@@ -381,46 +385,58 @@ describe('xmlDeclarationCheck() (unit)', () => {
          });
       });
 
-      const cases: Array<[ConformanceVersion, string, boolean, string?]> = [
+      const cases: Array<[ConformanceVersion, string, boolean, string?, string?]> = [
          [new ConformanceVersion(1, 1), '1.0', false],
          [new ConformanceVersion(1, 2), '1.0', false],
          [new ConformanceVersion(1, 3), '1.0', false],
          [new ConformanceVersion(1, 4), '1.0', false],
          [new ConformanceVersion(1, 5), '1.0', false],
          [new ConformanceVersion(1, 6), '1.0', false],
-         [new ConformanceVersion(1.1, 1), '1.0', true, '1.1'],
-         [new ConformanceVersion(1.1, 2), '1.0', true, '1.1'],
-         [new ConformanceVersion(1.1, 3), '1.0', true, '1.1'],
-         [new ConformanceVersion(1, 1), '1.1', false],
-         [new ConformanceVersion(1, 2), '1.1', false],
-         [new ConformanceVersion(1, 3), '1.1', true, '1.0'],
-         [new ConformanceVersion(1, 4), '1.1', true, '1.0'],
-         [new ConformanceVersion(1, 5), '1.1', false],
-         [new ConformanceVersion(1, 6), '1.1', false],
+         [new ConformanceVersion(1.1, 1), '1.0', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [new ConformanceVersion(1.1, 2), '1.0', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [new ConformanceVersion(1.1, 3), '1.0', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [new ConformanceVersion(1, 1), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 2), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 3), '1.1', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 4), '1.1', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 5), '1.1', true, XWID.BAD_VERSION, '1.0'],
+         [new ConformanceVersion(1, 6), '1.1', true, XWID.BAD_VERSION, '1.0'],
          [new ConformanceVersion(1.1, 1), '1.1', false],
          [new ConformanceVersion(1.1, 2), '1.1', false],
          [new ConformanceVersion(1.1, 3), '1.1', false],
-         [new ConformanceVersion(1, 1), '1.3', false],
-         [new ConformanceVersion(1, 2), '1.3', false],
-         [new ConformanceVersion(1, 3), '1.3', true, '1.0'],
-         [new ConformanceVersion(1, 4), '1.3', true, '1.0'],
-         [new ConformanceVersion(1, 5), '1.3', false],
-         [new ConformanceVersion(1, 6), '1.3', false],
-         [new ConformanceVersion(1.1, 1), '1.3', true, '1.1'],
-         [new ConformanceVersion(1.1, 2), '1.3', true, '1.1'],
-         [new ConformanceVersion(1.1, 3), '1.3', true, '1.1'],
-         [new ConformanceVersion(1, 1), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
-         [new ConformanceVersion(1, 2), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
-         [new ConformanceVersion(1, 3), '^bad^', true, '1.0'],
-         [new ConformanceVersion(1, 4), '^bad^', true, '1.0'],
-         [new ConformanceVersion(1, 5), '^bad^', true, '1.[0-9]+'],
-         [new ConformanceVersion(1, 6), '^bad^', true, '1.[0-9]+'],
-         [new ConformanceVersion(1.1, 1), '^bad^', true, '1.1'],
-         [new ConformanceVersion(1.1, 2), '^bad^', true, '1.1'],
-         [new ConformanceVersion(1.1, 3), '^bad^', true, '1.1'],
+         [new ConformanceVersion(1, 1), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 2), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 3), '1.3', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 4), '1.3', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 5), '1.3', true, XWID.BAD_VERSION, '1.0'],
+         [new ConformanceVersion(1, 6), '1.3', true, XWID.BAD_VERSION, '1.0'],
+         [new ConformanceVersion(1.1, 1), '1.3', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [new ConformanceVersion(1.1, 2), '1.3', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [new ConformanceVersion(1.1, 3), '1.3', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [
+            new ConformanceVersion(1, 1),
+            '^bad^',
+            true,
+            WFEID.XMLDECL_VERSION_INVALD,
+            "([a-zA-Z0-9_.:] | '-')+",
+         ],
+         [
+            new ConformanceVersion(1, 2),
+            '^bad^',
+            true,
+            WFEID.XMLDECL_VERSION_INVALD,
+            "([a-zA-Z0-9_.:] | '-')+",
+         ],
+         [new ConformanceVersion(1, 3), '^bad^', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 4), '^bad^', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 5), '^bad^', true, WFEID.XMLDECL_VERSION_INVALD, '1.[0-9]+'],
+         [new ConformanceVersion(1, 6), '^bad^', true, WFEID.XMLDECL_VERSION_INVALD, '1.[0-9]+'],
+         [new ConformanceVersion(1.1, 1), '^bad^', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [new ConformanceVersion(1.1, 2), '^bad^', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
+         [new ConformanceVersion(1.1, 3), '^bad^', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
       ];
       cases.forEach((details) => {
-         const [confVer, version, isError, expected] = details;
+         const [confVer, version, isError, code, expected] = details;
          it(`reports ${
             isError ? 'an' : 'no'
          } error when the value is ${version} and the conf version is ${
@@ -442,10 +458,24 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
             xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
-            if (isError) {
+            if (isError && code === WFEID.XMLDECL_VERSION_INVALD) {
                // @ts-expect-error 2329/matchers
                expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
+                  id: code,
+                  params: [expected, version],
+                  position: xmlDeclPToken.fields[0].value,
+               });
+            } else if (isError && code === XWID.BAD_VERSION) {
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportWarning({
+                  id: code,
+                  params: [expected, version],
+                  position: xmlDeclPToken.fields[0].value,
+               });
+            } else if (isError && code === XEID.DECL_VERSION_PROBLEM) {
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportXmlError({
+                  id: code,
                   params: [expected, version],
                   position: xmlDeclPToken.fields[0].value,
                });

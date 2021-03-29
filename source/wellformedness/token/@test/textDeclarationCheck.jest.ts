@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, XmlFatalError } from 'basic';
+import { ConformanceVersion, XmlError, XmlFatalError } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -14,7 +14,10 @@ import { textDeclarationCheck } from '../textDeclarationCheck';
 
 jest.mock('../../common/charCheck');
 
-describe('textDeclaration (unit)', () => {
+const WFEID = WellFormedError.ID;
+const XEID = XmlError.ID;
+
+fdescribe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;
    let start: InstructionStart;
    let mockErrorCollector: MockErrorCollector;
@@ -102,7 +105,7 @@ describe('textDeclaration (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.TEXTDECL_SPACE_AFTER_OPEN,
+         id: WFEID.TEXTDECL_SPACE_AFTER_OPEN,
          params: undefined,
          position: textDeclPToken.openSpace,
       });
@@ -117,7 +120,7 @@ describe('textDeclaration (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.TEXTDECL_NO_TARGET,
+         id: WFEID.TEXTDECL_NO_TARGET,
          params: undefined,
          lastPosition: textDeclPToken.open,
       });
@@ -132,7 +135,7 @@ describe('textDeclaration (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.TEXTDECL_NO_SPACE_AFTER_TARGET,
+         id: WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET,
          params: undefined,
          lastPosition: textDeclPToken.target,
       });
@@ -198,7 +201,7 @@ describe('textDeclaration (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.TEXTDECL_PARAM_INVALID_CASE,
+         id: WFEID.TEXTDECL_PARAM_INVALID_CASE,
          params: ['version', 'VERSION'],
          position: textDeclPToken.fields[0].name,
       });
@@ -211,7 +214,7 @@ describe('textDeclaration (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.TEXTDECL_NO_CLOSE,
+         id: WFEID.TEXTDECL_NO_CLOSE,
          params: undefined,
          lastPosition: textDeclPToken.targetSpace,
       });
@@ -237,7 +240,7 @@ describe('textDeclaration (unit)', () => {
                   nameSpace: x85,
                   equal: toSToken('='),
                   equalSpace: x2028,
-                  value: toSToken('1.1'),
+                  value: toSToken(version === 1.1 ? '1.1' : '1.0'),
                   valueSpace: x85,
                },
                {
@@ -254,13 +257,13 @@ describe('textDeclaration (unit)', () => {
 
          textDeclarationCheck(textDeclPToken, mockErrorCollector, new ConformanceVersion(version));
 
-         const expected = pass ? 1 : 7;
+         const expected = pass ? 0 : 7;
          const nonSpaceError = mockErrorCollector.errors.reduce((prev, error) => {
             return prev || error.id !== XmlFatalError.ID.TEXTDECL_INVALID_SPACE;
          }, false);
 
          expect(mockErrorCollector.errors.length).toEqual(expected);
-         expect(nonSpaceError).toEqual(pass ? true : false);
+         expect(nonSpaceError).toEqual(false);
       });
    });
 
@@ -294,12 +297,13 @@ describe('textDeclaration (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.TEXTDECL_VERSION_INVALID_ORDER,
+            id: WFEID.TEXTDECL_VERSION_INVALID_ORDER,
             params: undefined,
             position: textDeclPToken.fields[1].name,
          });
       });
-      const cases: Array<[ConformanceVersion, string, boolean, string?]> = [
+
+      const cases: Array<[ConformanceVersion, string, boolean, string?, string?]> = [
          [new ConformanceVersion(1, 1), '1.0', false],
          [new ConformanceVersion(1, 2), '1.0', false],
          [new ConformanceVersion(1, 3), '1.0', false],
@@ -309,36 +313,48 @@ describe('textDeclaration (unit)', () => {
          [new ConformanceVersion(1.1, 1), '1.0', false],
          [new ConformanceVersion(1.1, 2), '1.0', false],
          [new ConformanceVersion(1.1, 3), '1.0', false],
-         [new ConformanceVersion(1, 1), '1.1', false],
-         [new ConformanceVersion(1, 2), '1.1', false],
-         [new ConformanceVersion(1, 3), '1.1', true, '1.0'],
-         [new ConformanceVersion(1, 4), '1.1', true, '1.0'],
-         [new ConformanceVersion(1, 5), '1.1', true, '1.0'],
-         [new ConformanceVersion(1, 6), '1.1', true, '1.0'],
+         [new ConformanceVersion(1, 1), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 2), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 3), '1.1', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 4), '1.1', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 5), '1.1', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 6), '1.1', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1.1, 1), '1.1', false],
          [new ConformanceVersion(1.1, 2), '1.1', false],
          [new ConformanceVersion(1.1, 3), '1.1', false],
-         [new ConformanceVersion(1, 1), '1.3', false],
-         [new ConformanceVersion(1, 2), '1.3', false],
-         [new ConformanceVersion(1, 3), '1.3', true, '1.0'],
-         [new ConformanceVersion(1, 4), '1.3', true, '1.0'],
-         [new ConformanceVersion(1, 5), '1.3', true, '1.0'],
-         [new ConformanceVersion(1, 6), '1.3', true, '1.0'],
-         [new ConformanceVersion(1.1, 1), '1.3', true, '1.0/1.1'],
-         [new ConformanceVersion(1.1, 2), '1.3', true, '1.0/1.1'],
-         [new ConformanceVersion(1.1, 3), '1.3', true, '1.0/1.1'],
-         [new ConformanceVersion(1, 1), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
-         [new ConformanceVersion(1, 2), '^bad^', true, "([a-zA-Z0-9_.:] | '-')+"],
-         [new ConformanceVersion(1, 3), '^bad^', true, '1.0'],
-         [new ConformanceVersion(1, 4), '^bad^', true, '1.0'],
-         [new ConformanceVersion(1, 5), '^bad^', true, '1.0'],
-         [new ConformanceVersion(1, 6), '^bad^', true, '1.0'],
-         [new ConformanceVersion(1.1, 1), '^bad^', true, '1.0/1.1'],
-         [new ConformanceVersion(1.1, 2), '^bad^', true, '1.0/1.1'],
-         [new ConformanceVersion(1.1, 3), '^bad^', true, '1.0/1.1'],
+         [new ConformanceVersion(1, 1), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 2), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 3), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 4), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 5), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 6), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1.1, 1), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 2), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 3), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0/1.1'],
+         [
+            new ConformanceVersion(1, 1),
+            '^bad^',
+            true,
+            WFEID.TEXTDECL_VERSION_INVALD,
+            "([a-zA-Z0-9_.:] | '-')+",
+         ],
+         [
+            new ConformanceVersion(1, 2),
+            '^bad^',
+            true,
+            WFEID.TEXTDECL_VERSION_INVALD,
+            "([a-zA-Z0-9_.:] | '-')+",
+         ],
+         [new ConformanceVersion(1, 3), '^bad^', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 4), '^bad^', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
+         [new ConformanceVersion(1, 5), '^bad^', true, WFEID.TEXTDECL_VERSION_INVALD, '1.[0-9]+'],
+         [new ConformanceVersion(1, 6), '^bad^', true, WFEID.TEXTDECL_VERSION_INVALD, '1.[0-9]+'],
+         [new ConformanceVersion(1.1, 1), '^bad^', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 2), '^bad^', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0/1.1'],
+         [new ConformanceVersion(1.1, 3), '^bad^', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0/1.1'],
       ];
       cases.forEach((details) => {
-         const [confVer, version, isError, expected] = details;
+         const [confVer, version, isError, code, expected] = details;
          it(`reports ${
             isError ? 'an' : 'no'
          } error when the value is ${version} and the conf version is ${
@@ -360,10 +376,17 @@ describe('textDeclaration (unit)', () => {
 
             textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-            if (isError) {
+            if (isError && code === WFEID.TEXTDECL_VERSION_INVALD) {
                // @ts-expect-error 2329/matchers
                expect(mockErrorCollector).toReportWFError({
-                  id: WellFormedError.ID.TEXTDECL_VERSION_INVALD,
+                  id: code,
+                  params: [expected, version],
+                  position: textDeclPToken.fields[0].value,
+               });
+            } else if (isError && code === XEID.DECL_VERSION_PROBLEM) {
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportXmlError({
+                  id: code,
                   params: [expected, version],
                   position: textDeclPToken.fields[0].value,
                });
@@ -397,7 +420,7 @@ describe('textDeclaration (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.TEXTDECL_DUPLICATE_VERSION,
+            id: WFEID.TEXTDECL_DUPLICATE_VERSION,
             params: undefined,
             position: textDeclPToken.fields[1].name,
          });
@@ -434,7 +457,7 @@ describe('textDeclaration (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.TEXTDECL_ENCODING_INVALID,
+            id: WFEID.TEXTDECL_ENCODING_INVALID,
             params: ['$$BAD_ENCODING$$'],
             position: textDeclPToken.fields[1].value,
          });
@@ -464,7 +487,7 @@ describe('textDeclaration (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.TEXTDECL_DUPLICATE_ENCODING,
+            id: WFEID.TEXTDECL_DUPLICATE_ENCODING,
             params: undefined,
             position: textDeclPToken.fields[1].name,
          });

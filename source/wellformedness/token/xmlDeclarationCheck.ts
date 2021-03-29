@@ -5,51 +5,12 @@ import { InstructionField, XmlDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { charCheck } from '../common/charCheck';
-import { checkSpaceProblems, checkSpaces } from '../common/xmlTextDeclUtils';
+import { checkSpaceProblems, checkSpaces, checkVersionString } from '../common/xmlTextDeclUtils';
 import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 const PARAM_NAMES = ['version', 'encoding', 'standalone'];
-const VERSION_10_1_REGEXP = /^[-a-zA-Z0-9_.:]+$/;
-const VERSION_10_5_REGEXP = /^1.[0-9]+$/;
-
-/*
- * Check the value of the vesion="X" text.  See Interpretations.md for full details.
- * Recall that the ConformanceVersion specifies how we are to be interpreting the
- * document. It may, conceivably, not match the version in the XML Declaration.
- *
- * §2.8.0
- *    Process as 1.0/[1-2]: The version number could be is [-a-zA-Z0-9_.:]+
- *    Process as 1.0/[3-4]: The version number can only be 1.0
- *    Process as 1.0/[5-6]: The version number can be 1.[0-9]
- *       Even though the VersionNum production matches any version number of
- *       the form '1.x', XML 1.0 documents should not specify a version number
- *       other than '1.0'.
- *    Process as 1.1/[1-3]: The version number can only be 1.1
- */
-
-function checkVersionString(
-   versionText: string,
-   ec: ErrorCollector,
-   confVer: ConformanceVersion,
-): void {
-   if (confVer.version === 1 && confVer.revision <= 2) {
-      ec.check(!VERSION_10_1_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [
-         "([a-zA-Z0-9_.:] | '-')+",
-         versionText,
-      ]);
-   } else if (confVer.version === 1 && confVer.revision < 5) {
-      ec.check(versionText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, ['1.0', versionText]);
-   } else if (confVer.version === 1 && confVer.revision >= 5) {
-      ec.check(!VERSION_10_5_REGEXP.test(versionText), WFEID.XMLDECL_VERSION_INVALD, [
-         '1.[0-9]+',
-         versionText,
-      ]);
-   } else {
-      ec.check(versionText !== '1.1', WFEID.XMLDECL_VERSION_INVALD, ['1.1', versionText]);
-   }
-}
 
 function checkFields(
    params: ReadonlyArray<InstructionField>,
@@ -88,7 +49,7 @@ function checkFields(
             ec.setPos(value);
             charCheck(value, ec, confVer);
 
-            checkVersionString(valueText, ec, confVer);
+            checkVersionString(valueText, true, ec, confVer);
             break;
          case 'encoding':
             ec.check(foundEncoding, WFEID.XMLDECL_DUPLICATE_ENCODING);
