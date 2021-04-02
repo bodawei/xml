@@ -488,7 +488,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-129': 'ELEMENTDECL_SPEC_UNKNOWN', // OK - Invalid syntax for Element Type Declaration.
    'not-wf-sa-130': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
    'not-wf-sa-131': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax for Element Type Declaration.
-   'not-wf-sa-132': 'error', // Invalid syntax mixed connectors used.
+   'not-wf-sa-132': 'CONTENTMODEL_BAD_SEQUENCE', // Invalid syntax mixed connectors used.
    'not-wf-sa-133': 'CONTENTMODEL_NAME_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
    'not-wf-sa-134': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // good - Illegal whitespace before optional character causes syntax error.
    'not-wf-sa-135': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid character used as connector.
@@ -923,7 +923,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p66fail3': 'CHARREF_NO_DIGITS', // meh no hex digits in numeric reference
    'o-p66fail4': 'CHARREF_NO_CLOSE', // meh - only hex digits in hex references
    'o-p66fail5': 'CHARREF_INVALID_CHAR', // great - no references to non-characters
-   'o-p66fail6': 'error', // no references to non-characters
+   'o-p66fail6': 'CHARDATA_INVALID_CHAR', // no references to non-characters
    'o-p68fail1': 'REFERENCE_NO_SEMICOLON', // terminating ';' is required
    'o-p68fail2': 'REFERENCE_XTRA_SPACE', // no S after ''
    'o-p68fail3': 'REFERENCE_XTRA_TRAILING_SPACE', // no S before ';'

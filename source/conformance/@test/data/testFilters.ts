@@ -8,15 +8,12 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      // 681 - easy  should recognize a / as the temination of an empty element
-      'not-wf-sa-047', // error message so bad that i think I'm not checking the right thing -  Invalid empty element tag invalid whitespace
+      // easyish 684 - we can easily extend the content model wellformedness check in some way to report this better
+      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
    ],
    excludedIds: [
       // easyish 684 - we can easily extend the content model wellformedness check in some way to report this better
       'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
-
-      // 686 - easy - char refs should be rejecting surrogate halves
-      'o-p66fail6', // no references to non-characters
 
       // pretty-easy Scanning entity values
       // 689 - error - another case of scanning entity values even if not referenced
