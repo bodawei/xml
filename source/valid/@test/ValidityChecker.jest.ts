@@ -19,6 +19,7 @@ import {
 
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
+import { conditionalValidate } from '../token/conditionalValidate';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
 import { elementDeclarationValidate } from '../token/elementDeclarationValidate';
 import { elementEndUpdateState } from '../token/elementEndUpdateState';
@@ -34,9 +35,11 @@ import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityD
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 import { ConformanceVersion } from 'basic';
-import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
+import { ConditionalPToken, ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
+import { toSToken } from 'sToken';
 
 jest.mock('../token/attListDeclarationUpdateState');
+jest.mock('../token/conditionalValidate');
 jest.mock('../token/elementDeclarationUpdateState');
 jest.mock('../token/elementDeclarationValidate');
 jest.mock('../token/elementEndUpdateState');
@@ -104,6 +107,15 @@ describe('ValidityChecker (unit)', () => {
       checker.checkPToken(attListDecl, ec);
 
       expect(attListDeclarationUpdateState).toHaveBeenCalledWith(attListDecl, expect.any(Object));
+   });
+
+   it('validates a conditional start', () => {
+      const conditional = new ConditionalPToken({ open: toSToken('<![') });
+      checker.checkPToken(version, ec);
+
+      checker.checkPToken(conditional, ec);
+
+      expect(conditionalValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
    });
 
    it('updates the state when passed an element start', () => {

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
+import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion, ERROR_TYPE } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
@@ -11,7 +11,6 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
    AttListDeclarationPToken,
-   ContextType,
    ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -25,8 +24,10 @@ import {
    resumeParseEntityDeclaration,
    resumeParseNotationDeclaration,
    TextPToken,
+   parseText,
+   ContextType,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { STokenSource, strOrBlank } from 'sToken';
 import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
@@ -42,13 +43,11 @@ import {
    CONDITIONAL_PTOKEN,
    ConditionalPToken,
    CONDITIONAL_CLOSE_PTOKEN,
-   ConditionalClosePToken,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
-import { setupConditional } from './utils/setupConditional';
 import { expandAttributes } from './utils/expandAttributes';
 import { expandEntityValue } from './utils/expandEntityValue';
 import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
@@ -56,6 +55,8 @@ import { EntityProcessors, ExpandParams } from './types';
 import { EntityContextStack } from './utils/EntityContextStack';
 import { expandMarkupUnexpanded } from './utils/expandMarkupUnexpanded';
 import { entityValueToSTokenSource } from './utils/entityValueToSTokenSource';
+import { ConditionalBodyProcessor } from './utils/ConditionalBodyProcessor';
+import { ConditionalStartExpander } from './utils/ConditionalStartExpander';
 
 type DeclToken =
    | AttListDeclarationPToken
@@ -66,13 +67,6 @@ type DeclToken =
 
 type PTokenExpanded = () => void;
 type DeliverPToken = (token: ParseToken) => void;
-
-enum State {
-   AT_START,
-   IN_INTERNAL_SUBSET,
-   IN_EXTERNAL_SUBSET,
-   IN_CONTENT,
-}
 
 /**********************************************************************\
  This is the entrypoint to entity expanding. it has semantics similar
@@ -96,13 +90,13 @@ class EntityExpander {
 
    private expandParams: ExpandParams;
 
-   private state = State.AT_START;
-
    private expandedExternalSubset = false;
 
    private docTypeDepth = 0;
 
-   private skipEndDepth = 0;
+   private conditionalBodyProcessor?: ConditionalBodyProcessor;
+
+   private conditionalStartExpander?: ConditionalStartExpander;
 
    private entityContextStack: EntityContextStack = new EntityContextStack();
 
@@ -111,7 +105,6 @@ class EntityExpander {
       this.expandParams = {
          entityId: new EntityId(''),
          confVer: new ConformanceVersion(),
-         conditionalStack: [],
          entityDetails: new EntityDetails(),
          loadExternalEntities: validating,
          utils: processors,
@@ -119,6 +112,29 @@ class EntityExpander {
    }
 
    public expandPToken(pToken: ParseToken, expanded: PTokenExpanded): void {
+      if (this.conditionalStartExpander) {
+         if (pToken.type === TEXT_PTOKEN) {
+            this.conditionalStartExpander.expandPToken(pToken, expanded);
+            return;
+         } else if (pToken.type !== ERROR_TYPE) {
+            this.conditionalStartExpander.finish();
+         }
+      }
+      if (this.conditionalBodyProcessor) {
+         this.conditionalBodyProcessor.handleToken(pToken, () => {
+            if (this.conditionalBodyProcessor?.isDone) {
+               this.conditionalBodyProcessor = undefined;
+            }
+
+            expanded();
+         });
+         return;
+      }
+
+      this.innerExpandPToken(pToken, expanded);
+   }
+
+   private innerExpandPToken(pToken: ParseToken, expanded: PTokenExpanded): void {
       switch (pToken.type) {
          case ENTITY_ID:
             this.expandParams.entityId = pToken;
@@ -133,7 +149,6 @@ class EntityExpander {
             break;
          case DOCTYPE_START_PTOKEN:
             if (this.docTypeDepth > 0) {
-               this.skipEndDepth++;
                this.deliverToken(pToken);
                expanded();
                return;
@@ -142,9 +157,6 @@ class EntityExpander {
             this.handleDocTypeStart(pToken, expanded);
             break;
          case INTERNAL_SUBSET_START_TOKEN:
-            if (!this.expandedExternalSubset && this.docTypeDepth === 1) {
-               this.state = State.IN_INTERNAL_SUBSET;
-            }
             this.deliverToken(pToken);
             expanded();
             break;
@@ -166,16 +178,14 @@ class EntityExpander {
             if (!this.expandedExternalSubset) {
                this.handleAndExpandExternalSubset(pToken, expanded);
             } else {
-               this.state = State.IN_CONTENT;
                this.deliverToken(pToken);
                expanded();
             }
             break;
          case CONDITIONAL_PTOKEN:
-            this.handleConditional(pToken, expanded);
-            break;
-         case CONDITIONAL_CLOSE_PTOKEN:
-            this.handleConditionalEnd(pToken, expanded);
+            if (!this.conditionalStartExpander) {
+               this.handleConditional(pToken, expanded);
+            }
             break;
          case ATTLIST_DECLARATION_PTOKEN:
          case ELEMENT_DECLARATION_PTOKEN:
@@ -193,8 +203,7 @@ class EntityExpander {
             this.handleEntityReference(pToken, expanded);
             break;
          case TEXT_PTOKEN:
-            this.handleText(pToken, expanded);
-            break;
+         case CONDITIONAL_CLOSE_PTOKEN:
          default:
             this.deliverToken(pToken);
             expanded();
@@ -242,67 +251,39 @@ class EntityExpander {
       pToken: InternalSubsetEndToken | DocTypeEndPToken,
       handled: PTokenExpanded,
    ): void {
-      this.emptyConditionalStack(() => {
-         if (pToken.type === INTERNAL_SUBSET_END_TOKEN) {
+      if (pToken.type === INTERNAL_SUBSET_END_TOKEN) {
+         this.deliverToken(pToken);
+      }
+
+      const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
+      this.expandedExternalSubset = true;
+
+      if (!externalSubsetToken || !this.expandParams.loadExternalEntities) {
+         if (pToken.type === DOCTYPE_END_PTOKEN) {
             this.deliverToken(pToken);
          }
+         handled();
+         return;
+      }
 
-         const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
-         this.expandedExternalSubset = true;
+      streamParsedReplacementText(
+         externalSubsetToken,
+         this.expandParams,
+         this.entityContextStack,
+         (result, nextPTokenDone) => {
+            if (result) {
+               this.expandPToken(result, nextPTokenDone);
+               return;
+            }
 
-         if (!externalSubsetToken || !this.expandParams.loadExternalEntities) {
             if (pToken.type === DOCTYPE_END_PTOKEN) {
-               this.state = State.IN_CONTENT;
                this.deliverToken(pToken);
             }
-            handled();
-            return;
-         }
 
-         this.state = State.IN_EXTERNAL_SUBSET;
-
-         streamParsedReplacementText(
-            externalSubsetToken,
-            this.expandParams,
-            this.entityContextStack,
-            (result, nextPTokenDone) => {
-               if (result) {
-                  this.expandPToken(result, nextPTokenDone);
-                  return;
-               }
-
-               this.emptyConditionalStack(() => {
-                  if (pToken.type === DOCTYPE_END_PTOKEN) {
-                     this.state = State.IN_CONTENT;
-                     this.deliverToken(pToken);
-                  }
-
-                  nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
-                  handled(); // and mark the end of processing of the DOCTYPE end token
-               });
-            },
-         );
-      });
-   }
-
-   private emptyConditionalStack(done: () => void): void {
-      const stack = this.expandParams.conditionalStack;
-
-      let topCondition = stack[stack.length - 1];
-
-      while (topCondition && !topCondition.source) {
-         this.expandParams.conditionalStack.pop();
-         topCondition = stack[stack.length - 1];
-      }
-
-      if (topCondition && topCondition.source) {
-         topCondition.textIsFinished = (): void => {
-            this.emptyConditionalStack(done);
-         };
-         topCondition.source.endText();
-      } else {
-         done();
-      }
+            nextPTokenDone(); // acknowledge we are done with the callback from expandBodyReference()
+            handled(); // and mark the end of processing of the DOCTYPE end token
+         },
+      );
    }
 
    /*
@@ -311,78 +292,75 @@ class EntityExpander {
     * processing of any text which comes in afterwards. As that is processed, it will
     * be passed back through the 5th parameter which will deliver those values back through this.
     */
-   private handleConditional(startToken: ConditionalPToken, handled: PTokenExpanded): void {
-      if (!startToken.peRef) {
+   private handleConditional(startToken: ConditionalPToken, startHandled: PTokenExpanded): void {
+      if (!startToken.unexpanded) {
          this.deliverToken(startToken);
-         handled();
-         return;
-      }
+         startHandled();
+      } else {
+         let startCalledBack = false;
+         new ConditionalStartExpander(
+            startToken,
+            this.expandParams,
+            this.entityContextStack,
+            (result): void => {
+               if (!result.done) {
+                  this.conditionalStartExpander = result.hack;
+                  startCalledBack = true;
+                  startHandled();
+               } else {
+                  const { newStart, extraText } = result;
+                  const isInclude = strOrBlank(newStart.sectionType).toLowerCase() === 'include';
+                  this.deliverToken(newStart);
+                  this.conditionalStartExpander = undefined;
 
-      setupConditional(
-         startToken.peRef,
-         this.expandParams,
-         this.entityContextStack,
-         this.state === State.IN_CONTENT
-            ? ContextType.GENERAL_ENTITY
-            : ContextType.PARAMETER_ENTITY,
-         (token, tokenHandled) => {
-            // Specially handle text, as we don't want these fed back into handleText()
-            if (token.type === TEXT_PTOKEN) {
-               this.deliverToken(token);
-               tokenHandled();
-            } else {
-               this.expandPToken(token, tokenHandled);
-            }
-         },
-         (conditionalState) => {
-            const newStart = new ConditionalPToken(startToken, {
-               sectionType: conditionalState.sectionType,
-            });
-            this.expandParams.conditionalStack.push(conditionalState);
-            this.deliverToken(newStart);
-            handled();
-         },
-      );
+                  if (!isInclude) {
+                     extraText.endText();
+                     parseText(extraText, [], (text) => {
+                        if (text) {
+                           this.deliverToken(text);
+                        }
+                        if (!startCalledBack) {
+                           startHandled();
+                        }
+                     });
+                  } else {
+                     this.conditionalBodyProcessor = new ConditionalBodyProcessor(
+                        extraText,
+                        (
+                           sTokenSource: STokenSource,
+                           handleNextToken: (
+                              token: ParseToken | undefined,
+                              expanded: PTokenExpanded,
+                           ) => void,
+                        ): void => {
+                           this.expandParams.utils.parseBody(
+                              sTokenSource,
+                              ContextType.EXTERNAL_SUBSET,
+                              handleNextToken,
+                           );
+                        },
+                        (token: ParseToken | undefined, expanded: PTokenExpanded): void => {
+                           if (!token) {
+                              expanded();
+                           } else {
+                              this.innerExpandPToken(token, expanded);
+                           }
+                        },
+                     );
+
+                     if (!startCalledBack) {
+                        startHandled();
+                     }
+                  }
+               }
+            },
+         );
+      }
    }
 
-   /*
-    * Ordinarily we pass text through unscathed. However, if we are in the middle
-    * of processing a conditional section which had a peRef, then the text token
-    * represents unprocessed text.  We need to add this text into the STokenSource
-    * that was set up by setupConditional().
-    */
    private handleText(textToken: TextPToken, handled: PTokenExpanded): void {
-      const depth = this.expandParams.conditionalStack.length;
-      const info = this.expandParams.conditionalStack[depth - 1];
-
-      if (info && info.source) {
-         info.source.addText(strOrBlank(textToken.text)); // need to add range
-      } else {
-         this.deliverToken(textToken);
-      }
-
+      this.deliverToken(textToken);
       handled();
-   }
-
-   /*
-    * When we reach the end of a conditional section (which may well be within another),
-    * if it was one with an expanded INCLUDE/IGNORE value, then we need to wrap up
-    * the consumption of the TextPToken values that came between the start and the
-    * end.
-    */
-   private handleConditionalEnd(endToken: ConditionalClosePToken, handled: PTokenExpanded): void {
-      const info = this.expandParams.conditionalStack.pop();
-
-      if (info && info.source) {
-         info.textIsFinished = (): void => {
-            this.deliverToken(endToken);
-            handled();
-         };
-         info.source.endText();
-      } else {
-         this.deliverToken(endToken);
-         handled();
-      }
    }
 
    /*

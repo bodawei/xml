@@ -57,7 +57,6 @@ describe('streamParsedReplacementText() (unit)', () => {
          },
          confVer: new ConformanceVersion(),
          loadExternalEntities: true,
-         conditionalStack: [],
          utils: {
             parseBody: (): void => {
                return undefined;

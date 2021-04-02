@@ -10,7 +10,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'invalid--002': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // Tests the "Proper Group/PE Nesting" validity constraint by fragmenting a content model between two parameter entities.
    'invalid--005': 'ELEMENTDECL_EXTRA_TEXT', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
    'invalid--006': 'ELEMENTDECL_EXTRA_TEXT', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
-   'invalid-not-sa-022': 'CONDITIONAL_UNKNOWN', // Test the "Proper Conditional Section/ PE Nesting" validity constraint.
+   'invalid-not-sa-022': 'CONDITIONAL_BAD_NESTING', // Test the "Proper Conditional Section/ PE Nesting" validity constraint.
    'inv-dtd01': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC
    'inv-dtd02': 'ENTITYDECL_UNDECLARED_NOTATION', // Tests the "Notation Declared" VC by using an undeclared notation name.
    'inv-dtd03': 'CHILDREN_UNEXPECTED_END', // Tests the "Element Valid" VC (clause 2) by omitting a required element.

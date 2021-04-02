@@ -1,4 +1,4 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { parseParameterEntityReference, ParameterEntityReferencePToken } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
@@ -60,13 +60,17 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
    source.extractNoParams('peekChar', (charSToken) => {
       if (charSToken && charSToken.str === '%') {
          parseParameterEntityReference(source, (result) => {
-            sectionData.peRef = result;
+            const extra = !result
+               ? {}
+               : {
+                    unexpanded: {
+                       peRef: result,
+                       propName: 'sectionType',
+                    },
+                 };
+            const conditionalPToken = new ConditionalPToken(sectionData, extra);
 
-            if (result) {
-               sectionData.peRefPlus = [result];
-            }
-
-            continueToContent(source, sectionData, deliverSection);
+            deliverSection(conditionalPToken);
          });
       } else {
          source.extractToObject('word', ['[', '>'], sectionData, 'sectionType');

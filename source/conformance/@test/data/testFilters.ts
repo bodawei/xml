@@ -6,47 +6,12 @@ interface FilterData {
    futureFeatures: Array<string>;
 }
 
+/*
+- 
+*/
 const testFilters: FilterData = {
-   includedIds: [
-      // pretty-easy Scanning entity values
-      // 689 - error - another case of scanning entity values even if not referenced
-      // https://www.w3.org/XML/xml-V10-2e-errata
-      // This requires that we scan all entitiy values for general entity references. We need to do this at the end of the dtd, i think.  We could keep a table of references as we go, and then report any we found that turned out to be unparsed
-      // 'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
-      // // 683 easy. Extend entity decl value validation to make sure that general entities syntax is reasonably
-      // // constructed.  This is even for non-referenced entities, which is weird
-      // 'o-p09fail2', // EntityValue excludes '&'
-      // 'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
-      // 'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
-      // 'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
-      // // // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
-      // 'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-   ],
+   includedIds: [],
    excludedIds: [
-      // pretty-easy Scanning entity values
-      // 689 - error - another case of scanning entity values even if not referenced
-      // https://www.w3.org/XML/xml-V10-2e-errata
-      // This requires that we scan all entitiy values for general entity references. We need to do this at the end of the dtd, i think.  We could keep a table of references as we go, and then report any we found that turned out to be unparsed
-      // 'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
-      // 683 easy. Extend entity decl value validation to make sure that general entities syntax is reasonably
-      // constructed.  This is even for non-referenced entities, which is weird
-      // 'o-p09fail2', // EntityValue excludes '&'
-      // 'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
-      // 'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
-      // 'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
-      // // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
-      // 'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
-
-      // nasty - 672
-      // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.
-      // Doc must mention this aspect of what %foo; in a markup declaration can carry
-      // This changes setupConditional()
-      // - Minmally, we need a resumeParseConditionalStart() which pulls out the first word and possibly [ and then
-      //    - defers to parseBody()
-      // - But a related problem is taht we assume we can read in the whle PE value into memory, which isn't strictly true
-      //    - so we need to investigate a steaming support here.
-      'invalid-not-sa-022',
-
       // nasty - 638 'rmt-054' - checking on valid characters in already-processed chardata
       /*
        * This is nasty, and I think it reflects we are doing something wrong.
@@ -65,6 +30,10 @@ const testFilters: FilterData = {
        *
        * I think we need to remove the check from CharData and do this check in ContentChecker if not in a general entity.
        * Review uses of misc.checkCharWellFormed()
+       *
+       * So contentCheck needs to know when we are in a geref (or in an attribute when in a geref)
+       * - We are doing checks on literalValue, cdataCheck, charDataCheck and entityDeclarationCheck
+       *       these need to receive a special thing.
        */
       'rmt-054',
    ],

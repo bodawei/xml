@@ -62,7 +62,6 @@ describe('addProtoReplacementText() (unit)', () => {
             revision: 5,
          },
          entityDetails,
-         conditionalStack: [],
          loadExternalEntities: true,
          utils: {
             parseBody: (): void => {

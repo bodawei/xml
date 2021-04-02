@@ -1,4 +1,4 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion } from 'basic';
 import {
@@ -9,7 +9,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { EntityValuePToken } from 'token';
+import { ConditionalPToken, EntityValuePToken } from 'token';
 
 import { ExpandParams } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';
@@ -27,6 +27,7 @@ describe('setupConditional() (unit)', () => {
    let pieceMealInclude: EntityValuePToken;
    let testDecl: ParameterEntityDeclarationPToken;
    let testRef: ParameterEntityReferencePToken;
+   let conditionalStart: ConditionalPToken;
 
    beforeEach(() => {
       testDecl = new ParameterEntityDeclarationPToken({
@@ -34,6 +35,10 @@ describe('setupConditional() (unit)', () => {
          name: toSToken('test'),
       });
       testRef = new ParameterEntityReferencePToken({ open: toSToken('%'), name: toSToken('test') });
+      conditionalStart = new ConditionalPToken({
+         open: toSToken('<!['),
+         peRef: testRef,
+      });
       testStack = new EntityContextStack();
       params = {
          entityDetails: new EntityDetails(),
@@ -72,20 +77,27 @@ describe('setupConditional() (unit)', () => {
    });
 
    it('calls addProtoReplacementText() with rqeuired parameters', (done) => {
-      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
-         const args = addProtoReplacementTextSpy.calls.argsFor(0);
+      setupConditional(
+         conditionalStart,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         () => {
+            const args = addProtoReplacementTextSpy.calls.argsFor(0);
 
-         expect(args[0]).toEqual(testRef);
-         expect(args[1]).toEqual(params);
-         expect(args[2]).toEqual(testStack);
-         expect(args[3]).toBeInstanceOf(Function);
-         done();
-      });
+            expect(args[0]).toEqual(testRef);
+            expect(args[1]).toEqual(params);
+            expect(args[2]).toEqual(testStack);
+            expect(args[3]).toBeInstanceOf(Function);
+            done();
+         },
+      );
    });
 
    it('returns an empty result when there are no details for the specified reference', (done) => {
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
@@ -101,7 +113,7 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, undefined, '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
@@ -117,14 +129,16 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, [testIgnore], '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result).toEqual({
-               sectionType: toSToken('IGNORE'),
+               newStart: new ConditionalPToken(conditionalStart, {
+                  sectionType: toSToken('IGNORE'),
+               }),
             });
             done();
          },
@@ -136,14 +150,16 @@ describe('setupConditional() (unit)', () => {
       testStack.pushName(testRef, '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result).toEqual({
-               sectionType: testInclude.text,
+               newStart: new ConditionalPToken(conditionalStart, {
+                  sectionType: testInclude.text,
+               }),
             });
             done();
          },
@@ -154,7 +170,7 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
@@ -170,13 +186,13 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
-            expect(result.sectionType).toEqual(testInclude.text);
+            expect(result.newStart?.sectionType).toEqual(testInclude.text);
             done();
          },
       );
@@ -186,7 +202,7 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, pieceMealInclude, '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
@@ -202,7 +218,7 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
@@ -223,43 +239,57 @@ describe('setupConditional() (unit)', () => {
    it('passes a token through when it is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
 
-      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
-         setTimeout(() => {
-            const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[2];
-            // eslint-disable-next-line func-style
-            const handled = (): void => {};
+      setupConditional(
+         conditionalStart,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         () => {
+            setTimeout(() => {
+               const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
+               const callback = args[2];
+               // eslint-disable-next-line func-style
+               const handled = (): void => {};
 
-            callback(testInclude, handled);
+               callback(testInclude, handled);
 
-            expect(deliverSpy).toHaveBeenCalledWith(testInclude, handled);
-            done();
-         }, 0);
-      });
+               expect(deliverSpy).toHaveBeenCalledWith(testInclude, handled);
+               done();
+            }, 0);
+         },
+      );
    });
 
    it('calls handled when no value is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
 
-      setupConditional(testRef, params, testStack, ContextType.PARAMETER_ENTITY, deliverSpy, () => {
-         setTimeout(() => {
-            const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
-            const callback = args[2];
-            const handled = jasmine.createSpy();
+      setupConditional(
+         conditionalStart,
+         params,
+         testStack,
+         ContextType.PARAMETER_ENTITY,
+         deliverSpy,
+         () => {
+            setTimeout(() => {
+               const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
+               const callback = args[2];
+               const handled = jasmine.createSpy();
 
-            callback(undefined, handled);
+               callback(undefined, handled);
 
-            expect(handled).toHaveBeenCalled();
-            done();
-         }, 0);
-      });
+               expect(handled).toHaveBeenCalled();
+               done();
+            }, 0);
+         },
+      );
    });
 
    it('clears the source when no value is passed to the callback to parseBody()', (done) => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,
@@ -282,7 +312,7 @@ describe('setupConditional() (unit)', () => {
       params.entityDetails.addEntity(testDecl, [testInclude], '');
 
       setupConditional(
-         testRef,
+         conditionalStart,
          params,
          testStack,
          ContextType.PARAMETER_ENTITY,

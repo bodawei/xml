@@ -92,9 +92,10 @@ describe('section (unit)', () => {
          expect(callback).toEqualRangeless({
             open: SToken.fromString('<!['),
             openSpace: SToken.fromString(' '),
-            peRef,
-            peRefPlus: [peRef],
-            sectionTypeSpace: SToken.fromString(' '),
+            unexpanded: {
+               peRef,
+               propName: 'sectionType',
+            }
          });
       });
 

@@ -1,0 +1,14 @@
+<!DOCTYPE doc [
+<!ELEMENT doc (#PCDATA)>
+<!ENTITY baz "baz">
+<!ENTITY % bar SYSTEM "two.ent">
+%bar;
+]>
+
+
+<doc>
+&e;
+<![CDATA[
+xmllint --loaddtd  --noent  --valid 
+]]>
+</doc>

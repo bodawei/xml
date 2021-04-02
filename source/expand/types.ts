@@ -1,18 +1,12 @@
 import { EntityId, ConformanceVersion } from 'basic';
 import { ContextType, ParseToken } from 'pToken';
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ErrorToken } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
 
 type ExpandToken = (token: ParseToken | undefined, tokenProcessed: TokenHandled) => void;
 type TokenHandled = () => void;
-
-interface ConditionalInfo {
-   source?: STokenSource | undefined;
-   textIsFinished?: () => void;
-   sectionType?: SToken;
-}
 
 interface RetrieveResults {
    sTokenSource: STokenSource;
@@ -47,13 +41,11 @@ interface ExpandParams {
    confVer: ConformanceVersion;
    entityDetails: EntityDetails;
    loadExternalEntities: boolean;
-   conditionalStack: Array<ConditionalInfo>;
    utils: EntityProcessors;
 }
 
 export {
    AttributeValueResults,
-   ConditionalInfo,
    ExpandParams,
    RetrieveResults,
    EntityProcessors,

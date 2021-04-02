@@ -67,10 +67,10 @@ describe('section (integration)', () => {
             const expected = new ConditionalPToken({
                open: SToken.fromString('<!['),
                openSpace: toSToken(' '),
-               peRef,
-               peRefPlus: [peRef],
-               sectionTypeSpace: toSToken(' '),
-               bracket: toSToken('['),
+               unexpanded: {
+                  peRef,
+                  propName: 'sectionType',
+               }
             });
 
             expect(parsing).toEqualRangeless(expected);

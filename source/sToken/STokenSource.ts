@@ -127,21 +127,35 @@ class STokenSource {
 
    private _resuming?: boolean;
 
+   public constructor(other: STokenSource);
+   public constructor(
+      entityId?: EntityId,
+      processLineEndings?: boolean,
+      extractorInfo?: ExtractorMap,
+   );
    constructor(
-      entityId: EntityId = new EntityId(),
+      entityIdOrSource?: EntityId | STokenSource,
       processLineEndings = true,
       extractorInfo: ExtractorMap = defaultExtractors,
    ) {
+      if (entityIdOrSource instanceof STokenSource) {
+         this.entityId = entityIdOrSource.entityId;
+         this.confVer = entityIdOrSource.confVer;
+         // Should do a deepl clone or should reset the other
+         this._segments = entityIdOrSource._segments;
+         this._lastOffset = entityIdOrSource._lastOffset;
+         this.processLineEndings = entityIdOrSource.processLineEndings;
+      } else {
+         this.entityId = entityIdOrSource || new EntityId();
+         this.confVer = new ConformanceVersion();
+         this._segments = [];
+         this._lastOffset = undefined;
+         this.processLineEndings = processLineEndings;
+      }
       this.errors = [];
-      this.entityId = entityId;
-      this.confVer = new ConformanceVersion();
-      this.processLineEndings = processLineEndings;
       this._extractorInfo = extractorInfo;
 
-      this._segments = [];
       this._extractors = [];
-
-      this._lastOffset = undefined;
    }
 
    setConfVer(version: ConformanceVersion): void {
@@ -168,7 +182,6 @@ class STokenSource {
       }
 
       const rangeToUse = range || this._orphanedRange;
-      delete this._orphanedRange;
 
       // If this is the first segment we are adding, then make sure lastOffset contains
       // the starting offset which will either be the start of the range associated
@@ -189,6 +202,19 @@ class STokenSource {
    endText(): void {
       this._allTextAdded = true;
       this.resumeOperation();
+   }
+
+   continueText(): void {
+      this._allTextAdded = false;
+      // This might leave us in a limbo spot.  Someone must either call addText or endText to flush any remaining data
+   }
+
+   atEnd(): boolean {
+      return this._segments.length === 0;
+   }
+
+   ended(): boolean {
+      return this.atEnd() && this._allTextAdded;
    }
 
    extractToObjectNoParams(type: string, obj: Record<string, any>, name: string): void {

@@ -13,6 +13,7 @@ import {
 import { ValidateState } from './validateState';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { charDataValidate } from './token/charDataValidate';
+import { conditionalValidate } from './token/conditionalValidate';
 import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
 import { elementDeclarationValidate } from './token/elementDeclarationValidate';
 import { elementStartUpdateState } from './token/elementStartUpdateState';
@@ -31,6 +32,7 @@ import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
 
 // ick
 import {
+   CONDITIONAL_PTOKEN,
    ELEMENT_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
    ELEMENT_END_PTOKEN,
@@ -71,6 +73,9 @@ class ValidityChecker {
             break;
          case CHARDATA_PTOKEN:
             charDataValidate(token, this.state, ec);
+            break;
+         case CONDITIONAL_PTOKEN:
+            conditionalValidate(token, this.state, ec);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             this.state = elementDeclarationUpdateState(token, this.state);

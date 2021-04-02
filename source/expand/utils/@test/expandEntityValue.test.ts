@@ -55,7 +55,6 @@ describe('expandEntityValue() (unit)', () => {
          },
          confVer: new ConformanceVersion(),
          entityDetails,
-         conditionalStack: [],
          loadExternalEntities: true,
          utils: {
             parseBody: (): void => {
