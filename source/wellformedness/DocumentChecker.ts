@@ -32,6 +32,7 @@ import { checkMap } from './checkMap';
 import { WellFormedError } from './error/WellFormedError';
 import { conditionalStartCheck } from './token/conditionalStartCheck';
 import { docTypeEndCheck } from './token/docTypeEndCheck';
+import { dtdEndCheck } from './common/dtdEndCheck';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
@@ -147,6 +148,7 @@ class DocumentChecker {
          );
          docTypeEndCheck(pToken, specialErrorCollector);
          errorCollector.appendFrom(specialErrorCollector);
+         dtdEndCheck(this.checkState, errorCollector);
       } else if (pToken.type === CONDITIONAL_PTOKEN) {
          conditionalStartCheck(pToken, errorCollector);
       } else if (mapped) {

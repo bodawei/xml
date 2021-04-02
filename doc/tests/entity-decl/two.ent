@@ -1,0 +1,2 @@
+<!ENTITY % problem SYSTEM "problem.ent">
+<!ENTITY e "%problem;">

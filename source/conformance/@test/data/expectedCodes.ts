@@ -469,8 +469,8 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
    'not-wf-sa-111': 'ATTRIBUTE_INVALID_NAME', // OK - Entiry reference must be in content of element not Start-tag.
    'not-wf-sa-112': 'CDATA_INVALID_CASE', // great - CDATA sections start '![CDATA[', not '!cdata['.
-   'not-wf-sa-113': 'error', // Parameter entity values must use valid reference syntax; this reference is malformed.
-   'not-wf-sa-114': 'error', // General entity values must use valid reference syntax; this reference is malformed.
+   'not-wf-sa-113': 'REFERENCE_INVALID_CHARS', // ok - Parameter entity values must use valid reference syntax; this reference is malformed.
+   'not-wf-sa-114': 'REFERENCE_INVALID_CHARS', // ok - General entity values must use valid reference syntax; this reference is malformed.
    'not-wf-sa-115': 'REFERENCE_NO_NAME', // ok - The replacement text of this entity is an illegal character reference, which must be rejected when it is parsed in the context of an attribute value.
    'not-wf-sa-116': 'CHARREF_NO_CLOSE', // good - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
    'not-wf-sa-117': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
@@ -478,7 +478,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-119': 'REFERENCE_NO_NAME', // ok - Internal general parsed entities are only well formed if they match the "content" production. This is a partial character reference, not a full one.
    'not-wf-sa-120': 'REFERENCE_NO_NAME', // ok - Character references are expanded in the replacement text of an internal entity, which is then parsed as usual. Accordingly,must be doubly quoted': 'error', // encoded either as_amp;_or as_#38;#38;_.
    'not-wf-sa-121': 'ENTITYDECL_NAME_INVALID', // great - A name of an ENTITY was started with an invalid character.
-   'not-wf-sa-122': 'CONTENTMODEL_NO_DELIM', // meh - Invalid syntax mixed connectors are used.
+   'not-wf-sa-122': 'CONTENTMODEL_BAD_SEQUENCE', // ok - Invalid syntax mixed connectors are used.
    'not-wf-sa-123': 'ELEMENTDECL_NO_CLOSE', // meh - Invalid syntax mismatched parenthesis.
    'not-wf-sa-124': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid format of Mixed-content declaration.
    'not-wf-sa-125': 'CONTENTMODEL_NAME_INVALID', // ok - Invalid syntax extra set of parenthesis not necessary.
@@ -538,7 +538,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-156': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xMl ...?>' is neither an XML declaration nor a legal processing instruction target name.
    'not-wf-sa-157': 'XMLDECL_TARGET_INVALID_CASE', // ok - '?xmL ...?>' is not a legal processing instruction target name.
    'not-wf-sa-158': 'ATTLISTDECL_ATTR_TYPE_UNKNOWN', // OK - SGML-ism: "#NOTATION gif" can't have attributes.
-   'not-wf-sa-159': 'error', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
+   'not-wf-sa-159': 'REFERENCE_INVALID_CHARS', // OK - Uses '&' unquoted in an entity declaration, which is illegal syntax for an entity reference.
    'not-wf-sa-160': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
    'not-wf-sa-161': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
    'not-wf-sa-162': 'REFERENCE_INVALID_SUBSET_CONTEXT', // great - Violates the_PEs in Internal Subset_WFC by using a PE reference within a declaration.
@@ -622,7 +622,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    content03: 'CONTENTMODEL_NAME_EXTRA_SPACE', // No whitespace before "+" in content model
    decl01: 'TEXTDECL_NO_CLOSE', // External entities may not have standalone decls.
    'nwf-dtd00': 'CONTENTMODEL_NO_DELIM', // Comma mandatory in content model
-   'nwf-dtd01': 'CONTENTMODEL_NAME_INVALID', // Can't mix comma and vertical bar in content models
+   'nwf-dtd01': 'CONTENTMODEL_BAD_SEQUENCE', // ok - Can't mix comma and vertical bar in content models
    dtd02: 'PEREF_XTRA_SPACE', // PE name immediately after "%"
    dtd03: 'PEREF_XTRA_TRAILING_SPACE', // PE name immediately followed by ";"
    dtd04: 'LITERAL_NO_OPEN_QUOTE', // PUBLIC literal must be quoted
@@ -752,7 +752,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p05fail4': 'ELEMENT_NAME_INVALID', // a Name cannot start with a CombiningChar
    'o-p05fail5': 'ELEMENT_NAME_INVALID', // a Name cannot start with an Extender
    'o-p09fail1': 'PEREF_NO_SEMICOLON', // EntityValue excludes '%'
-   'o-p09fail2': 'error', // EntityValue excludes ''
+   'o-p09fail2': 'REFERENCE_INVALID_CHARS', // EntityValue excludes '&'
    'o-p09fail3': 'CHARREF_NO_CLOSE', // incomplete character reference
    'o-p09fail4': 'LITERAL_NO_CLOSE_QUOTE', // quote types must match
    'o-p09fail5': 'LITERAL_NO_CLOSE_QUOTE', // quote types must match
@@ -865,19 +865,19 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p46fail4': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // no space before occurrence
    'o-p46fail5': 'ELEMENTDECL_NO_CLOSE', // single group
    'o-p46fail6': 'ELEMENTDECL_NO_CLOSE', // can't be both declared and modeled
-   'o-p47fail1': 'CONTENTMODEL_NO_DELIM', // Invalid operator '|' must match previous operator ','
+   'o-p47fail1': 'CONTENTMODEL_BAD_SEQUENCE', // ok - Invalid operator '|' must match previous operator ','
    'o-p47fail2': 'ELEMENTDECL_NO_CLOSE', // Illegal character '-' in Element-content model
    'o-p47fail3': 'ELEMENTDECL_SPEC_UNKNOWN', // Optional character must follow a name or list
    'o-p47fail4': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // Illegal space before optional character
    'o-p48fail1': 'CONTENTMODEL_NAME_EXTRA_SPACE', // Illegal space before optional character
    'o-p48fail2': 'CONTENTMODEL_CLOSE_EXTRA_SPACE', // Illegal space before optional character
-   'o-p49fail1': 'CONTENTMODEL_NO_DELIM', // connectors must match
-   'o-p50fail1': 'CONTENTMODEL_NO_DELIM', // connectors must match
+   'o-p49fail1': 'CONTENTMODEL_BAD_CHOICE', // ok - connectors must match
+   'o-p50fail1': 'CONTENTMODEL_BAD_SEQUENCE', // ok - connectors must match
    'o-p51fail1': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // good - occurrence on #PCDATA group must be *
    'o-p51fail2': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // good - occurrence on #PCDATA group must be *
    'o-p51fail3': 'CONTENTMODEL_NAME_INVALID', // #PCDATA must come first
    'o-p51fail4': 'CONTENTMODEL_MIXED_INVALID_REPEAT', // occurrence on #PCDATA group must be *
-   'o-p51fail5': 'CONTENTMODEL_NAME_INVALID', // only '|' connectors
+   'o-p51fail5': 'CONTENTMODEL_BAD_CHOICE', // ok - only '|' connectors
    'o-p51fail6': 'CONTENTMODEL_BAD_CHOICE', // Only '|' connectors and occurrence on #PCDATA group must be *
    'o-p51fail7': 'CONTENTMODEL_MIXED_INVALID_SUBPARTICLE', // no nested groups
    'o-p52fail1': 'ATTLISTDECL_NO_ELEMENT_NAME', // A name is required
@@ -1352,7 +1352,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    // §3.2.1 seq
    'ibm-not-wf-P50-ibm50n01.xml': 'CONTENTMODEL_NO_NAME',
    'ibm-not-wf-P50-ibm50n02.xml': 'CONTENTMODEL_EXTRA_DELIM',
-   'ibm-not-wf-P50-ibm50n03.xml': 'CONTENTMODEL_NAME_INVALID',
+   'ibm-not-wf-P50-ibm50n03.xml': 'CONTENTMODEL_BAD_SEQUENCE', // ok
    'ibm-not-wf-P50-ibm50n04.xml': 'CONTENTMODEL_NO_DELIM',
    'ibm-not-wf-P50-ibm50n05.xml': 'CONTENTMODEL_NO_NAME',
    'ibm-not-wf-P50-ibm50n06.xml': 'CONTENTMODEL_NO_DELIM',
@@ -1489,7 +1489,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    // §4.1.0 CharRef
    'ibm-not-wf-P66-ibm66n01.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm-not-wf-P66-ibm66n02.xml': 'CHARREF_NO_CLOSE', // great
-   'ibm-not-wf-P66-ibm66n03.xml': 'error', // Tests CharRef with an illegal character referred to. The "49" is used as the referred character in the CharRef in the EntityDecl in the DTD.
+   'ibm-not-wf-P66-ibm66n03.xml': 'REFERENCE_INVALID_SYNTAX', // mech - Tests CharRef with an illegal character referred to. The "49" is used as the referred character in the CharRef in the EntityDecl in the DTD.
    'ibm-not-wf-P66-ibm66n04.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm-not-wf-P66-ibm66n05.xml': 'CHARREF_INVALID_CHAR', // good
    'ibm-not-wf-P66-ibm66n06.xml': 'CHARREF_INVALID_CHAR', // great
@@ -2271,16 +2271,17 @@ const expectedErrorCodes: IdToErrorMap = {
    'ibm-invalid-P69-ibm69i03.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The Name "pe3" in the PEReference in the file ibm69i03.ent does not match the Name of any declared PE.
    'ibm-invalid-P69-ibm69i04.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe2" is referred before declared in the file ibm69i04.ent.
    'ibm-not-wf-P69-ibm69n05.xml': 'REFERENCE_NO_DECLARATION', // good - Based on E29 substantial source: minutes XML-Syntax 1999-02-24 E38 in XML 1.0 Errata, this WFC does not apply to P69, but the VC Entity declared still apply. Tests PEReference which is against P69 WFC: Entity Declared. The PE with the name "paaa" is referred before declared in the DTD.
-   'rmt-008': 'XMLDECL_VERSION_INVALD', // an implausibly-versioned document
-   'rmt-009': 'TEXTDECL_VERSION_INVALD', // External general entity has implausible version number
    'rmt-e2e-34': 'ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC', // A non-deterministic content model is an error even if the element type is not used.
+   'rmt-e2e-55': 'REFERENCE_NO_UNPARSED', // ok - Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
    'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
    'x-rmt-008--V1R1': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1
    'x-rmt-008--V1R2': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1
    'x-rmt-008--V1R5': 'BAD_VERSION', // This input is actually just fine for 1.0/5
    'rmt-e2e-57': 'XMLSPACE_INVALID_VALUE', // ok - A value other than preserve or default for xml:space is an error
    uri01: 'SYSTEMLITERAL_NO_FRAGMENT', // ok - The system literal may not contain fragments (§4.2.2). Found "foo#bar".
-   'o-p11pass1': 'SYSTEMLITERAL_NO_FRAGMENT',
+   'o-p11pass1': 'SYSTEMLITERAL_NO_FRAGMENT', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
+   'rmt-008': 'XMLDECL_VERSION_INVALD', // an implausibly-versioned document
+   'rmt-009': 'TEXTDECL_VERSION_INVALD', // External general entity has implausible version number
    'rmt-055': 'XMLDECL_INVALID_SPACE', // ok - Has a Latin-1 NEL in the XML declaration (to be made an error in PR)
    'rmt-056': 'XMLDECL_INVALID_SPACE', // ok - Has a UTF-8 NEL in the XML declaration (to be made an error in PR)
    'rmt-057': 'XMLDECL_INVALID_SPACE', // ok - Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)

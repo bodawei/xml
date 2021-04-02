@@ -1253,7 +1253,7 @@
               "SECTIONS": "2.3 [9]",
               "testPath": "./source/conformance/xmlts20130923/xmlconf/xmltest/not-wf/sa/113.xml",
               "testData": "<!DOCTYPE doc [\r\n<!ENTITY % foo \"&\">\r\n]>\r\n<doc></doc>\r\n",
-              "description": "Parameter entity values must use valid reference syntax; this reference is malformed."
+              "description": "Parameter entity fvalues must use valid reference syntax; this reference is malformed."
             },
             {
               "type": "TEST",

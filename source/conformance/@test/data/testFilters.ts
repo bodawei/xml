@@ -8,26 +8,34 @@ interface FilterData {
 
 const testFilters: FilterData = {
    includedIds: [
-      // easyish 684 - we can easily extend the content model wellformedness check in some way to report this better
-      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
-   ],
-   excludedIds: [
-      // easyish 684 - we can easily extend the content model wellformedness check in some way to report this better
-      'not-wf-sa-132', // message is outright bad - Invalid syntax mixed connectors used.
-
       // pretty-easy Scanning entity values
       // 689 - error - another case of scanning entity values even if not referenced
       // https://www.w3.org/XML/xml-V10-2e-errata
       // This requires that we scan all entitiy values for general entity references. We need to do this at the end of the dtd, i think.  We could keep a table of references as we go, and then report any we found that turned out to be unparsed
-      'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
+      // 'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
+      // // 683 easy. Extend entity decl value validation to make sure that general entities syntax is reasonably
+      // // constructed.  This is even for non-referenced entities, which is weird
+      // 'o-p09fail2', // EntityValue excludes '&'
+      // 'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
+      // 'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
+      // 'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
+      // // // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
+      // 'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
+   ],
+   excludedIds: [
+      // pretty-easy Scanning entity values
+      // 689 - error - another case of scanning entity values even if not referenced
+      // https://www.w3.org/XML/xml-V10-2e-errata
+      // This requires that we scan all entitiy values for general entity references. We need to do this at the end of the dtd, i think.  We could keep a table of references as we go, and then report any we found that turned out to be unparsed
+      // 'rmt-e2e-55', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)
       // 683 easy. Extend entity decl value validation to make sure that general entities syntax is reasonably
       // constructed.  This is even for non-referenced entities, which is weird
-      'o-p09fail2', // EntityValue excludes '&'
-      'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
-      'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
-      // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
-      'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
+      // 'o-p09fail2', // EntityValue excludes '&'
+      // 'not-wf-sa-113', // Parameter entity values must use valid reference syntax; this reference is malformed.
+      // 'not-wf-sa-114', // General entity values must use valid reference syntax; this reference is malformed.
+      // 'not-wf-sa-159', // Uses '' unquoted in an entity declaration, which is illegal syntax for an entity reference.
+      // // This is closely related to those.  when do we check that these are not wellformed?  At the end of the doc?
+      // 'ibm-not-wf-P66-ibm66n03.xml', // It is not clear if this is actually an error. If the entity were used, then it would be.  But it isn't, and it could as easily be a geref as a char ref.
 
       // nasty - 672
       // This is serious.  We need to allow "INCLUDE[..." to be the text in the parameter entity reference in a conditional section.

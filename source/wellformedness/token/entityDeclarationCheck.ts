@@ -1,12 +1,14 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, isName, XmlWarning } from 'basic';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   TEXT_PTOKEN,
 } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { LiteralValuePToken } from 'token';
 
 import { charCheck } from '../common/charCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
@@ -17,11 +19,44 @@ import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
+const POSSIBLE_GEREF_REGEXP = /&([^;]*);/g;
 
 function isParameterEntityDeclaration(
    pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
 ): pToken is ParameterEntityDeclarationPToken {
    return 'parameter' in pToken;
+}
+
+function checkAmpersands(value: LiteralValuePToken, ec: ErrorCollector): void {
+   for (const element of value) {
+      if (element.type !== TEXT_PTOKEN) {
+         continue;
+      }
+
+      const contents = strOrBlank(element.text);
+      let ampIndex = contents.indexOf('&');
+
+      while (ampIndex !== -1) {
+         POSSIBLE_GEREF_REGEXP.lastIndex = ampIndex;
+         const match = POSSIBLE_GEREF_REGEXP.exec(contents);
+
+         if (!match) {
+            ec.report(
+               WellFormedError.ID.REFERENCE_INVALID_CHARS,
+               [contents.substr(ampIndex, 10)],
+               element.text,
+            );
+         } else {
+            const possibleName = match[1];
+
+            if (!isName(possibleName)) {
+               ec.report(WellFormedError.ID.REFERENCE_INVALID_SYNTAX, [match[0]], element.text);
+            }
+         }
+
+         ampIndex = contents.indexOf('&', ampIndex + 1);
+      }
+   }
 }
 
 function entityDeclarationCheck(
@@ -81,6 +116,7 @@ function entityDeclarationCheck(
       }
    } else {
       literalCheck(pToken, ec, confVer, WFEID.NOUN_ENTITYVALUE);
+      checkAmpersands(pToken.value, ec);
    }
 
    if (pToken.extra) {

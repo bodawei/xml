@@ -53,12 +53,14 @@ import {
    makeElementEmpty,
 } from 'token-test';
 
+import { dtdEndCheck } from '../common/dtdEndCheck';
 import { WellFormedError } from '../error/WellFormedError';
 import { DocumentChecker } from '../DocumentChecker';
 import { CHECKER_DONE, CheckState, MarkupChecker, ContentChecker } from '../checkUtils';
 import { checkMap } from '../checkMap';
 import { conditionalStartCheck } from '../token/conditionalStartCheck';
 
+jest.mock('../common/dtdEndCheck');
 jest.mock('../token/conditionalStartCheck');
 
 describe('DocumentChecker (unit)', () => {
@@ -539,10 +541,16 @@ describe('DocumentChecker (unit)', () => {
             });
          });
 
-         it('allows the end of the DOCTYE', () => {
+         it('allows the end of the DOCTYPE', () => {
             checker.check(docTypeEnd, ec);
 
             expect(ec.errors).toEqual([]);
+         });
+
+         it('calls docTypeEndCheck() when encountering a doctype end', () => {
+            checker.check(docTypeEnd, ec);
+
+            expect(dtdEndCheck).toHaveBeenCalledWith(expect.any(Object), ec);
          });
 
          it('allows an internal subset start marker', () => {

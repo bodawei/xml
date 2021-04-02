@@ -6,6 +6,7 @@ import {
    TextPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
 
@@ -221,6 +222,206 @@ describe('entityDeclarationCheck (unit)', () => {
          params: ['fooo'],
          position: pToken.extra,
          lastPosition: undefined,
+      });
+   });
+
+   describe('general entity references', () => {
+      it('reports no errors if there is no value', () => {
+         const pToken = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('ENTITY'),
+            declTypeSpace: toSToken(' '),
+            parameter: toSToken('%'),
+            parameterSpace: toSToken(' '),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            close: toSToken('>'),
+         });
+
+         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no errors if the value has no ampersands in it', () => {
+         const pToken = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('ENTITY'),
+            declTypeSpace: toSToken(' '),
+            parameter: toSToken('%'),
+            parameterSpace: toSToken(' '),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            value: [
+               new TextPToken(toSToken('wowzers')),
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+                  name: toSToken('fred'),
+                  close: toSToken(';'),
+               }),
+            ],
+            close: toSToken('>'),
+         });
+
+         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports a syntax error if there is a lone ampersand in the value', () => {
+         const text = new TextPToken(toSToken('foo & bar'));
+         const pToken = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('ENTITY'),
+            declTypeSpace: toSToken(' '),
+            parameter: toSToken('%'),
+            parameterSpace: toSToken(' '),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            value: [
+               text,
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+                  name: toSToken('fred'),
+                  close: toSToken(';'),
+               }),
+            ],
+            close: toSToken('>'),
+         });
+
+         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.REFERENCE_INVALID_CHARS,
+            params: ['& bar'],
+            position: text.text,
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports a syntax error for each lone ampersand', () => {
+         const text = new TextPToken(toSToken('foo & bar & ginger'));
+         const pToken = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('ENTITY'),
+            declTypeSpace: toSToken(' '),
+            parameter: toSToken('%'),
+            parameterSpace: toSToken(' '),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            value: [
+               text,
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+                  name: toSToken('fred'),
+                  close: toSToken(';'),
+               }),
+            ],
+            close: toSToken('>'),
+         });
+
+         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.REFERENCE_INVALID_CHARS,
+            params: ['& bar & gi'],
+            position: text.text,
+            lastPosition: undefined,
+         });
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.REFERENCE_INVALID_CHARS,
+            params: ['& ginger'],
+            position: text.text,
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports a syntax error if there is something that looks like a reference but it has the wrong name syntax', () => {
+         const text = new TextPToken(toSToken('foo &123;'));
+         const pToken = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('ENTITY'),
+            declTypeSpace: toSToken(' '),
+            parameter: toSToken('%'),
+            parameterSpace: toSToken(' '),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            value: [
+               text,
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+                  name: toSToken('fred'),
+                  close: toSToken(';'),
+               }),
+            ],
+            close: toSToken('>'),
+         });
+
+         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.REFERENCE_INVALID_SYNTAX,
+            params: ['&123;'],
+            position: text.text,
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports a syntax error if we have a spacious reference', () => {
+         const text = new TextPToken(toSToken('foo & name ;'));
+         const pToken = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('ENTITY'),
+            declTypeSpace: toSToken(' '),
+            parameter: toSToken('%'),
+            parameterSpace: toSToken(' '),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            value: [
+               text,
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+                  name: toSToken('fred'),
+                  close: toSToken(';'),
+               }),
+            ],
+            close: toSToken('>'),
+         });
+
+         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+
+         expect(mockErrorCollector).toReportWFError({
+            id: WellFormedError.ID.REFERENCE_INVALID_SYNTAX,
+            params: ['& name ;'],
+            position: text.text,
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports no error if the value looks like a legitimate name', () => {
+         const text = new TextPToken(toSToken('foo &onetwothree;'));
+         const pToken = new ParameterEntityDeclarationPToken({
+            open: toSToken('<!'),
+            declType: toSToken('ENTITY'),
+            declTypeSpace: toSToken(' '),
+            parameter: toSToken('%'),
+            parameterSpace: toSToken(' '),
+            name: toSToken('anEntity'),
+            nameSpace: toSToken(' '),
+            value: [
+               text,
+               new ParameterEntityReferencePToken({
+                  open: toSToken('%'),
+                  name: toSToken('fred'),
+                  close: toSToken(';'),
+               }),
+            ],
+            close: toSToken('>'),
+         });
+
+         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
    });
 });

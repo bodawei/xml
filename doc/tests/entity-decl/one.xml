@@ -1,0 +1,13 @@
+<!DOCTYPE doc [
+<!ELEMENT doc (#PCDATA)>
+<!ENTITY baz "baz">
+<!ENTITY % bar "baz;">
+<!ENTITY e "<![CDATA[Tim &%bar; Michael]]>">
+]>
+
+
+<doc>
+<![CDATA[
+xmllint --loaddtd  --noent  --valid ./docs/tests/entity-decl/one.xml
+]]>
+</doc>
