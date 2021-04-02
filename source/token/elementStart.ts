@@ -84,7 +84,7 @@ function parseElementStart(source: STokenSource, open: SToken, deliverPToken: De
 
    attribute.parse(source, {
       geRef: true,
-      terminators: [ '>', '/>' ],
+      terminators: [ '/', '>', '/>' ],
    }, (attributes) => {
       protoToken.attributes = attributes;
 

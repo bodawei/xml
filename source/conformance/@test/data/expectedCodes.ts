@@ -363,7 +363,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    },
    'not-wf-sa-045': 'ELEMENT_NAME_INVALID', // ok = Invalid Empty Element Tag
    'not-wf-sa-046': 'ELEMENT_NAME_INVALID', // ok - This start (or empty element) tag was not terminated correctly.
-   'not-wf-sa-047': 'error', // Invalid empty element tag invalid whitespace
+   'not-wf-sa-047': 'ELEMENT_NO_CLOSE', // Invalid empty element tag invalid whitespace
    'not-wf-sa-048': {
       // good? - Provides a CDATA section after the root element.
       id: 'TOKEN_INVALID_CONTEXT',

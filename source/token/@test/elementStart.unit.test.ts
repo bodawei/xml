@@ -2,8 +2,6 @@
 
 /* eslint-env jasmine */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
-import { MockErrorCollector } from'basic-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import attribute from '../common/attribute';
@@ -127,7 +125,7 @@ describe('elementStart (unit)', () => {
          const args = attrParse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual({
-            terminators: [ '>', '/>' ],
+            terminators: [ '/', '>', '/>' ],
             geRef: true,
          });
          expect(args[2]).toBeInstanceOf(Function);
