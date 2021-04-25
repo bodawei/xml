@@ -37,8 +37,18 @@ describe('commentCheck()', () => {
 
       commentCheck(commentPToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(commentPToken.text[0], mockErrorCollector, confVer);
-      expect(charCheck).toHaveBeenCalledWith(commentPToken.text[1], mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(
+         commentPToken.text[0],
+         mockErrorCollector,
+         confVer,
+         false,
+      );
+      expect(charCheck).toHaveBeenCalledWith(
+         commentPToken.text[1],
+         mockErrorCollector,
+         confVer,
+         false,
+      );
    });
 
    it('reports an error when the content ends with a hyphen', () => {

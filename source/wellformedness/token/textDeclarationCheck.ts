@@ -36,7 +36,7 @@ function checkFields(
 
             checkSpaces(param, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
-            charCheck(value, ec, confVer);
+            charCheck(value, ec, confVer, false);
 
             checkVersionString(valueText, false, ec, confVer);
             break;
@@ -46,7 +46,7 @@ function checkFields(
 
             checkSpaces(param, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
-            charCheck(value, ec, confVer);
+            charCheck(value, ec, confVer, false);
             ec.check(!ENCODING_REGEXP.test(valueText), WFEID.TEXTDECL_ENCODING_INVALID, [
                valueText,
             ]);
@@ -71,7 +71,7 @@ function textDeclarationCheck(
    checkSpaceProblems(pToken.openSpace, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, ec, confVer);
 
    ec.setPos(pToken.target);
-   charCheck(pToken.target, ec, confVer);
+   charCheck(pToken.target, ec, confVer, false);
 
    if (pToken.target) {
       const target = strOrBlank(pToken.target);

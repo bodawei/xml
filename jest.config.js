@@ -21,7 +21,7 @@ module.exports = {
   collectCoverageFrom: [
      'source/attFixer/**/*.ts',
      '!source/attFixer/**/@test/**/*.ts',
-     'source/expand/**/*.ts',
+     'source/expand/**/*jest.ts',
      '!source/expand/**/@test/**/*.ts',
      'source/pToken/**/*.ts',
      '!source/pToken/**/@test/**/*.ts',

@@ -55,7 +55,12 @@ import { parameterEntityStartCheck } from './marker/parameterEntityStartCheck';
 interface CheckMap {
    [type: string]:
       | undefined
-      | ((pToken: any, errorCollector: ErrorCollector, confVer: ConformanceVersion) => void);
+      | ((
+           pToken: any,
+           errorCollector: ErrorCollector,
+           confVer: ConformanceVersion,
+           inSecondPassContxt?: boolean,
+        ) => void);
 }
 
 const checkMap: CheckMap = {

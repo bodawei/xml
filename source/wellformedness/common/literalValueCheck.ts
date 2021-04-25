@@ -23,7 +23,7 @@ function literalValueCheck(
 
       if (isTextPToken(item)) {
          ec.setPos(item.text);
-         charCheck(item.text, ec, confVer);
+         charCheck(item.text, ec, confVer, false);
       } else if (
          item.type === CHARREF_PTOKEN ||
          item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN ||

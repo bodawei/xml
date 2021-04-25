@@ -192,7 +192,7 @@ describe('entityDeclarationCheck (unit)', () => {
 
       entityDeclarationCheck(pToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(pToken.nDataName, mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(pToken.nDataName, mockErrorCollector, confVer, false);
    });
 
    it('reports an error if there was no closing', () => {

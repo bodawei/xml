@@ -9,9 +9,11 @@ function charDataCheck(
    pToken: CharDataPToken,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
+   inSecondPassText = false,
 ): void {
    ec.setPos(pToken.text);
-   charCheck(pToken.text, ec, confVer);
+
+   charCheck(pToken.text, ec, confVer, inSecondPassText);
 }
 
 export { charDataCheck };

@@ -51,7 +51,12 @@ describe('processingInstructionCheck() (unit)', () => {
    it('calls charCheck() on the instruction data', () => {
       processingInstructionCheck(piPToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(piPToken.instruction, mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(
+         piPToken.instruction,
+         mockErrorCollector,
+         confVer,
+         false,
+      );
    });
 
    it('calls nameXmlCheck()', () => {

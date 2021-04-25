@@ -53,7 +53,12 @@ describe('xmlDeclarationCheck() (unit)', () => {
    it('calls charCheck() on the target value', () => {
       xmlDeclarationCheck(xmlDeclPToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(xmlDeclPToken.target, mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(
+         xmlDeclPToken.target,
+         mockErrorCollector,
+         confVer,
+         false,
+      );
    });
 
    it('calls charCheck() on the version value', () => {
@@ -73,6 +78,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
+         false,
       );
    });
 
@@ -93,6 +99,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
+         false,
       );
    });
 
@@ -113,6 +120,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
          xmlDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
+         false,
       );
    });
 

@@ -107,6 +107,8 @@ class ContentChecker implements IContentChecker {
 
    private start: ContentStart;
 
+   private inIngernalGeRef: boolean;
+
    private elementNameStack: Array<string> = [];
 
    private embeddedChecker?: ContentChecker;
@@ -125,6 +127,7 @@ class ContentChecker implements IContentChecker {
       this.state = State.PRE;
       this.geContext = [...geContext];
       this.start = start;
+      this.inIngernalGeRef = false;
 
       if (start.type !== GENERAL_ENTITY_START_PTOKEN) {
          this.check(start, ec);
@@ -139,12 +142,17 @@ class ContentChecker implements IContentChecker {
             this.state = State.ENTITY_START;
          } else {
             this.state = State.CONTENT;
+            this.inIngernalGeRef = true;
          }
       }
    }
 
    get isDone(): boolean {
       return this.state === State.DONE;
+   }
+
+   get inSecondPassContxt(): boolean {
+      return this.inIngernalGeRef || this.embeddedChecker?.inSecondPassContxt || false;
    }
 
    check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE {

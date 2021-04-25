@@ -36,7 +36,7 @@ function cdataCheck(pToken: CdataPToken, ec: ErrorCollector, confVer: Conformanc
    ec.check(!pToken.bracket, WFEID.CDATA_NO_SECOND_BRACKET, [typeText]);
 
    ec.setPos(pToken.text);
-   charCheck(pToken.text, ec, confVer);
+   charCheck(pToken.text, ec, confVer, false);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.CDATA_NO_CLOSE);

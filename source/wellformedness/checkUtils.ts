@@ -51,11 +51,13 @@ interface ParameterEntitiesInfo {
 
 interface MarkupChecker {
    check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
+   inSecondPassContxt: boolean;
 }
 
 interface ContentChecker {
    check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
    isDone: boolean;
+   inSecondPassContxt: boolean;
 }
 
 interface ContentCheckerConstructor {

@@ -26,9 +26,14 @@ describe('commentCheck()', () => {
       mockErrorCollector = new MockErrorCollector();
    });
 
-   it('asks the checks the text is well formed', () => {
+   it('asks the charCheck to verify the text is well formed', () => {
       charDataCheck(charDataPToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(
+         charDataPToken.text,
+         mockErrorCollector,
+         confVer,
+         false,
+      );
    });
 });

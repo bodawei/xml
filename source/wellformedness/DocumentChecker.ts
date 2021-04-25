@@ -152,7 +152,12 @@ class DocumentChecker {
       } else if (pToken.type === CONDITIONAL_PTOKEN) {
          conditionalStartCheck(pToken, errorCollector);
       } else if (mapped) {
-         mapped(pToken, errorCollector, this.checkState.confVer);
+         mapped(
+            pToken,
+            errorCollector,
+            this.checkState.confVer,
+            this.subChecker?.inSecondPassContxt,
+         );
       }
 
       if (this.subChecker) {

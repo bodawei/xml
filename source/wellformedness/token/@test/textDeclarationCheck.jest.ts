@@ -53,7 +53,12 @@ fdescribe('textDeclaration (unit)', () => {
    it('calls charCheck() on the target value', () => {
       textDeclarationCheck(textDeclPToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(textDeclPToken.target, mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(
+         textDeclPToken.target,
+         mockErrorCollector,
+         confVer,
+         false,
+      );
    });
 
    it('calls charCheck() on the version value', () => {
@@ -73,6 +78,7 @@ fdescribe('textDeclaration (unit)', () => {
          textDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
+         false,
       );
    });
 
@@ -93,6 +99,7 @@ fdescribe('textDeclaration (unit)', () => {
          textDeclPToken.fields[0].value,
          mockErrorCollector,
          confVer,
+         false,
       );
    });
 

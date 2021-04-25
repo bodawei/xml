@@ -112,7 +112,7 @@ function entityDeclarationCheck(
          ]);
          ec.setPos(pToken.nDataName);
          ec.check(!pToken.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [enNameText]);
-         charCheck(pToken.nDataName, ec, confVer);
+         charCheck(pToken.nDataName, ec, confVer, false);
       }
    } else {
       literalCheck(pToken, ec, confVer, WFEID.NOUN_ENTITYVALUE);

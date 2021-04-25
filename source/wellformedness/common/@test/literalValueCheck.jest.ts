@@ -27,7 +27,7 @@ describe('literalValueCheck() (unit)', () => {
    it('calls charCheck() to check the value', () => {
       literalValueCheck(valuePToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(toSToken('xxx'), mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(toSToken('xxx'), mockErrorCollector, confVer, false);
    });
 
    it('sets the position before calling misc.checkWellFormed', () => {

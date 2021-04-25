@@ -95,6 +95,7 @@ describe('DocumentChecker (unit)', () => {
          subState = checkState;
          this.lastSeen = start;
       }
+      inSecondPassContxt: boolean;
 
       check(...args: Array<unknown>): undefined | typeof CHECKER_DONE {
          subParams = args; // eslint-disable-line prefer-rest-params
@@ -127,6 +128,7 @@ describe('DocumentChecker (unit)', () => {
          this.lastSeen = start;
          this.allDone = start.type === ELEMENT_EMPTY_PTOKEN;
       }
+      inSecondPassContxt: boolean;
 
       get isDone() {
          return this.allDone;
@@ -201,7 +203,12 @@ describe('DocumentChecker (unit)', () => {
 
          checker.check(xmlDecl, ec);
 
-         expect(cwfSpy).toHaveBeenCalledWith(xmlDecl, expect.any(ErrorCollector), confVer);
+         expect(cwfSpy).toHaveBeenCalledWith(
+            xmlDecl,
+            expect.any(ErrorCollector),
+            confVer,
+            undefined,
+         );
       });
 
       it('handles an error token with no problems', () => {

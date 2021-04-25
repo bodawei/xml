@@ -469,6 +469,8 @@ class MarkupDeclChecker implements MarkupChecker {
       }
    }
 
+   readonly inSecondPassContxt = false;
+
    private checkPERef(
       pToken: ParameterEntityReferencePToken,
       ec: ErrorCollector,

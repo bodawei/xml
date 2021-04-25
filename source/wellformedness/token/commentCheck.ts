@@ -25,7 +25,7 @@ function commentCheck(
          const isDoubleHyphenPiece = textSToken.str === '--';
 
          ec.setPos(textSToken);
-         charCheck(textSToken, ec, confVer);
+         charCheck(textSToken, ec, confVer, false);
 
          if (isDoubleHyphenPiece) {
             ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);

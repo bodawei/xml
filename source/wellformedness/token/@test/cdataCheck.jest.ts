@@ -32,7 +32,7 @@ describe('cdataCheck()', () => {
    it('checks the text is well formed', () => {
       cdataCheck(cdataPToken, mockErrorCollector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(cdataPToken.text, mockErrorCollector, confVer);
+      expect(charCheck).toHaveBeenCalledWith(cdataPToken.text, mockErrorCollector, confVer, false);
    });
 
    it('reports an error if there is no section type provided', () => {

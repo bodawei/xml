@@ -11,6 +11,8 @@ const XWID = XmlWarning.ID;
 const BAD_CHARS_11 = /[\u0000\u0001-\u0008\u000B\u000C\u000E-\u001F\u007F-\u0084\u0086-\u009F\uFFFE\uFFFF]/g;
 const BAD_CHARS_10 = /[\u0000\u0001-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g;
 
+const BAD_SECOND_PASS_CHARS_11 = /[\u0000\uFFFE\uFFFF]/g;
+
 /*
  * \u1FFFE-\u1FFFF\u2FFFE-\u2FFFF\u3FFFE-\u3FFFF\u4FFFE-\u4FFFF\u5FFFE-\u5FFFF\u6FFFE-\u6FFFF\u7FFFE-\u7FFFF\u8FFFE-\u8FFFF\u9FFFE-\u9FFFF\uAFFFE-\uAFFFF\uBFFFE-\uBFFFF\uCFFFE-\uCFFFF\uDFFFE-\uDFFFF\uEFFFE-\uEFFFF\uFFFFE-\uFFFFF\u10FFFE-\u10FFFF
  * is the same as
@@ -33,6 +35,7 @@ function charCheck(
    sToken: SToken | undefined,
    ec: ErrorCollector,
    confVer: ConformanceVersion,
+   isSecondPass: boolean,
 ): void {
    if (!sToken) {
       return;
@@ -40,7 +43,13 @@ function charCheck(
 
    const badIndices = [];
    const discouragedIndices = [];
-   const badRegEx = confVer.version === 1.1 ? BAD_CHARS_11 : BAD_CHARS_10;
+   let badRegEx: RegExp;
+
+   if (isSecondPass) {
+      badRegEx = confVer.version === 1.1 ? BAD_SECOND_PASS_CHARS_11 : BAD_CHARS_10;
+   } else {
+      badRegEx = confVer.version === 1.1 ? BAD_CHARS_11 : BAD_CHARS_10;
+   }
 
    badRegEx.lastIndex = 0;
    let found = badRegEx.test(sToken.str);

@@ -47,7 +47,7 @@ function checkFields(
 
             checkSpaces(param, XmlFatalError.ID.XMLDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
-            charCheck(value, ec, confVer);
+            charCheck(value, ec, confVer, false);
 
             checkVersionString(valueText, true, ec, confVer);
             break;
@@ -64,7 +64,7 @@ function checkFields(
                confVer,
             );
             ec.setPos(value);
-            charCheck(value, ec, confVer);
+            charCheck(value, ec, confVer, false);
             ec.check(!ENCODING_REGEXP.exec(valueText), WFEID.XMLDECL_ENCODING_INVALID, [valueText]);
             break;
          case 'standalone':
@@ -74,7 +74,7 @@ function checkFields(
 
             checkSpaces(param, XmlFatalError.ID.XMLDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
-            charCheck(value, ec, confVer);
+            charCheck(value, ec, confVer, false);
             ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [
                valueText,
             ]);
@@ -109,7 +109,7 @@ function xmlDeclarationCheck(
    checkSpaceProblems(pToken.openSpace, XmlFatalError.ID.XMLDECL_INVALID_SPACE, ec, confVer);
 
    ec.setPos(pToken.target);
-   charCheck(pToken.target, ec, confVer);
+   charCheck(pToken.target, ec, confVer, false);
    if (pToken.target) {
       const target = strOrBlank(pToken.target);
       const lcTarget = target.toLowerCase();

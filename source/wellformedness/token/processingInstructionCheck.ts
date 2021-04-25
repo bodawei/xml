@@ -45,7 +45,7 @@ function processingInstructionCheck(
    }
 
    ec.setPos(pToken.instruction);
-   charCheck(pToken.instruction, ec, confVer);
+   charCheck(pToken.instruction, ec, confVer, false);
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.PI_NO_CLOSE, [targetName]);
 }
