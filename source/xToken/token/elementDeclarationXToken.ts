@@ -8,7 +8,7 @@ enum ContentSpecType {
    EMPTY = 'EMPTY',
    ANY = 'ANY',
    MIXED = 'MIXED',
-   CHILDREN = 'CHILDREN',
+   ELEMENT = 'ELEMENT',
 }
 
 const ELEMENT_DECLARATION_XTOKEN = 'ELEMENT_DECLARATION_XTOKEN';
@@ -36,7 +36,7 @@ function stringToSpecType(
          return ContentSpecType.EMPTY;
       default:
          if (contentModel) {
-            return isMixedModel ? ContentSpecType.MIXED : ContentSpecType.CHILDREN;
+            return isMixedModel ? ContentSpecType.MIXED : ContentSpecType.ELEMENT;
          }
          return ContentSpecType.ANY;
    }
@@ -94,7 +94,7 @@ class ElementDeclarationXToken {
          if (contentModel) {
             const [isMixed, finalContentModel] = adjustMixed(contentModel);
 
-            specType = isMixed ? ContentSpecType.MIXED : ContentSpecType.CHILDREN;
+            specType = isMixed ? ContentSpecType.MIXED : ContentSpecType.ELEMENT;
             model = finalContentModel;
          }
 

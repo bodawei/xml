@@ -2856,7 +2856,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('MIXED content', () => {
 
             it('reports no error if there is a comment found in mixed content  in 1.0/1 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -2879,7 +2879,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if there is a processing instruction found in mixed content  in 1.0/1 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -2901,7 +2901,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if there is a comment found in mixed content in 1.0/3 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -2922,7 +2922,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if there is a processing instruction found in mixed content in 1.1/1 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -2943,7 +2943,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if element, chardata, and charRef are found in mixed content in 1.0/1 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -2965,7 +2965,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if a CDATA section found in 1.0/1 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -2985,7 +2985,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if a CDATA section found in 1.0/5 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -3005,7 +3005,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if element, chardata, charRef, and CData are found in mixed content in 1.0/5 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -3028,7 +3028,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if entity start and end markers are found in 1.0/5 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -3048,7 +3048,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error other markup is found in mixed content (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: '#PCDATA',
                      repeat: CpRepeat.ONE
@@ -3113,18 +3113,18 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                if (causesError) {
                   if (token === commentToken) {
-                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, ['one', version.toString(), rev.toString()]);
+                     errorToken = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_COMMENT, ['one', version.toString(), rev.toString()]);
                   } else if (token === piToken) {
-                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_PI, ['one', version.toString(), rev.toString()]);
+                     errorToken = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_PI, ['one', version.toString(), rev.toString()]);
                   } else {
-                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, ['one', version.toString(), rev.toString(), token.type]);
+                     errorToken = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_CONTENT, ['one', version.toString(), rev.toString(), token.type]);
                   }
                }
 
                it(`${causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an element in XML ${version}/${rev} (§3.0.0)`, (done) => {
                   const confVer = new ConformanceVersion(version, rev);
                   const elementDecl2 = new ElementDeclarationXToken('two', ContentSpecType.ANY);
-                  const elementDecl1 = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+                  const elementDecl1 = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                      particles: [{
                         name: 'two',
                         repeat: CpRepeat.ONE,
@@ -3150,7 +3150,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if there is S before the first child in version 1.0/1 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3168,12 +3168,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementEndXToken('one'));
                validator.end();
 
-               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, []);
+               const expected = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_SPACE, []);
                expectStream(validator, expected, done);
             });
 
             it('reports an error if there is S before the last child in version 1.0/1 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3191,12 +3191,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementEndXToken('one'));
                validator.end();
 
-               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, []);
+               const expected = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_SPACE, []);
                expectStream(validator, expected, done);
             });
 
             it('reports an error if there is S before the first child in version 1.0/2 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3218,7 +3218,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if there is S before the last child in version 1.0/2 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3240,7 +3240,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no errors if a comment is found between children in 1.0/4 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3261,7 +3261,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if a comment is found in an expanded entity in 1.0/4 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3280,12 +3280,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementEndXToken('one'));
                validator.end();
 
-               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, ['one', '1', '4']);
+               const expected = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_COMMENT, ['one', '1', '4']);
                expectStream(validator, expected, done);
             });
 
             it('reports no error if a comment is found in an expanded entity in 1.0/5 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3308,7 +3308,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no errors if a PI is found between children in 1.0/4 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3329,7 +3329,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if a PI is found in an expanded entity in 1.0/4 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3348,12 +3348,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementEndXToken('one'));
                validator.end();
 
-               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_PI, ['one', '1', '4']);
+               const expected = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_PI, ['one', '1', '4']);
                expectStream(validator, expected, done);
             });
 
             it('reports no error if a PI is found in an expanded entity in 1.0/5 (§3.0.0)', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3376,7 +3376,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('converts chardata that is just whitespace into space tokens', (done) => {
-               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+               const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE
@@ -3400,7 +3400,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports an error if an element with element content is externally declared and standalone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
                validator.write(new ExternalSubsetStartToken());
-               validator.write(new ElementDeclarationXToken('extDeclaredElement', ContentSpecType.CHILDREN, {
+               validator.write(new ElementDeclarationXToken('extDeclaredElement', ContentSpecType.ELEMENT, {
                   particles: [{
                      name: 'child',
                      repeat: CpRepeat.ONE,
@@ -3414,7 +3414,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementEndXToken('extDeclaredElement'));
                validator.end();
 
-               const expected = new ValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED,
+               const expected = new ValidityError(ValidityError.ID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
                   ['extDeclaredElement']);
                expectStream(validator, expected, done);
             });

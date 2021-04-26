@@ -9,3 +9,7 @@
 ## Test files
 * Should import jest globals via
    `import { describe, expect, it } from '@jest/globals';`
+* Test descriptions should be present active singular ("(it) does x"). If more details are needed, should be of the form "(it) does x when y")
+
+## Errors
+* WellFormed, Validity, Error and Fatal ErrotTokens should reference spec sections at the end in the form `(§1.2.3)`

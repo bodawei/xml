@@ -118,7 +118,7 @@ describe('elementStartUpdateState (unit)', () => {
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                graph: { startId: 9, endId: 10, states: {} },
             },
          },
@@ -126,7 +126,7 @@ describe('elementStartUpdateState (unit)', () => {
       const expectedContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
-            type: ElDeclType.CHILDREN,
+            type: ElDeclType.ELEMENT,
             graph: { startId: 9, endId: 10, states: {} },
          },
          parentName: 'elementName',
@@ -145,11 +145,11 @@ describe('elementStartUpdateState (unit)', () => {
       });
    });
 
-   it('transitions the activeContext to a new state, when context is CHILDREN', () => {
+   it('transitions the activeContext to a new state, when context is ELEMENT', () => {
       const activeContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
-            type: ElDeclType.CHILDREN,
+            type: ElDeclType.ELEMENT,
             graph,
          },
          parentName: 'elementName',
@@ -160,7 +160,7 @@ describe('elementStartUpdateState (unit)', () => {
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                graph,
             },
          },
@@ -173,7 +173,7 @@ describe('elementStartUpdateState (unit)', () => {
       const expectedContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
-            type: ElDeclType.CHILDREN,
+            type: ElDeclType.ELEMENT,
             graph,
          },
          parentName: 'elementName',
@@ -192,11 +192,11 @@ describe('elementStartUpdateState (unit)', () => {
       });
    });
 
-   it('does not transition to a new state, when context is CHILDREN, but the graph has no transition for this', () => {
+   it('does not transition to a new state, when context is ELEMENT, but the graph has no transition for this', () => {
       const activeContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
-            type: ElDeclType.CHILDREN,
+            type: ElDeclType.ELEMENT,
             graph,
          },
          parentName: 'elementName',
@@ -206,7 +206,7 @@ describe('elementStartUpdateState (unit)', () => {
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                graph,
             },
          },

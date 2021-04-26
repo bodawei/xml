@@ -56,7 +56,7 @@ describe('elementDeclarationValidate (unit)', () => {
          close: toSToken('>'),
       });
       childrenDetails = {
-         type: ElDeclType.CHILDREN,
+         type: ElDeclType.ELEMENT,
          token: elementDeclaration,
          graph: { startId: 0, endId: 0, states: {} },
       };
@@ -316,7 +316,7 @@ describe('elementDeclarationValidate (unit)', () => {
          close: toSToken('>'),
       });
       state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
+         type: ElDeclType.ELEMENT,
          graph: {
             startId: 0,
             endId: 1,
@@ -445,7 +445,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
       });
       state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
+         type: ElDeclType.ELEMENT,
          token: elementDeclaration,
          graph: { startId: 0, endId: 0, states: {} },
       };
@@ -517,7 +517,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: elementDeclaration,
                graph: { startId: 0, endId: 0, states: {} },
             },
@@ -667,7 +667,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: elementDeclaration,
                graph: { startId: 0, endId: 0, states: {} },
             },
@@ -700,7 +700,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: elementDeclaration,
                graph: { startId: 0, endId: 0, states: {} },
             },
@@ -724,7 +724,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
       });
       state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
+         type: ElDeclType.ELEMENT,
          token: elementDeclaration,
          graph: { startId: 0, endId: 0, states: {} },
       };
@@ -755,7 +755,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: elementDeclaration,
                graph: { startId: 0, endId: 0, states: {} },
             },
@@ -788,7 +788,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: elementDeclaration,
                graph: { startId: 0, endId: 0, states: {} },
             },
@@ -821,7 +821,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: elementDeclaration,
                graph: { startId: 0, endId: 0, states: {} },
             },
@@ -889,7 +889,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: elementDeclaration,
                graph: { startId: 0, endId: 0, states: {} },
             },
@@ -913,7 +913,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
       });
       state.elementDeclarations.elementName = {
-         type: ElDeclType.CHILDREN,
+         type: ElDeclType.ELEMENT,
          token: elementDeclaration,
          graph: { startId: 0, endId: 0, states: {} },
       };

@@ -9,7 +9,7 @@ import { ElementContext, ElDeclType, ValidateState } from '../validateState';
 function updateCurrentElContext(elName: string, state: ValidateState): ValidateState {
    const activeContext = state.elementContext.activeContext;
 
-   if (activeContext?.declDetails.type === ElDeclType.CHILDREN) {
+   if (activeContext?.declDetails.type === ElDeclType.ELEMENT) {
       const currentState = activeContext.declDetails.graph.states[activeContext.stateId];
       const destState = currentState.trans[elName];
 
@@ -60,7 +60,7 @@ function elementStartUpdateState(
       context = {
          declDetails,
          parentName: elName,
-         stateId: declDetails.type === ElDeclType.CHILDREN ? declDetails.graph.startId : 0,
+         stateId: declDetails.type === ElDeclType.ELEMENT ? declDetails.graph.startId : 0,
       };
    } else {
       // @@@@ this seems like we should be reporting an error here.  What error is that?

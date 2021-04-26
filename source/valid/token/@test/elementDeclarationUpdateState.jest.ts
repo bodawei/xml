@@ -355,7 +355,7 @@ describe('elementDeclarationUpdateState (unit)', () => {
             elementDeclarations: {
                elementName: {
                   token: elementDeclaration,
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph: { startId: 0, endId: 0, states: {} },
                },
             },
@@ -391,7 +391,7 @@ describe('elementDeclarationUpdateState (unit)', () => {
             elementDeclarations: {
                elementName: {
                   token: elementDeclaration,
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph: { startId: 0, endId: 0, states: {} },
                },
             },

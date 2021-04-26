@@ -56,7 +56,7 @@ describe('elementStartValidate (unit)', () => {
       const currentContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
-            type: ElDeclType.CHILDREN,
+            type: ElDeclType.ELEMENT,
             graph,
          },
          parentName: 'elementName',
@@ -65,7 +65,7 @@ describe('elementStartValidate (unit)', () => {
       state = new ValidateState({
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: new ElementDeclarationPToken({
                   open: toSToken('<!'),
                   declType: toSToken('ELEMENT'),
@@ -167,14 +167,14 @@ describe('elementStartValidate (unit)', () => {
       });
    });
 
-   it('reports an error when the context is CHILDREN, and there is no transition from this state', () => {
+   it('reports an error when the context is ELEMENT, and there is no transition from this state', () => {
       state = new ValidateState({
          elementContext: {
             ...state.elementContext,
             activeContext: {
                declDetails: {
                   token: elementDeclaration,
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph,
                },
                parentName: 'parentName',

@@ -459,7 +459,7 @@ class CheckXTokenValidStream extends Transform {
 
          if (xToken.type === SPACE_XTOKEN) {
             if (isNoSpaceAtEndsVersion && context.atElementContentStart) {
-               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
+               this.pushValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_SPACE, [], sToken);
             }
          } else {
             context.atElementContentStart = false;
@@ -471,14 +471,14 @@ class CheckXTokenValidStream extends Transform {
                break;
             case ELEMENT_END_XTOKEN:
                if (isNoSpaceAtEndsVersion && context.lastElementContentValue === SPACE_XTOKEN) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
+                  this.pushValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_SPACE, [], sToken);
                }
                break;
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
                if (isNoSpaceAtEndsVersion || isSpaceAtEndsVersion) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [...notAllowedParams, xToken.type], sToken);
+                  this.pushValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_CONTENT, [...notAllowedParams, xToken.type], sToken);
                }
 
                if (xToken.type === GENERAL_ENTITY_START_XTOKEN) {
@@ -496,26 +496,26 @@ class CheckXTokenValidStream extends Transform {
                // whether those spaces are content or throwaway S.
 
                if (this.standalone && declInfo.externallyDeclared) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
+                  this.pushValidityError(ValidityError.ID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
                }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
                const piInEntity = context.elementContentEntityRefStack.length > 0;
                if ((!isOnlySInEntityVersion || (isOnlySInEntityVersion && piInEntity)) && !isTolerantVersion) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_PI, notAllowedParams, sToken);
+                  this.pushValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_PI, notAllowedParams, sToken);
                }
                break;
             case COMMENT_XTOKEN:
                const inEntity = context.elementContentEntityRefStack.length > 0;
                if ((!isOnlySInEntityVersion || (isOnlySInEntityVersion && inEntity)) && !isTolerantVersion) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, notAllowedParams, sToken);
+                  this.pushValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_COMMENT, notAllowedParams, sToken);
                }
                break;
             case TEXTDECL_XTOKEN:
                // We don't care if there is a TEXTDECL in here.
                break;
             default:
-               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [...notAllowedParams, xToken.type], sToken);
+               this.pushValidityError(ValidityError.ID.ELEMENT_CONTENT_XTRA_CONTENT, [...notAllowedParams, xToken.type], sToken);
                break;
          }
 

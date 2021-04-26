@@ -13,7 +13,7 @@ const S_REGEXP = /^[\t\n\r ]*$/;
 function charDataValidate(token: CharDataPToken, state: ValidateState, ec: ErrorCollector): void {
    if (
       !state.elementContext.activeContext ||
-      state.elementContext.activeContext.declDetails.type !== ElDeclType.CHILDREN
+      state.elementContext.activeContext.declDetails.type !== ElDeclType.ELEMENT
    ) {
       return;
    }
@@ -26,7 +26,7 @@ function charDataValidate(token: CharDataPToken, state: ValidateState, ec: Error
     *    white space (characters matching the nonterminal S).]
     */
    if (!S_REGEXP.test(strOrBlank(token.text))) {
-      ec.report(VID.CHILDREN_BAD_SPACE, [strOrBlank(token.text)]);
+      ec.report(VID.ELEMENT_CONTENT_BAD_SPACE, [strOrBlank(token.text)]);
    }
 }
 

@@ -81,7 +81,7 @@ function elementDeclarationUpdateState(
          if (!isMixed) {
             entry = {
                token: elDecl,
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                graph: makeCmGraph(elDecl.contentModel),
             };
          }

@@ -69,7 +69,7 @@ function adjustAttListDeclaration(token: any) {
 
 /*
  * Change the ELEMENT declaration token so that it is completely valid.
- *  - If content spec type is unknown make it ANY or CHILDREN
+ *  - If content spec type is unknown make it ANY or ELEMENT
  *  - If content spec type is known, but the wrong case, capitalize.
  *  - if content spec type is ANY or EMPTY, make sure there are no children.
  *  - Change any #PCDATA in the wrong case into all caps
@@ -77,7 +77,7 @@ function adjustAttListDeclaration(token: any) {
  *  - If this is Mixed (first item is #PCDATA) flatten any hierarchical items,
  *    make sure it is a CHOICE list, and the repeat is correct.
  */
-const ALLOWED_CONTENT_SPEC_TYPES = [ 'ANY', 'EMPTY', 'CHILDREN' ];
+const ALLOWED_CONTENT_SPEC_TYPES = [ 'ANY', 'EMPTY', 'ELEMENT' ];
 
 function adjustElementDeclaration(token: ElementDeclarationXToken): ElementDeclarationXToken {
    const contentSpec = token.contentSpec || '';
@@ -88,14 +88,14 @@ function adjustElementDeclaration(token: ElementDeclarationXToken): ElementDecla
 
    // note: A bunch of this is not needed any longer.  
    if (ALLOWED_CONTENT_SPEC_TYPES.indexOf(capContentSpec) === -1) {
-      const newContentSpec = token.contentModel ? ContentSpecType.CHILDREN : ContentSpecType.ANY;
+      const newContentSpec = token.contentModel ? ContentSpecType.ELEMENT : ContentSpecType.ANY;
       newToken = new ElementDeclarationXToken(token.name, newContentSpec, token.contentModel);
    } else if (contentSpec !== capContentSpec) {
       let specType: ContentSpecType;
 
       switch (capContentSpec) {
-         case 'CHILDREN':
-            specType = ContentSpecType.CHILDREN;
+         case 'ELEMENT':
+            specType = ContentSpecType.ELEMENT;
             break;
          default:
          case 'ANY':

@@ -57,7 +57,7 @@ describe('ValidityChecker (integration)', () => {
       });
    }
 
-   it('reports an error the current context is a CHILDREN context, but we are not at the end', (done) => {
+   it('reports an error the current context is a ELEMENT context, but we are not at the end', (done) => {
       expectError(
          `<?xml version="1.0"?>
       <!DOCTYPE root [
@@ -84,7 +84,7 @@ describe('ValidityChecker (integration)', () => {
             <one>
             </one>
          </root>`,
-         ValidityError.ID.CHILDREN_UNEXPECTED_END,
+         ValidityError.ID.ELEMENT_UNEXPECTED_END,
          done!,
       );
    });

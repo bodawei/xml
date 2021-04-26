@@ -107,7 +107,7 @@ describe('FixingStream (unit)', () => {
          });
       });
 
-      it('changes a bad type to CHILDREN if there are indeed children', (done) => {
+      it('changes a bad type to ELEMENT if there are indeed children', (done) => {
          const before = new ElementDeclarationXToken('elName', undefined, {
             particles: [],
             listType: CpType.CHOICE,
@@ -118,7 +118,7 @@ describe('FixingStream (unit)', () => {
          fs.end();
 
          gatherStreamResults<XToken>(fs, (tokens: Array<XToken>) => {
-            expect(tokens[0].contentSpec).toEqual(ContentSpecType.CHILDREN);
+            expect(tokens[0].contentSpec).toEqual(ContentSpecType.ELEMENT);
             done();
          });
       });
@@ -157,7 +157,7 @@ describe('FixingStream (unit)', () => {
       // });
 
       it('capitalizes #PCDATA', (done) => {
-         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.ELEMENT, {
             particles: [{
                name: '#pcdata',
                repeat: CpRepeat.ZEROPLUS
@@ -179,7 +179,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('moves #PCDATA to the start', (done) => {
-         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.ELEMENT, {
             particles: [{
                name: 'one',
                repeat: CpRepeat.ONEPLUS,
@@ -204,7 +204,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('moves #PCDATA to the start, even if in a sublist', (done) => {
-         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.ELEMENT, {
             particles: [{
                name: 'one',
                repeat: CpRepeat.ONEPLUS,
@@ -233,7 +233,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('removes duplicate #PCDATA', (done) => {
-         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.ELEMENT, {
             particles: [{
                name: '#pcdata',
                repeat: CpRepeat.ZEROPLUS
@@ -258,7 +258,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('flattens a Mixed list, removes duplicates and sets repeat correctly', (done) => {
-         const before = new ElementDeclarationXToken('elName', ContentSpecType.CHILDREN, {
+         const before = new ElementDeclarationXToken('elName', ContentSpecType.ELEMENT, {
             particles: [{
                name: 'one',
                repeat: CpRepeat.ONEPLUS,

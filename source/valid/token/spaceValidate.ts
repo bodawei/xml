@@ -13,7 +13,7 @@ const S_REGEXP = /^[\t\n\r ]*$/;
 function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollector): void {
    if (
       !state.elementContext.activeContext ||
-      state.elementContext.activeContext.declDetails.type !== ElDeclType.CHILDREN
+      state.elementContext.activeContext.declDetails.type !== ElDeclType.ELEMENT
    ) {
       return;
    }
@@ -31,7 +31,7 @@ function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollec
 
       for (const char of chars) {
          if (!S_REGEXP.test(char)) {
-            ec.report(VID.CHILDREN_BAD_SPACE, [char]);
+            ec.report(VID.ELEMENT_CONTENT_BAD_SPACE, [char]);
          }
       }
    }

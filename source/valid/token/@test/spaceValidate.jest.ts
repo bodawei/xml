@@ -25,7 +25,7 @@ describe('spaceValidate (unit)', () => {
             activeContext: {
                declDetails: {
                   token: makeElementDeclaration(),
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph: { startId: 0, endId: 0, states: {} },
                },
                parentName: 'foo',
@@ -41,14 +41,14 @@ describe('spaceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.CHILDREN_BAD_SPACE,
+         id: ValidityError.ID.ELEMENT_CONTENT_BAD_SPACE,
          params: ['\u0085'],
          position: space.text,
          lastPosition: undefined,
       });
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.CHILDREN_BAD_SPACE,
+         id: ValidityError.ID.ELEMENT_CONTENT_BAD_SPACE,
          params: ['\u2028'],
          position: space.text,
          lastPosition: undefined,
@@ -62,7 +62,7 @@ describe('spaceValidate (unit)', () => {
             activeContext: {
                declDetails: {
                   token: makeElementDeclaration(),
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph: { startId: 0, endId: 0, states: {} },
                },
                parentName: 'foo',

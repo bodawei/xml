@@ -54,7 +54,7 @@ describe('elementEndValidate (unit)', () => {
       const currentContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
-            type: ElDeclType.CHILDREN,
+            type: ElDeclType.ELEMENT,
             graph,
          },
          parentName: 'elementName',
@@ -63,7 +63,7 @@ describe('elementEndValidate (unit)', () => {
       state = new ValidateState({
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                token: new ElementDeclarationPToken({
                   open: toSToken('<!'),
                   declType: toSToken('ELEMENT'),
@@ -81,19 +81,19 @@ describe('elementEndValidate (unit)', () => {
       });
    });
 
-   it('reports an error the current context is a CHILDREN context, but we are not at the end', () => {
+   it('reports an error the current context is a ELEMENT context, but we are not at the end', () => {
       elementEndValidate(elementEnd, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.CHILDREN_UNEXPECTED_END,
+      expect(mockErrorCollector).toReportValidityError({
+         id: ValidityError.ID.ELEMENT_CONTENT_UNEXPECTED_END,
          params: ['elementName', 'one, two'],
          position: elementDeclaration.name,
          lastPosition: undefined,
       });
    });
 
-   it('reports no error the current context is a CHILDREN context, but we are at the end', () => {
+   it('reports no error the current context is a ELEMENT context, but we are at the end', () => {
       graph.states[4].done = true;
 
       elementEndValidate(elementEnd, state, mockErrorCollector);
@@ -129,7 +129,7 @@ describe('elementEndValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports no error when the active context is not a CHILDREN context', () => {
+   it('reports no error when the active context is not an ELEMENT context', () => {
       state = {
          ...state,
          elementContext: {

@@ -23,7 +23,7 @@ describe('conditionalValidate (unit)', () => {
             activeContext: {
                declDetails: {
                   token: makeElementDeclaration(),
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph: { startId: 0, endId: 0, states: {} },
                },
                parentName: 'foo',

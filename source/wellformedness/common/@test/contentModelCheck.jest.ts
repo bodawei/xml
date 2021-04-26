@@ -194,7 +194,7 @@ describe('contentModelCheck()', () => {
       });
    });
 
-   describe('non-mixed children', () => {
+   describe('element content', () => {
       it('checks if the name is valid', () => {
          contentModelCheck(cmToken, mockErrorCollector, confVer, true);
          const particle: ContentNameP = cmToken.delimitedParticles[0].particle as ContentNameP;

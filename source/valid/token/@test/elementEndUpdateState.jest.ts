@@ -124,7 +124,7 @@ describe('elementEndUpdateState (unit)', () => {
       const currentContext: ElementContext = {
          declDetails: {
             token: elementDeclaration,
-            type: ElDeclType.CHILDREN,
+            type: ElDeclType.ELEMENT,
             graph: { startId: 9, endId: 10, states: {} },
          },
          parentName: 'elementName',
@@ -134,7 +134,7 @@ describe('elementEndUpdateState (unit)', () => {
          elementDeclarations: {
             elementName: {
                token: elementDeclaration,
-               type: ElDeclType.CHILDREN,
+               type: ElDeclType.ELEMENT,
                graph: { startId: 9, endId: 10, states: {} },
             },
          },

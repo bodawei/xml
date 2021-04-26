@@ -16,7 +16,7 @@ function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: Erro
 
    const declDetails = context.declDetails;
 
-   if (declDetails.type !== ElDeclType.CHILDREN) {
+   if (declDetails.type !== ElDeclType.ELEMENT) {
       return;
    }
 
@@ -29,7 +29,7 @@ function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: Erro
    //     between each pair of child elements.
    ec.check(
       !currentState.done,
-      ValidityError.ID.CHILDREN_UNEXPECTED_END,
+      ValidityError.ID.ELEMENT_CONTENT_UNEXPECTED_END,
       [context.parentName, Object.keys(currentState.trans).join(', ')],
       el.name,
    );

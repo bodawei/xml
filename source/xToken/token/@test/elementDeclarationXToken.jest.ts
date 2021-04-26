@@ -89,7 +89,7 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'elementName',
-         contentSpec: 'CHILDREN',
+         contentSpec: 'ELEMENT',
          contentModel: {
             listType: CpType.CHOICE,
             particles: [],
@@ -140,7 +140,7 @@ describe('ElementDeclarationXToken', () => {
    });
 
    it('returns an element declaration when provided with specific parameters', () => {
-      const result = new ElementDeclarationXToken('one', ContentSpecType.CHILDREN, {
+      const result = new ElementDeclarationXToken('one', ContentSpecType.ELEMENT, {
          listType: CpType.CHOICE,
          particles: [],
          repeat: CpRepeat.ZEROPLUS,
@@ -149,7 +149,7 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'one',
-         contentSpec: 'CHILDREN',
+         contentSpec: 'ELEMENT',
          contentModel: {
             listType: CpType.CHOICE,
             particles: [],
@@ -179,7 +179,7 @@ describe('ElementDeclarationXToken', () => {
       expect(result).toEqual({
          type: ELEMENT_DECLARATION_XTOKEN,
          name: 'one',
-         contentSpec: ContentSpecType.CHILDREN,
+         contentSpec: ContentSpecType.ELEMENT,
          contentModel: {
             listType: CpType.CHOICE,
             particles: [],

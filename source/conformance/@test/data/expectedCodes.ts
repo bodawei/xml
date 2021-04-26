@@ -13,7 +13,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'invalid-not-sa-022': 'CONDITIONAL_BAD_NESTING', // Test the "Proper Conditional Section/ PE Nesting" validity constraint.
    'inv-dtd01': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC
    'inv-dtd02': 'ENTITYDECL_UNDECLARED_NOTATION', // Tests the "Notation Declared" VC by using an undeclared notation name.
-   'inv-dtd03': 'CHILDREN_UNEXPECTED_END', // Tests the "Element Valid" VC (clause 2) by omitting a required element.
+   'inv-dtd03': 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the "Element Valid" VC (clause 2) by omitting a required element.
    el01: 'UNDECLARED_ELEMENT', // Tests the Element Valid VC (clause 4) by including an undeclared child element.
    el02: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1) by including elements in an EMPTY content model.
    el03: 'INVALID_ELEMENT_IN_MIXED', // Tests the Element Valid VC (clause 3) by including a child element not permitted by a mixed content model.
@@ -29,7 +29,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    id07: 'ELEMENTSTART_IDREFS_NOT_NAME', // Tests the IDREFS (is a Names) VC
    id08: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (matches an ID) VC
    id09: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (IDREFS matches an ID) VC
-   'inv-not-sa01': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that optional whitespace causes a validity error.
+   'inv-not-sa01': 'ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that optional whitespace causes a validity error.
    'inv-not-sa02': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that attributes needing normalization cause a validity error.
    'inv-not-sa04': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that attributes needing defaulting cause a validity error.
    'inv-not-sa05': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that a token attribute that needs normalization causes a validity error.
@@ -41,28 +41,28 @@ const expectedInvalidCodes: IdToErrorMap = {
    'inv-not-sa11': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an IDREFS attribute needing normalization causes a validity error.
    'inv-not-sa12': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ENTITY attribute needing normalization causes a validity error.
    'inv-not-sa13': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ENTITIES attribute needing normalization causes a validity error.
-   'inv-not-sa14': 'CHILDREN_XTRA_CONTENT', // CDATA sections containing only whitespace do not match the nonterminal S, and cannot appear in these positions.
+   'inv-not-sa14': 'ELEMENT_CONTENT_XTRA_CONTENT', // CDATA sections containing only whitespace do not match the nonterminal S, and cannot appear in these positions.
 
-   optional01: 'CHILDREN_UNEXPECTED_END', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one is required.
+   optional01: 'ELEMENT_CONTENT_UNEXPECTED_END', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one is required.
    optional02: 'INVALID_ELEMENT_IN_CONTENT', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing two children where one is required.
-   optional03: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where two are required.
+   optional03: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where two are required.
    optional04: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where two are required.
-   optional05: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (one construction of that model).
-   optional06: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a second construction of that model).
-   optional07: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a third construction of that model).
-   optional08: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fourth construction of that model).
-   optional09: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fifth construction of that model).
+   optional05: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (one construction of that model).
+   optional06: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a second construction of that model).
+   optional07: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a third construction of that model).
+   optional08: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fourth construction of that model).
+   optional09: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fifth construction of that model).
    optional10: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a basic construction of that model).
    optional11: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a second construction of that model).
    optional12: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a third construction of that model).
    optional13: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fourth construction of that model).
    optional14: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fifth construction of that model).
-   optional20: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a sixth construction of that model).
-   optional21: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a seventh construction of that model).
-   optional22: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (an eigth construction of that model).
-   optional23: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a ninth construction of that model).
-   optional24: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a tenth construction of that model).
-   optional25: 'CHILDREN_XTRA_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing text content where one or more elements are required.
+   optional20: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a sixth construction of that model).
+   optional21: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a seventh construction of that model).
+   optional22: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (an eigth construction of that model).
+   optional23: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a ninth construction of that model).
+   optional24: 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a tenth construction of that model).
+   optional25: 'ELEMENT_CONTENT_XTRA_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing text content where one or more elements are required.
    'inv-required00': 'ELEMENTSTART_NO_REQUIRED', // Tests the Required Attribute VC.
    'inv-required01': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
    'inv-required02': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
@@ -86,7 +86,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    attr16: 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal enumeration value.
    utf16b: 'error', // Tests reading an invalid "big endian" UTF-16 document
    utf16l: 'error', // Tests reading an invalid "little endian" UTF-16 document
-   empty: 'CHILDREN_XTRA_CONTENT', // CDATA section containing only white space does not match the nonterminal S, and cannot appear in these positions.
+   empty: 'ELEMENT_CONTENT_XTRA_CONTENT', // CDATA section containing only white space does not match the nonterminal S, and cannot appear in these positions.
 
    'o-p01pass1': 'UNDECLARED_ELEMENT', // no prolog
    'o-p01pass3': 'UNDECLARED_ELEMENT', // Misc items after the document
@@ -145,9 +145,9 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P28-ibm28i01.xml': 'MISMATCH_ROOT_ELEMENT_TYPE', // great
    'ibm-invalid-P32-ibm32i01.xml': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // great
    'ibm-invalid-P32-ibm32i03.xml': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // great
-   'ibm-invalid-P32-ibm32i04.xml': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // great
+   'ibm-invalid-P32-ibm32i04.xml': 'ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED', // great
    'ibm-invalid-P39-ibm39i01.xml': 'CONTENT_IN_EMPTY_ELEMENT', // great
-   'ibm-invalid-P39-ibm39i02.xml': 'CHILDREN_XTRA_CONTENT', // good
+   'ibm-invalid-P39-ibm39i02.xml': 'ELEMENT_CONTENT_XTRA_CONTENT', // good
    'ibm-invalid-P39-ibm39i03.xml': 'INVALID_ELEMENT_IN_MIXED', // great
    'ibm-invalid-P39-ibm39i04.xml': 'UNDECLARED_ELEMENT', // great
    'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
@@ -219,8 +219,8 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P89-ibm89n11.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
    'ibm-invalid-P89-ibm89n12.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
 
-   'ibm-1-1-valid-P46-ibm46i01.xml': 'CHILDREN_BAD_SPACE', // ok - An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
-   'ibm-1-1-valid-P46-ibm46i02.xml': 'CHILDREN_BAD_SPACE', // ok - An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
+   'ibm-1-1-valid-P46-ibm46i01.xml': 'ELEMENT_CONTENT_BAD_SPACE', // ok - An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
+   'ibm-1-1-valid-P46-ibm46i02.xml': 'ELEMENT_CONTENT_BAD_SPACE', // ok - An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
    'rmt-e2e-2a': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Duplicate token in enumerated attribute declaration
    'rmt-e2e-2b': 'ATTLISTDECL_DUPLICATE_NOTATION', // great - Duplicate token in NOTATION attribute declaration
@@ -241,8 +241,8 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-e2e-15b': 'CONTENT_IN_EMPTY_ELEMENT', // meh - Empty content can't contain a comment
    'rmt-e2e-15c': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain a PI
    'rmt-e2e-15d': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain whitespace
-   'rmt-e2e-15g': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain character reference to whitespace
-   'rmt-e2e-15h': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain entity reference if replacement text is character reference to whitespace
+   'rmt-e2e-15g': 'ELEMENT_CONTENT_XTRA_CONTENT', // ok - Element content can't contain character reference to whitespace
+   'rmt-e2e-15h': 'ELEMENT_CONTENT_XTRA_CONTENT', // ok - Element content can't contain entity reference if replacement text is character reference to whitespace
    'rmt-e2e-20': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // Tokens, after normalization, must be separated by space, not other whitespace characters
    'rmt-015': 'UNDECLARED_ELEMENT', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-017': 'UNDECLARED_ELEMENT', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
@@ -251,10 +251,10 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-032': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-036': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
    'rmt-037': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-   'rmt-048': 'CHILDREN_XTRA_CONTENT', // meh - Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-046': 'CHILDREN_XTRA_CONTENT', // meh - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-052': 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-   'rmt-053': 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-048': 'ELEMENT_CONTENT_XTRA_CONTENT', // meh - Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-046': 'ELEMENT_CONTENT_XTRA_CONTENT', // meh - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-052': 'ELEMENT_CONTENT_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-053': 'ELEMENT_CONTENT_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
 
    // Group namespaces
    'rmt-ns10-017': 'error', // Simple legal case: no namespaces

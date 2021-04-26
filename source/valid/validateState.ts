@@ -7,7 +7,7 @@ import { CmGraph } from './contentModal/cmGraphTypes';
 
 enum ElDeclType {
    ANY,
-   CHILDREN,
+   ELEMENT,
    EMPTY,
    MIXED,
 }
@@ -29,13 +29,13 @@ interface MixedDetails {
    duplicateNames: Array<string>;
 }
 
-interface ChildrenDetails {
+interface ElementDetails {
    token: ElementDeclarationPToken;
-   type: ElDeclType.CHILDREN;
+   type: ElDeclType.ELEMENT;
    graph: CmGraph;
 }
 
-type DeclarationDetails = AnyDetails | EmptyDetails | MixedDetails | ChildrenDetails;
+type DeclarationDetails = AnyDetails | EmptyDetails | MixedDetails | ElementDetails;
 
 interface ParameterEntityDetails {
    isInternal: boolean;

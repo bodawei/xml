@@ -25,7 +25,7 @@ describe('charDataValidate (unit)', () => {
             activeContext: {
                declDetails: {
                   token: makeElementDeclaration(),
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph: { startId: 0, endId: 0, states: {} },
                },
                parentName: 'foo',
@@ -41,7 +41,7 @@ describe('charDataValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.CHILDREN_BAD_SPACE,
+         id: ValidityError.ID.ELEMENT_CONTENT_BAD_SPACE,
          params: [' \u0085 \u2028'],
          position: charData.text,
          lastPosition: undefined,
@@ -55,7 +55,7 @@ describe('charDataValidate (unit)', () => {
             activeContext: {
                declDetails: {
                   token: makeElementDeclaration(),
-                  type: ElDeclType.CHILDREN,
+                  type: ElDeclType.ELEMENT,
                   graph: { startId: 0, endId: 0, states: {} },
                },
                parentName: 'foo',

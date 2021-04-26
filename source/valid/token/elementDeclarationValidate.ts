@@ -215,7 +215,7 @@ function elementDeclarationValidate(
       ]);
    }
 
-   if (declInfo.type === ElDeclType.CHILDREN) {
+   if (declInfo.type === ElDeclType.ELEMENT) {
       // §3.2.1
       //   For compatibility, it is an error if an element in the document can
       //    match more than one occurrence of an element type in the content
@@ -240,7 +240,7 @@ function elementDeclarationValidate(
       }
    }
 
-   if (declInfo.type === ElDeclType.CHILDREN || declInfo.type === ElDeclType.MIXED) {
+   if (declInfo.type === ElDeclType.ELEMENT || declInfo.type === ElDeclType.MIXED) {
       validateEntities(elDecl, elName, state, ec, version);
    }
 }
