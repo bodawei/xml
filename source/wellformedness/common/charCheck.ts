@@ -75,7 +75,7 @@ function charCheck(
    if (confVer.version === 1.1) {
       discouragedRegEx = DISCOURAGED_CHARS_11;
    } else {
-      switch (confVer.revision) {
+      switch (confVer.edition) {
          case 1:
          case 2:
             return; // no discouraged characters here

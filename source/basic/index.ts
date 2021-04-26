@@ -5,7 +5,7 @@ import { ConformanceVersion } from './conformanceVersion';
 import { EntityId } from './entityId';
 
 type XmlVersion = 1.0 | 1.1;
-type XmlRevision = 1 | 2 | 3 | 4 | 5 | 6;
+type XmlEdition = 1 | 2 | 3 | 4 | 5 | 6;
 
 type BaseToken = BaseError | EntityId | ConformanceVersion;
 
@@ -40,4 +40,4 @@ export * from './doAsyncWhileLoop';
 export * from './extractSurrogatePair';
 export * from './XmlError';
 export * from './XmlFatalError';
-export { XmlVersion, XmlRevision };
+export { XmlVersion, XmlEdition };

@@ -449,7 +449,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
             isError ? 'an' : 'no'
          } error when the value is ${version} and the conf version is ${
             confVer.version === 1.0 ? '1.0' : 1.1
-         }/${confVer.revision} (§2.8.0 and §4.3.4)`, () => {
+         }/${confVer.edition} (§2.8.0 and §4.3.4)`, () => {
             xmlDeclPToken = new XmlDeclarationPToken({
                open: toSToken('<?'),
                target: toSToken('xml'),

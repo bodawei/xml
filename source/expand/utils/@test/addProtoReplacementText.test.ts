@@ -59,7 +59,7 @@ describe('addProtoReplacementText() (unit)', () => {
          confVer: {
             type: CONFORMANCE_VERSION,
             version: 1,
-            revision: 5,
+            edition: 5,
          },
          entityDetails,
          loadExternalEntities: true,

@@ -35,7 +35,7 @@ function nmtokenCheck(
    //    Values of type NMTOKEN must match the Nmtoken production;
    //    values of type NMTOKENS must match Nmtokens.
    for (let index = 0; index < names.length; index++) {
-      if (!isNmToken(names[index], state.confVer.version, state.confVer.revision)) {
+      if (!isNmToken(names[index], state.confVer.version, state.confVer.edition)) {
          badNames.push(names[index]);
       }
    }

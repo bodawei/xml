@@ -78,7 +78,7 @@ describe('PTokenStream (unit)', () => {
                jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1,
-               revision: 5,
+               edition: 5,
             }));
             done();
          });
@@ -99,7 +99,7 @@ describe('PTokenStream (unit)', () => {
                jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1,
-               revision: 5,
+               edition: 5,
             }));
             done();
          });
@@ -117,7 +117,7 @@ describe('PTokenStream (unit)', () => {
                jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1.1,
-               revision: 2,
+               edition: 2,
             }));
             done();
          });
@@ -128,7 +128,7 @@ describe('PTokenStream (unit)', () => {
             confVer: {
                type: CONFORMANCE_VERSION,
                version: 1.0,
-               revision: 3,
+               edition: 3,
             },
          });
          pTokenStream.addText('<?xml version="1.1"?>');
@@ -140,7 +140,7 @@ describe('PTokenStream (unit)', () => {
             expect(result).toEqual(jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1.0,
-               revision: 3,
+               edition: 3,
             }));
             done();
          });
@@ -157,7 +157,7 @@ describe('PTokenStream (unit)', () => {
             expect(result).toEqual(jasmine.objectContaining({
                type: CONFORMANCE_VERSION,
                version: 1.0,
-               revision: 5,
+               edition: 5,
             }));
             done();
          });

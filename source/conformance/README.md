@@ -16,7 +16,7 @@ There are three other bodies of data that go into describing all the test to be 
 
 * `testFilters.ts` This is a file which lists any xmlconf tests that should not be run. It has both an exclude section, as well as an include section. The latter actually means "include only these in the run".  Both sections contain arrays of test ID's (as defined in the xmlconf metadata). This has mainly been used as a debugging tool to help more precisely control which tests should be run at any given time.  However, since there is at least one xmlconf test which I think it wrong (ibm-not-wf-P66-ibm66n03.xml), the exclude list includes those too.
 
-* `expectedCodes.ts` For all error, invalid and not-wellformed tests, we need to identify that these tests fail for the right reasons.  Thus, this file contains the expected error code for each test.  In some cases, the error codes are not precise enough, so additional metadata can be included (at this moment, just a substring of the error message that must be matched). In addition, some tests will fail in some versions/revisions, but not in others (`x-rmt-008` is a good example). Thus, you can also add an entry of the form `x-rmt-008==V1R5` which indicates that this is the expected error information for Version 1.0, revision 5.  Finally, if the error id value is set to `"none"`, then this is the same as saying that the test will not generate any errors.
+* `expectedCodes.ts` For all error, invalid and not-wellformed tests, we need to identify that these tests fail for the right reasons.  Thus, this file contains the expected error code for each test.  In some cases, the error codes are not precise enough, so additional metadata can be included (at this moment, just a substring of the error message that must be matched). In addition, some tests will fail in some versions/editions, but not in others (`x-rmt-008` is a good example). Thus, you can also add an entry of the form `x-rmt-008==V1R5` which indicates that this is the expected error information for Version 1.0, edition 5.  Finally, if the error id value is set to `"none"`, then this is the same as saying that the test will not generate any errors.
 
 * `fixTest.ts` Bafflingly, many tests have minor defects in them (!). Mos notably, hundreds of tests lack an XML declaration (`<?xml version=...?>`). One can only assume that the original builders of these tests were relying on a harness that automatically added that, since it is quite explicit in the specification that that is required. In at least one case, it looks like one of the test answers is wrong, and so this fixes that. See the appendix below for more details.
 
@@ -93,7 +93,7 @@ For these, note that the xmlconf `testcases.dtd` file says "Nonvalidating parser
 
 These are "wrong":
 
-* x-rmt-008 says for 1.0/1-4 it should fail, but for 1.0/5 it should pass. This is true for revision 2-5, but is not true for 1.0/1.  That is, if the assertion of the test is: if your processor can handle processing revision 5, then a version of 1.7 is legal, as long as it uses no features not found in 1.9.  Well, then, given the syntax for version in 1.0/1, then if you have a processor that can only handle processng revision 1, then 1.7 is legal as long as it only uses 1.0/1 features.
+* x-rmt-008 says for 1.0/1-4 it should fail, but for 1.0/5 it should pass. This is true for edition 2-5, but is not true for 1.0/1.  That is, if the assertion of the test is: if your processor can handle processing edition 5, then a version of 1.7 is legal, as long as it uses no features not found in 1.9.  Well, then, given the syntax for version in 1.0/1, then if you have a processor that can only handle processng edition 1, then 1.7 is legal as long as it only uses 1.0/1 features.
 * These three all have what I think are invalid language codes
    * v-lang03: i-klingon-whorf
    * v-lang04: x-dialect-valleygirl
@@ -124,7 +124,7 @@ These have errors:
    * 'x-ibm-1-0.5-not-wf-P04a-ibm04an23.xml', // Tests an element with an illegal NameChar: #0xDAFF
    * 'x-ibm-1-0.5-not-wf-P04a-ibm04an24.xml', // Tests an element with an illegal NameChar: #0xDFFF
 
-* These tests are in the "invalid" category.  But, they appear to be failing beause of wellformed errors. You'll note that both of these tests, which apply to revision 5 of the XML 1.0 standard, and their descriptin say these names should be valid.
+* These tests are in the "invalid" category.  But, they appear to be failing beause of wellformed errors. You'll note that both of these tests, which apply to edition 5 of the XML 1.0 standard, and their descriptin say these names should be valid.
       * 'invalid-sa-140', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
       * 'invalid-sa-141', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
 * These are the same as the previous, but these are for 1.1

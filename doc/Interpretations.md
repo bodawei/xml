@@ -104,7 +104,7 @@ The syntactic construct, Name, is used for the identifiers for elements, attribu
 
 # Validity
 ## Element Content
-In production 43, `content` is defined as `(CharData | element | Reference | CDSect | PI | Comment)` (with some variation in latter spec revisions to prevent `]]>` from accidentally being possible).
+In production 43, `content` is defined as `(CharData | element | Reference | CDSect | PI | Comment)` (with some variation in latter spec editions to prevent `]]>` from accidentally being possible).
 
 Further by the time one is actually doing validation, the References must have been replaced by `CharData | element | CDSect | PI | Comment` or else some other error would have been encountered.
 
@@ -522,7 +522,7 @@ In conclusion:
 # Mixed versions
 How should this processor respond if it encounters different xml versions while processing a document (e.g. the XML Declaration is 1.0, but some Text Declaration is 1.1, or vice versa)?
 
-This varies across revisions of the XML standard.  As a background, note that version 1.1 didn't formally exist until early 2004 (though drafts of it were being worked on in 2002).  Also note that all the text for the 1.0/* cases is from §2.8.0, while that for 1.1/* is from §4.3.4
+This varies across editions of the XML standard.  As a background, note that version 1.1 didn't formally exist until early 2004 (though drafts of it were being worked on in 2002).  Also note that all the text for the 1.0/* cases is from §2.8.0, while that for 1.1/* is from §4.3.4
 
 * 1.0/1 and 1.0/2: Pretty silent about what happens if a 1.0 document references a version other than 1.0 (though, it does allow a very wide syntax for version numbers).  This is syntactically allowed, but it is also declared that this is an error if anything but "1.0" is specified.  Thus, this processor will report an XmlError if it is not 1.0 (it will, however, nonetheless process the non 1.0 document As a 1.0 document, so if it fails some other WF or validity constraint, it will produce an error)
 * 1.0/3 and 1.0/4: These changed the syntax for `VersionNum` to only allow `1.0`. (this is interesting, since 1.0/3 was released the same time 1.1 was) (note that the eratta that produced this change is at https://www.w3.org/XML/xml-V10-2e-errata.html#E38 ) Thus, this processor considers the presence in an XML Declaration or Text Declaration of a version value that is not 1.0 to be a well formed error. It will then process the contents as 1.0, regardless of the specified version.

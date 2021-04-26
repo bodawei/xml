@@ -141,8 +141,8 @@ function validateEntities(
       //    not be empty ...
       //    (1.0/2 changes this to "replacement text should contain at least one non-blank character"
       const hasEmptyContent =
-         (version.version === 1 && version.revision === 1 && space === 0 && nonSpace === 0) ||
-         (((version.version === 1 && version.revision > 1) || version.version > 1) &&
+         (version.version === 1 && version.edition === 1 && space === 0 && nonSpace === 0) ||
+         (((version.version === 1 && version.edition > 1) || version.version > 1) &&
             nonSpace === 0);
 
       if (cmEndFound && hasEmptyContent) {

@@ -47,7 +47,7 @@ function checkVersionString(
 ): void {
    const code = isXmlDecl ? WFEID.XMLDECL_VERSION_INVALD : WFEID.TEXTDECL_VERSION_INVALD;
 
-   if (confVer.version === 1 && confVer.revision <= 2) {
+   if (confVer.version === 1 && confVer.edition <= 2) {
       const doesNotMatchSyntax = !VERSION_10_1_REGEXP.test(versionText);
       const isNot10 = versionText !== '1.0';
 
@@ -56,9 +56,9 @@ function checkVersionString(
       } else if (isNot10) {
          ec.reportError(XmlError.ID.DECL_VERSION_PROBLEM, XmlError, ['1.0', versionText]);
       }
-   } else if (confVer.version === 1 && confVer.revision < 5) {
+   } else if (confVer.version === 1 && confVer.edition < 5) {
       ec.check(versionText !== '1.0', code, ['1.0', versionText]);
-   } else if (confVer.version === 1 && confVer.revision >= 5) {
+   } else if (confVer.version === 1 && confVer.edition >= 5) {
       const doesNotMatchSyntax = !VERSION_10_5_REGEXP.test(versionText);
       const isNot10 = versionText !== '1.0';
 

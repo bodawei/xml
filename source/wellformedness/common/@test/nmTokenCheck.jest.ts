@@ -13,8 +13,8 @@ jest.mock('basic', () => {
    const realBasic: Record<string, unknown> = jest.requireActual('basic');
    return {
       ...realBasic,
-      isNmToken: (nmToken: string, version: number, revision: number) => {
-         return nmToken === 'good' && version === 1 && revision === 3;
+      isNmToken: (nmToken: string, version: number, edition: number) => {
+         return nmToken === 'good' && version === 1 && edition === 3;
       },
    };
 });

@@ -1,5 +1,6 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ConformanceVersion } from '../conformanceVersion';
 
 describe('ConformanceVersion', () => {
@@ -11,7 +12,7 @@ describe('ConformanceVersion', () => {
       const token: ConformanceVersion = {
          type: CONFORMANCE_VERSION,
          version: 1,
-         revision: 4,
+         edition: 4,
       };
 
       // This is a lame test.  The core of it really is that
@@ -19,45 +20,41 @@ describe('ConformanceVersion', () => {
       expect(token).toEqual({
          type: 'CONFORMANCE_VERSION',
          version: 1,
-         revision: 4,
+         edition: 4,
       });
    });
 
-   it('can construct from another instance', () => {
-      const token: ConformanceVersion = {
-         type: CONFORMANCE_VERSION,
-         version: 1,
-         revision: 4,
-      };
+   it('constructs from another instance', () => {
+      const token: ConformanceVersion = new ConformanceVersion(1, 4);
 
-      expect(new ConformanceVersion(token)).toEqual(jasmine.objectContaining({
+      expect(new ConformanceVersion(token)).toEqual({
          type: 'CONFORMANCE_VERSION',
          version: 1,
-         revision: 4,
-      }));
+         edition: 4,
+      });
    });
 
-   it('can construct with no arguments', () => {
-      expect(new ConformanceVersion()).toEqual(jasmine.objectContaining({
+   it('constructs with no arguments', () => {
+      expect(new ConformanceVersion()).toEqual({
          type: 'CONFORMANCE_VERSION',
          version: 1,
-         revision: 5,
-      }));
+         edition: 5,
+      });
    });
 
-   it('can construct with only a 1.1 version ', () => {
-      expect(new ConformanceVersion(1.1)).toEqual(jasmine.objectContaining({
+   it('constructs with only a 1.1 version ', () => {
+      expect(new ConformanceVersion(1.1)).toEqual({
          type: 'CONFORMANCE_VERSION',
          version: 1.1,
-         revision: 2,
-      }));
+         edition: 2,
+      });
    });
 
-   it('can construct with only a 1.0 version ', () => {
-      expect(new ConformanceVersion(1.0)).toEqual(jasmine.objectContaining({
+   it('constructs with only a 1.0 version ', () => {
+      expect(new ConformanceVersion(1.0)).toEqual({
          type: 'CONFORMANCE_VERSION',
          version: 1,
-         revision: 5,
-      }));
+         edition: 5,
+      });
    });
 });

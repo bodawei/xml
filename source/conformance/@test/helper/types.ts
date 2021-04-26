@@ -56,7 +56,7 @@ interface ErrorDetails {
 interface TestDetails extends Test {
    readonly expectedError?: {
       // These all are of the form V1R1 or 'default'
-      readonly [versionRevision: string]: ErrorDetails | undefined;
+      readonly [versionEdition: string]: ErrorDetails | undefined;
    };
    readonly cases: Array<TestCases>;
    readonly suite: TestSuite;

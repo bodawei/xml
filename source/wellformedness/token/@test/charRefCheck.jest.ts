@@ -10,7 +10,15 @@ import { WellFormedError } from '../../error/WellFormedError';
 
 import { charRefCheck } from '../charRefCheck';
 
-jest.mock('basic');
+jest.mock('basic', () => {
+   const basicOriginal: Record<string, unknown> = jest.requireActual('basic');
+
+   return {
+      ...basicOriginal,
+      isChar: jest.fn(),
+      extractSurrogatePair: jest.fn(),
+   };
+});
 
 describe('charRefCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -19,11 +27,7 @@ describe('charRefCheck()', () => {
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
-      confVer = {
-         type: 'CONFORMANCE_VERSION',
-         version: 1.0,
-         revision: 2,
-      };
+      confVer = new ConformanceVersion(1, 2);
 
       (extractSurrogatePair as jest.Mock).mockReturnValue([123, 456]);
 

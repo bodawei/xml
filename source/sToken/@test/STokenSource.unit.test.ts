@@ -389,7 +389,7 @@ describe('STokenSource (unit)', () => {
          source.setConfVer({
             type: CONFORMANCE_VERSION,
             version: 1.1,
-            revision: 3,
+            edition: 3,
          });
 
          source.extract('foo', 55, () => {});

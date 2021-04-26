@@ -14,7 +14,7 @@ function nameCheck(
    confVer: ConformanceVersion,
    errorCode: string,
 ): void {
-   if (!nameSToken || isName(nameSToken.str, confVer.version, confVer.revision)) {
+   if (!nameSToken || isName(nameSToken.str, confVer.version, confVer.edition)) {
       return;
    }
 

@@ -214,14 +214,14 @@ function attributeLangCheck(
 
    const attrValue = getAttributeValueText(value);
 
-   if (confVer.version === 1.0 && confVer.revision === 1) {
+   if (confVer.version === 1.0 && confVer.edition === 1) {
       check1dot0rev1(value, attrValue, ec);
       return;
    }
 
    if (
       attrValue === '' &&
-      ((confVer.version === 1.0 && confVer.revision >= 3) || confVer.version === 1.1)
+      ((confVer.version === 1.0 && confVer.edition >= 3) || confVer.version === 1.1)
    ) {
       return;
    }

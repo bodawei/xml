@@ -27,11 +27,11 @@ There are a couple caveats to this:
    <body attr="&CRLF;" attr_indirect="&CRLF_INDIRECT;">
    ```
    * That is, by the time we get to processing the attribute, we'll have a TextPToken with content of `"\r\n"`
-   * Revision 1.0/1 of the XML spec says `\r\n` should be normalized as `' '` when it "is part of an external parsed entity or the literal entity value of an internal parsed entity"
+   * ReviEditionsion 1.0/1 of the XML spec says `\r\n` should be normalized as `' '` when it "is part of an external parsed entity or the literal entity value of an internal parsed entity"
       * If it is part of an external parsed entity as literal characters 0x0D and 0x0A, then that will already have been converted to 0x0A by §2.11.  If it is specified with character references, then those character references will be passed through unchanged, as discussed above.
       * if they appear as the literal entity value (see §4.5.0) of an internal entity value (that is, before the value is converted to replacement test) it will also have been converted to a single `\n` by §2.11
       * In short, this bit of phrasing is a red-herring, and appers to be trying to help support what is said in §2.11 but at a glance implies other processing.
-   * Subsequent versions and revisions all indicate it should be normalized as two spaces: `'  '`.
+   * Subsequent versions and editions all indicate it should be normalized as two spaces: `'  '`.
       * I don't see any indication that this kind of 
    * So, what happens in the above example?
       * The char references in CRLF_INDIRECT will be processed as is normal for internal entities.

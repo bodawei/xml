@@ -15,7 +15,7 @@ function checkEntity(
    confVer: ConformanceVersion,
 ) {
    // E55 in https://www.w3.org/XML/xml-V10-2e-errata changed how this should be reported
-   const isForbidden = confVer.version === 1 && confVer.revision < 3;
+   const isForbidden = confVer.version === 1 && confVer.edition < 3;
 
    for (const element of value) {
       if (element.type !== TEXT_PTOKEN) {

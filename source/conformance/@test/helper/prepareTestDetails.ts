@@ -50,8 +50,8 @@ function buildDetails(
    }
 
    for (const ver of [1.0, 1.1]) {
-      for (const revision of [1, 2, 3, 4, 5, 6]) {
-         const key = `V${ver}R${revision}`;
+      for (const edition of [1, 2, 3, 4, 5, 6]) {
+         const key = `V${ver}R${edition}`;
          const longKey = `${test.ID}--${key}`;
          const info = constructErrorInfo(expected, longKey);
 

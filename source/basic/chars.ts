@@ -3,7 +3,7 @@
 import { surrogatePairToCharCode } from './surrogatePairToCharCode';
 
 type XMLVersion = 1.0 | 1.1;
-type XMLRevision = 1 | 2 | 3 | 4 | 5 | 6;
+type XMLedition = 1 | 2 | 3 | 4 | 5 | 6;
 
 const SPACE_10_REGEX = /^[ \t\n\r]+$/;
 const SPACE_11_REGEX = /^[ \t\n\r\u0085\u2028]+$/;
@@ -81,8 +81,8 @@ function isSpace(candidate: string, version: XMLVersion = 1.0): boolean {
       [89] Extender      ::= #x00B7 | #x02D0 | #x02D1 | #x0387 | #x0640 | #x0E46 | #x0EC6 | #x3005 | [#x3031-#x3035] | [#x309D-#x309E] | [#x30FC-#x30FE]
 \**********************************************************************/
 
-function isName(candidate: string, version: XMLVersion = 1.0, revision: XMLRevision = 5): boolean {
-   const use11Names = version === 1.1 || (version === 1.0 && revision >= 5);
+function isName(candidate: string, version: XMLVersion = 1.0, edition: XMLedition = 5): boolean {
+   const use11Names = version === 1.1 || (version === 1.0 && edition >= 5);
    const regEx = use11Names ? WHOLENAME_REGEX11 : WHOLENAME_REGEX10;
 
    const allowedChars = !!regEx.exec(candidate);
@@ -115,12 +115,8 @@ function isName(candidate: string, version: XMLVersion = 1.0, revision: XMLRevis
       [89] Extender      ::= #x00B7 | #x02D0 | #x02D1 | #x0387 | #x0640 | #x0E46 | #x0EC6 | #x3005 | [#x3031-#x3035] | [#x309D-#x309E] | [#x30FC-#x30FE]
 \**********************************************************************/
 
-function isNmToken(
-   candidate: string,
-   version: XMLVersion = 1.0,
-   revision: XMLRevision = 5,
-): boolean {
-   const use11Names = version === 1.1 || (version === 1.0 && revision >= 5);
+function isNmToken(candidate: string, version: XMLVersion = 1.0, edition: XMLedition = 5): boolean {
+   const use11Names = version === 1.1 || (version === 1.0 && edition >= 5);
    const regEx = use11Names ? WHOLENMTOKEN_REGEX11 : WHOLENMTOKEN_REGEX10;
 
    const allowedChars = !!regEx.exec(candidate);

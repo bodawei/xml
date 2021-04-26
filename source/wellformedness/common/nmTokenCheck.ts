@@ -14,7 +14,7 @@ function nmTokenCheck(
    confVers: ConformanceVersion,
    errorCode: string,
 ): void {
-   if (!nameTokenSToken || isNmToken(nameTokenSToken.str, confVers.version, confVers.revision)) {
+   if (!nameTokenSToken || isNmToken(nameTokenSToken.str, confVers.version, confVers.edition)) {
       return;
    }
 

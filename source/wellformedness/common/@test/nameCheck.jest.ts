@@ -11,8 +11,8 @@ jest.mock('basic', () => {
    const realBasic: Record<string, unknown> = jest.requireActual('basic');
    return {
       ...realBasic,
-      isName: (name: string, version: number, revision: number) => {
-         return name === 'good' && version === 1 && revision === 3;
+      isName: (name: string, version: number, edition: number) => {
+         return name === 'good' && version === 1 && edition === 3;
       },
    };
 });

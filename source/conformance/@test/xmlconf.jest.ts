@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
-import { ConformanceVersion, XmlRevision, XmlVersion } from 'basic';
+import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, CheckWellFormed } from 'nodeStream';
 import { ContextType, ParseToken } from 'pToken';
@@ -24,7 +24,7 @@ installMatchers();
 function setupWellFormedStream(
    test: TestDetails,
    ver?: XmlVersion,
-   rev?: XmlRevision,
+   edition?: XmlEdition,
 ): {
    pTokenStream: PTokenStream;
    wellFormedStream: CheckWellFormed;
@@ -32,7 +32,7 @@ function setupWellFormedStream(
    const sTokenSource = new STokenSource();
    const pTokenStream = new PTokenStream(sTokenSource, {
       context: ContextType.DOCUMENT,
-      confVer: ver && rev ? new ConformanceVersion(ver, rev) : undefined,
+      confVer: ver && edition ? new ConformanceVersion(ver, edition) : undefined,
    });
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
@@ -46,7 +46,7 @@ function setupWellFormedStream(
    };
 }
 
-function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlRevision): Transform {
+function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlEdition): Transform {
    const { pTokenStream, wellFormedStream } = setupWellFormedStream(test, ver, rev);
    const checkValidity = new CheckValidityStream();
    const toXToken = new PToXTokenStream();
@@ -65,13 +65,13 @@ describe('XML Conformance tests', () => {
 
    allDetails.forEach((testData) => {
       const ver = testData.VERSION ? (Number.parseFloat(testData.VERSION) as XmlVersion) : 1.0;
-      const defaultRev: XmlRevision = ver === 1.0 ? 5 : 2;
+      const defaultRev: XmlEdition = ver === 1.0 ? 5 : 2;
       const editionString = testData.EDITION ? testData.EDITION : String(defaultRev);
       const hasEdition = !!testData.EDITION;
 
       const allEditions = editionString
          .split(/ +/)
-         .map((ver) => Number.parseInt(ver, 10) as XmlRevision);
+         .map((ver) => Number.parseInt(ver, 10) as XmlEdition);
 
       allEditions.forEach((edition) => {
          it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {

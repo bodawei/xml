@@ -21,7 +21,7 @@ function nameXmlCheck(
       return;
    }
 
-   const isV1R6 = confVer.version === 1.0 && confVer.revision === 6;
+   const isV1R6 = confVer.version === 1.0 && confVer.edition === 6;
    const name = nameSToken.str;
    const lcName = nameSToken.str.toLowerCase();
 
