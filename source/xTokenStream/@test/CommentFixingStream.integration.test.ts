@@ -5,12 +5,7 @@ import { Transform } from 'stream';
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { STokenSource } from 'sToken';
-import {
-   COMMENT_XTOKEN,
-   CHARDATA_XTOKEN,
-   ELEMENT_END_XTOKEN
-} from 'token';
-import {    ELEMENT_START_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
+import {   COMMENT_XTOKEN, ELEMENT_END_XTOKEN,  CHARDATA_XTOKEN,  ELEMENT_START_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 
 import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';

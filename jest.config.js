@@ -23,7 +23,7 @@ module.exports = {
      '!source/attFixer/**/@test/**/*.ts',
      'source/basic/**/conformanceVersion.ts',
      '!source/basic/**/@test/**/*.ts',
-     'source/expand/**/*.ts',
+     'source/expand/**/*Conditional*.ts',
      '!source/expand/**/@test/**/*.ts',
      'source/pToken/**/*.ts',
      '!source/pToken/**/@test/**/*.ts',

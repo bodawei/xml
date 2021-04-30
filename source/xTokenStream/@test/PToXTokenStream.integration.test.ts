@@ -6,6 +6,11 @@ import { STokenSource, toSToken } from 'sToken';
 import {
    AttListDeclarationXToken,
    AttDefinitionType,
+   CdataXToken,
+   CharDataXToken,
+   CommentXToken,
+   DocTypeEndXToken,
+   ElementEndXToken,
    ElementEmptyXToken,
    ElementStartXToken,
    ExternalIdX,
@@ -21,13 +26,7 @@ import {
 import { stripPTokens } from 'xToken-test';
 import {
    declaration,
-
-   CdataXToken,
-   CharDataXToken,
-   CommentXToken,
-   DocTypeEndXToken,
    DocTypeStartXToken,
-   ElementEndXToken,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';

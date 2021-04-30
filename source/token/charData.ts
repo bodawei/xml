@@ -4,24 +4,7 @@ import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 
 const CHARDATA_PTOKEN = 'CHARDATA_PTOKEN';
-const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';
 
-/**********************************************************************\
- The charData namespace contains the usual tools for processing
- a run of CharData
-\**********************************************************************/
-
-class CharDataXToken {
-   public readonly type: typeof CHARDATA_XTOKEN = CHARDATA_XTOKEN;
-   public readonly text: string;
-   public readonly pToken?: CharDataPToken;
-
-   constructor(text: string, pToken?: CharDataPToken) {
-      this.text = text;
-      this.pToken = pToken;
-   }
-
-}
 
 class CharDataPToken {
    public readonly type: typeof CHARDATA_PTOKEN = CHARDATA_PTOKEN;
@@ -29,10 +12,6 @@ class CharDataPToken {
 
    constructor(props: { text: SToken }) {
       this.text = props.text;
-   }
-
-   toXToken() {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray(): Array<SToken> {
@@ -68,14 +47,6 @@ function parseCharData(source: STokenSource, otherTerminators: Array<string>, de
 }
 
 /**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: CharDataPToken) {
-   return new CharDataXToken(strOrBlank(pToken.text), pToken);
-}
-
-/**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the STokens
 \**********************************************************************/
 
@@ -89,10 +60,8 @@ function sTokensFromPToken(pToken: CharDataPToken): Array<SToken> {
 
 export {
    CHARDATA_PTOKEN,
-   CHARDATA_XTOKEN,
 
    CharDataPToken,
-   CharDataXToken,
 
    parseCharData,
 };

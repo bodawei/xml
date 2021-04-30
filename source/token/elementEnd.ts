@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
+import { STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
-const ELEMENT_END_XTOKEN = 'ELEMENT_END_XTOKEN';
 
 type PreToken = { open: SToken; [ other: string ]: any };
 
@@ -21,26 +20,11 @@ class ElementEndPToken {
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   toXToken() {
-      return pTokenToXToken(this);
-   }
-
    toSTokenArray() {
       return sTokensFromPToken(this);
    }
 }
 
-class ElementEndXToken {
-   public readonly type: typeof ELEMENT_END_XTOKEN = ELEMENT_END_XTOKEN;
-   public readonly name: string;
-   public pToken?: ElementEndPToken;
-
-   constructor(name: string, pToken?: ElementEndPToken) {
-      this.name = name;
-      this.pToken = pToken;
-   }
-
-}
 
 /**********************************************************************\
  parseElementEnd() extracts the pieces of an element end tag.
@@ -72,13 +56,6 @@ function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (res
    });
 }
 
-/**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: ElementEndPToken) {
-   return new ElementEndXToken(strOrBlank(pToken.name), pToken);
-}
 
 /**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the component STokens
@@ -99,9 +76,7 @@ function sTokensFromPToken(pToken: ElementEndPToken): Array<SToken> {
 
 export {
    ELEMENT_END_PTOKEN,
-   ELEMENT_END_XTOKEN,
    ElementEndPToken,
-   ElementEndXToken,
 
    parseElementEnd,
 };

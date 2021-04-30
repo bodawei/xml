@@ -63,10 +63,10 @@ type ErrorToken = {
 }
 
 type PToken =
-| ErrorToken
-   | CommentPToken
+   | ErrorToken
    | CdataPToken
    | CharDataPToken
+   | CommentPToken
    | ConditionalClosePToken
    | ConditionalPToken
    | DocTypeStartPToken

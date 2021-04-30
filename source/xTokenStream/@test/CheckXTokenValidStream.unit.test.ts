@@ -8,14 +8,19 @@ import { WellFormedError,  } from 'wellformedness';
 import { SToken } from 'sToken';
 import { ValidityError, } from 'valid';
 import {
+   SPACE_XTOKEN,
    AttDefinitionType,
    AttDefaultType,
    AttListDeclarationXToken,
-   SPACE_XTOKEN,
+   CdataXToken,
+   CharDataXToken,
    CharRefXToken,
+   CommentXToken,
    ContentSpecType,
    CpRepeat,
    CpType,
+   DocTypeEndXToken,
+   ElementEndXToken,
    ElementDeclarationXToken,
    ElementEmptyXToken,
    ElementStartXToken,
@@ -33,14 +38,7 @@ import {
 import * as chars from '../../basic/chars'
 
 import {
-
-   CdataXToken,
-   CharDataXToken,
-   CommentXToken,
-   DocTypeEndXToken,
    DocTypeStartXToken,
-   ElementEndXToken,
-   ElementStartPToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    GeneralEntityEndXToken,

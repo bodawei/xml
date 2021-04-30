@@ -1,9 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { gatherStreamResults } from 'basic-test';
-import { AttListDeclarationXToken, AttDefinitionType, AttDefaultType, ContentSpecType, ElementDeclarationXToken, CpRepeat, CpType } from 'xToken';
-
-import { CommentXToken } from 'token';
+import { CommentXToken, AttListDeclarationXToken, AttDefinitionType, AttDefaultType, ContentSpecType, ElementDeclarationXToken, CpRepeat, CpType } from 'xToken';
 
 import FixingStream from '../FixingStream';
 

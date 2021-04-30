@@ -2,12 +2,10 @@
 
 import { Transform } from 'stream';
 
-import {
-   CdataXToken,
-   CharDataXToken,
+import {      CharDataXToken,
    ElementEndXToken,
-} from '../token';
-import { TEXT_XTOKEN,CHARREF_XTOKEN,    ElementStartXToken   , XToken } from 'xToken';
+   CdataXToken,
+   TEXT_XTOKEN,CHARREF_XTOKEN,    ElementStartXToken   , XToken } from 'xToken';
 
 type Token = { type: string };
 

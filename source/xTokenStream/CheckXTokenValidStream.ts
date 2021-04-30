@@ -6,8 +6,12 @@ import { ConformanceVersion, isSpace, isName, isNmToken, ERROR_TYPE, XmlWarning,
 import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
+   CDATA_XTOKEN,
+   CHARDATA_XTOKEN,
    CHARREF_XTOKEN,
+   COMMENT_XTOKEN,
    ELEMENT_EMPTY_XTOKEN,
+   ELEMENT_END_XTOKEN,
    ELEMENT_START_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
@@ -15,13 +19,16 @@ import {
    SPACE_XTOKEN,
    TEXTDECL_XTOKEN,
    XMLDECL_XTOKEN,
+
    AttListDeclarationXToken,
    AttDefinitionXToken,
    ContentModelX,
    CpRepeat,
    CpType,
+   DocTypeEndXToken,
    ElementDeclarationXToken,
    ElementEmptyXToken,
+   ElementEndXToken,
    ElementStartXToken,
    GeneralEntityDeclarationXToken,
    isContentNameX,
@@ -35,9 +42,7 @@ import {
 
 
 import {
-   DocTypeEndXToken,
    DocTypeStartXToken,
-   ElementEndXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    ParameterEntityEndXToken,
@@ -49,11 +54,7 @@ import {
    GENERAL_ENTITY_START_XTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
-
-   CDATA_XTOKEN,
-   CHARDATA_XTOKEN,
-   COMMENT_XTOKEN,
-   ELEMENT_END_XTOKEN,
+   
 } from 'token';
 
 import { AttributeValueXToken } from '../token/common/attribute';

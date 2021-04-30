@@ -3,25 +3,8 @@
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';
-const COMMENT_XTOKEN = 'COMMENT_XTOKEN';
 
 type DeliverPToken = (pToken: CommentPToken) => void;
-
-/**********************************************************************\
- The comment namespace contains the usual tools for processing XML
- comments
-\**********************************************************************/
-
-class CommentXToken {
-   public readonly type: typeof COMMENT_XTOKEN = COMMENT_XTOKEN;
-   public readonly text: string;
-   public pToken?: CommentPToken;
-
-   constructor(text: string, pToken?: CommentPToken) {
-      this.text = text;
-      this.pToken = pToken;
-   }
-}
 
 /**********************************************************************\
  In practice, at this time, double hyphens in the input will be stored
@@ -42,10 +25,6 @@ class CommentPToken {
       });
 
       this.open = param.open;
-   }
-
-   toXToken() {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray() {
@@ -106,17 +85,6 @@ function extractCommentContent(source: STokenSource, pToken: { open: SToken; [ke
 }
 
 /**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: CommentPToken) {
-   const texts = pToken.text;
-   const combinedTexts = texts.map((item) => item.str);
-
-   return new CommentXToken(combinedTexts.join(''), pToken);
-}
-
-/**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the STokens
 \**********************************************************************/
 
@@ -132,9 +100,7 @@ function sTokensFromPToken(pToken: CommentPToken): ReadonlyArray<SToken> {
 
 export {
    COMMENT_PTOKEN,
-   COMMENT_XTOKEN,
    CommentPToken,
-   CommentXToken,
 
    parseComment,
 };

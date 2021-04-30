@@ -4,7 +4,7 @@
 
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
-import { CharDataPToken, CharDataXToken, parseCharData } from '../charData';
+import { CharDataPToken, parseCharData } from '../charData';
 
 describe('charData', () => {
    let charDataPToken: CharDataPToken;
@@ -67,16 +67,6 @@ describe('charData', () => {
          expect(callback.calls.argsFor(0)[0].toSTokenArray()).toEqual([
             charDataPToken.text,
          ]);
-      });
-
-   });
-
-   describe('pTokenToXToken()', () => {
-
-      it('returns a token with the expected fields defined', () => {
-         const token = charDataPToken.toXToken();
-
-         expect(token).toEqual(new CharDataXToken('test text', charDataPToken));
       });
 
    });

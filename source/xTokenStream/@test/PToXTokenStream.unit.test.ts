@@ -50,25 +50,25 @@ describe('PToXTokenStream (unit)', () => {
    //    expect(attListDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    // });
 
-   it('calls cdata.pTokenToXToken()', () => {
-      const pToken = new CdataPToken({ open: SToken.fromString('<![') });
-      spyOn(pToken, 'toXToken');
+   // it('calls cdata.pTokenToXToken()', () => {
+   //    const pToken = new CdataPToken({ open: SToken.fromString('<![') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
-   it('calls charData.toXToken()', () => {
-      const pToken = new CharDataPToken({ text: SToken.fromString('x') });
-      spyOn(pToken, 'toXToken');
+   // it('calls charData.toXToken()', () => {
+   //    const pToken = new CharDataPToken({ text: SToken.fromString('x') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    // it('calls charRef.toXToken()', () => {
    //    const pToken = new CharRefPToken({ open: SToken.fromString('&#') });
@@ -80,15 +80,15 @@ describe('PToXTokenStream (unit)', () => {
    //    expect(pToken.toXToken).toHaveBeenCalledWith();
    // });
 
-   it('calls comment.toXToken()', () => {
-      const pToken = new CommentPToken({ open: SToken.fromString('<!--') });
-      spyOn(pToken, 'toXToken');
+   // it('calls comment.toXToken()', () => {
+   //    const pToken = new CommentPToken({ open: SToken.fromString('<!--') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    // it('calls conditional.toXToken()', () => {
    //    const pToken = new ConditionalPToken({ open: SToken.fromString('<[') });
@@ -130,15 +130,15 @@ describe('PToXTokenStream (unit)', () => {
    //    expect(pToken.toXToken).toHaveBeenCalledWith();
    // });
 
-   it('calls elementEnd.toXToken()', () => {
-      const pToken = new ElementEndPToken({ open: SToken.fromString('<') });
-      spyOn(pToken, 'toXToken');
+   // it('calls elementEnd.toXToken()', () => {
+   //    const pToken = new ElementEndPToken({ open: SToken.fromString('<') });
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    // it('calls elementDeclaration.pTokenToXToken()', () => {
    //    spyOn(elementDeclaration, 'pTokenToXToken');

@@ -5,7 +5,6 @@ import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import {
    CommentPToken,
-   CommentXToken,
    parseComment,
 } from '../comment';
 
@@ -148,43 +147,4 @@ describe('comment (unit)', () => {
       });
 
    });
-
-   describe('toXToken()', () => {
-
-      it('returns comment with the text of the comment', () => {
-         const token = commentPToken.toXToken();
-
-         expect(token.text).toEqual('commentText');
-      });
-
-      it('returns the text as an empty string when no text values present', () => {
-         (commentPToken.text as any).pop();
-
-         const token = commentPToken.toXToken();
-
-         expect(token.text).toEqual('');
-      });
-
-      it('returns a comment token with all the expected values', () => {
-         const token = commentPToken.toXToken();
-
-         expect(token).toEqual(new CommentXToken('commentText', commentPToken));
-      });
-
-      it('returns a comment token from a PToken with all STokens', () => {
-         const pToken = new CommentPToken({
-            open: expectedSToken('<!--'),
-            text: [
-               expectedSToken('part1'),
-               expectedSToken('--'),
-            ],
-            close: expectedSToken('-->'),
-         });
-         const token = pToken.toXToken();
-
-         expect(token).toEqual(new CommentXToken('part1--', pToken));
-      });
-
-   });
-
 });

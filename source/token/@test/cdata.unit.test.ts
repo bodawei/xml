@@ -6,7 +6,7 @@ import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import { SectionStart } from '../bridge/section';
-import { parseCdata, CdataXToken, CdataPToken } from '../cdata';
+import { parseCdata, CdataPToken } from '../cdata';
 
 describe('cdata (unit)', () => {
    let sectionStart: SectionStart;
@@ -66,16 +66,6 @@ describe('cdata (unit)', () => {
 
    });
 
-   describe('pToken.toXToken()', () => {
-
-      it('returns a token with the expected fields defined', () => {
-         const token = cDataPToken.toXToken();
-         const expected = new CdataXToken('test text', cDataPToken);
-
-         expect(token).toEqual(expected);
-      });
-
-   });
 
    describe('pToken.toSTokenArray()', () => {
 

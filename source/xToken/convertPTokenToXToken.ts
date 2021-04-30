@@ -17,9 +17,14 @@ import {
 } from 'pToken';
 
 import {
+   CDATA_PTOKEN,
+   CHARDATA_PTOKEN,
+   COMMENT_PTOKEN,
    CONDITIONAL_CLOSE_PTOKEN,
    CONDITIONAL_PTOKEN,
+   DOCTYPE_END_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_END_PTOKEN,
    ELEMENT_START_PTOKEN,
    SPACE_PTOKEN,
 } from 'token';
@@ -31,7 +36,10 @@ import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXTok
 import { NotationDeclarationXToken } from './index';
 import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
 import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
+import { CommentXToken } from './token/commentXToken';
+import { DocTypeEndXToken } from './token/docTypeEndXToken';
 import { ElementEmptyXToken } from './token/elementEmptyXToken';
+import { ElementEndXToken } from './token/elementEndXToken';
 import { ElementStartXToken } from './token/elementStartXToken';
 import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
@@ -43,6 +51,8 @@ import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { TextXToken } from './token/textXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
+import { CdataXToken } from './token/cdataXToken';
+import { CharDataXToken } from './token/charDataXToken';
 
 function convertPTokenToXToken(pToken: ParseToken): XToken {
    switch (pToken.type) {
@@ -52,10 +62,20 @@ function convertPTokenToXToken(pToken: ParseToken): XToken {
          return new ConditionalSectionStartXToken(pToken);
       case CONDITIONAL_CLOSE_PTOKEN:
          return new ConditionalSectionEndXToken(pToken);
+      case CDATA_PTOKEN:
+         return new CdataXToken(pToken);
+      case CHARDATA_PTOKEN:
+         return new CharDataXToken(pToken);
       case CHARREF_PTOKEN:
          return new CharRefXToken(pToken);
+      case COMMENT_PTOKEN:
+         return new CommentXToken(pToken);
+      case DOCTYPE_END_PTOKEN:
+         return new DocTypeEndXToken(pToken);
       case ELEMENT_EMPTY_PTOKEN:
          return new ElementEmptyXToken(pToken);
+      case ELEMENT_END_PTOKEN:
+         return new ElementEndXToken(pToken);
       case ELEMENT_START_PTOKEN:
          return new ElementStartXToken(pToken);
       case ELEMENT_DECLARATION_PTOKEN:

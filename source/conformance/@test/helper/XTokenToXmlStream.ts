@@ -4,6 +4,10 @@ import { Transform } from 'stream';
 import {
    XToken,
    CHARREF_XTOKEN,
+   CDATA_XTOKEN,
+   CHARDATA_XTOKEN,
+   DOCTYPE_END_XTOKEN,
+   ELEMENT_END_XTOKEN,
    NOTATION_DECLARATION_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    ELEMENT_START_XTOKEN,
@@ -13,14 +17,7 @@ import {
    XMLDECL_XTOKEN,
    ExternalIdX,
 } from 'xToken';
-import {
-   DOCTYPE_START_XTOKEN,
-   DOCTYPE_END_XTOKEN,
-   ELEMENT_END_XTOKEN,
-   CDATA_XTOKEN,
-   CHARDATA_XTOKEN,
-   DocTypeStartXToken,
-} from 'token';
+import { DOCTYPE_START_XTOKEN, DocTypeStartXToken } from 'token';
 import { AttributeXToken } from '../../../token/common/attribute';
 
 function formatExternalId(externalId?: ExternalIdX): string {

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
 
-import { CommentXToken } from 'token';
+import { CommentXToken } from 'xToken';
 
 import CommentFixingStream from '../CommentFixingStream';
 

@@ -5,7 +5,7 @@
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
-import { DocTypeEndPToken, DocTypeEndXToken, parseDocTypeEnd } from '../docTypeEnd';
+import { DocTypeEndPToken, parseDocTypeEnd } from '../docTypeEnd';
 import { DocTypeStartPToken } from '../docTypeStart';
 
 describe('docTypeEnd (unit)', () => {
@@ -73,20 +73,6 @@ describe('docTypeEnd (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(docTypeEndPToken);
-      });
-
-   });
-
-   describe('toXToken()', () => {
-
-      it('returns a token given a good parsing', () => {
-         const makeSToken = makeSTokenMaker(undefined, 1, 0, 1);
-
-         (docTypeEndPToken as any).closeSubsetSpace = makeSToken('\t');
-
-         const token = docTypeEndPToken.toXToken();
-
-         expect(token).toEqual(new DocTypeEndXToken(docTypeEndPToken));
       });
 
    });

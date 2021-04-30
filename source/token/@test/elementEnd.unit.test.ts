@@ -60,17 +60,6 @@ describe('elementEnd', () => {
 
    });
 
-   describe('toXToken()', () => {
-
-      it('returns a token with an empty string if no name was found', () => {
-         (elementEndPToken as any).name = undefined;
-
-         const token = elementEndPToken.toXToken();
-
-         expect(token.name).toEqual('');
-      });
-
-   });
 
    describe('toSTokenArray()', () => {
 

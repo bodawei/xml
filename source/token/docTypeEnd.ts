@@ -12,7 +12,6 @@ import { DocTypeStartPToken } from './docTypeStart';
 \**********************************************************************/
 
 const DOCTYPE_END_PTOKEN = 'DOCTYPE_END_PTOKEN';
-const DOCTYPE_END_XTOKEN = 'DOCTYPE_END_XTOKEN';
 
 type PreToken = { docTypeStartPToken: DocTypeStartPToken; [ other: string ]: any };
 
@@ -30,23 +29,11 @@ class DocTypeEndPToken {
       this.type = DOCTYPE_END_PTOKEN;
    }
 
-   toXToken() {
-      return pTokenToXToken(this);
-   }
-
    toSTokenArray() {
       return sTokensFromPToken(this);
    }
 }
 
-class DocTypeEndXToken {
-   public readonly type: typeof DOCTYPE_END_XTOKEN = DOCTYPE_END_XTOKEN;
-   public pToken?: DocTypeEndPToken;
-
-   constructor(pToken?: DocTypeEndPToken) {
-      this.pToken = pToken;
-   }
-}
 
 /**********************************************************************\
  parseDocTypeEnd() extracts ]> from the end of a DOCTYPE statement.
@@ -77,14 +64,6 @@ function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken,
 }
 
 /**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: DocTypeEndPToken) {
-   return new DocTypeEndXToken(pToken);
-}
-
-/**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the component STokens
 \**********************************************************************/
 
@@ -101,10 +80,8 @@ function sTokensFromPToken(pToken: DocTypeEndPToken): Array<SToken> {
 
 export {
    DOCTYPE_END_PTOKEN,
-   DOCTYPE_END_XTOKEN,
 
    DocTypeEndPToken,
-   DocTypeEndXToken,
 
    parseDocTypeEnd,
 };

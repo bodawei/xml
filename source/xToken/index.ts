@@ -1,5 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+export { CDATA_XTOKEN, CdataXToken } from './token/cdataXToken';
+export { CHARDATA_XTOKEN, CharDataXToken } from './token/charDataXToken';
 export { CHARREF_XTOKEN, CharRefXToken } from './token/charRefXToken';
 export {
    GENERAL_ENTITY_REFERENCE_XTOKEN,
@@ -17,6 +19,9 @@ export {
    CONDITIONAL_SECTION_START_XTOKEN,
    ConditionalSectionStartXToken,
 } from './token/conditionalSectionStartXToken';
+export { DocTypeEndXToken, DOCTYPE_END_XTOKEN } from './token/docTypeEndXToken';
+export { ELEMENT_END_XTOKEN, ElementEndXToken } from './token/elementEndXToken';
+export { COMMENT_XTOKEN, CommentXToken } from './token/commentXToken';
 export { ExternalIdX } from './common/externalIdX';
 
 // Fully converted

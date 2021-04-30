@@ -2,7 +2,7 @@
 
 import { Transform } from 'stream';
 
-import { COMMENT_XTOKEN, CommentXToken } from '../token';
+import { COMMENT_XTOKEN, CommentXToken } from 'xToken';
 
 const HEX_REGEX = /^x([A-Fa-f0-9]+);(.*)$/;
 const DEC_REGEX = /^([0-9]+);(.*)$/;
@@ -75,7 +75,7 @@ function replaceCharRefsInComment(token: CommentXToken) {
       }
    }
 
-   return new CommentXToken(results.join(''), token.pToken);
+   return new CommentXToken(results.join(''));
 }
 
 export default CommentFixingStream;

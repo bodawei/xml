@@ -5,25 +5,8 @@ import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import { SectionStart } from './bridge/section';
 
 const CDATA_PTOKEN = 'CDATA_PTOKEN';
-const CDATA_XTOKEN = 'CDATA_XTOKEN';
 
 type DeliverPToken = (pToken: CdataPToken) => void;
-
-/**********************************************************************\
- The cdata namespace contains the usual tools for processing
- a CDATA element
-\**********************************************************************/
-
-class CdataXToken {
-   public readonly type: typeof CDATA_XTOKEN = CDATA_XTOKEN;
-   public readonly text: string;
-   public readonly pToken?: CdataPToken;
-
-   constructor(text: string, pToken?: CdataPToken) {
-      this.text = text;
-      this.pToken = pToken;
-   }
-}
 
 class CdataPToken {
    public readonly type: typeof CDATA_PTOKEN = CDATA_PTOKEN;
@@ -38,10 +21,6 @@ class CdataPToken {
    constructor(param: CdataPToken | SectionStart) {
       Object.assign(this, param);
       this.open = param.open;
-   }
-
-   toXToken(): CdataXToken {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray(): Array<SToken> {
@@ -78,16 +57,6 @@ function parseCdata(source: STokenSource, sectionStart: SectionStart, deliverPTo
 }
 
 /**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: CdataPToken) {
-   const token = new CdataXToken(strOrBlank(pToken.text), pToken);
-
-   return token;
-}
-
-/**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the STokens
 \**********************************************************************/
 
@@ -107,9 +76,7 @@ function sTokensFromPToken(pToken: CdataPToken): Array<SToken> {
 
 export {
    CDATA_PTOKEN,
-   CDATA_XTOKEN,
    CdataPToken,
-   CdataXToken,
 
    parseCdata,
 };
