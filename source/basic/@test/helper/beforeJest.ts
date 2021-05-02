@@ -3,7 +3,7 @@
 import { expect } from '@jest/globals';
 import { XmlError } from '../../XmlError';
 import { BaseError } from '../../BaseError';
-import { XmlWarning } from '../../XmlWarning';
+import { warning } from '../../error/warning';
 import { MockErrorCollector } from './helper';
 import { makeErrorMatcher } from './makeErrorMatcher';
 import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
@@ -112,7 +112,7 @@ expect.extend({
    toBeErrorFree,
    toBeErrorAndWarningFree,
    toNotReportError,
-   toReportWarning: makeErrorMatcher(XmlWarning),
+   toReportWarning: makeNewErrorMatcher(warning),
    toReportXmlError: makeErrorMatcher(XmlError),
    toReportFatalError: makeNewErrorMatcher(fatalError),
 });

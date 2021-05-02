@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, XmlError, XmlWarning } from 'basic';
+import { ConformanceVersion, XmlError, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -149,7 +149,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+         id: warning.id.ELEMENT_CHILD_UNDECLARED,
          params: ['elementName', 'bogus'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
@@ -183,7 +183,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).not.toReportWarning({
-         id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+         id: warning.id.ELEMENT_CHILD_UNDECLARED,
          params: ['elementName', '#PCDATA'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
@@ -230,7 +230,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+         id: warning.id.ELEMENT_CHILD_UNDECLARED,
          params: ['elementName', 'bogus1,bogus2'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
@@ -528,7 +528,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+         id: warning.id.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
@@ -563,7 +563,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
@@ -603,7 +603,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).not.toReportWarning({
-         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
@@ -632,7 +632,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'empty'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,
@@ -861,7 +861,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
          lastPosition: undefined,

@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { XmlWarning } from 'basic';
+import { warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -89,7 +89,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.PREDEFINED_UNDECLARED,
+         id: warning.id.PREDEFINED_UNDECLARED,
          params: ['lt'],
          position: ref.name,
          lastPosition: undefined,

@@ -2,7 +2,7 @@
 
 import { Transform } from 'stream';
 
-import { ConformanceVersion, isSpace, isName, isNmToken, ERROR_TYPE, XmlWarning, CONFORMANCE_VERSION } from 'basic';
+import { ConformanceVersion, isSpace, isName, isNmToken, ERROR_TYPE, warning, WarningToken, CONFORMANCE_VERSION } from 'basic';
 import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
@@ -291,7 +291,7 @@ class CheckXTokenValidStream extends Transform {
    }
 
    private pushWarning(id: string, params: Array<string>, pos?: SToken | undefined, context?: SToken | undefined) {
-      const warning = new XmlWarning(id, params, pos, context);
+      const warning = new WarningToken(id, params, pos, context);
 
       this.push(warning);
    }
@@ -684,8 +684,8 @@ class CheckXTokenValidStream extends Transform {
       // §4.2 If the same entity is declared more than once, ... at user option,
       // an XML processor may issue a warning if entities are declared multiple times.
       if (seen[name]) {
-         const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ name ]);
-         this.push(warning);
+         const warningToken = new WarningToken(warning.id.ENTITYDECL_XRA_DECLARATION, [ name ]);
+         this.push(warningToken);
       }
 
       seen[name] = xToken;
@@ -723,7 +723,7 @@ class CheckXTokenValidStream extends Transform {
          //   attribute-list declaration for a given element type ... For interoperability,
          //   an XML processor may at user option issue a warning when more than one
          //   attribute-list declaration is provided for a given element type,
-         this.pushWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ elName ], openSToken, openSToken);
+         this.pushWarning(warning.id.ATTLISTDECL_ELEMENT_XTRA_DECLARATION, [ elName ], openSToken, openSToken);
          attrDefs.tokens.push(attListDecl);
       } else {
          attrDefs = {
@@ -738,7 +738,7 @@ class CheckXTokenValidStream extends Transform {
       // Note: This takes the position that if the element wasn't declared before this, it is a warning.
       // Conceivably this should wait until the end of the DTD and then make this assessment.
       if (!this.elementDeclarations[elName]) {
-         this.pushWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL, [ elName ], openSToken, openSToken);
+         this.pushWarning(warning.id.ATTLISTDECL_NO_ELEMENTDECL, [ elName ], openSToken, openSToken);
       }
 
       for (let index = 0; index < attListDecl.attDefs.length; index++) {
@@ -759,7 +759,7 @@ class CheckXTokenValidStream extends Transform {
             // §3.3.0: ... For interoperability, an XML processor may at user option
             //   issue a warning when ... more than one attribute definition is provided for a given
             //   attribute, but this is not an error.
-            this.pushWarning(XmlWarning.ID.ATTLISTDECL_ATTR_EXTRA_DECLARATION, [ elName, attDef.name ],
+            this.pushWarning(warning.id.ATTLISTDECL_ATTR_XTRA_DECLARATION, [ elName, attDef.name ],
                openSToken, openSToken);
          }
       }
@@ -1359,9 +1359,9 @@ class CheckXTokenValidStream extends Transform {
       let warningId;
 
       if (tokenIsEmptyType && !declarationIsEmpty) {
-         warningId = XmlWarning.ID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL;
+         warningId = warning.id.ELEMENT_EMPTY_WITH_NONEMPTY_DECL;
       } else if (!tokenIsEmptyType && declarationIsEmpty) {
-         warningId = XmlWarning.ID.ELEMENT_WITH_EMPTY_DECL;
+         // warningId = warning.id.ELEMENT_WITH_EMPTY_DECL;
       }
 
       if (warningId) {

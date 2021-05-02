@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlError, XmlWarning } from 'basic';
+import { ConformanceVersion, XmlError, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -218,8 +218,8 @@ describe('attributeCheck (unit)', () => {
          mockErrorCollector,
          confVer,
          'ATTRIBUTE',
-         XmlWarning.ID.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
-         XmlWarning.ID.ATTRIBUTE_NAME_XML_RESERVED,
+         warning.id.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
+         warning.id.ATTRIBUTE_NAME_XML_RESERVED,
       );
    });
 

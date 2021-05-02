@@ -1,6 +1,13 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion, isSpace, XmlError, XmlWarning } from 'basic';
+import {
+   ErrorCollector,
+   ConformanceVersion,
+   isSpace,
+   XmlError,
+   warning,
+   WarningToken,
+} from 'basic';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
@@ -146,13 +153,13 @@ function validateEntities(
             nonSpace === 0);
 
       if (cmEndFound && hasEmptyContent) {
-         ec.reportError(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY, XmlWarning, [elName, entityName]);
+         ec.reportError(warning.id.ELEMENTDECL_PEREF_EMPTY, WarningToken, [elName, entityName]);
       }
 
       // §3.2.1 For interoperability, ... neither the first nor last non-blank character
       //    of the replacement text should be a connector (| or ,).
       if (cmEndFound && trailingDelimiter) {
-         ec.reportError(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR, XmlWarning, [
+         ec.reportError(warning.id.ELEMENTDECL_PEREF_TRAILING_CONNECTOR, WarningToken, [
             elName,
             entityName,
          ]);
@@ -200,7 +207,7 @@ function elementDeclarationValidate(
    // §3.2.0: At user option, an XML processor may issue a warning when a declaration mentions an
    //    element type for which no declaration is provided, but this is not an error.
    if (undeclaredNames.length > 0) {
-      ec.reportError(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED, XmlWarning, [
+      ec.reportError(warning.id.ELEMENT_CHILD_UNDECLARED, WarningToken, [
          elName,
          undeclaredNames.join(','),
       ]);

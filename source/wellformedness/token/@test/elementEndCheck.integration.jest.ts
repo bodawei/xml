@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning } from 'basic';
 import { STokenSource, toSToken } from 'sToken';
 import { parseElementEnd } from 'token';
 
@@ -26,7 +26,7 @@ describe('elementEndCheck() (integration)', () => {
 
          elementEndCheck(pToken, ec, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(warning.id.ELEMENT_NAME_XML_RESERVED);
          done?.();
       });
    });

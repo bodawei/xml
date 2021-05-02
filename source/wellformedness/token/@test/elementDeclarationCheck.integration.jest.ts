@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning } from 'basic';
 import { parseElementDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
@@ -45,7 +45,7 @@ describe('elementDeclarationCheck()', () => {
 
          elementDeclarationCheck(parsing, ec, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(warning.id.ELEMENTDECL_NAME_XML_RESERVED);
          done();
       });
    });

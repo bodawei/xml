@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -68,8 +68,8 @@ describe('notationdeDeclaration (unit)', () => {
          mockErrorCollector,
          confVer,
          'NOTATION',
-         XmlWarning.ID.NOTATIONDECL_NAME_XMLDASH_RESERVED,
-         XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED,
+         warning.id.NOTATIONDECL_NAME_XMLDASH_RESERVED,
+         warning.id.NOTATIONDECL_NAME_XML_RESERVED,
       );
    });
 

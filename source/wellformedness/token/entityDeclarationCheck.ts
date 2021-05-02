@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, isName, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, isName, warning } from 'basic';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
@@ -18,7 +18,7 @@ import { nameXmlCheck } from '../common/nameXmlCheck';
 import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
-const WARN = XmlWarning.ID;
+const WARN = warning.id;
 const POSSIBLE_GEREF_REGEXP = /&([^;]*);/g;
 
 function isParameterEntityDeclaration(

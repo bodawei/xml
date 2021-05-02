@@ -1,6 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    TextPToken,
@@ -117,8 +117,8 @@ describe('entityDeclarationCheck (unit)', () => {
          mockErrorCollector,
          confVer,
          'ENTITY',
-         XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
-         XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED,
+         warning.id.ENTITYDECL_NAME_XMLDASH_RESERVED,
+         warning.id.ENTITYDECL_NAME_XML_RESERVED,
       );
    });
 

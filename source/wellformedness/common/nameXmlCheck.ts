@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, WarningToken } from 'basic';
 import { SToken } from 'sToken';
 
 /**********************************************************************\
@@ -90,10 +90,10 @@ function nameXmlCheck(
       }
 
       if (isProblematic) {
-         ec.reportError(v1R6Warning, XmlWarning, [name]);
+         ec.reportError(v1R6Warning, WarningToken, [name]);
       }
    } else if (name.substring(0, 3).toLowerCase() === 'xml') {
-      ec.reportError(otherWarning, XmlWarning, [name]);
+      ec.reportError(otherWarning, WarningToken, [name]);
    }
 }
 

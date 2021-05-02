@@ -2272,11 +2272,11 @@ const expectedErrorCodes: IdToErrorMap = {
    'ibm-invalid-P69-ibm69i04.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe2" is referred before declared in the file ibm69i04.ent.
    'ibm-not-wf-P69-ibm69n05.xml': 'REFERENCE_NO_DECLARATION', // good - Based on E29 substantial source: minutes XML-Syntax 1999-02-24 E38 in XML 1.0 Errata, this WFC does not apply to P69, but the VC Entity declared still apply. Tests PEReference which is against P69 WFC: Entity Declared. The PE with the name "paaa" is referred before declared in the DTD.
    'rmt-e2e-34': 'ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC', // A non-deterministic content model is an error even if the element type is not used.
-   'rmt-e2e-55': 'REFERENCE_NO_UNPARSED', // ok - Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
+   'rmt-e2e-55': 'REFERENCE_INVALID_UNPARSED', // ok - Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
    'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
    'x-rmt-008--V1R1': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1
    'x-rmt-008--V1R2': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1
-   'x-rmt-008--V1R5': 'BAD_VERSION', // This input is actually just fine for 1.0/5
+   'x-rmt-008--V1R5': 'XMLDECL_VERSION_INVALID', // This input is actually just fine for 1.0/5
    'rmt-e2e-57': 'XMLSPACE_INVALID_VALUE', // ok - A value other than preserve or default for xml:space is an error
    uri01: 'SYSTEMLITERAL_NO_FRAGMENT', // ok - The system literal may not contain fragments (§4.2.2). Found "foo#bar".
    'o-p11pass1': 'SYSTEMLITERAL_NO_FRAGMENT', // A reference to an unparsed entity in an entity value is an error rather than forbidden (unless the entity is referenced, of course)

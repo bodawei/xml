@@ -36,8 +36,8 @@ function checkEntity(
 
             if (isUnparsed) {
                const code = isForbidden
-                  ? fatalError.id.REFERENCE_NO_UNPARSED
-                  : XmlError.ID.REFERENCE_NO_UNPARSED;
+                  ? fatalError.id.REFERENCE_INVALID_UNPARSED
+                  : XmlError.ID.REFERENCE_INVALID_UNPARSED;
                ec.setPos(element.text);
                ec.reportError(code, isForbidden ? FatalErrorToken : XmlError, [name]);
             }

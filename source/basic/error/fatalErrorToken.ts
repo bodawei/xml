@@ -23,12 +23,12 @@ class FatalErrorToken implements XmlErrorToken {
 
    constructor(
       id: string,
-      params?: ReadonlyArray<string>,
+      params?: ReadonlyArray<string | number | boolean>,
       place?: XmlErrorPosition,
       context?: XmlErrorPosition,
    ) {
       this.id = id;
-      this.code = fatalError.code[id];
+      this.code = fatalError.code[id] ?? 0;
       this.context = makeOffset(context);
       this.message = fatalError.messageFor(id, params);
       this.place = makeOffset(place);

@@ -1,6 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning } from 'basic';
 import { parseEntityDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
@@ -55,7 +55,7 @@ describe('entityDeclarationCheck() (integration)', () => {
 
          entityDeclarationCheck(result, ec, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(warning.id.ENTITYDECL_NAME_XML_RESERVED);
          done();
       });
    });

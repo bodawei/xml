@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import {GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';

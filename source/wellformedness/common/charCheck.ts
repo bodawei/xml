@@ -1,12 +1,12 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning, WarningToken } from 'basic';
 import { SToken } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
-const XWID = XmlWarning.ID;
+const XWID = warning.id;
 
 const BAD_CHARS_11 = /[\u0000\u0001-\u0008\u000B\u000C\u000E-\u001F\u007F-\u0084\u0086-\u009F\uFFFE\uFFFF]/g;
 const BAD_CHARS_10 = /[\u0000\u0001-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g;
@@ -99,7 +99,7 @@ function charCheck(
          foundDiscouraged = discouragedRegEx.test(sToken.str);
       }
 
-      ec.reportError(XWID.CHARDATA_DISCOURAGED_CHAR, XmlWarning, [discouragedIndices.join(', ')]);
+      ec.reportError(XWID.CHARDATA_DISCOURAGED_CHAR, WarningToken, [discouragedIndices.join(', ')]);
    }
 }
 

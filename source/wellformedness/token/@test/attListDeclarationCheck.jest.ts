@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, Range, EntityId, XmlWarning } from 'basic';
+import { ConformanceVersion, Range, EntityId, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -152,8 +152,8 @@ describe('attListDeclarationCheck()', () => {
          mockErrorCollector,
          confVer,
          'ATTRIBUTE',
-         XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
-         XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED,
+         warning.id.ATTLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
+         warning.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
       );
    });
 
@@ -184,7 +184,7 @@ describe('attListDeclarationCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.ATTLISTDECL_ATTR_NAME_DUPLICATE,
+         id: warning.id.ATTLISTDECL_ATTR_NAME_DUPLICATE,
          params: ['att1'],
          position: testToken.attDefs[2].name,
       });

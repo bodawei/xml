@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning } from 'basic';
 import { parseAttListDeclaration } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
@@ -70,7 +70,7 @@ describe('checkWellFormed()', () => {
       parseAttListDeclaration(source, declarationStart, (result) => {
          attListDeclarationCheck(result, ec, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(warning.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED);
          done?.();
       });
    });

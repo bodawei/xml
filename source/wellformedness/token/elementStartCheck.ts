@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning } from 'basic';
 import { ElementEmptyPToken, ElementStartPToken } from 'token';
 
 import { attributeCheck } from '../common/attributeCheck';
@@ -9,7 +9,7 @@ import { nameXmlCheck } from '../common/nameXmlCheck';
 import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
-const WARN = XmlWarning.ID;
+const WARN = warning.id;
 
 function elementStartCheck(
    pToken: ElementStartPToken | ElementEmptyPToken,

@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, WarningToken, warning } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -10,7 +10,7 @@ import { nameXmlCheck } from '../common/nameXmlCheck';
 import { wordListCheck } from '../common/wordListCheck';
 import { WellFormedError } from '../error/WellFormedError';
 
-const WARN = XmlWarning.ID;
+const WARN = warning.id;
 const WFEID = WellFormedError.ID;
 const ATTR_TYPES = [
    'CDATA',
@@ -65,12 +65,12 @@ function attListDeclarationCheck(
          ec,
          confVer,
          'ATTRIBUTE',
-         WARN.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
-         WARN.ATTRLISTDECL_ATTR_NAME_XML_RESERVED,
+         WARN.ATTLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
+         WARN.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
       );
 
       if (namesSeen[attName]) {
-         ec.reportError(WARN.ATTLISTDECL_ATTR_NAME_DUPLICATE, XmlWarning, [attName]);
+         ec.reportError(WARN.ATTLISTDECL_ATTR_NAME_DUPLICATE, WarningToken, [attName]);
       }
 
       namesSeen[attName] = true;

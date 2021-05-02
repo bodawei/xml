@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
@@ -15,8 +15,8 @@ describe('nameXmlCheck()', () => {
    beforeEach(() => {
       ec = new MockErrorCollector();
       confVer = new ConformanceVersion();
-      WARN1 = XmlWarning.ID.ENTITYDECL_DUPLICATE;
-      WARN2 = XmlWarning.ID.ELEMENT_WITH_EMPTY_DECL;
+      WARN1 = warning.id.ENTITYDECL_XRA_DECLARATION;
+      WARN2 = warning.id.ELEMENT_WITH_EMPTY_DECL;
    });
 
    it('adds no errors if a name is not passed in', () => {

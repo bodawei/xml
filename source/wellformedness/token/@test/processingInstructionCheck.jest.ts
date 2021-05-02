@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -67,8 +67,8 @@ describe('processingInstructionCheck() (unit)', () => {
          mockErrorCollector,
          confVer,
          'PI',
-         XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED,
-         XmlWarning.ID.PI_TARGET_XML_RESERVED,
+         warning.id.PI_TARGET_XMLDASH_RESERVED,
+         warning.id.PI_TARGET_XML_RESERVED,
       );
    });
 

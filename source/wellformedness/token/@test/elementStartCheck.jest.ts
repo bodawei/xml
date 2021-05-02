@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ElementStartPToken } from 'token';
@@ -61,8 +61,8 @@ describe('elementStartCheck()', () => {
          mockErrorCollector,
          confVer,
          'ELEMENT',
-         XmlWarning.ID.ELEMENT_NAME_XMLCOLON_RESERVED,
-         XmlWarning.ID.ELEMENT_NAME_XML_RESERVED,
+         warning.id.ELEMENT_NAME_XMLCOLON_RESERVED,
+         warning.id.ELEMENT_NAME_XML_RESERVED,
       );
    });
 

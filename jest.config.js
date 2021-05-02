@@ -21,7 +21,7 @@ module.exports = {
   collectCoverageFrom: [
      'source/attFixer/**/*.ts',
      '!source/attFixer/**/@test/**/*.ts',
-     'source/basic/**/conformanceVersion.ts',
+     'source/basic/**/*.ts',
      '!source/basic/**/@test/**/*.ts',
      'source/expand/**/*Conditional*.ts',
      '!source/expand/**/@test/**/*.ts',

@@ -170,7 +170,7 @@ describe('dtdEndCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_NO_UNPARSED,
+         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -212,7 +212,7 @@ describe('dtdEndCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_NO_UNPARSED,
+         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -254,7 +254,7 @@ describe('dtdEndCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportFatalError({
-         id: fatalError.id.REFERENCE_NO_UNPARSED,
+         id: fatalError.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -295,19 +295,19 @@ describe('dtdEndCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_NO_UNPARSED,
+         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
          params: ['bar1'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_NO_UNPARSED,
+         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
          params: ['bar2'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_NO_UNPARSED,
+         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
          params: ['bar3'],
          position: text2.text,
       });

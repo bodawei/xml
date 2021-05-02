@@ -4,13 +4,14 @@ import { Offset, Range, EntityId } from 'basic';
 import { SToken } from 'sToken';
 
 import ErrorCollector from '../ErrorCollector';
-import { XmlWarning } from '../XmlWarning';
+import { WarningToken } from '../error/WarningToken';
+import { warning } from '../error/warning';
 
 describe('ErrorCollector', () => {
    describe('construction', () => {
       it('can be constructed without error', () => {
          expect(() => {
-            new ErrorCollector(SToken.fromString('foo'), XmlWarning);
+            new ErrorCollector(SToken.fromString('foo'), WarningToken);
          }).not.toThrow();
       });
    });
@@ -19,7 +20,7 @@ describe('ErrorCollector', () => {
       let ec: ErrorCollector;
 
       it('calls report if condition is truthy', () => {
-         ec = new ErrorCollector(SToken.fromString('foo'), XmlWarning);
+         ec = new ErrorCollector(SToken.fromString('foo'), WarningToken);
          spyOn(ec, 'report');
 
          ec.check(true, 'foo', [], SToken.fromString('x'));
@@ -28,7 +29,7 @@ describe('ErrorCollector', () => {
       });
 
       it('does not call report if condition is falsy', () => {
-         ec = new ErrorCollector(SToken.fromString('foo'), XmlWarning);
+         ec = new ErrorCollector(SToken.fromString('foo'), WarningToken);
          spyOn(ec, 'report');
 
          ec.check(false, 'foo', [], SToken.fromString('x'));
@@ -46,7 +47,7 @@ describe('ErrorCollector', () => {
       let errorStart: SToken;
 
       beforeEach(() => {
-         errorId = XmlWarning.ID.ELEMENT_NAME_XML_RESERVED;
+         errorId = warning.id.ELEMENT_NAME_XML_RESERVED;
          loc = new EntityId();
          constructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));

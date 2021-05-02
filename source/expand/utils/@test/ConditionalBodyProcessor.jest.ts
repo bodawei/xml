@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { EntityId, XmlWarning, Range } from 'basic';
+import { EntityId, WarningToken, warning, Range } from 'basic';
 import { ParseToken } from 'pToken';
 
 import { STokenSource, strOrBlank, toSToken } from 'sToken';
@@ -47,7 +47,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
 
    it('immediately passes an error token to the expander', () => {
       const expanded = () => {};
-      const token = new XmlWarning(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+      const token = new WarningToken(warning.id.ELEMENT_NAME_XML_RESERVED);
       const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
 
       cbp.handleToken(token, expanded);

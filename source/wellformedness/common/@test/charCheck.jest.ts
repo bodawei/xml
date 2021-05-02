@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
@@ -86,7 +86,7 @@ describe('charCheck()', () => {
       charCheck(sToken, mockErrorCollector, new ConformanceVersion(), false);
 
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+         id: warning.id.CHARDATA_DISCOURAGED_CHAR,
          params: ['5, 7'],
          position: undefined,
       });
@@ -122,7 +122,7 @@ describe('charCheck()', () => {
       charCheck(sToken, mockErrorCollector, new ConformanceVersion(1.0, 5), false);
 
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+         id: warning.id.CHARDATA_DISCOURAGED_CHAR,
          params: ['3'],
          position: undefined,
       });
@@ -134,7 +134,7 @@ describe('charCheck()', () => {
       charCheck(sToken, mockErrorCollector, new ConformanceVersion(1.0, 5), false);
 
       expect(mockErrorCollector).toReportWarning({
-         id: XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+         id: warning.id.CHARDATA_DISCOURAGED_CHAR,
          params: ['3'],
          position: undefined,
       });

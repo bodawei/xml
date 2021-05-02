@@ -20,7 +20,7 @@ describe('wellformedness', () => {
    it('adds several errors to the fatalError', () => {
       expect(fatalError.id).toMatchInlineSnapshot(`
          Object {
-           "REFERENCE_NO_UNPARSED": "REFERENCE_NO_UNPARSED",
+           "REFERENCE_INVALID_UNPARSED": "REFERENCE_INVALID_UNPARSED",
            "TEXTDECL_INVALID_SPACE": "TEXTDECL_INVALID_SPACE",
            "XMLDECL_INVALID_SPACE": "XMLDECL_INVALID_SPACE",
          }

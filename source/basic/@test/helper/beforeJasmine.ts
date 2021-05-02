@@ -3,10 +3,10 @@
 /* eslint-env jasmine */
 
 import { BaseError } from '../../BaseError';
+import { warning } from '../../error/warning';
 import { XmlError } from '../../XmlError';
-import { XmlWarning } from '../../XmlWarning';
 import { MockErrorCollector } from './helper';
-import { makeJasmineErrorMatcher } from './makeJasmineErrorMatcher';
+import { makeJasmineErrorMatcher, makeNewJasmineErrorMatcher } from './makeJasmineErrorMatcher';
 
 interface JasmineResult {
    pass: boolean;
@@ -172,7 +172,7 @@ function toNotReportError(util: any) {
 }
 
 function toReportWarning(util: any) {
-   return makeJasmineErrorMatcher(util, XmlWarning);
+   return makeNewJasmineErrorMatcher(util, warning);
 }
 
 function toReportXmlError(util: any) {

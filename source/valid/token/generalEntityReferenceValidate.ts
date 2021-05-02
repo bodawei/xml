@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, XmlWarning } from 'basic';
+import { ErrorCollector, warning, WarningToken } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -9,7 +9,7 @@ import { ValidateState } from '../validateState';
 
 const PREDEFINED = ['lt', 'gt', 'quot', 'apos', 'amp'];
 const VEID = ValidityError.ID;
-const WARNID = XmlWarning.ID;
+const WARNID = warning.id;
 
 function generalEntityReferenceValidate(
    token: GeneralEntityReferencePToken,
@@ -39,7 +39,7 @@ function generalEntityReferenceValidate(
        *    For interoperability, valid documents should declare the entities
        *    amp, lt, gt, apos, quot, in the form specified in 4.6 Predefined Entities.
        */
-      ec.reportError(WARNID.PREDEFINED_UNDECLARED, XmlWarning, [geDeclName]);
+      ec.reportError(WARNID.PREDEFINED_UNDECLARED, WarningToken, [geDeclName]);
    }
 }
 

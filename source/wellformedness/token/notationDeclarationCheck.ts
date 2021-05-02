@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning } from 'basic';
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -9,7 +9,7 @@ import { nameXmlCheck } from '../common/nameXmlCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
 import { WellFormedError } from '../error/WellFormedError';
 
-const WARN = XmlWarning.ID;
+const WARN = warning.id;
 const WFEID = WellFormedError.ID;
 
 function notationDeclarationCheck(

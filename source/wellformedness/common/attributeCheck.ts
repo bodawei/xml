@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlError, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, XmlError, warning } from 'basic';
 import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import { AttributePToken, LiteralValuePToken } from 'token';
@@ -25,7 +25,7 @@ type CheckAttName = (
 ) => void;
 
 const WFEID = WellFormedError.ID;
-const WARN = XmlWarning.ID;
+const WARN = warning.id;
 
 function attributeCheck(
    attributes: ReadonlyArray<AttributePToken>,

@@ -29,7 +29,6 @@ export { default as Offset } from './Offset';
 export { default as Range } from './Range';
 export { default as ErrorCollector } from './ErrorCollector';
 export * from './BaseError';
-export * from './XmlWarning';
 export * from './StringBundle';
 export * from './token';
 export * from './conformanceVersion';
@@ -43,3 +42,5 @@ export { XmlVersion, XmlEdition };
 
 export { FatalErrorToken } from './error/FatalErrorToken';
 export { fatalError } from './error/fatalError';
+export { WARNING_SUBTYPE, WarningToken } from './error/WarningToken';
+export { warning } from './error/warning';

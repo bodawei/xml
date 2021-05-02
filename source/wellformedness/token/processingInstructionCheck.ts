@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, warning } from 'basic';
 import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -35,8 +35,8 @@ function processingInstructionCheck(
       ec,
       confVer,
       'PI',
-      XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED,
-      XmlWarning.ID.PI_TARGET_XML_RESERVED,
+      warning.id.PI_TARGET_XMLDASH_RESERVED,
+      warning.id.PI_TARGET_XML_RESERVED,
    );
 
    ec.setPos(pToken.targetSpace);

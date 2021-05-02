@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlWarning } from 'basic';
+import { ConformanceVersion, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -115,8 +115,8 @@ describe('elementDeclarationCheck()', () => {
          mockErrorCollector,
          confVer,
          'ELEMENT',
-         XmlWarning.ID.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
-         XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED,
+         warning.id.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
+         warning.id.ELEMENTDECL_NAME_XML_RESERVED,
       );
    });
 

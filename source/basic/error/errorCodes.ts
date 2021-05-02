@@ -1,8 +1,10 @@
 interface ErrorCodeMap {
-   [errorId: string]: {
-      code: number;
-      message: string;
-   };
+   [errorId: string]:
+      | undefined
+      | {
+           code: number;
+           message: string;
+        };
 }
 
 const BRACES = /\{([{}])\}/g;
@@ -15,7 +17,7 @@ function unescapeBraces(message = ''): string {
 }
 
 class ErrorCodes {
-   public code: Record<string, number>;
+   public code: Record<string, number | undefined>;
 
    public id: Record<string, string>;
 
@@ -33,24 +35,24 @@ class ErrorCodes {
       for (const key of Object.keys(mapping)) {
          // Validate no duplication
          this.id[key] = key;
-         this.code[key] = mapping[key].code;
+         this.code[key] = mapping[key]?.code ?? 0;
          this.mapping[key] = mapping[key];
       }
    }
 
    public codeFor(id: string): number {
-      return this.code[id];
+      return this.code[id] ?? 0;
    }
 
    public messageTemplateFor(id: string): string | undefined {
-      return this.mapping[id].message;
+      return this.mapping[id]?.message ?? '';
    }
 
    public messageFor(
       id: string,
       params: ReadonlyArray<string | number | boolean> | undefined,
    ): string {
-      let message = this.mapping[id].message;
+      let message = this.mapping[id]?.message ?? '';
 
       if (params && message) {
          const paramsArray = Array.isArray(params) ? params : [params];
