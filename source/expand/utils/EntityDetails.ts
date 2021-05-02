@@ -3,12 +3,13 @@
 import { strOrBlank, toSToken } from 'sToken';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
+   ExternalIdP,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { EntityValuePToken, ExternalId, ErrorToken, ElidedEntityDeclarationPToken } from 'token';
+import { EntityValuePToken, ErrorToken, ElidedEntityDeclarationPToken } from 'token';
 
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
@@ -149,7 +150,7 @@ class EntityDetails {
       return isPERef ? this.getPEDetails(entityName) : this.getGEDetails(entityName);
    }
 
-   public addExternalSubset(externalId: ExternalId): void {
+   public addExternalSubset(externalId: ExternalIdP): void {
       this.externalSubset = new ExternalDtdSubsetPseudoToken(externalId);
    }
 

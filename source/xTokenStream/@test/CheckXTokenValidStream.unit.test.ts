@@ -20,6 +20,7 @@ import {
    CpRepeat,
    CpType,
    DocTypeEndXToken,
+   DocTypeStartXToken,
    ElementEndXToken,
    ElementDeclarationXToken,
    ElementEmptyXToken,
@@ -38,7 +39,6 @@ import {
 import * as chars from '../../basic/chars'
 
 import {
-   DocTypeStartXToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    GeneralEntityEndXToken,

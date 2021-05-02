@@ -1,13 +1,12 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
+import {  STokenArrayBuilder, SToken, STokenSource } from 'sToken';
 
-import { ExternalId, parseExternalId, getSTokens } from './common/externalId';
+import { ExternalIdP, parseExternalId } from '../pToken/common/externalId';
+import { externalIdToSTokens } from '../stringify/common/externalIdToSTokens';
 import { DeclarationPToken } from './bridge/baseDeclaration';
-import { ExternalIdX } from 'xToken';
 
 const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
-const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 
 /**********************************************************************\
  The docTypeStart namespace contains the Token class, parser, validator
@@ -28,22 +27,6 @@ const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 
 type PreToken = { open: SToken; [ other: string ]: any };
 
-class DocTypeStartXToken {
-   public readonly type: typeof DOCTYPE_START_XTOKEN = DOCTYPE_START_XTOKEN;
-   public readonly name: string;
-   public readonly externalId: ExternalIdX | undefined;
-   public readonly hasInternalSubset: boolean;
-   public pToken?: DocTypeStartPToken;
-
-   constructor(name: string, externalId: ExternalIdX | undefined, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
-      this.name = name;
-      this.externalId = externalId;
-      this.hasInternalSubset = hasInternalSubset;
-      this.pToken = pToken;
-   }
-
-}
-
 class DocTypeStartPToken {
    public readonly type: typeof DOCTYPE_START_PTOKEN = DOCTYPE_START_PTOKEN;
    public readonly open: SToken;
@@ -52,7 +35,7 @@ class DocTypeStartPToken {
    public readonly postDeclTypeSpace?: SToken;
    public readonly name?: SToken;
    public readonly nameSpace?: SToken;
-   public readonly externalId?: ExternalId;
+   public readonly externalId?: ExternalIdP;
    public readonly externalIdSpace?: SToken;
    public readonly openSubset?: SToken;
 
@@ -61,10 +44,6 @@ class DocTypeStartPToken {
 
       this.type = DOCTYPE_START_PTOKEN;
       this.open = basePToken.open; // Make sure type system knows we always assign open
-   }
-
-   toXToken() {
-      return pTokenToXToken(this);
    }
 
    toSTokenArray() {
@@ -95,8 +74,8 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
    source.extractToObject('word', [ '[', '>' ], pToken, 'name'); // look for quotes?
    source.extractToObject('space', undefined, pToken, 'nameSpace');
 
-   parseExternalId(source, [ '[', '>' ], false, (parseResult) => {
-      pToken.externalId = parseResult.externalId;
+   parseExternalId(source, [ '[', '>' ], (parseResult) => {
+      pToken.externalId = parseResult?.externalId;
 
       source.extractToObject('space', undefined, pToken, 'externalIdSpace');
 
@@ -107,25 +86,13 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
    });
 }
 
-
-/**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: DocTypeStartPToken) {
-   return new DocTypeStartXToken(strOrBlank(pToken.name),
-      pToken.externalId ? new ExternalIdX(pToken.externalId) : undefined,
-      !!pToken.openSubset,
-      pToken);
-}
-
 /**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the component STokens
 \**********************************************************************/
 
 function sTokensFromPToken(pToken: DocTypeStartPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
-   const externalTokens = getSTokens(pToken.externalId);
+   const externalTokens = externalIdToSTokens(pToken.externalId);
 
    builder.add(
       pToken.open,
@@ -144,8 +111,6 @@ function sTokensFromPToken(pToken: DocTypeStartPToken): Array<SToken> {
 
 export {
    DOCTYPE_START_PTOKEN,
-   DOCTYPE_START_XTOKEN,
-   DocTypeStartXToken,
    DocTypeStartPToken,
 
    parseDocTypeStart,

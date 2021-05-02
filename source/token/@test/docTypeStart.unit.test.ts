@@ -2,14 +2,11 @@
 
 /* eslint-env jasmine */
 
-import { TextPToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
-import { EXTERNAL_ID } from '../common/externalId';
-import * as externalId from '../common/externalId';
-import { ExternalIdX } from 'xToken';
+import * as externalId from '../../pToken/common/externalId';
 
 describe('docTypeStart (unit)', () => {
    let docTypeStartPToken: DocTypeStartPToken;
@@ -19,7 +16,7 @@ describe('docTypeStart (unit)', () => {
          open: SToken.fromString('<!'),
          name: toSToken('rootElement'),
          nameSpace: toSToken(' '),
-         externalId: { type: EXTERNAL_ID },
+         externalId: { },
          externalIdSpace: toSToken(' '),
          openSubset: toSToken('['),
       });
@@ -30,8 +27,8 @@ describe('docTypeStart (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(externalId, 'parseExternalId').and.callFake((sTokenSource: STokenSource, tokens: any, allowPERefs: boolean, cb: any) => {
-            cb({ externalId: { type: EXTERNAL_ID } });
+         spyOn(externalId, 'parseExternalId').and.callFake((sTokenSource: STokenSource, tokens: any, cb: any) => {
+            cb({ externalId: { } });
          });
       });
 
@@ -64,41 +61,9 @@ describe('docTypeStart (unit)', () => {
             name: undefined,
             nameSpace: undefined,
             externalIdSpace: undefined,
-            externalId: { type: EXTERNAL_ID },
+            externalId: { },
             openSubset: undefined,
          });
-      });
-
-   });
-
-   describe('toXToken()', () => {
-
-      it('returns a token with an empty string if no name was found', () => {
-         delete (docTypeStartPToken as any).name;
-
-         const token = docTypeStartPToken.toXToken();
-
-         expect(token.name).toEqual('');
-      });
-
-      it('returns a token with an external Id', () => {
-         docTypeStartPToken = new DocTypeStartPToken({
-            open: SToken.fromString('<!'),
-            name: toSToken('rootElement'),
-            nameSpace: toSToken(' '),
-            externalId: { type: EXTERNAL_ID, system: {
-               value: [ new TextPToken({ text: toSToken('system.xml') }) ],
-            }, public: {
-               value: [ new TextPToken({ text: toSToken('- // public') }) ],
-             },
-            },
-            externalIdSpace: toSToken(' '),
-            openSubset: toSToken('['),
-         });
-
-         const token = docTypeStartPToken.toXToken();
-
-         expect(token.externalId).toEqual(new ExternalIdX('system.xml', '- // public'));
       });
 
    });
@@ -117,14 +82,14 @@ describe('docTypeStart (unit)', () => {
          ] as any);
       });
 
-      it('calls externalId getSTokens', () => {
-         spyOn(externalId, 'getSTokens');
-         const pToken = new DocTypeStartPToken(docTypeStartPToken);
+      // it('calls externalId getSTokens', () => {
+      //    spyOn(externalId, 'getSTokens');
+      //    const pToken = new DocTypeStartPToken(docTypeStartPToken);
 
-         pToken.toSTokenArray();
+      //    pToken.toSTokenArray();
 
-         expect(externalId.getSTokens).toHaveBeenCalledWith(docTypeStartPToken.externalId);
-      });
+      //    expect(externalId.getSTokens).toHaveBeenCalledWith(docTypeStartPToken.externalId);
+      // });
 
    });
 

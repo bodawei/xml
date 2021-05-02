@@ -26,6 +26,7 @@ import {
    CpRepeat,
    CpType,
    DocTypeEndXToken,
+   DocTypeStartXToken,
    ElementDeclarationXToken,
    ElementEmptyXToken,
    ElementEndXToken,
@@ -42,7 +43,6 @@ import {
 
 
 import {
-   DocTypeStartXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    ParameterEntityEndXToken,

@@ -10,16 +10,16 @@ import { InternalSubsetStartToken } from './marker/internalSubsetStart';
 import { InternalSubsetEndToken } from './marker/internalSubsetEnd';
 import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
 import { ExternalSubsetEndToken } from './marker/externalSubsetEnd';
-import { DocTypeEndPToken, DOCTYPE_END_PTOKEN } from './docTypeEnd';
+import { DocTypeEndPToken } from './docTypeEnd';
 import { CdataPToken } from './cdata';
 import { CharDataPToken } from './charData';
 import { CommentPToken } from './comment';
 import { ConditionalPToken } from './conditional';
 import { ConditionalClosePToken } from './conditionalClose';
 import { ElidedEntityDeclarationPToken } from './ElidedEntityDeclarationPToken';
-import { GeneralEntityStartPToken, GENERAL_ENTITY_START_PTOKEN } from './marker/generalEntityStart';
-import { GeneralEntityEndPToken, GENERAL_ENTITY_END_PTOKEN } from './marker/generalEntityEnd';
-import { ParameterEntityStartPToken, PARAMETER_ENTITY_START_PTOKEN } from './marker/parameterEntityStart';
+import { GeneralEntityStartPToken } from './marker/generalEntityStart';
+import { GeneralEntityEndPToken } from './marker/generalEntityEnd';
+import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 import { SpacePToken } from './space';
 import { DocTypeStartPToken } from './docTypeStart';
 import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
@@ -50,8 +50,6 @@ export * from './docTypeStart';
 export * from './elementEnd';
 export * from './elementStart';
 export * from './space';
-
-import { EXTERNAL_ID, ExternalId, parseExternalId } from './common/externalId';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
@@ -100,7 +98,6 @@ export {
    WordListType,
    WordListEntryPToken,
    parseAttribute,
-   parseExternalId,
    parseLiteral,
    parseLiteralValue,
    parseWordList,
@@ -109,8 +106,6 @@ export {
 
    literalValue,
    AttributeValuePToken,
-   EXTERNAL_ID,
-   ExternalId,
    PToken,
    ErrorToken,
 };

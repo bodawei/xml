@@ -2,6 +2,7 @@
 
 import { toSToken } from 'sToken';
 import {
+   ExternalIdP,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
@@ -12,7 +13,6 @@ import {
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
-import { EntityId } from 'basic';
 
 describe('EntityDetails (unit)', () => {
    let entityDetails: EntityDetails;
@@ -342,7 +342,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('addExternalSubset()', () => {
       it('adds an external subset token to this', () => {
-         entityDetails.addExternalSubset(new EntityId());
+         entityDetails.addExternalSubset(new ExternalIdP({}));
 
          const result = entityDetails.getExternalSubsetReference();
          expect(result).toBeInstanceOf(ExternalDtdSubsetPseudoToken);
@@ -351,7 +351,7 @@ describe('EntityDetails (unit)', () => {
 
    describe('getExternalSubsetReference()', () => {
       it('adds an external subset token to this', () => {
-         entityDetails.addExternalSubset(new EntityId());
+         entityDetails.addExternalSubset(new ExternalIdP({}));
 
          const result = entityDetails.getExternalSubsetReference();
 

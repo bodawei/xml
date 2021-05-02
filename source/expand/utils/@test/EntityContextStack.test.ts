@@ -3,7 +3,6 @@ import { EntityId } from 'basic';
 
 import { toSToken } from 'sToken';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'pToken';
-import { EXTERNAL_ID } from 'token';
 
 import { EntityContextStack } from '../EntityContextStack';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
@@ -33,9 +32,7 @@ describe('EntityContextStack (unit)', () => {
          open: toSToken('&'),
          name: toSToken('bar'),
       });
-      extToken = new ExternalDtdSubsetPseudoToken({
-         type: EXTERNAL_ID,
-      });
+      extToken = new ExternalDtdSubsetPseudoToken({});
 
       entityNameStack = new EntityContextStack();
    });

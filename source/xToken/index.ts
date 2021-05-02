@@ -19,7 +19,8 @@ export {
    CONDITIONAL_SECTION_START_XTOKEN,
    ConditionalSectionStartXToken,
 } from './token/conditionalSectionStartXToken';
-export { DocTypeEndXToken, DOCTYPE_END_XTOKEN } from './token/docTypeEndXToken';
+export { DOCTYPE_END_XTOKEN, DocTypeEndXToken } from './token/docTypeEndXToken';
+export { DOCTYPE_START_XTOKEN, DocTypeStartXToken } from './token/docTypeStartXToken';
 export { ELEMENT_END_XTOKEN, ElementEndXToken } from './token/elementEndXToken';
 export { COMMENT_XTOKEN, CommentXToken } from './token/commentXToken';
 export { ExternalIdX } from './common/externalIdX';

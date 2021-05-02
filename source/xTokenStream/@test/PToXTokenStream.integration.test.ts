@@ -10,6 +10,7 @@ import {
    CharDataXToken,
    CommentXToken,
    DocTypeEndXToken,
+   DocTypeStartXToken,
    ElementEndXToken,
    ElementEmptyXToken,
    ElementStartXToken,
@@ -26,7 +27,6 @@ import {
 import { stripPTokens } from 'xToken-test';
 import {
    declaration,
-   DocTypeStartXToken,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';

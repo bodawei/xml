@@ -23,6 +23,7 @@ import {
    CONDITIONAL_CLOSE_PTOKEN,
    CONDITIONAL_PTOKEN,
    DOCTYPE_END_PTOKEN,
+   DOCTYPE_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
    ELEMENT_END_PTOKEN,
    ELEMENT_START_PTOKEN,
@@ -38,6 +39,7 @@ import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken
 import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
 import { CommentXToken } from './token/commentXToken';
 import { DocTypeEndXToken } from './token/docTypeEndXToken';
+import { DocTypeStartXToken } from './token/docTypeStartXToken';
 import { ElementEmptyXToken } from './token/elementEmptyXToken';
 import { ElementEndXToken } from './token/elementEndXToken';
 import { ElementStartXToken } from './token/elementStartXToken';
@@ -72,6 +74,8 @@ function convertPTokenToXToken(pToken: ParseToken): XToken {
          return new CommentXToken(pToken);
       case DOCTYPE_END_PTOKEN:
          return new DocTypeEndXToken(pToken);
+      case DOCTYPE_START_PTOKEN:
+         return new DocTypeStartXToken(pToken);
       case ELEMENT_EMPTY_PTOKEN:
          return new ElementEmptyXToken(pToken);
       case ELEMENT_END_PTOKEN:

@@ -2,9 +2,9 @@
 
 import { describe, expect, it } from '@jest/globals';
 
+import { ExternalIdP } from 'pToken';
 import { toSToken } from 'sToken';
 //ick
-import { ExternalId, EXTERNAL_ID } from 'token';
 import literal from '../../../token/common/literal'; // ick
 
 import { externalIdToSTokens } from '../externalIdToSTokens';
@@ -18,9 +18,7 @@ describe('externalIdToSTokens()', () => {
    });
 
    it('calls literal.getSTokens() for the PUBLIC value', () => {
-      const pTokenPart: ExternalId = {
-         type: EXTERNAL_ID,
-      };
+      const pTokenPart: ExternalIdP = {};
 
       externalIdToSTokens(pTokenPart);
 
@@ -28,9 +26,7 @@ describe('externalIdToSTokens()', () => {
    });
 
    it('calls literal.getSTokens() for the SYSTEM value', () => {
-      const pTokenPart: ExternalId = {
-         type: EXTERNAL_ID,
-      };
+      const pTokenPart: ExternalIdP = {};
 
       externalIdToSTokens(pTokenPart);
 
@@ -39,7 +35,6 @@ describe('externalIdToSTokens()', () => {
 
    it('returns the STokens that made up the external ID', () => {
       const pTokenPart = {
-         type: EXTERNAL_ID,
          peRefPlus: [],
          externalType: toSToken('PUBLIC'),
          externalTypeSpace: toSToken(' '),

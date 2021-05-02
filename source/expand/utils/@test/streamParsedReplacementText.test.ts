@@ -43,7 +43,6 @@ describe('streamParsedReplacementText() (unit)', () => {
       stack = new EntityContextStack();
       entityDetails = new EntityDetails();
       entityDetails.addExternalSubset({
-         type: 'EXTERNAL_ID',
          system: {
             value: [new TextPToken({ text: toSToken('theExternalID') })],
          },

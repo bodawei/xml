@@ -2,37 +2,29 @@
 /* eslint-env jasmine */
 
 import { TextPToken } from 'pToken';
-import { STokenSource, SToken } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
-import { ExternalIdX } from 'xToken';
+import { STokenSource, SToken, toSToken } from 'sToken';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
-import { DeclarationPToken } from '../bridge/baseDeclaration';
-import { EXTERNAL_ID } from '../common/externalId';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken: DocTypeStartPToken;
 
    beforeEach(() => {
-      const makeSToken = makeSTokenMaker();
       docTypeStartPToken = new DocTypeStartPToken({
          open: SToken.fromString('<!'),
-         name: makeSToken('rootElement'),
-         nameSpace: makeSToken(' '),
+         name: toSToken('rootElement'),
+         nameSpace: toSToken(' '),
          externalId: {
-            type: EXTERNAL_ID,
-            externalType: makeSToken('SYSTEM'),
-            externalTypeSpace: makeSToken(' '),
-            public: undefined,
-            publicSpace: undefined,
+            externalType: toSToken('SYSTEM'),
+            externalTypeSpace: toSToken(' '),
             system: {
-               openQuote: makeSToken('"'),
-               value: [ new TextPToken({ text: makeSToken('sys.dtd') }) ],
-               closeQuote: makeSToken('"'),
+               openQuote: toSToken('"'),
+               value: [ new TextPToken({ text: toSToken('sys.dtd') }) ],
+               closeQuote: toSToken('"'),
             },
          },
-         externalIdSpace: makeSToken(' '),
-         openSubset: makeSToken('['),
+         externalIdSpace: toSToken(' '),
+         openSubset: toSToken('['),
       });
    });
 
@@ -44,39 +36,10 @@ describe('docTypeStart (integration)', () => {
          source.endText();
 
          parseDocTypeStart(source, { open: SToken.fromString('<!'), } as any, (parsing) => {
-            expect(parsing).toContainPTokenProps(docTypeStartPToken);
+            expect(parsing).toEqualRangeless(docTypeStartPToken);
             done();
          });
       });
 
    });
-
-   describe('toXToken()', () => {
-      let declaration: DeclarationPToken;
-
-      beforeEach(() => {
-         const makeSToken = makeSTokenMaker();
-         declaration = new DeclarationPToken('FOO', {
-            open: makeSToken('<!'),
-            declType: makeSToken('DOCTYPE'),
-         });
-      });
-
-      it('populates the token with data from the PToken', (done) => {
-         const source = new STokenSource();
-         source.addText('rootElement SYSTEM "sys.dtd" [');
-         source.endText();
-
-         parseDocTypeStart(source, declaration, (pToken) => {
-            const token = pToken.toXToken();
-
-            expect(token.name).toEqual('rootElement');
-            expect(token.externalId).toEqual(new ExternalIdX('sys.dtd'));
-            expect(token.pToken!.declType).toEqual(declaration.declType);
-            done();
-         });
-      });
-
-   });
-
 });

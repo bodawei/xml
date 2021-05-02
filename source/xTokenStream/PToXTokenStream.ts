@@ -59,7 +59,6 @@ class PToXTokenStream extends Transform {
          case declaration.PTYPE:
             this.push(declaration.pTokenToXToken(pToken));
             break;
-            case DOCTYPE_START_PTOKEN:
          case GENERAL_ENTITY_START_PTOKEN:
          case GENERAL_ENTITY_END_PTOKEN:
          case PARAMETER_ENTITY_END_PTOKEN:
@@ -74,6 +73,7 @@ class PToXTokenStream extends Transform {
          case CONDITIONAL_PTOKEN:
          case COMMENT_PTOKEN:
          case DOCTYPE_END_PTOKEN:
+         case DOCTYPE_START_PTOKEN:
          case ELEMENT_END_PTOKEN:
          case ELEMENT_DECLARATION_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:

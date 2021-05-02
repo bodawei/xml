@@ -7,6 +7,7 @@ import {
    CDATA_XTOKEN,
    CHARDATA_XTOKEN,
    DOCTYPE_END_XTOKEN,
+   DOCTYPE_START_XTOKEN,
    ELEMENT_END_XTOKEN,
    NOTATION_DECLARATION_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
@@ -16,8 +17,8 @@ import {
    TEXT_XTOKEN,
    XMLDECL_XTOKEN,
    ExternalIdX,
+   DocTypeStartXToken,
 } from 'xToken';
-import { DOCTYPE_START_XTOKEN, DocTypeStartXToken } from 'token';
 import { AttributeXToken } from '../../../token/common/attribute';
 
 function formatExternalId(externalId?: ExternalIdX): string {
