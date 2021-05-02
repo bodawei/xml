@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { SToken, getStartOffset, isSToken } from 'sToken';
+import { SToken } from 'sToken';
 import Offset from '../Offset';
 
 const XML_ERROR_TOKEN = 'ERROR_TYPE';
@@ -17,12 +17,4 @@ interface XmlErrorToken {
    readonly type: typeof XML_ERROR_TOKEN;
 }
 
-function makeOffset(place?: Offset | SToken): Offset | undefined {
-   if (isSToken(place)) {
-      return getStartOffset(place);
-   } else if (place) {
-      return place.clone();
-   }
-}
-
-export { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken, makeOffset };
+export { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken };

@@ -1,6 +1,13 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlError, FatalErrorToken, fatalError } from 'basic';
+import {
+   ConformanceVersion,
+   ErrorCollector,
+   error,
+   ErrorToken,
+   FatalErrorToken,
+   fatalError,
+} from 'basic';
 import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { LiteralValuePToken } from 'token';
@@ -37,9 +44,9 @@ function checkEntity(
             if (isUnparsed) {
                const code = isForbidden
                   ? fatalError.id.REFERENCE_INVALID_UNPARSED
-                  : XmlError.ID.REFERENCE_INVALID_UNPARSED;
+                  : error.id.REFERENCE_INVALID_UNPARSED;
                ec.setPos(element.text);
-               ec.reportError(code, isForbidden ? FatalErrorToken : XmlError, [name]);
+               ec.reportError(code, isForbidden ? FatalErrorToken : ErrorToken, [name]);
             }
          }
 

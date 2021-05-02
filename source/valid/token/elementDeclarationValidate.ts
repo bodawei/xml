@@ -4,7 +4,8 @@ import {
    ErrorCollector,
    ConformanceVersion,
    isSpace,
-   XmlError,
+   error,
+   ErrorToken,
    warning,
    WarningToken,
 } from 'basic';
@@ -240,7 +241,7 @@ function elementDeclarationValidate(
       }
 
       if (cases.length > 0) {
-         ec.reportError(XmlError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC, XmlError, [
+         ec.reportError(error.id.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC, ErrorToken, [
             elName,
             cases.join(','),
          ]);

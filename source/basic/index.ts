@@ -37,10 +37,11 @@ export * from './chars';
 export * from './doAsyncLoop';
 export * from './doAsyncWhileLoop';
 export * from './extractSurrogatePair';
-export * from './XmlError';
 export { XmlVersion, XmlEdition };
 
-export { FatalErrorToken } from './error/FatalErrorToken';
-export { fatalError } from './error/fatalError';
+export { ERROR_SUBTYPE, ErrorToken } from './error/ErrorToken';
+export { FATAL_ERROR_SUBTYPE, FatalErrorToken } from './error/FatalErrorToken';
 export { WARNING_SUBTYPE, WarningToken } from './error/WarningToken';
+export { error } from './error/error';
+export { fatalError } from './error/fatalError';
 export { warning } from './error/warning';

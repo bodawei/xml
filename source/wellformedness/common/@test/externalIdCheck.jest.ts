@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, XmlError } from 'basic';
+import { ConformanceVersion, error } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { CharRefPToken, ExternalIdP, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -87,8 +87,8 @@ describe('externalIdCheck()', () => {
       cb?.();
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.SYSTEMLITERAL_NO_FRAGMENT,
+      expect(mockErrorCollector).toReportError({
+         id: error.id.SYSTEMLITERAL_NO_FRAGMENT,
          params: ['stuff#'],
          position: externalId.publicSpace, // This is only because we call the callback after
       });

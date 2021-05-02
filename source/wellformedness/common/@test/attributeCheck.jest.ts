@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, XmlError, warning } from 'basic';
+import { ConformanceVersion, error, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -100,8 +100,8 @@ describe('attributeCheck (unit)', () => {
          WellFormedError.ID.NOUN_ATTRIBUTE,
       );
 
-      expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.XMLSPACE_INVALID_VALUE,
+      expect(mockErrorCollector).toReportError({
+         id: error.id.XMLSPACE_INVALID_VALUE,
          params: ['bogus'],
          position: undefined,
          lastPosition: toSToken('='),

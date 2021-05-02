@@ -3,7 +3,8 @@
 import {
    ConformanceVersion,
    ErrorCollector,
-   XmlError,
+   error,
+   ErrorToken,
    FatalErrorToken,
    warning,
    WarningToken,
@@ -61,7 +62,11 @@ function checkVersionString(
       if (doesNotMatchSyntax) {
          ec.report(code, ["([a-zA-Z0-9_.:] | '-')+", versionText]);
       } else if (isNot10) {
-         ec.reportError(XmlError.ID.DECL_VERSION_PROBLEM, XmlError, ['1.0', versionText]);
+         ec.reportError(
+            isXmlDecl ? error.id.XMLDECL_VERSION_INVALID : error.id.TEXTDECL_VERSION_INVALID,
+            ErrorToken,
+            ['1.0', versionText],
+         );
       }
    } else if (confVer.version === 1 && confVer.edition < 5) {
       ec.check(versionText !== '1.0', code, ['1.0', versionText]);

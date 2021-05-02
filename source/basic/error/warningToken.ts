@@ -1,7 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import Offset from '../Offset';
-import { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken, makeOffset } from './XmlErrorToken';
+import { makeOffset } from './makeOffset';
+import { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken } from './XmlErrorToken';
 import { warning } from './warning';
 
 const WARNING_SUBTYPE = 'WARNING_SUBTYPE';

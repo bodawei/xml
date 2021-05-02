@@ -1,8 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import Offset from '../Offset';
-import { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken, makeOffset } from './XmlErrorToken';
 import { fatalError } from './fatalError';
+import { makeOffset } from './makeOffset';
+import { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken } from './XmlErrorToken';
 
 const FATAL_ERROR_SUBTYPE = 'FATAL_ERROR_SUBTYPE';
 
@@ -28,7 +29,7 @@ class FatalErrorToken implements XmlErrorToken {
       context?: XmlErrorPosition,
    ) {
       this.id = id;
-      this.code = fatalError.code[id] ?? 0;
+      this.code = fatalError.codeFor(id);
       this.context = makeOffset(context);
       this.message = fatalError.messageFor(id, params);
       this.place = makeOffset(place);

@@ -90,6 +90,7 @@ function doLocaleSet(sourceDir, destDir, setName) {
    const jsonBase = {};
    const jsonCode = {};
    const names = {};
+   const other = {};
 
    noDupValues(codesObject, CODE_FILE);
    keysMatch(baseObject, BASE_FILE, codesObject, CODE_FILE);
@@ -103,6 +104,10 @@ function doLocaleSet(sourceDir, destDir, setName) {
          jsonBase[key] = value;
          jsonCode[key] = code;
          names[key] = key;
+         other[key] = {
+            code: code,
+            messge: value
+         };
       }
    }
 
@@ -120,6 +125,7 @@ function doLocaleSet(sourceDir, destDir, setName) {
       message: {
          base: jsonBase,
       },
+      other,
    }, undefined, 2));
 }
 

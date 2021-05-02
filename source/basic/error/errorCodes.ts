@@ -17,9 +17,9 @@ function unescapeBraces(message = ''): string {
 }
 
 class ErrorCodes {
-   public code: Record<string, number | undefined>;
-
    public id: Record<string, string>;
+
+   private code: Record<string, number | undefined>;
 
    private mapping: ErrorCodeMap;
 
@@ -33,9 +33,9 @@ class ErrorCodes {
 
    public addMapping(mapping: ErrorCodeMap): void {
       for (const key of Object.keys(mapping)) {
-         // Validate no duplication
          this.id[key] = key;
-         this.code[key] = mapping[key]?.code ?? 0;
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- always defined since we just got key from this
+         this.code[key] = mapping[key]!.code;
          this.mapping[key] = mapping[key];
       }
    }
@@ -52,13 +52,11 @@ class ErrorCodes {
       id: string,
       params: ReadonlyArray<string | number | boolean> | undefined,
    ): string {
-      let message = this.mapping[id]?.message ?? '';
+      let message = this.mapping[id]?.message;
 
       if (params && message) {
-         const paramsArray = Array.isArray(params) ? params : [params];
-
-         for (let index = 0; index < paramsArray.length; index++) {
-            message = message.replace(`{${index}}`, paramsArray[index]);
+         for (let index = 0; index < params.length; index++) {
+            message = message.replace(new RegExp(`\\{${index}\\}`, 'g'), String(params[index]));
          }
       }
 

@@ -4,9 +4,9 @@
 
 import { BaseError } from '../../BaseError';
 import { warning } from '../../error/warning';
-import { XmlError } from '../../XmlError';
+import { error } from '../../error/error';
 import { MockErrorCollector } from './helper';
-import { makeJasmineErrorMatcher, makeNewJasmineErrorMatcher } from './makeJasmineErrorMatcher';
+import { makeNewJasmineErrorMatcher } from './makeJasmineErrorMatcher';
 
 interface JasmineResult {
    pass: boolean;
@@ -175,10 +175,6 @@ function toReportWarning(util: any) {
    return makeNewJasmineErrorMatcher(util, warning);
 }
 
-function toReportXmlError(util: any) {
-   return makeJasmineErrorMatcher(util, XmlError);
-}
-
 if (typeof jest === 'undefined') {
    beforeEach(() => {
       jasmine.addMatchers({
@@ -187,7 +183,6 @@ if (typeof jest === 'undefined') {
          toBeErrorFree,
          toBeErrorAndWarningFree,
          toNotReportError,
-         toReportXmlError,
          toReportWarning,
       });
    });
@@ -210,9 +205,8 @@ declare global {
          toNotReportError(id: string): void;
          toReportWarning(errorProps: ErrorProps): void;
          toReportWFError(errorProps: ErrorProps): void; // not sure why this isn't picked up from wf
-         toReportXmlError(errorProps: ErrorProps): void; // not sure why this isn't picked up from wf
       }
    }
 }
 
-export { toBeInstanceOf, toReportWarning, toReportXmlError };
+export { toBeInstanceOf, toReportWarning };

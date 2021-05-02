@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, XmlError, fatalError } from 'basic';
+import { ConformanceVersion, error, fatalError } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -15,7 +15,7 @@ import { textDeclarationCheck } from '../textDeclarationCheck';
 jest.mock('../../common/charCheck');
 
 const WFEID = WellFormedError.ID;
-const XEID = XmlError.ID;
+const XEID = error.id;
 
 fdescribe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;
@@ -325,8 +325,8 @@ fdescribe('textDeclaration (unit)', () => {
          [new ConformanceVersion(1.1, 1), '1.0', false],
          [new ConformanceVersion(1.1, 2), '1.0', false],
          [new ConformanceVersion(1.1, 3), '1.0', false],
-         [new ConformanceVersion(1, 1), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
-         [new ConformanceVersion(1, 2), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 1), '1.1', true, XEID.TEXTDECL_VERSION_INVALID, '1.0'],
+         [new ConformanceVersion(1, 2), '1.1', true, XEID.TEXTDECL_VERSION_INVALID, '1.0'],
          [new ConformanceVersion(1, 3), '1.1', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 4), '1.1', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 5), '1.1', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
@@ -334,8 +334,8 @@ fdescribe('textDeclaration (unit)', () => {
          [new ConformanceVersion(1.1, 1), '1.1', false],
          [new ConformanceVersion(1.1, 2), '1.1', false],
          [new ConformanceVersion(1.1, 3), '1.1', false],
-         [new ConformanceVersion(1, 1), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
-         [new ConformanceVersion(1, 2), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 1), '1.3', true, XEID.TEXTDECL_VERSION_INVALID, '1.0'],
+         [new ConformanceVersion(1, 2), '1.3', true, XEID.TEXTDECL_VERSION_INVALID, '1.0'],
          [new ConformanceVersion(1, 3), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 4), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 5), '1.3', true, WFEID.TEXTDECL_VERSION_INVALD, '1.0'],
@@ -400,9 +400,9 @@ fdescribe('textDeclaration (unit)', () => {
                   params: [expected, version],
                   position: textDeclPToken.fields[0].value,
                });
-            } else if (isError && code === XEID.DECL_VERSION_PROBLEM) {
+            } else if (isError && code === XEID.TEXTDECL_VERSION_INVALID) {
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportXmlError({
+               expect(mockErrorCollector).toReportError({
                   id: code,
                   params: [expected, version],
                   position: textDeclPToken.fields[0].value,

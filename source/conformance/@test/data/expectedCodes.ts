@@ -2274,8 +2274,8 @@ const expectedErrorCodes: IdToErrorMap = {
    'rmt-e2e-34': 'ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC', // A non-deterministic content model is an error even if the element type is not used.
    'rmt-e2e-55': 'REFERENCE_INVALID_UNPARSED', // ok - Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)
    'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
-   'x-rmt-008--V1R1': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1
-   'x-rmt-008--V1R2': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1
+   'x-rmt-008--V1R1': 'XMLDECL_VERSION_INVALID', // This input is actually just fine for 1.0/1
+   'x-rmt-008--V1R2': 'XMLDECL_VERSION_INVALID', // This input is actually just fine for 1.0/1
    'x-rmt-008--V1R5': 'XMLDECL_VERSION_INVALID', // This input is actually just fine for 1.0/5
    'rmt-e2e-57': 'XMLSPACE_INVALID_VALUE', // ok - A value other than preserve or default for xml:space is an error
    uri01: 'SYSTEMLITERAL_NO_FRAGMENT', // ok - The system literal may not contain fragments (§4.2.2). Found "foo#bar".

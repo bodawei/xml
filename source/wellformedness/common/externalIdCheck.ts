@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlError } from 'basic';
+import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
 import { ExternalIdP, pTokenArrayToString, TextPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -78,7 +78,7 @@ function externalIdCheck(
          const literalString = pTokenArrayToString(externalId.system?.value);
 
          if (literalString.indexOf('#') !== -1) {
-            ec.reportError(XmlError.ID.SYSTEMLITERAL_NO_FRAGMENT, XmlError, [literalString]);
+            ec.reportError(error.id.SYSTEMLITERAL_NO_FRAGMENT, ErrorToken, [literalString]);
          }
       });
    }

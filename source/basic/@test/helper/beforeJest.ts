@@ -1,7 +1,7 @@
 /* Copyright ® 2017-202 by 柏大衛. All rights reserved. */
 
 import { expect } from '@jest/globals';
-import { XmlError } from '../../XmlError';
+import { error } from '../..//error/error';
 import { BaseError } from '../../BaseError';
 import { warning } from '../../error/warning';
 import { MockErrorCollector } from './helper';
@@ -113,6 +113,6 @@ expect.extend({
    toBeErrorAndWarningFree,
    toNotReportError,
    toReportWarning: makeNewErrorMatcher(warning),
-   toReportXmlError: makeErrorMatcher(XmlError),
+   toReportError: makeNewErrorMatcher(error),
    toReportFatalError: makeNewErrorMatcher(fatalError),
 });

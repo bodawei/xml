@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, XmlError, fatalError } from 'basic';
+import { ConformanceVersion, error, fatalError } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -169,8 +169,8 @@ describe('dtdEndCheck()', () => {
       dtdEndCheck(fakeState, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
+      expect(mockErrorCollector).toReportError({
+         id: error.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -211,8 +211,8 @@ describe('dtdEndCheck()', () => {
       dtdEndCheck(fakeState, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
+      expect(mockErrorCollector).toReportError({
+         id: error.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -294,20 +294,20 @@ describe('dtdEndCheck()', () => {
       dtdEndCheck(fakeState, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
+      expect(mockErrorCollector).toReportError({
+         id: error.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar1'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
+      expect(mockErrorCollector).toReportError({
+         id: error.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar2'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportXmlError({
-         id: XmlError.ID.REFERENCE_INVALID_UNPARSED,
+      expect(mockErrorCollector).toReportError({
+         id: error.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar3'],
          position: text2.text,
       });

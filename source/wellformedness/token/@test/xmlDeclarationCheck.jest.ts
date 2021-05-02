@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, XmlError, fatalError, warning } from 'basic';
+import { ConformanceVersion, error, fatalError, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { XmlDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -14,7 +14,7 @@ import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 jest.mock('../../common/charCheck');
 
 const WFEID = WellFormedError.ID;
-const XEID = XmlError.ID;
+const XEID = error.id;
 const XWID = warning.id;
 
 describe('xmlDeclarationCheck() (unit)', () => {
@@ -403,8 +403,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
          [new ConformanceVersion(1.1, 1), '1.0', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
          [new ConformanceVersion(1.1, 2), '1.0', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
          [new ConformanceVersion(1.1, 3), '1.0', true, WFEID.XMLDECL_VERSION_INVALD, '1.1'],
-         [new ConformanceVersion(1, 1), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
-         [new ConformanceVersion(1, 2), '1.1', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 1), '1.1', true, XEID.XMLDECL_VERSION_INVALID, '1.0'],
+         [new ConformanceVersion(1, 2), '1.1', true, XEID.XMLDECL_VERSION_INVALID, '1.0'],
          [new ConformanceVersion(1, 3), '1.1', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 4), '1.1', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 5), '1.1', true, XWID.XMLDECL_VERSION_INVALID, '1.0'],
@@ -412,8 +412,8 @@ describe('xmlDeclarationCheck() (unit)', () => {
          [new ConformanceVersion(1.1, 1), '1.1', false],
          [new ConformanceVersion(1.1, 2), '1.1', false],
          [new ConformanceVersion(1.1, 3), '1.1', false],
-         [new ConformanceVersion(1, 1), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
-         [new ConformanceVersion(1, 2), '1.3', true, XEID.DECL_VERSION_PROBLEM, '1.0'],
+         [new ConformanceVersion(1, 1), '1.3', true, XEID.XMLDECL_VERSION_INVALID, '1.0'],
+         [new ConformanceVersion(1, 2), '1.3', true, XEID.XMLDECL_VERSION_INVALID, '1.0'],
          [new ConformanceVersion(1, 3), '1.3', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 4), '1.3', true, WFEID.XMLDECL_VERSION_INVALD, '1.0'],
          [new ConformanceVersion(1, 5), '1.3', true, XWID.XMLDECL_VERSION_INVALID, '1.0'],
@@ -480,9 +480,9 @@ describe('xmlDeclarationCheck() (unit)', () => {
                   params: [expected, version],
                   position: xmlDeclPToken.fields[0].value,
                });
-            } else if (isError && code === XEID.DECL_VERSION_PROBLEM) {
+            } else if (isError && code === XEID.XMLDECL_VERSION_INVALID) {
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportXmlError({
+               expect(mockErrorCollector).toReportError({
                   id: code,
                   params: [expected, version],
                   position: xmlDeclPToken.fields[0].value,

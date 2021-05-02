@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlError, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector, error, ErrorToken, warning } from 'basic';
 import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import { AttributePToken, LiteralValuePToken } from 'token';
@@ -126,8 +126,8 @@ function attributeCheck(
 
             if (valueString !== 'preserve' && valueString !== 'default') {
                ec.reportError(
-                  XmlError.ID.XMLSPACE_INVALID_VALUE,
-                  XmlError,
+                  error.id.XMLSPACE_INVALID_VALUE,
+                  ErrorToken,
                   [valueString],
                   position?.getStartOffset(),
                );
