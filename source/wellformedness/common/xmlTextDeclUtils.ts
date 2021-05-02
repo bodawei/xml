@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlError, XmlFatalError, XmlWarning } from 'basic';
+import { ConformanceVersion, ErrorCollector, XmlError, FatalErrorToken, XmlWarning } from 'basic';
 import { InstructionField } from 'pToken';
 import { SToken } from 'sToken';
 
@@ -102,7 +102,7 @@ function checkSpaceProblems(
       if (!S_REGEXP.test(char)) {
          // §2.11.0 Therefore, it is a fatal error to use them
          //    within the XML declaration or text declaration.
-         ec.reportError(code, XmlFatalError, [char.charCodeAt(0).toString(16)]);
+         ec.reportError(code, FatalErrorToken, [char.charCodeAt(0).toString(16)]);
       }
    }
 }

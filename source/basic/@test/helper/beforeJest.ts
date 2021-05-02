@@ -2,11 +2,12 @@
 
 import { expect } from '@jest/globals';
 import { XmlError } from '../../XmlError';
-import { XmlFatalError } from '../../XmlFatalError';
 import { BaseError } from '../../BaseError';
 import { XmlWarning } from '../../XmlWarning';
 import { MockErrorCollector } from './helper';
 import { makeErrorMatcher } from './makeErrorMatcher';
+import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
+import { fatalError } from '../../error/fatalError';
 
 function toHaveError(actual: any, expected: any) {
    let pass = false;
@@ -113,5 +114,5 @@ expect.extend({
    toNotReportError,
    toReportWarning: makeErrorMatcher(XmlWarning),
    toReportXmlError: makeErrorMatcher(XmlError),
-   toReportXmlFatalError: makeErrorMatcher(XmlFatalError),
+   toReportFatalError: makeNewErrorMatcher(fatalError),
 });

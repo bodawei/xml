@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, XmlError, XmlFatalError, XmlWarning } from 'basic';
+import { ConformanceVersion, XmlError, fatalError, XmlWarning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { XmlDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -350,7 +350,7 @@ describe('xmlDeclarationCheck() (unit)', () => {
 
          const expected = pass ? 0 : 10;
          const nonSpaceError = mockErrorCollector.errors.reduce((prev, error) => {
-            return prev || error.id !== XmlFatalError.ID.XMLDECL_INVALID_SPACE;
+            return prev || error.id !== fatalError.id.XMLDECL_INVALID_SPACE;
          }, false);
 
          expect(mockErrorCollector.errors.length).toEqual(expected);

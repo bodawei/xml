@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, XmlError, XmlFatalError } from 'basic';
+import { ConformanceVersion, XmlError, fatalError } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -271,7 +271,7 @@ fdescribe('textDeclaration (unit)', () => {
 
          const expected = pass ? 0 : 7;
          const nonSpaceError = mockErrorCollector.errors.reduce((prev, error) => {
-            return prev || error.id !== XmlFatalError.ID.TEXTDECL_INVALID_SPACE;
+            return prev || error.id !== fatalError.id.TEXTDECL_INVALID_SPACE;
          }, false);
 
          expect(mockErrorCollector.errors.length).toEqual(expected);

@@ -11,6 +11,12 @@ interface ErrorInfo {
 interface JestThis {
    equals: (one: any, two: any) => boolean;
 }
+
+interface JestMatcherReturn {
+   pass: boolean;
+   message: () => string;
+}
+
 function makeMatcher(ErrorClass: any) {
    return function (
       this: JestThis,

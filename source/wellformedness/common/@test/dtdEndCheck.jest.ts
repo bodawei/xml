@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, XmlError, XmlFatalError } from 'basic';
+import { ConformanceVersion, XmlError, fatalError } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -253,8 +253,8 @@ describe('dtdEndCheck()', () => {
       dtdEndCheck(fakeState, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportXmlFatalError({
-         id: XmlFatalError.ID.REFERENCE_NO_UNPARSED,
+      expect(mockErrorCollector).toReportFatalError({
+         id: fatalError.id.REFERENCE_NO_UNPARSED,
          params: ['bar'],
          position: text.text,
       });

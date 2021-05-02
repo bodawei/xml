@@ -4,6 +4,8 @@ import stoken from './SToken';
 
 const toSToken = stoken.fromString;
 
+export { getStartOffset } from './getStartOffset';
+export { isSToken } from './isSToken';
 export { default as SToken } from './SToken';
 export { default as STokenSource } from './STokenSource';
 export { default as STokenArrayBuilder } from './STokenArrayBuilder';

@@ -39,5 +39,7 @@ export * from './doAsyncLoop';
 export * from './doAsyncWhileLoop';
 export * from './extractSurrogatePair';
 export * from './XmlError';
-export * from './XmlFatalError';
 export { XmlVersion, XmlEdition };
+
+export { FatalErrorToken } from './error/FatalErrorToken';
+export { fatalError } from './error/fatalError';

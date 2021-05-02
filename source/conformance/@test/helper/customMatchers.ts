@@ -50,6 +50,7 @@ function toHaveXmlConfErrors(
    const actualErrors: Array<ErrorToken> = actual.filter(
       (token) => token.type === ERROR_TYPE && token.subtype !== 'WARNING',
    ) as Array<ErrorToken>;
+
    const hasAllExpectedErrors = expected.reduce((foundAll, expectedId) => {
       if (!expectedId) {
          return false;

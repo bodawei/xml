@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlFatalError } from 'basic';
+import { ConformanceVersion, ErrorCollector, fatalError } from 'basic';
 import { InstructionField, TextDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -34,7 +34,7 @@ function checkFields(
             foundVersion = true;
             ec.check(foundEncoding, WFEID.TEXTDECL_VERSION_INVALID_ORDER);
 
-            checkSpaces(param, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
+            checkSpaces(param, fatalError.id.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
             charCheck(value, ec, confVer, false);
 
@@ -44,7 +44,7 @@ function checkFields(
             ec.check(foundEncoding, WFEID.TEXTDECL_DUPLICATE_ENCODING);
             foundEncoding = true;
 
-            checkSpaces(param, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
+            checkSpaces(param, fatalError.id.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
             ec.setPos(value);
             charCheck(value, ec, confVer, false);
             ec.check(!ENCODING_REGEXP.test(valueText), WFEID.TEXTDECL_ENCODING_INVALID, [
@@ -54,7 +54,7 @@ function checkFields(
       }
 
       ec.setPos(param.valueSpace);
-      checkSpaceProblems(param.valueSpace, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, ec, confVer);
+      checkSpaceProblems(param.valueSpace, fatalError.id.TEXTDECL_INVALID_SPACE, ec, confVer);
    }
 
    ec.check(!foundEncoding, WFEID.TEXTDECL_ENCODING_MISSING);
@@ -68,7 +68,7 @@ function textDeclarationCheck(
    ec.setPos(pToken.open);
    ec.setPos(pToken.openSpace);
    ec.check(pToken.openSpace, WFEID.TEXTDECL_SPACE_AFTER_OPEN);
-   checkSpaceProblems(pToken.openSpace, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, ec, confVer);
+   checkSpaceProblems(pToken.openSpace, fatalError.id.TEXTDECL_INVALID_SPACE, ec, confVer);
 
    ec.setPos(pToken.target);
    charCheck(pToken.target, ec, confVer, false);
@@ -83,7 +83,7 @@ function textDeclarationCheck(
 
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);
-   checkSpaceProblems(pToken.targetSpace, XmlFatalError.ID.TEXTDECL_INVALID_SPACE, ec, confVer);
+   checkSpaceProblems(pToken.targetSpace, fatalError.id.TEXTDECL_INVALID_SPACE, ec, confVer);
 
    checkFields(pToken.fields, ec, confVer);
 

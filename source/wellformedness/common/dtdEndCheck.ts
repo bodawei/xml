@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, XmlError, XmlFatalError } from 'basic';
+import { ConformanceVersion, ErrorCollector, XmlError, FatalErrorToken, fatalError } from 'basic';
 import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { LiteralValuePToken } from 'token';
@@ -36,10 +36,10 @@ function checkEntity(
 
             if (isUnparsed) {
                const code = isForbidden
-                  ? XmlFatalError.ID.REFERENCE_NO_UNPARSED
+                  ? fatalError.id.REFERENCE_NO_UNPARSED
                   : XmlError.ID.REFERENCE_NO_UNPARSED;
                ec.setPos(element.text);
-               ec.reportError(code, isForbidden ? XmlFatalError : XmlError, [name]);
+               ec.reportError(code, isForbidden ? FatalErrorToken : XmlError, [name]);
             }
          }
 
