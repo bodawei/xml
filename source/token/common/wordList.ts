@@ -41,16 +41,10 @@ class WordListPToken {
       this.words = this.words || [];
    }
 
-   toXToken(): WordListXToken {
-      return makeXTokenCompatible(this);
-   }
-
    toSTokenArray(): Array<SToken> {
       return toSTokenArray(this);
    }
 }
-
-type WordListXToken = Array<string>;
 
 /**********************************************************************\
  parse() extracts the STokens for a () enclosed series of words
@@ -112,21 +106,6 @@ function parseNames(source: STokenSource, deliverPToken: DeliverNamePToken): voi
    });
 }
 
-/**********************************************************************\
- XToken
-\**********************************************************************/
-
-function makeXTokenCompatible(pToken: WordListPToken): WordListXToken {
-   const words: WordListXToken = [];
-
-   for (const word of pToken.words) {
-      if (word.word) {
-         words.push(word.word.str);
-      }
-   }
-
-   return words;
-}
 
 /**********************************************************************\
  STokenArray
@@ -157,7 +136,6 @@ export {
    NOTATION_PTOKEN,
    WordListType,
    WordListPToken,
-   WordListXToken,
 
    WordListEntryPToken,
 };

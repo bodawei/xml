@@ -3,6 +3,8 @@
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
+import { makeWordListX } from '../common/makeWordListX';
+
 import { AttributeValueXToken } from '../../token/common/attribute';
 import literal from '../../token/common/literal';
 
@@ -28,7 +30,7 @@ enum AttDefaultType {
 interface AttDefinitionProps {
    name: string;
    type: AttDefinitionType;
-   enumeration?: Array<string>;
+   enumeration?: ReadonlyArray<string>;
    defaultType: AttDefaultType | undefined;
    value: AttributeValueXToken;
 }
@@ -36,7 +38,7 @@ interface AttDefinitionProps {
 interface AttDefinitionXToken {
    readonly name: string;
    readonly type: AttDefinitionType;
-   readonly enumeration?: Array<string>;
+   readonly enumeration?: ReadonlyArray<string>;
    readonly defaultType: AttDefaultType | undefined;
    readonly value: AttributeValueXToken;
 }
@@ -121,7 +123,7 @@ class AttListDeclarationXToken {
             xDefs.push({
                name: attDef.name.str,
                type,
-               enumeration: attDef.enumeration?.toXToken(),
+               enumeration: makeWordListX(attDef.enumeration),
                defaultType: stringDefaultTypeToEnum(ucDefaultType),
                value: literal.makeTokenCompatible(attDef) || [],
             });

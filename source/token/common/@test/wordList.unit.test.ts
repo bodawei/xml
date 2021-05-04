@@ -223,32 +223,6 @@ describe('wordList (unit)', () => {
 
    });
 
-   describe('pToken.toXToken()', () => {
-
-      it('returns the words', () => {
-         const xWords = wlPToken.toXToken();
-
-         expect(xWords).toEqual(['one', 'two']);
-      });
-
-      it('returns an empty result if no words', () => {
-         (wlPToken as any).words = []; // typeHack
-
-         const xWords = wlPToken.toXToken();
-
-         expect(xWords).toEqual([]);
-      });
-
-      it('silently ignores entries without words', () => {
-         delete (wlPToken as any).words[0].word; // typeHack
-
-         const xWords = wlPToken.toXToken();
-
-         expect(xWords).toEqual(['two']);
-      });
-
-   });
-
    describe('pToken.toSTokenArray()', () => {
 
       it('returns the STokens', () => {

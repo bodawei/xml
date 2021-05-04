@@ -5,7 +5,6 @@ import { ConformanceVersion } from 'basic';
 import {GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import { TextXToken } from 'xToken';
 
 import { ElementStartPToken, parseElementStart } from '../elementStart';
 
