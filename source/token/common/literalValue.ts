@@ -1,16 +1,15 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ErrorCollector } from 'basic';
-import { CharRefPToken, parseCharRef, CHARREF_PTOKEN, GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from 'pToken';
+import { CharRefPToken, parseCharRef, GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { generalEntityReferenceToSTokens } from 'stringify';
-import { CharRefXToken, GeneralEntityReferenceXToken, ParameterEntityReferenceXToken, TextXToken } from 'xToken';
 
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken, TextPToken, isTextPToken, parseParameterEntityReference } from 'pToken';
-import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
-import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
-import { PARAMETER_ENTITY_END_PTOKEN, ParameterEntityEndPToken, ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
-import { PARAMETER_ENTITY_START_PTOKEN, ParameterEntityStartPToken, ParameterEntityStartXToken } from '../marker/parameterEntityStart';
+import { ParameterEntityReferencePToken, TextPToken, isTextPToken, parseParameterEntityReference } from 'pToken';
+import {  GeneralEntityEndPToken } from '../marker/generalEntityEnd';
+import { GeneralEntityStartPToken } from '../marker/generalEntityStart';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
+import { ParameterEntityStartPToken, } from '../marker/parameterEntityStart';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -21,7 +20,6 @@ import { PARAMETER_ENTITY_START_PTOKEN, ParameterEntityStartPToken, ParameterEnt
 
 type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
 type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
-type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
 
 let checkMap: { [typeName: string]: (item: any, ec: ErrorCollector, confVer: ConformanceVersion) => void };
@@ -103,35 +101,6 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
    });
 }
 
-/**********************************************************************\
- Builds a value which can be put in an XToken
-\**********************************************************************/
-
-function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
-   const value: LiteralValueXToken = [];
-
-   for (let index = 0; index < pToken.length; index++) {
-      const item = pToken[index];
-
-      if (isTextPToken(item)) {
-         value.push(new TextXToken(item));
-      } else if (item.type === CHARREF_PTOKEN) {
-         value.push(new CharRefXToken(item));
-      } else if (item.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-         value.push(new ParameterEntityReferenceXToken(item));
-      } else if (item.type === PARAMETER_ENTITY_START_PTOKEN) {
-         value.push(new ParameterEntityStartXToken(item.referencePToken.name?.str || '',  item));
-      } else if (item.type === PARAMETER_ENTITY_END_PTOKEN) {
-         value.push(new ParameterEntityEndXToken(item.referencePToken.name?.str || '', item));
-      } else if (item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-         value.push(new GeneralEntityReferenceXToken(item));
-      } else {
-         value.push(item.toXToken());
-      }
-   }
-
-   return value;
-}
 
 /**********************************************************************\
  SToken extraction
@@ -161,17 +130,14 @@ function getSTokens(pToken: LiteralValuePToken) {
 const parseLiteralValue = parse;
 export {
    LiteralValuePToken,
-   LiteralValueXToken,
    Terminators,
 
    parse,
    parseLiteralValue,
-   makeXTokenCompatible,
    getSTokens,
 }
 
 export default {
    parse,
-   makeXTokenCompatible,
    getSTokens,
 };

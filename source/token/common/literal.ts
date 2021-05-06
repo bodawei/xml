@@ -1,12 +1,11 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { SToken, STokenSource } from 'sToken';
-import { isTextXToken } from 'xToken';
+import { isTextXToken, makeLiteralValueX,  LiteralValueX } from 'xToken';
 
 import literalValue, {
    LiteralValuePToken,
    Terminators as LiteralValueTerminators,
-   LiteralValueXToken,
 } from './literalValue';
 
 type DeliverPToken = (foundLiteral?: LiteralPToken) => void;
@@ -76,16 +75,16 @@ function parse(source: STokenSource, options: ParseOptions | undefined, done: De
    });
 }
 
-function makeTokenCompatible(pToken?: LiteralPToken): LiteralValueXToken | void {
+function makeTokenCompatible(pToken?: LiteralPToken): LiteralValueX | void {
    const pieces = pToken?.value ?? [];
 
-   const result = literalValue.makeXTokenCompatible(pieces);
+   const result = makeLiteralValueX(pieces);
 
    return result.length === 0 ? undefined : result;
 }
 
 function makeOneTokenCompatible(pToken: LiteralPToken): string | void {
-   const result = literalValue.makeXTokenCompatible(pToken.value);
+   const result = makeLiteralValueX(pToken.value);
 
    if (result.length === 0) {
       return;
@@ -133,5 +132,4 @@ export {
    parseLiteral,
    LiteralPToken,
    LiteralValuePToken,
-   LiteralValueXToken,
 };

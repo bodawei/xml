@@ -1,5 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+export { makeLiteralValueX, LiteralValueX } from './common/makeLiteralValueX';
+export { GENERAL_ENTITY_END_XTOKEN, GeneralEntityEndXToken } from './marker/generalEntityEndXToken';
+export {
+   GENERAL_ENTITY_START_XTOKEN,
+   GeneralEntityStartXToken,
+} from './marker/generalEntityStartXToken';
 export { CDATA_XTOKEN, CdataXToken } from './token/cdataXToken';
 export { CHARDATA_XTOKEN, CharDataXToken } from './token/charDataXToken';
 export { CHARREF_XTOKEN, CharRefXToken } from './token/charRefXToken';
@@ -7,6 +13,14 @@ export {
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    GeneralEntityReferenceXToken,
 } from './token/generalEntityReferenceXToken';
+export {
+   PARAMETER_ENTITY_END_XTOKEN,
+   ParameterEntityEndXToken,
+} from './marker/parameterEntityEndXToken';
+export {
+   PARAMETER_ENTITY_START_XTOKEN,
+   ParameterEntityStartXToken,
+} from './marker/parameterEntityStartXToken';
 export {
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
    ParameterEntityReferenceXToken,

@@ -59,29 +59,27 @@ class PToXTokenStream extends Transform {
          case declaration.PTYPE:
             this.push(declaration.pTokenToXToken(pToken));
             break;
-         case GENERAL_ENTITY_START_PTOKEN:
-         case GENERAL_ENTITY_END_PTOKEN:
-         case PARAMETER_ENTITY_END_PTOKEN:
-         case PARAMETER_ENTITY_START_PTOKEN:
-            this.push(pToken.toXToken());
-            break;
-         case ATTLIST_DECLARATION_PTOKEN:
-         case CHARREF_PTOKEN:
-         case CDATA_PTOKEN:
-         case CHARDATA_PTOKEN:
-         case CONDITIONAL_CLOSE_PTOKEN:
-         case CONDITIONAL_PTOKEN:
-         case COMMENT_PTOKEN:
-         case DOCTYPE_END_PTOKEN:
-         case DOCTYPE_START_PTOKEN:
-         case ELEMENT_END_PTOKEN:
-         case ELEMENT_DECLARATION_PTOKEN:
-         case ELEMENT_EMPTY_PTOKEN:
-         case ELEMENT_START_PTOKEN:
+                  case ATTLIST_DECLARATION_PTOKEN:
+                     case CHARREF_PTOKEN:
+                        case CDATA_PTOKEN:
+                           case CHARDATA_PTOKEN:
+                              case CONDITIONAL_CLOSE_PTOKEN:
+                                 case CONDITIONAL_PTOKEN:
+                                    case COMMENT_PTOKEN:
+                                       case DOCTYPE_END_PTOKEN:
+                                          case DOCTYPE_START_PTOKEN:
+                                             case ELEMENT_END_PTOKEN:
+                                                case ELEMENT_DECLARATION_PTOKEN:
+                                                   case ELEMENT_EMPTY_PTOKEN:
+                                                      case ELEMENT_START_PTOKEN:
+                                                         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+                                                            case GENERAL_ENTITY_END_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
-         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         case GENERAL_ENTITY_START_PTOKEN:
          case NOTATION_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_END_PTOKEN:
+         case PARAMETER_ENTITY_START_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          case PROCESSING_INSTRUCTION_PTOKEN:
          case SPACE_PTOKEN:

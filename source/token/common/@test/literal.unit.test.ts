@@ -5,6 +5,7 @@ import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
+import * as xTokenStuff from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';
@@ -156,11 +157,11 @@ describe('literal (unit)', () => {
       let litValMakeCompatSpy: jasmine.Spy;
 
       beforeEach(() => {
-         litValMakeCompatSpy = spyOn(literalValue, 'makeXTokenCompatible')
+         litValMakeCompatSpy = spyOn(xTokenStuff, 'makeLiteralValueX')
             .and.returnValue([]);
       });
 
-      it('calls literalValue.makeXTokenCompatible()', () => {
+      it('calls makeLiteralValueX()', () => {
          literal.makeTokenCompatible(literalPToken);
 
          expect(litValMakeCompatSpy).toHaveBeenCalledWith(literalPToken.value);
@@ -185,7 +186,7 @@ describe('literal (unit)', () => {
       let litValMakeCompatSpy: jasmine.Spy;
 
       beforeEach(() => {
-         litValMakeCompatSpy = spyOn(literalValue, 'makeXTokenCompatible')
+         litValMakeCompatSpy = spyOn(xTokenStuff, 'makeLiteralValueX')
             .and.returnValue([]);
       });
 

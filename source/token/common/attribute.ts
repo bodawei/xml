@@ -2,15 +2,13 @@
 
 import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
-import { TextXToken } from 'xToken';
+import { GeneralEntityEndXToken, GeneralEntityStartXToken, ParameterEntityEndXToken, ParameterEntityStartXToken, TextXToken } from 'xToken';
 
 import literal, { LiteralPToken } from './literal';
-import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
-import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
+import { GeneralEntityEndPToken } from '../marker/generalEntityEnd';
+import { GeneralEntityStartPToken } from '../marker/generalEntityStart';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
-import { ParameterEntityStartXToken } from '../marker/parameterEntityStart';
 import { CharRefXToken, ParameterEntityReferenceXToken, GeneralEntityReferenceXToken } from 'xToken';
 
 type ParseOptions = {

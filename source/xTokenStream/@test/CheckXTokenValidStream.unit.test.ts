@@ -27,9 +27,13 @@ import {
    ElementStartXToken,
    NotationDeclarationXToken,
    GeneralEntityDeclarationXToken,
+   GeneralEntityEndXToken,
+   GeneralEntityStartXToken,
    ParameterEntityDeclarationXToken,
    ParameterEntityReferenceXToken,
    GeneralEntityReferenceXToken,
+   ParameterEntityEndXToken,
+   ParameterEntityStartXToken,     
    ProcessingInstructionXToken,
    XmlDeclarationXToken,
    SpaceXToken,
@@ -41,12 +45,8 @@ import * as chars from '../../basic/chars'
 import {
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
-   GeneralEntityEndXToken,
-   GeneralEntityStartXToken,
    InternalSubsetStartToken,
    InternalSubsetEndToken,
-   ParameterEntityEndXToken,
-   ParameterEntityStartXToken,     
 } from 'token';
 import { makeDocTypeEnd } from 'token-test';
 

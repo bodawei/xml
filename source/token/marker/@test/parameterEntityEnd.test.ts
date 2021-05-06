@@ -5,7 +5,7 @@
 import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken } from 'sToken';
 
-import { ParameterEntityEndPToken, ParameterEntityEndXToken } from '../parameterEntityEnd';
+import { ParameterEntityEndPToken } from '../parameterEntityEnd';
 
 describe('ParameterEntityEndPToken (unit)', () => {
 
@@ -13,26 +13,6 @@ describe('ParameterEntityEndPToken (unit)', () => {
       const token = new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }));
 
       expect(token.referencePToken).toEqual(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }));
-   });
-
-   it('will create an xToken', () => {
-      const token = new ParameterEntityEndPToken(new ParameterEntityReferencePToken({
-         open: SToken.fromString('%'),
-         name: SToken.fromString('foo'),
-      }));
-
-      expect(token.toXToken()).toEqual(new ParameterEntityEndXToken('foo', token));
-   });
-
-});
-
-describe('ParameterEntityEndXToken (unit)', () => {
-
-   it('is constructed with the specified name', () => {
-      const token = new ParameterEntityEndXToken('foo');
-
-      expect(token.name).toEqual('foo');
-      expect(token.pToken).toBeUndefined();
    });
 
 });

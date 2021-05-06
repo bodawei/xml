@@ -14,12 +14,14 @@ import {
    ELEMENT_END_XTOKEN,
    ELEMENT_START_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
+   GENERAL_ENTITY_END_XTOKEN,
+   GENERAL_ENTITY_START_XTOKEN,
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    SPACE_XTOKEN,
    TEXTDECL_XTOKEN,
    XMLDECL_XTOKEN,
-
+   
    AttListDeclarationXToken,
    AttDefinitionXToken,
    ContentModelX,
@@ -32,8 +34,12 @@ import {
    ElementEndXToken,
    ElementStartXToken,
    GeneralEntityDeclarationXToken,
+   GeneralEntityEndXToken,
+   GeneralEntityStartXToken,
    isContentNameX,
    NotationDeclarationXToken,
+   ParameterEntityEndXToken,
+   ParameterEntityStartXToken,
    SpaceXToken,
    ParameterEntityDeclarationXToken,
    isTextXToken,
@@ -42,19 +48,11 @@ import {
  import { ValidityError, } from 'valid';
 
 
-import {
-   GeneralEntityEndXToken,
-   GeneralEntityStartXToken,
-   ParameterEntityEndXToken,
-   ParameterEntityStartXToken,
-
+import {   
    EXTERNAL_SUBSET_START_TOKEN,
    EXTERNAL_SUBSET_END_TOKEN,
-   GENERAL_ENTITY_END_XTOKEN,
-   GENERAL_ENTITY_START_XTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
-   
+   INTERNAL_SUBSET_END_TOKEN,   
 } from 'token';
 
 import { AttributeValueXToken } from '../token/common/attribute';
@@ -898,7 +896,7 @@ class CheckXTokenValidStream extends Transform {
             }
          }
       } else if (type === 'NOTATION') {
-         const notationNames: Array<string> = attDef.enumeration || [];
+         const notationNames: ReadonlyArray<string> = attDef.enumeration || [];
 
          if (oneDotZeroRev3OrHigher) {
             // §3.3.1 (for 1.0/>=3): Validity constraint: No Duplicate Tokens
@@ -919,7 +917,7 @@ class CheckXTokenValidStream extends Transform {
                [ attList.elementName, attDef.name, notationNames.join(', '), defaultText ], pToken.open);
          }
       } else if (attDef.type === 'ENUMERATION') {
-         const enumerationNames: Array<string> = attDef.enumeration || [];
+         const enumerationNames: ReadonlyArray<string> = attDef.enumeration || [];
 
          if (oneDotZeroRev3OrHigher) {
             // §3.3.1: Validity constraint: No Duplicate Tokens
@@ -950,7 +948,7 @@ class CheckXTokenValidStream extends Transform {
       }
    }
 
-   private findDuplicateNamesInEnumeration(names: Array<string>): Array<string> {
+   private findDuplicateNamesInEnumeration(names: ReadonlyArray<string>): Array<string> {
       const nameCounts: { [name: string]: number } = {};
       const duplicates: Array<string> = [];
 
@@ -1059,7 +1057,7 @@ class CheckXTokenValidStream extends Transform {
                //    ...all notation names in the declaration must be declared.
                // However, it is interesting to note that they do not need to have been dceclared
                // before the ATTLIST.  See valid-sa-076
-               const notationNames: Array<string> = attrDef.enumeration || [];
+               const notationNames: ReadonlyArray<string> = attrDef.enumeration || [];
                const attDecl = attList.tokens.find(token => {
                   return !!token.attDefs.find(def => {
                      return def === attrDef;

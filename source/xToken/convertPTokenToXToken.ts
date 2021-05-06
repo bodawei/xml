@@ -28,8 +28,14 @@ import {
    ELEMENT_END_PTOKEN,
    ELEMENT_START_PTOKEN,
    SPACE_PTOKEN,
+   GENERAL_ENTITY_END_PTOKEN,
+   GENERAL_ENTITY_START_PTOKEN,
+   PARAMETER_ENTITY_END_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
 } from 'token';
 
+import { GeneralEntityEndXToken } from './marker/generalEntityEndXToken';
+import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
@@ -46,6 +52,8 @@ import { ElementStartXToken } from './token/elementStartXToken';
 import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
 import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
+import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
+import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
 import { SpaceXToken } from './token/spaceXToken';
@@ -86,12 +94,20 @@ function convertPTokenToXToken(pToken: ParseToken): XToken {
          return new ElementDeclarationXToken(pToken);
       case GENERAL_ENTITY_DECLARATION_PTOKEN:
          return new GeneralEntityDeclarationXToken(pToken);
+      case GENERAL_ENTITY_END_PTOKEN:
+         return new GeneralEntityEndXToken(pToken);
       case GENERAL_ENTITY_REFERENCE_PTOKEN:
          return new GeneralEntityReferenceXToken(pToken);
+      case GENERAL_ENTITY_START_PTOKEN:
+         return new GeneralEntityStartXToken(pToken);
       case NOTATION_DECLARATION_PTOKEN:
          return new NotationDeclarationXToken(pToken);
       case PARAMETER_ENTITY_DECLARATION_PTOKEN:
          return new ParameterEntityDeclarationXToken(pToken);
+      case PARAMETER_ENTITY_END_PTOKEN:
+         return new ParameterEntityEndXToken(pToken);
+      case PARAMETER_ENTITY_START_PTOKEN:
+         return new ParameterEntityStartXToken(pToken);
       case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          return new ParameterEntityReferenceXToken(pToken);
       case PROCESSING_INSTRUCTION_PTOKEN:
