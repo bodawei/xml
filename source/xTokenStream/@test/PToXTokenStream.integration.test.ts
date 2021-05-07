@@ -70,11 +70,11 @@ describe('PToXTokenStream (integration)', () => {
       });
    }
 
-   it('tokenizes an UNKNOWN declaration', (done) => {
-      expectInputToProduce('<!BOGUS', [
-         new declaration.XToken(),
-      ], done);
-   });
+   // it('tokenizes an UNKNOWN declaration', (done) => {
+   //    expectInputToProduce('<!BOGUS', [
+   //       new declaration.XToken(),
+   //    ], done);
+   // });
 
    it('tokenizes an ATTLIST declaration', (done) => {
       expectInputToProduce('<!ATTLIST elementName atOne IDREF atTwo ENTITY>', [

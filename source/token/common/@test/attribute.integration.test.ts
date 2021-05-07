@@ -4,7 +4,6 @@
 import { TextPToken, } from 'pToken';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
-import {  TextXToken } from 'xToken';
 
 import attribute from '../attribute';
 
@@ -91,21 +90,6 @@ describe('attribute (integration)', () => {
          });
       });
 
-   });
-
-   describe('makeOneTokenCompatible()', () => {
-
-      it('returns name value pairs', () => {
-         const attrs = attribute.makeOneTokenCompatible(attributesPToken);
-
-         expect(attrs).toEqual([ {
-            name: 'one',
-            value: [ new TextXToken('1') ],
-         }, {
-            name: 'two',
-            value: [ new TextXToken('two') ],
-         } ]);
-      });
    });
 
    describe('getSTokens()', () => {

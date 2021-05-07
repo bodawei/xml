@@ -2,7 +2,7 @@
 
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
-import attribute, { AttributePToken, AttributeXToken } from './common/attribute';
+import attribute, { AttributePToken } from './common/attribute';
 
 const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
 const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';

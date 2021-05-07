@@ -10,26 +10,17 @@ import base, { STokenArray } from '../base';
  other parsers.
 \**********************************************************************/
 
-const UNKNOWNDECL = 'UNKNOWNDECL';
-const UNKNOWNDECL_XTOKEN = 'UNKNOWNDECL_XTOKEN';
-
-class UnknownDeclaration {
-   public readonly type = UNKNOWNDECL_XTOKEN;
-   public pToken?: DeclarationPToken;
-
-   constructor(pToken?: DeclarationPToken) {
-      this.pToken = pToken;
-   }
-}
+const UNKNOWNDECL_PTOKEN = 'UNKNOWNDECL';
 
 class DeclarationPToken extends base.PToken {
+   public type: typeof UNKNOWNDECL_PTOKEN = UNKNOWNDECL_PTOKEN;
    public open: SToken;
    public postOpenSpace?: SToken;
    public declType?: SToken;
    public postDeclTypeSpace?: SToken;
 
    constructor(type?: string, props?: any) {
-      super(type || UNKNOWNDECL, props);
+      super(type || UNKNOWNDECL_PTOKEN, props);
 
       if (props && 'open' in props) {
          this.open = props.open;
@@ -79,22 +70,11 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: 
    });
 }
 
-/**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: DeclarationPToken): UnknownDeclaration {
-   return new UnknownDeclaration(pToken);
-}
-
 const declaration = {
-   PTYPE: UNKNOWNDECL,
-   XTYPE: UNKNOWNDECL_XTOKEN,
-   XToken: UnknownDeclaration,
+   PTYPE: UNKNOWNDECL_PTOKEN,
    PToken: DeclarationPToken,
    parse,
-   pTokenToXToken,
 };
 
 export default declaration;
-export { DeclarationPToken };
+export { UNKNOWNDECL_PTOKEN, DeclarationPToken };

@@ -5,8 +5,7 @@ import { strOrBlank } from 'sToken';
 
 import { makeWordListX } from '../common/makeWordListX';
 
-import { AttributeValueXToken } from '../../token/common/attribute';
-import literal from '../../token/common/literal';
+import { LiteralValueX, makeLiteralValueX } from '../common/makeLiteralValueX';
 
 enum AttDefinitionType {
    CDATA = 'CDATA',
@@ -32,7 +31,7 @@ interface AttDefinitionProps {
    type: AttDefinitionType;
    enumeration?: ReadonlyArray<string>;
    defaultType: AttDefaultType | undefined;
-   value: AttributeValueXToken;
+   value: LiteralValueX;
 }
 
 interface AttDefinitionXToken {
@@ -40,7 +39,7 @@ interface AttDefinitionXToken {
    readonly type: AttDefinitionType;
    readonly enumeration?: ReadonlyArray<string>;
    readonly defaultType: AttDefaultType | undefined;
-   readonly value: AttributeValueXToken;
+   readonly value: LiteralValueX;
 }
 
 function stringTypeToEnum(type: string): AttDefinitionType {
@@ -125,7 +124,7 @@ class AttListDeclarationXToken {
                type,
                enumeration: makeWordListX(attDef.enumeration),
                defaultType: stringDefaultTypeToEnum(ucDefaultType),
-               value: literal.makeTokenCompatible(attDef) || [],
+               value: makeLiteralValueX(attDef.value),
             });
          }
 

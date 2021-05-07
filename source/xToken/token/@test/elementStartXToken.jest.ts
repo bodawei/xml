@@ -4,37 +4,16 @@ import { describe, expect, it } from '@jest/globals';
 
 import { toSToken } from 'sToken';
 import { ElementStartPToken } from 'token';
-import attribute from '../../../token/common/attribute';
 
+import { AttributeX } from '../../common/attributeX';
 import { ElementStartXToken } from '../elementStartXToken';
+
+jest.mock('../../common/attributeX');
 
 describe('elementStartXToken (unit)', () => {
    let elementStartPToken: ElementStartPToken;
-   let elementStartPTokenWithLeading: ElementStartPToken;
-   let mtc: jest.MockedFunction<typeof attribute.makeTokenCompatible>;
 
    beforeEach(() => {
-      elementStartPTokenWithLeading = new ElementStartPToken({
-         open: toSToken('<'),
-         openSpace: toSToken(' '),
-         name: toSToken('elemName'),
-         nameSpace: toSToken(' '),
-         close: toSToken('>'),
-      });
-      elementStartPToken = new ElementStartPToken({
-         open: toSToken('<'),
-         openSpace: undefined,
-         name: toSToken('elemName'),
-         nameSpace: toSToken(' '),
-         close: toSToken('>'),
-      });
-
-      mtc = jest.spyOn(attribute, 'makeTokenCompatible') as jest.MockedFunction<
-         typeof attribute.makeTokenCompatible
-      >;
-   });
-
-   it('asks the attribute system to provide the attributes', () => {
       elementStartPToken = new ElementStartPToken({
          open: toSToken('<'),
          openSpace: toSToken(' '),
@@ -43,21 +22,23 @@ describe('elementStartXToken (unit)', () => {
          attributes: [{}],
          close: toSToken('>'),
       });
+   });
 
+   it('asks the attribute system to provide the attributes', () => {
       new ElementStartXToken(elementStartPToken);
 
-      expect(attribute.makeTokenCompatible).toHaveBeenCalledWith(elementStartPToken.attributes);
+      expect(AttributeX).toHaveBeenCalledWith({});
    });
 
    it('returns a token with the expected fields defined', () => {
-      mtc.mockReturnValue([{ name: 'foo', value: [] }]);
+      (AttributeX as jest.Mock).mockImplementation(() => ({ name: 'foo', value: [] }));
 
-      const token = new ElementStartXToken(elementStartPTokenWithLeading);
+      const token = new ElementStartXToken(elementStartPToken);
 
       expect(token).toMatchObject({
          name: 'elemName',
          attributes: [{ name: 'foo', value: [] }],
-         pToken: elementStartPTokenWithLeading,
+         pToken: elementStartPToken,
       });
    });
 

@@ -3,7 +3,7 @@
 import { strOrBlank } from 'sToken';
 import { ElementStartPToken } from 'token';
 
-import attribute, { AttributeXToken } from '../../token/common/attribute';
+import { AttributeX } from '../common/attributeX';
 
 const ELEMENT_START_XTOKEN = 'ELEMENT_START_XTOKEN';
 
@@ -12,19 +12,25 @@ class ElementStartXToken {
 
    public readonly name: string;
 
-   public readonly attributes: ReadonlyArray<AttributeXToken>;
+   public readonly attributes: ReadonlyArray<AttributeX>;
 
    public pToken?: ElementStartPToken;
 
    constructor(pToken: ElementStartPToken);
-   constructor(name: string, attributes: Array<AttributeXToken>);
-   constructor(nameOrPToken: string | ElementStartPToken, attributes?: Array<AttributeXToken>) {
+   constructor(name: string, attributes: ReadonlyArray<AttributeX>);
+   constructor(nameOrPToken: string | ElementStartPToken, attributes?: ReadonlyArray<AttributeX>) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
          this.attributes = attributes ?? [];
       } else {
+         const attributesX = [];
+
+         for (const item of nameOrPToken.attributes) {
+            attributesX.push(new AttributeX(item));
+         }
+
          this.name = strOrBlank(nameOrPToken.name);
-         this.attributes = attribute.makeTokenCompatible(nameOrPToken.attributes);
+         this.attributes = attributesX;
          this.pToken = nameOrPToken;
       }
    }

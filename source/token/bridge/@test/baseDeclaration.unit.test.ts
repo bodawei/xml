@@ -81,14 +81,4 @@ describe('declaration (unit)', () => {
 
    });
 
-   describe('pTokenToXToken()', () => {
-
-      it('returns a token with the tokens found in the PToken', () => {
-         const token = declaration.pTokenToXToken(declarationPToken);
-
-         expect(token).toEqual(new declaration.XToken(declarationPToken));
-      });
-
-   });
-
 });

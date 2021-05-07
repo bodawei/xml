@@ -30,15 +30,15 @@ describe('PToXTokenStream (unit)', () => {
       tokenStream = new PToXTokenStream();
    });
 
-   it('calls declaration.pTokenToXToken()', () => {
-      spyOn(declaration, 'pTokenToXToken');
-      const pToken: any = { type: declaration.PTYPE };
+   // it('calls declaration.pTokenToXToken()', () => {
+   //    spyOn(declaration, 'pTokenToXToken');
+   //    const pToken: any = { type: declaration.PTYPE };
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(declaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
-   });
+   //    expect(declaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
+   // });
 
    // it('calls attListDeclaration.pTokenToXToken()', () => {
    //    spyOn(attListDeclaration, 'pTokenToXToken');
@@ -150,25 +150,25 @@ describe('PToXTokenStream (unit)', () => {
    //    expect(elementDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    // });
 
-   it('calls peStart.toXToken() with a parameter entity reference', () => {
-      const pToken = new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('&') }));
-      spyOn(pToken, 'toXToken');
+   // it('calls peStart.toXToken() with a parameter entity reference', () => {
+   //    const pToken = new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('&') }));
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
-   it('calls peEnd.toXToken() with a parameter entity reference', () => {
-      const pToken = new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('&') }));
-      spyOn(pToken, 'toXToken');
+   // it('calls peEnd.toXToken() with a parameter entity reference', () => {
+   //    const pToken = new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('&') }));
+   //    spyOn(pToken, 'toXToken');
 
-      tokenStream.write(pToken);
-      tokenStream.read();
+   //    tokenStream.write(pToken);
+   //    tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith();
-   });
+   //    expect(pToken.toXToken).toHaveBeenCalledWith();
+   // });
 
    // it('calls peRef.toXToken() with a parameter entity reference', () => {
    //    const pToken = new ParameterEntityReferencePToken({ open: SToken.fromString('&') });

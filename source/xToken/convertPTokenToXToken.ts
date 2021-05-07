@@ -32,6 +32,7 @@ import {
    GENERAL_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
+   UNKNOWNDECL_PTOKEN,
 } from 'token';
 
 import { GeneralEntityEndXToken } from './marker/generalEntityEndXToken';
@@ -59,6 +60,7 @@ import { ProcessingInstructionXToken } from './token/processingInstructionXToken
 import { SpaceXToken } from './token/spaceXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { TextXToken } from './token/textXToken';
+import { UnknownDeclarationXToken } from './bridge/unknownDeclarationXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
 import { CdataXToken } from './token/cdataXToken';
@@ -118,6 +120,8 @@ function convertPTokenToXToken(pToken: ParseToken): XToken {
          return new TextXToken(pToken);
       case TEXTDECL_PTOKEN:
          return new TextDeclarationXToken(pToken);
+      case UNKNOWNDECL_PTOKEN:
+         return new UnknownDeclarationXToken(pToken);
       case XMLDECL_PTOKEN:
          return new XmlDeclarationXToken(pToken);
       default:

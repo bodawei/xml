@@ -67,6 +67,7 @@ type PToken =
    | CommentPToken
    | ConditionalClosePToken
    | ConditionalPToken
+   | DeclarationPToken
    | DocTypeStartPToken
    | DocTypeEndPToken
    | ElementEmptyPToken

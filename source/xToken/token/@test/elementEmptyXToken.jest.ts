@@ -4,45 +4,33 @@ import { describe, expect, it } from '@jest/globals';
 
 import { toSToken } from 'sToken';
 import { ElementEmptyPToken } from 'token';
-import attribute from '../../../token/common/attribute';
 
+import { AttributeX } from '../../common/attributeX';
 import { ElementEmptyXToken } from '../ElementEmptyXToken';
+
+jest.mock('../../common/attributeX');
 
 describe('ElementEmptyXToken (unit)', () => {
    let elementEmptyPToken: ElementEmptyPToken;
-   let mtc: jest.MockedFunction<typeof attribute.makeTokenCompatible>;
 
    beforeEach(() => {
       elementEmptyPToken = new ElementEmptyPToken({
          open: toSToken('<'),
          name: toSToken('elemName'),
          nameSpace: toSToken(' '),
-         attributes: [],
-         close: toSToken('>'),
-      });
-
-      mtc = jest.spyOn(attribute, 'makeTokenCompatible') as jest.MockedFunction<
-         typeof attribute.makeTokenCompatible
-      >;
-   });
-
-   it('asks the attribute system to provide the attributes', () => {
-      elementEmptyPToken = new ElementEmptyPToken({
-         open: toSToken('<'),
-         openSpace: toSToken(' '),
-         name: toSToken('elemName'),
-         nameSpace: toSToken(' '),
          attributes: [{}],
          close: toSToken('>'),
       });
+   });
 
+   it('asks the attribute system to provide the attributes', () => {
       new ElementEmptyXToken(elementEmptyPToken);
 
-      expect(attribute.makeTokenCompatible).toHaveBeenCalledWith(elementEmptyPToken.attributes);
+      expect(AttributeX).toHaveBeenCalledWith({});
    });
 
    it('returns a token with the expected fields defined', () => {
-      mtc.mockReturnValue([{ name: 'foo', value: [] }]);
+      (AttributeX as jest.Mock).mockImplementation(() => ({ name: 'foo', value: [] }));
 
       const token = new ElementEmptyXToken(elementEmptyPToken);
 

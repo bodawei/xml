@@ -1,15 +1,13 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { strOrBlank, SToken, STokenSource } from 'sToken';
-import { GeneralEntityEndXToken, GeneralEntityStartXToken, ParameterEntityEndXToken, ParameterEntityStartXToken, TextXToken } from 'xToken';
+import { SToken, STokenSource } from 'sToken';
 
 import literal, { LiteralPToken } from './literal';
 import { GeneralEntityEndPToken } from '../marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from '../marker/generalEntityStart';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { CharRefXToken, ParameterEntityReferenceXToken, GeneralEntityReferenceXToken } from 'xToken';
 
 type ParseOptions = {
    geRef?: boolean;
@@ -30,14 +28,6 @@ interface AttributePToken extends LiteralPToken {
 
 type AttributeValueElement = TextPToken|CharRefPToken|GeneralEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken;
 type AttributeValuePToken = Array<AttributeValueElement>;
-type AttributeValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
-
-type AttributeXToken = {
-   name: string;
-   value: AttributeValueXToken,
-}
-
-type AttributesXToken = Array<AttributeXToken>;
 
 type AttributesPToken = Array<AttributePToken>;
 type DeliverPToken = (result?: AttributesPToken) => void;
@@ -114,44 +104,6 @@ function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, optio
    });
 }
 
-/**********************************************************************\
- makeTokenCompatible() converts a pToken value into a form that
- can be inserted into a token.
-\**********************************************************************/
-
-function makeTokenCompatible(pAttributes: AttributesPToken = []) {
-   const attrs: AttributesXToken = [];
-
-   for (let index = 0; index < pAttributes.length; index++) {
-      const attr = pAttributes[index];
-      const value = literal.makeTokenCompatible(attr);
-      const details: AttributeXToken = {
-         name: strOrBlank(attr.name),
-         value: value || [],
-      };
-
-      attrs.push(details);
-   }
-
-   return attrs;
-}
-
-function makeOneTokenCompatible(attributes: AttributesPToken = []) {
-   const attrs: AttributesXToken = [];
-
-   for (let index = 0; index < attributes.length; index++) {
-      const attr = attributes[index];
-      const value = literal.makeOneTokenCompatible(attr);
-      const details: AttributeXToken = {
-         name: strOrBlank(attr.name),
-         value: value ? [ new TextXToken(value) ] : [],
-      };
-
-      attrs.push(details);
-   }
-
-   return attrs;
-}
 
 function getSTokens(attributes: AttributesPToken = []) {
    let results: Array<SToken> = [];
@@ -187,8 +139,6 @@ const parseAttribute = parse;
 const attribute = {
    parse,
    parseAttribute,
-   makeTokenCompatible,
-   makeOneTokenCompatible,
    getSTokens,
 };
 
@@ -197,9 +147,7 @@ export default attribute;
 export {
    AttrValue,
    AttributePToken,
-   AttributeXToken,
    AttributeValuePToken,
-   AttributeValueXToken,
    AttributeValueElement,
    parseAttribute,
 };

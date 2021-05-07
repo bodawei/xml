@@ -18,7 +18,7 @@ import {
    DocTypeEndPToken,
    DocTypeStartPToken,
 } from 'token';
-import { DeclarationPToken } from './baseDeclaration';
+import { DeclarationPToken, UNKNOWNDECL_PTOKEN } from './baseDeclaration';
 
 type DeclarationStart = {
    open: SToken,
@@ -105,7 +105,7 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
 }
 
 export {
+   UNKNOWNDECL_PTOKEN,
    DeclarationStart,
-
    parseDeclaration,
 };

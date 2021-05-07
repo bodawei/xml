@@ -5,7 +5,6 @@ import { ConformanceVersion } from 'basic';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken,  } from 'pToken';
-import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
 
@@ -83,59 +82,6 @@ describe('literal (integration)', () => {
             });
             done();
          });
-      });
-
-   });
-
-   describe('makeTokenCompatible()', () => {
-
-      it('converts intput PToken into a set of XTokens', (done) => {
-         const pToken: LiteralPToken = {} as  LiteralPToken;
-         source.addText('"one&ref;two"');
-         source.endText();
-         literal.parse(source, {
-            pToken: pToken,
-            geRef: true,
-         }, () => {
-            const results = literal.makeTokenCompatible(pToken);
-            const makeSToken = makeSTokenMaker();
-            makeSToken('"');
-            const pToken1 = new TextPToken({ text: makeSToken('one') });
-            const pTokenRef = new GeneralEntityReferencePToken({
-               open: makeSToken('&'),
-               openSpace: undefined,
-               name: makeSToken('ref'),
-               nameSpace: undefined,
-               close: makeSToken(';'),
-            });
-            const pToken2 = new TextPToken({ text: makeSToken('two') });
-
-            expect(results).toEqual([
-               new TextXToken(pToken1),
-               new GeneralEntityReferenceXToken(pTokenRef),
-               new TextXToken(pToken2),
-            ]);
-            done();
-         });
-      });
-
-      describe('makeOneTokenCompatible()', () => {
-
-         it('converts intput PToken into a single string', (done) => {
-            const pToken: LiteralPToken = {} as  LiteralPToken;
-            source.addText('"one"');
-            source.endText();
-            literal.parse(source, {
-               pToken: pToken,
-               geRef: true,
-            }, () => {
-               const results = literal.makeOneTokenCompatible(pToken);
-
-               expect(results).toEqual('one');
-               done();
-            });
-         });
-
       });
 
    });

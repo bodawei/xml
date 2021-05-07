@@ -1,11 +1,9 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
+import { TextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { GeneralEntityReferenceXToken, TextXToken } from 'xToken';
-import * as xTokenStuff from 'xToken';
 
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';
@@ -153,66 +151,7 @@ describe('literal (unit)', () => {
 
    });
 
-   describe('makeTokenCompatible()', () => {
-      let litValMakeCompatSpy: jasmine.Spy;
-
-      beforeEach(() => {
-         litValMakeCompatSpy = spyOn(xTokenStuff, 'makeLiteralValueX')
-            .and.returnValue([]);
-      });
-
-      it('calls makeLiteralValueX()', () => {
-         literal.makeTokenCompatible(literalPToken);
-
-         expect(litValMakeCompatSpy).toHaveBeenCalledWith(literalPToken.value);
-      });
-
-      it('copes with no quoted value at all', () => {
-         delete (literalPToken as any).value;
-         const result = literal.makeTokenCompatible(literalPToken);
-
-         expect(result).toEqual(undefined);
-      });
-
-      it('copes with no pToken at all', () => {
-         const result = literal.makeTokenCompatible();
-
-         expect(result).toEqual(undefined);
-      });
-
-   });
-
-   describe('makeOneTokenCompatible()', () => {
-      let litValMakeCompatSpy: jasmine.Spy;
-
-      beforeEach(() => {
-         litValMakeCompatSpy = spyOn(xTokenStuff, 'makeLiteralValueX')
-            .and.returnValue([]);
-      });
-
-      it('returns the string from the PToken result', () => {
-         litValMakeCompatSpy.and.returnValue([ new TextXToken(new TextPToken({ text: SToken.fromString('xxx') })) ])
-         const result = literal.makeOneTokenCompatible(literalPToken);
-
-         expect(result).toEqual('xxx');
-      });
-
-      it('copes with no quoted value at all', () => {
-         litValMakeCompatSpy.and.returnValue([]);
-         const result = literal.makeOneTokenCompatible(literalPToken);
-
-         expect(result).toEqual(undefined);
-      });
-
-      it('copes the value being an entity reference', () => {
-         litValMakeCompatSpy.and.returnValue([ new GeneralEntityReferenceXToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') })) ]);
-         const result = literal.makeOneTokenCompatible(literalPToken);
-
-         expect(result).toEqual(undefined);
-      });
-
-   });
-
+   
    describe('getSTokens()', () => {
       let litValGetSTokens: jasmine.Spy;
 

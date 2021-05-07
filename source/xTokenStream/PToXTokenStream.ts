@@ -39,6 +39,7 @@ import {
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    SPACE_PTOKEN,
+   UNKNOWNDECL_PTOKEN,
 
    ELIDED_ENTITY_DECLARATION_PTOKEN,
 } from 'token';
@@ -55,25 +56,22 @@ class PToXTokenStream extends Transform {
    }
 
    _transform(pToken: any, encoding: string, done: () => void) { // typeHack
-      switch (pToken.type) {
-         case declaration.PTYPE:
-            this.push(declaration.pTokenToXToken(pToken));
-            break;
-                  case ATTLIST_DECLARATION_PTOKEN:
-                     case CHARREF_PTOKEN:
-                        case CDATA_PTOKEN:
-                           case CHARDATA_PTOKEN:
-                              case CONDITIONAL_CLOSE_PTOKEN:
-                                 case CONDITIONAL_PTOKEN:
-                                    case COMMENT_PTOKEN:
-                                       case DOCTYPE_END_PTOKEN:
-                                          case DOCTYPE_START_PTOKEN:
-                                             case ELEMENT_END_PTOKEN:
-                                                case ELEMENT_DECLARATION_PTOKEN:
-                                                   case ELEMENT_EMPTY_PTOKEN:
-                                                      case ELEMENT_START_PTOKEN:
-                                                         case GENERAL_ENTITY_DECLARATION_PTOKEN:
-                                                            case GENERAL_ENTITY_END_PTOKEN:
+switch (pToken.type) {
+         case ATTLIST_DECLARATION_PTOKEN:
+         case CHARREF_PTOKEN:
+         case CDATA_PTOKEN:
+         case CHARDATA_PTOKEN:
+               case CONDITIONAL_CLOSE_PTOKEN:
+                  case CONDITIONAL_PTOKEN:
+                     case COMMENT_PTOKEN:
+         case DOCTYPE_END_PTOKEN:
+            case DOCTYPE_START_PTOKEN:
+               case ELEMENT_END_PTOKEN:
+                  case ELEMENT_DECLARATION_PTOKEN:
+                     case ELEMENT_EMPTY_PTOKEN:
+                        case ELEMENT_START_PTOKEN:
+                           case GENERAL_ENTITY_DECLARATION_PTOKEN:
+                              case GENERAL_ENTITY_END_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
          case GENERAL_ENTITY_START_PTOKEN:
          case NOTATION_DECLARATION_PTOKEN:
@@ -85,6 +83,7 @@ class PToXTokenStream extends Transform {
          case SPACE_PTOKEN:
          case TEXT_PTOKEN:
          case TEXTDECL_PTOKEN:
+         case UNKNOWNDECL_PTOKEN:
          case XMLDECL_PTOKEN:
             this.push(convertPTokenToXToken(pToken));
             break;

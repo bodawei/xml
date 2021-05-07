@@ -55,8 +55,8 @@ import {
    INTERNAL_SUBSET_END_TOKEN,   
 } from 'token';
 
-import { AttributeValueXToken } from '../token/common/attribute';
 import { ContentSpecType } from 'xToken';
+import { LiteralValueX } from 'xToken';
 
 type XToken = {
    type: string;
@@ -246,7 +246,7 @@ class CheckXTokenValidStream extends Transform {
       return newValue;
    }
 
-   private checkAttributeValueStandaloneability(attrName: string, value: AttributeValueXToken, pTokenOpen: any, elementAttribute: boolean) {
+   private checkAttributeValueStandaloneability(attrName: string, value: LiteralValueX, pTokenOpen: any, elementAttribute: boolean) {
       let depth = 0;
       let invalidAt = -1;
 
@@ -940,7 +940,7 @@ class CheckXTokenValidStream extends Transform {
       }
    }
 
-   private checkAttributeValueForUnexpandedReferences(value: AttributeValueXToken, errorId: string, attrName: string, elementName: string, context?: SToken) {
+   private checkAttributeValueForUnexpandedReferences(value: LiteralValueX, errorId: string, attrName: string, elementName: string, context?: SToken) {
       for (const element of value) {
          if (element.type === GENERAL_ENTITY_REFERENCE_XTOKEN || element.type === PARAMETER_ENTITY_REFERENCE_XTOKEN) {
             this.pushValidityError(errorId, [ (element as any).name, attrName, elementName ], context);
@@ -1139,7 +1139,8 @@ class CheckXTokenValidStream extends Transform {
          const attrName = attributes[index].name;
          const attrInfo = elemAttrDef && elemAttrDef.attributes[attrName];
 
-         attributes[index].value = this.normalizeAttributeValue(attributes[index], attrInfo,
+         // eeek
+         (attributes[index] as any).value = this.normalizeAttributeValue(attributes[index], attrInfo,
             elName, pTokenOpen);
       }
 

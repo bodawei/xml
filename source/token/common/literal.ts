@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { SToken, STokenSource } from 'sToken';
-import { isTextXToken, makeLiteralValueX,  LiteralValueX } from 'xToken';
 
 import literalValue, {
    LiteralValuePToken,
@@ -75,28 +74,6 @@ function parse(source: STokenSource, options: ParseOptions | undefined, done: De
    });
 }
 
-function makeTokenCompatible(pToken?: LiteralPToken): LiteralValueX | void {
-   const pieces = pToken?.value ?? [];
-
-   const result = makeLiteralValueX(pieces);
-
-   return result.length === 0 ? undefined : result;
-}
-
-function makeOneTokenCompatible(pToken: LiteralPToken): string | void {
-   const result = makeLiteralValueX(pToken.value);
-
-   if (result.length === 0) {
-      return;
-   } else {
-      const firstItem = result[0];
-
-      if (isTextXToken(firstItem)) {
-         return firstItem.text;
-      }
-   }
-}
-
 function getSTokens(pToken: LiteralPToken | void): Array<SToken> {
    let results: Array<SToken> = [];
 
@@ -122,8 +99,6 @@ const parseLiteral = parse;
 const literal = {
    parse,
    parseLiteral,
-   makeTokenCompatible,
-   makeOneTokenCompatible,
    getSTokens,
 };
 
