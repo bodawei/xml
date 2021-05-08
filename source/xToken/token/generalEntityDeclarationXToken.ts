@@ -4,7 +4,7 @@ import { strOrBlank } from 'sToken';
 import { GeneralEntityDeclarationPToken } from 'pToken';
 import { ExternalIdX } from 'xToken';
 
-import { ExntityValueX, makeEntityValueX } from '../util/makeEntityValueX';
+import { ExntityValueX, makeEntityValueX } from '../common/makeEntityValueX';
 
 const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
 

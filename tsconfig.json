@@ -27,8 +27,8 @@
          "extractor": [
             "./source/extractor"
          ],
-         "nodeStream": [
-            "./source/nodeStream"
+         "node": [
+            "source/node"
          ],
          "pToken": [
             "./source/pToken"

@@ -1,5 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { ParseToken } from 'pToken';
+
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
 import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
@@ -14,20 +16,20 @@ import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/ParameterEntityReferenceXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 import { TextXToken } from './token/textXToken';
-
-// Temporary additions to allow us to build out the XTokenToXmlStream data
-
-import {
-   CdataXToken,
-   CharDataXToken,
-   DocTypeEndXToken,
-   DocTypeStartXToken,
-   ElementEmptyXToken,
-   ElementEndXToken,
-   ElementStartXToken,
-   SpaceXToken,
-} from 'token';
-import { ParseToken } from 'pToken';
+import { SpaceXToken } from './token/spaceXtoken';
+import { CdataXToken } from './token/cdataXToken';
+import { CharDataXToken } from './token/charDataXToken';
+import { CommentXToken } from './token/commentXToken';
+import { DocTypeEndXToken } from './token/docTypeEndXToken';
+import { DocTypeStartXToken } from './token/docTypeStartXToken';
+import { ElementEmptyXToken } from './token/elementEmptyXToken';
+import { ElementEndXToken } from './token/elementEndXToken';
+import { ElementStartXToken } from './token/elementStartXToken';
+import { GeneralEntityEndXToken } from './marker/generalEntityEndXToken';
+import { UnknownDeclarationXToken } from './token/unknownDeclarationXToken';
+import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
+import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
+import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
 
 type XToken =
    | CharRefXToken
@@ -41,6 +43,7 @@ type XToken =
    | ConditionalSectionStartXToken
    | CharDataXToken
    | CdataXToken
+   | CommentXToken
    | DocTypeEndXToken
    | DocTypeStartXToken
    | ElementEmptyXToken
@@ -54,6 +57,11 @@ type XToken =
    | NotationDeclarationXToken
    | ParameterEntityDeclarationXToken
    | ProcessingInstructionXToken
+   | GeneralEntityEndXToken
+   | GeneralEntityStartXToken
+   | ParameterEntityEndXToken
+   | ParameterEntityStartXToken
+   | UnknownDeclarationXToken
    | TextXToken;
 
 export { XToken };

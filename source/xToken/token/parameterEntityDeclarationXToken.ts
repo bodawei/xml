@@ -4,7 +4,7 @@ import { strOrBlank } from 'sToken';
 import { ParameterEntityDeclarationPToken } from 'pToken';
 import { ExternalIdX } from 'xToken';
 
-import { ExntityValueX, makeEntityValueX } from '../util/makeEntityValueX';
+import { ExntityValueX, makeEntityValueX } from '../common/makeEntityValueX';
 
 const PARAMETER_ENTITY_DECLARATION_XTOKEN = 'PARAMETER_ENTITY_DECLARATION_XTOKEN';
 

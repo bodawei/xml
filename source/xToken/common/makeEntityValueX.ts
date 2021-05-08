@@ -1,12 +1,14 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'pToken';
-import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
-
-// ick
-import { LiteralValuePToken } from '../../token/common/literalValue';
-import { PARAMETER_ENTITY_END_PTOKEN, PARAMETER_ENTITY_START_PTOKEN } from 'token';
 import { strOrBlank } from 'sToken';
+import {
+   PARAMETER_ENTITY_END_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
+   LiteralValuePToken,
+} from 'token';
+
+import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
 
 type MutableExntityValueX = Array<string | ParameterEntityReferenceXToken>;
 type ExntityValueX = ReadonlyArray<string | ParameterEntityReferenceXToken>;

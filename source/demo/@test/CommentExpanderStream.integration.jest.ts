@@ -1,39 +1,40 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
-
-import { Transform } from 'stream';
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { gatherStreamResults } from 'basic-test';
+import { XMLDECL_PTOKEN, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
-import {   COMMENT_XTOKEN, ELEMENT_END_XTOKEN,  CHARDATA_XTOKEN,  ELEMENT_START_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
+import {
+   COMMENT_PTOKEN,
+   ELEMENT_END_PTOKEN,
+   CHARDATA_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   CommentPToken,
+} from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
-import PToXTokenStream from '../PToXTokenStream';
-import CommentFixingStream from '../CommentFixingStream';
+import { CommentExpanderStream } from '../CommentExpanderStream';
 
-describe('CommentFixingStream (integration)', () => {
+describe('CommentExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
-   let xTokenStream: PToXTokenStream;
 
    function testTransformation(before: string, after: string, done: () => void) {
-      const cf = new CommentFixingStream();
+      const ces = new CommentExpanderStream();
       pTokenStream = new PTokenStream(new STokenSource());
-      xTokenStream = new PToXTokenStream();
 
       pTokenStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
       pTokenStream.endText();
-      (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
+      pTokenStream.pipe(ces);
 
-      gatherStreamResults<any>(cf, (results) => {
-         const result = results.find(r => r.type === COMMENT_XTOKEN);
+      gatherStreamResults<ParseToken>(ces, (results) => {
+         const result = results.find((r) => r.type === COMMENT_PTOKEN);
 
-         expect(result.text).toEqual(after);
+         expect((result as CommentPToken).text[0].str).toEqual(after);
          done();
       });
    }
 
    describe('transformation', () => {
-
       it('passes through an a comment with no character references', (done) => {
          testTransformation(' this is a test ', ' this is a test ', done);
       });
@@ -57,29 +58,32 @@ describe('CommentFixingStream (integration)', () => {
       it('handles a character reference at the end', (done) => {
          testTransformation('&#32;this &#105;s &#x61; test&#32;', ' this is a test ', done);
       });
-
    });
 
    describe('passthrough', () => {
-
       it('passes all tokens through', (done) => {
          pTokenStream = new PTokenStream(new STokenSource());
-         xTokenStream = new PToXTokenStream();
 
          pTokenStream.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
          pTokenStream.endText();
 
-         const cf = new CommentFixingStream();
-         (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
+         const cf = new CommentExpanderStream();
+         pTokenStream.pipe(cf);
 
-         gatherStreamResults<any>(cf, (results) => {
-            const types = results.map(r => r.type);
+         gatherStreamResults<ParseToken>(cf, (results) => {
+            const types = results.map((r) => r.type);
 
-            expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, XMLDECL_XTOKEN, COMMENT_XTOKEN, ELEMENT_START_XTOKEN, CHARDATA_XTOKEN, ELEMENT_END_XTOKEN]);
+            expect(types).toEqual([
+               CONFORMANCE_VERSION,
+               ENTITY_ID,
+               XMLDECL_PTOKEN,
+               COMMENT_PTOKEN,
+               ELEMENT_START_PTOKEN,
+               CHARDATA_PTOKEN,
+               ELEMENT_END_PTOKEN,
+            ]);
             done();
          });
       });
-
    });
-
 });

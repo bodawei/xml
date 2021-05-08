@@ -40,7 +40,6 @@ import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
-// tsnode seems to load this file twice. here and in the index.  So, here we only load it once.  Unclear why it is doing this, though.
 import { NotationDeclarationXToken } from './index';
 import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
 import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
@@ -60,13 +59,19 @@ import { ProcessingInstructionXToken } from './token/processingInstructionXToken
 import { SpaceXToken } from './token/spaceXToken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { TextXToken } from './token/textXToken';
-import { UnknownDeclarationXToken } from './bridge/unknownDeclarationXToken';
+import { UnknownDeclarationXToken } from './token/unknownDeclarationXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
 import { CdataXToken } from './token/cdataXToken';
 import { CharDataXToken } from './token/charDataXToken';
 
-function convertPTokenToXToken(pToken: ParseToken): XToken {
+interface ConvertOptions {
+   doNothing?: string;
+}
+
+function convertPTokenToXToken(pToken: ParseToken, options?: ConvertOptions): XToken {
+   if (options?.doNothing) {
+   }
    switch (pToken.type) {
       case ATTLIST_DECLARATION_PTOKEN:
          return new AttListDeclarationXToken(pToken);

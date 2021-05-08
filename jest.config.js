@@ -23,6 +23,8 @@ module.exports = {
      '!source/attFixer/**/@test/**/*.ts',
      'source/basic/**/*.ts',
      '!source/basic/**/@test/**/*.ts',
+     'source/demo/**/*.ts',
+     '!source/demo/**/@test/**/*.ts',
      'source/expand/**/*Conditional*.ts',
      '!source/expand/**/@test/**/*.ts',
      'source/pToken/**/*.ts',
@@ -105,7 +107,7 @@ module.exports = {
      '^error-test$': '<rootDir>/source/error/@test/helper',
      '^expand$': '<rootDir>/source/expand',
      '^extractor$': '<rootDir>/source/extractor',
-     '^nodeStream$': '<rootDir>/source/nodeStream',
+     '^node$': '<rootDir>/source/node',
      '^pToken$': '<rootDir>/source/pToken',
      '^pTokenStream$': '<rootDir>/source/pTokenStream',
      '^pToken-test$': '<rootDir>/source/pToken/@test/helper',
@@ -195,6 +197,7 @@ module.exports = {
   // The glob patterns Jest uses to detect test files
   testMatch: [
      "<rootDir>/**/@test/**/*jest.ts?(x)",
+   //   "<rootDir>/source/xToken/**/@test/**/*jest.ts?(x)",
   //   "**/__tests__/**/*.[jt]s?(x)",
   //   "**/?(*.)+(spec|test).f[tj]s?(x)"
   ],

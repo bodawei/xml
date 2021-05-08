@@ -40,7 +40,7 @@ import {
    TextXToken,
 } from 'xToken';
 
-import * as chars from '../../basic/chars'
+import * as chars from '../../../basic/chars';
 
 import {
    ExternalSubsetStartToken,

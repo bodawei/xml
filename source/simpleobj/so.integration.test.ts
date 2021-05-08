@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { PTokenStream } from '../pTokenStream';
-import { PToXTokenStream } from '../xTokenStream';
+import { PToXTokenStream } from '../node';
 import SimpleObjStream from './so';
 import { STokenSource } from 'sToken';
 

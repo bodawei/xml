@@ -3,19 +3,18 @@
 
 import { EntityId, Offset } from 'basic';
 import { gatherStreamResults } from 'basic-test';
+import { PToXTokenStream } from 'source/node';
 import { STokenSource } from 'sToken';
-import { ValidityError, } from 'valid';
+import { ValidityError } from 'valid';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
-import PToXTokenStream from '../PToXTokenStream';
-import { PTokenStream } from '../../pTokenStream';
-import { EntityExpanderStream } from '../../nodeStream/EntityExpanderStream';
+import { PTokenStream } from '../../../pTokenStream';
+import { EntityExpanderStream } from '../../../node/EntityExpanderStream';
 
 describe('CheckXTokenValidStream (integration)', () => {
    let validator: CheckXTokenValidStream;
    let parser: PTokenStream;
    let replacer: EntityExpanderStream;
-
 
    function expectStream(validator: CheckXTokenValidStream, expected: any, done: () => void) {
       gatherStreamResults<any>(validator, (tokens) => {
@@ -34,8 +33,11 @@ describe('CheckXTokenValidStream (integration)', () => {
    });
 
    it('reports an error when the DOCTYPE and first element do not match', (done) => {
-      const expected = new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, ['one', 'two'],
-         new Offset(new EntityId(), 23, 0, 23));
+      const expected = new ValidityError(
+         ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
+         ['one', 'two'],
+         new Offset(new EntityId(), 23, 0, 23),
+      );
 
       parser.addText('<?xml version="1.0"?><!DOCTYPE one><two></two>');
       parser.endText();
@@ -44,21 +46,28 @@ describe('CheckXTokenValidStream (integration)', () => {
    });
 
    it('reports an error when the NOTATION is added twice', (done) => {
-      const error = new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, ['one'],
-         new Offset(new EntityId(), 70, 0, 70));
+      const error = new ValidityError(
+         ValidityError.ID.NOTATION_NOT_UNIQUE,
+         ['one'],
+         new Offset(new EntityId(), 70, 0, 70),
+      );
 
-      parser.addText('<?xml version="1.0"?><!DOCTYPE one [<!NOTATION one SYSTEM "-//test">' +
-         '<!NOTATION one SYSTEM "-//foo">]>');
+      parser.addText(
+         '<?xml version="1.0"?><!DOCTYPE one [<!NOTATION one SYSTEM "-//test">' +
+            '<!NOTATION one SYSTEM "-//foo">]>',
+      );
       parser.endText();
 
       expectStream(validator, error, done);
    });
 
    describe('ATTLIST', () => {
-
       it('reports an error when the an IDREF is not a valid name', (done) => {
-         const error = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT, ['root', 'reference', '$good'],
-            new Offset(new EntityId(), 118, 3, 17));
+         const error = new ValidityError(
+            ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT,
+            ['root', 'reference', '$good'],
+            new Offset(new EntityId(), 118, 3, 17),
+         );
 
          parser.addText(`<?xml version="1.0"?><!DOCTYPE root [
             <!ENTITY bad "$">
@@ -73,6 +82,5 @@ describe('CheckXTokenValidStream (integration)', () => {
 
          expectStream(validator, error, done);
       });
-
    });
 });

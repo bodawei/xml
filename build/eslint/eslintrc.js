@@ -34,6 +34,7 @@ module.exports = {
             './source/attFixer/**/*.ts',
             './source/basic/**/*.ts',
             './source/conformance/**/*.ts',
+            './source/demo/**/*.ts',
             './source/expand/**/*.ts',
             './source/pToken/**/*.ts',
             './source/sToken/**/*.ts',
@@ -42,6 +43,7 @@ module.exports = {
             './source/wellformedness/**/*.ts',
             './source/xToken/**/*.ts',
 
+            './source/node/**/PToXTokenStream*.ts',
             './source/**/charRef*.ts',
             './source/**/parameterEntityReference*.ts',
             './source/token/bridge/section.ts',

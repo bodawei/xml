@@ -19,24 +19,3 @@ The intent is that if you do not need the detailed information about the origina
 * Any kind of entity value is represented as a series of strings and (if they have not been expanded) ParemterEntityReferences.
 * Arrays are always present, with 0 elements. Thus, in some cases, it is ambiguous whether a literal was present and empty or was not present.
 * Properties with fixed value (e.g. the attribute type in AttListDeclarations) will be converted to an enumerated value. If an invalid value is present in a PToken, then a default value will be inserted into the XToken. No error will be generated (if you care about errors, the Wellformed system will have reported it)
-
-## Open issues
-* Icks:
-   * literal
-   * attribute
-   * TxtPTokens
-   * literalValue
-   * CharRef
-   * ParameterEntityReferencePToken
-   * GeneralEntityDeclarationPToken
-* Need to review the following types for matching design standards
-   * xmldecl
-   * textDecl
-   * processing instruction
-   * parameterentityreference
-   * notationdeclaration
-   * generalEntityDeclaration
-   * conditionalSection
-   * conditionalClose
-   * charRef
-   * attListDecl
