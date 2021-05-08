@@ -10,7 +10,7 @@ class CharDataXToken {
 
    public readonly text: string;
 
-   public readonly pToken?: CharDataPToken;
+   public pToken?: CharDataPToken;
 
    constructor(textOrPToken: string | CharDataPToken) {
       if (typeof textOrPToken === 'string') {

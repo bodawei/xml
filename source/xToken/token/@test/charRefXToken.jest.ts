@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { CharRefPToken } from 'pToken';
@@ -65,6 +65,6 @@ describe('CharRefXToken', () => {
          }),
       );
 
-      expect(xToken.char).toEqual('🀦'); // This is actually two entties in the utf8 array.
+      expect(xToken.char).toEqual('🀦'); // This is actually two entries in the utf8 array.
    });
 });

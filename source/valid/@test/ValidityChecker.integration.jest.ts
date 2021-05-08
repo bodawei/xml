@@ -7,7 +7,7 @@ import { gatherStreamResults } from 'basic-test';
 import { ContextType, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
-import { AttFixerStream, EntityExpanderStream } from 'source/node';
+import { AttFixerStream, EntityExpanderStream } from 'node';
 
 import { ValidityChecker } from '../ValidityChecker';
 import { ValidityError } from '../error/ValidityError';

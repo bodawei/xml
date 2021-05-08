@@ -3,8 +3,8 @@
 import { ParseToken } from 'pToken';
 
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
-import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
-import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
+import { ConditionalEndXToken } from './token/conditionalEndXToken';
+import { ConditionalStartXToken } from './token/conditionalStartXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
@@ -32,35 +32,34 @@ import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
 
 type XToken =
+   | ParseToken
+   | AttListDeclarationXToken
+   | CdataXToken
+   | CharDataXToken
    | CharRefXToken
+   | CommentXToken
+   | ConditionalEndXToken
+   | ConditionalStartXToken
+   | DocTypeEndXToken
+   | DocTypeStartXToken
+   | GeneralEntityEndXToken
+   | GeneralEntityStartXToken
+   | ParameterEntityEndXToken
+   | ParameterEntityStartXToken
+   // ---
    | GeneralEntityReferenceXToken
    | ParameterEntityReferenceXToken
    | TextDeclarationXToken
    | XmlDeclarationXToken
-   // temp additions
-   | ParseToken // EEEK.
-   | ConditionalSectionEndXToken
-   | ConditionalSectionStartXToken
-   | CharDataXToken
-   | CdataXToken
-   | CommentXToken
-   | DocTypeEndXToken
-   | DocTypeStartXToken
    | ElementEmptyXToken
    | ElementEndXToken
    | ElementStartXToken
    | SpaceXToken
-   // Fully blessed
-   | AttListDeclarationXToken
    | ElementDeclarationXToken
    | GeneralEntityDeclarationXToken
    | NotationDeclarationXToken
    | ParameterEntityDeclarationXToken
    | ProcessingInstructionXToken
-   | GeneralEntityEndXToken
-   | GeneralEntityStartXToken
-   | ParameterEntityEndXToken
-   | ParameterEntityStartXToken
    | UnknownDeclarationXToken
    | TextXToken;
 

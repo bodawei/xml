@@ -6,7 +6,7 @@ export {
    GENERAL_ENTITY_START_XTOKEN,
    GeneralEntityStartXToken,
 } from './marker/generalEntityStartXToken';
-export { CDATA_XTOKEN, CdataXToken } from './token/cdataXToken';
+export { CDATA_SECTION_XTOKEN, CdataXToken } from './token/cdataXToken';
 export { CHARDATA_XTOKEN, CharDataXToken } from './token/charDataXToken';
 export { CHARREF_XTOKEN, CharRefXToken } from './token/charRefXToken';
 export {
@@ -25,14 +25,11 @@ export {
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
    ParameterEntityReferenceXToken,
 } from './token/parameterEntityReferenceXToken';
-export {
-   CONDITIONAL_SECTION_END_XTOKEN,
-   ConditionalSectionEndXToken,
-} from './token/conditionalSectionEndXToken';
+export { CONDITIONAL_SECTION_END_XTOKEN, ConditionalEndXToken } from './token/conditionalEndXToken';
 export {
    CONDITIONAL_SECTION_START_XTOKEN,
-   ConditionalSectionStartXToken,
-} from './token/conditionalSectionStartXToken';
+   ConditionalStartXToken,
+} from './token/conditionalStartXToken';
 export { DOCTYPE_END_XTOKEN, DocTypeEndXToken } from './token/docTypeEndXToken';
 export { DOCTYPE_START_XTOKEN, DocTypeStartXToken } from './token/docTypeStartXToken';
 export { ELEMENT_END_XTOKEN, ElementEndXToken } from './token/elementEndXToken';

@@ -18,12 +18,20 @@ describe('DocTypeEndXToken (unit)', () => {
       });
    });
 
-   it('returns a token given a good parsing', () => {
+   it('returns a token given PToken', () => {
       const token = new DocTypeEndXToken(docTypeEndPToken);
 
       expect(token).toEqual({
          type: DOCTYPE_END_XTOKEN,
          pToken: docTypeEndPToken,
+      });
+   });
+
+   it('returns a token given no parameter', () => {
+      const token = new DocTypeEndXToken();
+
+      expect(token).toEqual({
+         type: DOCTYPE_END_XTOKEN,
       });
    });
 });

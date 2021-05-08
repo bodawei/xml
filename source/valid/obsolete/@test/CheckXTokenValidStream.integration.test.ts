@@ -3,13 +3,12 @@
 
 import { EntityId, Offset } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { PToXTokenStream } from 'source/node';
+import { EntityExpanderStream, PToXTokenStream } from 'node';
 import { STokenSource } from 'sToken';
 import { ValidityError } from 'valid';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import { PTokenStream } from '../../../pTokenStream';
-import { EntityExpanderStream } from '../../../node/EntityExpanderStream';
 
 describe('CheckXTokenValidStream (integration)', () => {
    let validator: CheckXTokenValidStream;

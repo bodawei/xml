@@ -3,10 +3,6 @@
 import { GeneralEntityStartPToken } from 'token';
 import { strOrBlank } from 'sToken';
 
-/**********************************************************************\
- Defines a simple token that tracks the start of an entity expansion.
-\**********************************************************************/
-
 const GENERAL_ENTITY_START_XTOKEN = 'GENERAL_ENTITY_START_XTOKEN';
 
 class GeneralEntityStartXToken {
@@ -14,7 +10,7 @@ class GeneralEntityStartXToken {
 
    public readonly name: string;
 
-   public readonly pToken?: GeneralEntityStartPToken;
+   public pToken?: GeneralEntityStartPToken;
 
    constructor(nameOrToken: string | GeneralEntityStartPToken) {
       if (typeof nameOrToken === 'string') {

@@ -18,7 +18,7 @@ class PToXTokenStream extends Transform {
 
    _transform(token: ParseToken, encoding: string, done: () => void): void {
       const result = convertPTokenToXToken(token, this.options);
-
+      
       this.push(result);
 
       done();

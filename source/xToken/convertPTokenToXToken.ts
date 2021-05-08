@@ -41,8 +41,8 @@ import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 import { NotationDeclarationXToken } from './index';
-import { ConditionalSectionEndXToken } from './token/conditionalSectionEndXToken';
-import { ConditionalSectionStartXToken } from './token/conditionalSectionStartXToken';
+import { ConditionalEndXToken } from './token/conditionalEndXToken';
+import { ConditionalStartXToken } from './token/conditionalStartXToken';
 import { CommentXToken } from './token/commentXToken';
 import { DocTypeEndXToken } from './token/docTypeEndXToken';
 import { DocTypeStartXToken } from './token/docTypeStartXToken';
@@ -75,10 +75,6 @@ function convertPTokenToXToken(pToken: ParseToken, options?: ConvertOptions): XT
    switch (pToken.type) {
       case ATTLIST_DECLARATION_PTOKEN:
          return new AttListDeclarationXToken(pToken);
-      case CONDITIONAL_PTOKEN:
-         return new ConditionalSectionStartXToken(pToken);
-      case CONDITIONAL_CLOSE_PTOKEN:
-         return new ConditionalSectionEndXToken(pToken);
       case CDATA_PTOKEN:
          return new CdataXToken(pToken);
       case CHARDATA_PTOKEN:
@@ -87,6 +83,10 @@ function convertPTokenToXToken(pToken: ParseToken, options?: ConvertOptions): XT
          return new CharRefXToken(pToken);
       case COMMENT_PTOKEN:
          return new CommentXToken(pToken);
+      case CONDITIONAL_PTOKEN:
+         return new ConditionalStartXToken(pToken);
+      case CONDITIONAL_CLOSE_PTOKEN:
+         return new ConditionalEndXToken(pToken);
       case DOCTYPE_END_PTOKEN:
          return new DocTypeEndXToken(pToken);
       case DOCTYPE_START_PTOKEN:

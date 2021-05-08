@@ -10,7 +10,7 @@ class GeneralEntityEndXToken {
 
    public readonly name: string;
 
-   public readonly pToken?: GeneralEntityEndPToken;
+   public pToken?: GeneralEntityEndPToken;
 
    constructor(nameOrToken: string | GeneralEntityEndPToken) {
       if (typeof nameOrToken === 'string') {

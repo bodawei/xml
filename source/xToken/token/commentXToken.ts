@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'sToken';
 import { CommentPToken } from 'token';
 
 const COMMENT_XTOKEN = 'COMMENT_XTOKEN';
@@ -15,8 +16,11 @@ class CommentXToken {
       if (typeof textOrPToken === 'string') {
          this.text = textOrPToken;
       } else {
-         const texts = textOrPToken.text;
-         const combinedTexts = texts.map((item) => item.str);
+         const combinedTexts = [];
+
+         for (const text of textOrPToken.text) {
+            combinedTexts.push(strOrBlank(text));
+         }
 
          this.text = combinedTexts.join('');
          this.pToken = textOrPToken;

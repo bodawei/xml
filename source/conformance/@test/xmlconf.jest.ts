@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { AttFixerStream, CheckWellFormed, PToXTokenStream } from 'source/node';
+import { AttFixerStream, CheckWellFormed, PToXTokenStream } from 'node';
 import { ContextType, ParseToken } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';

@@ -1,18 +1,17 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
-// ick
 import { ConditionalPToken } from 'token';
 
 const CONDITIONAL_SECTION_START_XTOKEN = 'CONDITIONAL_SECTION_START_XTOKEN';
 
-class ConditionalSectionStartXToken {
+class ConditionalStartXToken {
    public readonly type: typeof CONDITIONAL_SECTION_START_XTOKEN = CONDITIONAL_SECTION_START_XTOKEN;
 
-   public readonly pToken?: ConditionalPToken;
+   public pToken?: ConditionalPToken;
 
    constructor(pToken?: ConditionalPToken) {
       this.pToken = pToken;
    }
 }
 
-export { CONDITIONAL_SECTION_START_XTOKEN, ConditionalSectionStartXToken };
+export { CONDITIONAL_SECTION_START_XTOKEN, ConditionalStartXToken };

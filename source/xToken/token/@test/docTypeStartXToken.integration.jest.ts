@@ -1,5 +1,6 @@
-/* Copyright ® 2017-201 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationPToken, parseDocTypeStart } from 'token';
 import { ExternalIdX } from 'xToken';
@@ -27,7 +28,7 @@ describe('docTypeStart (integration)', () => {
          expect(token.name).toEqual('rootElement');
          expect(token.externalId).toEqual(new ExternalIdX('sys.dtd'));
          expect(token.pToken!.declType).toEqual(declaration.declType);
-         done();
+         done?.();
       });
    });
 });

@@ -1,16 +1,14 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
-
-import { ConditionalSectionEndXToken } from '../conditionalSectionEndXToken';
-
-// ick
 import { ConditionalClosePToken } from 'token';
+
+import { ConditionalEndXToken } from '../conditionalEndXToken';
 
 describe('ConditionalClose', () => {
    it('creates an XToken from no ptoken', () => {
-      const xToken = new ConditionalSectionEndXToken();
+      const xToken = new ConditionalEndXToken();
 
       expect(xToken).toEqual({
          type: 'CONDITIONAL_SECTION_END_XTOKEN',
@@ -18,7 +16,7 @@ describe('ConditionalClose', () => {
    });
 
    it('creates an XToken from a pToken', () => {
-      const xToken = new ConditionalSectionEndXToken(
+      const xToken = new ConditionalEndXToken(
          new ConditionalClosePToken({ open: toSToken('<![') }),
       );
 

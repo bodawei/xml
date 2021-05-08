@@ -6,7 +6,7 @@ import { ConformanceVersion, isSpace, isName, isNmToken, ERROR_TYPE, warning, Wa
 import { AttListDeclarationPToken, } from 'pToken';
 import { SToken } from 'sToken';
 import {
-   CDATA_XTOKEN,
+   CDATA_SECTION_XTOKEN,
    CHARDATA_XTOKEN,
    CHARREF_XTOKEN,
    COMMENT_XTOKEN,
@@ -344,7 +344,7 @@ class CheckXTokenValidStream extends Transform {
                //    this.pushValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
                // }
                break;
-            case CDATA_XTOKEN:
+            case CDATA_SECTION_XTOKEN:
                // called out by valid/P43/ibm43v01.xml as OK
                // if (!isTolerantVersion) {
                //    this.pushValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
@@ -396,7 +396,7 @@ class CheckXTokenValidStream extends Transform {
             case ELEMENT_END_XTOKEN:
                // always ok
                break;
-            case CDATA_XTOKEN:
+            case CDATA_SECTION_XTOKEN:
                // IBM valid/P19/ibm19v01.xml says that this isn't an error.
                // if (!isTolerantVersion) {
                //    this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,

@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { AttListDeclarationPToken, TextPToken } from 'pToken';
@@ -46,6 +46,13 @@ describe('attListDeclarationXToken', () => {
             defaultType: AttDefaultType.FIXED,
             value: [],
          },
+         {
+            name: 'att2',
+            type: AttDefinitionType.CDATA,
+            defaultType: AttDefaultType.FIXED,
+            enumeration: ['foo', 'bar'],
+            value: [],
+         },
       ]);
 
       expect(xToken).toEqual({
@@ -56,6 +63,13 @@ describe('attListDeclarationXToken', () => {
                name: 'att1',
                type: 'CDATA',
                defaultType: AttDefaultType.FIXED,
+               value: [],
+            },
+            {
+               name: 'att2',
+               type: AttDefinitionType.CDATA,
+               defaultType: AttDefaultType.FIXED,
+               enumeration: ['foo', 'bar'],
                value: [],
             },
          ],
@@ -134,14 +148,12 @@ describe('attListDeclarationXToken', () => {
                type: toSToken('CDATA'),
                typeSpace: toSToken(' '),
                enumeration,
-               defaultType: toSToken('#REQUIRED'),
+               defaultType: toSToken('#IMPLIED'),
                defaultTypeSpace: toSToken(' '),
                value: [],
             },
          ],
       });
-
-      enumeration.toXToken = () => [];
 
       const xToken = new AttListDeclarationXToken(testToken);
 
@@ -153,7 +165,7 @@ describe('attListDeclarationXToken', () => {
                name: 'att1',
                type: 'CDATA',
                enumeration: [],
-               defaultType: 'REQUIRED',
+               defaultType: 'IMPLIED',
                value: [],
             },
          ],
@@ -177,7 +189,6 @@ describe('attListDeclarationXToken', () => {
             },
          ],
       });
-      enumeration.toXToken = () => [];
 
       const xToken = new AttListDeclarationXToken(testToken);
 
@@ -197,7 +208,7 @@ describe('attListDeclarationXToken', () => {
       });
    });
 
-   it('replaces a missing type and defaultType value with a default value', () => {
+   it('replaces a missing type with a default value', () => {
       const testToken = new AttListDeclarationPToken(aldPToken, {
          attDefs: [
             {
@@ -221,6 +232,163 @@ describe('attListDeclarationXToken', () => {
                type: 'CDATA',
                enumeration: undefined,
                defaultType: 'REQUIRED',
+               value: [],
+            },
+         ],
+         pToken: testToken,
+      });
+   });
+
+   it('replaces a flawed defaultType with a default value', () => {
+      const testToken = new AttListDeclarationPToken(aldPToken, {
+         attDefs: [
+            {
+               name: toSToken('att1'),
+               nameSpace: toSToken(' '),
+               type: toSToken('CDATA'),
+               defaultType: toSToken('#BOGUS'),
+               defaultTypeSpace: toSToken(' '),
+               value: [],
+            },
+         ],
+      });
+
+      const xToken = new AttListDeclarationXToken(testToken);
+
+      expect(xToken).toEqual({
+         type: ATTLIST_DECLARATION_XTOKEN,
+         elementName: 'elementName',
+         attDefs: [
+            {
+               name: 'att1',
+               type: 'CDATA',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+         ],
+         pToken: testToken,
+      });
+   });
+
+   it('converts all types', () => {
+      const testToken = new AttListDeclarationPToken(aldPToken, {
+         attDefs: [
+            {
+               name: toSToken('1'),
+               type: toSToken('ID'),
+               value: [],
+            },
+            {
+               name: toSToken('2'),
+               type: toSToken('IDREF'),
+               value: [],
+            },
+            {
+               name: toSToken('3'),
+               type: toSToken('IDREFS'),
+               value: [],
+            },
+            {
+               name: toSToken('4'),
+               type: toSToken('ENTITY'),
+               value: [],
+            },
+            {
+               name: toSToken('5'),
+               type: toSToken('ENTITIES'),
+               value: [],
+            },
+            {
+               name: toSToken('6'),
+               type: toSToken('NMTOKEN'),
+               value: [],
+            },
+            {
+               name: toSToken('7'),
+               type: toSToken('NMTOKENS'),
+               value: [],
+            },
+            {
+               name: toSToken('8'),
+               type: toSToken('NOTATION'),
+               value: [],
+            },
+            {
+               name: toSToken('9'),
+               type: toSToken('CDATA'),
+               value: [],
+            },
+         ],
+      });
+
+      const xToken = new AttListDeclarationXToken(testToken);
+
+      expect(xToken).toEqual({
+         type: ATTLIST_DECLARATION_XTOKEN,
+         elementName: 'elementName',
+         attDefs: [
+            {
+               name: '1',
+               type: 'ID',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '2',
+               type: 'IDREF',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '3',
+               type: 'IDREFS',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '4',
+               type: 'ENTITY',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '5',
+               type: 'ENTITIES',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '6',
+               type: 'NMTOKEN',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '7',
+               type: 'NMTOKENS',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '8',
+               type: 'NOTATION',
+               enumeration: undefined,
+               defaultType: undefined,
+               value: [],
+            },
+            {
+               name: '9',
+               type: 'CDATA',
+               enumeration: undefined,
+               defaultType: undefined,
                value: [],
             },
          ],

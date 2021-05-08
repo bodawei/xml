@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { CharRefPToken } from 'pToken';
 
@@ -9,7 +9,7 @@ class CharRefXToken {
 
    public readonly char: string;
 
-   public readonly pToken?: CharRefPToken;
+   public pToken?: CharRefPToken;
 
    constructor(characterOrPToken: string | CharRefPToken) {
       if (typeof characterOrPToken === 'string') {

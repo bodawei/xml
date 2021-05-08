@@ -4,7 +4,7 @@ import { Transform } from 'stream';
 import {
    XToken,
    CHARREF_XTOKEN,
-   CDATA_XTOKEN,
+   CDATA_SECTION_XTOKEN,
    CHARDATA_XTOKEN,
    DOCTYPE_END_XTOKEN,
    DOCTYPE_START_XTOKEN,
@@ -163,7 +163,7 @@ class XTokenToXmlStream extends Transform {
          case CHARREF_XTOKEN:
             this.push(formatText(xToken.char));
             break;
-         case CDATA_XTOKEN:
+         case CDATA_SECTION_XTOKEN:
          case CHARDATA_XTOKEN:
             this.push(formatText(xToken.text));
             break;

@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { parseAttListDeclaration } from 'pToken';
@@ -26,10 +26,6 @@ describe('attListDeclarationXToken (integration)', () => {
       source.endText();
 
       parseAttListDeclaration(source, declarationStart, (pToken) => {
-         if (!pToken) {
-            throw new Error('Unexpected undefined PToken.');
-         }
-
          const token = new AttListDeclarationXToken(pToken);
 
          expect(token).toEqual({

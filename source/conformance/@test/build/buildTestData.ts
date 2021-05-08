@@ -6,7 +6,7 @@ import { Transform } from 'stream';
 
 import { EntityId, ConformanceVersion } from 'basic';
 import { PTokenStream } from 'pTokenStream';
-import { EntityExpanderStream, PToXTokenStream } from 'source/node';
+import { EntityExpanderStream, PToXTokenStream } from 'node';
 import SimpleObj from '../../../simpleobj/so';
 import { STokenSource } from 'sToken';
 

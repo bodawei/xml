@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ElementDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';

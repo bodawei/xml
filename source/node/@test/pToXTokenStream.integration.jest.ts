@@ -67,7 +67,6 @@ describe('PToXTokenStream (integration)', () => {
                  },
                  DocTypeStartXToken {
                    "externalId": undefined,
-                   "hasInternalSubset": true,
                    "name": "test",
                    "type": "DOCTYPE_START_XTOKEN",
                  },

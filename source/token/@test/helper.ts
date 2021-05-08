@@ -19,6 +19,7 @@ import { SToken, toSToken } from 'sToken';
 import {
    CdataPToken,
    CommentPToken,
+   ConditionalPToken,
    ElementEndPToken,
    ElementStartPToken,
    ElementEmptyPToken,
@@ -37,6 +38,7 @@ import {
    CharDataPToken,
 } from 'token';
 import { AttrValue } from '../../token/common/attribute';
+import { ConditionalClosePToken } from '../conditionalClose';
 
 const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
 const RANGE = new Range(new EntityId(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
@@ -97,6 +99,18 @@ function makeComment(): CommentPToken {
       open: toSToken('<!--'),
       text: [toSToken('commentText')],
       close: toSToken('-->'),
+   });
+}
+
+function makeConditionalClose(): ConditionalClosePToken {
+   return new ConditionalClosePToken({
+      open: toSToken(']]>'),
+   });
+}
+
+function makeConditionalSection(): ConditionalPToken {
+   return new ConditionalPToken({
+      open: toSToken('<['),
    });
 }
 
@@ -390,6 +404,8 @@ export {
    makeCdata,
    makeCharRef,
    makeComment,
+   makeConditionalClose,
+   makeConditionalSection,
    makeDocTypeEnd,
    makeDocTypeStart,
    makeElementDeclaration,

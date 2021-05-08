@@ -196,8 +196,8 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-     "<rootDir>/**/@test/**/*jest.ts?(x)",
-   //   "<rootDir>/source/xToken/**/@test/**/*jest.ts?(x)",
+   //   "<rootDir>/**/@test/**/*jest.ts?(x)",
+     "<rootDir>/source/xToken/**/@test/**/*jest.ts?(x)",
   //   "**/__tests__/**/*.[jt]s?(x)",
   //   "**/?(*.)+(spec|test).f[tj]s?(x)"
   ],

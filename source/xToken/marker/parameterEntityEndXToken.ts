@@ -10,7 +10,7 @@ class ParameterEntityEndXToken {
 
    public readonly name: string;
 
-   public readonly pToken?: ParameterEntityEndPToken;
+   public pToken?: ParameterEntityEndPToken;
 
    constructor(nameOrToken: string | ParameterEntityEndPToken) {
       if (typeof nameOrToken === 'string') {

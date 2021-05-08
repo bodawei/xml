@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { ParameterEntityStartPToken } from 'token';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -26,7 +27,7 @@ describe('ParameterEntityStartXToken (unit)', () => {
       });
    });
 
-   it('is constructed with the specified name', () => {
+   it('can be constructed with just a name', () => {
       const token = new ParameterEntityStartXToken('foo');
 
       expect(token.name).toEqual('foo');

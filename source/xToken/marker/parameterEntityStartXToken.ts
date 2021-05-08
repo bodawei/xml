@@ -10,7 +10,7 @@ class ParameterEntityStartXToken {
 
    public readonly name: string;
 
-   public readonly pToken?: ParameterEntityStartPToken;
+   public pToken?: ParameterEntityStartPToken;
 
    constructor(nameOrToken: string | ParameterEntityStartPToken) {
       if (typeof nameOrToken === 'string') {

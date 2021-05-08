@@ -1,15 +1,16 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { CdataPToken } from 'token';
-import { CDATA_XTOKEN, CdataXToken } from '../cdataXToken';
+import { CDATA_SECTION_XTOKEN, CdataXToken } from '../cdataXToken';
 
 describe('cdataXToken (unit)', () => {
    it('constructs from a text value', () => {
       const result = new CdataXToken('foo');
 
       expect(result).toEqual({
-         type: CDATA_XTOKEN,
+         type: CDATA_SECTION_XTOKEN,
          text: 'foo',
       });
    });
@@ -26,7 +27,7 @@ describe('cdataXToken (unit)', () => {
       );
 
       expect(result).toEqual({
-         type: CDATA_XTOKEN,
+         type: CDATA_SECTION_XTOKEN,
          text: 'test text',
          pToken: new CdataPToken({
             open: toSToken('<!['),

@@ -3,14 +3,14 @@
 import { strOrBlank } from 'sToken';
 import { CdataPToken } from 'token';
 
-const CDATA_XTOKEN = 'CDATA_XTOKEN';
+const CDATA_SECTION_XTOKEN = 'CDATA_SECTION_XTOKEN';
 
 class CdataXToken {
-   public readonly type: typeof CDATA_XTOKEN = CDATA_XTOKEN;
+   public readonly type: typeof CDATA_SECTION_XTOKEN = CDATA_SECTION_XTOKEN;
 
    public readonly text: string;
 
-   public readonly pToken?: CdataPToken;
+   public pToken?: CdataPToken;
 
    constructor(source: string | CdataPToken) {
       if (typeof source === 'string') {
@@ -22,4 +22,4 @@ class CdataXToken {
    }
 }
 
-export { CDATA_XTOKEN, CdataXToken };
+export { CDATA_SECTION_XTOKEN, CdataXToken };

@@ -1,11 +1,21 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { AttListDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { SToken, strOrBlank } from 'sToken';
 
 import { makeWordListX } from '../common/makeWordListX';
 
 import { LiteralValueX, makeLiteralValueX } from '../common/makeLiteralValueX';
+
+interface AttDefinitionXToken {
+   readonly name: string;
+   readonly type: AttDefinitionType;
+   readonly enumeration?: ReadonlyArray<string>;
+   readonly defaultType: AttDefaultType | undefined;
+   readonly value: LiteralValueX;
+}
+
+const ATTLIST_DECLARATION_XTOKEN = 'ATTLIST_DECLARATION_XTOKEN';
 
 enum AttDefinitionType {
    CDATA = 'CDATA',
@@ -26,24 +36,14 @@ enum AttDefaultType {
    FIXED = 'FIXED',
 }
 
-interface AttDefinitionProps {
-   name: string;
-   type: AttDefinitionType;
-   enumeration?: ReadonlyArray<string>;
-   defaultType: AttDefaultType | undefined;
-   value: LiteralValueX;
-}
+function typeToEnum(inputType: SToken | undefined, hasEnumeration: boolean): AttDefinitionType {
+   const ucName = strOrBlank(inputType).toUpperCase();
 
-interface AttDefinitionXToken {
-   readonly name: string;
-   readonly type: AttDefinitionType;
-   readonly enumeration?: ReadonlyArray<string>;
-   readonly defaultType: AttDefaultType | undefined;
-   readonly value: LiteralValueX;
-}
+   if (hasEnumeration && ucName === '') {
+      return AttDefinitionType.ENUMERATION;
+   }
 
-function stringTypeToEnum(type: string): AttDefinitionType {
-   switch (type) {
+   switch (ucName) {
       case AttDefinitionType.ID:
          return AttDefinitionType.ID;
       case AttDefinitionType.IDREF:
@@ -65,7 +65,9 @@ function stringTypeToEnum(type: string): AttDefinitionType {
          return AttDefinitionType.CDATA;
    }
 }
-function stringDefaultTypeToEnum(type: string): AttDefaultType | undefined {
+function defaultTypeToEnum(defaultType: SToken | undefined): AttDefaultType | undefined {
+   const type = strOrBlank(defaultType).toUpperCase();
+
    switch (type) {
       case '#REQUIRED':
          return AttDefaultType.REQUIRED;
@@ -77,8 +79,6 @@ function stringDefaultTypeToEnum(type: string): AttDefaultType | undefined {
          return undefined;
    }
 }
-
-const ATTLIST_DECLARATION_XTOKEN = 'ATTLIST_DECLARATION_XTOKEN';
 
 class AttListDeclarationXToken {
    public readonly type: typeof ATTLIST_DECLARATION_XTOKEN = ATTLIST_DECLARATION_XTOKEN;
@@ -95,41 +95,30 @@ class AttListDeclarationXToken {
       nameOrPToken: string | AttListDeclarationPToken,
       attDefs: ReadonlyArray<AttDefinitionXToken> = [],
    ) {
-      const xDefs: Array<AttDefinitionProps> = [];
+      const xDefs: Array<AttDefinitionXToken> = [];
 
       if (typeof nameOrPToken === 'string') {
          this.elementName = nameOrPToken;
 
          for (const item of attDefs) {
             xDefs.push({
-               name: item.name,
-               type: item.type,
-               enumeration: item.enumeration,
-               defaultType: item.defaultType,
-               value: item.value,
+               ...item,
+               enumeration: item.enumeration ? [...item.enumeration] : undefined,
             });
          }
       } else {
+         this.elementName = strOrBlank(nameOrPToken.elementName);
+         this.pToken = nameOrPToken;
+
          for (const attDef of nameOrPToken.attDefs) {
-            const ucName = strOrBlank(attDef.type).toUpperCase();
-            const ucDefaultType = strOrBlank(attDef.defaultType).toUpperCase();
-            let type: AttDefinitionType = stringTypeToEnum(ucName);
-
-            if (attDef.enumeration && ucName === '') {
-               type = AttDefinitionType.ENUMERATION;
-            }
-
             xDefs.push({
-               name: attDef.name.str,
-               type,
+               name: strOrBlank(attDef.name),
+               type: typeToEnum(attDef.type, !!attDef.enumeration),
                enumeration: makeWordListX(attDef.enumeration),
-               defaultType: stringDefaultTypeToEnum(ucDefaultType),
+               defaultType: defaultTypeToEnum(attDef.defaultType),
                value: makeLiteralValueX(attDef.value),
             });
          }
-
-         this.elementName = strOrBlank(nameOrPToken.elementName);
-         this.pToken = nameOrPToken;
       }
 
       this.attDefs = xDefs;

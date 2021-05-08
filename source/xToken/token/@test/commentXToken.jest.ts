@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { CommentPToken } from 'token';
 
@@ -14,6 +15,12 @@ describe('comment (unit)', () => {
          text: [toSToken('commentText')],
          close: toSToken('-->'),
       });
+   });
+
+   it('can be constructed with a string', () => {
+      const token = new CommentXToken('string text -- whee');
+
+      expect(token.text).toEqual('string text -- whee');
    });
 
    it('returns comment with the text of the comment', () => {

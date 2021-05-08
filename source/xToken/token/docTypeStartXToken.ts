@@ -14,27 +14,19 @@ class DocTypeStartXToken {
 
    public readonly externalId: ExternalIdX | undefined;
 
-   public readonly hasInternalSubset: boolean;
-
    public pToken?: DocTypeStartPToken;
 
    constructor(pToken: DocTypeStartPToken);
-   constructor(name: string, externalId: ExternalIdX | undefined, hasInternalSubset: boolean);
-   constructor(
-      nameOrPToken: string | DocTypeStartPToken,
-      externalId?: ExternalIdX | undefined,
-      hasInternalSubset?: boolean,
-   ) {
+   constructor(name: string, externalId: ExternalIdX | undefined);
+   constructor(nameOrPToken: string | DocTypeStartPToken, externalId?: ExternalIdX | undefined) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
          this.externalId = externalId;
-         this.hasInternalSubset = !!hasInternalSubset;
       } else {
          this.name = strOrBlank(nameOrPToken.name);
          this.externalId = nameOrPToken.externalId
             ? new ExternalIdX(nameOrPToken.externalId)
             : undefined;
-         this.hasInternalSubset = !!nameOrPToken.openSubset;
          this.pToken = nameOrPToken;
       }
    }
