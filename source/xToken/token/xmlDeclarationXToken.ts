@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { XmlDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
@@ -20,17 +20,11 @@ class XmlDeclarationXToken {
    public pToken?: XmlDeclarationPToken;
 
    constructor(pToken: XmlDeclarationPToken);
-   constructor(
-      version: XmlVersion,
-      encoding?: string,
-      standalone?: boolean,
-      pToken?: XmlDeclarationPToken,
-   );
+   constructor(version: XmlVersion, encoding?: string, standalone?: boolean);
    constructor(
       versionOrPToken: XmlVersion | XmlDeclarationPToken,
       encoding?: string,
       standalone?: boolean,
-      pToken?: XmlDeclarationPToken,
    ) {
       this.version = 1.0;
       this.encoding = encoding || DEFAULT_ENCODING;
@@ -38,7 +32,6 @@ class XmlDeclarationXToken {
 
       if (typeof versionOrPToken === 'number') {
          this.version = versionOrPToken;
-         this.pToken = pToken;
          return;
       }
 

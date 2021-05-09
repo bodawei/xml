@@ -109,10 +109,25 @@ Like PTokens, the constructors here generate objects with no methods. As such, y
 | `ConditionalStartXToken`| `CONDITIONAL_SECTION_START_XTOKEN` | `ConditionalStartPToken` | `<[ INCLUDE [` |
 | `DocTypeEndXToken`| `DOCTYPE_END_XTOKEN` | `DocTypeEndPToken` | `]>` |
 | `DocTypeStartXToken`| `DOCTYPE_START_XTOKEN` | `DocTypeStartPToken` | `<!DOCTYPE foo [` |
+| `ElementDeclarationXToken`| `ELEMENT_DECLARATION_XTOKEN` | `ElementDeclarationPToken` | `<!ELEMENT ... >` |
+| `ElementEmptyXToken`| `ELEMENT_EMPTY_XTOKEN` | `ElementEmptyPToken` | `<MyElement/>` |
+| `ElementEndXToken`| `ELEMENT_END_XTOKEN` | `ElementEndPToken` | `</MyElement>` |
+| `ElementStartXToken`| `ELEMENT_START_XTOKEN` | `ElementStartPToken` | `<MyElement>` |
 | `GeneralEntityEndXToken`| `GENERAL_ENTITY_END_XTOKEN` | `GeneralEntityEndPToken` | n/a |
-| `GeneralEntityStartXToken`| `GENERAL_ENTITY_START_XTOKEN` | `GeneralEntityStartToken` | n/a |
+| `GeneralEntityStartXToken`| `GENERAL_ENTITY_START_XTOKEN` | `GeneralEntityStartPToken` | n/a |
+| `GeneralEntityDeclarationXToken`| `GENERAL_ENTITY_DECLARATION_XTOKEN` | `GeneralEntityDeclarationPToken` | `<!ENTITY ...` |
+| `GeneralEntityReferenceXToken`| `GENERAL_ENTITY_REFERENCE_XTOKEN` | `GeneralEntityReferencePToken` | `&entity;` |
+| `NotationDeclarationXToken`| `NOTATION_DECLARATION_XTOKEN` | `NotationDeclarationPToken` | `<!NOTATION ... >` |
 | `ParameterEntityEndXToken`| `PARAMETER_ENTITY_END_XTOKEN` | `ParameterEntityEndPToken` | n/a |
 | `ParameterEntityStartXToken`| `PARAMETER_ENTITY_START_XTOKEN` | `ParameterEntityStartToken` | n/a |
+| `ParamterEntityDeclarationXToken`| `PARAMETER_ENTITY_DECLARATION_XTOKEN` | `ParamterEntityDeclarationPToken` | `<!ENTITY % ...` |
+| `ParamterEntityReferenceXToken`| `PARAMETER_ENTITY_REFERENCE_XTOKEN` | `ParamterEntityReferencePToken` | `%entity;` |
+| `ProcessingInstructionXToken`| `PROCESSING_INSTRUCTION_XTOKEN` | `ProcessingInstructionPToken` | `<?name instruction?>` |
+| `SpaceXToken`| `SPACE_XTOKEN` | `SpacePToken` | `   ` |
+| `TextXToken`| `TEXT_XTOKEN` | `TextPToken` | `text` |
+| `TextDeclarationXToken`| `TEXTDECL_XTOKEN` | `TextDeclarationPToken` | `<?xml ... ?>` |
+| `UnknownDeclarationXToken`| `UNKNOWN_DECLARATION_XTOKEN` | `...` | `<!BOGUS ... >` |
+| `XmlDeclarationXToken`| `XMLDECL_XTOKEN` | `XmlDeclarationPToken` | `<?xml ... ?>` |
 
 ### Notes about conversion
 Some assumptions are made when converting PTokens to XTokens:
@@ -121,6 +136,13 @@ Some assumptions are made when converting PTokens to XTokens:
    * An unknown/erronious `type` in the PToken is marked as `CDATA` in the XToken
    * An unknown/erronious `defaultType` in the PToken is represented as `undefined` in the XToken
    * Like the PToken, an attribute definition with an enumerated value is given the type `ENUMERATION`.
+* `ElementDeclarationXToken`
+   * The content spec will be set to `ANY` if another can not be identified
+   * The `#PCDATA` will be capitalized and moved to the start of the list of "names" if the content model is identified as a `MIXED` type.
+      * Note that if the `contentModel` is not a simple list of names, but contains `#PCDATA` that will remain unaltered.
+* `TextDeclarationXToken` and `XmlDeclarationXToken`
+   * A version that isn't `1.0` or `1.1` is assumed to be `1.0`
+   * A standalone value that is not `yes` or `no` will be treated as `no`
 
 ## Design standards
 1. XToken constructors do not do wellformed or validity checks on parameters.  Thus, if you construct one with an invalid XML name, for example, it will accept the value.
@@ -130,3 +152,6 @@ Some assumptions are made when converting PTokens to XTokens:
 * Any kind of entity value is represented as a series of strings and (if they have not been expanded) ParemterEntityReferences.
 * Arrays are always present, with 0 elements. Thus, in some cases, it is ambiguous whether a literal was present and empty or was not present.
 * Properties with fixed value (e.g. the attribute type in AttListDeclarations) will be converted to an enumerated value. If an invalid value is present in a PToken, then a default value will be inserted into the XToken. No error will be generated (if you care about errors, the Wellformed system will have reported it)
+* All properties are added by the XToken constructors.
+   * Arrays are always present, but may be empty
+   * A few properties are allowed to be set to `undefined` when they are optional (e.g. `notationDatanName` in a general entity declaration) 

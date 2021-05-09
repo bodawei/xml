@@ -1,4 +1,4 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { EntityId } from 'basic';
@@ -12,8 +12,11 @@ import {
    makeConditionalSection,
    makeDocTypeEnd,
    makeDocTypeStart,
-   makeElementDeclaration,
-   makeGeneralEntityDeclaration,
+   makeElementDeclarationWithContentModel,
+   makeElementEmpty,
+   makeElementEnd,
+   makeElementStartWithAttrValueFromString,
+   makeGeneralEntityDeclarationWithExternalId,
    makeGeneralEntityEnd,
    makeGeneralEntityReference,
    makeGeneralEntityStart,
@@ -23,11 +26,12 @@ import {
    makeParameterEntityReference,
    makeParameterEntityStart,
    makeProcessingInstruction,
+   makeSpace,
    makeTextDecl,
    makeTextPToken,
+   makeUnknownDeclaration,
    makeXmlDecl,
 } from 'token-test';
-import { TEXTDECL_XTOKEN, XMLDECL_XTOKEN } from 'xToken';
 
 import { GeneralEntityEndXToken } from '../marker/generalEntityEndXToken';
 import { GeneralEntityStartXToken } from '../marker/generalEntityStartXToken';
@@ -43,14 +47,21 @@ import { ConditionalEndXToken } from '../token/conditionalEndXToken';
 import { ConditionalStartXToken } from '../token/conditionalStartXToken';
 import { DocTypeEndXToken } from '../token/docTypeEndXToken';
 import { DocTypeStartXToken } from '../token/docTypeStartXToken';
-import { ELEMENT_DECLARATION_XTOKEN } from '../token/elementDeclarationXToken';
-import { GENERAL_ENTITY_DECLARATION_XTOKEN } from '../token/generalEntityDeclarationXToken';
-import { GENERAL_ENTITY_REFERENCE_XTOKEN } from '../token/generalEntityReferenceXToken';
-import { NOTATION_DECLARATION_XTOKEN } from '../token/notationDeclarationXToken';
-import { PARAMETER_ENTITY_DECLARATION_XTOKEN } from '../token/parameterEntityDeclarationXToken';
-import { PARAMETER_ENTITY_REFERENCE_XTOKEN } from '../token/parameterEntityReferenceXToken';
-import { PROCESSING_INSTRUCTION_XTOKEN } from '../token/processingInstructionXToken';
-import { TEXT_XTOKEN } from '../token/textXToken';
+import { ElementDeclarationXToken } from '../token/elementDeclarationXToken';
+import { ElementEmptyXToken } from '../token/elementEmptyXToken';
+import { ElementEndXToken } from '../token/elementEndXToken';
+import { ElementStartXToken } from '../token/elementStartXToken';
+import { GeneralEntityDeclarationXToken } from '../token/generalEntityDeclarationXToken';
+import { GeneralEntityReferenceXToken } from '../token/generalEntityReferenceXToken';
+import { NotationDeclarationXToken } from '../token/notationDeclarationXToken';
+import { ParameterEntityDeclarationXToken } from '../token/parameterEntityDeclarationXToken';
+import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
+import { ProcessingInstructionXToken } from '../token/processingInstructionXToken';
+import { SpaceXToken } from '../token/spaceXToken';
+import { TextXToken } from '../token/textXToken';
+import { UnknownDeclarationXToken } from '../token/unknownDeclarationXToken';
+import { TextDeclarationXToken } from '../token/textDeclarationXToken';
+import { XmlDeclarationXToken } from '../token/xmlDeclarationXToken';
 
 import { convertPTokenToXToken } from '../convertPTokenToXToken';
 
@@ -193,6 +204,119 @@ describe('convertPTokenToXToken() (integration)', () => {
       `);
    });
 
+   it('converts an ELEMENT Declaration', () => {
+      const pToken = makeElementDeclarationWithContentModel();
+
+      const result = convertPTokenToXToken(pToken);
+
+      delete (result as ElementDeclarationXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         ElementDeclarationXToken {
+           "contentModel": ContentModelX {
+             "listType": "CHOICE",
+             "particles": Array [
+               Object {
+                 "name": "aName",
+                 "repeat": "ONEPLUS",
+               },
+               ContentModelX {
+                 "listType": "SEQUENCE",
+                 "particles": Array [
+                   Object {
+                     "name": "first",
+                     "repeat": "ONE",
+                   },
+                   Object {
+                     "name": "second",
+                     "repeat": "ZEROONE",
+                   },
+                 ],
+                 "repeat": "ZEROPLUS",
+               },
+             ],
+             "repeat": "ZEROPLUS",
+           },
+           "contentSpec": "ELEMENT",
+           "name": "elementName",
+           "type": "ELEMENT_DECLARATION_XTOKEN",
+         }
+      `);
+   });
+
+   it('converts an empty element', () => {
+      const pToken = makeElementEmpty();
+
+      const result = convertPTokenToXToken(pToken);
+
+      delete (result as ElementEmptyXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         ElementEmptyXToken {
+           "attributes": Array [],
+           "name": "elStart",
+           "type": "ELEMENT_EMPTY_XTOKEN",
+         }
+      `);
+   });
+
+   it('converts an element end', () => {
+      const pToken = makeElementEnd();
+
+      const result = convertPTokenToXToken(pToken);
+
+      delete (result as ElementEndXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         ElementEndXToken {
+           "name": "elStart",
+           "type": "ELEMENT_END_XTOKEN",
+         }
+      `);
+   });
+
+   it('converts an element start', () => {
+      const pToken = makeElementStartWithAttrValueFromString('attr');
+
+      const result = convertPTokenToXToken(pToken);
+
+      delete (result as ElementStartXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         ElementStartXToken {
+           "attributes": Array [
+             AttributeX {
+               "name": "att1",
+               "value": Array [
+                 TextXToken {
+                   "text": "attr",
+                   "type": "TEXT_XTOKEN",
+                 },
+               ],
+             },
+           ],
+           "name": "elStart",
+           "type": "ELEMENT_START_XTOKEN",
+         }
+      `);
+   });
+
+   it('converts an general entity declaration token', () => {
+      const pToken = makeGeneralEntityDeclarationWithExternalId();
+
+      const result = convertPTokenToXToken(pToken);
+
+      delete (result as GeneralEntityDeclarationXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         GeneralEntityDeclarationXToken {
+           "externalId": ExternalIdX {
+             "publicId": "- foo -",
+             "systemId": "http://foo.com",
+           },
+           "name": "geDecl",
+           "notationDataName": undefined,
+           "type": "GENERAL_ENTITY_DECLARATION_XTOKEN",
+           "value": Array [],
+         }
+      `);
+   });
+
    it('converts an GeneralEntityEnd token', () => {
       const pToken = makeGeneralEntityEnd();
 
@@ -249,20 +373,18 @@ describe('convertPTokenToXToken() (integration)', () => {
       `);
    });
 
-   it('converts an ELEMENT Declaration', () => {
-      const pToken = makeElementDeclaration();
-
-      const result = convertPTokenToXToken(pToken);
-
-      expect(result.type).toEqual(ELEMENT_DECLARATION_XTOKEN);
-   });
-
    it('converts an General entity reference token', () => {
       const pToken = makeGeneralEntityReference();
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(GENERAL_ENTITY_REFERENCE_XTOKEN);
+      delete (result as GeneralEntityReferenceXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         GeneralEntityReferenceXToken {
+           "name": "testRef",
+           "type": "GENERAL_ENTITY_REFERENCE_XTOKEN",
+         }
+      `);
    });
 
    it('converts an NOTATION Declaration', () => {
@@ -270,15 +392,17 @@ describe('convertPTokenToXToken() (integration)', () => {
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(NOTATION_DECLARATION_XTOKEN);
-   });
-
-   it('converts an general entity declaration token', () => {
-      const pToken = makeGeneralEntityDeclaration();
-
-      const result = convertPTokenToXToken(pToken);
-
-      expect(result.type).toEqual(GENERAL_ENTITY_DECLARATION_XTOKEN);
+      delete (result as NotationDeclarationXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         NotationDeclarationXToken {
+           "externalId": ExternalIdX {
+             "publicId": undefined,
+             "systemId": "",
+           },
+           "name": "notationName",
+           "type": "NOTATION_DECLARATION_XTOKEN",
+         }
+      `);
    });
 
    it('converts an parameter entity declaration token', () => {
@@ -286,7 +410,17 @@ describe('convertPTokenToXToken() (integration)', () => {
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(PARAMETER_ENTITY_DECLARATION_XTOKEN);
+      delete (result as ParameterEntityDeclarationXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         ParameterEntityDeclarationXToken {
+           "externalId": undefined,
+           "name": "entityName",
+           "type": "PARAMETER_ENTITY_DECLARATION_XTOKEN",
+           "value": Array [
+             "value",
+           ],
+         }
+      `);
    });
 
    it('converts an parameter entity reference token', () => {
@@ -294,7 +428,13 @@ describe('convertPTokenToXToken() (integration)', () => {
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(PARAMETER_ENTITY_REFERENCE_XTOKEN);
+      delete (result as ParameterEntityReferenceXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         ParameterEntityReferenceXToken {
+           "name": "entityName",
+           "type": "PARAMETER_ENTITY_REFERENCE_XTOKEN",
+         }
+      `);
    });
 
    it('converts an processing instruction token', () => {
@@ -302,7 +442,28 @@ describe('convertPTokenToXToken() (integration)', () => {
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(PROCESSING_INSTRUCTION_XTOKEN);
+      delete (result as ProcessingInstructionXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         ProcessingInstructionXToken {
+           "instruction": "blah",
+           "target": "foo",
+           "type": "PROCESSING_INSTRUCTION_XTOKEN",
+         }
+      `);
+   });
+
+   it('converts a Text', () => {
+      const pToken = makeSpace();
+
+      const result = convertPTokenToXToken(pToken);
+
+      delete (result as SpaceXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         SpaceXToken {
+           "text": " ",
+           "type": "SPACE_XTOKEN",
+         }
+      `);
    });
 
    it('converts a Text', () => {
@@ -310,7 +471,13 @@ describe('convertPTokenToXToken() (integration)', () => {
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(TEXT_XTOKEN);
+      delete (result as TextXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         TextXToken {
+           "text": "foo",
+           "type": "TEXT_XTOKEN",
+         }
+      `);
    });
 
    it('converts a Text Declaration', () => {
@@ -318,7 +485,27 @@ describe('convertPTokenToXToken() (integration)', () => {
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(TEXTDECL_XTOKEN);
+      delete (result as TextDeclarationXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         TextDeclarationXToken {
+           "encoding": "utf-8",
+           "type": "TEXTDECL_XTOKEN",
+           "version": 1.1,
+         }
+      `);
+   });
+
+   it('converts un UnknownDeclarat', () => {
+      const pToken = makeUnknownDeclaration();
+
+      const result = convertPTokenToXToken(pToken);
+
+      delete (result as UnknownDeclarationXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         UnknownDeclarationXToken {
+           "type": "UNKNOWN_DECLARATION_XTOKEN",
+         }
+      `);
    });
 
    it('converts an XML Declaration', () => {
@@ -326,7 +513,15 @@ describe('convertPTokenToXToken() (integration)', () => {
 
       const result = convertPTokenToXToken(pToken);
 
-      expect(result.type).toEqual(XMLDECL_XTOKEN);
+      delete (result as XmlDeclarationXToken).pToken;
+      expect(result).toMatchInlineSnapshot(`
+         XmlDeclarationXToken {
+           "encoding": "utf-8",
+           "standalone": false,
+           "type": "XMLDECL_XTOKEN",
+           "version": 1.1,
+         }
+      `);
    });
 
    it('does not change other types', () => {

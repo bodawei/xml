@@ -4,13 +4,21 @@ import { describe, expect, it } from '@jest/globals';
 import { TextDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { TextDeclarationXToken } from '../textDeclarationXToken';
+import { TextDeclarationXToken, TEXTDECL_XTOKEN } from '../textDeclarationXToken';
 
 describe('TextDeclarationXToken()', () => {
-   let textDeclPToken;
+   it('can be constructed with literal values', () => {
+      const result = new TextDeclarationXToken(1.0, 'UTF-99');
+
+      expect(result).toEqual({
+         type: TEXTDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'UTF-99',
+      });
+   });
 
    it('sets all parameters using the input', () => {
-      textDeclPToken = new TextDeclarationPToken({
+      const textDeclPToken = new TextDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -36,11 +44,16 @@ describe('TextDeclarationXToken()', () => {
 
       const result = new TextDeclarationXToken(textDeclPToken);
 
-      expect(result).toEqual(new TextDeclarationXToken(1.0, 'UTF-99', textDeclPToken));
+      expect(result).toEqual({
+         type: TEXTDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'UTF-99',
+         pToken: textDeclPToken,
+      });
    });
 
    it('sets version to 1.1 if that is what is passed in', () => {
-      textDeclPToken = new TextDeclarationPToken({
+      const textDeclPToken = new TextDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -59,11 +72,16 @@ describe('TextDeclarationXToken()', () => {
 
       const result = new TextDeclarationXToken(textDeclPToken);
 
-      expect(result).toEqual(new TextDeclarationXToken(1.1, undefined, textDeclPToken));
+      expect(result).toEqual({
+         type: TEXTDECL_XTOKEN,
+         version: 1.1,
+         encoding: 'utf-8',
+         pToken: textDeclPToken,
+      });
    });
 
    it('sets default parameters when input has none', () => {
-      textDeclPToken = new TextDeclarationPToken({
+      const textDeclPToken = new TextDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -74,11 +92,16 @@ describe('TextDeclarationXToken()', () => {
 
       const result = new TextDeclarationXToken(textDeclPToken);
 
-      expect(result).toEqual(new TextDeclarationXToken(1.0, 'utf-8', textDeclPToken));
+      expect(result).toEqual({
+         type: TEXTDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'utf-8',
+         pToken: textDeclPToken,
+      });
    });
 
    it('sets default values when input values are erronious', () => {
-      textDeclPToken = new TextDeclarationPToken({
+      const textDeclPToken = new TextDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -111,11 +134,16 @@ describe('TextDeclarationXToken()', () => {
 
       const result = new TextDeclarationXToken(textDeclPToken);
 
-      expect(result).toEqual(new TextDeclarationXToken(1.0, 'some-encoding', textDeclPToken));
+      expect(result).toEqual({
+         type: TEXTDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'some-encoding',
+         pToken: textDeclPToken,
+      });
    });
 
    it('treats a mis-cased standalone as the correct case', () => {
-      textDeclPToken = new TextDeclarationPToken({
+      const textDeclPToken = new TextDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -148,6 +176,11 @@ describe('TextDeclarationXToken()', () => {
 
       const result = new TextDeclarationXToken(textDeclPToken);
 
-      expect(result).toEqual(new TextDeclarationXToken(1.0, 'some-encoding', textDeclPToken));
+      expect(result).toEqual({
+         type: TEXTDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'some-encoding',
+         pToken: textDeclPToken,
+      });
    });
 });

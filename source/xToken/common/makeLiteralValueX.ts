@@ -27,12 +27,12 @@ import {
 type LiteralValueX = Array<
    | TextXToken
    | CharRefXToken
-   | GeneralEntityReferenceXToken
-   | ParameterEntityReferenceXToken
-   | GeneralEntityStartXToken
    | GeneralEntityEndXToken
-   | ParameterEntityStartXToken
+   | GeneralEntityReferenceXToken
+   | GeneralEntityStartXToken
    | ParameterEntityEndXToken
+   | ParameterEntityStartXToken
+   | ParameterEntityReferenceXToken
 >;
 
 function makeLiteralValueX(pToken: LiteralValuePToken): LiteralValueX {

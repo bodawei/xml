@@ -10,7 +10,7 @@ import { LiteralValueX, makeLiteralValueX } from '../common/makeLiteralValueX';
 interface AttDefinitionXToken {
    readonly name: string;
    readonly type: AttDefinitionType;
-   readonly enumeration?: ReadonlyArray<string>;
+   readonly enumeration: ReadonlyArray<string> | undefined;
    readonly defaultType: AttDefaultType | undefined;
    readonly value: LiteralValueX;
 }

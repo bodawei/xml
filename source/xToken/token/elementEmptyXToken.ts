@@ -17,7 +17,7 @@ class ElementEmptyXToken {
    public pToken?: ElementEmptyPToken;
 
    constructor(pToken: ElementEmptyPToken);
-   constructor(name: string, attributes: ReadonlyArray<AttributeX>);
+   constructor(name: string, attributes?: ReadonlyArray<AttributeX>);
    constructor(nameOrPToken: string | ElementEmptyPToken, attributes?: ReadonlyArray<AttributeX>) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;

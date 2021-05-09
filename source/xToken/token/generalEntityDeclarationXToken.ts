@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { strOrBlank } from 'sToken';
 import { GeneralEntityDeclarationPToken } from 'pToken';
@@ -15,9 +15,7 @@ class GeneralEntityDeclarationXToken {
 
    public readonly externalId: ExternalIdX | undefined;
 
-   public readonly notationDataName: string;
-
-   public readonly isParameter: boolean;
+   public readonly notationDataName: string | undefined;
 
    public readonly value: ExntityValueX;
 
@@ -40,16 +38,14 @@ class GeneralEntityDeclarationXToken {
          this.name = nameOrPToken;
          this.value = [...value];
          this.externalId = externalId;
-         this.notationDataName = notationDataName || '';
+         this.notationDataName = notationDataName;
       } else {
          this.name = strOrBlank(nameOrPToken.name);
          this.value = makeEntityValueX(nameOrPToken.value);
          this.externalId = nameOrPToken.externalId && new ExternalIdX(nameOrPToken.externalId);
-         this.notationDataName = strOrBlank(nameOrPToken.nDataName);
+         this.notationDataName = nameOrPToken.nDataName && strOrBlank(nameOrPToken.nDataName);
          this.pToken = nameOrPToken;
       }
-
-      this.isParameter = false;
    }
 }
 

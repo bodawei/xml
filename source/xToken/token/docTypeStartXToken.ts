@@ -24,9 +24,7 @@ class DocTypeStartXToken {
          this.externalId = externalId;
       } else {
          this.name = strOrBlank(nameOrPToken.name);
-         this.externalId = nameOrPToken.externalId
-            ? new ExternalIdX(nameOrPToken.externalId)
-            : undefined;
+         this.externalId = nameOrPToken.externalId && new ExternalIdX(nameOrPToken.externalId);
          this.pToken = nameOrPToken;
       }
    }

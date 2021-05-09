@@ -4,13 +4,22 @@ import { describe, expect, it } from '@jest/globals';
 import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { XmlDeclarationXToken } from '../xmlDeclarationXToken';
+import { XmlDeclarationXToken, XMLDECL_XTOKEN } from '../xmlDeclarationXToken';
 
 describe('XmlDeclarationXToken()', () => {
-   let xmlDeclPToken: XmlDeclarationPToken;
+   it('can be constructed with literal values', () => {
+      const result = new XmlDeclarationXToken(1.0, 'UTF-99', true);
+
+      expect(result).toEqual({
+         type: XMLDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'UTF-99',
+         standalone: true,
+      });
+   });
 
    it('sets all parameters using the input', () => {
-      xmlDeclPToken = new XmlDeclarationPToken({
+      const xmlDeclPToken = new XmlDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -43,11 +52,17 @@ describe('XmlDeclarationXToken()', () => {
 
       const result = new XmlDeclarationXToken(xmlDeclPToken);
 
-      expect(result).toEqual(new XmlDeclarationXToken(1.0, 'UTF-99', true, xmlDeclPToken));
+      expect(result).toEqual({
+         type: XMLDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'UTF-99',
+         standalone: true,
+         pToken: xmlDeclPToken,
+      });
    });
 
    it('sets version to 1.1 if that is what is passed in', () => {
-      xmlDeclPToken = new XmlDeclarationPToken({
+      const xmlDeclPToken = new XmlDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -66,11 +81,17 @@ describe('XmlDeclarationXToken()', () => {
 
       const result = new XmlDeclarationXToken(xmlDeclPToken);
 
-      expect(result).toEqual(new XmlDeclarationXToken(1.1, undefined, undefined, xmlDeclPToken));
+      expect(result).toEqual({
+         type: XMLDECL_XTOKEN,
+         version: 1.1,
+         encoding: 'utf-8',
+         standalone: false,
+         pToken: xmlDeclPToken,
+      });
    });
 
    it('sets default parameters when input has none', () => {
-      xmlDeclPToken = new XmlDeclarationPToken({
+      const xmlDeclPToken = new XmlDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -81,11 +102,17 @@ describe('XmlDeclarationXToken()', () => {
 
       const result = new XmlDeclarationXToken(xmlDeclPToken);
 
-      expect(result).toEqual(new XmlDeclarationXToken(1.0, 'utf-8', false, xmlDeclPToken));
+      expect(result).toEqual({
+         type: XMLDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'utf-8',
+         standalone: false,
+         pToken: xmlDeclPToken,
+      });
    });
 
    it('sets default values when input values are erronious', () => {
-      xmlDeclPToken = new XmlDeclarationPToken({
+      const xmlDeclPToken = new XmlDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -118,11 +145,17 @@ describe('XmlDeclarationXToken()', () => {
 
       const result = new XmlDeclarationXToken(xmlDeclPToken);
 
-      expect(result).toEqual(new XmlDeclarationXToken(1.0, 'some-encoding', false, xmlDeclPToken));
+      expect(result).toEqual({
+         type: XMLDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'some-encoding',
+         standalone: false,
+         pToken: xmlDeclPToken,
+      });
    });
 
    it('treats a mis-cased standalone as the correct case', () => {
-      xmlDeclPToken = new XmlDeclarationPToken({
+      const xmlDeclPToken = new XmlDeclarationPToken({
          open: toSToken('<?'),
          openSpace: toSToken(' '),
          target: toSToken('xml'),
@@ -155,6 +188,12 @@ describe('XmlDeclarationXToken()', () => {
 
       const result = new XmlDeclarationXToken(xmlDeclPToken);
 
-      expect(result).toEqual(new XmlDeclarationXToken(1.0, 'some-encoding', true, xmlDeclPToken));
+      expect(result).toEqual({
+         type: XMLDECL_XTOKEN,
+         version: 1.0,
+         encoding: 'some-encoding',
+         standalone: true,
+         pToken: xmlDeclPToken,
+      });
    });
 });

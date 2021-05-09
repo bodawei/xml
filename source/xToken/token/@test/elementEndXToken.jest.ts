@@ -20,6 +20,15 @@ describe('elementEnd', () => {
       });
    });
 
+   it('constructs with just a string', () => {
+      const token = new ElementEndXToken('MyElement');
+
+      expect(token).toEqual({
+         type: ELEMENT_END_XTOKEN,
+         name: 'MyElement',
+      });
+   });
+
    it('returns a token with an empty string if no name was found', () => {
       const token = new ElementEndXToken(elementEndPToken);
       expect(token).toEqual({

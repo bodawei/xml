@@ -14,6 +14,8 @@ import {
    XmlDeclarationPToken,
    ElementDeclarationPToken,
    TextPToken,
+   ContentModelP,
+   TEXT_PTOKEN,
  } from 'pToken';
 import { SToken, toSToken } from 'sToken';
 import {
@@ -36,6 +38,7 @@ import {
    ParameterEntityStartPToken,
    SpacePToken,
    CharDataPToken,
+   DeclarationPToken,
 } from 'token';
 import { AttrValue } from '../../token/common/attribute';
 import { ConditionalClosePToken } from '../conditionalClose';
@@ -226,6 +229,49 @@ function makeElementDeclaration(): ElementDeclarationPToken {
    });
 }
 
+function makeElementDeclarationWithContentModel(): ElementDeclarationPToken {
+   return new ElementDeclarationPToken({
+      open: toSToken('<!'),
+      openSpace: undefined,
+      declType: toSToken('ELEMENT'),
+      declTypeSpace: toSToken(' '),
+      name: toSToken('elementName'),
+      nameSpace: toSToken(' '),
+      contentSpec: undefined,
+      contentModel: new ContentModelP({
+         open: toSToken('('),
+         delimitedParticles: [{
+            particle: {
+               name: toSToken('aName'),
+               repeat: toSToken('+'),
+            },
+            delimiter: toSToken('|'),
+         }, {
+            particle: {
+               open: toSToken('('),
+               delimitedParticles: [{
+                  particle: {
+                     name: toSToken('first'),
+                  },
+                  delimiter: toSToken(','),
+               }, {
+                  particle: {
+                     name: toSToken('second'),
+                     repeat: toSToken('?'),
+                  },
+               }],
+               close: toSToken(')'),
+               repeat: toSToken('*'),
+            },
+         }],
+         close: toSToken(')'),
+         repeat: toSToken('*'),
+      }),
+      contentSpecSpace: toSToken(' '),
+      close: toSToken('>'),
+   });
+}
+
 function makeExternalSubsetEnd(): ExternalSubsetEndToken {
    return new ExternalSubsetEndToken();
 }
@@ -237,6 +283,31 @@ function makeGeneralEntityDeclaration(name = 'geDecl'): GeneralEntityDeclaration
    return new GeneralEntityDeclarationPToken({
       open: toSToken('<!'),
       name: toSToken(name),
+      value: [{
+         type: TEXT_PTOKEN,
+         text: toSToken('blah'),
+      }],
+      close: toSToken('>'),
+   });
+}
+
+function makeGeneralEntityDeclarationWithExternalId(name = 'geDecl'): GeneralEntityDeclarationPToken {
+   return new GeneralEntityDeclarationPToken({
+      open: toSToken('<!'),
+      name: toSToken(name),
+      externalId: {
+         externalType: toSToken('PUBLIC'),
+         public: {
+            openQuote: toSToken('"'),
+            value: [new TextPToken(toSToken('- foo -'))],
+            closeQuote: toSToken('"'),
+         },
+         system: {
+            openQuote: toSToken('\''),
+            value: [new TextPToken(toSToken('http://foo.com'))],
+            closeQuote: toSToken('\''),
+         },
+      },
       close: toSToken('>'),
    });
 }
@@ -354,6 +425,10 @@ function makeTextDecl(): TextDeclarationPToken {
    });
 }
 
+function makeUnknownDeclaration(): DeclarationPToken {
+   return new DeclarationPToken();
+}
+
 function makeXmlDecl(): XmlDeclarationPToken {
    return new XmlDeclarationPToken({
       open: toSToken('<?'),
@@ -409,6 +484,7 @@ export {
    makeDocTypeEnd,
    makeDocTypeStart,
    makeElementDeclaration,
+   makeElementDeclarationWithContentModel,
    makeElementEmpty,
    makeElementEmptyWithAttrValue,
    makeElementEmptyWithAttrValueFromString,
@@ -419,6 +495,7 @@ export {
    makeExternalSubsetEnd,
    makeExternalSubsetStart,
    makeGeneralEntityDeclaration,
+   makeGeneralEntityDeclarationWithExternalId,
    makeGeneralEntityEnd,
    makeGeneralEntityReference,
    makeGeneralEntityStart,
@@ -434,6 +511,7 @@ export {
    makeSpace,
    makeTextPToken,
    makeTextDecl,
+   makeUnknownDeclaration,
    makeXmlDecl,
    makeXmlDecl10,
 };

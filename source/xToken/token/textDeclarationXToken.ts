@@ -19,17 +19,12 @@ class TextDeclarationXToken {
 
    constructor(pToken: TextDeclarationPToken);
    constructor(version: XmlVersion, encoding?: string, pToken?: TextDeclarationPToken);
-   constructor(
-      versionOrPToken: XmlVersion | TextDeclarationPToken,
-      encoding?: string,
-      pToken?: TextDeclarationPToken,
-   ) {
+   constructor(versionOrPToken: XmlVersion | TextDeclarationPToken, encoding?: string) {
       this.version = 1.0;
       this.encoding = encoding || DEFAULT_ENCODING;
 
       if (typeof versionOrPToken === 'number') {
          this.version = versionOrPToken;
-         this.pToken = pToken;
          return;
       }
 

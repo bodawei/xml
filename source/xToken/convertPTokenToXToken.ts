@@ -37,6 +37,8 @@ import {
 
 import { GeneralEntityEndXToken } from './marker/generalEntityEndXToken';
 import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
+import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
+import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
@@ -52,8 +54,6 @@ import { ElementStartXToken } from './token/elementStartXToken';
 import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
 import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
-import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
-import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
 import { SpaceXToken } from './token/spaceXToken';
@@ -91,14 +91,14 @@ function convertPTokenToXToken(pToken: ParseToken, options?: ConvertOptions): XT
          return new DocTypeEndXToken(pToken);
       case DOCTYPE_START_PTOKEN:
          return new DocTypeStartXToken(pToken);
+      case ELEMENT_DECLARATION_PTOKEN:
+         return new ElementDeclarationXToken(pToken);
       case ELEMENT_EMPTY_PTOKEN:
          return new ElementEmptyXToken(pToken);
       case ELEMENT_END_PTOKEN:
          return new ElementEndXToken(pToken);
       case ELEMENT_START_PTOKEN:
          return new ElementStartXToken(pToken);
-      case ELEMENT_DECLARATION_PTOKEN:
-         return new ElementDeclarationXToken(pToken);
       case GENERAL_ENTITY_DECLARATION_PTOKEN:
          return new GeneralEntityDeclarationXToken(pToken);
       case GENERAL_ENTITY_END_PTOKEN:

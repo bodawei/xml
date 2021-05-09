@@ -1,8 +1,9 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ElementDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
-import { ContentModelX, ContentNameX, isContentNameX } from '../common/contentModelX';
+import { SToken, strOrBlank } from 'sToken';
+
+import { ContentModelX, isContentNameX } from '../common/contentModelX';
 
 enum ContentSpecType {
    EMPTY = 'EMPTY',
@@ -13,23 +14,31 @@ enum ContentSpecType {
 
 const ELEMENT_DECLARATION_XTOKEN = 'ELEMENT_DECLARATION_XTOKEN';
 
-function isMixed(contentModel: ContentModelX): boolean {
-   const childrenAreAllNames = contentModel.particles.reduce((acc, particle) => {
-      return acc && isContentNameX(particle);
-   }, true);
-   const first: ContentModelX | ContentNameX | undefined =
-      contentModel.particles.length > 0 ? contentModel.particles[0] : undefined;
-   const firstIsPCData = !!first && isContentNameX(first) && first.name.toUpperCase() === '#PCDATA';
+function isMixed(contentModel: ContentModelX | undefined): boolean {
+   let childrenAreAllNames = true;
+   let hasPCData = false;
 
-   return childrenAreAllNames && firstIsPCData;
+   if (!contentModel) {
+      return false;
+   }
+
+   for (const particle of contentModel.particles) {
+      childrenAreAllNames = childrenAreAllNames && isContentNameX(particle);
+      hasPCData =
+         hasPCData || (isContentNameX(particle) && particle.name.toUpperCase() === '#PCDATA');
+   }
+
+   return childrenAreAllNames && hasPCData;
 }
 
-function stringToSpecType(
-   type: string,
+function deriveSpecType(
+   contentSpec: SToken | undefined,
    contentModel: ContentModelX | undefined,
    isMixedModel: boolean,
 ): ContentSpecType {
-   switch (type) {
+   const ucSpecType = strOrBlank(contentSpec);
+
+   switch (ucSpecType) {
       case 'ANY':
          return ContentSpecType.ANY;
       case 'EMPTY':
@@ -44,29 +53,33 @@ function stringToSpecType(
 
 function adjustMixed(
    contentModel: ContentModelX | undefined,
-): [boolean, ContentModelX | undefined] {
-   if (!contentModel) {
-      return [false, undefined];
+   isMixedModel: boolean,
+): ContentModelX | undefined {
+   if (!isMixedModel || !contentModel) {
+      return contentModel;
    }
 
-   let adjusted = contentModel;
-   const isMixedModel = isMixed(contentModel);
+   const newParticles = [];
+   let seenPCData = false;
 
-   if (isMixedModel) {
-      const pcData = contentModel.particles[0] as ContentNameX; // We know the first type is a name
-      const rest = contentModel.particles.slice(1);
-      const newPCData = {
-         ...pcData,
-         name: '#PCDATA',
-      };
-
-      adjusted = {
-         ...contentModel,
-         particles: [newPCData, ...rest],
-      };
+   for (const particle of contentModel.particles) {
+      if (isContentNameX(particle) && particle.name.toUpperCase() === '#PCDATA') {
+         if (!seenPCData) {
+            newParticles.unshift({
+               ...particle,
+               name: '#PCDATA',
+            });
+            seenPCData = true;
+         }
+      } else {
+         newParticles.push(particle);
+      }
    }
 
-   return [isMixedModel, adjusted];
+   return {
+      ...contentModel,
+      particles: newParticles,
+   };
 }
 
 class ElementDeclarationXToken {
@@ -92,26 +105,27 @@ class ElementDeclarationXToken {
          let model = contentModel;
 
          if (contentModel) {
-            const [isMixed, finalContentModel] = adjustMixed(contentModel);
+            const isMixedModel = isMixed(contentModel);
 
-            specType = isMixed ? ContentSpecType.MIXED : ContentSpecType.ELEMENT;
-            model = finalContentModel;
+            specType = isMixedModel ? ContentSpecType.MIXED : ContentSpecType.ELEMENT;
+            model = isMixedModel ? contentModel : adjustMixed(contentModel, isMixedModel);
          }
 
          this.name = nameOrPToken;
          this.contentSpec = specType;
          this.contentModel = model;
       } else {
-         const ucSpecType = strOrBlank(nameOrPToken.contentSpec);
-         const contentModelPreAdjustment = nameOrPToken.contentModel
+         const rawContentModel = nameOrPToken.contentModel
             ? new ContentModelX(nameOrPToken.contentModel)
             : undefined;
-         const [isMixed, finalContentModel] = adjustMixed(contentModelPreAdjustment);
-         const contentSpec = stringToSpecType(ucSpecType, finalContentModel, isMixed);
+         const isMixedModel = isMixed(rawContentModel);
+         const contentModel = isMixedModel
+            ? adjustMixed(rawContentModel, isMixedModel)
+            : rawContentModel;
 
          this.name = strOrBlank(nameOrPToken.name);
-         this.contentSpec = contentSpec;
-         this.contentModel = finalContentModel;
+         this.contentSpec = deriveSpecType(nameOrPToken.contentSpec, contentModel, isMixedModel);
+         this.contentModel = contentModel;
          this.pToken = nameOrPToken;
       }
    }

@@ -216,4 +216,47 @@ describe('ElementDeclarationXToken', () => {
          },
       });
    });
+
+   it('returns an element declaration token with mixed type with duplicate #PCDATA entries removed', () => {
+      const elementDeclaration = new ElementDeclarationPToken({
+         open: toSToken('<!'),
+         openSpace: undefined,
+         declType: toSToken('ELEMENT'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('elementName'),
+         nameSpace: toSToken(' '),
+         contentModel: new ContentModelP({
+            open: toSToken('('),
+            delimitedParticles: [
+               {
+                  particle: { name: toSToken('foo') },
+               },
+               {
+                  particle: { name: toSToken('#pcdata') },
+               },
+               {
+                  particle: { name: toSToken('#PCData') },
+               },
+            ],
+            repeat: toSToken('+'),
+         }),
+         close: toSToken('>'),
+      });
+      const result = new ElementDeclarationXToken(elementDeclaration);
+
+      expect(result).toEqual({
+         type: ELEMENT_DECLARATION_XTOKEN,
+         name: 'elementName',
+         contentSpec: 'MIXED',
+         contentModel: {
+            listType: CpType.CHOICE,
+            particles: [
+               { name: '#PCDATA', repeat: 'ONE' },
+               { name: 'foo', repeat: 'ONE' },
+            ],
+            repeat: CpRepeat.ONEPLUS,
+         },
+         pToken: elementDeclaration,
+      });
+   });
 });

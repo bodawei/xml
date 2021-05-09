@@ -60,8 +60,7 @@ describe('GeneralEntityDeclarationXToken()', () => {
             ),
             'three',
          ],
-         notationDataName: '',
-         isParameter: false,
+         notationDataName: undefined,
          pToken,
       });
    });
@@ -80,7 +79,6 @@ describe('GeneralEntityDeclarationXToken()', () => {
          externalId: { publicId: '', systemId: '' },
          value: [],
          notationDataName: 'notation',
-         isParameter: false,
       });
    });
 
@@ -90,8 +88,7 @@ describe('GeneralEntityDeclarationXToken()', () => {
          name: 'eName',
          externalId: undefined,
          value: [],
-         notationDataName: '',
-         isParameter: false,
+         notationDataName: undefined,
       });
    });
 
@@ -111,8 +108,7 @@ describe('GeneralEntityDeclarationXToken()', () => {
          name: '',
          externalId: undefined,
          value: [],
-         notationDataName: '',
-         isParameter: false,
+         notationDataName: undefined,
          pToken,
       });
    });
@@ -145,6 +141,26 @@ describe('GeneralEntityDeclarationXToken()', () => {
       expect(new GeneralEntityDeclarationXToken(pToken).externalId).toEqual({
          publicId: 'foo',
          systemId: 'bar',
+      });
+   });
+
+   it('returns a entity declaration with a notation declaration', () => {
+      pToken = new GeneralEntityDeclarationPToken({
+         open: toSToken('&'),
+         name: toSToken('entityName'),
+         nameSpace: toSToken(' '),
+         value: [new TextPToken({ text: toSToken('value') })],
+         nDataName: toSToken('foo'),
+         close: toSToken('>'),
+      });
+
+      expect(new GeneralEntityDeclarationXToken(pToken)).toEqual({
+         type: GENERAL_ENTITY_DECLARATION_XTOKEN,
+         name: 'entityName',
+         externalId: undefined,
+         value: ['value'],
+         notationDataName: 'foo',
+         pToken,
       });
    });
 });

@@ -6,7 +6,8 @@ import { toSToken } from 'sToken';
 import { ElementStartPToken } from 'token';
 
 import { AttributeX } from '../../common/attributeX';
-import { ElementStartXToken } from '../elementStartXToken';
+import { ElementStartXToken, ELEMENT_START_XTOKEN } from '../elementStartXToken';
+import { TEXT_XTOKEN } from '../textXToken';
 
 jest.mock('../../common/attributeX');
 
@@ -21,6 +22,36 @@ describe('elementStartXToken (unit)', () => {
          nameSpace: toSToken(' '),
          attributes: [{}],
          close: toSToken('>'),
+      });
+   });
+
+   it('constructs with just a string', () => {
+      const token = new ElementStartXToken('MyElement');
+
+      expect(token).toEqual({
+         type: ELEMENT_START_XTOKEN,
+         name: 'MyElement',
+         attributes: [],
+      });
+   });
+
+   it('constructs with a string and attributes', () => {
+      const token = new ElementStartXToken('MyElement', [
+         {
+            name: 'attr1',
+            value: [{ type: TEXT_XTOKEN, text: 'whee' }],
+         },
+      ]);
+
+      expect(token).toEqual({
+         type: ELEMENT_START_XTOKEN,
+         name: 'MyElement',
+         attributes: [
+            {
+               name: 'attr1',
+               value: [{ type: TEXT_XTOKEN, text: 'whee' }],
+            },
+         ],
       });
    });
 

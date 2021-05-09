@@ -2,7 +2,7 @@
 
 import { DeclarationPToken } from 'token';
 
-import { UNKNOWNDECL_XTOKEN, UnknownDeclarationXToken } from '../unknownDeclarationXToken';
+import { UNKNOWN_DECLARATION_XTOKEN, UnknownDeclarationXToken } from '../unknownDeclarationXToken';
 
 describe('UnknownDeclarationXToken (unit)', () => {
    let declaration: DeclarationPToken;
@@ -15,7 +15,7 @@ describe('UnknownDeclarationXToken (unit)', () => {
       const result = new UnknownDeclarationXToken(declaration);
 
       expect(result).toEqual({
-         type: UNKNOWNDECL_XTOKEN,
+         type: UNKNOWN_DECLARATION_XTOKEN,
          pToken: declaration,
       });
    });

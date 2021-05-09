@@ -17,7 +17,7 @@ class ElementStartXToken {
    public pToken?: ElementStartPToken;
 
    constructor(pToken: ElementStartPToken);
-   constructor(name: string, attributes: ReadonlyArray<AttributeX>);
+   constructor(name: string, attributes?: ReadonlyArray<AttributeX>);
    constructor(nameOrPToken: string | ElementStartPToken, attributes?: ReadonlyArray<AttributeX>) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;

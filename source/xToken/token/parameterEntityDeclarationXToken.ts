@@ -15,8 +15,6 @@ class ParameterEntityDeclarationXToken {
 
    public readonly externalId: ExternalIdX | undefined;
 
-   public readonly isParameter: boolean;
-
    public readonly value: ExntityValueX;
 
    public pToken?: ParameterEntityDeclarationPToken;
@@ -43,8 +41,6 @@ class ParameterEntityDeclarationXToken {
          this.externalId = nameOrPToken.externalId && new ExternalIdX(nameOrPToken.externalId);
          this.pToken = nameOrPToken;
       }
-
-      this.isParameter = true;
    }
 }
 

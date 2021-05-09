@@ -166,6 +166,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'first',
                   type: AttDefinitionType.CDATA,
+                  enumeration: undefined,
                   value: [],
                   defaultType: undefined,
                },
@@ -261,6 +262,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'needed',
                   type: AttDefinitionType.CDATA,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.REQUIRED,
                },
@@ -311,6 +313,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'textAttr',
                      type: AttDefinitionType.CDATA,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -347,6 +350,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idRefs',
                      type: AttDefinitionType.IDREFS,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -412,6 +416,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'textAttr',
                      type: AttDefinitionType.CDATA,
+                     enumeration: undefined,
                      value: [new TextXToken('oneTwo')],
                      defaultType: AttDefaultType.FIXED,
                   },
@@ -447,6 +452,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'textAttr',
                      type: AttDefinitionType.CDATA,
+                     enumeration: undefined,
                      value: [new TextXToken('oneTwo')],
                      defaultType: AttDefaultType.FIXED,
                   },
@@ -476,6 +482,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'textAttr',
                      type: AttDefinitionType.CDATA,
+                     enumeration: undefined,
                      value: [new TextXToken('oneTwo')],
                      defaultType: AttDefaultType.FIXED,
                   },
@@ -500,6 +507,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'textAttr',
                      type: AttDefinitionType.CDATA,
+                     enumeration: undefined,
                      value: [new TextXToken('the default value')],
                      defaultType: undefined,
                   },
@@ -525,6 +533,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -556,6 +565,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -586,6 +596,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -595,6 +606,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'id',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -636,6 +648,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -645,6 +658,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'id',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -697,6 +711,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idRefAttr',
                      type: AttDefinitionType.IDREF,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -760,6 +775,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idRefsAttr',
                      type: AttDefinitionType.IDREFS,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -789,12 +805,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idRefAttr',
                      type: AttDefinitionType.IDREF,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.IMPLIED,
                   },
                   {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.IMPLIED,
                   },
@@ -822,12 +840,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idRefAttr',
                      type: AttDefinitionType.IDREF,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.IMPLIED,
                   },
                   {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.IMPLIED,
                   },
@@ -855,12 +875,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idRefAttr',
                      type: AttDefinitionType.IDREF,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
                   {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -896,6 +918,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'idRefsAttr',
                      type: AttDefinitionType.IDREFS,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -937,6 +960,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'entityAttr',
                      type: AttDefinitionType.ENTITY,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -1003,6 +1027,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'entitiesAttr',
                      type: AttDefinitionType.ENTITIES,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -1062,6 +1087,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'entitiesAttr',
                      type: AttDefinitionType.ENTITIES,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -1091,6 +1117,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'entitiesAttr',
                      type: AttDefinitionType.ENTITIES,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -1131,6 +1158,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'nmTokenAttr',
                      type: AttDefinitionType.NMTOKEN,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -1197,6 +1225,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'notationAttr',
                      type: AttDefinitionType.NOTATION,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -1277,6 +1306,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'enumerationAttr',
                      type: AttDefinitionType.ENUMERATION,
+                     enumeration: undefined,
                      value: [],
                      defaultType: AttDefaultType.REQUIRED,
                   },
@@ -1325,6 +1355,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'first',
                   type: AttDefinitionType.CDATA,
+                  enumeration: undefined,
                   value: [],
                   defaultType: undefined,
                },
@@ -1423,6 +1454,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'idAttr',
                   type: AttDefinitionType.ID,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.IMPLIED,
                },
@@ -1445,6 +1477,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'idAttr',
                   type: AttDefinitionType.ID,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.IMPLIED,
                },
@@ -1462,6 +1495,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'idAttr',
                   type: AttDefinitionType.ID,
+                  enumeration: undefined,
                   value: [],
                   defaultType: undefined,
                },
@@ -1484,18 +1518,21 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'idAttr',
                   type: AttDefinitionType.ID,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.IMPLIED,
                },
                {
                   name: 'ref',
                   type: AttDefinitionType.IDREF,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.REQUIRED,
                },
                {
                   name: 'second',
                   type: AttDefinitionType.ID,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.REQUIRED,
                },
@@ -1558,6 +1595,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'xml:space',
                      type: AttDefinitionType.ID,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [],
                   },
                ]);
@@ -1579,6 +1617,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'xml:space',
                      type: AttDefinitionType.ENUMERATION,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [],
                   },
                ]);
@@ -1695,6 +1734,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1716,6 +1756,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'idAttr',
                      type: AttDefinitionType.ID,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1742,6 +1783,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'idRefAttr',
                      type: AttDefinitionType.IDREF,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1763,6 +1805,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'idRefAttr',
                      type: AttDefinitionType.IDREF,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1789,6 +1832,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'idRefsAttr',
                      type: AttDefinitionType.IDREFS,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad good $bad2')],
                   },
                ]);
@@ -1810,6 +1854,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'idRefsAttr',
                      type: AttDefinitionType.IDREFS,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad good $bad2')],
                   },
                ]);
@@ -1836,6 +1881,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'entityAttr',
                      type: AttDefinitionType.ENTITY,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1857,6 +1903,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'entityAttr',
                      type: AttDefinitionType.ENTITY,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1883,6 +1930,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'entitiesAttr',
                      type: AttDefinitionType.ENTITIES,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad good $bad2')],
                   },
                ]);
@@ -1904,6 +1952,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'entitiesAttr',
                      type: AttDefinitionType.ENTITIES,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad good $bad2')],
                   },
                ]);
@@ -1926,6 +1975,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'entitiesAttr',
                      type: AttDefinitionType.ENTITIES,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('all awesome good')],
                   },
                ]);
@@ -1947,6 +1997,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'nmTokenAttr',
                      type: AttDefinitionType.NMTOKEN,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1967,6 +2018,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'nmTokenAttr',
                      type: AttDefinitionType.NMTOKEN,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad')],
                   },
                ]);
@@ -1992,6 +2044,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'nmTokenAttr',
                      type: AttDefinitionType.NMTOKENS,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad good $alsoBad')],
                   },
                ]);
@@ -2012,6 +2065,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'nmTokensAttr',
                      type: AttDefinitionType.NMTOKENS,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('$bad good $alsoBad')],
                   },
                ]);
@@ -2034,6 +2088,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'nmTokensAttr',
                      type: AttDefinitionType.NMTOKENS,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [new TextXToken('all awesome good')],
                   },
                ]);
@@ -2066,6 +2121,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'ref',
                      type: AttDefinitionType.IDREF,
                      value: [],
+                     enumeration: undefined,
                      defaultType: AttDefaultType.REQUIRED,
                   },
                   {
@@ -2103,6 +2159,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      name: 'ref',
                      type: AttDefinitionType.IDREF,
                      defaultType: AttDefaultType.REQUIRED,
+                     enumeration: undefined,
                      value: [],
                   },
                ]);
@@ -2391,12 +2448,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'idAttr',
                   type: AttDefinitionType.ID,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.IMPLIED,
                },
                {
                   name: 'anAttribute',
                   type: AttDefinitionType.CDATA,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.REQUIRED,
                },
@@ -2405,6 +2464,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'anAttribute',
                   type: AttDefinitionType.ID, // This would cause us to have two ID's, if this were honored
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.REQUIRED,
                },
@@ -2431,12 +2491,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'idAttr',
                   type: AttDefinitionType.ID,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.IMPLIED,
                },
                {
                   name: 'anAttribute',
                   type: AttDefinitionType.CDATA,
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.REQUIRED,
                },
@@ -2445,6 +2507,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                {
                   name: 'anAttribute',
                   type: AttDefinitionType.ID, // This would cause us to have two ID's, if this were honored
+                  enumeration: undefined,
                   value: [],
                   defaultType: AttDefaultType.REQUIRED,
                },
@@ -2469,6 +2532,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   name: 'textAttr',
                   type: AttDefinitionType.CDATA,
                   value: [new GeneralEntityReferenceXToken('foo')],
+                  enumeration: undefined,
                   defaultType: undefined,
                },
             ]);
@@ -2807,6 +2871,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'cdataAttr',
                      type: AttDefinitionType.CDATA,
+                     enumeration: undefined,
                      value: [
                         new GeneralEntityStartXToken('extDeclEntity'),
                         new GeneralEntityEndXToken('extDeclEntity'),
@@ -2837,6 +2902,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'cdataAttr',
                      type: AttDefinitionType.CDATA,
+                     enumeration: undefined,
                      value: [
                         new GeneralEntityStartXToken('intDeclEntity'),
                         new ParameterEntityStartXToken('extDeclParamEntity'),
@@ -2887,6 +2953,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                new AttListDeclarationXToken('testEl', [
                   {
                      name: 'entityAttr',
+                     enumeration: undefined,
                      type: AttDefinitionType.ENTITY,
                      value: [new TextXToken('extDeclEntity')],
                      defaultType: AttDefaultType.REQUIRED,
@@ -2913,6 +2980,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   {
                      name: 'entityAttr',
                      type: AttDefinitionType.ENTITIES,
+                     enumeration: undefined,
                      value: [new TextXToken('extDeclEntity')],
                      defaultType: AttDefaultType.REQUIRED,
                   },

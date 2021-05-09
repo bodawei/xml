@@ -2,10 +2,10 @@
 
 import { DeclarationPToken } from 'token';
 
-const UNKNOWNDECL_XTOKEN = 'UNKNOWNDECL_XTOKEN';
+const UNKNOWN_DECLARATION_XTOKEN = 'UNKNOWN_DECLARATION_XTOKEN';
 
 class UnknownDeclarationXToken {
-   public readonly type = UNKNOWNDECL_XTOKEN;
+   public readonly type = UNKNOWN_DECLARATION_XTOKEN;
 
    public pToken?: DeclarationPToken;
 
@@ -14,4 +14,4 @@ class UnknownDeclarationXToken {
    }
 }
 
-export { UNKNOWNDECL_XTOKEN, UnknownDeclarationXToken };
+export { UNKNOWN_DECLARATION_XTOKEN, UnknownDeclarationXToken };

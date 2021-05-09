@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
@@ -12,7 +12,7 @@ class ProcessingInstructionXToken {
 
    public readonly instruction: string;
 
-   public readonly pToken?: ProcessingInstructionPToken;
+   public pToken?: ProcessingInstructionPToken;
 
    constructor(pToken: ProcessingInstructionPToken);
    constructor(target: string, instruction?: string);

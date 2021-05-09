@@ -6,7 +6,7 @@ import { toSToken } from 'sToken';
 import { ElementEmptyPToken } from 'token';
 
 import { AttributeX } from '../../common/attributeX';
-import { ElementEmptyXToken } from '../ElementEmptyXToken';
+import { ElementEmptyXToken, ELEMENT_EMPTY_XTOKEN } from '../ElementEmptyXToken';
 
 jest.mock('../../common/attributeX');
 
@@ -20,6 +20,36 @@ describe('ElementEmptyXToken (unit)', () => {
          nameSpace: toSToken(' '),
          attributes: [{}],
          close: toSToken('>'),
+      });
+   });
+
+   it('constructs with a string and attributes', () => {
+      const result = new ElementEmptyXToken('foo', [
+         {
+            name: 'attr',
+            value: [],
+         },
+      ]);
+
+      expect(result).toEqual({
+         type: ELEMENT_EMPTY_XTOKEN,
+         name: 'foo',
+         attributes: [
+            {
+               name: 'attr',
+               value: [],
+            },
+         ],
+      });
+   });
+
+   it('constructs with just a string for the name', () => {
+      const result = new ElementEmptyXToken('foo');
+
+      expect(result).toEqual({
+         type: ELEMENT_EMPTY_XTOKEN,
+         name: 'foo',
+         attributes: [],
       });
    });
 

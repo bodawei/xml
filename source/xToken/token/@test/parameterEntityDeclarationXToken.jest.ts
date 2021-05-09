@@ -60,7 +60,6 @@ describe('ParameterEntityDeclarationXToken()', () => {
             ),
             'three',
          ],
-         isParameter: true,
          pToken,
       });
    });
@@ -78,7 +77,6 @@ describe('ParameterEntityDeclarationXToken()', () => {
          name: 'eName',
          externalId: { publicId: '', systemId: '' },
          value: [],
-         isParameter: true,
       });
    });
 
@@ -88,7 +86,6 @@ describe('ParameterEntityDeclarationXToken()', () => {
          name: 'eName',
          externalId: undefined,
          value: [],
-         isParameter: true,
       });
    });
 
@@ -107,7 +104,6 @@ describe('ParameterEntityDeclarationXToken()', () => {
          name: '',
          externalId: undefined,
          value: [],
-         isParameter: true,
          pToken,
       });
    });

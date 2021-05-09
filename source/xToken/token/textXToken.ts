@@ -22,9 +22,7 @@ function isTextXToken(item: unknown): item is TextXToken {
       return false;
    }
 
-   const obj = typeof item === 'object' ? (item as { type: string }) : undefined;
-
-   return !!obj && obj.type === TEXT_XTOKEN;
+   return typeof item === 'object' && (item as { type: string }).type === TEXT_XTOKEN;
 }
 
 export { TEXT_XTOKEN, TextXToken, isTextXToken };
