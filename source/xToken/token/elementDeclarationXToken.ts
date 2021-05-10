@@ -3,7 +3,7 @@
 import { ElementDeclarationPToken } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 
-import { ContentModelX, isContentNameX } from '../common/contentModelX';
+import { ContentModelX, isContentNameX, cloneContentModelX } from '../common/contentModelX';
 
 enum ContentSpecType {
    EMPTY = 'EMPTY',
@@ -113,7 +113,7 @@ class ElementDeclarationXToken {
 
          this.name = nameOrPToken;
          this.contentSpec = specType;
-         this.contentModel = model;
+         this.contentModel = cloneContentModelX(model);
       } else {
          const rawContentModel = nameOrPToken.contentModel
             ? new ContentModelX(nameOrPToken.contentModel)

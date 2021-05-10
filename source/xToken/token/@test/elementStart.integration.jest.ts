@@ -22,6 +22,8 @@ describe('ElementStartXToken (integration)', () => {
 
          if (pToken?.type === ELEMENT_START_PTOKEN) {
             token = new ElementStartXToken(pToken);
+            delete token.attributes[0].value[0].pToken;
+            delete token.attributes[1].value[0].pToken;
             delete token.pToken;
          }
 

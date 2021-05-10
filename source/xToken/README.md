@@ -140,6 +140,8 @@ Some assumptions are made when converting PTokens to XTokens:
    * The content spec will be set to `ANY` if another can not be identified
    * The `#PCDATA` will be capitalized and moved to the start of the list of "names" if the content model is identified as a `MIXED` type.
       * Note that if the `contentModel` is not a simple list of names, but contains `#PCDATA` that will remain unaltered.
+   * If the content model PToken has inconsistent delimiters (that is, `|` and `,`), the XToken conversion will use the first such delimiter in each `()`"ed group to specify the `listType` for that whole group. 
+   * If the content model PToken has an unknown repeat value, then the XToken will have `ONE`.
 * `TextDeclarationXToken` and `XmlDeclarationXToken`
    * A version that isn't `1.0` or `1.1` is assumed to be `1.0`
    * A standalone value that is not `yes` or `no` will be treated as `no`

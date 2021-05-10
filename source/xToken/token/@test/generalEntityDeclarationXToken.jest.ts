@@ -9,14 +9,17 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
+import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
+import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXToken';
+import { ParameterEntityEndXToken } from '../../marker/parameterEntityEndXToken';
 import {
    GeneralEntityDeclarationXToken,
    GENERAL_ENTITY_DECLARATION_XTOKEN,
-} from '../GeneralEntityDeclarationXToken';
+} from '../generalEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToken';
-
-import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
+import { TextXToken } from '../textXToken';
+import { CharRefXToken } from '../charRefXToken';
 
 describe('GeneralEntityDeclarationXToken()', () => {
    let pToken: GeneralEntityDeclarationPToken;
@@ -46,19 +49,29 @@ describe('GeneralEntityDeclarationXToken()', () => {
    });
 
    it('constructs an entity declaration token with the name and value found in the PToken', () => {
-      expect(new GeneralEntityDeclarationXToken(pToken)).toEqual({
+      const result = new GeneralEntityDeclarationXToken(pToken);
+      const modifiedResult = {
+         ...result,
+         value: result.value.map((x) => {
+            delete x.pToken;
+
+            return x;
+         }),
+      };
+
+      expect(modifiedResult).toEqual({
          type: GENERAL_ENTITY_DECLARATION_XTOKEN,
          name: 'entityName',
          externalId: undefined,
          value: [
-            'valuetwoA',
-            new ParameterEntityReferenceXToken(
-               new ParameterEntityReferencePToken({ open: toSToken('&'), name: toSToken('Ref1') }),
-            ),
-            new ParameterEntityReferenceXToken(
-               new ParameterEntityReferencePToken({ open: toSToken('&'), name: toSToken('Ref2') }),
-            ),
-            'three',
+            new TextXToken('value'),
+            new TextXToken('two'),
+            new CharRefXToken('A'),
+            new ParameterEntityStartXToken('Ref0'),
+            new ParameterEntityReferenceXToken('Ref1'),
+            new ParameterEntityReferenceXToken('Ref2'),
+            new TextXToken('three'),
+            new ParameterEntityEndXToken('Ref0'),
          ],
          notationDataName: undefined,
          pToken,
@@ -158,7 +171,7 @@ describe('GeneralEntityDeclarationXToken()', () => {
          type: GENERAL_ENTITY_DECLARATION_XTOKEN,
          name: 'entityName',
          externalId: undefined,
-         value: ['value'],
+         value: [new TextXToken(new TextPToken({ text: toSToken('value') }))],
          notationDataName: 'foo',
          pToken,
       });

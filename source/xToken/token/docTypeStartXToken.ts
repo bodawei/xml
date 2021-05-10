@@ -3,7 +3,7 @@
 import { DocTypeStartPToken } from 'token';
 import { strOrBlank } from 'sToken';
 
-import { ExternalIdX } from 'xToken';
+import { ExternalIdX, cloneExternalIdX } from '../common/externalIdX';
 
 const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 
@@ -21,7 +21,7 @@ class DocTypeStartXToken {
    constructor(nameOrPToken: string | DocTypeStartPToken, externalId?: ExternalIdX | undefined) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
-         this.externalId = externalId;
+         this.externalId = cloneExternalIdX(externalId);
       } else {
          this.name = strOrBlank(nameOrPToken.name);
          this.externalId = nameOrPToken.externalId && new ExternalIdX(nameOrPToken.externalId);

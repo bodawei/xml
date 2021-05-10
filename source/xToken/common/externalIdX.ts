@@ -1,11 +1,7 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { ExternalIdP, pTokenArrayToString } from 'pToken';
 
-/*
- * Converts an ExternaId PToken into an XToken.  This is always
- * embedded in one of the relevant markup declaration tokens.
- */
 class ExternalIdX {
    readonly systemId: string;
 
@@ -24,4 +20,14 @@ class ExternalIdX {
    }
 }
 
-export { ExternalIdX };
+function cloneExternalIdX(source: ExternalIdX | undefined): ExternalIdX | undefined {
+   if (!source) {
+      return undefined;
+   }
+
+   return {
+      ...source,
+   };
+}
+
+export { ExternalIdX, cloneExternalIdX };

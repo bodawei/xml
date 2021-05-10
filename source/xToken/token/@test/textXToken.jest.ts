@@ -17,6 +17,28 @@ describe('TextXToken (unit)', () => {
 
          expect(result).toMatchInlineSnapshot(`
             TextXToken {
+              "pToken": TextPToken {
+                "text": SToken {
+                  "originalStr": "foo",
+                  "ranges": Array [
+                    Range {
+                      "endColumn": 0,
+                      "endIndex": 0,
+                      "endRow": 0,
+                      "entityId": EntityId {
+                        "publicId": undefined,
+                        "systemId": "",
+                        "type": "ENTITY_ID",
+                      },
+                      "startColumn": 0,
+                      "startIndex": 0,
+                      "startRow": 0,
+                    },
+                  ],
+                  "str": "foo",
+                },
+                "type": "TEXT_PTOKEN",
+              },
               "text": "foo",
               "type": "TEXT_XTOKEN",
             }

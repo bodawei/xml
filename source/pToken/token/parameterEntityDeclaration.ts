@@ -6,7 +6,7 @@ import { ExternalIdP } from '../common/externalId';
 import { UnexpandedMarkupDetails } from '../types';
 
 import { DeclarationStart } from '../../token/bridge/declaration';
-import { LiteralValuePToken } from '../../token/common/literal';
+import { EntityValuePToken } from 'token';
 
 const PARAMETER_ENTITY_DECLARATION_PTOKEN = 'PARAMETER_ENTITY_DECLARATION_PTOKEN';
 
@@ -22,7 +22,7 @@ interface ParameterEntityDeclarationProps {
    externalId?: ExternalIdP;
    externalIdSpace?: SToken;
    openQuote?: SToken;
-   value?: LiteralValuePToken;
+   value?: EntityValuePToken;
    closeQuote?: SToken;
    valueSpace?: SToken;
    unexpanded?: UnexpandedMarkupDetails | undefined;
@@ -79,7 +79,7 @@ class ParameterEntityDeclarationPToken {
 
    public readonly openQuote?: SToken;
 
-   public readonly value: LiteralValuePToken;
+   public readonly value: EntityValuePToken;
 
    public readonly closeQuote?: SToken;
 

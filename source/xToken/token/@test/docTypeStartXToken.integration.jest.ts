@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationPToken, parseDocTypeStart } from 'token';
-import { ExternalIdX } from 'xToken';
+import { ExternalIdX } from '../../common/externalIdX';
 
 import { DocTypeStartXToken } from '../docTypeStartXToken';
 

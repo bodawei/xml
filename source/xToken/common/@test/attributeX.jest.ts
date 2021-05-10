@@ -1,12 +1,14 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { AttributePToken } from 'token';
 
 import { AttributeX } from '../attributeX';
-import { makeLiteralValueX } from '../makeLiteralValueX';
+import { TextXToken } from '../../token/textXToken';
+import { cloneLiteralValueX, makeLiteralValueX } from '../literalValueX';
 
-jest.mock('../makeLiteralValueX');
+jest.mock('../literalValueX');
 
 describe('attribute (unit)', () => {
    let attribute: AttributePToken;
@@ -22,6 +24,23 @@ describe('attribute (unit)', () => {
       };
    });
 
+   it('can be constructed with a string and a literalValue', () => {
+      (cloneLiteralValueX as jest.Mock).mockReturnValue([new TextXToken('wow')]);
+
+      const attrX = new AttributeX('name', [new TextXToken('wow')]);
+
+      expect(attrX).toEqual({
+         name: 'name',
+         value: [new TextXToken('wow')],
+      });
+   });
+
+   it('calls cloneLiteralValueX() when passed a literal string', () => {
+      new AttributeX('foo');
+
+      expect(cloneLiteralValueX).toHaveBeenCalledWith(undefined);
+   });
+
    it('calls makeLiteralValueX()', () => {
       new AttributeX(attribute);
 
@@ -29,12 +48,12 @@ describe('attribute (unit)', () => {
    });
 
    it('returns name value pairs from the parsing', () => {
-      (makeLiteralValueX as jest.Mock).mockReturnValue([{ foo: true }]);
+      (makeLiteralValueX as jest.Mock).mockReturnValue([new TextXToken('wow')]);
       const attrX = new AttributeX(attribute);
 
       expect(attrX).toEqual({
          name: 'version',
-         value: [{ foo: true } as any],
+         value: [new TextXToken('wow')],
       });
    });
 });

@@ -9,14 +9,18 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
+import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
+
+import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXToken';
+import { ParameterEntityEndXToken } from '../../marker/parameterEntityEndXToken';
+import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToken';
+import { TextXToken } from '../textXToken';
+import { CharRefXToken } from '../charRefXToken';
 
 import {
-   ParameterEntityDeclarationXToken,
    PARAMETER_ENTITY_DECLARATION_XTOKEN,
+   ParameterEntityDeclarationXToken,
 } from '../parameterEntityDeclarationXToken';
-import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToken';
-
-import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 describe('ParameterEntityDeclarationXToken()', () => {
    let pToken: ParameterEntityDeclarationPToken;
@@ -46,19 +50,29 @@ describe('ParameterEntityDeclarationXToken()', () => {
    });
 
    it('constructs an entity declaration token with the name and value found in the PToken', () => {
-      expect(new ParameterEntityDeclarationXToken(pToken)).toEqual({
+      const result = new ParameterEntityDeclarationXToken(pToken);
+      const modifiedResult = {
+         ...result,
+         value: result.value.map((x) => {
+            delete x.pToken;
+
+            return x;
+         }),
+      };
+
+      expect(modifiedResult).toEqual({
          type: PARAMETER_ENTITY_DECLARATION_XTOKEN,
          name: 'entityName',
          externalId: undefined,
          value: [
-            'valuetwoA',
-            new ParameterEntityReferenceXToken(
-               new ParameterEntityReferencePToken({ open: toSToken('&'), name: toSToken('Ref1') }),
-            ),
-            new ParameterEntityReferenceXToken(
-               new ParameterEntityReferencePToken({ open: toSToken('&'), name: toSToken('Ref2') }),
-            ),
-            'three',
+            new TextXToken('value'),
+            new TextXToken('two'),
+            new CharRefXToken('A'),
+            new ParameterEntityStartXToken('Ref0'),
+            new ParameterEntityReferenceXToken('Ref1'),
+            new ParameterEntityReferenceXToken('Ref2'),
+            new TextXToken('three'),
+            new ParameterEntityEndXToken('Ref0'),
          ],
          pToken,
       });

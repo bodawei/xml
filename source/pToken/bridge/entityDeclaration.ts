@@ -15,6 +15,7 @@ import {
    ParameterEntityDeclarationProps,
    ParameterEntityDeclarationPToken,
 } from '../token/parameterEntityDeclaration';
+import { EntityValuePToken } from 'token';
 
 type AnyEntityDeclaration = GeneralEntityDeclarationProps & ParameterEntityDeclarationProps;
 
@@ -60,7 +61,7 @@ function parseLiteralValue(
          if (appendedPToken) {
             source.extractNoParams('space', (sToken) => {
                appendedPToken.valueSpace = sToken;
-               done(appendedPToken);
+               done(appendedPToken as any); // typehack
             });
          } else {
             done(props);

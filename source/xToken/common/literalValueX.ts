@@ -1,28 +1,26 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import {
+   CHARREF_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   TEXT_PTOKEN,
+} from 'pToken';
+import {
    GENERAL_ENTITY_END_PTOKEN,
-   GENERAL_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    LiteralValuePToken,
 } from 'token';
-import {
-   CHARREF_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   isTextPToken,
-} from 'pToken';
-import {
-   CharRefXToken,
-   GeneralEntityReferenceXToken,
-   GeneralEntityEndXToken,
-   GeneralEntityStartXToken,
-   ParameterEntityReferenceXToken,
-   ParameterEntityEndXToken,
-   ParameterEntityStartXToken,
-   TextXToken,
-} from 'xToken';
+
+import { GeneralEntityEndXToken } from '../marker/generalEntityEndXToken';
+import { GeneralEntityStartXToken } from '../marker/generalEntityStartXToken';
+import { ParameterEntityEndXToken } from '../marker/parameterEntityEndXToken';
+import { ParameterEntityStartXToken } from '../marker/parameterEntityStartXToken';
+import { TextXToken } from '../token/textXToken';
+import { CharRefXToken } from '../token/charRefXToken';
+import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
+import { GeneralEntityReferenceXToken } from '../token/generalEntityReferenceXToken';
 
 type LiteralValueX = Array<
    | TextXToken
@@ -41,7 +39,7 @@ function makeLiteralValueX(pToken: LiteralValuePToken): LiteralValueX {
    for (let index = 0; index < pToken.length; index++) {
       const item = pToken[index];
 
-      if (isTextPToken(item)) {
+      if (item.type === TEXT_PTOKEN) {
          value.push(new TextXToken(item));
       } else if (item.type === CHARREF_PTOKEN) {
          value.push(new CharRefXToken(item));
@@ -55,7 +53,7 @@ function makeLiteralValueX(pToken: LiteralValuePToken): LiteralValueX {
          value.push(new GeneralEntityReferenceXToken(item));
       } else if (item.type === GENERAL_ENTITY_END_PTOKEN) {
          value.push(new GeneralEntityEndXToken(item));
-      } else if (item.type === GENERAL_ENTITY_START_PTOKEN) {
+      } else {
          value.push(new GeneralEntityStartXToken(item));
       }
    }
@@ -63,4 +61,18 @@ function makeLiteralValueX(pToken: LiteralValuePToken): LiteralValueX {
    return value;
 }
 
-export { makeLiteralValueX, LiteralValueX };
+function cloneLiteralValueX(source: LiteralValueX | undefined): LiteralValueX {
+   if (!source) {
+      return [];
+   }
+
+   const newCopy: LiteralValueX = [];
+
+   for (const item of source) {
+      newCopy.push({ ...item });
+   }
+
+   return newCopy;
+}
+
+export { makeLiteralValueX, LiteralValueX, cloneLiteralValueX };

@@ -3,8 +3,8 @@
 import { describe, expect, it } from '@jest/globals';
 import { AttListDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { TextXToken } from 'xToken';
 import { WordListPToken, WordListType } from 'token';
+import { TextXToken } from '../textXToken';
 
 import {
    ATTLIST_DECLARATION_XTOKEN,
@@ -44,6 +44,7 @@ describe('attListDeclarationXToken', () => {
             name: 'att1',
             type: AttDefinitionType.CDATA,
             defaultType: AttDefaultType.FIXED,
+            enumeration: undefined,
             value: [],
          },
          {

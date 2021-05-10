@@ -4,7 +4,13 @@ import { describe, expect, it } from '@jest/globals';
 import { ContentModelP } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { ContentModelX, CpRepeat, CpType, isContentNameX } from '../ContentModelX';
+import {
+   ContentModelX,
+   CpRepeat,
+   CpType,
+   isContentNameX,
+   cloneContentModelX,
+} from '../ContentModelX';
 
 describe('ContentModelX()', () => {
    let contentModelP: ContentModelP;
@@ -39,6 +45,58 @@ describe('ContentModelX()', () => {
          closeSpace: undefined,
          repeat: undefined,
          repeatSpace: undefined,
+      });
+   });
+
+   it('cloneContentModelX clones the existing', () => {
+      const contentModel = cloneContentModelX({
+         particles: [
+            {
+               name: 'one',
+               repeat: CpRepeat.ZEROPLUS,
+            },
+            {
+               particles: [
+                  {
+                     name: 'one',
+                     repeat: CpRepeat.ZEROPLUS,
+                  },
+                  {
+                     name: 'two',
+                     repeat: CpRepeat.ONE,
+                  },
+               ],
+               listType: CpType.CHOICE,
+               repeat: CpRepeat.ONE,
+            },
+         ],
+         listType: CpType.CHOICE,
+         repeat: CpRepeat.ONE,
+      });
+
+      expect(contentModel).toEqual({
+         particles: [
+            {
+               name: 'one',
+               repeat: CpRepeat.ZEROPLUS,
+            },
+            {
+               particles: [
+                  {
+                     name: 'one',
+                     repeat: CpRepeat.ZEROPLUS,
+                  },
+                  {
+                     name: 'two',
+                     repeat: CpRepeat.ONE,
+                  },
+               ],
+               listType: CpType.CHOICE,
+               repeat: CpRepeat.ONE,
+            },
+         ],
+         listType: CpType.CHOICE,
+         repeat: CpRepeat.ONE,
       });
    });
 
@@ -486,13 +544,11 @@ describe('ContentModelX()', () => {
 
       it('returns false if given soemthing a name, but with a listType', () => {
          expect(
-            isContentNameX(
-               {
-                  name: 'fred',
-                  repeat: CpRepeat.ONE,
-                  listType: CpType.CHOICE,
-               } as any /* allow no particles */,
-            ),
+            isContentNameX({
+               name: 'fred',
+               repeat: CpRepeat.ONE,
+               listType: CpType.CHOICE,
+            }),
          ).toEqual(false);
       });
    });

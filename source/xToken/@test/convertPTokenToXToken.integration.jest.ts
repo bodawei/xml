@@ -37,7 +37,6 @@ import { GeneralEntityEndXToken } from '../marker/generalEntityEndXToken';
 import { GeneralEntityStartXToken } from '../marker/generalEntityStartXToken';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStartXToken';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEndXToken';
-
 import { AttListDeclarationXToken } from '../token/attListDeclarationXToken';
 import { CdataXToken } from '../token/cdataXToken';
 import { CharDataXToken } from '../token/charDataXToken';
@@ -82,6 +81,28 @@ describe('convertPTokenToXToken() (integration)', () => {
                "type": "CDATA",
                "value": Array [
                  TextXToken {
+                   "pToken": TextPToken {
+                     "text": SToken {
+                       "originalStr": "x",
+                       "ranges": Array [
+                         Range {
+                           "endColumn": 0,
+                           "endIndex": 0,
+                           "endRow": 0,
+                           "entityId": EntityId {
+                             "publicId": undefined,
+                             "systemId": "",
+                             "type": "ENTITY_ID",
+                           },
+                           "startColumn": 0,
+                           "startIndex": 0,
+                           "startRow": 0,
+                         },
+                       ],
+                       "str": "x",
+                     },
+                     "type": "TEXT_PTOKEN",
+                   },
                    "text": "x",
                    "type": "TEXT_XTOKEN",
                  },
@@ -285,6 +306,14 @@ describe('convertPTokenToXToken() (integration)', () => {
                "name": "att1",
                "value": Array [
                  TextXToken {
+                   "pToken": TextPToken {
+                     "text": SToken {
+                       "originalStr": "attr",
+                       "ranges": Array [],
+                       "str": "attr",
+                     },
+                     "type": "TEXT_PTOKEN",
+                   },
                    "text": "attr",
                    "type": "TEXT_XTOKEN",
                  },
@@ -417,7 +446,32 @@ describe('convertPTokenToXToken() (integration)', () => {
            "name": "entityName",
            "type": "PARAMETER_ENTITY_DECLARATION_XTOKEN",
            "value": Array [
-             "value",
+             TextXToken {
+               "pToken": TextPToken {
+                 "text": SToken {
+                   "originalStr": "value",
+                   "ranges": Array [
+                     Range {
+                       "endColumn": 0,
+                       "endIndex": 0,
+                       "endRow": 0,
+                       "entityId": EntityId {
+                         "publicId": undefined,
+                         "systemId": "",
+                         "type": "ENTITY_ID",
+                       },
+                       "startColumn": 0,
+                       "startIndex": 0,
+                       "startRow": 0,
+                     },
+                   ],
+                   "str": "value",
+                 },
+                 "type": "TEXT_PTOKEN",
+               },
+               "text": "value",
+               "type": "TEXT_XTOKEN",
+             },
            ],
          }
       `);

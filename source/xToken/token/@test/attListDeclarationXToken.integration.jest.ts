@@ -40,7 +40,7 @@ describe('attListDeclarationXToken (integration)', () => {
 
    it('includes an ENUMERATED type', (done) => {
       const source = new STokenSource();
-      source.addText('elName attrName ( one | two ) #REQUIRED>');
+      source.addText('elName attrName ( one |  | two ) #REQUIRED>');
       source.endText();
 
       parseAttListDeclaration(source, declarationStart, (pToken) => {

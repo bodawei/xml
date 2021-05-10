@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { ElementEmptyPToken } from 'token';
 
-import { AttributeX } from '../../common/attributeX';
+import { AttributeX, cloneAttributeX } from '../../common/attributeX';
 import { ElementEmptyXToken, ELEMENT_EMPTY_XTOKEN } from '../ElementEmptyXToken';
 
 jest.mock('../../common/attributeX');
@@ -21,6 +21,8 @@ describe('ElementEmptyXToken (unit)', () => {
          attributes: [{}],
          close: toSToken('>'),
       });
+
+      (cloneAttributeX as jest.Mock).mockReturnValue({ name: 'clonedAttr' });
    });
 
    it('constructs with a string and attributes', () => {
@@ -34,12 +36,7 @@ describe('ElementEmptyXToken (unit)', () => {
       expect(result).toEqual({
          type: ELEMENT_EMPTY_XTOKEN,
          name: 'foo',
-         attributes: [
-            {
-               name: 'attr',
-               value: [],
-            },
-         ],
+         attributes: [{ name: 'clonedAttr' }],
       });
    });
 

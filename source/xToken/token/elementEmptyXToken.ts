@@ -3,7 +3,7 @@
 import { strOrBlank } from 'sToken';
 import { ElementEmptyPToken } from 'token';
 
-import { AttributeX } from '../common/attributeX';
+import { AttributeX, cloneAttributeX } from '../common/attributeX';
 
 const ELEMENT_EMPTY_XTOKEN = 'ELEMENT_EMPTY_XTOKEN';
 
@@ -20,8 +20,16 @@ class ElementEmptyXToken {
    constructor(name: string, attributes?: ReadonlyArray<AttributeX>);
    constructor(nameOrPToken: string | ElementEmptyPToken, attributes?: ReadonlyArray<AttributeX>) {
       if (typeof nameOrPToken === 'string') {
+         const newAttributes = [];
+
+         if (attributes) {
+            for (const attr of attributes) {
+               newAttributes.push(cloneAttributeX(attr));
+            }
+         }
+
          this.name = nameOrPToken;
-         this.attributes = attributes ?? [];
+         this.attributes = newAttributes;
       } else {
          const attributesX = [];
 

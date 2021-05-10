@@ -2,34 +2,34 @@
 
 import { ParseToken } from 'pToken';
 
-import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
-import { ConditionalEndXToken } from './token/conditionalEndXToken';
-import { ConditionalStartXToken } from './token/conditionalStartXToken';
-import { CharRefXToken } from './token/CharRefXToken';
-import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
-import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
-import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
-import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
-import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
-import { TextDeclarationXToken } from './token/textDeclarationXToken';
-import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
-import { ParameterEntityReferenceXToken } from './token/ParameterEntityReferenceXToken';
-import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
-import { TextXToken } from './token/textXToken';
-import { SpaceXToken } from './token/spaceXtoken';
-import { CdataXToken } from './token/cdataXToken';
-import { CharDataXToken } from './token/charDataXToken';
-import { CommentXToken } from './token/commentXToken';
-import { DocTypeEndXToken } from './token/docTypeEndXToken';
-import { DocTypeStartXToken } from './token/docTypeStartXToken';
-import { ElementEmptyXToken } from './token/elementEmptyXToken';
-import { ElementEndXToken } from './token/elementEndXToken';
-import { ElementStartXToken } from './token/elementStartXToken';
 import { GeneralEntityEndXToken } from './marker/generalEntityEndXToken';
 import { UnknownDeclarationXToken } from './token/unknownDeclarationXToken';
 import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
 import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
+import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
+import { CdataXToken } from './token/cdataXToken';
+import { CharDataXToken } from './token/charDataXToken';
+import { CharRefXToken } from './token/charRefXToken';
+import { CommentXToken } from './token/commentXToken';
+import { ConditionalEndXToken } from './token/conditionalEndXToken';
+import { ConditionalStartXToken } from './token/conditionalStartXToken';
+import { DocTypeEndXToken } from './token/docTypeEndXToken';
+import { DocTypeStartXToken } from './token/docTypeStartXToken';
+import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
+import { ElementEmptyXToken } from './token/elementEmptyXToken';
+import { ElementEndXToken } from './token/elementEndXToken';
+import { ElementStartXToken } from './token/elementStartXToken';
+import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
+import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
+import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
+import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
+import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
+import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
+import { SpaceXToken } from './token/spaceXToken';
+import { TextDeclarationXToken } from './token/textDeclarationXToken';
+import { TextXToken } from './token/textXToken';
+import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 
 type XToken =
    | ParseToken
@@ -42,25 +42,24 @@ type XToken =
    | ConditionalStartXToken
    | DocTypeEndXToken
    | DocTypeStartXToken
-   | GeneralEntityEndXToken
-   | GeneralEntityStartXToken
-   | ParameterEntityEndXToken
-   | ParameterEntityStartXToken
-   // ---
-   | GeneralEntityReferenceXToken
-   | ParameterEntityReferenceXToken
-   | TextDeclarationXToken
-   | XmlDeclarationXToken
+   | ElementDeclarationXToken
    | ElementEmptyXToken
    | ElementEndXToken
    | ElementStartXToken
-   | SpaceXToken
-   | ElementDeclarationXToken
    | GeneralEntityDeclarationXToken
-   | NotationDeclarationXToken
+   | GeneralEntityEndXToken
+   | GeneralEntityReferenceXToken
+   | GeneralEntityStartXToken
    | ParameterEntityDeclarationXToken
+   | ParameterEntityEndXToken
+   | ParameterEntityReferenceXToken
+   | ParameterEntityStartXToken
    | ProcessingInstructionXToken
+   | NotationDeclarationXToken
+   | SpaceXToken
+   | TextDeclarationXToken
+   | TextXToken
    | UnknownDeclarationXToken
-   | TextXToken;
+   | XmlDeclarationXToken;
 
 export { XToken };

@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { CharRefPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { ExternalIdX } from '../externalIdX';
+import { ExternalIdX, cloneExternalIdX } from '../externalIdX';
 
 describe('ExternalIdX', () => {
    it('converts an ExternalId to an ExternalIdX', () => {
@@ -42,5 +42,17 @@ describe('ExternalIdX', () => {
       });
 
       expect(token).toEqual(new ExternalIdX('sysFoo', undefined));
+   });
+
+   it('cloneExternalIdX() makes a clone of the provided external ID', () => {
+      const token = cloneExternalIdX({
+         systemId: 'sys',
+         publicId: 'pub',
+      });
+
+      expect(token).toEqual({
+         systemId: 'sys',
+         publicId: 'pub',
+      });
    });
 });

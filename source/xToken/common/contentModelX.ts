@@ -70,4 +70,35 @@ function isContentNameX(item: ContentModelX | ContentNameX): item is ContentName
    return 'name' in item && !('particles' in item) && !('listType' in item);
 }
 
-export { ContentModelX, ContentNameX, CpRepeat, CpType, isContentNameX };
+function cloneParticlesArray(
+   source: ReadonlyArray<ContentNameX | ContentModelX>,
+): ReadonlyArray<ContentNameX | ContentModelX> {
+   const particles: Array<ContentNameX | ContentModelX> = [];
+
+   for (const particle of source) {
+      if (isContentNameX(particle)) {
+         particles.push({
+            ...particle,
+         });
+      } else {
+         particles.push({
+            ...particle,
+            particles: cloneParticlesArray(particle.particles),
+         });
+      }
+   }
+
+   return particles;
+}
+function cloneContentModelX(source: ContentModelX | undefined): ContentModelX | undefined {
+   if (!source) {
+      return source;
+   }
+
+   return {
+      ...source,
+      particles: cloneParticlesArray(source.particles),
+   };
+}
+
+export { ContentModelX, ContentNameX, CpRepeat, CpType, isContentNameX, cloneContentModelX };

@@ -65,13 +65,7 @@ import { XToken } from './types';
 import { CdataXToken } from './token/cdataXToken';
 import { CharDataXToken } from './token/charDataXToken';
 
-interface ConvertOptions {
-   doNothing?: string;
-}
-
-function convertPTokenToXToken(pToken: ParseToken, options?: ConvertOptions): XToken {
-   if (options?.doNothing) {
-   }
+function convertPTokenToXToken(pToken: ParseToken): XToken {
    switch (pToken.type) {
       case ATTLIST_DECLARATION_PTOKEN:
          return new AttListDeclarationXToken(pToken);

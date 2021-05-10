@@ -3,9 +3,7 @@
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 
-import { makeWordListX } from '../common/makeWordListX';
-
-import { LiteralValueX, makeLiteralValueX } from '../common/makeLiteralValueX';
+import { LiteralValueX, makeLiteralValueX } from '../common/literalValueX';
 
 interface AttDefinitionXToken {
    readonly name: string;
@@ -103,7 +101,7 @@ class AttListDeclarationXToken {
          for (const item of attDefs) {
             xDefs.push({
                ...item,
-               enumeration: item.enumeration ? [...item.enumeration] : undefined,
+               enumeration: item.enumeration && [...item.enumeration],
             });
          }
       } else {
@@ -111,10 +109,24 @@ class AttListDeclarationXToken {
          this.pToken = nameOrPToken;
 
          for (const attDef of nameOrPToken.attDefs) {
+            let enumeration: Array<string> | undefined;
+
+            if (attDef.enumeration) {
+               enumeration = [];
+
+               for (const word of attDef.enumeration.words) {
+                  const wordString = strOrBlank(word.word);
+
+                  if (wordString !== '') {
+                     enumeration.push(wordString);
+                  }
+               }
+            }
+
             xDefs.push({
                name: strOrBlank(attDef.name),
                type: typeToEnum(attDef.type, !!attDef.enumeration),
-               enumeration: makeWordListX(attDef.enumeration),
+               enumeration,
                defaultType: defaultTypeToEnum(attDef.defaultType),
                value: makeLiteralValueX(attDef.value),
             });

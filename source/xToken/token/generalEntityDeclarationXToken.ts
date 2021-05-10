@@ -2,9 +2,9 @@
 
 import { strOrBlank } from 'sToken';
 import { GeneralEntityDeclarationPToken } from 'pToken';
-import { ExternalIdX } from 'xToken';
 
-import { ExntityValueX, makeEntityValueX } from '../common/makeEntityValueX';
+import { ExternalIdX, cloneExternalIdX } from '../common/externalIdX';
+import { ExntityValueX, makeEntityValueX, cloneEntityValueX } from '../common/entityValueX';
 
 const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
 
@@ -36,8 +36,8 @@ class GeneralEntityDeclarationXToken {
    ) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
-         this.value = [...value];
-         this.externalId = externalId;
+         this.value = cloneEntityValueX(value);
+         this.externalId = cloneExternalIdX(externalId);
          this.notationDataName = notationDataName;
       } else {
          this.name = strOrBlank(nameOrPToken.name);

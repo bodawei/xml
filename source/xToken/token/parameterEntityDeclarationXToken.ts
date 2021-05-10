@@ -2,9 +2,9 @@
 
 import { strOrBlank } from 'sToken';
 import { ParameterEntityDeclarationPToken } from 'pToken';
-import { ExternalIdX } from 'xToken';
 
-import { ExntityValueX, makeEntityValueX } from '../common/makeEntityValueX';
+import { ExternalIdX } from '../common/externalIdX';
+import { ExntityValueX, makeEntityValueX, cloneEntityValueX } from '../common/entityValueX';
 
 const PARAMETER_ENTITY_DECLARATION_XTOKEN = 'PARAMETER_ENTITY_DECLARATION_XTOKEN';
 
@@ -33,7 +33,7 @@ class ParameterEntityDeclarationXToken {
    ) {
       if (typeof nameOrPToken === 'string') {
          this.name = nameOrPToken;
-         this.value = [...value];
+         this.value = cloneEntityValueX(value);
          this.externalId = externalId;
       } else {
          this.name = strOrBlank(nameOrPToken.name);

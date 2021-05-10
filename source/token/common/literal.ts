@@ -38,6 +38,7 @@ interface LiteralPToken {
    closeQuote: SToken|void
 \**********************************************************************/
 
+// @@@ We need a version of this taht returns EntityValuePToken...
 function parse(source: STokenSource, options: ParseOptions | undefined, done: DeliverPToken): void {
    const pToken = options?.pToken || {};
 

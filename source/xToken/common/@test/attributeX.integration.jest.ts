@@ -3,7 +3,7 @@
 import { TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { AttributePToken } from 'token';
-import { TextXToken } from 'xToken';
+import { TextXToken } from '../../token/textXToken';
 
 import { AttributeX } from '../attributeX';
 
@@ -24,7 +24,7 @@ describe('attributeX (integration)', () => {
 
       expect(attrX).toEqual({
          name: 'one',
-         value: [new TextXToken('1')],
+         value: [new TextXToken(new TextPToken({ text: toSToken('1') }))],
       });
    });
 });

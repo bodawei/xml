@@ -13,7 +13,12 @@ class TextXToken {
    public pToken?: TextPToken;
 
    constructor(textOrPToken: string | TextPToken) {
-      this.text = typeof textOrPToken === 'string' ? textOrPToken : strOrBlank(textOrPToken.text);
+      if (typeof textOrPToken === 'string') {
+         this.text = textOrPToken;
+      } else {
+         this.text = strOrBlank(textOrPToken.text);
+         this.pToken = textOrPToken;
+      }
    }
 }
 
