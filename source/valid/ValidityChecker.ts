@@ -41,7 +41,9 @@ import {
    EXTERNAL_SUBSET_END_TOKEN,
    SPACE_PTOKEN,
    CHARDATA_PTOKEN,
+   DOCTYPE_START_PTOKEN,
 } from 'token';
+import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 
 class ValidityChecker {
    private version: ConformanceVersion;
@@ -76,6 +78,9 @@ class ValidityChecker {
             break;
          case CONDITIONAL_PTOKEN:
             conditionalValidate(token, this.state, ec);
+            break;
+         case DOCTYPE_START_PTOKEN:
+            this.state = docTypeStartUpdateState(token, this.state);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             this.state = elementDeclarationUpdateState(token, this.state);

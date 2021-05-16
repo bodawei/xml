@@ -186,8 +186,6 @@ class CheckXTokenValidStream extends Transform {
 
    private confVer: ConformanceVersion = new ConformanceVersion();
 
-   private _seenRoot = false;
-
    private standalone = false;
 
    private externalDeclarations = false;
@@ -753,17 +751,6 @@ class CheckXTokenValidStream extends Transform {
       } else if (xToken instanceof DocTypeStartXToken) {
          this.docType = xToken;
       } else if (xToken instanceof ElementStartXToken || xToken instanceof ElementEmptyXToken) {
-         if (!this._seenRoot) {
-            if (this.docType && xToken.name !== this.docType.name) {
-               this.pushValidityError(
-                  ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
-                  [this.docType.name, xToken.name],
-                  this.docType.pToken && this.docType.pToken.open,
-               );
-            }
-            this._seenRoot = true;
-         }
-
          if (xToken instanceof ElementStartXToken) {
             if (this.elementDeclarations[xToken.name]) {
                this.currentContext = {

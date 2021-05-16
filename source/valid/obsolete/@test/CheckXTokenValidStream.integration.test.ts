@@ -31,19 +31,6 @@ describe('CheckXTokenValidStream (integration)', () => {
       (parser as any).pipe(replacer).pipe(tokenizer).pipe(validator); // typeHack
    });
 
-   it('reports an error when the DOCTYPE and first element do not match', (done) => {
-      const expected = new ValidityError(
-         ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
-         ['one', 'two'],
-         new Offset(new EntityId(), 23, 0, 23),
-      );
-
-      parser.addText('<?xml version="1.0"?><!DOCTYPE one><two></two>');
-      parser.endText();
-
-      expectStream(validator, expected, done);
-   });
-
    it('reports an error when the NOTATION is added twice', (done) => {
       const error = new ValidityError(
          ValidityError.ID.NOTATION_NOT_UNIQUE,

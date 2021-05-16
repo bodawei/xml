@@ -4,6 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 import {
    makeAttListDeclaration,
+   makeDocTypeStart,
    makeElementDeclaration,
    makeElementEmpty,
    makeElementEnd,
@@ -20,6 +21,7 @@ import {
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
 import { conditionalValidate } from '../token/conditionalValidate';
+import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
 import { elementDeclarationValidate } from '../token/elementDeclarationValidate';
 import { elementEndUpdateState } from '../token/elementEndUpdateState';
@@ -40,6 +42,7 @@ import { toSToken } from 'sToken';
 
 jest.mock('../token/attListDeclarationUpdateState');
 jest.mock('../token/conditionalValidate');
+jest.mock('../token/docTypeStartUpdateState');
 jest.mock('../token/elementDeclarationUpdateState');
 jest.mock('../token/elementDeclarationValidate');
 jest.mock('../token/elementEndUpdateState');
@@ -118,6 +121,14 @@ describe('ValidityChecker (unit)', () => {
       expect(conditionalValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
    });
 
+   it('updates the state when passed a docTypeStart', () => {
+      const docTypeStart = makeDocTypeStart();
+
+      checker.checkPToken(docTypeStart, ec);
+
+      expect(docTypeStartUpdateState).toHaveBeenCalledWith(docTypeStart, expect.any(Object));
+   });
+
    it('updates the state when passed an element start', () => {
       const elementEmpty = makeElementEmpty();
 
@@ -174,7 +185,7 @@ describe('ValidityChecker (unit)', () => {
 
    it('updates the state when passed an elided entity declaration', () => {
       const peDecl = makeParameterEntityDeclaration();
-      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value as EntityValuePToken); // typehack
+      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value); // typehack
 
       checker.checkPToken(elided, ec);
 

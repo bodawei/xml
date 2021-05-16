@@ -10,7 +10,7 @@ interface FilterData {
 - 
 */
 const testFilters: FilterData = {
-   includedIds: [],
+   includedIds: ['ibm-invalid-P28-ibm28i01.xml'],
    excludedIds: [],
 
    futureFeatures: [

@@ -10,6 +10,7 @@ import { ValidityError } from '../../error/ValidityError';
 import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
 import { ElementStartPToken } from 'token';
 import { CmGraph } from '../../contentModal/cmGraphTypes';
+import { makeElementDeclaration } from 'token-test';
 
 describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
@@ -81,6 +82,58 @@ describe('elementStartValidate (unit)', () => {
             pastEnd: false,
          },
       });
+   });
+
+   it('reports an error when element is the first/root element, and it does not match the docType', () => {
+      state = new ValidateState({
+         docType: 'rootType',
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportValidityError({
+         id: ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
+         params: ['rootType', 'elementName'],
+         position: elementStart.name,
+         lastPosition: undefined,
+      });
+   });
+
+   it('reports no error when element is the first/root element, and it does match the docType', () => {
+      state = new ValidateState({
+         docType: 'elementName',
+         elementDeclarations: {
+            elementName: {
+               token: makeElementDeclaration(),
+               type: ElDeclType.ANY,
+            },
+         },
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('reports no error when element is the first/root element, does not match the docType, but we are past the end', () => {
+      state = new ValidateState({
+         docType: 'bogusName',
+         elementDeclarations: {
+            elementName: {
+               token: makeElementDeclaration(),
+               type: ElDeclType.ANY,
+            },
+         },
+         elementContext: {
+            contextStack: [],
+            pastEnd: true,
+         },
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 
    it('reports an error when the context is EMPTY', () => {

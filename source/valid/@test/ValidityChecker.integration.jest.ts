@@ -5,16 +5,14 @@ import { describe, expect, it } from '@jest/globals';
 import { ErrorCollector } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ContextType, ParseToken } from 'pToken';
+import { PTokenStream } from '../../pTokenStream';
 import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
+import { ErrorToken } from 'token';
 import { AttFixerStream, EntityExpanderStream } from 'node';
 
 import { ValidityChecker } from '../ValidityChecker';
 import { ValidityError } from '../error/ValidityError';
-
-// ick
-import { PTokenStream } from '../../pTokenStream';
-import { ErrorToken } from 'token';
 
 describe('ValidityChecker (integration)', () => {
    let ec: ErrorCollector;
@@ -112,7 +110,7 @@ describe('ValidityChecker (integration)', () => {
            &I-Am-Not-Defined;
          </root>`,
          ValidityError.ID.GEREF_UNDEFINED,
-         done,
+         done!,
       );
    });
 
@@ -125,6 +123,19 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          ValidityError.ID.PEREF_UNDEFINED,
+         done!,
+      );
+   });
+
+   it('reports an error when the doctype does not match the root element (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT bar ANY>
+            %I-Am-Not-Defined;
+         ]>
+         <bar/>`,
+         ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
          done!,
       );
    });

@@ -116,22 +116,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(dtStart as any); // typeHack
       });
 
-      it('adds an error if the DOCTYPE name and the element start name do not match', () => {
-         const dtStart = new DocTypeStartXToken('docTypeName', undefined as any);
-         const elStart = new ElementStartXToken('elementName', []);
-
-         validator.write(dtStart);
-         validator.write(elStart);
-
-         expect(validator.read()).toEqual(dtStart as any); // typeHack
-         expect(validator.read()).toEqual(
-            new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [
-               'docTypeName',
-               'elementName',
-            ]),
-         );
-      });
-
       it('adds an error if the NOTATION name shows up more than once', (done) => {
          const nOne = new NotationDeclarationXToken('one');
          const nTwo = new NotationDeclarationXToken('one');

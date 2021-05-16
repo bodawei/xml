@@ -57,6 +57,7 @@ type ReadonlyGeneralEntityDetails = Readonly<GeneralEntityDetails>;
 type ReadonlyParameterEntityDetails = Readonly<ParameterEntityDetails>;
 
 interface ValidateStateProps {
+   docType?: string;
    attributeDefs?: {
       [elementName: string]: AttributeDefs;
    };
@@ -94,6 +95,8 @@ interface AttributeDefs {
 }
 
 class ValidateState {
+   readonly docType?: string;
+
    readonly inExternalSubset: boolean;
 
    readonly attributeDefs: {
@@ -123,6 +126,7 @@ class ValidateState {
    confVer: ConformanceVersion;
 
    constructor(otherState?: ValidateStateProps) {
+      this.docType = otherState?.docType;
       this.attributeDefs = otherState?.attributeDefs || {};
       this.elementDeclarations = otherState?.elementDeclarations || {};
       // Too simplistic.
