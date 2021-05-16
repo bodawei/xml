@@ -31,22 +31,6 @@ describe('CheckXTokenValidStream (integration)', () => {
       (parser as any).pipe(replacer).pipe(tokenizer).pipe(validator); // typeHack
    });
 
-   it('reports an error when the NOTATION is added twice', (done) => {
-      const error = new ValidityError(
-         ValidityError.ID.NOTATION_NOT_UNIQUE,
-         ['one'],
-         new Offset(new EntityId(), 70, 0, 70),
-      );
-
-      parser.addText(
-         '<?xml version="1.0"?><!DOCTYPE one [<!NOTATION one SYSTEM "-//test">' +
-            '<!NOTATION one SYSTEM "-//foo">]>',
-      );
-      parser.endText();
-
-      expectStream(validator, error, done);
-   });
-
    describe('ATTLIST', () => {
       it('reports an error when the an IDREF is not a valid name', (done) => {
          const error = new ValidityError(

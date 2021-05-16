@@ -66,6 +66,10 @@ interface ValidateStateProps {
       [elementName: string]: GeneralEntityDetails;
    };
 
+   notationDeclarations: {
+      [notationName: string]: true | undefined;
+   };
+
    parameterEntities?: {
       [name: string]: ParameterEntityDetails;
    };
@@ -111,6 +115,10 @@ class ValidateState {
       [name: string]: DeclarationDetails | undefined;
    };
 
+   readonly notationDeclarations: {
+      readonly [notationName: string]: true | undefined;
+   };
+
    readonly parameterEntities: {
       readonly [elementName: string]: ReadonlyParameterEntityDetails;
    };
@@ -131,6 +139,7 @@ class ValidateState {
       this.elementDeclarations = otherState?.elementDeclarations || {};
       // Too simplistic.
       this.generalEntities = otherState?.generalEntities ? { ...otherState.generalEntities } : {};
+      this.notationDeclarations = { ...(otherState?.notationDeclarations ?? {}) };
       this.parameterEntities = otherState?.parameterEntities
          ? { ...otherState.parameterEntities }
          : {};

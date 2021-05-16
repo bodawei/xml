@@ -4,11 +4,24 @@ import {
    ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParseToken,
    XMLDECL_PTOKEN,
 } from 'pToken';
+import {
+   CONDITIONAL_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_END_PTOKEN,
+   ELIDED_ENTITY_DECLARATION_PTOKEN,
+   EXTERNAL_SUBSET_START_TOKEN,
+   EXTERNAL_SUBSET_END_TOKEN,
+   SPACE_PTOKEN,
+   CHARDATA_PTOKEN,
+   DOCTYPE_START_PTOKEN,
+} from 'token';
 
 import { ValidateState } from './validateState';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
@@ -29,21 +42,9 @@ import { parameterEntityReferenceValidate } from './token/parameterEntityReferen
 import { parameterEntityDeclarationUpdateState } from './token/parameterEntityDeclarationUpdateState';
 import { spaceValidate } from './token/spaceValidate';
 import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
-
-// ick
-import {
-   CONDITIONAL_PTOKEN,
-   ELEMENT_START_PTOKEN,
-   ELEMENT_EMPTY_PTOKEN,
-   ELEMENT_END_PTOKEN,
-   ELIDED_ENTITY_DECLARATION_PTOKEN,
-   EXTERNAL_SUBSET_START_TOKEN,
-   EXTERNAL_SUBSET_END_TOKEN,
-   SPACE_PTOKEN,
-   CHARDATA_PTOKEN,
-   DOCTYPE_START_PTOKEN,
-} from 'token';
 import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
+import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
+import { notationDeclarationValidate } from './token/notationDeclarationValidate';
 
 class ValidityChecker {
    private version: ConformanceVersion;
@@ -109,6 +110,10 @@ class ValidityChecker {
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             generalEntityReferenceValidate(token, this.state, ec);
+            break;
+         case NOTATION_DECLARATION_PTOKEN:
+            notationDeclarationValidate(token, this.state, ec);
+            this.state = notationDeclarationUpdateState(token, this.state);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             this.state = parameterEntityDeclarationUpdateState(token, this.state);

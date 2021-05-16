@@ -116,18 +116,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(dtStart as any); // typeHack
       });
 
-      it('adds an error if the NOTATION name shows up more than once', (done) => {
-         const nOne = new NotationDeclarationXToken('one');
-         const nTwo = new NotationDeclarationXToken('one');
-
-         validator.write(nOne);
-         validator.write(nTwo);
-         validator.end();
-
-         const expected = new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, ['one']);
-         expectStream(validator, expected, done);
-      });
-
       it('adds no error if the NOTATION name shows up more than once and this is version 1.0/1', (done) => {
          const nOne = new NotationDeclarationXToken('one');
          const nTwo = new NotationDeclarationXToken('one');

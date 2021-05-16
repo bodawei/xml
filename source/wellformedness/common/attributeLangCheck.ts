@@ -42,10 +42,6 @@ function firstSToken(value: AttributeValue): SToken | undefined {
       }
    }
 
-   if (!pToken) {
-      return;
-   }
-
    return pToken.text;
 }
 

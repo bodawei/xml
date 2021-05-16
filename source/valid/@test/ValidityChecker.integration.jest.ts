@@ -132,10 +132,22 @@ describe('ValidityChecker (integration)', () => {
          `<?xml version="1.0"?>
          <!DOCTYPE root [
             <!ELEMENT bar ANY>
-            %I-Am-Not-Defined;
          ]>
          <bar/>`,
          ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
+         done!,
+      );
+   });
+
+   it('reports an error when a notation name is declared more than once (§4.7.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!NOTATION bar PUBLIC "http://somewhere.com">
+            <!NOTATION bar PUBLIC "http://somewhere-else.com">
+         ]>
+         <root/>`,
+         ValidityError.ID.NOTATION_NOT_UNIQUE,
          done!,
       );
    });

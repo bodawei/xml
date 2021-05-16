@@ -13,6 +13,7 @@ import {
    makeExternalSubsetStart,
    makeGeneralEntityDeclaration,
    makeGeneralEntityReference,
+   makeNotationDeclaration,
    makeParameterEntityDeclaration,
    makeParameterEntityReference,
    makeXmlDecl,
@@ -33,11 +34,13 @@ import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpda
 import { externalSubsetEndUpdateState } from '../token/externalSubsetEndUpdateState';
 import { generalEntityDeclarationUpdateState } from '../token/generalEntityDeclarationUpdateState';
 import { generalEntityReferenceValidate } from '../token/generalEntityReferenceValidate';
+import { notationDeclarationUpdateState } from '../token/notationDeclarationUpdateState';
+import { notationDeclarationValidate } from '../token/notationDeclarationValidate';
 import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityDeclarationUpdateState';
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 import { ConformanceVersion } from 'basic';
-import { ConditionalPToken, ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
+import { ConditionalPToken, ElidedEntityDeclarationPToken } from 'token';
 import { toSToken } from 'sToken';
 
 jest.mock('../token/attListDeclarationUpdateState');
@@ -54,6 +57,8 @@ jest.mock('../token/externalSubsetEndUpdateState');
 jest.mock('../token/externalSubsetStartUpdateState');
 jest.mock('../token/generalEntityDeclarationUpdateState');
 jest.mock('../token/generalEntityReferenceValidate');
+jest.mock('../token/notationDeclarationUpdateState');
+jest.mock('../token/notationDeclarationValidate');
 jest.mock('../token/parameterEntityDeclarationUpdateState');
 jest.mock('../token/parameterEntityReferenceValidate');
 jest.mock('../token/xmlDeclarationUpdateState');
@@ -222,6 +227,26 @@ describe('ValidityChecker (unit)', () => {
       checker.checkPToken(geRef, ec);
 
       expect(generalEntityReferenceValidate).toHaveBeenCalledWith(geRef, expect.any(Object), ec);
+   });
+
+   it('updates the state when passed a notation declaration', () => {
+      const notationDecl = makeNotationDeclaration();
+
+      checker.checkPToken(notationDecl, ec);
+
+      expect(notationDeclarationUpdateState).toHaveBeenCalledWith(notationDecl, expect.any(Object));
+   });
+
+   it('validates a notation declaration', () => {
+      const notationDecl = makeNotationDeclaration();
+
+      checker.checkPToken(notationDecl, ec);
+
+      expect(notationDeclarationValidate).toHaveBeenCalledWith(
+         notationDecl,
+         expect.any(Object),
+         ec,
+      );
    });
 
    it('updates the state when passed a parameter entity declaration', () => {

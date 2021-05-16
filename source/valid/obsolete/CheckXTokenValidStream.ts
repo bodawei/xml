@@ -703,7 +703,8 @@ class CheckXTokenValidStream extends Transform {
       }
 
       if (xToken.type === NOTATION_DECLARATION_XTOKEN) {
-         this.validateNotationDeclaration(xToken as NotationDeclarationXToken);
+         const notationDecl = xToken as NotationDeclarationXToken;
+         this.notations[notationDecl.name] = notationDecl;
       } else if (xToken instanceof AttListDeclarationXToken) {
          this.validateAttListDecl(xToken);
       } else if (
@@ -820,28 +821,6 @@ class CheckXTokenValidStream extends Transform {
       }
 
       seen[name] = xToken;
-   }
-
-   private validateNotationDeclaration(notationDecl: NotationDeclarationXToken) {
-      if (this.notations[notationDecl.name]) {
-         // §4.7 Validity constraint: Unique Notation Name
-         // A given Name must not be declared in more than one notation declaration.
-         const pToken = notationDecl.pToken ? notationDecl.pToken.open : undefined;
-         const errorOnDuplicate =
-            (this.confVer.version === 1 && this.confVer.edition >= 2) ||
-            this.confVer.version === 1.1;
-
-         if (errorOnDuplicate) {
-            this.pushValidityError(
-               ValidityError.ID.NOTATION_NOT_UNIQUE,
-               [notationDecl.name],
-               pToken,
-            );
-         }
-         return;
-      }
-
-      this.notations[notationDecl.name] = notationDecl;
    }
 
    private validateAttListDecl(attListDecl: AttListDeclarationXToken) {
