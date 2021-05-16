@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
+import { STokenSource, SToken } from 'sToken';
 
 
 const CHARDATA_PTOKEN = 'CHARDATA_PTOKEN';
@@ -12,10 +12,6 @@ class CharDataPToken {
 
    constructor(props: { text: SToken }) {
       this.text = props.text;
-   }
-
-   toSTokenArray(): Array<SToken> {
-      return sTokensFromPToken(this);
    }
 }
 
@@ -44,18 +40,6 @@ function parseCharData(source: STokenSource, otherTerminators: Array<string>, de
 
       deliverPToken(new CharDataPToken({ text: sToken }));
    });
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: CharDataPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.text);
-
-   return builder.sTokenArray;
 }
 
 export {

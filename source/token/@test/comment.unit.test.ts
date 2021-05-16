@@ -21,26 +21,6 @@ describe('comment (unit)', () => {
       });
    });
 
-   describe('PToken', () => {
-
-      describe('sTokensFromPToken()', () => {
-
-         it('returns all the STokens', () => {
-            const pToken = new CommentPToken(commentPToken);
-            const result = pToken.toSTokenArray();
-            const expected = [
-               pToken.open,
-               pToken.text[0],
-               pToken.close!,
-            ];
-
-            expect(result).toEqual(expected);
-         });
-
-      });
-
-   });
-
    describe('parseComment()', () => {
       let callback: jasmine.Spy;
 

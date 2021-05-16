@@ -41,63 +41,6 @@ describe('elementStart (unit)', () => {
       });
    });
 
-   describe('ElementStartPToken', () => {
-
-      describe('toSTokenArray()', () => {
-
-         it('returns all the STokens', () => {
-            expect(elementStartPTokenWithLeading.toSTokenArray()).toEqual([
-               elementStartPTokenWithLeading.open,
-               elementStartPTokenWithLeading.openSpace,
-               elementStartPTokenWithLeading.name,
-               elementStartPTokenWithLeading.nameSpace,
-               elementStartPTokenWithLeading.close,
-            ] as any);
-         });
-
-      });
-
-      it('asks the attribute to provide the STokens', () => {
-         spyOn(attribute, 'getSTokens');
-         (elementStartPToken as any).attributes = [ {} ];
-
-         elementStartPToken.toSTokenArray();
-
-         expect(attribute.getSTokens).toHaveBeenCalledWith(elementStartPToken.attributes);
-      });
-
-   });
-
-   describe('EmptyPToken', () => {
-
-      describe('getSTokenStream()', () => {
-
-         it('returns all the STokens', () => {
-            const pToken = new ElementEmptyPToken(elementStartPTokenWithLeading);
-
-            expect(pToken.toSTokenArray()).toEqual([
-               elementStartPTokenWithLeading.open,
-               elementStartPTokenWithLeading.openSpace,
-               elementStartPTokenWithLeading.name,
-               elementStartPTokenWithLeading.nameSpace,
-               elementStartPTokenWithLeading.close,
-            ] as any);
-         });
-
-      });
-
-      it('asks the attribute to provide the STokens', () => {
-         const pToken = new ElementEmptyPToken(elementStartPTokenWithLeading);
-         spyOn(attribute, 'getSTokens');
-         (pToken as any).attributes = [ {} ];
-
-         pToken.toSTokenArray();
-
-         expect(attribute.getSTokens).toHaveBeenCalledWith(pToken.attributes);
-      });
-
-   });
-
    describe('parse()', () => {
       let callback: jasmine.Spy;
       let attrParse: jasmine.Spy;

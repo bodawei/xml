@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
+import { STokenSource, SToken } from 'sToken';
 
 const SPACE_PTOKEN = 'SPACE_PTOKEN';
 
@@ -14,10 +14,6 @@ class SpacePToken {
 
    constructor(props: { text: SToken }) {
       this.text = props.text;
-   }
-
-   toSTokenArray(): Array<SToken> {
-      return sTokensFromPToken(this);
    }
 }
 
@@ -42,18 +38,6 @@ function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|vo
 
       deliverPToken(new SpacePToken({ text: sToken }));
    });
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: SpacePToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.text);
-
-   return builder.sTokenArray;
 }
 
 export {

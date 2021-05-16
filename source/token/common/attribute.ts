@@ -105,41 +105,11 @@ function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, optio
 }
 
 
-function getSTokens(attributes: AttributesPToken = []) {
-   let results: Array<SToken> = [];
-
-   for (let index = 0; index < attributes.length; index++) {
-      const attr = attributes[index];
-
-      results.push(attr.name);
-      if (attr.postNameSpace) {
-         results.push(attr.postNameSpace);
-      }
-
-      if (attr.equal) {
-         results.push(attr.equal);
-      }
-
-      if (attr.postEqualSpace) {
-         results.push(attr.postEqualSpace);
-      }
-
-      results = results.concat(literal.getSTokens(attr));
-
-      if (attr.trailingSpace) {
-         results.push(attr.trailingSpace);
-      }
-   }
-
-   return results.filter(item => item);
-}
-
 const parseAttribute = parse;
 
 const attribute = {
    parse,
    parseAttribute,
-   getSTokens,
 };
 
 export default attribute;
@@ -149,5 +119,6 @@ export {
    AttributePToken,
    AttributeValuePToken,
    AttributeValueElement,
+   AttributesPToken,
    parseAttribute,
 };

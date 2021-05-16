@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
 
-import { STokenSource, STokenArrayBuilder, SToken } from 'sToken';
+import { STokenSource, SToken } from 'sToken';
 
 import { DocTypeStartPToken } from './docTypeStart';
 
@@ -27,10 +27,6 @@ class DocTypeEndPToken {
 
       this.docTypeStartPToken = basePToken.docTypeStartPToken; // Make sure type system knows we always assign open
       this.type = DOCTYPE_END_PTOKEN;
-   }
-
-   toSTokenArray() {
-      return sTokensFromPToken(this);
    }
 }
 
@@ -61,21 +57,6 @@ function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken,
       pToken.close = sToken;
       deliverPToken(new DocTypeEndPToken(pToken));
    });
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the component STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: DocTypeEndPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(
-      pToken.closeSubset,
-      pToken.closeSubsetSpace,
-      pToken.close);
-
-   return builder.sTokenArray;
 }
 
 export {

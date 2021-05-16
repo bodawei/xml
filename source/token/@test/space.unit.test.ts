@@ -16,16 +16,6 @@ describe('space (unit)', () => {
       });
    });
 
-   describe('toStokenArray()', () => {
-
-      it('returns all the STokens', () => {
-         expect(spacePToken.toSTokenArray()).toEqual([
-            spacePToken.text,
-         ]);
-      });
-
-   });
-
    describe('parseSpace()', () => {
       let callback: jasmine.Spy;
 

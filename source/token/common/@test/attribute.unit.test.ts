@@ -188,48 +188,4 @@ describe('attribute (unit)', () => {
 
    });
 
-   describe('getSTokens()', () => {
-
-      beforeEach(() => {
-         spyOn(literal, 'getSTokens');
-      });
-
-      it('calls literal.getSTokens()', () => {
-         attributesPChunk.pop();
-
-         attribute.getSTokens(attributesPChunk);
-
-         expect(literal.getSTokens).toHaveBeenCalledWith(attributesPChunk[0]);
-      });
-
-      it('returns the STokens that made up the attribute', () => {
-         const results = attribute.getSTokens(attributesPChunk);
-
-         expect(results).toEqual([
-            attributesPChunk[0].name,
-            attributesPChunk[0].postNameSpace,
-            attributesPChunk[0].equal,
-            attributesPChunk[0].postEqualSpace,
-            attributesPChunk[0].trailingSpace,
-            attributesPChunk[1].name,
-            attributesPChunk[1].equal,
-         ]);
-      });
-
-      it('handles most attributes being missing', () => {
-         const results = attribute.getSTokens([{
-            value: []
-         }] as any);
-
-         expect(results).toEqual([]);
-      });
-
-      it('returns an empty array if no attributes are passed', () => {
-         const results = attribute.getSTokens(undefined);
-
-         expect(results).toEqual([]);
-      });
-
-   });
-
 });

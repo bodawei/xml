@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import declaration, { DeclarationPToken } from '../baseDeclaration';
@@ -21,25 +20,6 @@ describe('declaration (unit)', () => {
          declType: makeSToken('DOCTYPE'),
          postDeclTypeSpace: makeSToken(' '),
       } as any;
-   });
-
-   describe('PToken', () => {
-
-      describe('getSTokenStream()', () => {
-
-         it('returns all the STokens', () => {
-            const pToken = new declaration.PToken(undefined, declarationPToken);
-
-            expect(pToken.getSTokenArray()).toEqual([
-               pToken.open,
-               pToken.postOpenSpace,
-               pToken.declType,
-               pToken.postDeclTypeSpace,
-            ] as Array<SToken>);
-         });
-
-      });
-
    });
 
    describe('parse()', () => {

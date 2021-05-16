@@ -342,7 +342,6 @@ function resumeParseContentModelP(
       });
    } else {
       const last = delParticles[delParticles.length - 1];
-      const first = delParticles[0];
 
       if (isIncompleteParticle(last)) {
          resumeParseDelimitedParticle(source, last, preSpace, (particle) => {

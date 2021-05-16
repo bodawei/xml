@@ -42,7 +42,7 @@ import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken'
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
 import { CharRefXToken } from './token/CharRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
-import { NotationDeclarationXToken } from './index';
+import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
 import { ConditionalEndXToken } from './token/conditionalEndXToken';
 import { ConditionalStartXToken } from './token/conditionalStartXToken';
 import { CommentXToken } from './token/commentXToken';

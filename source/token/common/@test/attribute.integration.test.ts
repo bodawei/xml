@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { TextPToken, } from 'pToken';
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import attribute from '../attribute';
@@ -86,22 +86,6 @@ describe('attribute (integration)', () => {
                postEqualSpace: undefined,
                value: [],
             } ]);
-            done();
-         });
-      });
-
-   });
-
-   describe('getSTokens()', () => {
-
-      it('adds STokens from the quoted value (calling literal.getSTokens()', (done) => {
-         source.addText('name="value">');
-         source.endText();
-
-         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
-            const results = attribute.getSTokens(parsing);
-
-            expect(results[3].str).toEqual('value');
             done();
          });
       });

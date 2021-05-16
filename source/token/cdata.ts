@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 
 import { SectionStart } from './bridge/section';
 
@@ -21,10 +21,6 @@ class CdataPToken {
    constructor(param: CdataPToken | SectionStart) {
       Object.assign(this, param);
       this.open = param.open;
-   }
-
-   toSTokenArray(): Array<SToken> {
-      return sTokensFromPToken(this);
    }
 }
 
@@ -54,24 +50,6 @@ function parseCdata(source: STokenSource, sectionStart: SectionStart, deliverPTo
       props.close = sToken;
       deliverPToken(new CdataPToken(props));
    });
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: CdataPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.open,
-      pToken.openSpace,
-      pToken.sectionType,
-      pToken.sectionTypeSpace,
-      pToken.bracket,
-      pToken.text,
-      pToken.close);
-
-   return builder.sTokenArray;
 }
 
 export {

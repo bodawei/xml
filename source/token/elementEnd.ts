@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { STokenSource, SToken, STokenArrayBuilder } from 'sToken';
+import { STokenSource, SToken } from 'sToken';
 
 const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
 
@@ -18,10 +18,6 @@ class ElementEndPToken {
       Object.assign(this, basePToken);
 
       this.open = basePToken.open; // Make sure type system knows we always assign open
-   }
-
-   toSTokenArray() {
-      return sTokensFromPToken(this);
    }
 }
 
@@ -54,24 +50,6 @@ function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (res
       pToken.close = sToken;
       deliverPToken(new ElementEndPToken(pToken));
    });
-}
-
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the component STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: ElementEndPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(
-      pToken.open,
-      pToken.openSpace,
-      pToken.name,
-      pToken.nameSpace,
-      pToken.close);
-
-   return builder.sTokenArray;
 }
 
 export {

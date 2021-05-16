@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';
 
@@ -25,10 +25,6 @@ class CommentPToken {
       });
 
       this.open = param.open;
-   }
-
-   toSTokenArray() {
-      return sTokensFromPToken(this);
    }
 }
 
@@ -82,20 +78,6 @@ function extractCommentContent(source: STokenSource, pToken: { open: SToken; [ke
          });
       });
    });
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: CommentPToken): ReadonlyArray<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.open);
-   builder.add(pToken.text.slice(0));
-   builder.add(pToken.close);
-
-   return builder.sTokenArray;
 }
 
 export {

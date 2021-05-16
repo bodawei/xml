@@ -29,8 +29,8 @@ module.exports = {
      '!source/expand/**/@test/**/*.ts',
      'source/pToken/**/*.ts',
      '!source/pToken/**/@test/**/*.ts',
-     'source/stringify/**/*.ts',
-     '!source/stringify/**/@test/**/*.ts',
+     'source/flat/**/*.ts',
+     '!source/flat/**/@test/**/*.ts',
      'source/valid/**/*.ts',
      '!source/valid/**/@test/**/*.ts',
      'source/wellformedness/**/*.ts',
@@ -113,7 +113,7 @@ module.exports = {
      '^pToken-test$': '<rootDir>/source/pToken/@test/helper',
      '^sToken$': '<rootDir>/source/sToken',
      '^sToken-test$': '<rootDir>/source/sToken/@test/helper',
-     '^stringify$': '<rootDir>/source/stringify',
+     '^flat$': '<rootDir>/source/flat',
      '^token$': '<rootDir>/source/token',
      '^token-test$': '<rootDir>/source/token/@test/helper',
      '^valid$': '<rootDir>/source/valid',
@@ -196,8 +196,10 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-   //   "<rootDir>/**/@test/**/*jest.ts?(x)",
-     "<rootDir>/source/xToken/**/@test/**/*jest.ts?(x)",
+     "<rootDir>/**/@test/**/*jest.ts?(x)",
+   //   "<rootDir>/source/xToken/**/@test/**/*jest.ts?(x)",
+   //   "<rootDir>/source/flat/**/@test/**/*jest.ts?(x)",
+   //   "<rootDir>/source/node/**/@test/**/*jest.ts?(x)",
   //   "**/__tests__/**/*.[jt]s?(x)",
   //   "**/?(*.)+(spec|test).f[tj]s?(x)"
   ],

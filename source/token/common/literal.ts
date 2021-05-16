@@ -75,32 +75,11 @@ function parse(source: STokenSource, options: ParseOptions | undefined, done: De
    });
 }
 
-function getSTokens(pToken: LiteralPToken | void): Array<SToken> {
-   let results: Array<SToken> = [];
-
-   if (!pToken) {
-      return results;
-   }
-
-   if (pToken.openQuote) {
-      results.push(pToken.openQuote);
-   }
-
-   results = results.concat(literalValue.getSTokens(pToken.value || []));
-
-   if (pToken.closeQuote) {
-      results.push(pToken.closeQuote);
-   }
-
-   return results;
-}
-
 const parseLiteral = parse;
 
 const literal = {
    parse,
    parseLiteral,
-   getSTokens,
 };
 
 export default literal;

@@ -68,29 +68,4 @@ describe('docTypeStart (unit)', () => {
 
    });
 
-   describe('getSTokenStream()', () => {
-
-      it('returns all the STokens', () => {
-         const pToken = new DocTypeStartPToken(docTypeStartPToken);
-
-         expect(pToken.toSTokenArray()).toEqual([
-            docTypeStartPToken.open,
-            docTypeStartPToken.name,
-            docTypeStartPToken.nameSpace,
-            docTypeStartPToken.externalIdSpace,
-            docTypeStartPToken.openSubset,
-         ] as any);
-      });
-
-      // it('calls externalId getSTokens', () => {
-      //    spyOn(externalId, 'getSTokens');
-      //    const pToken = new DocTypeStartPToken(docTypeStartPToken);
-
-      //    pToken.toSTokenArray();
-
-      //    expect(externalId.getSTokens).toHaveBeenCalledWith(docTypeStartPToken.externalId);
-      // });
-
-   });
-
 });

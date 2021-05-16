@@ -1,6 +1,6 @@
 /* Copyright ® 2017-201 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 
 import attribute, { AttributePToken } from './common/attribute';
 
@@ -27,10 +27,6 @@ class ElementStartPToken {
       this.type = ELEMENT_START_PTOKEN;
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
-
-   toSTokenArray() {
-      return sTokensFromPToken(this);
-   }
 }
 
 class ElementEmptyPToken {
@@ -48,10 +44,6 @@ class ElementEmptyPToken {
 
       this.type = ELEMENT_EMPTY_PTOKEN;
       this.open = basePToken.open; // Make sure type system knows we always assign open
-   }
-
-   toSTokenArray() {
-      return sTokensFromPToken(this);
    }
 }
 
@@ -108,24 +100,6 @@ function parseElementStart(source: STokenSource, open: SToken, deliverPToken: De
    });
 }
 
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the component STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: ElementStartPToken | ElementEmptyPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-   const sTokens = attribute.getSTokens(pToken.attributes);
-
-   builder.add(
-      pToken.open,
-      pToken.openSpace,
-      pToken.name,
-      pToken.nameSpace,
-      sTokens,
-      pToken.close);
-
-   return builder.sTokenArray;
-}
 
 export {
    ELEMENT_EMPTY_PTOKEN,

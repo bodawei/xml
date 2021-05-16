@@ -24,7 +24,7 @@ describe('PToXTokenStream (unit)', () => {
 
       pToXTokenStream.write(pToken);
 
-      expect(convertPTokenToXTokenMock).toHaveBeenCalledWith(pToken, {});
+      expect(convertPTokenToXTokenMock).toHaveBeenCalledWith(pToken);
    });
 
    it('calls the push() when with the result of the conversion', () => {

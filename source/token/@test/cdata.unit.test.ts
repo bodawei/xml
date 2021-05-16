@@ -66,19 +66,4 @@ describe('cdata (unit)', () => {
 
    });
 
-
-   describe('pToken.toSTokenArray()', () => {
-
-      it('returns all the STokens', () => {
-         expect(cDataPToken.toSTokenArray()).toEqual([
-            cDataPToken.open,
-            cDataPToken.sectionType,
-            cDataPToken.bracket,
-            cDataPToken.text,
-            cDataPToken.close,
-         ] as Array<SToken>);
-      });
-
-   });
-
 });

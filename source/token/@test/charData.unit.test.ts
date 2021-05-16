@@ -55,20 +55,6 @@ describe('charData', () => {
 
          expect(callback.calls.argsFor(0)).toEqual([ undefined ]);
       });
-
-      it('returns a PToken that can provide the STokens', () => {
-         const mockSource = new MockSTokenSource([
-            'test text',
-         ]);
-
-         parseCharData(mockSource, [], callback);
-         mockSource.respondInAsyncTime();
-
-         expect(callback.calls.argsFor(0)[0].toSTokenArray()).toEqual([
-            charDataPToken.text,
-         ]);
-      });
-
    });
 
 });

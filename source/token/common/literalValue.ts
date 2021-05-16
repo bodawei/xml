@@ -3,9 +3,8 @@
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { CharRefPToken, parseCharRef, GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
-import { generalEntityReferenceToSTokens } from 'stringify';
 
-import { ParameterEntityReferencePToken, TextPToken, isTextPToken, parseParameterEntityReference } from 'pToken';
+import { ParameterEntityReferencePToken, TextPToken, parseParameterEntityReference } from 'pToken';
 import {  GeneralEntityEndPToken } from '../marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from '../marker/generalEntityStart';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
@@ -102,30 +101,6 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
 }
 
 
-/**********************************************************************\
- SToken extraction
-\**********************************************************************/
-
-function getSTokens(pToken: LiteralValuePToken) {
-   let results: Array<SToken> = [];
-
-   for (let index = 0; index < pToken.length; index++) {
-      const item = pToken[index];
-
-      if (item.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
-         results.push(...generalEntityReferenceToSTokens(item));
-         } else if (!isTextPToken(item)) {
-         const typeHack: any = item
-
-         results = results.concat(typeHack.toSTokenArray());
-      } else {
-         results.push(item.text);
-      }
-   }
-
-   return results;
-}
-
 
 const parseLiteralValue = parse;
 export {
@@ -134,10 +109,8 @@ export {
 
    parse,
    parseLiteralValue,
-   getSTokens,
 }
 
 export default {
    parse,
-   getSTokens,
 };

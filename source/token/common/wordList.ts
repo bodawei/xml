@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 
 const ENUMERATION_PTOKEN = 'ENUMERATION_PTOKEN';
 const NOTATION_PTOKEN = 'NOTATION_PTOKEN';
@@ -39,10 +39,6 @@ class WordListPToken {
       this.type = type === WordListType.NOTATION ? NOTATION_PTOKEN : ENUMERATION_PTOKEN;
       this.open = props.open; // Convince compiler that there is an open
       this.words = this.words || [];
-   }
-
-   toSTokenArray(): Array<SToken> {
-      return toSTokenArray(this);
    }
 }
 
@@ -104,25 +100,6 @@ function parseNames(source: STokenSource, deliverPToken: DeliverNamePToken): voi
          deliverPToken(result);
       });
    });
-}
-
-
-/**********************************************************************\
- STokenArray
-\**********************************************************************/
-
-function toSTokenArray(pToken: WordListPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.open, pToken.openSpace);
-
-   for (const entry of pToken.words) {
-      builder.add(entry.word, entry.wordSpace, entry.connector, entry.connectorSpace);
-   }
-
-   builder.add(pToken.close, pToken.closeSpace);
-
-   return builder.sTokenArray;
 }
 
 /**********************************************************************\

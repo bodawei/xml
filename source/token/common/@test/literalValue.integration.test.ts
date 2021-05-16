@@ -75,25 +75,4 @@ describe('literalValue (integration)', () => {
 
    });
 
-   describe('getSTokens()', () => {
-
-      it('converts intput PToken into an array of STokens', (done) => {
-         source.addText('one&two;"');
-         source.endText();
-         literalValue.parse(source, ['"', '&'], (pToken) => {
-            const results = literalValue.getSTokens(pToken);
-            const makeSToken = makeSTokenMaker();
-
-            expect(results).toEqual([
-               makeSToken('one'),
-               makeSToken('&'),
-               makeSToken('two'),
-               makeSToken(';'),
-            ]);
-            done();
-         });
-      });
-
-   });
-
 });

@@ -223,23 +223,4 @@ describe('wordList (unit)', () => {
 
    });
 
-   describe('pToken.toSTokenArray()', () => {
-
-      it('returns the STokens', () => {
-         const tokens = wlPToken.toSTokenArray();
-
-         expect(tokens).toEqual([
-            wlPToken.open,
-            wlPToken.openSpace,
-            wlPToken.words[0].word,
-            wlPToken.words[0].wordSpace,
-            wlPToken.words[0].connector,
-            wlPToken.words[0].connectorSpace,
-            wlPToken.words[1].word,
-            wlPToken.close,
-         ] as Array<SToken>);
-      });
-
-   });
-
 });

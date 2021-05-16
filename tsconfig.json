@@ -27,6 +27,9 @@
          "extractor": [
             "./source/extractor"
          ],
+         "flat": [
+            "./source/flat"
+         ],
          "node": [
             "source/node"
          ],
@@ -41,9 +44,6 @@
          ],
          "sToken-test": [
             "./source/sToken/@test/helper"
-         ],
-         "stringify": [
-            "./source/stringify"
          ],
          "token": [
             "./source/token"

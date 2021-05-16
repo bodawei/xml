@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { SToken, STokenSource } from 'sToken';
-import base, { STokenArray } from '../base';
+import base from '../base';
 
 /**********************************************************************\
  The declaration namespace contains a "bridge" parser which will
@@ -27,17 +27,6 @@ class DeclarationPToken extends base.PToken {
       } else {
          this.open = SToken.fromString('');
       }
-   }
-
-   getSTokenArray(): STokenArray {
-      const results: STokenArray = super.getSTokenArray();
-
-      results.pushSTokens(this.open,
-         this.postOpenSpace,
-         this.declType,
-         this.postDeclTypeSpace);
-
-      return results;
    }
 }
 

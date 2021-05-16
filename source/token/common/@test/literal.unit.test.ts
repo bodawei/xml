@@ -152,47 +152,4 @@ describe('literal (unit)', () => {
    });
 
    
-   describe('getSTokens()', () => {
-      let litValGetSTokens: jasmine.Spy;
-
-      beforeEach(() => {
-         litValGetSTokens = spyOn(literalValue, 'getSTokens')
-            .and.returnValue([]);
-      });
-
-      it('calls literalValue.getSTokens()', () => {
-         const results = literal.getSTokens(literalPToken);
-
-         expect(literalValue.getSTokens).toHaveBeenCalledWith(literalPToken.value);
-      });
-
-      it('does a basic population', () => {
-         litValGetSTokens.and.returnValue(SToken.fromString('value'));
-         const results = literal.getSTokens(literalPToken);
-
-         expect(results).toEqual([
-            literalPToken.openQuote as SToken,
-            SToken.fromString('value'),
-            literalPToken.closeQuote as SToken,
-         ]);
-      });
-
-      it('does not add the quotes if they are not there', () => {
-         litValGetSTokens.and.returnValue(SToken.fromString('value'));
-         delete literalPToken.openQuote;
-         delete literalPToken.closeQuote;
-         const results = literal.getSTokens(literalPToken);
-
-         expect(results).toEqual([
-            SToken.fromString('value'),
-         ]);
-      });
-
-      it('adds nothing if the PToken value is undefined', () => {
-         const results = literal.getSTokens(undefined);
-
-         expect(results).toEqual([]);
-      });
-
-   });
 });

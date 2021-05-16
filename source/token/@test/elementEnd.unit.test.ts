@@ -60,18 +60,4 @@ describe('elementEnd', () => {
 
    });
 
-
-   describe('toSTokenArray()', () => {
-
-      it('returns all the STokens', () => {
-         expect(elementEndPToken.toSTokenArray()).toEqual([
-            elementEndPToken.open!,
-            elementEndPToken.name!,
-            elementEndPToken.nameSpace!,
-            elementEndPToken.close!,
-         ]);
-      });
-
-   });
-
 });

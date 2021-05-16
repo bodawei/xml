@@ -1,9 +1,8 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import {  STokenArrayBuilder, SToken, STokenSource } from 'sToken';
+import {  SToken, STokenSource } from 'sToken';
 
 import { ExternalIdP, parseExternalId } from '../pToken/common/externalId';
-import { externalIdToSTokens } from '../stringify/common/externalIdToSTokens';
 import { DeclarationPToken } from './bridge/baseDeclaration';
 
 const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
@@ -45,10 +44,6 @@ class DocTypeStartPToken {
       this.type = DOCTYPE_START_PTOKEN;
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
-
-   toSTokenArray() {
-      return sTokensFromPToken(this);
-   }
 }
 
 /**********************************************************************\
@@ -84,29 +79,6 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
          deliverPToken(new DocTypeStartPToken(pToken));
       });
    });
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the component STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: DocTypeStartPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-   const externalTokens = externalIdToSTokens(pToken.externalId);
-
-   builder.add(
-      pToken.open,
-      pToken.postOpenSpace,
-      pToken.declType,
-      pToken.postDeclTypeSpace,
-      pToken.name,
-      pToken.nameSpace,
-      externalTokens,
-      pToken.externalIdSpace,
-      pToken.openSubset,
-   );
-
-   return builder.sTokenArray;
 }
 
 export {

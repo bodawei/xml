@@ -705,7 +705,7 @@ class CheckXTokenValidStream extends Transform {
       }
 
       if (xToken.type === NOTATION_DECLARATION_XTOKEN) {
-         this.validateNotationDeclaration(xToken);
+         this.validateNotationDeclaration(xToken as NotationDeclarationXToken);
       } else if (xToken instanceof AttListDeclarationXToken) {
          this.validateAttListDecl(xToken);
       } else if (

@@ -76,17 +76,4 @@ describe('docTypeEnd (unit)', () => {
       });
 
    });
-
-   describe('toStokenArray()', () => {
-
-      it('returns the Stokens', () => {
-
-            expect(docTypeEndPToken.toSTokenArray()).toEqual([
-               docTypeEndPToken.closeSubset,
-               docTypeEndPToken.close,
-            ] as any);
-      });
-
-   });
-
 });

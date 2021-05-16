@@ -166,32 +166,4 @@ describe('literalValue (unit)', () => {
 
    });
 
-
-   describe('getSTokens()', () => {
-
-      it('does a basic population', () => {
-         const pToken = [ new TextPToken({ text: SToken.fromString('blah') }) ];
-         const results = literalValue.getSTokens(pToken);
-
-         expect(results).toEqual([ SToken.fromString('blah') ]);
-      });
-
-      it('adds STokens from any entity references', () => {
-         const pToken = [
-            new TextPToken({ text: SToken.fromString('blah') }),
-            new GeneralEntityReferencePToken({
-               open: SToken.fromString('&'),
-               name: SToken.fromString('theName'),
-            }),
-         ];
-         const results = literalValue.getSTokens(pToken);
-
-         expect(results).toEqual([
-            SToken.fromString('blah'),
-            SToken.fromString('&'),
-            SToken.fromString('theName'),
-         ]);
-      });
-
-   });
 });
