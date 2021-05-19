@@ -7,10 +7,10 @@ import validityMessages from '../../error/derive/ValidityError.json';
 import { ValidityError } from '../../error/ValidityError';
 import { error, warning } from 'basic';
 import { validWarnings } from '../../error/validWarnings';
-import { validErrors } from '../../error/validErrors';
+import { validError } from '../../error/validError';
 
 warning.addMapping(validWarnings);
-error.addMapping(validErrors);
+error.addMapping(validError);
 
 expect.extend({
    toReportValidityError: makeErrorMatcher(ValidityError, {

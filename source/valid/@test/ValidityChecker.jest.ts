@@ -4,6 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 import {
    makeAttListDeclaration,
+   makeDocTypeEnd,
    makeDocTypeStart,
    makeElementDeclaration,
    makeElementEmpty,
@@ -33,6 +34,7 @@ import { elidedEntityDeclarationUpdateState } from '../token/elidedEntityDeclara
 import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpdateState';
 import { externalSubsetEndUpdateState } from '../token/externalSubsetEndUpdateState';
 import { generalEntityDeclarationUpdateState } from '../token/generalEntityDeclarationUpdateState';
+import { dtdEndValidate } from '../token/dtdEndValidate';
 import { generalEntityReferenceValidate } from '../token/generalEntityReferenceValidate';
 import { notationDeclarationUpdateState } from '../token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from '../token/notationDeclarationValidate';
@@ -46,6 +48,7 @@ import { toSToken } from 'sToken';
 jest.mock('../token/attListDeclarationUpdateState');
 jest.mock('../token/conditionalValidate');
 jest.mock('../token/docTypeStartUpdateState');
+jest.mock('../token/dtdEndValidate');
 jest.mock('../token/elementDeclarationUpdateState');
 jest.mock('../token/elementDeclarationValidate');
 jest.mock('../token/elementEndUpdateState');
@@ -219,6 +222,12 @@ describe('ValidityChecker (unit)', () => {
       checker.checkPToken(geDecl, ec);
 
       expect(generalEntityDeclarationUpdateState).toHaveBeenCalledWith(geDecl, expect.any(Object));
+   });
+
+   it('validates the state at the end of a DTD', () => {
+      checker.checkPToken(makeDocTypeEnd(), ec);
+
+      expect(dtdEndValidate).toHaveBeenCalledWith(expect.any(Object), ec);
    });
 
    it('validates an general entity reference', () => {

@@ -1,4 +1,4 @@
-const validErrors = {
+const validError = {
    ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC: {
       code: 1200,
       message:
@@ -6,4 +6,4 @@ const validErrors = {
    },
 };
 
-export { validErrors };
+export { validError };

@@ -18,10 +18,10 @@ deriveLocale({
    destDir: NEW_VALIDITY_DERIVED,
 });
 
-const NEW_WARNING_SOURCE = path.join(__dirname, '../../source/basic/locale/');
-const NEW_WARNING_DERIVED = path.join(__dirname, '../../source/basic/derive/');
+// const NEW_WARNING_SOURCE = path.join(__dirname, '../../source/basic/locale/');
+// const NEW_WARNING_DERIVED = path.join(__dirname, '../../source/basic/derive/');
 
-deriveLocale({
-   sourceDir: NEW_WARNING_SOURCE,
-   destDir: NEW_WARNING_DERIVED,
-});
+// deriveLocale({
+//    sourceDir: NEW_WARNING_SOURCE,
+//    destDir: NEW_WARNING_DERIVED,
+// });

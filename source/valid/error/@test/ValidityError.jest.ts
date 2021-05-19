@@ -7,14 +7,14 @@ import { ValidityError } from '../ValidityError';
 describe('ValidityCheckError', () => {
    describe('class values', () => {
       it('populates the ID property', () => {
-         expect(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE).toEqual('MISMATCH_ROOT_ELEMENT_TYPE');
+         expect(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).toEqual('ELEMENT_MISMATCH_ROOT_TYPE');
       });
    });
 
    describe('construction', () => {
       it('throws no error when constructed', () => {
          expect(() => {
-            new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE);
+            new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE);
          }).not.toThrow();
       });
 
@@ -25,19 +25,18 @@ describe('ValidityCheckError', () => {
       });
 
       it('sets the id', () => {
-         expect(new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE).id).toEqual(
-            ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
+         expect(new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).id).toEqual(
+            ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE,
          );
       });
 
       it('sets the code', () => {
-         expect(new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE).code).toEqual(10001);
+         expect(new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).code).toEqual(10001);
       });
 
       it('sets the message', () => {
-         expect(new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE).message).toEqual(
-            'The name ("{0}") in the document type declaration must match the ' +
-               'element type of the root element. Found ("{1}").',
+         expect(new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).message).toEqual(
+            'The name of the root element must match the type "{0}" in the document type declaration (§2.8.0). Found "{1}".',
          );
       });
    });

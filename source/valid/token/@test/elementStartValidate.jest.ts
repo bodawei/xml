@@ -7,10 +7,13 @@ import { toSToken } from 'sToken';
 
 import { elementStartValidate } from '../elementStartValidate';
 import { ValidityError } from '../../error/ValidityError';
+import { validityConstraint } from '../../error/validityConstraint';
 import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
 import { ElementStartPToken } from 'token';
 import { CmGraph } from '../../contentModal/cmGraphTypes';
 import { makeElementDeclaration } from 'token-test';
+
+const VID = validityConstraint.id;
 
 describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
@@ -93,7 +96,7 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
+         id: VID.ELEMENT_MISMATCH_ROOT_TYPE,
          params: ['rootType', 'elementName'],
          position: elementStart.name,
          lastPosition: undefined,

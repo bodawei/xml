@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ENTITY three SYSTEM "http://somewhere.com" NDATA good >
+   <!NOTATION bogus SYSTEM "http://somewhere.com" >
+   <!ELEMENT one ANY>
+]>
+
+<one>
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid validity-contraint.xml
+
+   Demonstrates that we get an error if an NDATA value is not declared anywhere, even if the ENTITY is never referenced.
+]]>
+</one>

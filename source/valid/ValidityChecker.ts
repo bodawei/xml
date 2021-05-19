@@ -21,6 +21,7 @@ import {
    SPACE_PTOKEN,
    CHARDATA_PTOKEN,
    DOCTYPE_START_PTOKEN,
+   DOCTYPE_END_PTOKEN,
 } from 'token';
 
 import { ValidateState } from './validateState';
@@ -37,6 +38,7 @@ import { externalSubsetStartUpdateState } from './token/externalSubsetStartUpdat
 import { elementEndUpdateState } from './token/elementEndUpdateState';
 import { elementEndValidate } from './token/elementEndValidate';
 import { generalEntityDeclarationUpdateState } from './token/generalEntityDeclarationUpdateState';
+import { dtdEndValidate } from './token/dtdEndValidate';
 import { generalEntityReferenceValidate } from './token/generalEntityReferenceValidate';
 import { parameterEntityReferenceValidate } from './token/parameterEntityReferenceValidate';
 import { parameterEntityDeclarationUpdateState } from './token/parameterEntityDeclarationUpdateState';
@@ -82,6 +84,9 @@ class ValidityChecker {
             break;
          case DOCTYPE_START_PTOKEN:
             this.state = docTypeStartUpdateState(token, this.state);
+            break;
+         case DOCTYPE_END_PTOKEN:
+            dtdEndValidate(this.state, ec);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             this.state = elementDeclarationUpdateState(token, this.state);

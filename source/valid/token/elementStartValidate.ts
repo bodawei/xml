@@ -7,8 +7,10 @@ import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
 import { ValidityError } from '../error/ValidityError';
+import { validityConstraint } from '../error/validityConstraint';
 import { ElDeclType, ValidateState } from '../validateState';
 
+const NVID = validityConstraint.id;
 const VID = ValidityError.ID;
 
 function nmtokenCheck(
@@ -132,7 +134,7 @@ function elementStartValidate(
       if (state.docType && !state.elementContext.activeContext) {
          ec.check(
             state.docType !== elName,
-            VID.MISMATCH_ROOT_ELEMENT_TYPE,
+            NVID.ELEMENT_MISMATCH_ROOT_TYPE,
             [state.docType, elName],
             el.name,
          );

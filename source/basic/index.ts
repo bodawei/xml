@@ -39,6 +39,9 @@ export * from './doAsyncWhileLoop';
 export * from './extractSurrogatePair';
 export { XmlVersion, XmlEdition };
 
+export { ErrorCodes } from './error/errorCodes';
+export { makeOffset } from './error/makeOffset';
+export { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken } from './error/XmlErrorToken';
 export { ERROR_SUBTYPE, ErrorToken } from './error/ErrorToken';
 export { FATAL_ERROR_SUBTYPE, FatalErrorToken } from './error/FatalErrorToken';
 export { WARNING_SUBTYPE, WarningToken } from './error/WarningToken';

@@ -20,6 +20,7 @@ function generalEntityDeclarationUpdateState(
       generalEntities: {
          ...state.generalEntities,
          [elName]: {
+            token: el,
             isInternal: !el.externalId,
          },
       },

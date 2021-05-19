@@ -2549,25 +2549,6 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             expectStream(validator, expected, done);
          });
-
-         it('reports an error when a notation is named, but was not declared', (done) => {
-            const geDecl1 = new GeneralEntityDeclarationXToken(
-               'one',
-               [],
-               undefined,
-               'BadNDeclName',
-            );
-            const expected = new ValidityError(ValidityError.ID.ENTITYDECL_UNDECLARED_NOTATION, [
-               'one',
-               'BadNDeclName',
-            ]);
-
-            validator.write(geDecl1);
-            validator.write(new DocTypeEndXToken());
-            validator.end();
-
-            expectStream(validator, expected, done);
-         });
       });
 
       describe('ELEMENT', () => {

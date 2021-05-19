@@ -1,7 +1,12 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { AttDefinitionP, ElementDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
+import {
+   AttDefinitionP,
+   ElementDeclarationPToken,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+} from 'pToken';
 import { EntityValuePToken } from 'token';
 import { CmGraph } from './contentModal/cmGraphTypes';
 
@@ -50,6 +55,7 @@ interface ElementContext {
 }
 
 interface GeneralEntityDetails {
+   token: GeneralEntityDeclarationPToken;
    isInternal: boolean;
 }
 
@@ -66,7 +72,7 @@ interface ValidateStateProps {
       [elementName: string]: GeneralEntityDetails;
    };
 
-   notationDeclarations: {
+   notationDeclarations?: {
       [notationName: string]: true | undefined;
    };
 

@@ -42,7 +42,7 @@ function firstSToken(value: AttributeValue): SToken | undefined {
       }
    }
 
-   return pToken.text;
+   return pToken?.text;
 }
 
 /*

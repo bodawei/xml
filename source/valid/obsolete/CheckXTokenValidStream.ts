@@ -1315,25 +1315,6 @@ class CheckXTokenValidStream extends Transform {
             }
          });
       });
-
-      Object.values(this.generalEntitiesSeen).forEach(
-         (genEntity: GeneralEntityDeclarationXToken) => {
-            if (genEntity.notationDataName) {
-               const pTokenOpen = genEntity.pToken ? genEntity.pToken.open : undefined;
-               const nDataName = genEntity.notationDataName;
-
-               // §4.2.2: Validity Constraint: Notation Declared
-               // The Name must match the declared name of a notation.
-               if (!this.notations[nDataName]) {
-                  this.pushValidityError(
-                     ValidityError.ID.ENTITYDECL_UNDECLARED_NOTATION,
-                     [genEntity.name, nDataName],
-                     pTokenOpen,
-                  );
-               }
-            }
-         },
-      );
    }
 
    private validateDocumentEnd() {

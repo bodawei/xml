@@ -67,7 +67,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'inv-required01': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
    'inv-required02': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
 
-   root: 'MISMATCH_ROOT_ELEMENT_TYPE', // Tests the Root Element Type VC
+   root: 'ELEMENT_MISMATCH_ROOT_TYPE', // Tests the Root Element Type VC
    attr01: 'ELEMENTSTART_ENTITY_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITY attribute type.
    attr02: 'ELEMENTSTART_ENTITIES_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITIES attribute type.
    attr03: 'ELEMENTSTART_NOTATION_NOT_DECLARED', // ok - Tests the "Notation Attributes" VC for the NOTATION attribute type, first clause: value must be one of the ones that's declared.
@@ -142,7 +142,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'o-p74pass1': 'UNDECLARED_ELEMENT', // PEDef is either an entity value or an external id
    'o-p75pass1': 'UNDECLARED_ELEMENT', // valid external identifiers
    'o-e2': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Validity Constraint: No duplicate tokens
-   'ibm-invalid-P28-ibm28i01.xml': 'MISMATCH_ROOT_ELEMENT_TYPE', // great
+   'ibm-invalid-P28-ibm28i01.xml': 'ELEMENT_MISMATCH_ROOT_TYPE', // great
    'ibm-invalid-P32-ibm32i01.xml': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // great
    'ibm-invalid-P32-ibm32i03.xml': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // great
    'ibm-invalid-P32-ibm32i04.xml': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // great

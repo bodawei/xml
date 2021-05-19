@@ -4,10 +4,10 @@ import { ErrorCollector } from 'basic';
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ValidityError } from '../error/ValidityError';
 import { ValidateState } from '../validateState';
+import { validityConstraint } from '../error/validityConstraint';
 
-const VID = ValidityError.ID;
+const VID = validityConstraint.id;
 
 function notationDeclarationValidate(
    token: NotationDeclarationPToken,
@@ -23,9 +23,11 @@ function notationDeclarationValidate(
     * §4.7.0: Validity constraint: Unique Notation Name ( >= 1.0/2)
     *    A given Name must not be declared in more than one notation declaration.
     */
-   ec.check(mustEnforce && state.notationDeclarations[notationName], VID.NOTATION_NOT_UNIQUE, [
-      notationName,
-   ]);
+   ec.check(
+      mustEnforce && state.notationDeclarations[notationName],
+      VID.NOTATION_XTRA_DECLARATION,
+      [notationName],
+   );
 }
 
 export { notationDeclarationValidate };

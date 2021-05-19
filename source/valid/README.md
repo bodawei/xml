@@ -1,3 +1,26 @@
+# Valid
+
+## Overview
+
+## Commentary on individual constraints
+
+* §2.8.0 Root element type
+No commentary.
+
+* §4.2.2 Notation declared
+This states that the NDATA name must match the declared name of a notation.
+
+One's thought might be that, like PE references, that this would imply that the notation must be declared before the ENTITY declaration.
+
+However, several XML Conformance tests reveal that it is perfectly legal to have the notation declared after the entity declaration.
+
+And using the `xmllint` as a guide, it is also apparent that these must be declared even if the entity is never referenced.
+
+* §4.7.0 Unique notation name
+This assumes that the first occurence of a notation declaration is correct, while subsequent ones are in error.  This is consistent with the general pattern of "first occurrence wins" in XML.
+
+Note also that this is not enforced in 1.0/1, since that edition did not have this constraint.
+
 ## Architecture
 
 The wellformedness check system approached checking by having a global context which is checked in the main routine, and then having token-specific checking routines.  The notion was that there is a bunch of more "global" state (bigger than individual tokens) that needs coordinateing.  As a result we had "global" state and "global" processing, as well as local processing.

@@ -2,17 +2,19 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ErrorCollector } from 'basic';
+import { ErrorCollector, XmlErrorToken } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ContextType, ParseToken } from 'pToken';
 import { PTokenStream } from '../../pTokenStream';
 import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
-import { ErrorToken } from 'token';
 import { AttFixerStream, EntityExpanderStream } from 'node';
 
 import { ValidityChecker } from '../ValidityChecker';
 import { ValidityError } from '../error/ValidityError';
+import { validityConstraint } from '../error/validityConstraint';
+
+const VID = validityConstraint.id;
 
 describe('ValidityChecker (integration)', () => {
    let ec: ErrorCollector;
@@ -24,7 +26,7 @@ describe('ValidityChecker (integration)', () => {
    });
 
    function expectError(input: string, errorCode: string, done: () => void): void {
-      const finalResults: Array<ErrorToken> = [];
+      const finalResults: Array<XmlErrorToken> = [];
 
       pTokenStream = new PTokenStream(new STokenSource(), {
          context: ContextType.DOCUMENT,
@@ -134,7 +136,20 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT bar ANY>
          ]>
          <bar/>`,
-         ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
+         VID.ELEMENT_MISMATCH_ROOT_TYPE,
+         done!,
+      );
+   });
+
+   it('reports an error when a general entity declaration has a NDATA name that has not been declared (§4.2.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!NOTATION bar SYSTEM "http://somewhere.com">
+            <!ENTITY bar SYSTEM "http://somewhere-else.com" NDATA baz>
+         ]>
+         <root/>`,
+         VID.ENTITYDECL_UNDECLARED_NOTATION,
          done!,
       );
    });
@@ -143,11 +158,11 @@ describe('ValidityChecker (integration)', () => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE root [
-            <!NOTATION bar PUBLIC "http://somewhere.com">
-            <!NOTATION bar PUBLIC "http://somewhere-else.com">
+            <!NOTATION bar SYSTEM "http://somewhere.com">
+            <!NOTATION bar SYSTEM "http://somewhere-else.com">
          ]>
          <root/>`,
-         ValidityError.ID.NOTATION_NOT_UNIQUE,
+         VID.NOTATION_XTRA_DECLARATION,
          done!,
       );
    });

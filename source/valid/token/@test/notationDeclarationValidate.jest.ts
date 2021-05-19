@@ -7,8 +7,10 @@ import { MockErrorCollector } from 'basic-test';
 import { makeNotationDeclaration } from 'token-test';
 
 import { notationDeclarationValidate } from '../notationDeclarationValidate';
-import { ValidityError } from '../../error/ValidityError';
 import { ValidateState } from '../../validateState';
+import { validityConstraint } from '../../error/validityConstraint';
+
+const VID = validityConstraint.id;
 
 describe('notationDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -42,7 +44,7 @@ describe('notationDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.NOTATION_NOT_UNIQUE,
+         id: VID.NOTATION_XTRA_DECLARATION,
          params: ['notationName'],
          position: notationDecl.name,
          lastPosition: undefined,

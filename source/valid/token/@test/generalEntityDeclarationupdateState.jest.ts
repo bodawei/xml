@@ -24,6 +24,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             generalEntities: {
                geDecl: {
+                  token: decl,
                   isInternal: true,
                },
             },
@@ -42,6 +43,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             generalEntities: {
                geDecl: {
+                  token: decl,
                   isInternal: false,
                },
             },
@@ -62,6 +64,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             generalEntities: {
                geDecl: {
+                  token: decl,
                   isInternal: true,
                },
             },
