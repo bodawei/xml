@@ -27,10 +27,10 @@ function nmtokenCheck(
 
    if (attType === 'NMTOKEN') {
       names.push(attValue);
-      code = ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN;
+      code = NVID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN;
    } else {
       names = attValue.trim().split(/ +/);
-      code = ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
+      code = NVID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
    }
 
    // §3.3.1: Validity Constraint: Name Token

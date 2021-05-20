@@ -380,7 +380,7 @@ describe('elementStartValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            id: VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
             params: ['', 'elementName', 'att1'],
             position: toSToken('"'),
             lastPosition: undefined,
@@ -424,7 +424,7 @@ describe('elementStartValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            id: VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
             params: ['fooo$$bar, foo\nbar', 'elementName', 'att1'],
             position: toSToken('"'),
             lastPosition: undefined,
