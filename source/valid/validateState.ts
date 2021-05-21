@@ -114,7 +114,7 @@ class ValidateState {
    };
 
    readonly generalEntities: {
-      readonly [elementName: string]: ReadonlyGeneralEntityDetails;
+      readonly [elementName: string]: ReadonlyGeneralEntityDetails | undefined;
    };
 
    elementDeclarations: {

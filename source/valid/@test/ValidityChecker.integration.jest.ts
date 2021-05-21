@@ -166,4 +166,20 @@ describe('ValidityChecker (integration)', () => {
          done!,
       );
    });
+
+   it('reports an error when an ENTITIES value matches a parsed entity (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root EMPTY>
+            <!ATTLIST root
+               unparsed ENTITIES
+            >
+            <!ENTITY foo "hi">
+         ]>
+         <root unparsed="  foo bar   "  />`,
+         VID.ELEMENTSTART_ENTITIES_PARSED_ENTITY,
+         done!,
+      );
+   });
 });

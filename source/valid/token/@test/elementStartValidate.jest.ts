@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
-import { ElementDeclarationPToken, TextPToken } from 'pToken';
+import { ElementDeclarationPToken, GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { elementStartValidate } from '../elementStartValidate';
@@ -343,7 +343,7 @@ describe('elementStartValidate (unit)', () => {
          expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
             params: ['', 'elementName', 'att1'],
-            position: toSToken('"'),
+            position: toSToken('att1'),
             lastPosition: undefined,
          });
       });
@@ -382,7 +382,7 @@ describe('elementStartValidate (unit)', () => {
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
             params: ['', 'elementName', 'att1'],
-            position: toSToken('"'),
+            position: toSToken('att1'),
             lastPosition: undefined,
          });
       });
@@ -426,7 +426,7 @@ describe('elementStartValidate (unit)', () => {
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
             params: ['fooo$$bar, foo\nbar', 'elementName', 'att1'],
-            position: toSToken('"'),
+            position: toSToken('att1'),
             lastPosition: undefined,
          });
       });
@@ -465,8 +465,146 @@ describe('elementStartValidate (unit)', () => {
          expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
             params: ['fooo$$bar', 'elementName', 'att1'],
-            position: toSToken('"'),
+            position: toSToken('att1'),
             lastPosition: undefined,
+         });
+      });
+
+      const entiDat: Array<[string, boolean, string, string, string, string, string, string]> = [
+         [
+            'ENTITY',
+            false,
+            '$badEntName',
+            '$badEntName',
+            'entName',
+            'entName',
+            'parsedEnt',
+            'parsedEnt',
+         ],
+         [
+            'ENTITIES',
+            true,
+            'foo $BAD bar',
+            '$BAD',
+            'paramA another',
+            'paramA, another',
+            'one param two',
+            'param',
+         ],
+      ];
+
+      entiDat.forEach((item) => {
+         const [
+            type,
+            isPlural,
+            badEntName,
+            badEntReport,
+            entName,
+            entNameReport,
+            parsedEntName,
+            parsedEntNameReported,
+         ] = item;
+
+         describe(`${type} attribute type`, () => {
+            beforeEach(() => {
+               state = new ValidateState({
+                  generalEntities: {
+                     [parsedEntNameReported]: {
+                        token: new GeneralEntityDeclarationPToken({
+                           open: toSToken('yipes'),
+                        }),
+                        isInternal: false,
+                     },
+                  },
+                  attributeDefs: {
+                     elementName: {
+                        att1: {
+                           def: {
+                              name: toSToken('att1'),
+                              type: toSToken(type),
+                              value: [],
+                           },
+                           isExternal: false,
+                        },
+                     },
+                  },
+               });
+            });
+
+            it('reports an error when an ENTITY value is not a name (§3.3.1)', () => {
+               elementStart = new ElementStartPToken({
+                  open: toSToken('</'),
+                  name: toSToken('elementName'),
+                  attributes: [
+                     {
+                        name: toSToken('att1'),
+                        value: [new TextPToken(toSToken(badEntName))],
+                     },
+                  ],
+               });
+
+               elementStartValidate(elementStart, state, mockErrorCollector);
+
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportValidityError({
+                  id: isPlural
+                     ? VID.ELEMENTSTART_ENTITIES_NOT_NAME
+                     : VID.ELEMENTSTART_ENTITY_NOT_NAME,
+                  params: [badEntReport, 'elementName', 'att1'],
+                  position: toSToken('att1'),
+                  lastPosition: undefined,
+               });
+            });
+
+            it('reports an error when an ENTITY value does not reference a known entity (§3.3.1)', () => {
+               elementStart = new ElementStartPToken({
+                  open: toSToken('</'),
+                  name: toSToken('elementName'),
+                  attributes: [
+                     {
+                        name: toSToken('att1'),
+                        value: [new TextPToken(toSToken(entName))],
+                     },
+                  ],
+               });
+
+               elementStartValidate(elementStart, state, mockErrorCollector);
+
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportValidityError({
+                  id: isPlural
+                     ? VID.ELEMENTSTART_ENTITIES_NO_ENTITY
+                     : VID.ELEMENTSTART_ENTITY_NO_ENTITY,
+                  params: [entNameReport, 'elementName', 'att1'],
+                  position: toSToken('att1'),
+                  lastPosition: undefined,
+               });
+            });
+
+            it('reports an error when an ENTITY value does not reference an unparsed entity (§3.3.1)', () => {
+               elementStart = new ElementStartPToken({
+                  open: toSToken('</'),
+                  name: toSToken('elementName'),
+                  attributes: [
+                     {
+                        name: toSToken('att1'),
+                        value: [new TextPToken(toSToken(parsedEntName))],
+                     },
+                  ],
+               });
+
+               elementStartValidate(elementStart, state, mockErrorCollector);
+
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportValidityError({
+                  id: isPlural
+                     ? VID.ELEMENTSTART_ENTITIES_PARSED_ENTITY
+                     : VID.ELEMENTSTART_ENTITY_PARSED_ENTITY,
+                  params: [parsedEntNameReported, 'elementName', 'att1'],
+                  position: toSToken('att1'),
+                  lastPosition: undefined,
+               });
+            });
          });
       });
 

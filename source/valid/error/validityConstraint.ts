@@ -45,7 +45,7 @@ const validityConstraint = new ErrorCodes({
    ELEMENTSTART_ENTITY_PARSED_ENTITY: {
       code: 1107,
       message:
-         ' The ENTITY value for attribute "{2}" of element "{1}" must name an unparsed declared entity (§3.3.1). Found "{0}".',
+         'The ENTITY value for attribute "{2}" of element "{1}" must name an unparsed declared entity (§3.3.1). Found "{0}".',
    },
    ELEMENTSTART_ENTITIES_NO_ENTITY: {
       code: 1108,

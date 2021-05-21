@@ -13,13 +13,13 @@ function dtdEndValidate(state: ValidateState, ec: ErrorCollector): void {
 
    for (const details of generalEntityDetails) {
       const [geDeclName, info] = details;
-      const nDataName = strOrBlank(info.token.nDataName);
+      const nDataName = strOrBlank(info?.token.nDataName);
 
       if (nDataName !== '') {
          const notationDeclared = state.notationDeclarations[nDataName];
 
-         ec.setPos(info.token.name);
-         ec.setPos(info.token.nDataName);
+         ec.setPos(info?.token.name);
+         ec.setPos(info?.token.nDataName);
 
          /*
           * §4.2.2: Validity constraint: Notation Declared

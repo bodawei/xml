@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { isAugmentedAttribute } from 'attFixer';
-import { ErrorCollector, isNmToken } from 'basic';
+import { ErrorCollector, isName, isNmToken } from 'basic';
 import { pTokenArrayToString } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
 import { ValidityError } from '../error/ValidityError';
@@ -13,38 +13,77 @@ import { ElDeclType, ValidateState } from '../validateState';
 const NVID = validityConstraint.id;
 const VID = ValidityError.ID;
 
-function nmtokenCheck(
+function entityCheck(
    elName: string,
    attName: string,
-   attType: string,
    attValue: string,
+   isPlural: boolean,
+   nameSToken: SToken,
    ec: ErrorCollector,
    state: ValidateState,
 ): void {
-   let names: Array<string> = [];
+   const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
+   const notNameId = isPlural
+      ? NVID.ELEMENTSTART_ENTITIES_NOT_NAME
+      : NVID.ELEMENTSTART_ENTITY_NOT_NAME;
+   const undeclId = isPlural
+      ? NVID.ELEMENTSTART_ENTITIES_NO_ENTITY
+      : NVID.ELEMENTSTART_ENTITY_NO_ENTITY;
+   const parsedId = isPlural
+      ? NVID.ELEMENTSTART_ENTITIES_PARSED_ENTITY
+      : NVID.ELEMENTSTART_ENTITY_PARSED_ENTITY;
    const badNames: Array<string> = [];
-   let code: string;
+   const undeclared: Array<string> = [];
+   const parsed: Array<string> = [];
 
-   if (attType === 'NMTOKEN') {
-      names.push(attValue);
-      code = NVID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN;
-   } else {
-      names = attValue.trim().split(/ +/);
-      code = NVID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
+   // §3.3.1: Validity Constraint: Entity Name
+   //    Values of type ENTITY must match the Name production, values of type ENTITIES
+   //    must match Names; each Name must match the name of an unparsed entity
+   //    declared in the DTD.
+   for (const name of names) {
+      const token = state.generalEntities[name]?.token;
+
+      if (!isName(name, state.confVer.version, state.confVer.edition)) {
+         badNames.push(name);
+      }
+
+      if (!token) {
+         undeclared.push(name);
+      } else if (!token.nDataName) {
+         parsed.push(name);
+      }
    }
+
+   ec.check(badNames.length > 0, notNameId, [badNames.join(', '), elName, attName], nameSToken);
+   ec.check(undeclared.length > 0, undeclId, [undeclared.join(', '), elName, attName], nameSToken);
+   ec.check(parsed.length > 0, parsedId, [parsed.join(', '), elName, attName], nameSToken);
+}
+
+function nmtokenCheck(
+   elName: string,
+   attName: string,
+   attValue: string,
+   isPlural: boolean,
+   nameSToken: SToken,
+   ec: ErrorCollector,
+   state: ValidateState,
+): void {
+   const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
+   const code = isPlural
+      ? NVID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN
+      : NVID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN;
+   const badNames: Array<string> = [];
 
    // §3.3.1: Validity Constraint: Name Token
    //    Values of type NMTOKEN must match the Nmtoken production;
    //    values of type NMTOKENS must match Nmtokens.
-   for (let index = 0; index < names.length; index++) {
-      if (!isNmToken(names[index], state.confVer.version, state.confVer.edition)) {
-         badNames.push(names[index]);
+   for (const name of names) {
+      if (!isNmToken(name, state.confVer.version, state.confVer.edition)) {
+         badNames.push(name);
       }
    }
 
-   if (badNames.length > 0) {
-      ec.report(code, [badNames.join(', '), elName, attName]);
-   }
+   ec.check(badNames.length > 0, code, [badNames.join(', '), elName, attName], nameSToken);
 }
 
 function checkAttributes(
@@ -105,8 +144,16 @@ function checkAttributes(
 
       switch (type) {
          case 'NMTOKEN':
+            nmtokenCheck(elName, attName, attrValue, false, attr.name, ec, state);
+            break;
          case 'NMTOKENS':
-            nmtokenCheck(elName, attName, type, attrValue, ec, state);
+            nmtokenCheck(elName, attName, attrValue, true, attr.name, ec, state);
+            break;
+         case 'ENTITY':
+            entityCheck(elName, attName, attrValue, false, attr.name, ec, state);
+            break;
+         case 'ENTITIES':
+            entityCheck(elName, attName, attrValue, true, attr.name, ec, state);
             break;
       }
    }
