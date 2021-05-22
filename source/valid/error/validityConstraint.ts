@@ -87,6 +87,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'Must not have more than one attribute of type NOTATION for the element type "{0}" (§3.3.1). Found "{1}".',
    },
+   ELEMENTSTART_ENUMERATION_NOT_DECLARED: {
+      code: 1116,
+      message:
+         'The enumeration value for attribute "{1}" of element "{0}" must be one of the values declared ({2}). (§3.3.1). Found "{3}".',
+   },
 });
 
 export { validityConstraint };

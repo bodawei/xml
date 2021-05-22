@@ -1256,8 +1256,6 @@ class CheckXTokenValidStream extends Transform {
          (attributes[index] as any).value = this.normalizeAttributeValue(
             attributes[index],
             attrInfo,
-            elName,
-            pTokenOpen,
          );
       }
 

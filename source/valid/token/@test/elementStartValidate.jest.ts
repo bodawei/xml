@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
@@ -713,7 +713,7 @@ describe('elementStartValidate (unit)', () => {
       });
 
       describe('Notation Attributes (§3.3.1)', () => {
-         it('reports an error when the value of a notation in the element start is not found in the ATTLISt declaration (§3.3.1)', () => {
+         it('reports an error when the value of a notation in the element start is not found in the ATTLIST declaration (§3.3.1)', () => {
             state = new ValidateState({
                attributeDefs: {
                   elementName: {
@@ -814,6 +814,139 @@ describe('elementStartValidate (unit)', () => {
                         def: {
                            name: toSToken('att1'),
                            type: toSToken('NOTATION'),
+                           enumeration: {
+                              type: NOTATION_PTOKEN,
+                              open: toSToken('('),
+                              words: [
+                                 {
+                                    word: toSToken('first'),
+                                 },
+                              ],
+                           },
+                           value: [],
+                        },
+                        isExternal: true,
+                     },
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               open: toSToken('</'),
+               name: toSToken('elementName'),
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('first'))],
+                  },
+               ],
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            expect(mockErrorCollector.errors).toEqual([]);
+         });
+      });
+
+      describe('Enumeration (§3.3.1)', () => {
+         it('reports an error when the value of an enumeration in the element start is not found in the ATTLIST declaration (§3.3.1)', () => {
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           enumeration: {
+                              type: NOTATION_PTOKEN,
+                              open: toSToken('('),
+                              words: [
+                                 {
+                                    word: toSToken('first'),
+                                 },
+                                 {
+                                    word: toSToken('second'),
+                                 },
+                              ],
+                           },
+                           value: [],
+                        },
+                        isExternal: true,
+                     },
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               open: toSToken('</'),
+               name: toSToken('elementName'),
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('bad'))],
+                  },
+               ],
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportValidityError({
+               id: ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+               params: ['elementName', 'att1', 'first|second', 'bad'],
+               position: toSToken('att1'),
+               lastPosition: undefined,
+            });
+         });
+
+         it('reports no error when the ATTLIST has no enumeration (§3.3.1)', () => {
+            state = new ValidateState({
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           // We don't have neough info to know what this is
+                           enumeration: undefined,
+                           value: [],
+                        },
+                        isExternal: true,
+                     },
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               open: toSToken('</'),
+               name: toSToken('elementName'),
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('bad'))],
+                  },
+               ],
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            expect(mockErrorCollector.errors).toEqual([]);
+         });
+
+         it('reports no error when the value of a enumeration in the element start is found in the ATTLIST declaration (§3.3.1)', () => {
+            state = new ValidateState({
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
                            enumeration: {
                               type: NOTATION_PTOKEN,
                               open: toSToken('('),

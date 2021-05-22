@@ -13,7 +13,7 @@ import { ElDeclType, ValidateState } from '../validateState';
 const NVID = validityConstraint.id;
 const VID = ValidityError.ID;
 
-function notationCheck(
+function enumeratedValueCheck(
    elName: string,
    attName: string,
    attValue: string,
@@ -21,10 +21,15 @@ function notationCheck(
    nameSToken: SToken,
    ec: ErrorCollector,
 ): void {
-   // §3.3.1: Validity Constraint: Notation Attributes
-   //    Values of this type must match one of the notation names included in the declaration;
+   const isNotation = strOrBlank(attDef.type).toUpperCase() === 'NOTATION';
+   const code = isNotation
+      ? NVID.ELEMENTSTART_NOTATION_NOT_DECLARED
+      : NVID.ELEMENTSTART_ENUMERATION_NOT_DECLARED;
    let foundDeclaration = false;
    const allWords: Array<string> = [];
+   // If this is a notation att OR we have an enumeration, then do the check.
+   // This protects against malformed attrDef's that have no type and no enumeration being evaluated as an enumeration
+   const shouldEval = isNotation || attDef.enumeration;
 
    if (attDef.enumeration) {
       for (const wordInfo of attDef.enumeration.words) {
@@ -37,9 +42,13 @@ function notationCheck(
       }
    }
 
+   // §3.3.1: Validity Constraint: Notation Attributes
+   //    Values of this type must match one of the notation names included in the declaration;
+   // §3.3.1: Validity Constraint: Enumeration
+   //    Values of this type must match one of the Nmtoken tokens in the declaration.
    ec.check(
-      !foundDeclaration,
-      NVID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+      shouldEval && !foundDeclaration,
+      code,
       [elName, attName, allWords.join('|'), attValue],
       nameSToken,
    );
@@ -188,7 +197,11 @@ function checkAttributes(
             entityCheck(elName, attName, attrValue, true, attr.name, ec, state);
             break;
          case 'NOTATION':
-            notationCheck(elName, attName, attrValue, details.def, attr.name, ec);
+            enumeratedValueCheck(elName, attName, attrValue, details.def, attr.name, ec);
+            break;
+         // Enumerations have no type
+         case '':
+            enumeratedValueCheck(elName, attName, attrValue, details.def, attr.name, ec);
             break;
       }
    }

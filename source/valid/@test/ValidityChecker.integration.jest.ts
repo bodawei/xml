@@ -283,4 +283,19 @@ describe('ValidityChecker (integration)', () => {
          done!,
       );
    });
+
+   it('reports an error when an element has an enumerated attribute value that is not among the declared values for that attribute (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               enumerationAtt (one | two)
+            >
+         ]>
+         <root enumerationAtt= 'bad' />`,
+         VID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+         done!,
+      );
+   });
 });
