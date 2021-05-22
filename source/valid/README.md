@@ -18,7 +18,10 @@ This says "all notation names in the declaration must be declared". Note that on
 This was introduced in 1.0/2, so is not enforced when the conformance version is 1.0/1.
 
 ### §3.3.1 No Duplicate Tokens
-This was introduced in 1.0/3, so is not enforced when the conformance version is 1.0/1 and 1.0/1.
+This was introduced in 1.0/3, so is not enforced when the conformance version is 1.0/1 and 1.0/2.
+
+### §3.3.1 One Notation Per Element Type
+This was introduced in 1.0/2, so is not enforced when the conformance version is 1.0/1.
 
 ### §4.2.2 Notation Declared
 This states that the NDATA name must match the declared name of a notation.

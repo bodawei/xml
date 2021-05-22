@@ -82,6 +82,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'Must not have duplicate NOTATION values on the "{1}" attribute of element "{0}" (§3.3.1). Found "{2}".',
    },
+   ATTLISTDECL_EXTRA_NOTATION: {
+      code: 1115,
+      message:
+         'Must not have more than one attribute of type NOTATION for the element type "{0}" (§3.3.1). Found "{1}".',
+   },
 });
 
 export { validityConstraint };

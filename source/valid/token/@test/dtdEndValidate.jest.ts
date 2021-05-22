@@ -260,6 +260,102 @@ describe('dtdEndValidate (unit)', () => {
       });
    });
 
+   describe('One Notation Per Element Type constraint (§3.3.1)', () => {
+      it('reports an error when an element type has multiple notation attributes (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               someElement: {
+                  notationAttr: {
+                     def: {
+                        name: toSToken('notationAttr'),
+                        type: toSToken('NOTATION'),
+                        enumeration: undefined,
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+                  notationAttr2: {
+                     def: {
+                        name: toSToken('notationAttr2'),
+                        type: toSToken('NOTATION'),
+                        enumeration: undefined,
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_EXTRA_NOTATION,
+            params: ['someElement', 'notationAttr2'],
+            position: toSToken('NOTATION'),
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports no error when there is only one NOTATION attribute per element (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               someElement: {
+                  notationAttr: {
+                     def: {
+                        name: toSToken('notationAttr'),
+                        type: toSToken('NOTATION'),
+                        enumeration: undefined,
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+            notationDeclarations: {
+               declared: true,
+            },
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no error when there are multiple NOTATION attribute per element, but the conformance version is 1.0/1 (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               someElement: {
+                  notationAttr: {
+                     def: {
+                        name: toSToken('notationAttr'),
+                        type: toSToken('NOTATION'),
+                        enumeration: undefined,
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+                  notationAttr2: {
+                     def: {
+                        name: toSToken('notationAttr2'),
+                        type: toSToken('NOTATION'),
+                        enumeration: undefined,
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+            confVer: new ConformanceVersion(1.0, 1),
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+   });
+
    describe('Notation Declared constraint (§4.2.2)', () => {
       it('reports an error when a NDATA name has no corresponding notation declaration (§4.2.2)', () => {
          state = new ValidateState({

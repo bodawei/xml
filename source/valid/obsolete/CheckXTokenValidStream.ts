@@ -42,7 +42,6 @@ import {
    ElementEndXToken,
    ElementStartXToken,
    GeneralEntityDeclarationXToken,
-   GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    isContentNameX,
    NotationDeclarationXToken,
@@ -130,10 +129,6 @@ interface IDMap {
       token: ElementStartXToken | ElementEmptyXToken;
       attrName: string;
    };
-}
-
-interface AttributeMap {
-   [name: string]: AttDefinitionXToken;
 }
 
 interface EntityInfo {
@@ -234,12 +229,7 @@ class CheckXTokenValidStream extends Transform {
     * §3.3.3: Attribute value normalization.
     * This should be done whether or not we are validating.
     */
-   normalizeAttributeValue(
-      attribute: any,
-      attInfo: AttInfo | undefined,
-      elName: string,
-      pToken: any,
-   ): any {
+   normalizeAttributeValue(attribute: any, attInfo: AttInfo | undefined): any {
       // typeHack
       const attrDef: AttDefinitionXToken | undefined = attInfo ? attInfo.def : undefined;
       const isCData = !attrDef || attrDef.type === 'CDATA';
@@ -1076,20 +1066,6 @@ class CheckXTokenValidStream extends Transform {
       } else if (type === 'NOTATION') {
          const notationNames: ReadonlyArray<string> = attDef.enumeration || [];
 
-         if (oneDotZeroRev3OrHigher) {
-            // §3.3.1 (for 1.0/>=3): Validity constraint: No Duplicate Tokens
-            //    The notation names in a single NotationType attribute declaration [...] must all be distinct.
-            const duplicates = this.findDuplicateNamesInEnumeration(notationNames);
-
-            if (duplicates.length > 0) {
-               this.pushValidityError(
-                  ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION,
-                  [attList.elementName, attDef.name, duplicates.join(', ')],
-                  pToken.open,
-               );
-            }
-         }
-
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ... of an enumerated type (either a NOTATION type or an enumeration) must match one of the enumerated values.
@@ -1102,20 +1078,6 @@ class CheckXTokenValidStream extends Transform {
          }
       } else if (attDef.type === 'ENUMERATION') {
          const enumerationNames: ReadonlyArray<string> = attDef.enumeration || [];
-
-         if (oneDotZeroRev3OrHigher) {
-            // §3.3.1: Validity constraint: No Duplicate Tokens
-            //    ...the NmTokens in a single Enumeration attribute declaration, must all be distinct.
-            const duplicates = this.findDuplicateNamesInEnumeration(enumerationNames);
-
-            if (duplicates.length > 0) {
-               this.pushValidityError(
-                  ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
-                  [attList.elementName, attDef.name, duplicates.join(', ')],
-                  pToken.open,
-               );
-            }
-         }
 
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
@@ -1237,13 +1199,9 @@ class CheckXTokenValidStream extends Transform {
     * Does all checks that can only be done once we have the whole DTD processed
     */
    private validateDTD() {
-      const oneDotZeroRev2OrHigher =
-         this.confVer.version === 1.1 || (this.confVer.version === 1 && this.confVer.edition > 1);
-
       Object.keys(this.attrDefsByElementName).forEach((elementType: string) => {
          const attList = this.attrDefsByElementName[elementType];
          let idCount = 0;
-         let notationCount = 0;
 
          Object.keys(attList.attributes).forEach((name) => {
             const attrDef = attList.attributes[name].def;
@@ -1256,18 +1214,6 @@ class CheckXTokenValidStream extends Transform {
                if (idCount > 1) {
                   this.pushValidityError(
                      ValidityError.ID.ATTLISTDECL_EXTRA_ID,
-                     [elementType, attrDef.name],
-                     undefined,
-                  );
-               }
-            } else if (attrDef.type === 'NOTATION') {
-               // §3.3.1: (in 1.0/2+) Validity constraint: One Notation Per Element Type
-               //    An element type must not have more than one NOTATION attribute specified.
-               notationCount++;
-
-               if (oneDotZeroRev2OrHigher && notationCount > 1) {
-                  this.pushValidityError(
-                     ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION,
                      [elementType, attrDef.name],
                      undefined,
                   );

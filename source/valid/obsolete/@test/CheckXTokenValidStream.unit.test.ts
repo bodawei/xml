@@ -959,53 +959,6 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                expectNoErrorsOrWarnings(validator, done);
             });
-
-            // it('reports an error when the enumeration is empty so any notation value is illegal', (done) => {
-            //    attListDecl = new AttListDeclarationXToken(attListDecl.elementName, [
-            //       {
-            //          name: 'notationAttr',
-            //          type: AttDefinitionType.NOTATION,
-            //          enumeration: undefined,
-            //          value: [],
-            //          defaultType: AttDefaultType.REQUIRED,
-            //       },
-            //    ]);
-
-            //    validator.write(n1);
-            //    validator.write(n2);
-            //    validator.write(elDecl);
-            //    validator.write(attListDecl);
-            //    validator.write(startToken);
-            //    validator.end();
-
-            //    const expected = new ValidityError(
-            //       ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
-            //       ['first', 'testElement', 'notationAttr', ''],
-            //    );
-            //    expectStream(validator, expected, done);
-            // });
-
-            // it('reports an error if the attribute value not among the declared values', (done) => {
-            //    startToken = new ElementStartXToken('testElement', [
-            //       {
-            //          name: 'notationAttr',
-            //          value: [new TextXToken('third')],
-            //       },
-            //    ]);
-
-            //    validator.write(n1);
-            //    validator.write(n2);
-            //    validator.write(elDecl);
-            //    validator.write(attListDecl);
-            //    validator.write(startToken);
-            //    validator.end();
-
-            //    const expected = new ValidityError(
-            //       ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
-            //       ['third', 'testElement', 'notationAttr', 'first, second'],
-            //    );
-            //    expectStream(validator, expected, done);
-            // });
          });
 
          describe('ENUMERATION attribute', () => {
@@ -1113,18 +1066,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             const expected = new WarningToken(warning.id.ELEMENT_EMPTY_WITH_NONEMPTY_DECL, ['one']);
             expectStream(validator, expected, done);
          });
-
-         // it('reports a warning if a start tag is used for an element declared to be empty', (done) => {
-         //    const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.EMPTY, undefined);
-         //    const elStart = new ElementStartXToken('one', []);
-
-         //    validator.write(elementDecl);
-         //    validator.write(elStart);
-         //    validator.end();
-
-         //    const expected = new WarningToken(warning.id.ELEMENT_WITH_EMPTY_DECL, ['one']);
-         //    expectStream(validator, expected, done);
-         // });
       });
 
       describe('ATTLIST', () => {
@@ -1941,64 +1882,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
             }
 
-            // it('reports an error if a notation value used in an ATTLIST has not been declared by end of DTD', (done) => {
-            //    const elDecl = new ElementDeclarationXToken(
-            //       'elementType',
-            //       ContentSpecType.EMPTY,
-            //       undefined,
-            //    );
-            //    const notation = new NotationDeclarationXToken('first', undefined);
-            //    const attListDecl = new AttListDeclarationXToken('elementType', [
-            //       {
-            //          name: 'notation1',
-            //          type: AttDefinitionType.NOTATION,
-            //          enumeration: ['first', 'second'],
-            //          value: [],
-            //          defaultType: AttDefaultType.IMPLIED,
-            //       },
-            //    ]);
-            //    const docTypeEnd = new DocTypeEndXToken(makeDocTypeEnd());
-
-            //    validator.write(notation);
-            //    validator.write(elDecl);
-            //    validator.write(attListDecl);
-            //    validator.write(docTypeEnd);
-            //    validator.end();
-
-            //    const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION, [
-            //       'elementType',
-            //       'notation1',
-            //       'second',
-            //    ]);
-            //    expectStream(validator, expected, done);
-            // });
-
             it('reports no error if a 1.0/1 ATTLISTs NOTATION declaration has duplicate names', (done) => {
                setupDuplicateNotationValues(new ConformanceVersion(1.0, 1));
 
                expectNoErrorsOrWarnings(validator, done);
-            });
-
-            it('reports an error if a 1.0/3 ATTLISTs NOTATION declaration has duplicate names', (done) => {
-               setupDuplicateNotationValues(new ConformanceVersion(1.0, 3));
-
-               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION, [
-                  'elementType',
-                  'notationAttr',
-                  'first, third',
-               ]);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports an error if a 1.1/* ATTLISTs NOTATION declaration has duplicate names', (done) => {
-               setupDuplicateNotationValues(new ConformanceVersion(1.1, 1));
-
-               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION, [
-                  'elementType',
-                  'notationAttr',
-                  'first, third',
-               ]);
-               expectStream(validator, expected, done);
             });
 
             it('reports no error if an 1.0/1 ATTLIST has more than one NOTATION attribute', (done) => {
@@ -2006,52 +1893,6 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                expectNoErrorsOrWarnings(validator, done);
             });
-
-            it('reports an error if an 1.0/>1 ATTLIST has more than one NOTATION attribute', (done) => {
-               setup(new ConformanceVersion(1.0, 2));
-
-               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION, [
-                  'elementType',
-                  'notation2',
-               ]);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports an error if an 1.1/* ATTLIST has more than one NOTATION attribute', (done) => {
-               setup(new ConformanceVersion(1.1, 2));
-
-               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION, [
-                  'elementType',
-                  'notation2',
-               ]);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports no error if an 1.0/1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
-               setupEmptyElement(new ConformanceVersion(1.0, 1));
-
-               expectNoErrorsOrWarnings(validator, done);
-            });
-
-            // it('reports an error if an 1.0/>1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
-            //    setupEmptyElement(new ConformanceVersion(1.0, 2));
-
-            //    const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION, [
-            //       'elementType',
-            //       'notation1',
-            //    ]);
-            //    expectStream(validator, expected, done);
-            // });
-
-            // it('reports an error if an 1.1/* ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
-            //    setupEmptyElement(new ConformanceVersion(1.1, 2));
-
-            //    const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION, [
-            //       'elementType',
-            //       'notation1',
-            //    ]);
-            //    expectStream(validator, expected, done);
-            // });
 
             it('reports an error if the default value for a NOTATION attribute does not match one of the defined values', (done) => {
                const elDecl = new ElementDeclarationXToken('elementType', ContentSpecType.EMPTY);
@@ -2110,26 +1951,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                setupDuplicateEnumerationValues(new ConformanceVersion(1.0, 1));
 
                expectNoErrorsOrWarnings(validator, done);
-            });
-
-            it('reports an error if a 1.0/3 ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
-               setupDuplicateEnumerationValues(new ConformanceVersion(1.0, 3));
-
-               const expected = new ValidityError(
-                  ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
-                  ['elementType', 'enumerationAttr', 'first, third'],
-               );
-               expectStream(validator, expected, done);
-            });
-
-            it('reports an error if a 1.1/* ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
-               setupDuplicateEnumerationValues(new ConformanceVersion(1.1, 1));
-
-               const expected = new ValidityError(
-                  ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
-                  ['elementType', 'enumerationAttr', 'first, third'],
-               );
-               expectStream(validator, expected, done);
             });
 
             it('reports no error if a 1.0/3 ATTLISTs ENUMERATION declaration has no duplicate nmTokens', (done) => {

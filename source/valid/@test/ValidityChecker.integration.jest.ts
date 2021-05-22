@@ -262,4 +262,25 @@ describe('ValidityChecker (integration)', () => {
          done!,
       );
    });
+
+   it('reports an error when an element has multiple notation attributes (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               notationAttr NOTATION (one | two) #IMPLIED
+               other CDATA #IMPLIED
+            >
+            <!NOTATION one SYSTEM 'http://somewhere.in.time'>
+            <!NOTATION two SYSTEM 'http://somewhere.in.time'>
+            <!ATTLIST root
+               secondNotation NOTATION (one | two)
+            >
+         ]>
+         <root/>`,
+         VID.ATTLISTDECL_EXTRA_NOTATION,
+         done!,
+      );
+   });
 });

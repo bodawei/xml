@@ -45,6 +45,10 @@ function attListDeclarationValidate(
          ec.setPos(wordInfo.word);
          const word = strOrBlank(wordInfo.word);
 
+         // §3.3.1: (1.0/3+) Validity constraint: No Duplicate Tokens
+         //    The notation names in a single NotationType attribute declaration,
+         //    as well as the NmTokens in a single Enumeration attribute declaration,
+         //    must all be distinct.
          ec.check(seenWords[word], code, [elName, attName, word]);
 
          seenWords[word] = true;

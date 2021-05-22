@@ -9,7 +9,7 @@ import { validityConstraint } from '../error/validityConstraint';
 
 const VID = validityConstraint.id;
 
-function enumerationValidate(
+function notationValidate(
    enumeration: WordListPToken | undefined,
    elName: string,
    attName: string,
@@ -42,6 +42,7 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
       const elementDetails = state.elementDeclarations[elName];
       const elType = strOrBlank(elementDetails?.token.contentSpec);
       const elementIsEmpty = elType.toLocaleLowerCase() === 'empty';
+      let seenNotationAttr = false;
 
       if (!allAtts) {
          continue;
@@ -51,7 +52,18 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
          const isNotation = strOrBlank(attInfo?.def.type).toLowerCase() === 'notation';
 
          if (isNotation) {
-            enumerationValidate(attInfo?.def.enumeration, elName, attName, state, ec);
+            notationValidate(attInfo?.def.enumeration, elName, attName, state, ec);
+
+            // §3.3.1 (1.0/2+): Validity constraint: One Notation Per Element Type
+            //    An element type must not have more than one NOTATION attribute specified
+            ec.check(
+               seenNotationAttr && !isVer1Ed1,
+               VID.ATTLISTDECL_EXTRA_NOTATION,
+               [elName, attName],
+               attInfo?.def.type,
+            );
+
+            seenNotationAttr = true;
          }
 
          // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element
