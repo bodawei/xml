@@ -57,6 +57,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'The ENTITIES value for attribute "{2}" of element "{1}" names one or more parsed entities (§3.3.1). Found unparsed: "{0}".',
    },
+   ATTLISTDECL_EMPTY_NOTATION: {
+      code: 1110,
+      message:
+         'Must not have an attribute of type NOTATION on an EMPTY element "{0}" (§3.3.1). Found "{1}".',
+   },
 });
 
 export { validityConstraint };

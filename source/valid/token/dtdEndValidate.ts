@@ -8,11 +8,42 @@ import { validityConstraint } from '../error/validityConstraint';
 
 const VID = validityConstraint.id;
 
+function attListValidate(state: ValidateState, ec: ErrorCollector): void {
+   const attlists = Object.entries(state.attributeDefs);
+
+   // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element
+   //    For compatibility, an attribute of type NOTATION must
+   //    not be declared on an element declared EMPTY.
+   if (state.confVer.version !== 1.1 && state.confVer.edition === 1) {
+      return;
+   }
+
+   for (const [elName, details] of attlists) {
+      const elementDetails = state.elementDeclarations[elName];
+      const elType = strOrBlank(elementDetails?.token.contentSpec);
+      const elementIsEmpty = elType.toLocaleLowerCase() === 'empty';
+
+      if (details && elementIsEmpty) {
+         const attrsInfo = Object.entries(details);
+
+         for (const [attName, attInfo] of attrsInfo) {
+            ec.check(
+               strOrBlank(attInfo?.def.type).toLowerCase() === 'notation',
+               VID.ATTLISTDECL_EMPTY_NOTATION,
+               [elName, attName],
+               attInfo?.def.type,
+            );
+         }
+      }
+   }
+}
+
 function dtdEndValidate(state: ValidateState, ec: ErrorCollector): void {
+   attListValidate(state, ec);
+
    const generalEntityDetails = Object.entries(state.generalEntities);
 
-   for (const details of generalEntityDetails) {
-      const [geDeclName, info] = details;
+   for (const [geDeclName, info] of generalEntityDetails) {
       const nDataName = strOrBlank(info?.token.nDataName);
 
       if (nDataName !== '') {

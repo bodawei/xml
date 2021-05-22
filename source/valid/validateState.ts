@@ -65,7 +65,7 @@ type ReadonlyParameterEntityDetails = Readonly<ParameterEntityDetails>;
 interface ValidateStateProps {
    docType?: string;
    attributeDefs?: {
-      [elementName: string]: AttributeDefs;
+      [elementName: string]: AttributeDefs | undefined;
    };
 
    generalEntities?: {

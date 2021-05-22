@@ -1301,17 +1301,17 @@ class CheckXTokenValidStream extends Transform {
                // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element
                //    For compatibility, an attribute of type NOTATION must
                //    not be declared on an element declared EMPTY.
-               if (oneDotZeroRev2OrHigher) {
-                  const elementDecl = this.elementDeclarations[elementType];
+               // if (oneDotZeroRev2OrHigher) {
+               //    const elementDecl = this.elementDeclarations[elementType];
 
-                  if (elementDecl && elementDecl.type === 'EMPTY_CONTENT') {
-                     this.pushValidityError(
-                        ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
-                        [elementType, attrDef.name],
-                        undefined,
-                     );
-                  }
-               }
+               //    if (elementDecl && elementDecl.type === 'EMPTY_CONTENT') {
+               //       this.pushValidityError(
+               //          ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
+               //          [elementType, attrDef.name],
+               //          undefined,
+               //       );
+               //    }
+               // }
             }
          });
       });

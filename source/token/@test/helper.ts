@@ -215,7 +215,7 @@ function makeElementStartWithAttrValueFromString(value: string, origValue?: stri
    ], addedProps);
 }
 
-function makeElementDeclaration(): ElementDeclarationPToken {
+function makeElementDeclaration(contentSpec?: string): ElementDeclarationPToken {
    return new ElementDeclarationPToken({
       open: toSToken('<!'),
       openSpace: undefined,
@@ -223,7 +223,7 @@ function makeElementDeclaration(): ElementDeclarationPToken {
       declTypeSpace: toSToken(' '),
       name: toSToken('elementName'),
       nameSpace: toSToken(' '),
-      contentSpec: toSToken('ANY'),
+      contentSpec: toSToken(contentSpec ?? 'ANY'),
       contentSpecSpace: toSToken(' '),
       close: toSToken('>'),
    });

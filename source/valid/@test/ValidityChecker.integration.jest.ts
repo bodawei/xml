@@ -182,4 +182,20 @@ describe('ValidityChecker (integration)', () => {
          done!,
       );
    });
+
+   it('reports an error when an ENTITIES value matches a parsed entity (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT emptyElement EMPTY>
+            <!NOTATION aNotation SYSTEM 'http://somewhere.in.time'>
+            <!ATTLIST emptyElement
+               whatever NOTATION (aNotation)
+            >
+         ]>
+         <emptyElement/>`,
+         VID.ATTLISTDECL_EMPTY_NOTATION,
+         done!,
+      );
+   });
 });
