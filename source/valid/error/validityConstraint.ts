@@ -72,6 +72,16 @@ const validityConstraint = new ErrorCodes({
       message:
          'The NOTATION value for attribute "{1}" of element "{0}" must be one of the values declared ({2}) (§3.3.1). Found "{3}".',
    },
+   ATTLISTDECL_DUPLICATE_ENUMERATION: {
+      code: 1113,
+      message:
+         'Must not have duplicate enumeration values on the "{1}" attribute of element "{0}" (§3.3.1). Found "{2}".',
+   },
+   ATTLISTDECL_DUPLICATE_NOTATION: {
+      code: 1114,
+      message:
+         'Must not have duplicate NOTATION values on the "{1}" attribute of element "{0}" (§3.3.1). Found "{2}".',
+   },
 });
 
 export { validityConstraint };

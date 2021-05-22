@@ -22,6 +22,7 @@ import {
 
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
+import { attListDeclarationValidate } from '../token/attListDeclarationValidate';
 import { conditionalValidate } from '../token/conditionalValidate';
 import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
@@ -45,6 +46,7 @@ import { ConformanceVersion } from 'basic';
 import { ConditionalPToken, ElidedEntityDeclarationPToken } from 'token';
 import { toSToken } from 'sToken';
 
+jest.mock('../token/attListDeclarationValidate');
 jest.mock('../token/attListDeclarationUpdateState');
 jest.mock('../token/conditionalValidate');
 jest.mock('../token/docTypeStartUpdateState');
@@ -110,6 +112,14 @@ describe('ValidityChecker (unit)', () => {
          ec,
          version,
       );
+   });
+
+   it('validates an ATTLIST declaration', () => {
+      const attListDecl = makeAttListDeclaration();
+
+      checker.checkPToken(attListDecl, ec);
+
+      expect(attListDeclarationValidate).toHaveBeenCalledWith(attListDecl, expect.any(Object), ec);
    });
 
    it('updates the state when passed an ATTLIST declaration', () => {

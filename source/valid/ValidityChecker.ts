@@ -26,6 +26,7 @@ import {
 
 import { ValidateState } from './validateState';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
+import { attListDeclarationValidate } from './token/attListDeclarationValidate';
 import { charDataValidate } from './token/charDataValidate';
 import { conditionalValidate } from './token/conditionalValidate';
 import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
@@ -74,6 +75,7 @@ class ValidityChecker {
             }
             break;
          case ATTLIST_DECLARATION_PTOKEN:
+            attListDeclarationValidate(token, this.state, ec);
             this.state = attListDeclarationUpdateState(token, this.state);
             break;
          case CHARDATA_PTOKEN:

@@ -228,4 +228,38 @@ describe('ValidityChecker (integration)', () => {
          done!,
       );
    });
+
+   it('reports an error when a notation name is repeated in the ATTLIST declaration (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               notationAttr NOTATION (one | two | one)
+            >
+            <!NOTATION one SYSTEM 'http://somewhere.in.time'>
+            <!NOTATION two SYSTEM 'http://somewhere.in.time'>
+         ]>
+         <root/>`,
+         VID.ATTLISTDECL_DUPLICATE_NOTATION,
+         done!,
+      );
+   });
+
+   it('reports an error when an enumeration name is repeated in the ATTLIST declaration (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               notationAttr (one | two | one)
+            >
+            <!NOTATION one SYSTEM 'http://somewhere.in.time'>
+            <!NOTATION two SYSTEM 'http://somewhere.in.time'>
+         ]>
+         <root/>`,
+         VID.ATTLISTDECL_DUPLICATE_ENUMERATION,
+         done!,
+      );
+   });
 });
