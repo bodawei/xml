@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!NOTATION before SYSTEM "http://somewhere.com" >
+   <!ATTLIST one
+      anAttr NOTATION (before | after) #IMPLIED
+   >
+   <!NOTATION after SYSTEM "http://somewhere.com" >
+]>
+
+<one>
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid notation-attributes.xml
+
+   Demonstrates that notations can be declared after referenced in an ATTLIST
+]]>
+</one>

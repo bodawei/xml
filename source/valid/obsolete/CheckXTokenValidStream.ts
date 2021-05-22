@@ -1261,31 +1261,6 @@ class CheckXTokenValidStream extends Transform {
                   );
                }
             } else if (attrDef.type === 'NOTATION') {
-               // §3.3.1: Validity constraint: Notation Attributes
-               //    ...all notation names in the declaration must be declared.
-               // However, it is interesting to note that they do not need to have been dceclared
-               // before the ATTLIST.  See valid-sa-076
-               const notationNames: ReadonlyArray<string> = attrDef.enumeration || [];
-               const attDecl = attList.tokens.find((token) => {
-                  return !!token.attDefs.find((def) => {
-                     return def === attrDef;
-                  });
-               });
-               const pToken = attDecl?.pToken ?? { open: undefined };
-
-               for (let index = 0; index < notationNames.length; index++) {
-                  const notationName = notationNames[index];
-                  const notationDecl = this.notations[notationName];
-
-                  if (!notationDecl) {
-                     this.pushValidityError(
-                        ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
-                        [elementType, attrDef.name, notationName],
-                        pToken.open,
-                     );
-                  }
-               }
-
                // §3.3.1: (in 1.0/2+) Validity constraint: One Notation Per Element Type
                //    An element type must not have more than one NOTATION attribute specified.
                notationCount++;
@@ -1297,21 +1272,6 @@ class CheckXTokenValidStream extends Transform {
                      undefined,
                   );
                }
-
-               // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element
-               //    For compatibility, an attribute of type NOTATION must
-               //    not be declared on an element declared EMPTY.
-               // if (oneDotZeroRev2OrHigher) {
-               //    const elementDecl = this.elementDeclarations[elementType];
-
-               //    if (elementDecl && elementDecl.type === 'EMPTY_CONTENT') {
-               //       this.pushValidityError(
-               //          ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
-               //          [elementType, attrDef.name],
-               //          undefined,
-               //       );
-               //    }
-               // }
             }
          });
       });
@@ -1464,15 +1424,7 @@ class CheckXTokenValidStream extends Transform {
                const declaredNames = attrDef.enumeration || [];
 
                if (declaredNames.indexOf(attrText) === -1) {
-                  if (attrDef.type === 'NOTATION') {
-                     // §3.3.1: Validity Constraint: Notation Attributes
-                     //    Values of this type must match one of the notation names included in the declaration; ...
-                     this.pushValidityError(
-                        ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
-                        [attrText, elStart.name, attrName, declaredNames.join(', ')],
-                        pTokenOpen,
-                     );
-                  } else {
+                  if (attrDef.type !== 'NOTATION') {
                      // §3.3.1: Validity Constraint: Enumeration
                      //    Values of this type must match one of the Nmtoken tokens in the declaration.
                      this.pushValidityError(

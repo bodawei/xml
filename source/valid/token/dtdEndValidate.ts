@@ -2,38 +2,67 @@
 
 import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
+import { WordListPToken } from 'token';
 
 import { ValidateState } from '../validateState';
 import { validityConstraint } from '../error/validityConstraint';
 
 const VID = validityConstraint.id;
 
-function attListValidate(state: ValidateState, ec: ErrorCollector): void {
-   const attlists = Object.entries(state.attributeDefs);
-
-   // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element
-   //    For compatibility, an attribute of type NOTATION must
-   //    not be declared on an element declared EMPTY.
-   if (state.confVer.version !== 1.1 && state.confVer.edition === 1) {
+function enumerationValidate(
+   enumeration: WordListPToken | undefined,
+   elName: string,
+   attName: string,
+   state: ValidateState,
+   ec: ErrorCollector,
+): void {
+   if (!enumeration) {
       return;
    }
 
-   for (const [elName, details] of attlists) {
+   for (const wordEntry of enumeration.words) {
+      const wordStr = strOrBlank(wordEntry.word);
+
+      // §3.3.1: Notation Attributes
+      //    ...all notation names in the declaration must be declared.
+      ec.check(
+         !state.notationDeclarations[wordStr],
+         VID.ATTLISTDECL_BAD_NOTATION,
+         [elName, attName, wordStr],
+         wordEntry.word,
+      );
+   }
+}
+
+function attListValidate(state: ValidateState, ec: ErrorCollector): void {
+   const attlists = Object.entries(state.attributeDefs);
+   const isVer1Ed1 = state.confVer.version !== 1.1 && state.confVer.edition === 1;
+
+   for (const [elName, allAtts] of attlists) {
       const elementDetails = state.elementDeclarations[elName];
       const elType = strOrBlank(elementDetails?.token.contentSpec);
       const elementIsEmpty = elType.toLocaleLowerCase() === 'empty';
 
-      if (details && elementIsEmpty) {
-         const attrsInfo = Object.entries(details);
+      if (!allAtts) {
+         continue;
+      }
 
-         for (const [attName, attInfo] of attrsInfo) {
-            ec.check(
-               strOrBlank(attInfo?.def.type).toLowerCase() === 'notation',
-               VID.ATTLISTDECL_EMPTY_NOTATION,
-               [elName, attName],
-               attInfo?.def.type,
-            );
+      for (const [attName, attInfo] of Object.entries(allAtts)) {
+         const isNotation = strOrBlank(attInfo?.def.type).toLowerCase() === 'notation';
+
+         if (isNotation) {
+            enumerationValidate(attInfo?.def.enumeration, elName, attName, state, ec);
          }
+
+         // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element
+         //    For compatibility, an attribute of type NOTATION must
+         //    not be declared on an element declared EMPTY.
+         ec.check(
+            elementIsEmpty && isNotation && !isVer1Ed1,
+            VID.ATTLISTDECL_EMPTY_NOTATION,
+            [elName, attName],
+            attInfo?.def.type,
+         );
       }
    }
 }

@@ -5,7 +5,7 @@ import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import { AttributePToken, AttributesPToken, AttributeValuePToken, AttributeValueElement, parseAttribute } from './common/attribute';
 import { LiteralPToken, parseLiteral } from './common/literal';
 import literalValue, { LiteralValuePToken, parseLiteralValue } from './common/literalValue';
-import { WordListPToken, WordListType, WordListEntryPToken, parseWordList } from './common/wordList';
+import { WordListPToken, WordListType, WordListEntryPToken, parseWordList, NOTATION_PTOKEN } from './common/wordList';
 import { InternalSubsetStartToken } from './marker/internalSubsetStart';
 import { InternalSubsetEndToken } from './marker/internalSubsetEnd';
 import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
@@ -89,6 +89,7 @@ type PToken =
 
 export {
    ERROR_TYPE,
+   NOTATION_PTOKEN,
 
    DeclarationPToken,
    AttributePToken,

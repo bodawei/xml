@@ -62,6 +62,16 @@ const validityConstraint = new ErrorCodes({
       message:
          'Must not have an attribute of type NOTATION on an EMPTY element "{0}" (§3.3.1). Found "{1}".',
    },
+   ATTLISTDECL_BAD_NOTATION: {
+      code: 1111,
+      message:
+         'The attribute "{1}" of attribute list declaration "{0}" must name NOTATIONs that have been declared (§3.3.1). Found "{2}".',
+   },
+   ELEMENTSTART_NOTATION_NOT_DECLARED: {
+      code: 1112,
+      message:
+         'The NOTATION value for attribute "{1}" of element "{0}" must be one of the values declared ({2}) (§3.3.1). Found "{3}".',
+   },
 });
 
 export { validityConstraint };

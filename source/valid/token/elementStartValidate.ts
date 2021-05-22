@@ -2,7 +2,7 @@
 
 import { isAugmentedAttribute } from 'attFixer';
 import { ErrorCollector, isName, isNmToken } from 'basic';
-import { pTokenArrayToString } from 'pToken';
+import { AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
@@ -12,6 +12,38 @@ import { ElDeclType, ValidateState } from '../validateState';
 
 const NVID = validityConstraint.id;
 const VID = ValidityError.ID;
+
+function notationCheck(
+   elName: string,
+   attName: string,
+   attValue: string,
+   attDef: AttDefinitionP,
+   nameSToken: SToken,
+   ec: ErrorCollector,
+): void {
+   // §3.3.1: Validity Constraint: Notation Attributes
+   //    Values of this type must match one of the notation names included in the declaration;
+   let foundDeclaration = false;
+   const allWords: Array<string> = [];
+
+   if (attDef.enumeration) {
+      for (const wordInfo of attDef.enumeration.words) {
+         const word = strOrBlank(wordInfo.word);
+         allWords.push(word);
+
+         if (word === attValue) {
+            foundDeclaration = true;
+         }
+      }
+   }
+
+   ec.check(
+      !foundDeclaration,
+      NVID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+      [elName, attName, allWords.join('|'), attValue],
+      nameSToken,
+   );
+}
 
 function entityCheck(
    elName: string,
@@ -154,6 +186,9 @@ function checkAttributes(
             break;
          case 'ENTITIES':
             entityCheck(elName, attName, attrValue, true, attr.name, ec, state);
+            break;
+         case 'NOTATION':
+            notationCheck(elName, attName, attrValue, details.def, attr.name, ec);
             break;
       }
    }

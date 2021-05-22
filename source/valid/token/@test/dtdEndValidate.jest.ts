@@ -6,6 +6,7 @@ import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
+import { NOTATION_PTOKEN } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
 import { dtdEndValidate } from '../dtdEndValidate';
@@ -149,6 +150,108 @@ describe('dtdEndValidate (unit)', () => {
             elementDeclarations: {
                emptyEl: undefined,
             },
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+   });
+
+   describe('Notation Attributes constraint (§3.3.1)', () => {
+      it('reports an error when a NOTATION value has not been declared (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               someElement: {
+                  notationAttr: {
+                     def: {
+                        name: toSToken('notationAttr'),
+                        type: toSToken('NOTATION'),
+                        enumeration: {
+                           type: NOTATION_PTOKEN,
+                           open: toSToken('('),
+                           words: [
+                              {
+                                 word: toSToken('undeclared'),
+                              },
+                           ],
+                        },
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_NOTATION,
+            params: ['someElement', 'notationAttr', 'undeclared'],
+            position: toSToken('undeclared'),
+            lastPosition: undefined,
+         });
+      });
+
+      it('reports no error when NOTATION value was declared (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               someElement: {
+                  notationAttr: {
+                     def: {
+                        name: toSToken('notationAttr'),
+                        type: toSToken('NOTATION'),
+                        enumeration: {
+                           type: NOTATION_PTOKEN,
+                           open: toSToken('('),
+                           words: [
+                              {
+                                 word: toSToken('declared'),
+                              },
+                           ],
+                        },
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+            notationDeclarations: {
+               declared: true,
+            },
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no error for enumeration types (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               someElement: {
+                  enumerationAttr: {
+                     def: {
+                        name: toSToken('enumerationAttr'),
+                        type: toSToken('ENUMERATION'),
+                        enumeration: {
+                           type: NOTATION_PTOKEN,
+                           open: toSToken('('),
+                           words: [
+                              {
+                                 word: toSToken('unceclared'),
+                              },
+                           ],
+                        },
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+            notationDeclarations: {},
          });
 
          dtdEndValidate(state, mockErrorCollector);

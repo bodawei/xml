@@ -183,7 +183,7 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
-   it('reports an error when an ENTITIES value matches a parsed entity (§3.3.1)', (done) => {
+   it('reports an error when a NOTATION is on an empty element (§3.3.1)', (done) => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE emptyElement [
@@ -195,6 +195,36 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <emptyElement/>`,
          VID.ATTLISTDECL_EMPTY_NOTATION,
+         done!,
+      );
+   });
+
+   it('reports an error when a NOTATION value has not been declared (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               whatever NOTATION (aNotation)
+            >
+         ]>
+         <root/>`,
+         VID.ATTLISTDECL_BAD_NOTATION,
+         done!,
+      );
+   });
+
+   it('reports an error when an attribute has a notation value that was not in the ATTLIST declaration (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               notationAttr NOTATION (aNotation)
+            >
+         ]>
+         <root notationAttr="bad"/>`,
+         VID.ELEMENTSTART_NOTATION_NOT_DECLARED,
          done!,
       );
    });

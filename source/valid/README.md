@@ -4,10 +4,20 @@
 
 ## Commentary on individual constraints
 
-* §2.8.0 Root element type
+x 745 3.3.1 name token
+x 744 3.3.1 entity name
+
+
+### §2.8.0 Root element type
 No commentary.
 
-* §4.2.2 Notation declared
+### §3.3.1 Notation Attributes
+This says "all notation names in the declaration must be declared". Note that one of these notations can be declared after the ATTLIST
+
+### §3.3.1 No notation on empty element
+This was introduced in 1.0/2, so is not enforced when the conformance version is 1.0/1.
+
+### §4.2.2 Notation declared
 This states that the NDATA name must match the declared name of a notation.
 
 One's thought might be that, like PE references, that this would imply that the notation must be declared before the ENTITY declaration.
@@ -16,7 +26,7 @@ However, several XML Conformance tests reveal that it is perfectly legal to have
 
 And using the `xmllint` as a guide, it is also apparent that these must be declared even if the entity is never referenced.
 
-* §4.7.0 Unique notation name
+### §4.7.0 Unique notation name
 This assumes that the first occurence of a notation declaration is correct, while subsequent ones are in error.  This is consistent with the general pattern of "first occurrence wins" in XML.
 
 Note also that this is not enforced in 1.0/1, since that edition did not have this constraint.
@@ -198,3 +208,9 @@ The last processing phase does two things:
 ### Element end
 * If this encounters an unbalanced end, it will ignore the end element.
    * Like wellformedness, this does not try to auto-close parent elements.
+
+
+## Code style
+* A comment should be placed before each check for a valitity error that lists the section, and the portion of the text from the spec that describes the constraint.  This should be done with line comments.
+* Each test for a valitity constraint should list the section of the spec this test is checking.
+* Each group of tests for one validity constraint should be in its own `describe()` section.
