@@ -203,6 +203,45 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error when an ID attribute value is used more than once in a document (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               id ID #REQUIRED
+            >
+            <!ELEMENT body EMPTY>
+            <!ATTLIST body
+               id ID #REQUIRED
+            >
+         ]>
+         <root id="one">
+            <body id="one">
+         </root>`,
+         VID.ELEMENTSTART_ID_DUPLICATE,
+         done!,
+      );
+   });
+
+   it('reports an error when an element type has more than one id attribute defined (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               id ID #REQUIRED
+            >
+            <!ATTLIST root
+               secondary ID #REQUIRED
+            >
+         ]>
+         <root />`,
+         VID.ATTLISTDECL_EXTRA_ID,
+         done!,
+      );
+   });
+
    it('reports an error when an ENTITIES value matches a parsed entity (§3.3.1)', (done) => {
       expectError(
          `<?xml version="1.0"?>

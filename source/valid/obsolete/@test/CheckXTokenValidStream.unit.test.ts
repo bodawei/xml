@@ -1020,42 +1020,42 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
-         it('reports an error if an ATTLIST for an element type has more than one attribute of type ID', (done) => {
-            const endOfDocType = new DocTypeEndXToken();
-            const attListDecl = new AttListDeclarationXToken('elementType', [
-               {
-                  name: 'idAttr',
-                  type: AttDefinitionType.ID,
-                  enumeration: undefined,
-                  value: [],
-                  defaultType: AttDefaultType.IMPLIED,
-               },
-               {
-                  name: 'ref',
-                  type: AttDefinitionType.IDREF,
-                  enumeration: undefined,
-                  value: [],
-                  defaultType: AttDefaultType.REQUIRED,
-               },
-               {
-                  name: 'second',
-                  type: AttDefinitionType.ID,
-                  enumeration: undefined,
-                  value: [],
-                  defaultType: AttDefaultType.REQUIRED,
-               },
-            ]);
+         // it('reports an error if an ATTLIST for an element type has more than one attribute of type ID', (done) => {
+         //    const endOfDocType = new DocTypeEndXToken();
+         //    const attListDecl = new AttListDeclarationXToken('elementType', [
+         //       {
+         //          name: 'idAttr',
+         //          type: AttDefinitionType.ID,
+         //          enumeration: undefined,
+         //          value: [],
+         //          defaultType: AttDefaultType.IMPLIED,
+         //       },
+         //       {
+         //          name: 'ref',
+         //          type: AttDefinitionType.IDREF,
+         //          enumeration: undefined,
+         //          value: [],
+         //          defaultType: AttDefaultType.REQUIRED,
+         //       },
+         //       {
+         //          name: 'second',
+         //          type: AttDefinitionType.ID,
+         //          enumeration: undefined,
+         //          value: [],
+         //          defaultType: AttDefaultType.REQUIRED,
+         //       },
+         //    ]);
 
-            validator.write(attListDecl);
-            validator.write(endOfDocType);
-            validator.end();
+         //    validator.write(attListDecl);
+         //    validator.write(endOfDocType);
+         //    validator.end();
 
-            const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID, [
-               'elementType',
-               'second',
-            ]);
-            expectStream(validator, expected, done);
-         });
+         //    const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID, [
+         //       'elementType',
+         //       'second',
+         //    ]);
+         //    expectStream(validator, expected, done);
+         // });
 
          describe('xml:space', () => {
             it('reports no error on an enumeration declaration with preserve and default as values ', (done) => {
@@ -1830,48 +1830,48 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
          });
 
-         it('ignores attribute declarations after the first encountered', (done) => {
-            const endOfDocType = new DocTypeEndXToken();
-            const attListDecl1 = new AttListDeclarationXToken('elementType', [
-               {
-                  name: 'idAttr',
-                  type: AttDefinitionType.ID,
-                  enumeration: undefined,
-                  value: [],
-                  defaultType: AttDefaultType.IMPLIED,
-               },
-               {
-                  name: 'anAttribute',
-                  type: AttDefinitionType.CDATA,
-                  enumeration: undefined,
-                  value: [],
-                  defaultType: AttDefaultType.REQUIRED,
-               },
-            ]);
-            const attListDecl2 = new AttListDeclarationXToken('elementType', [
-               {
-                  name: 'anAttribute',
-                  type: AttDefinitionType.ID, // This would cause us to have two ID's, if this were honored
-                  enumeration: undefined,
-                  value: [],
-                  defaultType: AttDefaultType.REQUIRED,
-               },
-            ]);
+         // it('ignores attribute declarations after the first encountered', (done) => {
+         //    const endOfDocType = new DocTypeEndXToken();
+         //    const attListDecl1 = new AttListDeclarationXToken('elementType', [
+         //       {
+         //          name: 'idAttr',
+         //          type: AttDefinitionType.ID,
+         //          enumeration: undefined,
+         //          value: [],
+         //          defaultType: AttDefaultType.IMPLIED,
+         //       },
+         //       {
+         //          name: 'anAttribute',
+         //          type: AttDefinitionType.CDATA,
+         //          enumeration: undefined,
+         //          value: [],
+         //          defaultType: AttDefaultType.REQUIRED,
+         //       },
+         //    ]);
+         //    const attListDecl2 = new AttListDeclarationXToken('elementType', [
+         //       {
+         //          name: 'anAttribute',
+         //          type: AttDefinitionType.ID, // This would cause us to have two ID's, if this were honored
+         //          enumeration: undefined,
+         //          value: [],
+         //          defaultType: AttDefaultType.REQUIRED,
+         //       },
+         //    ]);
 
-            validator.write(attListDecl1);
-            validator.write(attListDecl2);
-            validator.write(endOfDocType);
-            validator.end();
+         //    validator.write(attListDecl1);
+         //    validator.write(attListDecl2);
+         //    validator.write(endOfDocType);
+         //    validator.end();
 
-            const notExpected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID, [
-               'elementType',
-               'anAttribute',
-            ]);
-            gatherStreamResults<any>(validator, (tokens) => {
-               (expect(tokens) as any).not.toHaveError(notExpected); // typeHack
-               done();
-            });
-         });
+         //    const notExpected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID, [
+         //       'elementType',
+         //       'anAttribute',
+         //    ]);
+         //    gatherStreamResults<any>(validator, (tokens) => {
+         //       (expect(tokens) as any).not.toHaveError(notExpected); // typeHack
+         //       done();
+         //    });
+         // });
 
          it('reports a warning if more than one attribute definition is provided for an attribute', (done) => {
             const endOfDocType = new DocTypeEndXToken();

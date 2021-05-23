@@ -781,8 +781,6 @@ class CheckXTokenValidStream extends Transform {
          if (this.contentStack.length === 0) {
             this.validateDocumentEnd();
          }
-      } else if (xToken instanceof DocTypeEndXToken) {
-         this.validateDTD();
       }
 
       if (xToken.type === CONFORMANCE_VERSION) {
@@ -1193,34 +1191,6 @@ class CheckXTokenValidStream extends Transform {
             }
          }
       }
-   }
-
-   /*
-    * Does all checks that can only be done once we have the whole DTD processed
-    */
-   private validateDTD() {
-      Object.keys(this.attrDefsByElementName).forEach((elementType: string) => {
-         const attList = this.attrDefsByElementName[elementType];
-         let idCount = 0;
-
-         Object.keys(attList.attributes).forEach((name) => {
-            const attrDef = attList.attributes[name].def;
-
-            // §3.3.1: Validity constraint: One ID per Element Type
-            //    An element type must not have more than one ID attribute specified.
-            if (attrDef.type === 'ID') {
-               idCount++;
-
-               if (idCount > 1) {
-                  this.pushValidityError(
-                     ValidityError.ID.ATTLISTDECL_EXTRA_ID,
-                     [elementType, attrDef.name],
-                     undefined,
-                  );
-               }
-            }
-         });
-      });
    }
 
    private validateDocumentEnd() {

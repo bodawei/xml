@@ -23,6 +23,64 @@ describe('dtdEndValidate (unit)', () => {
       mockErrorCollector = new MockErrorCollector();
    });
 
+   describe('One ID per Element Type constraint (§3.3.1)', () => {
+      it('reports an error when a NOTATION attribute type is on an EMPTY element (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               anElement: {
+                  id: {
+                     def: {
+                        name: toSToken('id'),
+                        type: toSToken('ID'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+                  other: {
+                     def: {
+                        name: toSToken('other'),
+                        type: toSToken('ID'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_EXTRA_ID,
+            lastPosition: undefined,
+            params: ['anElement', 'other', 'id'],
+            position: toSToken('ID'),
+         });
+      });
+
+      it('reports no error when there is only one ID attribute (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               anElement: {
+                  id: {
+                     def: {
+                        name: toSToken('id'),
+                        type: toSToken('ID'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+         });
+
+         dtdEndValidate(state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+   });
+
    describe('No Notation on Empty Element constraint (§3.3.1)', () => {
       it('reports an error when a NOTATION attribute type is on an EMPTY element (§3.3.1)', () => {
          state = new ValidateState({
@@ -51,9 +109,9 @@ describe('dtdEndValidate (unit)', () => {
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ATTLISTDECL_EMPTY_NOTATION,
+            lastPosition: undefined,
             params: ['emptyEl', 'notationAttr'],
             position: toSToken('NOTATION'),
-            lastPosition: undefined,
          });
       });
 
@@ -71,13 +129,13 @@ describe('dtdEndValidate (unit)', () => {
                   },
                },
             },
+            confVer: new ConformanceVersion(1.0, 1),
             elementDeclarations: {
                emptyEl: {
                   token: makeElementDeclaration('EMPTY'),
                   type: ElDeclType.EMPTY,
                },
             },
-            confVer: new ConformanceVersion(1.0, 1),
          });
 
          dtdEndValidate(state, mockErrorCollector);
@@ -165,17 +223,17 @@ describe('dtdEndValidate (unit)', () => {
                someElement: {
                   notationAttr: {
                      def: {
-                        name: toSToken('notationAttr'),
-                        type: toSToken('NOTATION'),
                         enumeration: {
-                           type: NOTATION_PTOKEN,
                            open: toSToken('('),
+                           type: NOTATION_PTOKEN,
                            words: [
                               {
                                  word: toSToken('undeclared'),
                               },
                            ],
                         },
+                        name: toSToken('notationAttr'),
+                        type: toSToken('NOTATION'),
                         value: [],
                      },
                      isExternal: false,

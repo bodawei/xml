@@ -31,17 +31,18 @@ module.exports = {
    overrides: [
       {
          files: [
+            './source/flat/**/*.ts',
+            './source/valid/**/*.ts',
+            './source/xToken/**/*.ts',
+
             './source/attFixer/**/*.ts',
             './source/basic/**/*.ts',
             './source/conformance/**/*.ts',
             './source/demo/**/*.ts',
             './source/expand/**/*.ts',
-            './source/flat/**/*.ts',
             './source/pToken/**/*.ts',
             './source/sToken/**/*.ts',
-            './source/valid/**/*.ts',
             './source/wellformedness/**/*.ts',
-            './source/xToken/**/*.ts',
 
             './source/node/**/PToXTokenStream*.ts',
             './source/**/charRef*.ts',
@@ -74,7 +75,6 @@ module.exports = {
          extends: [
             'plugin:prettier/recommended',
             'prettier',
-            'prettier/react',
             'plugin:@typescript-eslint/eslint-recommended',
             'plugin:@typescript-eslint/recommended',
             'plugin:@typescript-eslint/recommended-requiring-type-checking',
@@ -82,6 +82,10 @@ module.exports = {
          rules: {
             'prettier/prettier': 'error',
             'no-unused-vars': 'off',
+
+            // https://eslint.org/docs/rules/sort-keys
+            'sort-keys': ['error', 'asc', { caseSensitive: false, minKeys: 2, natural: true }],
+
             // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin
             '@typescript-eslint/adjacent-overload-signatures': 'error',
             '@typescript-eslint/array-type': [ 'error', { default: 'generic' } ],

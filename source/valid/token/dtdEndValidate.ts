@@ -43,6 +43,7 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
       const elType = strOrBlank(elementDetails?.token.contentSpec);
       const elementIsEmpty = elType.toLocaleLowerCase() === 'empty';
       let seenNotationAttr = false;
+      let firstIdAtt: string | undefined;
 
       if (!allAtts) {
          continue;
@@ -50,6 +51,7 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
 
       for (const [attName, attInfo] of Object.entries(allAtts)) {
          const isNotation = strOrBlank(attInfo?.def.type).toLowerCase() === 'notation';
+         const isId = strOrBlank(attInfo?.def.type).toLowerCase() === 'id';
 
          if (isNotation) {
             notationValidate(attInfo?.def.enumeration, elName, attName, state, ec);
@@ -64,6 +66,18 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
             );
 
             seenNotationAttr = true;
+         }
+
+         if (isId) {
+            // §3.3.1: Validity constraint: One ID per Element Type
+            //    An element type must not have more than one ID attribute specified.
+            ec.check(
+               firstIdAtt,
+               VID.ATTLISTDECL_EXTRA_ID,
+               [elName, attName, firstIdAtt as string],
+               attInfo?.def.type,
+            );
+            firstIdAtt = firstIdAtt ?? attName;
          }
 
          // §3.3.1 (1.0/2+): Validity constraint: No Notation on Empty Element

@@ -14,6 +14,9 @@ No commentary.
 ### §3.3.1 ID
 No commentary.
 
+### §3.3.1 One ID per Element Type
+No commentary.
+
 ### §3.3.1 Notation Attributes
 This says "all notation names in the declaration must be declared". Note that one of these notations can be declared after the ATTLIST
 

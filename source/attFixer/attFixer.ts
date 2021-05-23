@@ -289,13 +289,13 @@ function gatherDefaults(
 
       if (!hasAttr[attrName] && attrDef.defaultValue && attrName !== '') {
          newAttrs.push({
-            name: attrDef.name,
-            equal: toSToken('='),
-            openQuote: attrDef.openQuote,
-            value: attrDef.defaultValue,
             closeQuote: attrDef.closeQuote,
-            trailingSpace: toSToken(' '),
             defaulted: true,
+            equal: toSToken('='),
+            name: attrDef.name,
+            openQuote: attrDef.openQuote,
+            trailingSpace: toSToken(' '),
+            value: attrDef.defaultValue,
          });
       }
    }
