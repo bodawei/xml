@@ -242,6 +242,21 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error when an ID attribute is declared with neither #REQIRED or #IMPLICIT as a default type (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               id ID
+            >
+         ]>
+         <root />`,
+         VID.ATTLISTDECL_ID_BAD_DEFAULT,
+         done!,
+      );
+   });
+
    it('reports an error when an ENTITIES value matches a parsed entity (§3.3.1)', (done) => {
       expectError(
          `<?xml version="1.0"?>

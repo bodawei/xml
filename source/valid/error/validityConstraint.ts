@@ -33,6 +33,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'Must not have more than one attribute of type NOTATION for the element type "{0}" (§3.3.1). Found "{1}".',
    },
+   ATTLISTDECL_ID_BAD_DEFAULT: {
+      code: 1120,
+      message:
+         'The default type for attribute "{1}" of attribute list declaration "{0}" must be "#IMPLIED" or "#REQUIRED" (§3.3.1). Found: "{2}".',
+   },
    ELEMENT_MISMATCH_ROOT_TYPE: {
       code: 1101,
       message:

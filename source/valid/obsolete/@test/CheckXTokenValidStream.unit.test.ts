@@ -998,27 +998,27 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectNoErrorsOrWarnings(validator, done);
          });
 
-         it('reports an error if an attribute is of type ID but does not have value #IMPLIED or #REQUIRED', (done) => {
-            const attListDecl = new AttListDeclarationXToken('elementType', [
-               {
-                  name: 'idAttr',
-                  type: AttDefinitionType.ID,
-                  enumeration: undefined,
-                  value: [],
-                  defaultType: undefined,
-               },
-            ]);
+         // it('reports an error if an attribute is of type ID but does not have value #IMPLIED or #REQUIRED', (done) => {
+         //    const attListDecl = new AttListDeclarationXToken('elementType', [
+         //       {
+         //          name: 'idAttr',
+         //          type: AttDefinitionType.ID,
+         //          enumeration: undefined,
+         //          value: [],
+         //          defaultType: undefined,
+         //       },
+         //    ]);
 
-            validator.write(attListDecl);
-            validator.end();
+         //    validator.write(attListDecl);
+         //    validator.end();
 
-            const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT, [
-               'elementType',
-               'idAttr',
-               '',
-            ]);
-            expectStream(validator, expected, done);
-         });
+         //    const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT, [
+         //       'elementType',
+         //       'idAttr',
+         //       '',
+         //    ]);
+         //    expectStream(validator, expected, done);
+         // });
 
          // it('reports an error if an ATTLIST for an element type has more than one attribute of type ID', (done) => {
          //    const endOfDocType = new DocTypeEndXToken();

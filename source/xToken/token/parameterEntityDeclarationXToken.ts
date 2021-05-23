@@ -9,7 +9,8 @@ import { ExntityValueX, makeEntityValueX, cloneEntityValueX } from '../common/en
 const PARAMETER_ENTITY_DECLARATION_XTOKEN = 'PARAMETER_ENTITY_DECLARATION_XTOKEN';
 
 class ParameterEntityDeclarationXToken {
-   public readonly type: typeof PARAMETER_ENTITY_DECLARATION_XTOKEN = PARAMETER_ENTITY_DECLARATION_XTOKEN;
+   public readonly type: typeof PARAMETER_ENTITY_DECLARATION_XTOKEN =
+      PARAMETER_ENTITY_DECLARATION_XTOKEN;
 
    public readonly name: string;
 

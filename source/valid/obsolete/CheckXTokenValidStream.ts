@@ -943,16 +943,6 @@ class CheckXTokenValidStream extends Transform {
       );
 
       if (type === 'ID') {
-         // §3.3.1: Validity constraint: ID Attribute Default
-         //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
-         if (defaultType !== 'IMPLIED' && defaultType !== 'REQUIRED') {
-            this.pushValidityError(
-               ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
-               [attList.elementName, attDef.name, defaultType],
-               pToken.open,
-            );
-         }
-
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    It doesn't make a lot of sense for an ID to have a default value, but the spec doesn't
          //    forbid this. We allow it, and follow the spirit of this validity constraint to

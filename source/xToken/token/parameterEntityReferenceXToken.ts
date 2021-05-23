@@ -6,7 +6,8 @@ import { strOrBlank } from 'sToken';
 const PARAMETER_ENTITY_REFERENCE_XTOKEN = 'PARAMETER_ENTITY_REFERENCE_XTOKEN';
 
 class ParameterEntityReferenceXToken {
-   public readonly type: typeof PARAMETER_ENTITY_REFERENCE_XTOKEN = PARAMETER_ENTITY_REFERENCE_XTOKEN;
+   public readonly type: typeof PARAMETER_ENTITY_REFERENCE_XTOKEN =
+      PARAMETER_ENTITY_REFERENCE_XTOKEN;
 
    public readonly name: string;
 

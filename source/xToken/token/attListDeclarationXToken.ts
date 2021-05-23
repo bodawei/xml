@@ -124,10 +124,10 @@ class AttListDeclarationXToken {
             }
 
             xDefs.push({
+               defaultType: defaultTypeToEnum(attDef.defaultType),
+               enumeration,
                name: strOrBlank(attDef.name),
                type: typeToEnum(attDef.type, !!attDef.enumeration),
-               enumeration,
-               defaultType: defaultTypeToEnum(attDef.defaultType),
                value: makeLiteralValueX(attDef.value),
             });
          }

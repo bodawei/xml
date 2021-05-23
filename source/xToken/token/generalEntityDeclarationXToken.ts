@@ -9,7 +9,8 @@ import { ExntityValueX, makeEntityValueX, cloneEntityValueX } from '../common/en
 const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
 
 class GeneralEntityDeclarationXToken {
-   public readonly type: typeof GENERAL_ENTITY_DECLARATION_XTOKEN = GENERAL_ENTITY_DECLARATION_XTOKEN;
+   public readonly type: typeof GENERAL_ENTITY_DECLARATION_XTOKEN =
+      GENERAL_ENTITY_DECLARATION_XTOKEN;
 
    public readonly name: string;
 
