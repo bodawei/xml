@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ElementDeclarationPToken } from 'pToken';
+import { ElementDeclarationPToken, TextPToken } from 'pToken';
 import { CmGraph } from 'source/valid/contentModal/cmGraphTypes';
 import { SToken, toSToken } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
@@ -276,5 +276,95 @@ describe('elementStartUpdateState (unit)', () => {
       const newState = elementStartUpdateState(elementEmpty, state);
 
       expect(newState).toEqual(state);
+   });
+
+   it('adds info about each ID value to the state (§3.3.1)', () => {
+      state = new ValidateState({
+         attributeDefs: {
+            elementName: {
+               att1: {
+                  def: {
+                     name: toSToken('att1'),
+                     value: [],
+                     type: toSToken('ID'),
+                  },
+                  isExternal: true,
+               },
+            },
+         },
+      });
+
+      const newState = elementStartUpdateState(
+         new ElementStartPToken({
+            open: toSToken('<'),
+            name: toSToken('elementName'),
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: [new TextPToken(toSToken('attValue'))],
+               },
+            ],
+         }),
+         state,
+      );
+
+      expect(newState).toEqual({
+         ...state,
+         elementContext: expect.any(Object),
+         ids: {
+            attValue: {
+               elName: 'elementName',
+               attName: 'att1',
+            },
+         },
+      });
+   });
+
+   it('does not replace an existing entry for an id (§3.3.1)', () => {
+      state = new ValidateState({
+         attributeDefs: {
+            elementName: {
+               att1: {
+                  def: {
+                     name: toSToken('att1'),
+                     value: [],
+                     type: toSToken('ID'),
+                  },
+                  isExternal: true,
+               },
+            },
+         },
+         ids: {
+            attValue: {
+               elName: 'other',
+               attName: 'otherAtt',
+            },
+         },
+      });
+
+      const newState = elementStartUpdateState(
+         new ElementStartPToken({
+            open: toSToken('<'),
+            name: toSToken('elementName'),
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: [new TextPToken(toSToken('attValue'))],
+               },
+            ],
+         }),
+         state,
+      );
+
+      expect(newState).toEqual({
+         ...state,
+         elementContext: expect.any(Object),
+         ids: {
+            attValue: {
+               elName: 'other',
+               attName: 'otherAtt',
+            },
+         },
+      });
    });
 });

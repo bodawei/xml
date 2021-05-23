@@ -309,6 +309,180 @@ describe('elementStartValidate (unit)', () => {
          });
       });
 
+      describe('ID (§3.3.1)', () => {
+         it('reports an error when an ID attribute is not a name (§3.3.1)', () => {
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           type: toSToken('ID'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               open: toSToken('</'),
+               name: toSToken('elementName'),
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('$BOGUS'))],
+                     defaulted: true,
+                  },
+               ],
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportValidityError({
+               id: ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
+               params: ['elementName', 'att1', '$BOGUS'],
+               position: toSToken('att1'),
+               lastPosition: undefined,
+            });
+         });
+
+         it('reports no error when an ID attribute is a name (§3.3.1)', () => {
+            state = new ValidateState({
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           type: toSToken('ID'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               open: toSToken('</'),
+               name: toSToken('elementName'),
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('good'))],
+                     defaulted: true,
+                  },
+               ],
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            expect(mockErrorCollector.errors).toEqual([]);
+         });
+
+         it('reports an error when an ID value has been used before (§3.3.1)', () => {
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           type: toSToken('ID'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                  },
+               },
+               ids: {
+                  reused: {
+                     elName: 'otherElement',
+                     attName: 'otherAttribute',
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               open: toSToken('</'),
+               name: toSToken('elementName'),
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('reused'))],
+                     defaulted: true,
+                  },
+               ],
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportValidityError({
+               id: ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               params: ['elementName', 'att1', 'otherElement', 'otherAttribute', 'reused'],
+               position: toSToken('att1'),
+               lastPosition: undefined,
+            });
+         });
+
+         it('reports an error when an ID value has been used twice in the same element (§3.3.1)', () => {
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           type: toSToken('ID'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                     att2: {
+                        def: {
+                           name: toSToken('att2'),
+                           type: toSToken('ID'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                  },
+               },
+               ids: {},
+            });
+            elementStart = new ElementStartPToken({
+               open: toSToken('</'),
+               name: toSToken('elementName'),
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('reused'))],
+                     defaulted: true,
+                  },
+                  {
+                     name: toSToken('att2'),
+                     value: [new TextPToken(toSToken('reused'))],
+                     defaulted: true,
+                  },
+               ],
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportValidityError({
+               id: ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               params: ['elementName', 'att2', 'elementName', 'att1', 'reused'],
+               position: toSToken('att2'),
+               lastPosition: undefined,
+            });
+         });
+      });
+
       it('reports an error when a NMTOKEN value is empty (§3.3.1)', () => {
          state = new ValidateState({
             attributeDefs: {
@@ -330,7 +504,6 @@ describe('elementStartValidate (unit)', () => {
             attributes: [
                {
                   name: toSToken('att1'),
-                  openQuote: toSToken('"'),
                   value: [],
                   defaulted: true,
                },

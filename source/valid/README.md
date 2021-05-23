@@ -11,6 +11,9 @@ x 744 3.3.1 entity name
 ### §2.8.0 Root element type
 No commentary.
 
+### §3.3.1 ID
+No commentary.
+
 ### §3.3.1 Notation Attributes
 This says "all notation names in the declaration must be declared". Note that one of these notations can be declared after the ATTLIST
 

@@ -84,6 +84,10 @@ interface ValidateStateProps {
       [name: string]: DeclarationDetails | undefined;
    };
 
+   ids?: {
+      [id: string]: undefined | { elName: string; attName: string };
+   };
+
    elementContext?: {
       contextStack: ReadonlyArray<ElementContext>;
       activeContext?: ElementContext; // if this is undefined, contextStack is 0 length
@@ -104,6 +108,10 @@ interface AttributeDefs {
       | undefined;
 }
 
+interface IdMap {
+   readonly [id: string]: undefined | { readonly elName: string; readonly attName: string };
+}
+
 class ValidateState {
    readonly docType?: string;
 
@@ -116,6 +124,8 @@ class ValidateState {
    readonly generalEntities: {
       readonly [elementName: string]: ReadonlyGeneralEntityDetails | undefined;
    };
+
+   readonly ids: IdMap;
 
    elementDeclarations: {
       [name: string]: DeclarationDetails | undefined;
@@ -149,6 +159,9 @@ class ValidateState {
       this.parameterEntities = otherState?.parameterEntities
          ? { ...otherState.parameterEntities }
          : {};
+      this.ids = {
+         ...(otherState?.ids ?? {}),
+      };
       this.elementContext = {
          contextStack: otherState?.elementContext?.contextStack || [],
          activeContext: otherState?.elementContext?.activeContext,
@@ -160,4 +173,11 @@ class ValidateState {
    }
 }
 
-export { AttributeDefs, DeclarationDetails, ElementContext, ElDeclType, ValidateState };
+export {
+   AttributeDefs,
+   DeclarationDetails,
+   ElementContext,
+   ElDeclType,
+   ValidateState,
+   ValidateStateProps,
+};

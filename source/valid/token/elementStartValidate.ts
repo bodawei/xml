@@ -13,6 +13,12 @@ import { ElDeclType, ValidateState } from '../validateState';
 const NVID = validityConstraint.id;
 const VID = ValidityError.ID;
 
+type LocalDetials = Record<string, AttInfo | undefined>;
+interface AttInfo {
+   elName: string;
+   attName: string;
+}
+
 function enumeratedValueCheck(
    elName: string,
    attName: string,
@@ -100,6 +106,50 @@ function entityCheck(
    ec.check(parsed.length > 0, parsedId, [parsed.join(', '), elName, attName], nameSToken);
 }
 
+function idCheck(
+   elName: string,
+   attName: string,
+   attValue: string,
+   nameSToken: SToken,
+   ec: ErrorCollector,
+   state: ValidateState,
+   localInfo: Record<string, AttInfo | undefined>,
+): Record<string, AttInfo | undefined> {
+   const idDetails = state.ids[attValue];
+   const local = localInfo[attValue];
+
+   // §3.3.1: Validity Constraint: ID
+   //    Values of type **ID** must match the Name production.
+   ec.check(
+      !isName(attValue),
+      NVID.ELEMENTSTART_ID_NAME_INVALID,
+      [elName, attName, attValue],
+      nameSToken,
+   );
+
+   // §3.3.1: Validity Constraint: ID
+   //    A name must not appear more than once in an XML document
+   //    as a value of this type; i.e., ID values must uniquely
+   //    identify the elements which bear them.
+   if (idDetails || local) {
+      ec.report(
+         NVID.ELEMENTSTART_ID_DUPLICATE,
+         [
+            elName,
+            attName,
+            (idDetails?.elName || local?.elName) as string,
+            (idDetails?.attName || local?.attName) as string,
+            attValue,
+         ],
+         nameSToken,
+      );
+   }
+
+   localInfo[attValue] = localInfo[attValue] ?? { elName, attName };
+
+   return localInfo;
+}
+
 function nmtokenCheck(
    elName: string,
    attName: string,
@@ -134,6 +184,7 @@ function checkAttributes(
    ec: ErrorCollector,
 ): void {
    const attributes = el.attributes;
+   let localAtts: LocalDetials = {};
 
    for (const attr of attributes) {
       const attName = strOrBlank(attr.name);
@@ -184,6 +235,9 @@ function checkAttributes(
       ec.setPos(attr.openQuote);
 
       switch (type) {
+         case 'ID':
+            localAtts = idCheck(elName, attName, attrValue, attr.name, ec, state, localAtts);
+            break;
          case 'NMTOKEN':
             nmtokenCheck(elName, attName, attrValue, false, attr.name, ec, state);
             break;

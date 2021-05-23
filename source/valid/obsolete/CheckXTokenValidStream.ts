@@ -1295,27 +1295,17 @@ class CheckXTokenValidStream extends Transform {
                // do nothing
             } else if (attrDef.type === 'ID') {
                // §3.3.1: Validity constraint: ID
-               //    Values of type ID must match the Name production.  ...
-               if (!isName(attrText, this.confVer.version, this.confVer.edition)) {
-                  this.pushValidityError(
-                     ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
-                     [attrText, elStart.name, attrName],
-                     pTokenOpen,
-                  );
-               }
-
-               // §3.3.1: Validity constraint: ID
                //    ... A name must not appear more than once in an XML document as a value of
                //    this type; i.e., ID values must uniquely identify the elements which bear them.
                const previous = this.idValues[attrText] || {};
 
-               if (previous.token) {
-                  this.pushValidityError(
-                     ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-                     [attrText, elStart.name, attrName, previous.token.name, previous.attrName],
-                     pTokenOpen,
-                  );
-               } else {
+               if (!previous.token) {
+                  //    this.pushValidityError(
+                  //       ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+                  //       [attrText, elStart.name, attrName, previous.token.name, previous.attrName],
+                  //       pTokenOpen,
+                  //    );
+                  // } else {
                   this.idValues[attrText] = {
                      token: elStart,
                      attrName: attrDef.name,

@@ -17,6 +17,16 @@ const validityConstraint = new ErrorCodes({
       message:
          'The declaration of the entity "{0}" must not have an undeclared NDATA value (§4.2.2). Found "{1}".',
    },
+   ELEMENTSTART_ID_NAME_INVALID: {
+      code: 1117,
+      message:
+         'The ID value for attribute "{1}" of element "{0}" must match the syntax for names (§3.3.1). Found: "{2}".',
+   },
+   ELEMENTSTART_ID_DUPLICATE: {
+      code: 1118,
+      message:
+         'The ID value "{4}" must only be used once in a document. Found on attribute "{1}" of element type "{0}" when earlier used on attribute "{3}" of element type "{2}" (§3.3.1). Found: "{2}".',
+   },
    ELEMENTSTART_NMTOKEN_NOT_NMTOKEN: {
       code: 1104,
       message:
