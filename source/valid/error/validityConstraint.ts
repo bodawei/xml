@@ -88,6 +88,21 @@ const validityConstraint = new ErrorCodes({
       message:
          'The ID value for attribute "{1}" of element "{0}" must match the syntax for names (§3.3.1). Found: "{2}".',
    },
+   ELEMENTSTART_IDREF_NO_ID: {
+      code: 1123,
+      message:
+         'The attribute "{1}" of element "{0}" refers to an ID that is not in the document (§3.3.1). Found: "{2}".',
+   },
+   ELEMENTSTART_IDREF_NOT_NAME: {
+      code: 1121,
+      message:
+         'The IDREF value for attribute "{1}" of element "{0}" must match the syntax for names (§3.3.1). Found: "{2}".',
+   },
+   ELEMENTSTART_IDREFS_NOT_NAME: {
+      code: 1122,
+      message:
+         'The IDREFS value for attribute "{1}" of element "{0}" must match the syntax for names (§3.3.1). Found: "{2}".',
+   },
    ELEMENTSTART_NMTOKEN_NOT_NMTOKEN: {
       code: 1104,
       message:

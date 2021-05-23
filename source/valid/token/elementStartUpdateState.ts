@@ -10,32 +10,58 @@ function updateFromAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
    state: ValidateState,
 ): ValidateStateProps {
-   const ids: ValidateStateProps = {};
+   const ids = { ...state.ids };
+   const idRefs = { ...state.idRefs };
 
    const elName = strOrBlank(el.name);
    const attDefs = state.attributeDefs[elName];
 
    if (!attDefs) {
-      return ids;
+      return { idRefs, ids };
    }
 
+   // Store all ID attribute values that we find for future use in enforcing §3.3.1 validity
+   // constraints (see, in particular, docEndValidate())
    for (const att of el.attributes) {
       const attName = strOrBlank(att.name);
       const attValue = pTokenArrayToString(att.value);
       const defType = strOrBlank(attDefs[attName]?.def.type).toUpperCase();
 
-      if (defType === 'ID' && !state.ids[attValue]) {
-         ids.ids = {
-            ...state.ids,
-            [attValue]: {
-               elName,
-               attName,
-            },
+      if (defType === 'ID' && !ids[attValue]) {
+         ids[attValue] = {
+            attName,
+            elName,
+         };
+      }
+
+      // Store all IDREF attribute values that we find for future use in enforcing §3.3.1 validity
+      // constraints (see, in particular, docEndValidate())
+      let refs: Array<string> = [];
+
+      if (defType === 'IDREF') {
+         refs = [attValue];
+      } else if (defType === 'IDREFS') {
+         refs = attValue.trim().split(/ +/);
+      }
+
+      for (const refValue of refs) {
+         // Do not store reference values that we aready know their targets
+         if (ids[refValue]) {
+            continue;
+         }
+
+         idRefs[refValue] = idRefs[refValue] ?? {
+            attName,
+            elName,
+            sToken: att.name,
          };
       }
    }
 
-   return ids;
+   return {
+      idRefs,
+      ids,
+   };
 }
 
 function updateCurrentElContext(elName: string, state: ValidateState): ValidateState {
@@ -55,8 +81,8 @@ function updateCurrentElContext(elName: string, state: ValidateState): ValidateS
             ...state,
             elementContext: {
                ...state.elementContext,
-               contextStack: temp,
                activeContext: newContext,
+               contextStack: temp,
             },
          };
       }
@@ -80,12 +106,9 @@ function elementStartUpdateState(
       // And why aren't we checking the end more often?
       // And might it be better to check all conditions even if past the end?
       if (newState.elementContext.contextStack.length === 0) {
-         return {
-            ...newState,
-            elementContext: {
-               ...state.elementContext,
-               pastEnd: true,
-            },
+         elementContext = {
+            ...state.elementContext,
+            pastEnd: true,
          };
       }
    } else {
@@ -113,8 +136,8 @@ function elementStartUpdateState(
       const newElementContxt = newState.elementContext;
       elementContext = {
          ...newElementContxt,
-         contextStack: [...newElementContxt.contextStack, context],
          activeContext: context,
+         contextStack: [...newElementContxt.contextStack, context],
       };
    }
 

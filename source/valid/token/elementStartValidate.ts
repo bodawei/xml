@@ -145,7 +145,7 @@ function idCheck(
       );
    }
 
-   localInfo[attValue] = localInfo[attValue] ?? { elName, attName };
+   localInfo[attValue] = localInfo[attValue] ?? { attName, elName };
 
    return localInfo;
 }
@@ -175,6 +175,31 @@ function nmtokenCheck(
    }
 
    ec.check(badNames.length > 0, code, [badNames.join(', '), elName, attName], nameSToken);
+}
+
+function idRefCheck(
+   elName: string,
+   attName: string,
+   attValue: string,
+   isPlural: boolean,
+   nameSToken: SToken,
+   ec: ErrorCollector,
+   state: ValidateState,
+): void {
+   const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
+   const code = isPlural ? NVID.ELEMENTSTART_IDREFS_NOT_NAME : NVID.ELEMENTSTART_IDREF_NOT_NAME;
+   const badNames: Array<string> = [];
+
+   // §3.3.1: Validity Constraint: IDREF
+   //    Values of type IDREF must match the Name production,
+   //    and values of type IDREFS must match Names
+   for (const name of names) {
+      if (!isName(name, state.confVer.version, state.confVer.edition)) {
+         badNames.push(name);
+      }
+   }
+
+   ec.check(badNames.length > 0, code, [elName, attName, badNames.join(', ')], nameSToken);
 }
 
 function checkAttributes(
@@ -243,6 +268,12 @@ function checkAttributes(
             break;
          case 'NMTOKENS':
             nmtokenCheck(elName, attName, attrValue, true, attr.name, ec, state);
+            break;
+         case 'IDREF':
+            idRefCheck(elName, attName, attrValue, false, attr.name, ec, state);
+            break;
+         case 'IDREFS':
+            idRefCheck(elName, attName, attrValue, true, attr.name, ec, state);
             break;
          case 'ENTITY':
             entityCheck(elName, attName, attrValue, false, attr.name, ec, state);

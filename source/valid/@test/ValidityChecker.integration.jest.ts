@@ -257,6 +257,36 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error when an IDREF attribute is not a name (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               ref IDREF
+            >
+         ]>
+         <root ref="$BAD"/>`,
+         VID.ELEMENTSTART_IDREF_NOT_NAME,
+         done!,
+      );
+   });
+
+   it('reports an error when an IDREF does not reference a known ID (§3.3.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               ref IDREF
+            >
+         ]>
+         <root ref="OTHER"/>`,
+         VID.ELEMENTSTART_IDREF_NO_ID,
+         done,
+      );
+   });
+
    it('reports an error when an ENTITIES value matches a parsed entity (§3.3.1)', (done) => {
       expectError(
          `<?xml version="1.0"?>

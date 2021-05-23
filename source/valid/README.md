@@ -17,8 +17,11 @@ No commentary.
 ### §3.3.1 One ID per Element Type
 No commentary.
 
-### §3.3.1 One ID per Element Type
+### §3.3.1 ID Attribute Default
 No commentary.
+
+### §3.3.1 IDREF
+Note that idref's can be "forward" or "backward" references.  Thus, many may not actually be resolvable until the end of the document.
 
 ### §3.3.1 Notation Attributes
 This says "all notation names in the declaration must be declared". Note that one of these notations can be declared after the ATTLIST

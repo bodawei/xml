@@ -19,10 +19,11 @@ describe('elementStartUpdateState (unit)', () => {
 
    beforeEach(async () => {
       graph = {
-         startId: 0,
          endId: 0,
+         startId: 0,
          states: {
             '4': {
+               done: false,
                id: 4,
                trans: {
                   elementName: {
@@ -34,25 +35,24 @@ describe('elementStartUpdateState (unit)', () => {
                      stateId: 6,
                   },
                },
-               done: false,
             },
          },
       };
       elementEmpty = new ElementEmptyPToken({
-         open: toSToken('<'),
-         name: toSToken('elementName'),
          close: toSToken('/>'),
+         name: toSToken('elementName'),
+         open: toSToken('<'),
       });
       elementStart = new ElementStartPToken({
-         open: toSToken('<'),
-         name: toSToken('elementName'),
          close: toSToken('>'),
+         name: toSToken('elementName'),
+         open: toSToken('<'),
       });
       elementDeclaration = new ElementDeclarationPToken({
-         open: toSToken('<!'),
+         close: toSToken('>'),
          declType: toSToken('ELEMENT'),
          name: toSToken('elementName'),
-         close: toSToken('>'),
+         open: toSToken('<!'),
       });
       state = new ValidateState({
          elementDeclarations: {
@@ -79,8 +79,8 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            contextStack: [expectedContext],
             activeContext: expectedContext,
+            contextStack: [expectedContext],
             pastEnd: false,
          },
       });
@@ -88,9 +88,9 @@ describe('elementStartUpdateState (unit)', () => {
 
    it('adds a context to the stack with a fake token if no details could be found', () => {
       const unmatched = new ElementStartPToken({
-         open: toSToken('<!'),
-         name: toSToken('unmatched'),
          close: toSToken('>'),
+         name: toSToken('unmatched'),
+         open: toSToken('<!'),
       });
       const expectedContext: ElementContext = {
          declDetails: {
@@ -106,8 +106,8 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            contextStack: [expectedContext],
             activeContext: expectedContext,
+            contextStack: [expectedContext],
             pastEnd: false,
          },
       });
@@ -117,17 +117,17 @@ describe('elementStartUpdateState (unit)', () => {
       state = new ValidateState({
          elementDeclarations: {
             elementName: {
+               graph: { endId: 10, startId: 9, states: {} },
                token: elementDeclaration,
                type: ElDeclType.ELEMENT,
-               graph: { startId: 9, endId: 10, states: {} },
             },
          },
       });
       const expectedContext: ElementContext = {
          declDetails: {
+            graph: { endId: 10, startId: 9, states: {} },
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
-            graph: { startId: 9, endId: 10, states: {} },
          },
          parentName: 'elementName',
          stateId: 9,
@@ -138,8 +138,8 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            contextStack: [expectedContext],
             activeContext: expectedContext,
+            contextStack: [expectedContext],
             pastEnd: false,
          },
       });
@@ -148,33 +148,33 @@ describe('elementStartUpdateState (unit)', () => {
    it('transitions the activeContext to a new state, when context is ELEMENT', () => {
       const activeContext: ElementContext = {
          declDetails: {
+            graph,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
-            graph,
          },
          parentName: 'elementName',
          stateId: 4,
       };
       const modifiedActive = { ...activeContext, stateId: 5 };
       state = new ValidateState({
+         elementContext: {
+            activeContext: activeContext,
+            contextStack: [activeContext],
+            pastEnd: false,
+         },
          elementDeclarations: {
             elementName: {
+               graph,
                token: elementDeclaration,
                type: ElDeclType.ELEMENT,
-               graph,
             },
-         },
-         elementContext: {
-            contextStack: [activeContext],
-            activeContext: activeContext,
-            pastEnd: false,
          },
       });
       const expectedContext: ElementContext = {
          declDetails: {
+            graph,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
-            graph,
          },
          parentName: 'elementName',
          stateId: 0,
@@ -185,8 +185,8 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            contextStack: [modifiedActive, expectedContext],
             activeContext: expectedContext,
+            contextStack: [modifiedActive, expectedContext],
             pastEnd: false,
          },
       });
@@ -195,31 +195,31 @@ describe('elementStartUpdateState (unit)', () => {
    it('does not transition to a new state, when context is ELEMENT, but the graph has no transition for this', () => {
       const activeContext: ElementContext = {
          declDetails: {
+            graph,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
-            graph,
          },
          parentName: 'elementName',
          stateId: 4,
       };
       state = new ValidateState({
+         elementContext: {
+            activeContext: activeContext,
+            contextStack: [activeContext],
+            pastEnd: false,
+         },
          elementDeclarations: {
             elementName: {
+               graph,
                token: elementDeclaration,
                type: ElDeclType.ELEMENT,
-               graph,
             },
-         },
-         elementContext: {
-            contextStack: [activeContext],
-            activeContext: activeContext,
-            pastEnd: false,
          },
       });
       elementStart = new ElementStartPToken({
-         open: toSToken('<'),
-         name: toSToken('noTransition'),
          close: toSToken('>'),
+         name: toSToken('noTransition'),
+         open: toSToken('<'),
       });
       const expectedContext: ElementContext = {
          declDetails: {
@@ -235,8 +235,8 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            contextStack: [activeContext, expectedContext],
             activeContext: expectedContext,
+            contextStack: [activeContext, expectedContext],
             pastEnd: false,
          },
       });
@@ -248,8 +248,8 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            contextStack: [],
             activeContext: undefined,
+            contextStack: [],
             pastEnd: true,
          },
       });
@@ -258,6 +258,7 @@ describe('elementStartUpdateState (unit)', () => {
    it('changes nothing if it encounters an empty element while in the body of the document', () => {
       state = new ValidateState({
          elementContext: {
+            activeContext: undefined,
             contextStack: [
                {
                   declDetails: {
@@ -268,7 +269,6 @@ describe('elementStartUpdateState (unit)', () => {
                   stateId: 0,
                },
             ],
-            activeContext: undefined,
             pastEnd: false,
          },
       });
@@ -285,8 +285,8 @@ describe('elementStartUpdateState (unit)', () => {
                att1: {
                   def: {
                      name: toSToken('att1'),
-                     value: [],
                      type: toSToken('ID'),
+                     value: [],
                   },
                   isExternal: true,
                },
@@ -296,14 +296,14 @@ describe('elementStartUpdateState (unit)', () => {
 
       const newState = elementStartUpdateState(
          new ElementStartPToken({
-            open: toSToken('<'),
-            name: toSToken('elementName'),
             attributes: [
                {
                   name: toSToken('att1'),
                   value: [new TextPToken(toSToken('attValue'))],
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('<'),
          }),
          state,
       );
@@ -313,8 +313,8 @@ describe('elementStartUpdateState (unit)', () => {
          elementContext: expect.any(Object),
          ids: {
             attValue: {
-               elName: 'elementName',
                attName: 'att1',
+               elName: 'elementName',
             },
          },
       });
@@ -327,8 +327,8 @@ describe('elementStartUpdateState (unit)', () => {
                att1: {
                   def: {
                      name: toSToken('att1'),
-                     value: [],
                      type: toSToken('ID'),
+                     value: [],
                   },
                   isExternal: true,
                },
@@ -336,22 +336,22 @@ describe('elementStartUpdateState (unit)', () => {
          },
          ids: {
             attValue: {
-               elName: 'other',
                attName: 'otherAtt',
+               elName: 'other',
             },
          },
       });
 
       const newState = elementStartUpdateState(
          new ElementStartPToken({
-            open: toSToken('<'),
-            name: toSToken('elementName'),
             attributes: [
                {
                   name: toSToken('att1'),
                   value: [new TextPToken(toSToken('attValue'))],
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('<'),
          }),
          state,
       );
@@ -361,10 +361,152 @@ describe('elementStartUpdateState (unit)', () => {
          elementContext: expect.any(Object),
          ids: {
             attValue: {
-               elName: 'other',
                attName: 'otherAtt',
+               elName: 'other',
             },
          },
+      });
+   });
+
+   describe('IDREFS constraing (§3.3.1)', () => {
+      it('adds info about each IDREF value to the state (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {
+                  att1: {
+                     def: {
+                        name: toSToken('att1'),
+                        type: toSToken('IDREF'),
+                        value: [],
+                     },
+                     isExternal: true,
+                  },
+               },
+            },
+         });
+
+         const newState = elementStartUpdateState(
+            new ElementStartPToken({
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('attValue'))],
+                  },
+               ],
+               name: toSToken('elementName'),
+               open: toSToken('<'),
+            }),
+            state,
+         );
+
+         expect(newState).toEqual({
+            ...state,
+            elementContext: expect.any(Object),
+            idRefs: {
+               attValue: {
+                  attName: 'att1',
+                  elName: 'elementName',
+                  sToken: toSToken('att1'),
+               },
+            },
+         });
+      });
+
+      it('adds info about each IDREFS value to the state (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {
+                  att1: {
+                     def: {
+                        name: toSToken('att1'),
+                        type: toSToken('IDREFS'),
+                        value: [],
+                     },
+                     isExternal: true,
+                  },
+               },
+            },
+         });
+
+         const newState = elementStartUpdateState(
+            new ElementStartPToken({
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('attValue1 attValue2'))],
+                  },
+               ],
+               name: toSToken('elementName'),
+               open: toSToken('<'),
+            }),
+            state,
+         );
+
+         expect(newState).toEqual({
+            ...state,
+            elementContext: expect.any(Object),
+            idRefs: {
+               attValue1: {
+                  attName: 'att1',
+                  elName: 'elementName',
+                  sToken: toSToken('att1'),
+               },
+               attValue2: {
+                  attName: 'att1',
+                  elName: 'elementName',
+                  sToken: toSToken('att1'),
+               },
+            },
+         });
+      });
+
+      it('does not add info about an IDREF value if the id is already in the state (§3.3.1)', () => {
+         state = new ValidateState({
+            attributeDefs: {
+               elementName: {
+                  att1: {
+                     def: {
+                        name: toSToken('att1'),
+                        type: toSToken('IDREFS'),
+                        value: [],
+                     },
+                     isExternal: true,
+                  },
+               },
+            },
+            ids: {
+               value1: {
+                  attName: 'someAtt',
+                  elName: 'someElement',
+               },
+            },
+         });
+
+         const newState = elementStartUpdateState(
+            new ElementStartPToken({
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('value1 attValue2'))],
+                  },
+               ],
+               name: toSToken('elementName'),
+               open: toSToken('<'),
+            }),
+            state,
+         );
+
+         expect(newState).toEqual({
+            ...state,
+            elementContext: expect.any(Object),
+            idRefs: {
+               attValue2: {
+                  attName: 'att1',
+                  elName: 'elementName',
+                  sToken: toSToken('att1'),
+               },
+            },
+         });
       });
    });
 });

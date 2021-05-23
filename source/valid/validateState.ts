@@ -7,6 +7,7 @@ import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
 } from 'pToken';
+import { SToken } from 'sToken';
 import { EntityValuePToken } from 'token';
 import { CmGraph } from './contentModal/cmGraphTypes';
 
@@ -88,6 +89,10 @@ interface ValidateStateProps {
       [id: string]: undefined | { elName: string; attName: string };
    };
 
+   idRefs?: {
+      [id: string]: undefined | { elName: string; attName: string; sToken: SToken };
+   };
+
    elementContext?: {
       contextStack: ReadonlyArray<ElementContext>;
       activeContext?: ElementContext; // if this is undefined, contextStack is 0 length
@@ -112,6 +117,16 @@ interface IdMap {
    readonly [id: string]: undefined | { readonly elName: string; readonly attName: string };
 }
 
+interface IdRefDetails {
+   readonly elName: string;
+   readonly attName: string;
+   readonly sToken: SToken;
+}
+
+interface IdRefMap {
+   readonly [id: string]: undefined | IdRefDetails;
+}
+
 class ValidateState {
    readonly docType?: string;
 
@@ -126,6 +141,8 @@ class ValidateState {
    };
 
    readonly ids: IdMap;
+
+   readonly idRefs: IdRefMap;
 
    elementDeclarations: {
       [name: string]: DeclarationDetails | undefined;
@@ -162,9 +179,12 @@ class ValidateState {
       this.ids = {
          ...(otherState?.ids ?? {}),
       };
+      this.idRefs = {
+         ...(otherState?.idRefs ?? {}),
+      };
       this.elementContext = {
-         contextStack: otherState?.elementContext?.contextStack || [],
          activeContext: otherState?.elementContext?.activeContext,
+         contextStack: otherState?.elementContext?.contextStack || [],
          pastEnd: otherState?.elementContext?.pastEnd || false,
       };
       this.isStandalone = otherState?.isStandalone ?? false;
@@ -180,4 +200,5 @@ export {
    ElDeclType,
    ValidateState,
    ValidateStateProps,
+   IdRefDetails,
 };

@@ -326,15 +326,15 @@ describe('elementStartValidate (unit)', () => {
                },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
+                     defaulted: true,
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('$BOGUS'))],
-                     defaulted: true,
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -342,20 +342,14 @@ describe('elementStartValidate (unit)', () => {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
                id: ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
+               lastPosition: undefined,
                params: ['elementName', 'att1', '$BOGUS'],
                position: toSToken('att1'),
-               lastPosition: undefined,
             });
          });
 
          it('reports no error when an ID attribute is a name (§3.3.1)', () => {
             state = new ValidateState({
-               elementDeclarations: {
-                  elementName: {
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ANY,
-                  },
-               },
                attributeDefs: {
                   elementName: {
                      att1: {
@@ -368,17 +362,23 @@ describe('elementStartValidate (unit)', () => {
                      },
                   },
                },
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
+                     defaulted: true,
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('good'))],
-                     defaulted: true,
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -402,21 +402,21 @@ describe('elementStartValidate (unit)', () => {
                },
                ids: {
                   reused: {
-                     elName: 'otherElement',
                      attName: 'otherAttribute',
+                     elName: 'otherElement',
                   },
                },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
+                     defaulted: true,
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('reused'))],
-                     defaulted: true,
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -424,9 +424,9 @@ describe('elementStartValidate (unit)', () => {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
                id: ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               lastPosition: undefined,
                params: ['elementName', 'att1', 'otherElement', 'otherAttribute', 'reused'],
                position: toSToken('att1'),
-               lastPosition: undefined,
             });
          });
 
@@ -455,20 +455,20 @@ describe('elementStartValidate (unit)', () => {
                ids: {},
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
+                     defaulted: true,
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('reused'))],
-                     defaulted: true,
                   },
                   {
+                     defaulted: true,
                      name: toSToken('att2'),
                      value: [new TextPToken(toSToken('reused'))],
-                     defaulted: true,
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -476,10 +476,126 @@ describe('elementStartValidate (unit)', () => {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
                id: ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               lastPosition: undefined,
                params: ['elementName', 'att2', 'elementName', 'att1', 'reused'],
                position: toSToken('att2'),
-               lastPosition: undefined,
             });
+         });
+      });
+
+      describe('IDREF (§3.3.1)', () => {
+         it('reports an error when an IDREF attribute is not a name (§3.3.1)', () => {
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           type: toSToken('IDREF'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               attributes: [
+                  {
+                     defaulted: true,
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('$BOGUS'))],
+                  },
+               ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportValidityError({
+               id: ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME,
+               lastPosition: undefined,
+               params: ['elementName', 'att1', '$BOGUS'],
+               position: toSToken('att1'),
+            });
+         });
+
+         it('reports an error when an IDREFS attribute contains non-names (§3.3.1)', () => {
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           type: toSToken('IDREFS'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               attributes: [
+                  {
+                     defaulted: true,
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('good $BOGUS happy $BAD'))],
+                  },
+               ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            // @ts-expect-error 2329/matchers
+            expect(mockErrorCollector).toReportValidityError({
+               id: ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME,
+               lastPosition: undefined,
+               params: ['elementName', 'att1', '$BOGUS, $BAD'],
+               position: toSToken('att1'),
+            });
+         });
+
+         it('reports no error when an IDREF attribute is a name (§3.3.1)', () => {
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           type: toSToken('IDREF'),
+                           value: [],
+                        },
+                        isExternal: false,
+                     },
+                  },
+               },
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
+            });
+            elementStart = new ElementStartPToken({
+               attributes: [
+                  {
+                     defaulted: true,
+                     name: toSToken('att1'),
+                     value: [new TextPToken(toSToken('good'))],
+                  },
+               ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
+            });
+
+            elementStartValidate(elementStart, state, mockErrorCollector);
+
+            expect(mockErrorCollector.errors).toEqual([]);
          });
       });
 
@@ -681,14 +797,6 @@ describe('elementStartValidate (unit)', () => {
          describe(`${type} attribute type`, () => {
             beforeEach(() => {
                state = new ValidateState({
-                  generalEntities: {
-                     [parsedEntNameReported]: {
-                        token: new GeneralEntityDeclarationPToken({
-                           open: toSToken('yipes'),
-                        }),
-                        isInternal: false,
-                     },
-                  },
                   attributeDefs: {
                      elementName: {
                         att1: {
@@ -701,19 +809,27 @@ describe('elementStartValidate (unit)', () => {
                         },
                      },
                   },
+                  generalEntities: {
+                     [parsedEntNameReported]: {
+                        isInternal: false,
+                        token: new GeneralEntityDeclarationPToken({
+                           open: toSToken('yipes'),
+                        }),
+                     },
+                  },
                });
             });
 
-            it('reports an error when an ENTITY value is not a name (§3.3.1)', () => {
+            it(`reports an error when an ${type} value is not a name (§3.3.1)`, () => {
                elementStart = new ElementStartPToken({
-                  open: toSToken('</'),
-                  name: toSToken('elementName'),
                   attributes: [
                      {
                         name: toSToken('att1'),
                         value: [new TextPToken(toSToken(badEntName))],
                      },
                   ],
+                  name: toSToken('elementName'),
+                  open: toSToken('</'),
                });
 
                elementStartValidate(elementStart, state, mockErrorCollector);
@@ -723,22 +839,22 @@ describe('elementStartValidate (unit)', () => {
                   id: isPlural
                      ? VID.ELEMENTSTART_ENTITIES_NOT_NAME
                      : VID.ELEMENTSTART_ENTITY_NOT_NAME,
+                  lastPosition: undefined,
                   params: [badEntReport, 'elementName', 'att1'],
                   position: toSToken('att1'),
-                  lastPosition: undefined,
                });
             });
 
-            it('reports an error when an ENTITY value does not reference a known entity (§3.3.1)', () => {
+            it(`reports an error when an ${type} value does not reference a known entity (§3.3.1)`, () => {
                elementStart = new ElementStartPToken({
-                  open: toSToken('</'),
-                  name: toSToken('elementName'),
                   attributes: [
                      {
                         name: toSToken('att1'),
                         value: [new TextPToken(toSToken(entName))],
                      },
                   ],
+                  name: toSToken('elementName'),
+                  open: toSToken('</'),
                });
 
                elementStartValidate(elementStart, state, mockErrorCollector);
@@ -748,22 +864,22 @@ describe('elementStartValidate (unit)', () => {
                   id: isPlural
                      ? VID.ELEMENTSTART_ENTITIES_NO_ENTITY
                      : VID.ELEMENTSTART_ENTITY_NO_ENTITY,
+                  lastPosition: undefined,
                   params: [entNameReport, 'elementName', 'att1'],
                   position: toSToken('att1'),
-                  lastPosition: undefined,
                });
             });
 
-            it('reports an error when an ENTITY value does not reference an unparsed entity (§3.3.1)', () => {
+            it(`reports an error when an ${type} value does not reference an unparsed entity (§3.3.1)`, () => {
                elementStart = new ElementStartPToken({
-                  open: toSToken('</'),
-                  name: toSToken('elementName'),
                   attributes: [
                      {
                         name: toSToken('att1'),
                         value: [new TextPToken(toSToken(parsedEntName))],
                      },
                   ],
+                  name: toSToken('elementName'),
+                  open: toSToken('</'),
                });
 
                elementStartValidate(elementStart, state, mockErrorCollector);
@@ -773,10 +889,45 @@ describe('elementStartValidate (unit)', () => {
                   id: isPlural
                      ? VID.ELEMENTSTART_ENTITIES_PARSED_ENTITY
                      : VID.ELEMENTSTART_ENTITY_PARSED_ENTITY,
+                  lastPosition: undefined,
                   params: [parsedEntNameReported, 'elementName', 'att1'],
                   position: toSToken('att1'),
-                  lastPosition: undefined,
                });
+            });
+
+            it(`reports no error when an ${type} value references an unparsed entity (§3.3.1)`, () => {
+               state = new ValidateState({
+                  ...state,
+                  elementDeclarations: {
+                     elementName: {
+                        token: makeElementDeclaration(),
+                        type: ElDeclType.ANY,
+                     },
+                  },
+                  generalEntities: {
+                     [parsedEntNameReported]: {
+                        isInternal: false,
+                        token: new GeneralEntityDeclarationPToken({
+                           nDataName: toSToken('someNotation'),
+                           open: toSToken('yipes'),
+                        }),
+                     },
+                  },
+               });
+               elementStart = new ElementStartPToken({
+                  attributes: [
+                     {
+                        name: toSToken('att1'),
+                        value: [new TextPToken(toSToken(parsedEntNameReported))],
+                     },
+                  ],
+                  name: toSToken('elementName'),
+                  open: toSToken('</'),
+               });
+
+               elementStartValidate(elementStart, state, mockErrorCollector);
+
+               expect(mockErrorCollector.errors).toEqual([]);
             });
          });
       });
@@ -797,15 +948,15 @@ describe('elementStartValidate (unit)', () => {
             isStandalone: true,
          });
          elementStart = new ElementStartPToken({
-            open: toSToken('</'),
-            name: toSToken('elementName'),
             attributes: [
                {
+                  defaulted: true,
                   name: toSToken('att1'),
                   value: [],
-                  defaulted: true,
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('</'),
          });
 
          elementStartValidate(elementStart, state, mockErrorCollector);
@@ -813,15 +964,14 @@ describe('elementStartValidate (unit)', () => {
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
+            lastPosition: undefined,
             params: ['elementName', 'att1'],
             position: toSToken('att1'),
-            lastPosition: undefined,
          });
       });
 
       it('reports no error when an attribute is defaulted from an internal ATTLIST declaration, and the document is standalone', () => {
          state = new ValidateState({
-            elementDeclarations: state.elementDeclarations,
             attributeDefs: {
                elementName: {
                   att1: {
@@ -833,18 +983,19 @@ describe('elementStartValidate (unit)', () => {
                   },
                },
             },
+            elementDeclarations: state.elementDeclarations,
             isStandalone: true,
          });
          elementStart = new ElementStartPToken({
-            open: toSToken('</'),
-            name: toSToken('elementName'),
             attributes: [
                {
+                  defaulted: true,
                   name: toSToken('att1'),
                   value: [],
-                  defaulted: true,
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('</'),
          });
 
          elementStartValidate(elementStart, state, mockErrorCollector);
@@ -854,7 +1005,6 @@ describe('elementStartValidate (unit)', () => {
 
       it('reports no error when an attribute is defaulted from an external ATTLIST declaration, and the document is not standalone', () => {
          state = new ValidateState({
-            elementDeclarations: state.elementDeclarations,
             attributeDefs: {
                elementName: {
                   att1: {
@@ -866,18 +1016,19 @@ describe('elementStartValidate (unit)', () => {
                   },
                },
             },
+            elementDeclarations: state.elementDeclarations,
             isStandalone: false,
          });
          elementStart = new ElementStartPToken({
-            open: toSToken('</'),
-            name: toSToken('elementName'),
             attributes: [
                {
+                  defaulted: true,
                   name: toSToken('att1'),
                   value: [],
-                  defaulted: true,
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('</'),
          });
 
          elementStartValidate(elementStart, state, mockErrorCollector);
@@ -892,11 +1043,9 @@ describe('elementStartValidate (unit)', () => {
                   elementName: {
                      att1: {
                         def: {
-                           name: toSToken('att1'),
-                           type: toSToken('NOTATION'),
                            enumeration: {
-                              type: NOTATION_PTOKEN,
                               open: toSToken('('),
+                              type: NOTATION_PTOKEN,
                               words: [
                                  {
                                     word: toSToken('first'),
@@ -906,6 +1055,8 @@ describe('elementStartValidate (unit)', () => {
                                  },
                               ],
                            },
+                           name: toSToken('att1'),
+                           type: toSToken('NOTATION'),
                            value: [],
                         },
                         isExternal: true,
@@ -914,14 +1065,14 @@ describe('elementStartValidate (unit)', () => {
                },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('bad'))],
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -929,9 +1080,9 @@ describe('elementStartValidate (unit)', () => {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
                id: ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+               lastPosition: undefined,
                params: ['elementName', 'att1', 'first|second', 'bad'],
                position: toSToken('att1'),
-               lastPosition: undefined,
             });
          });
 
@@ -941,9 +1092,9 @@ describe('elementStartValidate (unit)', () => {
                   elementName: {
                      att1: {
                         def: {
+                           enumeration: undefined,
                            name: toSToken('att1'),
                            type: toSToken('NOTATION'),
-                           enumeration: undefined,
                            value: [],
                         },
                         isExternal: true,
@@ -952,14 +1103,14 @@ describe('elementStartValidate (unit)', () => {
                },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('bad'))],
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -967,51 +1118,51 @@ describe('elementStartValidate (unit)', () => {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
                id: ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+               lastPosition: undefined,
                params: ['elementName', 'att1', '', 'bad'],
                position: toSToken('att1'),
-               lastPosition: undefined,
             });
          });
 
          it('reports no error when the value of a notation in the element start is found in the ATTLIST declaration (§3.3.1)', () => {
             state = new ValidateState({
-               elementDeclarations: {
-                  elementName: {
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ANY,
-                  },
-               },
                attributeDefs: {
                   elementName: {
                      att1: {
                         def: {
-                           name: toSToken('att1'),
-                           type: toSToken('NOTATION'),
                            enumeration: {
-                              type: NOTATION_PTOKEN,
                               open: toSToken('('),
+                              type: NOTATION_PTOKEN,
                               words: [
                                  {
                                     word: toSToken('first'),
                                  },
                               ],
                            },
+                           name: toSToken('att1'),
+                           type: toSToken('NOTATION'),
                            value: [],
                         },
                         isExternal: true,
                      },
                   },
                },
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('first'))],
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -1027,10 +1178,9 @@ describe('elementStartValidate (unit)', () => {
                   elementName: {
                      att1: {
                         def: {
-                           name: toSToken('att1'),
                            enumeration: {
-                              type: NOTATION_PTOKEN,
                               open: toSToken('('),
+                              type: NOTATION_PTOKEN,
                               words: [
                                  {
                                     word: toSToken('first'),
@@ -1040,6 +1190,7 @@ describe('elementStartValidate (unit)', () => {
                                  },
                               ],
                            },
+                           name: toSToken('att1'),
                            value: [],
                         },
                         isExternal: true,
@@ -1048,14 +1199,14 @@ describe('elementStartValidate (unit)', () => {
                },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('bad'))],
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -1063,43 +1214,43 @@ describe('elementStartValidate (unit)', () => {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
                id: ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+               lastPosition: undefined,
                params: ['elementName', 'att1', 'first|second', 'bad'],
                position: toSToken('att1'),
-               lastPosition: undefined,
             });
          });
 
          it('reports no error when the ATTLIST has no enumeration (§3.3.1)', () => {
             state = new ValidateState({
-               elementDeclarations: {
-                  elementName: {
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ANY,
-                  },
-               },
                attributeDefs: {
                   elementName: {
                      att1: {
                         def: {
+                           enumeration: undefined,
                            name: toSToken('att1'),
                            // We don't have neough info to know what this is
-                           enumeration: undefined,
                            value: [],
                         },
                         isExternal: true,
                      },
                   },
                },
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('bad'))],
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -1109,42 +1260,42 @@ describe('elementStartValidate (unit)', () => {
 
          it('reports no error when the value of a enumeration in the element start is found in the ATTLIST declaration (§3.3.1)', () => {
             state = new ValidateState({
-               elementDeclarations: {
-                  elementName: {
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ANY,
-                  },
-               },
                attributeDefs: {
                   elementName: {
                      att1: {
                         def: {
-                           name: toSToken('att1'),
                            enumeration: {
-                              type: NOTATION_PTOKEN,
                               open: toSToken('('),
+                              type: NOTATION_PTOKEN,
                               words: [
                                  {
                                     word: toSToken('first'),
                                  },
                               ],
                            },
+                           name: toSToken('att1'),
                            value: [],
                         },
                         isExternal: true,
                      },
                   },
                },
+               elementDeclarations: {
+                  elementName: {
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
             });
             elementStart = new ElementStartPToken({
-               open: toSToken('</'),
-               name: toSToken('elementName'),
                attributes: [
                   {
                      name: toSToken('att1'),
                      value: [new TextPToken(toSToken('first'))],
                   },
                ],
+               name: toSToken('elementName'),
+               open: toSToken('</'),
             });
 
             elementStartValidate(elementStart, state, mockErrorCollector);
@@ -1156,7 +1307,6 @@ describe('elementStartValidate (unit)', () => {
 
    it('reports an error if an attribute changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
       state = new ValidateState({
-         elementDeclarations: state.elementDeclarations,
          attributeDefs: {
             elementName: {
                att1: {
@@ -1168,19 +1318,20 @@ describe('elementStartValidate (unit)', () => {
                },
             },
          },
+         elementDeclarations: state.elementDeclarations,
          isStandalone: true,
       });
       elementStart = new ElementStartPToken({
-         open: toSToken('</'),
-         name: toSToken('elementName'),
          attributes: [
             {
-               name: toSToken('att1'),
-               value: [],
-               normalized: true,
                dtdChangedNormalization: true,
+               name: toSToken('att1'),
+               normalized: true,
+               value: [],
             },
          ],
+         name: toSToken('elementName'),
+         open: toSToken('</'),
       });
 
       elementStartValidate(elementStart, state, mockErrorCollector);
@@ -1188,15 +1339,14 @@ describe('elementStartValidate (unit)', () => {
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
+         lastPosition: undefined,
          params: ['elementName', 'att1'],
          position: toSToken('att1'),
-         lastPosition: undefined,
       });
    });
 
    it('reports no error if an attribute changed through normalization, but the declaration was not external and the document is standalone (§2.9.0)', () => {
       state = new ValidateState({
-         elementDeclarations: state.elementDeclarations,
          attributeDefs: {
             elementName: {
                att1: {
@@ -1208,19 +1358,20 @@ describe('elementStartValidate (unit)', () => {
                },
             },
          },
+         elementDeclarations: state.elementDeclarations,
          isStandalone: true,
       });
       elementStart = new ElementStartPToken({
-         open: toSToken('</'),
-         name: toSToken('elementName'),
          attributes: [
             {
-               name: toSToken('att1'),
-               value: [],
-               normalized: true,
                dtdChangedNormalization: true,
+               name: toSToken('att1'),
+               normalized: true,
+               value: [],
             },
          ],
+         name: toSToken('elementName'),
+         open: toSToken('</'),
       });
 
       elementStartValidate(elementStart, state, mockErrorCollector);
@@ -1230,7 +1381,6 @@ describe('elementStartValidate (unit)', () => {
 
    it('reports no error if an attribute was not changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
       state = new ValidateState({
-         elementDeclarations: state.elementDeclarations,
          attributeDefs: {
             elementName: {
                att1: {
@@ -1242,17 +1392,18 @@ describe('elementStartValidate (unit)', () => {
                },
             },
          },
+         elementDeclarations: state.elementDeclarations,
          isStandalone: true,
       });
       elementStart = new ElementStartPToken({
-         open: toSToken('</'),
-         name: toSToken('elementName'),
          attributes: [
             {
                name: toSToken('att1'),
                value: [],
             },
          ],
+         name: toSToken('elementName'),
+         open: toSToken('</'),
       });
 
       elementStartValidate(elementStart, state, mockErrorCollector);

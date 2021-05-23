@@ -29,6 +29,7 @@ import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateS
 import { attListDeclarationValidate } from './token/attListDeclarationValidate';
 import { charDataValidate } from './token/charDataValidate';
 import { conditionalValidate } from './token/conditionalValidate';
+import { docEndValidate } from './token/docEndValidate';
 import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
 import { elementDeclarationValidate } from './token/elementDeclarationValidate';
 import { elementStartUpdateState } from './token/elementStartUpdateState';
@@ -66,6 +67,8 @@ class ValidityChecker {
    }
 
    checkPToken(token: ParseToken, ec: ErrorCollector): void {
+      const wasAtEndBefore = this.state.elementContext.pastEnd;
+
       switch (token.type) {
          case CONFORMANCE_VERSION:
             if (!this.seenVersion) {
@@ -139,6 +142,10 @@ class ValidityChecker {
             break;
          default:
             break;
+      }
+
+      if (!wasAtEndBefore && this.state.elementContext.pastEnd) {
+         docEndValidate(this.state, ec);
       }
    }
 }

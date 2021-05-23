@@ -35,7 +35,6 @@ import {
    ContentModelX,
    CpRepeat,
    CpType,
-   DocTypeEndXToken,
    DocTypeStartXToken,
    ElementDeclarationXToken,
    ElementEmptyXToken,
@@ -123,14 +122,6 @@ interface ContentContext {
    elementContentEntityRefStack: Array<string>;
    stateId: number;
 }
-
-interface IDMap {
-   [idValue: string]: {
-      token: ElementStartXToken | ElementEmptyXToken;
-      attrName: string;
-   };
-}
-
 interface EntityInfo {
    token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken;
    externallyDeclared: boolean; // §2.9
@@ -175,10 +166,6 @@ class CheckXTokenValidStream extends Transform {
 
    private currentContext: ContentContext | undefined;
 
-   private idValues: IDMap;
-
-   private unanchoredIDRefs: IDMap;
-
    private confVer: ConformanceVersion = new ConformanceVersion();
 
    private standalone = false;
@@ -200,8 +187,6 @@ class CheckXTokenValidStream extends Transform {
       this.elementDeclarations = {};
       this.contentStack = [];
       this.currentContext = undefined;
-      this.idValues = {};
-      this.unanchoredIDRefs = {};
    }
 
    /*
@@ -777,10 +762,6 @@ class CheckXTokenValidStream extends Transform {
       } else if (xToken instanceof ElementEndXToken) {
          this.contentStack.pop();
          this.currentContext = this.contentStack[this.contentStack.length - 1];
-
-         if (this.contentStack.length === 0) {
-            this.validateDocumentEnd();
-         }
       }
 
       if (xToken.type === CONFORMANCE_VERSION) {
@@ -1183,29 +1164,11 @@ class CheckXTokenValidStream extends Transform {
       }
    }
 
-   private validateDocumentEnd() {
-      Object.keys(this.unanchoredIDRefs).forEach((idName) => {
-         // §3.3.1: Validiatity Constraint: IDREF
-         //    ... each Name must match the value of an ID attribute on some element in the
-         //    XML document; i.e. IDREF values must match the value of some ID attribute.
-         const idRefInfo = this.unanchoredIDRefs[idName];
-         const pToken = idRefInfo.token.pToken && idRefInfo.token.pToken.open;
-
-         this.pushValidityError(
-            ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
-            [idName, idRefInfo.token.name, idRefInfo.attrName],
-            pToken,
-            pToken,
-         );
-      });
-   }
-
    private validateElementStart(elStart: ElementStartXToken | ElementEmptyXToken) {
       const elemAttrDef = this.attrDefsByElementName[elStart.name];
       const elementDecl = this.elementDeclarations[elStart.name];
       const attributes = elStart.attributes;
       const pTokenOpen = elStart.pToken && elStart.pToken.open;
-      const elName = elementDecl ? elementDecl.token.name : '';
 
       // §3.3.3: Normalization
       for (let index = 0; index < attributes.length; index++) {
@@ -1250,85 +1213,6 @@ class CheckXTokenValidStream extends Transform {
             const attrText = getAttributeValueText(attributes[index]);
 
             attributeNames.push(attrName); // for use further below.
-
-            if (!attrDef) {
-               // do nothing
-            } else if (attrDef.type === 'ID') {
-               // §3.3.1: Validity constraint: ID
-               //    ... A name must not appear more than once in an XML document as a value of
-               //    this type; i.e., ID values must uniquely identify the elements which bear them.
-               const previous = this.idValues[attrText] || {};
-
-               if (!previous.token) {
-                  //    this.pushValidityError(
-                  //       ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-                  //       [attrText, elStart.name, attrName, previous.token.name, previous.attrName],
-                  //       pTokenOpen,
-                  //    );
-                  // } else {
-                  this.idValues[attrText] = {
-                     token: elStart,
-                     attrName: attrDef.name,
-                  };
-               }
-
-               // §3.3.1: Validiatity Constraint: IDREF
-               //    ... each Name must match the value of an ID attribute on some element in the
-               //    XML document; i.e. IDREF values must match the value of some ID attribute.
-               if (this.unanchoredIDRefs[attrText]) {
-                  delete this.unanchoredIDRefs[attrText];
-               }
-            } else if (attrDef.type === 'IDREF' || attrDef.type === 'IDREFS') {
-               const names = attrDef.type === 'IDREF' ? [attrText] : attrText.split(/ +/); // Can't happen once normalization happens
-               const badNames = [];
-
-               // §3.3.1: Validity Constraint: IDREF
-               //    Values of type IDREF must match the Name production, and
-               //    values of type IDREFS must match Names...
-               for (let index = 0; index < names.length; index++) {
-                  const idRef = names[index];
-                  if (!isName(idRef, this.confVer.version, this.confVer.edition)) {
-                     badNames.push(idRef);
-                  }
-
-                  // §3.3.1: Validiatity Constraint: IDREF
-                  //    ... each Name must match the value of an ID attribute on some element in the
-                  //    XML document; i.e. IDREF values must match the value of some ID attribute.
-                  if (!this.idValues[idRef]) {
-                     // Only store the first occurrence.
-                     this.unanchoredIDRefs[idRef] = this.unanchoredIDRefs[idRef] || {
-                        token: elStart,
-                        attrName: attrDef.name,
-                     };
-                  }
-               }
-
-               if (badNames.length > 0) {
-                  const code =
-                     attrDef.type === 'IDREF'
-                        ? ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME
-                        : ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME;
-                  this.pushValidityError(
-                     code,
-                     [badNames.join(', '), elStart.name, attrName],
-                     pTokenOpen,
-                  );
-               }
-            } else if (attrDef.type === 'NOTATION' || attrDef.type === 'ENUMERATION') {
-               const declaredNames = attrDef.enumeration || [];
-
-               if (declaredNames.indexOf(attrText) === -1) {
-                  if (attrDef.type !== 'NOTATION') {
-                     // §3.3.1: Validity Constraint: Enumeration
-                     //    Values of this type must match one of the Nmtoken tokens in the declaration.
-                     this.pushValidityError(
-                        ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
-                        [attrText, elStart.name, attrName, declaredNames.join(', ')],
-                        pTokenOpen,
-                     );
-                  }
-               }
-            }
 
             // §3.3.2 Validity Constraint: Fixed Attribute Default
             //    If an attribute has a default value declared with the #FIXED keyword,
