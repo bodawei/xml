@@ -283,7 +283,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root ref="OTHER"/>`,
          VID.ELEMENTSTART_IDREF_NO_ID,
-         done,
+         done!,
       );
    });
 

@@ -32,7 +32,6 @@ interface MixedDetails {
    token: ElementDeclarationPToken;
    type: ElDeclType.MIXED;
    names: Array<string>;
-   duplicateNames: Array<string>;
 }
 
 interface ElementDetails {

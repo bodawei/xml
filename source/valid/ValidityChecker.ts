@@ -49,6 +49,7 @@ import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
 import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from './token/notationDeclarationValidate';
+import { elementDeclarationPreprocess } from './token/elementDeclarationPreprocess';
 
 class ValidityChecker {
    private version: ConformanceVersion;
@@ -94,8 +95,9 @@ class ValidityChecker {
             dtdEndValidate(this.state, ec);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
-            this.state = elementDeclarationUpdateState(token, this.state);
-            elementDeclarationValidate(token, this.state, ec, this.version);
+            const declDetails = elementDeclarationPreprocess(token);
+            elementDeclarationValidate(token, declDetails, this.state, ec, this.version);
+            this.state = elementDeclarationUpdateState(token, declDetails, this.state);
             break;
          case ELEMENT_END_PTOKEN:
             elementEndValidate(token, this.state, ec);

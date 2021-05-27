@@ -30,6 +30,7 @@ import { attListDeclarationValidate } from '../token/attListDeclarationValidate'
 import { conditionalValidate } from '../token/conditionalValidate';
 import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
+import { elementDeclarationPreprocess } from '../token/elementDeclarationPreprocess';
 import { elementDeclarationValidate } from '../token/elementDeclarationValidate';
 import { elementEndUpdateState } from '../token/elementEndUpdateState';
 import { elementEndValidate } from '../token/elementEndValidate';
@@ -53,6 +54,7 @@ jest.mock('../token/conditionalValidate');
 jest.mock('../token/docTypeStartUpdateState');
 jest.mock('../token/dtdEndValidate');
 jest.mock('../token/elementDeclarationUpdateState');
+jest.mock('../token/elementDeclarationPreprocess');
 jest.mock('../token/elementDeclarationValidate');
 jest.mock('../token/elementEndUpdateState');
 jest.mock('../token/elementEndValidate');
@@ -83,10 +85,11 @@ describe('ValidityChecker (unit)', () => {
       elementDeclarationUpdateStateMock = elementDeclarationUpdateState as jest.MockedFunction<
          typeof elementDeclarationUpdateState
       >;
-      elementDeclarationUpdateStateMock.mockImplementation((token, state) => state);
+      elementDeclarationUpdateStateMock.mockImplementation((token, details, state) => state);
    });
 
    it('stores the version passed to it and pass that on to other validations', () => {
+      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
       const elDecl = makeElementDeclaration();
 
@@ -95,6 +98,7 @@ describe('ValidityChecker (unit)', () => {
 
       expect(elementDeclarationValidate).toHaveBeenCalledWith(
          elDecl,
+         {},
          expect.any(Object),
          ec,
          version,
@@ -102,6 +106,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('stores only the first version passed to it', () => {
+      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
       const elDecl = makeElementDeclaration();
       checker.checkPToken(version, ec);
@@ -111,6 +116,7 @@ describe('ValidityChecker (unit)', () => {
 
       expect(elementDeclarationValidate).toHaveBeenCalledWith(
          elDecl,
+         {},
          expect.any(Object),
          ec,
          version,
@@ -172,15 +178,17 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an element declaration', () => {
+      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
       const elDecl = makeElementDeclaration();
 
       checker.checkPToken(elDecl, ec);
 
-      expect(elementDeclarationUpdateState).toHaveBeenCalledWith(elDecl, expect.any(Object));
+      expect(elementDeclarationUpdateState).toHaveBeenCalledWith(elDecl, {}, expect.any(Object));
    });
 
    it('validates an element declaration', () => {
+      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
       const elDecl = makeElementDeclaration();
       checker.checkPToken(version, ec);
@@ -189,6 +197,7 @@ describe('ValidityChecker (unit)', () => {
 
       expect(elementDeclarationValidate).toHaveBeenCalledWith(
          elDecl,
+         {},
          expect.any(Object),
          ec,
          version,

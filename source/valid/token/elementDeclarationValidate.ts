@@ -21,7 +21,7 @@ import {
 import { strOrBlank } from 'sToken';
 
 import { ValidityError } from '../error/ValidityError';
-import { ElDeclType, ValidateState } from '../validateState';
+import { DeclarationDetails, ElDeclType, ValidateState } from '../validateState';
 
 function getElementNames(contentModel: ContentModelP): Array<string> {
    const childNames: Array<string> = [];
@@ -173,17 +173,14 @@ function validateEntities(
 
 function elementDeclarationValidate(
    elDecl: ElementDeclarationPToken,
+   declInfo: DeclarationDetails,
    state: ValidateState,
    ec: ErrorCollector,
    version: ConformanceVersion,
 ): void {
    const openSToken = elDecl.open;
    const elName = strOrBlank(elDecl.name);
-   const declInfo = state.elementDeclarations[elName];
 
-   if (!declInfo) {
-      return;
-   }
    // §3.2.0: Validity constraint: Unique Element Type Declaration
    //    An element type must not be declared more than once.
    ec.setPos(openSToken);
@@ -216,10 +213,21 @@ function elementDeclarationValidate(
 
    // §3.2.2: Validity constraint: No Duplicate Types
    //    The same name must not appear more than once in a single mixed-content declaration.
-   if (declInfo.type === ElDeclType.MIXED && declInfo.duplicateNames.length > 0) {
-      ec.report(ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME, [
+   if (declInfo.type === ElDeclType.MIXED) {
+      const duplicateNames: Array<string> = [];
+      const seenNames: Record<string, boolean> = {};
+
+      for (const name of declInfo.names) {
+         if (seenNames[name]) {
+            duplicateNames.push(name);
+         } else {
+            seenNames[name] = true;
+         }
+      }
+
+      ec.check(duplicateNames.length > 0, ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME, [
          elName,
-         declInfo.duplicateNames.join(','),
+         duplicateNames.join(','),
       ]);
    }
 
