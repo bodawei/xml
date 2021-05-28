@@ -18,6 +18,10 @@ import { ValidityError } from '../../error/ValidityError';
 import { DeclarationDetails, ElDeclType, ValidateState } from '../../validateState';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
+import { validityConstraint } from '../../error/validityConstraint';
+
+const VID = validityConstraint.id;
+
 describe('elementDeclarationValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
@@ -66,12 +70,6 @@ describe('elementDeclarationValidate (unit)', () => {
             contextStack: [],
             pastEnd: false,
          },
-         elementDeclarations: {
-            elementName: {
-               token: elementDeclaration,
-               type: ElDeclType.ANY,
-            },
-         },
          parameterEntities: {
             close: {
                isInternal: true,
@@ -93,6 +91,10 @@ describe('elementDeclarationValidate (unit)', () => {
    });
 
    it('reports an error if there is more than one ELEMENT declaration for the same element type', () => {
+      state.elementDeclarations.elementName = {
+         token: elementDeclaration,
+         type: ElDeclType.ANY,
+      };
       elementDeclarationValidate(
          elementDeclaration,
          {
@@ -111,7 +113,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
+         id: VID.ELEMENT_EXTRA_DECLARATION,
          lastPosition: undefined,
          params: ['elementName'],
          position: elementDeclaration.name,
@@ -330,7 +332,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
+         id: VID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
          lastPosition: undefined,
          params: ['elementName', 'foo,bar'],
          position: elementDeclaration.contentModel?.open,

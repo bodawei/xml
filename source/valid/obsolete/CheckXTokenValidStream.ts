@@ -1103,19 +1103,19 @@ class CheckXTokenValidStream extends Transform {
    }
 
    private validateElementDecl(elDecl: ElementDeclarationXToken): void {
-      const openSToken = elDecl.pToken && elDecl.pToken.open;
+      // const openSToken = elDecl.pToken && elDecl.pToken.open;
       let isMixed = false;
 
       // Validity Constraint: §3.2.0: Validity constraint: Unique Element Type Declaration
       //    An element type must not be declared more than once.
-      if (this.elementDeclarations[elDecl.name]) {
-         this.pushValidityError(
-            ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
-            [elDecl.name],
-            openSToken,
-         );
-         return;
-      }
+      // if (this.elementDeclarations[elDecl.name]) {
+      //    this.pushValidityError(
+      //       ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
+      //       [elDecl.name],
+      //       openSToken,
+      //    );
+      //    return;
+      // }
 
       if (elDecl.contentSpec === 'EMPTY') {
          this.elementDeclarations[elDecl.name] = {

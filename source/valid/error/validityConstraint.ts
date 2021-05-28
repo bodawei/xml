@@ -38,10 +38,20 @@ const validityConstraint = new ErrorCodes({
       message:
          'The default type for attribute "{1}" of attribute list declaration "{0}" must be "#IMPLIED" or "#REQUIRED" (§3.3.1). Found: "{2}".',
    },
+   ELEMENT_EXTRA_DECLARATION: {
+      code: 1125,
+      message:
+         'There must be only one declaration for a particular element type (§3.2.0). Found "{0}".',
+   },
    ELEMENT_MISMATCH_ROOT_TYPE: {
       code: 1101,
       message:
          'The name of the root element must match the type "{0}" in the document type declaration (§2.8.0). Found "{1}".',
+   },
+   ELEMENTDECL_MIXED_DUPLICATE_NAME: {
+      code: 1124,
+      message:
+         'The Mixed content spec for element declaration "{0}" must not have the same type specified multiple times (§3.2.2). Found: "{1}".',
    },
    ELEMENTSTART_ENTITIES_NO_ENTITY: {
       code: 1108,
@@ -117,6 +127,10 @@ const validityConstraint = new ErrorCodes({
       code: 1112,
       message:
          'The NOTATION value for attribute "{1}" of element "{0}" must be one of the values declared ({2}) (§3.3.1). Found "{3}".',
+   },
+   ELEMENTSTART_UNDECLARED_ATTRIBUTE: {
+      code: 1126,
+      message: 'Attributes for element "{0}" must be declared (§3.1.0). Found "{1}".',
    },
    ENTITYDECL_UNDECLARED_NOTATION: {
       code: 1103,

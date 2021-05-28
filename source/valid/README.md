@@ -11,7 +11,16 @@ x 744 3.3.1 entity name
 ### §2.8.0 Root element type
 No commentary.
 
+### §3.2.0 Unique Element Type Declaration
+No commentary.
+
+### §3.1.0 Attribute Value Type
+This particular constraint says "The attribute must have been declared; the value must be of the type declared for it." The first portion (that the attribute has been declared) is straight forward. However, it is not at all clear to this validator how to enforce the second part beyond the various validity constraints from §3.3.1.
+
 ### §3.3.1 ID
+No commentary.
+
+### §3.2.2 No Duplicate Types
 No commentary.
 
 ### §3.3.1 One ID per Element Type

@@ -167,6 +167,43 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error when a MIXED element declaration (§3.2.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ELEMENT root ANY>
+         ]>
+         <root />`,
+         VID.ELEMENT_EXTRA_DECLARATION,
+         done!,
+      );
+   });
+
+   it('reports an error when an attribute has not been declared (§3.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+         ]>
+         <root foo="bar"/>`,
+         VID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+         done!,
+      );
+   });
+
+   it('reports an error when a MIXED element declaration (§3.2.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (#PCDATA one two three four one five)>
+         ]>
+         <root />`,
+         VID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
+         done!,
+      );
+   });
+
    it('reports an error when an ID attribute value does not match the name production (§3.3.1)', (done) => {
       expectError(
          `<?xml version="1.0"?>

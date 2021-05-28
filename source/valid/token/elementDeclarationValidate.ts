@@ -21,7 +21,10 @@ import {
 import { strOrBlank } from 'sToken';
 
 import { ValidityError } from '../error/ValidityError';
+import { validityConstraint } from '../error/validityConstraint';
 import { DeclarationDetails, ElDeclType, ValidateState } from '../validateState';
+
+const VID = validityConstraint.id;
 
 function getElementNames(contentModel: ContentModelP): Array<string> {
    const childNames: Array<string> = [];
@@ -185,7 +188,7 @@ function elementDeclarationValidate(
    //    An element type must not be declared more than once.
    ec.setPos(openSToken);
    ec.setPos(elDecl.name);
-   ec.check(declInfo.token !== elDecl, ValidityError.ID.ELEMENT_EXTRA_DECLARATION, [elName]);
+   ec.check(state.elementDeclarations[elName], VID.ELEMENT_EXTRA_DECLARATION, [elName]);
 
    if (!elDecl.contentModel) {
       return;
@@ -197,7 +200,7 @@ function elementDeclarationValidate(
    ec.setPos(elDecl.contentModel.open);
 
    for (const name of contentNames) {
-      if (!state.elementDeclarations[name]) {
+      if (!state.elementDeclarations[name] && name !== elName) {
          undeclaredNames.push(name);
       }
    }
@@ -225,7 +228,7 @@ function elementDeclarationValidate(
          }
       }
 
-      ec.check(duplicateNames.length > 0, ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME, [
+      ec.check(duplicateNames.length > 0, VID.ELEMENTDECL_MIXED_DUPLICATE_NAME, [
          elName,
          duplicateNames.join(','),
       ]);
