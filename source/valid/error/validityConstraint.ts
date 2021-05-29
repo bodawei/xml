@@ -141,6 +141,11 @@ const validityConstraint = new ErrorCodes({
       code: 1102,
       message: 'Must not declare a NOTATION more than once (§4.7.0). Found "{0}".',
    },
+   PEREF_INVALID_END_NESTING: {
+      code: 1126,
+      message:
+         'The last character of a {0} declaration must not be found in the replacement text of a parameter entity reference when the first was not also there (§2.8.0).',
+   },
 });
 
 export { validityConstraint };

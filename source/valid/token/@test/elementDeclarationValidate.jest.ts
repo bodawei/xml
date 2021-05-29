@@ -90,6 +90,98 @@ describe('elementDeclarationValidate (unit)', () => {
       });
    });
 
+   it('reports an error if a markup-internal PERef contains the closing > (§2.8.0)', () => {
+      elementDeclaration = new ElementDeclarationPToken({
+         close: undefined,
+         declType: toSToken('ELEMENT'),
+         declTypeSpace: toSToken(' '),
+         extra: toSToken('blah blah > '),
+         name: toSToken('elementName'),
+         nameSpace: toSToken(' '),
+         open: toSToken('<!'),
+         openSpace: undefined,
+         unexpanded: {
+            propName: 'name',
+            tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') })],
+         },
+      });
+      elementDeclarationValidate(
+         elementDeclaration,
+         {
+            token: elementDeclaration,
+            type: ElDeclType.ANY,
+         },
+         state,
+         mockErrorCollector,
+         version,
+      );
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportValidityError({
+         id: VID.PEREF_INVALID_END_NESTING,
+         lastPosition: undefined,
+         params: ['ELEMENT'],
+         position: elementDeclaration.open,
+      });
+   });
+
+   it('reports no error if a markup-internal PERef has not been expanded (§2.8.0)', () => {
+      elementDeclaration = new ElementDeclarationPToken({
+         close: undefined,
+         declType: toSToken('ELEMENT'),
+         declTypeSpace: toSToken(' '),
+         name: toSToken('elementName'),
+         nameSpace: toSToken(' '),
+         open: toSToken('<!'),
+         openSpace: undefined,
+         unexpanded: {
+            propName: 'name',
+            tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') })],
+         },
+      });
+      elementDeclarationValidate(
+         elementDeclaration,
+         {
+            token: elementDeclaration,
+            type: ElDeclType.ANY,
+         },
+         state,
+         mockErrorCollector,
+         version,
+      );
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('reports no error if a markup-internal PERef has been expanded and included no extra text (§2.8.0)', () => {
+      elementDeclaration = new ElementDeclarationPToken({
+         close: undefined,
+         declType: toSToken('ELEMENT'),
+         declTypeSpace: toSToken(' '),
+         extra: false,
+         name: toSToken('elementName'),
+         nameSpace: toSToken(' '),
+         open: toSToken('<!'),
+         openSpace: undefined,
+         unexpanded: {
+            propName: 'name',
+            tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') })],
+         },
+      });
+      elementDeclarationValidate(
+         elementDeclaration,
+         {
+            token: elementDeclaration,
+            type: ElDeclType.ANY,
+         },
+         state,
+         mockErrorCollector,
+         version,
+      );
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
    it('reports an error if there is more than one ELEMENT declaration for the same element type', () => {
       state.elementDeclarations.elementName = {
          token: elementDeclaration,

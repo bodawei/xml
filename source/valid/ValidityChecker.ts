@@ -35,6 +35,7 @@ import { elementDeclarationValidate } from './token/elementDeclarationValidate';
 import { elementStartUpdateState } from './token/elementStartUpdateState';
 import { elementStartValidate } from './token/elementStartValidate';
 import { elidedEntityDeclarationUpdateState } from './token/elidedEntityDeclarationUpdateState';
+import { entityDeclarationValidate } from './token/entityDeclarationValidate';
 import { externalSubsetEndUpdateState } from './token/externalSubsetEndUpdateState';
 import { externalSubsetStartUpdateState } from './token/externalSubsetStartUpdateState';
 import { elementEndUpdateState } from './token/elementEndUpdateState';
@@ -68,6 +69,7 @@ class ValidityChecker {
    }
 
    checkPToken(token: ParseToken, ec: ErrorCollector): void {
+      // Shouldn't THIS be creating the error collector and making sure the context is correct?
       const wasAtEndBefore = this.state.elementContext.pastEnd;
 
       switch (token.type) {
@@ -118,6 +120,7 @@ class ValidityChecker {
             this.state = externalSubsetStartUpdateState(token, this.state);
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
+            entityDeclarationValidate(token, this.state, ec);
             this.state = generalEntityDeclarationUpdateState(token, this.state);
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
@@ -128,6 +131,7 @@ class ValidityChecker {
             this.state = notationDeclarationUpdateState(token, this.state);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            entityDeclarationValidate(token, this.state, ec);
             this.state = parameterEntityDeclarationUpdateState(token, this.state);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:

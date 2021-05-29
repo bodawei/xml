@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ENTITY % pe1 "EMPTY> <!ELEMENT e2 EMPTY>" >
+]>
+
+<one>
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid pe-nesting0.xml
+
+   Demonstrates that we can have a PE declartion with fragmentary markup text in it, and it causes no
+   errors.
+]]>
+</one>

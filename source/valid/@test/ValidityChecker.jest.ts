@@ -37,6 +37,7 @@ import { elementEndValidate } from '../token/elementEndValidate';
 import { elementStartUpdateState } from '../token/elementStartUpdateState';
 import { elementStartValidate } from '../token/elementStartValidate';
 import { elidedEntityDeclarationUpdateState } from '../token/elidedEntityDeclarationUpdateState';
+import { entityDeclarationValidate } from '../token/entityDeclarationValidate';
 import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpdateState';
 import { externalSubsetEndUpdateState } from '../token/externalSubsetEndUpdateState';
 import { generalEntityDeclarationUpdateState } from '../token/generalEntityDeclarationUpdateState';
@@ -61,6 +62,7 @@ jest.mock('../token/elementEndValidate');
 jest.mock('../token/elementStartUpdateState');
 jest.mock('../token/elementStartValidate');
 jest.mock('../token/elidedEntityDeclarationUpdateState');
+jest.mock('../token/entityDeclarationValidate');
 jest.mock('../token/externalSubsetEndUpdateState');
 jest.mock('../token/externalSubsetStartUpdateState');
 jest.mock('../token/generalEntityDeclarationUpdateState');
@@ -250,6 +252,15 @@ describe('ValidityChecker (unit)', () => {
       expect(externalSubsetStartUpdateState).toHaveBeenCalledWith(esSSStart, expect.any(Object));
    });
 
+   it('validates a general entity declaration', () => {
+      (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      const geDecl = makeGeneralEntityDeclaration();
+
+      checker.checkPToken(geDecl, ec);
+
+      expect(entityDeclarationValidate).toHaveBeenCalledWith(geDecl, expect.any(Object), ec);
+   });
+
    it('updates the state when passed a general entity declaration', () => {
       (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
       const geDecl = makeGeneralEntityDeclaration();
@@ -305,6 +316,15 @@ describe('ValidityChecker (unit)', () => {
          peDecl,
          expect.any(Object),
       );
+   });
+
+   it('validates a general entity declaration', () => {
+      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      const peDecl = makeParameterEntityDeclaration();
+
+      checker.checkPToken(peDecl, ec);
+
+      expect(entityDeclarationValidate).toHaveBeenCalledWith(peDecl, expect.any(Object), ec);
    });
 
    it('validates an parameter entity reference', () => {

@@ -141,6 +141,58 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error when a peref includes the closing of an attlist declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "att CDATA>">
+            <!ATTLIST bar %problem;
+         ]>
+         <bar/>`,
+         VID.PEREF_INVALID_END_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a peref includes the closing of an element declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "ANY >">
+            <!ELEMENT bar %problem;
+         ]>
+         <bar/>`,
+         VID.PEREF_INVALID_END_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a peref includes the closing of an entity declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem " 'foo'> ">
+            <!ENTITY bar %problem;
+         ]>
+         <bar/>`,
+         VID.PEREF_INVALID_END_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a peref includes the closing of a notation declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem " SYSTEM 'http://somewhere.com'> ">
+            <!NOTATION bar %problem;
+         ]>
+         <bar/>`,
+         VID.PEREF_INVALID_END_NESTING,
+         done!,
+      );
+   });
+
    it('reports an error when a general entity declaration has a NDATA name that has not been declared (§4.2.2)', (done) => {
       expectError(
          `<?xml version="1.0"?>

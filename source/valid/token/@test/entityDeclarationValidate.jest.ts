@@ -1,0 +1,61 @@
+/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+
+import { describe, expect, it } from '@jest/globals';
+
+import { MockErrorCollector } from 'basic-test';
+
+import { entityDeclarationValidate } from '../entityDeclarationValidate';
+import { ValidateState } from '../../validateState';
+import { validityConstraint } from '../../error/validityConstraint';
+import { GeneralEntityDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
+import { toSToken } from 'sToken';
+
+const VID = validityConstraint.id;
+
+describe('entityDeclarationValidate (unit)', () => {
+   let mockErrorCollector: MockErrorCollector;
+   let state: ValidateState;
+
+   beforeEach(() => {
+      mockErrorCollector = new MockErrorCollector();
+      state = new ValidateState();
+   });
+
+   describe('Proper Declaration/PE Nesting (§2.8.0)', () => {
+      it('reports an error if a markup-internal PERef has been expanded and included the trailing > (§2.8.0)', () => {
+         const notationDecl = new GeneralEntityDeclarationPToken({
+            extra: toSToken('>'),
+            open: toSToken('<!'),
+            unexpanded: {
+               propName: 'name',
+               tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') })],
+            },
+         });
+
+         entityDeclarationValidate(notationDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.PEREF_INVALID_END_NESTING,
+            lastPosition: undefined,
+            params: ['ENTITY'],
+            position: notationDecl.open,
+         });
+      });
+
+      it('reports no error if a markup-internal PERef has been expanded and included no extra text (§2.8.0)', () => {
+         const notationDecl = new GeneralEntityDeclarationPToken({
+            extra: false,
+            open: toSToken('<!'),
+            unexpanded: {
+               propName: 'name',
+               tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') })],
+            },
+         });
+
+         entityDeclarationValidate(notationDecl, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+   });
+});

@@ -11,6 +11,41 @@ x 744 3.3.1 entity name
 ### §2.8.0 Root element type
 No commentary.
 
+### §2.8.0: Proper Declaration/PE Nesting
+This one is a bit hard to understand. This says
+
+> Parameter-entity replacement text must be properly nested with markup declarations. That is to say, if either the first character or the last character of a markup declaration (markupdecl above) is contained in the replacement text for a parameter-entity reference, both must be contained in the same replacement text.
+
+In the spec, it seems to apply to production `[29]` which says `markupdecl ::= elementdecl | AttlistDecl | EntityDecl | NotationDecl | PI | Comment`. But maybe it applies to `[28]` as well.
+
+There's some clarification in [https://www.xml.com/axml/axml.html](https://www.xml.com/axml/axml.html) (not normative, but nonetheless helpful), where it says
+
+> "This is probably not as clear as it could be. Here is an example of a PE reference that is disallowed by this rule: `<!ENTITY % pe1 "EMPTY> <!ELEMENT e2 EMPTY>" >  <!ELEMENT e1 %pe1;"`.
+
+Let's break down some thinking about what this might mean.
+
+From the standpoint of just examining the text of PE references, we can say that just having fragmentary markupdecl in entity text is not invalid in and of itself. This may not be a surprise, because the text of the validity constraint ("must be properly nested with markup declarations") seems to say when the parameter entity is referenced.  Using `xmllint` as a guide, we can test this out as well and see it works fine.
+
+From the standpoint of referencing a parameter entity within `intSubset` and `extSubsetDecl` we need to make sure to disallow:
+
+```
+<!ENTITY % troublesome "<!ELEMENT test ">
+%troublesome;
+ANY>
+```
+
+This will be reported as a problem by our parser and the expansion system. The parser will interpret the above as three tokens: `ENTITY_DECLARATION_PTOKEN`, `PARAMENTER_ENTITY_REFERENCE_PTOKEN` `CHARDATA_PTOKEN`, and the last will be reported as a token in the wrong place by the syntax checks in the wellformedness system. When it comes to expansion, the processing there will conclude that the ELEMENT declaration is simply incomplete, and again the syntax checks in the wellformedness system will also report that as an error.  Thus, in this processor, if the "first character ... of a markup declaration" appears in the replacement text of a parameter entity, it will always result in some kind of syntax error. This validity system (redundantly) checks for markup declaration tokens that were missing their closing value, and are are the end of a parameter entity expansion.
+
+Another aspect of this is having the "last character of a markup declaration" in the replacement text.  This covers things like: `<!NOTATION %myPERef;`. Here, again, the parser and expansion will report errors long before the data gets to the validator.  In particular, the parser will parse `<!NOTATION %myPERef; ...` as a `NOTATION_DECLARATION_PTOKEN` with a potentially long `unexpanded` property (it will read `...` until it finds a closing `>`.  Once it has gone through the expander, it will end up with text in the `extra` property (at least the `>` from the `myPERef` replacement text), which will be flagged as a syntax error. This validity system will still report a "Proper Declaration/PE Nesting" validity constraint if it finds an attlist, element, entity or notation declaration PToken with an unexpanded property and a `>` in the extra property. 
+
+Note that the definitions of PI and Comment both say that PE references are not recognized within them. So even seemingly legitimate things like `<!-- %foo; -->` will not cause the PE reference to be recognized, much less `<!-- %foo;`.
+
+The spec doesn't mention this, but it seems like this could apply to conditional sections as well.  For the case of the start of the conditional section being in the replacement text of a PE reference, the same situation described above would happen: the conditional section would start, but not have an end, and would be terminated by the end of the parameter entity's replacement text. For the case of the parameter entity containing just the end of the conditional section, in this case the parser would keep on processing the text after the PE reference as content for the conditional section, until it found a closing `]]>`. The original `]]>` would end up being reported as misplaced text by the wellformedness system.
+
+#### Some interesting cases to keep in mind
+* `&foo; <!ENTITY bar 'foo'>">` (`foo` contains `<!ENTITY % whatever "`).
+
+
 ### §3.2.0 Unique Element Type Declaration
 No commentary.
 

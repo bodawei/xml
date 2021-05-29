@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE one SYSTEM "./pe-nesting1.dtd" [
+   <!ELEMENT one ANY>
+   <!ENTITY % pe1 "EMPTY> <!ELEMENT e2 EMPTY>" >
+   <!ENTITY % pe0 "<!ELEMENT e3 " >
+]>
+
+<one>
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid pe-nesting2.xml
+
+   Demonstrates that we can have fragments of markupdecl's in parameter entity replacement texts,
+   and this in and of itself is not an error. in fact, we can combine them in another pe declaration and then
+   use that with no problems.
+]]>
+</one>
