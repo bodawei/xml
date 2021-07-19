@@ -3,10 +3,50 @@
 import { ErrorCodes } from 'basic';
 
 const validityConstraint = new ErrorCodes({
+   ATTLISTDECL_BAD_ENTITIES_DEFAULT: {
+      code: 1127,
+      message:
+         'The names in the default for the ENTITIES attribute "{1}" of attribute list declaration "{0}" must match the syntax for names (§3.3.2). Found "{2}".',
+   },
+   ATTLISTDECL_BAD_ENTITY_DEFAULT: {
+      code: 1128,
+      message:
+         'The default for the ENTITY attribute "{1}" of attribute list declaration "{0}" must match the syntax for names (§3.3.2). Found "{2}".',
+   },
+   ATTLISTDECL_BAD_ENUMERATION_DEFAULT: {
+      code: 1129,
+      message:
+         'The default for the attribute "{1}" of attribute list declaration "{0}" must have one of these values: {2} (§3.3.2). Found "{3}".',
+   },
+   ATTLISTDECL_BAD_IDREF_DEFAULT: {
+      code: 1131,
+      message:
+         'The default for the IDREF attribute "{1}" of attribute list declaration "{0}" must match the syntax for names (§3.3.2). Found "{2}".',
+   },
+   ATTLISTDECL_BAD_IDREFS_DEFAULT: {
+      code: 1132,
+      message:
+         'The names in the default for the IDREFS attribute "{1}" of attribute list declaration "{0}" must match the syntax for names (§3.3.2). Found "{2}".',
+   },
+   ATTLISTDECL_BAD_NMTOKEN_DEFAULT: {
+      code: 1133,
+      message:
+         'The default for the NMTOKEN attribute "{1}" of attribute list declaration "{0}" must match the syntax for name tokens (§3.3.2). Found "{2}".',
+   },
+   ATTLISTDECL_BAD_NMTOKENS_DEFAULT: {
+      code: 1134,
+      message:
+         'The names in the default for the NMTOKENS attribute "{1}" of attribute list declaration "{0}" must match the syntax for name tokens (§3.3.2). Found "{2}".',
+   },
    ATTLISTDECL_BAD_NOTATION: {
       code: 1111,
       message:
          'The attribute "{1}" of attribute list declaration "{0}" must name NOTATIONs that have been declared (§3.3.1). Found "{2}".',
+   },
+   ATTLISTDECL_BAD_NOTATION_DEFAULT: {
+      code: 1135,
+      message:
+         'The default for the attribute "{1}" of attribute list declaration "{0}" must have one of these values: {2} (§3.3.2). Found "{3}".',
    },
    ATTLISTDECL_DUPLICATE_ENUMERATION: {
       code: 1113,
@@ -38,6 +78,7 @@ const validityConstraint = new ErrorCodes({
       message:
          'The default type for attribute "{1}" of attribute list declaration "{0}" must be "#IMPLIED" or "#REQUIRED" (§3.3.1). Found: "{2}".',
    },
+
    ELEMENT_EXTRA_DECLARATION: {
       code: 1125,
       message:

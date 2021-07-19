@@ -85,6 +85,10 @@ No notes
 ### §3.3.2 Required Attribute
 No notes
 
+### §3.3.2 Attribute Default Legal / Attribute Default Value Syntactically Correct
+There are substantial wording differences across the different editions of the specification, but this author would not have interpreted different behavior.
+It is worth calling out that the spec doesn't require that an ID attribute with a default value  matches the syntax for names.  This makes sense because it is pretty non-sensical for an ID attribute (which is supposed to have a unique value each time it is used) to have a pre-defined value.
+
 ### §4.2.2 Notation Declared
 This states that the NDATA name must match the declared name of a notation.
 

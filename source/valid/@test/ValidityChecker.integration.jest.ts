@@ -256,7 +256,7 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
-   it('reports an error when an ID attribute value does not match the name production (§3.3.1)', (done) => {
+   it('reports an error when an ID attribute value does not match the Name production (§3.3.1)', (done) => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE root [
@@ -519,6 +519,118 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root />`,
          VID.ELEMENTSTART_NO_REQUIRED,
+         done!,
+      );
+   });
+
+   it('reports an error when an IDREF does not match the Name production (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               idref IDREF "$FOO"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_IDREF_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when an ENTITY does not match the Name production (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               entity ENTITY "$FOO"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_ENTITY_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when an IDREFS does not match the Name production (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               idref IDREFS "$FOO bar"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_IDREFS_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when an ENTITIES does not match the Name production (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               entity ENTITIES "$FOO BAZ"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_ENTITIES_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when an NMTOKEN defaultdoes not match the NmToken production (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               entity NMTOKEN "$FOO"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when an NMTOKENS default does not match the NmToken production (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               entity NMTOKENS "$FOO BAR"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when a NOTATION default does not match one of the defined values (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               entity NOTATION (a b c) "d"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when an ENUMERATION default does not match one of the defined values (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               entity (a b c) "d"
+            >
+         ]>`,
+         VID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
          done!,
       );
    });

@@ -4,15 +4,21 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 
 import { MockErrorCollector } from 'basic-test';
-import { AttListDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
+import { AttListDeclarationPToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { NOTATION_PTOKEN } from 'token';
+import { NOTATION_PTOKEN, ENUMERATION_PTOKEN } from 'token';
 
 import { validityConstraint } from '../../error/validityConstraint';
 import { ValidateState } from '../../validateState';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
 
 const VID = validityConstraint.id;
+
+jest.mock('basic', () => ({
+   ...jest.requireActual('basic'),
+   isName: jest.fn().mockImplementation((item) => item !== '$bad'),
+   isNmToken: jest.fn().mockImplementation((item) => item !== '$bad'),
+}));
 
 describe('attListDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -317,6 +323,266 @@ describe('attListDeclarationValidate (unit)', () => {
          attListDeclarationValidate(attListDecl, state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
+      });
+   });
+
+   describe('Attribute Default Value Syntactically Correct (§3.3.2)', () => {
+      it('reports no error when a CDATA declaration has a default value that does not match either Name or NmToken (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('CDATA'),
+                  value: [new TextPToken(toSToken('$bad'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no error when an ID declaration has a default value that does not match either Name or NmToken (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  defaultType: toSToken('#REQUIRED'),
+                  name: toSToken('att1'),
+                  type: toSToken('ID'),
+                  value: [new TextPToken(toSToken('$bad'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports an error when an IDREF declaration has a syntactically invalid default value (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('IDREF'),
+                  value: [new TextPToken(toSToken('$bad'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_IDREF_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', '$bad'],
+            position: toSToken('$bad'),
+         });
+      });
+
+      it('reports an error when an IDREFS declaration has a syntactically invalid default value (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('IDREFS'),
+                  value: [new TextPToken(toSToken('boo ba $bad bing'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_IDREFS_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', '$bad'],
+            position: toSToken('boo ba $bad bing'),
+         });
+      });
+
+      it('reports an error when an ENTITY declaration has a syntactically invalid default value (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('ENTITY'),
+                  value: [new TextPToken(toSToken('$bad'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_ENTITY_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', '$bad'],
+            position: toSToken('$bad'),
+         });
+      });
+
+      it('reports an error when an ENTITIES declaration has a syntactically invalid default value (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('ENTITIES'),
+                  value: [new TextPToken(toSToken('boo ba $bad bing'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_ENTITIES_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', '$bad'],
+            position: toSToken('boo ba $bad bing'),
+         });
+      });
+
+      it('reports an error when an NMTOKEN declaration has a syntactically invalid default value (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('NMTOKEN'),
+                  value: [new TextPToken(toSToken('$bad'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', '$bad'],
+            position: toSToken('$bad'),
+         });
+      });
+
+      it('reports an error when an NMTOKENS declaration has a syntactically invalid default value (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('NMTOKENS'),
+                  value: [new TextPToken(toSToken('boo ba $bad bing'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', '$bad'],
+            position: toSToken('boo ba $bad bing'),
+         });
+      });
+
+      it('reports an error when an NOTATION declaration has a default value that is not in the enumerated list (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  enumeration: {
+                     open: toSToken('('),
+                     type: NOTATION_PTOKEN,
+                     words: [
+                        {
+                           word: toSToken('one'),
+                        },
+                        {
+                           word: toSToken('two'),
+                        },
+                        {
+                           word: toSToken('three'),
+                        },
+                     ],
+                  },
+                  name: toSToken('att1'),
+                  type: toSToken('NOTATION'),
+                  value: [new TextPToken(toSToken('foo'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', 'one,two,three', 'foo'],
+            position: toSToken('foo'),
+         });
+      });
+
+      it('reports an error when an ENUMERATION declaration has a default value that is not in the enumerated list (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  enumeration: {
+                     open: toSToken('('),
+                     type: ENUMERATION_PTOKEN,
+                     words: [
+                        {
+                           word: toSToken('one'),
+                        },
+                        {
+                           word: toSToken('two'),
+                        },
+                        {
+                           word: toSToken('three'),
+                        },
+                     ],
+                  },
+                  name: toSToken('att1'),
+                  value: [new TextPToken(toSToken('foo'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', 'one,two,three', 'foo'],
+            position: toSToken('foo'),
+         });
       });
    });
 });
