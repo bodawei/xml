@@ -202,6 +202,28 @@ function idRefCheck(
    ec.check(badNames.length > 0, code, [elName, attName, badNames.join(', ')], nameSToken);
 }
 
+function requiredAttributesCheck(
+   attNames: Record<string, boolean>,
+   elName: string,
+   state: ValidateState,
+   ec: ErrorCollector,
+): void {
+   const attrs = state.attributeDefs[elName] ?? {};
+   const attNameAndDetails = Object.entries(attrs);
+
+   // §3.3.2: Validity Constraint: Required Attribute
+   //    If the default declaration is the keyword #REQUIRED, then
+   //    the attribute must be specified for all elements of the
+   //    type in the attribute-list declaration.
+   for (const pair of attNameAndDetails) {
+      const [name, details] = pair;
+
+      if (strOrBlank(details?.def.defaultType).toLowerCase() === '#required') {
+         ec.check(!attNames[name], VID.ELEMENTSTART_NO_REQUIRED, [elName, name]);
+      }
+   }
+}
+
 function checkAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
    elName: string,
@@ -210,10 +232,12 @@ function checkAttributes(
 ): void {
    const attributes = el.attributes;
    let localAtts: LocalDetials = {};
+   const attrNames: Record<string, boolean> = {};
 
    for (const attr of attributes) {
       const attName = strOrBlank(attr.name);
       const details = state.attributeDefs[elName]?.[attName];
+      attrNames[attName] = true;
 
       if (!details) {
          // §3.1.0: Validity constraint: Attribute Value Type
@@ -293,6 +317,10 @@ function checkAttributes(
             break;
       }
    }
+
+   ec.setPos(el.close);
+
+   requiredAttributesCheck(attrNames, elName, state, ec);
 }
 
 function elementStartValidate(

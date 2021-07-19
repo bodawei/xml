@@ -25,13 +25,13 @@ describe('elementStartValidate (unit)', () => {
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
       elementDeclaration = new ElementDeclarationPToken({
-         open: toSToken('<!'),
-         openSpace: undefined,
+         close: toSToken('>'),
          declType: toSToken('ELEMENT'),
          declTypeSpace: toSToken(' '),
          name: toSToken('elementName'),
          nameSpace: toSToken(' '),
-         close: toSToken('>'),
+         open: toSToken('<!'),
+         openSpace: undefined,
       });
       elementStart = new ElementStartPToken({
          open: toSToken('</'),
@@ -615,15 +615,15 @@ describe('elementStartValidate (unit)', () => {
             },
          });
          elementStart = new ElementStartPToken({
-            open: toSToken('</'),
-            name: toSToken('elementName'),
             attributes: [
                {
+                  defaulted: true,
                   name: toSToken('att1'),
                   value: [],
-                  defaulted: true,
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('</'),
          });
 
          elementStartValidate(elementStart, state, mockErrorCollector);
@@ -631,9 +631,9 @@ describe('elementStartValidate (unit)', () => {
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
+            lastPosition: undefined,
             params: ['', 'elementName', 'att1'],
             position: toSToken('att1'),
-            lastPosition: undefined,
          });
       });
 
@@ -653,16 +653,16 @@ describe('elementStartValidate (unit)', () => {
             },
          });
          elementStart = new ElementStartPToken({
-            open: toSToken('</'),
-            name: toSToken('elementName'),
             attributes: [
                {
+                  defaulted: true,
                   name: toSToken('att1'),
                   openQuote: toSToken('"'),
                   value: [],
-                  defaulted: true,
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('</'),
          });
 
          elementStartValidate(elementStart, state, mockErrorCollector);
@@ -670,9 +670,9 @@ describe('elementStartValidate (unit)', () => {
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            lastPosition: undefined,
             params: ['', 'elementName', 'att1'],
             position: toSToken('att1'),
-            lastPosition: undefined,
          });
       });
 
@@ -692,10 +692,9 @@ describe('elementStartValidate (unit)', () => {
             },
          });
          elementStart = new ElementStartPToken({
-            open: toSToken('</'),
-            name: toSToken('elementName'),
             attributes: [
                {
+                  defaulted: true,
                   name: toSToken('att1'),
                   openQuote: toSToken('"'),
                   value: [
@@ -704,9 +703,10 @@ describe('elementStartValidate (unit)', () => {
                      new TextPToken(toSToken('good')),
                      new TextPToken(toSToken(' foo\nbar')),
                   ],
-                  defaulted: true,
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('</'),
          });
 
          elementStartValidate(elementStart, state, mockErrorCollector);
@@ -714,9 +714,9 @@ describe('elementStartValidate (unit)', () => {
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            lastPosition: undefined,
             params: ['fooo$$bar, foo\nbar', 'elementName', 'att1'],
             position: toSToken('att1'),
-            lastPosition: undefined,
          });
       });
 
@@ -736,16 +736,16 @@ describe('elementStartValidate (unit)', () => {
             },
          });
          elementStart = new ElementStartPToken({
-            open: toSToken('</'),
-            name: toSToken('elementName'),
             attributes: [
                {
+                  defaulted: true,
                   name: toSToken('att1'),
                   openQuote: toSToken('"'),
                   value: [new TextPToken(toSToken('  fooo$$bar good '))],
-                  defaulted: true,
                },
             ],
+            name: toSToken('elementName'),
+            open: toSToken('</'),
          });
 
          elementStartValidate(elementStart, state, mockErrorCollector);
@@ -753,9 +753,9 @@ describe('elementStartValidate (unit)', () => {
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            lastPosition: undefined,
             params: ['fooo$$bar', 'elementName', 'att1'],
             position: toSToken('att1'),
-            lastPosition: undefined,
          });
       });
 
@@ -929,6 +929,100 @@ describe('elementStartValidate (unit)', () => {
 
                expect(mockErrorCollector.errors).toEqual([]);
             });
+         });
+      });
+
+      it('reports an error when a required attribute is not specified (§3.3.2)', () => {
+         state = new ValidateState({
+            ...state,
+            attributeDefs: {
+               elementName: {
+                  req1: {
+                     def: {
+                        defaultType: toSToken('#REQUIRED'),
+                        name: toSToken('req1'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+            elementDeclarations: {
+               elementName: {
+                  token: makeElementDeclaration(),
+                  type: ElDeclType.ANY,
+               },
+            },
+            generalEntities: {},
+         });
+
+         elementStart = new ElementStartPToken({
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: [new TextPToken(toSToken('foo'))],
+               },
+            ],
+            close: toSToken('>'),
+            name: toSToken('elementName'),
+            open: toSToken('</'),
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ELEMENTSTART_NO_REQUIRED,
+            lastPosition: undefined,
+            params: ['elementName', 'req1'],
+            position: elementStart.close,
+         });
+      });
+
+      it('reports an error when a required attribute is not specified, even when #REQUIRED has the wrong case (§3.3.2)', () => {
+         state = new ValidateState({
+            ...state,
+            attributeDefs: {
+               elementName: {
+                  req1: {
+                     def: {
+                        defaultType: toSToken('#reQuiRED'),
+                        name: toSToken('req1'),
+                        value: [],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+            elementDeclarations: {
+               elementName: {
+                  token: makeElementDeclaration(),
+                  type: ElDeclType.ANY,
+               },
+            },
+            generalEntities: {},
+         });
+
+         elementStart = new ElementStartPToken({
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  value: [new TextPToken(toSToken('foo'))],
+               },
+            ],
+            close: toSToken('>'),
+            name: toSToken('elementName'),
+            open: toSToken('</'),
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ELEMENTSTART_NO_REQUIRED,
+            lastPosition: undefined,
+            params: ['elementName', 'req1'],
+            position: elementStart.close,
          });
       });
 

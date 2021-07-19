@@ -507,4 +507,19 @@ describe('ValidityChecker (integration)', () => {
          done!,
       );
    });
+
+   it('reports an error when a required attribute is not present (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               requiredAttribute CDATA #REQUIRED
+            >
+         ]>
+         <root />`,
+         VID.ELEMENTSTART_NO_REQUIRED,
+         done!,
+      );
+   });
 });

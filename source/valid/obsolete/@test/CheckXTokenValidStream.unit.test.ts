@@ -200,33 +200,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
-         it('reports an error if a required attribute was not included on the attribute', (done) => {
-            const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ANY, undefined);
-            (attListDecl.attDefs as any).push({
-               name: 'needed',
-               type: AttDefinitionType.CDATA,
-               value: [],
-               defaultType: AttDefaultType.REQUIRED,
-            });
-            const startToken = new ElementStartXToken('one', [
-               {
-                  name: 'first',
-                  value: [],
-               },
-            ]);
-
-            validator.write(elementDecl);
-            validator.write(attListDecl);
-            validator.write(startToken);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NO_REQUIRED, [
-               'one',
-               'needed',
-            ]);
-            expectStream(validator, expected, done);
-         });
-
          it('reports no error if a required attribute was specified', (done) => {
             const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ANY, undefined);
             attListDecl = new AttListDeclarationXToken(attListDecl.elementName, [

@@ -123,6 +123,10 @@ const validityConstraint = new ErrorCodes({
       message:
          'The NMTOKENS value for attribute "{2}" of element "{1}" must match the syntax for name tokens (§3.3.1). Found: "{0}".',
    },
+   ELEMENTSTART_NO_REQUIRED: {
+      code: 1126,
+      message: 'The required attribute "{1}" missing on element "{0}".',
+   },
    ELEMENTSTART_NOTATION_NOT_DECLARED: {
       code: 1112,
       message:

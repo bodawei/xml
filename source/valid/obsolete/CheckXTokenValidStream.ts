@@ -1229,23 +1229,6 @@ class CheckXTokenValidStream extends Transform {
                }
             }
          }
-
-         // §3.3.2: Validity Constraint: Required Attribute
-         //    If the default declaration is the keyword #REQUIRED, then
-         //    the attribute must be specified for all elements of the
-         //    type in the attribute-list declaration.
-         for (let index = 0; index < requiredNames.length; index++) {
-            const requiredName = requiredNames[index];
-
-            if (attributeNames.indexOf(requiredName) === -1) {
-               this.pushValidityError(
-                  ValidityError.ID.ELEMENTSTART_NO_REQUIRED,
-                  [elStart.name, requiredName],
-                  pTokenOpen,
-                  pTokenOpen,
-               );
-            }
-         }
       }
 
       for (const attribute of attributes) {

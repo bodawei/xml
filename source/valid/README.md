@@ -52,10 +52,10 @@ No commentary.
 ### §3.1.0 Attribute Value Type
 This particular constraint says "The attribute must have been declared; the value must be of the type declared for it." The first portion (that the attribute has been declared) is straight forward. However, it is not at all clear to this validator how to enforce the second part beyond the various validity constraints from §3.3.1.
 
-### §3.3.1 ID
+### §3.2.2 No Duplicate Types
 No commentary.
 
-### §3.2.2 No Duplicate Types
+### §3.3.1 ID
 No commentary.
 
 ### §3.3.1 One ID per Element Type
@@ -80,6 +80,9 @@ This was introduced in 1.0/3, so is not enforced when the conformance version is
 This was introduced in 1.0/2, so is not enforced when the conformance version is 1.0/1.
 
 ### §3.3.1 Enumeration
+No notes
+
+### §3.3.2 Required Attribute
 No notes
 
 ### §4.2.2 Notation Declared
