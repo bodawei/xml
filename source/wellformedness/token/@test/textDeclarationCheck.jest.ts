@@ -17,7 +17,7 @@ jest.mock('../../common/charCheck');
 const WFEID = WellFormedError.ID;
 const XEID = error.id;
 
-fdescribe('textDeclaration (unit)', () => {
+describe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;
    let start: InstructionStart;
    let mockErrorCollector: MockErrorCollector;

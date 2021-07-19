@@ -1026,7 +1026,7 @@ describe('elementStartValidate (unit)', () => {
          });
       });
 
-      fit('reports an error when a #FIXED attribute is not given that value (§3.3.2)', () => {
+      it('reports an error when a #FIXED attribute is not given that value (§3.3.2)', () => {
          state = new ValidateState({
             ...state,
             attributeDefs: {

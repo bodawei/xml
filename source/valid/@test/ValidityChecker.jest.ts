@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
-import { ConditionalPToken, ElidedEntityDeclarationPToken } from 'token';
+import { ConditionalClosePToken, ConditionalPToken, ElidedEntityDeclarationPToken } from 'token';
 import {
    makeAttListDeclaration,
    makeDocTypeEnd,
@@ -27,7 +27,10 @@ import { ValidateState } from '../validateState';
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from '../token/attListDeclarationValidate';
-import { conditionalValidate } from '../token/conditionalValidate';
+import { conditionalEndUpdateState } from '../token/conditionalEndUpdateState';
+import { conditionalEndValidate } from '../token/conditionalEndValidate';
+import { conditionalStartUpdateState } from '../token/conditionalStartUpdateState';
+import { conditionalStartValidate } from '../token/conditionalStartValidate';
 import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
 import { elementDeclarationPreprocess } from '../token/elementDeclarationPreprocess';
@@ -51,7 +54,10 @@ import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 
 jest.mock('../token/attListDeclarationValidate');
 jest.mock('../token/attListDeclarationUpdateState');
-jest.mock('../token/conditionalValidate');
+jest.mock('../token/conditionalEndUpdateState');
+jest.mock('../token/conditionalEndValidate');
+jest.mock('../token/conditionalStartUpdateState');
+jest.mock('../token/conditionalStartValidate');
 jest.mock('../token/docTypeStartUpdateState');
 jest.mock('../token/dtdEndValidate');
 jest.mock('../token/elementDeclarationUpdateState');
@@ -78,6 +84,8 @@ describe('ValidityChecker (unit)', () => {
    let checker: ValidityChecker;
    let ec: MockErrorCollector;
    let elementDeclarationUpdateStateMock: jest.MockedFunction<typeof elementDeclarationUpdateState>;
+   let conditionalStartUpdateStateMock: jest.MockedFunction<typeof conditionalStartUpdateState>;
+   let conditionalEndUpdateStateMock: jest.MockedFunction<typeof conditionalEndUpdateState>;
 
    beforeEach(async () => {
       version = new ConformanceVersion();
@@ -87,7 +95,15 @@ describe('ValidityChecker (unit)', () => {
       elementDeclarationUpdateStateMock = elementDeclarationUpdateState as jest.MockedFunction<
          typeof elementDeclarationUpdateState
       >;
+      conditionalStartUpdateStateMock = conditionalStartUpdateState as jest.MockedFunction<
+         typeof conditionalStartUpdateState
+      >;
+      conditionalEndUpdateStateMock = conditionalEndUpdateState as jest.MockedFunction<
+         typeof conditionalEndUpdateState
+      >;
       elementDeclarationUpdateStateMock.mockImplementation((token, details, state) => state);
+      conditionalEndUpdateStateMock.mockImplementation((token, state) => state);
+      conditionalStartUpdateStateMock.mockImplementation((token, state) => state);
    });
 
    it('stores the version passed to it and pass that on to other validations', () => {
@@ -143,13 +159,37 @@ describe('ValidityChecker (unit)', () => {
       expect(attListDeclarationUpdateState).toHaveBeenCalledWith(attListDecl, expect.any(Object));
    });
 
+   it('updates the state for a conditional end', () => {
+      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+
+      checker.checkPToken(conditional, ec);
+
+      expect(conditionalEndUpdateState).toHaveBeenCalledWith(conditional, expect.any(Object));
+   });
+
+   it('validates a conditional end', () => {
+      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+
+      checker.checkPToken(conditional, ec);
+
+      expect(conditionalEndValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
+   });
+
    it('validates a conditional start', () => {
       const conditional = new ConditionalPToken({ open: toSToken('<![') });
       checker.checkPToken(version, ec);
 
       checker.checkPToken(conditional, ec);
 
-      expect(conditionalValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
+      expect(conditionalStartValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
+   });
+
+   it('updates the state for a conditional start', () => {
+      const conditional = new ConditionalPToken({ open: toSToken('<![') });
+
+      checker.checkPToken(conditional, ec);
+
+      expect(conditionalStartUpdateState).toHaveBeenCalledWith(conditional, expect.any(Object));
    });
 
    it('updates the state when passed a docTypeStart', () => {

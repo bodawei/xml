@@ -190,10 +190,25 @@ const validityConstraint = new ErrorCodes({
       code: 1102,
       message: 'Must not declare a NOTATION more than once (§4.7.0). Found "{0}".',
    },
+   PEREF_INVALID_CONDITIONAL_END_NESTING: {
+      code: 1131,
+      message:
+         'The last character of a conditional section must not be found in the replacement text of a parameter entity reference when the first was not also there (§2.8.0).',
+   },
+   PEREF_INVALID_CONDITIONAL_START_NESTING: {
+      code: 1132,
+      message:
+         'The first character ("<") of a conditional section must not be found in the replacement text of a parameter entity reference when the last (">") was not also there (§2.8.0).',
+   },
    PEREF_INVALID_END_NESTING: {
       code: 1126,
       message:
          'The last character of a {0} declaration must not be found in the replacement text of a parameter entity reference when the first was not also there (§2.8.0).',
+   },
+   PEREF_INVALID_START_NESTING: {
+      code: 1127,
+      message:
+         'The first character ("<") of a {0} declaration must not be found in the replacement text of a parameter entity reference when the last (">") was not also there (§2.8.0).',
    },
 });
 

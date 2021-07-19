@@ -52,7 +52,7 @@ describe('ValidityChecker (integration)', () => {
 
          const targetError = finalResults.find((err) => err.id === errorCode);
 
-         expect(targetError?.id).toEqual(errorCode);
+         expect(targetError?.id).toEqual(errorCode || 'Unknown error code passed');
          done();
       });
    }
@@ -68,23 +68,6 @@ describe('ValidityChecker (integration)', () => {
       ]>
       <root/>`,
          ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-         done!,
-      );
-   });
-
-   it('reports an Element End error if children of an element end before the context model says it should', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-         <!DOCTYPE root [
-            <!ELEMENT one ANY>
-            <!ELEMENT two ANY>
-            <!ELEMENT root (one , two)>
-         ]>
-         <root>
-            <one>
-            </one>
-         </root>`,
-         ValidityError.ID.ELEMENT_UNEXPECTED_END,
          done!,
       );
    });
@@ -145,10 +128,11 @@ describe('ValidityChecker (integration)', () => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE root [
+            <!ELEMENT root ANY>
             <!ENTITY % problem "att CDATA>">
-            <!ATTLIST bar %problem;
+            <!ATTLIST root %problem;
          ]>
-         <bar/>`,
+         <root/>`,
          VID.PEREF_INVALID_END_NESTING,
          done!,
       );
@@ -159,9 +143,9 @@ describe('ValidityChecker (integration)', () => {
          `<?xml version="1.0"?>
          <!DOCTYPE root [
             <!ENTITY % problem "ANY >">
-            <!ELEMENT bar %problem;
+            <!ELEMENT root %problem;
          ]>
-         <bar/>`,
+         <root/>`,
          VID.PEREF_INVALID_END_NESTING,
          done!,
       );
@@ -171,10 +155,11 @@ describe('ValidityChecker (integration)', () => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE root [
+            <!ELEMENT root ANY>
             <!ENTITY % problem " 'foo'> ">
             <!ENTITY bar %problem;
          ]>
-         <bar/>`,
+         <root/>`,
          VID.PEREF_INVALID_END_NESTING,
          done!,
       );
@@ -184,11 +169,107 @@ describe('ValidityChecker (integration)', () => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE root [
+            <!ELEMENT root ANY>
             <!ENTITY % problem " SYSTEM 'http://somewhere.com'> ">
             <!NOTATION bar %problem;
          ]>
-         <bar/>`,
+         <root/>`,
          VID.PEREF_INVALID_END_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a ATTLIST declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % problem "<!ATTLIST root ">
+            %problem; att1 CDATA > 
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a ELEMENT declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % problem "<!ELEMENT other ">
+            %problem; EMPTY > 
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a ENTITY declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % problem "<!ENTITY other ">
+            %problem; "some value"" > 
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a NOTATION declaration (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % problem "<!NOTATION bar ">
+            %problem; SYSTEM 'http://somewhere.com'> 
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a processing instruction (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "<?foo bar">
+            %problem; baz?>
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a comment (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "<!-- this is a ">
+            %problem; comment -->
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a conditional section (§2.8.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "<![INCLUDE[ foo> ">
+            %problem; ]]>
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_CONDITIONAL_START_NESTING,
          done!,
       );
    });

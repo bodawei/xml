@@ -9,7 +9,7 @@ import { ValidateState } from '../validateState';
 
 const VID = ValidityError.ID;
 
-function conditionalValidate(
+function conditionalStartValidate(
    token: ConditionalPToken,
    state: ValidateState,
    ec: ErrorCollector,
@@ -28,4 +28,4 @@ function conditionalValidate(
    ]);
 }
 
-export { conditionalValidate };
+export { conditionalStartValidate };

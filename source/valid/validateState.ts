@@ -6,9 +6,15 @@ import {
    ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
+   ParseToken,
 } from 'pToken';
 import { SToken } from 'sToken';
-import { EntityValuePToken } from 'token';
+import {
+   ConditionalPToken,
+   DocTypeStartPToken,
+   EntityValuePToken,
+   ParameterEntityStartPToken,
+} from 'token';
 import { CmGraph } from './contentModal/cmGraphTypes';
 
 enum ElDeclType {
@@ -98,6 +104,13 @@ interface ValidateStateProps {
       pastEnd: boolean; // when this is true, activeContext will be undefined
    };
 
+   dtdContext?: {
+      enclosingStack: ReadonlyArray<
+         DocTypeStartPToken | ParameterEntityStartPToken | ConditionalPToken
+      >;
+      lastPToken?: ParseToken;
+   };
+
    inExternalSubset?: boolean;
    isStandalone?: boolean;
    confVer?: ConformanceVersion;
@@ -161,6 +174,13 @@ class ValidateState {
       readonly pastEnd: boolean; // when this is true, activeContext will be undefined
    };
 
+   readonly dtdContext: {
+      readonly enclosingStack: ReadonlyArray<
+         DocTypeStartPToken | ParameterEntityStartPToken | ConditionalPToken
+      >;
+      readonly lastPToken?: ParseToken;
+   };
+
    readonly isStandalone: boolean;
 
    confVer: ConformanceVersion;
@@ -185,6 +205,10 @@ class ValidateState {
          activeContext: otherState?.elementContext?.activeContext,
          contextStack: otherState?.elementContext?.contextStack || [],
          pastEnd: otherState?.elementContext?.pastEnd || false,
+      };
+      this.dtdContext = {
+         enclosingStack: otherState?.dtdContext?.enclosingStack ?? [],
+         lastPToken: otherState?.dtdContext?.lastPToken,
       };
       this.isStandalone = otherState?.isStandalone ?? false;
       this.inExternalSubset = otherState?.inExternalSubset ?? false;

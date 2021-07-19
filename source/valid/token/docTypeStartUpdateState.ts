@@ -14,6 +14,10 @@ function docTypeStartUpdateState(
    return {
       ...state,
       docType: docTypeName,
+      dtdContext: {
+         ...state.dtdContext,
+         enclosingStack: [...state.dtdContext.enclosingStack, docTypePToken],
+      },
    };
 }
 

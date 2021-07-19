@@ -15,11 +15,16 @@ describe('docTypeStartUpdateState (unit)', () => {
    });
 
    it('adds the docType name to the state', () => {
-      const newState = docTypeStartUpdateState(makeDocTypeStart(), state);
+      const start = makeDocTypeStart();
+
+      const newState = docTypeStartUpdateState(start, state);
 
       expect(newState).toEqual({
          ...state,
          docType: 'root',
+         dtdContext: {
+            enclosingStack: [start],
+         },
       });
    });
 });

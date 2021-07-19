@@ -1,6 +1,13 @@
-import { ErrorCollector, ConformanceVersion, CONFORMANCE_VERSION } from 'basic';
+import {
+   ErrorCollector,
+   ConformanceVersion,
+   CONFORMANCE_VERSION,
+   ERROR_TYPE,
+   ENTITY_ID,
+} from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
+   CHARREF_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -8,6 +15,9 @@ import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParseToken,
+   PROCESSING_INSTRUCTION_PTOKEN,
+   TEXTDECL_PTOKEN,
+   TEXT_PTOKEN,
    XMLDECL_PTOKEN,
 } from 'pToken';
 import {
@@ -22,13 +32,26 @@ import {
    CHARDATA_PTOKEN,
    DOCTYPE_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
+   PARAMETER_ENTITY_END_PTOKEN,
+   CDATA_PTOKEN,
+   COMMENT_PTOKEN,
+   CONDITIONAL_CLOSE_PTOKEN,
+   UNKNOWNDECL_PTOKEN,
+   GENERAL_ENTITY_END_PTOKEN,
+   GENERAL_ENTITY_START_PTOKEN,
+   INTERNAL_SUBSET_START_TOKEN,
+   INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
 import { ValidateState } from './validateState';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from './token/attListDeclarationValidate';
 import { charDataValidate } from './token/charDataValidate';
-import { conditionalValidate } from './token/conditionalValidate';
+import { conditionalEndUpdateState } from './token/conditionalEndUpdateState';
+import { conditionalEndValidate } from './token/conditionalEndValidate';
+import { conditionalStartUpdateState } from './token/conditionalStartUpdateState';
+import { conditionalStartValidate } from './token/conditionalStartValidate';
 import { docEndValidate } from './token/docEndValidate';
 import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
 import { elementDeclarationValidate } from './token/elementDeclarationValidate';
@@ -43,10 +66,14 @@ import { elementEndValidate } from './token/elementEndValidate';
 import { generalEntityDeclarationUpdateState } from './token/generalEntityDeclarationUpdateState';
 import { dtdEndValidate } from './token/dtdEndValidate';
 import { generalEntityReferenceValidate } from './token/generalEntityReferenceValidate';
-import { parameterEntityReferenceValidate } from './token/parameterEntityReferenceValidate';
 import { parameterEntityDeclarationUpdateState } from './token/parameterEntityDeclarationUpdateState';
+import { parameterEntityEndUpdateState } from './token/parameterEntityEndUpdateState';
+import { parameterEntityEndValidate } from './token/parameterEntityEndValidate';
+import { parameterEntityReferenceValidate } from './token/parameterEntityReferenceValidate';
+import { parameterEntityStartUpdateState } from './token/parameterEntityStartUpdateState';
 import { spaceValidate } from './token/spaceValidate';
 import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
+import { docTypeEndUpdateState } from './token/docTypeEndUpdateState';
 import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from './token/notationDeclarationValidate';
@@ -88,13 +115,19 @@ class ValidityChecker {
             charDataValidate(token, this.state, ec);
             break;
          case CONDITIONAL_PTOKEN:
-            conditionalValidate(token, this.state, ec);
+            conditionalStartValidate(token, this.state, ec);
+            this.state = conditionalStartUpdateState(token, this.state);
+            break;
+         case CONDITIONAL_CLOSE_PTOKEN:
+            conditionalEndValidate(token, this.state, ec);
+            this.state = conditionalEndUpdateState(token, this.state);
             break;
          case DOCTYPE_START_PTOKEN:
             this.state = docTypeStartUpdateState(token, this.state);
             break;
          case DOCTYPE_END_PTOKEN:
             dtdEndValidate(this.state, ec);
+            this.state = docTypeEndUpdateState(token, this.state);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             const declDetails = elementDeclarationPreprocess(token);
@@ -134,8 +167,15 @@ class ValidityChecker {
             entityDeclarationValidate(token, this.state, ec);
             this.state = parameterEntityDeclarationUpdateState(token, this.state);
             break;
+         case PARAMETER_ENTITY_END_PTOKEN:
+            parameterEntityEndValidate(token, this.state, ec);
+            this.state = parameterEntityEndUpdateState(token, this.state);
+            break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             parameterEntityReferenceValidate(token, this.state, ec);
+            break;
+         case PARAMETER_ENTITY_START_PTOKEN:
+            this.state = parameterEntityStartUpdateState(token, this.state);
             break;
          case SPACE_PTOKEN:
             spaceValidate(token, this.state, ec);
@@ -146,12 +186,65 @@ class ValidityChecker {
                this.seenXmlDecl = true;
             }
             break;
+         case CDATA_PTOKEN:
+         case COMMENT_PTOKEN:
+         case CONDITIONAL_CLOSE_PTOKEN:
+         case UNKNOWNDECL_PTOKEN:
+         case CHARREF_PTOKEN:
+         case PROCESSING_INSTRUCTION_PTOKEN:
+         case TEXTDECL_PTOKEN:
+         case TEXT_PTOKEN:
+         case ERROR_TYPE:
+         case ENTITY_ID:
+         case GENERAL_ENTITY_END_PTOKEN:
+         case GENERAL_ENTITY_START_PTOKEN:
+         case INTERNAL_SUBSET_START_TOKEN:
+         case INTERNAL_SUBSET_END_TOKEN:
          default:
             break;
       }
 
       if (!wasAtEndBefore && this.state.elementContext.pastEnd) {
          docEndValidate(this.state, ec);
+      }
+
+      switch (token.type) {
+         case ATTLIST_DECLARATION_PTOKEN:
+         case CHARDATA_PTOKEN:
+         case CONDITIONAL_PTOKEN:
+         case DOCTYPE_START_PTOKEN:
+         case DOCTYPE_END_PTOKEN:
+         case ELEMENT_DECLARATION_PTOKEN:
+         case ELEMENT_END_PTOKEN:
+         case ELEMENT_START_PTOKEN:
+         case ELEMENT_EMPTY_PTOKEN:
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         case GENERAL_ENTITY_REFERENCE_PTOKEN:
+         case NOTATION_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_END_PTOKEN:
+         case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+         case PARAMETER_ENTITY_START_PTOKEN:
+         case SPACE_PTOKEN:
+         case XMLDECL_PTOKEN:
+         case CDATA_PTOKEN:
+         case COMMENT_PTOKEN:
+         case CONDITIONAL_CLOSE_PTOKEN:
+         case UNKNOWNDECL_PTOKEN:
+         case CHARREF_PTOKEN:
+         case PROCESSING_INSTRUCTION_PTOKEN:
+         case TEXTDECL_PTOKEN:
+         case TEXT_PTOKEN:
+            this.state = {
+               ...this.state,
+               dtdContext: {
+                  ...this.state.dtdContext,
+                  lastPToken: token,
+               },
+            };
+            break;
+         default:
+            break;
       }
    }
 }
