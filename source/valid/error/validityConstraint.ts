@@ -154,6 +154,10 @@ const validityConstraint = new ErrorCodes({
       message:
          'The IDREFS value for attribute "{1}" of element "{0}" must match the syntax for names (§3.3.1). Found: "{2}".',
    },
+   ELEMENTSTART_INVALID_FIXED: {
+      code: 1130,
+      message: 'Attribe "{1}" on element "{0}" must have a value of "{2}". (§3.3.2). Found "{3}".',
+   },
    ELEMENTSTART_NMTOKEN_NOT_NMTOKEN: {
       code: 1104,
       message:

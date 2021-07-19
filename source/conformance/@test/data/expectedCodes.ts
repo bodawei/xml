@@ -75,7 +75,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    attr05: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great - Tests the "Name Token" VC for the NMTOKEN attribute type.
    attr06: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great Tests the "Name Token" VC for the NMTOKENS attribute type.
    attr07: 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great Tests the "Enumeration" VC by providing a value which wasn't one of the choices.
-   attr08: 'ELEMENTSTART_FIXED_NOT_RIGHT', // great - Tests the "Fixed Attribute Default" VC by providing the wrong value.
+   attr08: 'ELEMENTSTART_INVALID_FIXED', // great - Tests the "Fixed Attribute Default" VC by providing the wrong value.
    attr09: 'ATTLISTDECL_BAD_IDREF_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREF value.
    attr10: 'ATTLISTDECL_BAD_IDREFS_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREFS value.
    attr11: 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal ENTITY value.
@@ -151,7 +151,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P39-ibm39i03.xml': 'INVALID_ELEMENT_IN_MIXED', // great
    'ibm-invalid-P39-ibm39i04.xml': 'UNDECLARED_ELEMENT', // great
    'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
-   'ibm-invalid-P41-ibm41i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
+   'ibm-invalid-P41-ibm41i02.xml': 'ELEMENTSTART_INVALID_FIXED', // great
    'ibm-invalid-P45-ibm45i01.xml': 'ELEMENT_EXTRA_DECLARATION', // great
    'ibm-invalid-P49-ibm49i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
    'ibm-invalid-P50-ibm50i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
@@ -178,7 +178,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P58-ibm58i02.xml': 'ATTLISTDECL_BAD_NOTATION', // great
    'ibm-invalid-P59-ibm59i01.xml': 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great
    'ibm-invalid-P60-ibm60i01.xml': 'ELEMENTSTART_NO_REQUIRED', // great
-   'ibm-invalid-P60-ibm60i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
+   'ibm-invalid-P60-ibm60i02.xml': 'ELEMENTSTART_INVALID_FIXED', // great
    'ibm-invalid-P60-ibm60i03.xml': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // great
    'ibm-invalid-P60-ibm60i04.xml': 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', //great
    'ibm-invalid-P68-ibm-not-wf-P67-ibm68i01.xml': {

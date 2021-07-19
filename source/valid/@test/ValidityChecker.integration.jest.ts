@@ -613,7 +613,7 @@ describe('ValidityChecker (integration)', () => {
          <!DOCTYPE emptyElement [
             <!ELEMENT root ANY>
             <!ATTLIST root
-               entity NOTATION (a b c) "d"
+               notation NOTATION (a b c) "d"
             >
          ]>`,
          VID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
@@ -627,10 +627,25 @@ describe('ValidityChecker (integration)', () => {
          <!DOCTYPE emptyElement [
             <!ELEMENT root ANY>
             <!ATTLIST root
-               entity (a b c) "d"
+               enumeration (a b c) "d"
             >
          ]>`,
          VID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
+         done!,
+      );
+   });
+
+   it('reports an error when an attribute declared with a #FIXED default is given a different value on an element start (§3.3.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE emptyElement [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               attr1 CDATA #FIXED "d"
+            >
+         ]>
+         <root attr1="bad" />`,
+         VID.ELEMENTSTART_INVALID_FIXED,
          done!,
       );
    });

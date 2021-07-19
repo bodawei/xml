@@ -1026,6 +1026,54 @@ describe('elementStartValidate (unit)', () => {
          });
       });
 
+      fit('reports an error when a #FIXED attribute is not given that value (§3.3.2)', () => {
+         state = new ValidateState({
+            ...state,
+            attributeDefs: {
+               elementName: {
+                  fixed1: {
+                     def: {
+                        defaultType: toSToken('#FIXED'),
+                        name: toSToken('fixed1'),
+                        value: [new TextPToken(toSToken('myDefault'))],
+                     },
+                     isExternal: false,
+                  },
+               },
+            },
+            elementDeclarations: {
+               elementName: {
+                  token: makeElementDeclaration(),
+                  type: ElDeclType.ANY,
+               },
+            },
+            generalEntities: {},
+         });
+
+         elementStart = new ElementStartPToken({
+            attributes: [
+               {
+                  name: toSToken('fixed1'),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken(toSToken('other'))],
+               },
+            ],
+            close: toSToken('>'),
+            name: toSToken('elementName'),
+            open: toSToken('</'),
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ELEMENTSTART_INVALID_FIXED,
+            lastPosition: undefined,
+            params: ['elementName', 'fixed1', 'myDefault', 'other'],
+            position: elementStart.attributes[0].openQuote,
+         });
+      });
+
       it('reports an error when an attribute is defaulted from an external ATTLIST declaration, and the document is standalone', () => {
          state = new ValidateState({
             attributeDefs: {

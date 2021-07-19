@@ -224,6 +224,31 @@ function requiredAttributesCheck(
    }
 }
 
+function fixedAttributesCheck(
+   elName: string,
+   attName: string,
+   attValue: string,
+   state: ValidateState,
+   ec: ErrorCollector,
+): void {
+   const attrs = state.attributeDefs[elName] ?? {};
+   const attDetails = attrs[attName];
+
+   // §3.3.2: Validity Constraint: Fixed Attribute Default**
+   //    If an attribute has a default value declared with the #FIXED keyword, instances
+   //    of that attribute must match the default value.
+   if (strOrBlank(attDetails?.def.defaultType).toUpperCase() === '#FIXED') {
+      const defValue = pTokenArrayToString(attDetails?.def.value);
+
+      ec.check(defValue.trim() !== attValue.trim(), VID.ELEMENTSTART_INVALID_FIXED, [
+         elName,
+         attName,
+         defValue,
+         attValue,
+      ]);
+   }
+}
+
 function checkAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
    elName: string,
@@ -247,7 +272,7 @@ function checkAttributes(
       }
 
       const type = strOrBlank(details.def.type).toUpperCase();
-      const attrValue = pTokenArrayToString(attr.value);
+      const attValue = pTokenArrayToString(attr.value);
 
       ec.setPos(attr.name);
 
@@ -286,34 +311,36 @@ function checkAttributes(
 
       ec.setPos(attr.openQuote);
 
+      fixedAttributesCheck(elName, attName, attValue, state, ec);
+
       switch (type) {
          case 'ID':
-            localAtts = idCheck(elName, attName, attrValue, attr.name, ec, state, localAtts);
+            localAtts = idCheck(elName, attName, attValue, attr.name, ec, state, localAtts);
             break;
          case 'NMTOKEN':
-            nmtokenCheck(elName, attName, attrValue, false, attr.name, ec, state);
+            nmtokenCheck(elName, attName, attValue, false, attr.name, ec, state);
             break;
          case 'NMTOKENS':
-            nmtokenCheck(elName, attName, attrValue, true, attr.name, ec, state);
+            nmtokenCheck(elName, attName, attValue, true, attr.name, ec, state);
             break;
          case 'IDREF':
-            idRefCheck(elName, attName, attrValue, false, attr.name, ec, state);
+            idRefCheck(elName, attName, attValue, false, attr.name, ec, state);
             break;
          case 'IDREFS':
-            idRefCheck(elName, attName, attrValue, true, attr.name, ec, state);
+            idRefCheck(elName, attName, attValue, true, attr.name, ec, state);
             break;
          case 'ENTITY':
-            entityCheck(elName, attName, attrValue, false, attr.name, ec, state);
+            entityCheck(elName, attName, attValue, false, attr.name, ec, state);
             break;
          case 'ENTITIES':
-            entityCheck(elName, attName, attrValue, true, attr.name, ec, state);
+            entityCheck(elName, attName, attValue, true, attr.name, ec, state);
             break;
          case 'NOTATION':
-            enumeratedValueCheck(elName, attName, attrValue, details.def, attr.name, ec);
+            enumeratedValueCheck(elName, attName, attValue, details.def, attr.name, ec);
             break;
          // Enumerations have no type
          case '':
-            enumeratedValueCheck(elName, attName, attrValue, details.def, attr.name, ec);
+            enumeratedValueCheck(elName, attName, attValue, details.def, attr.name, ec);
             break;
       }
    }

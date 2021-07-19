@@ -10,8 +10,8 @@ interface FilterData {
 - 
 */
 const testFilters: FilterData = {
-   includedIds: [],
    excludedIds: [],
+   includedIds: [],
 
    futureFeatures: [
       // ==== VALID ====

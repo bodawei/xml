@@ -1063,55 +1063,6 @@ class CheckXTokenValidStream extends Transform {
          );
       }
 
-      if (elemAttrDef) {
-         // This must be required somewhere...
-         const attributeNames = [];
-         const attDefNames = Object.keys(elemAttrDef.attributes);
-         const requiredNames = [];
-
-         // Fill in default values. That is, if the type isn't #REQUIRED, and the attribute is not provided, then use
-         // the default value.  (this assumes an attribute of the form myAttr="" is provided).
-         // §3.3.2: In an attribute declaration, #REQUIRED means that the attribute must always be provided,
-         //      #IMPLIED that no default value is provided. If the declaration is neither #REQUIRED nor
-         //      #IMPLIED, then the AttValue value contains the declared default value;
-         for (let index = 0; index < attDefNames.length; index++) {
-            const attDefName = attDefNames[index];
-            const attrInfo = elemAttrDef.attributes[attDefName];
-            const attDef = attrInfo.def;
-
-            if (attDef.defaultType === 'REQUIRED') {
-               requiredNames.push(attDef.name);
-            }
-         }
-
-         // §3.1: Validity constraint: Attribute Value Type
-         //    The attribute must have been declared; the value must be of
-         //    the type declared for it.
-         for (let index = 0; index < attributes.length; index++) {
-            const attrName = attributes[index].name;
-            const attInfo = elemAttrDef.attributes[attrName];
-            const attrDef = attInfo && attInfo.def;
-            const attrText = getAttributeValueText(attributes[index]);
-
-            attributeNames.push(attrName); // for use further below.
-
-            // §3.3.2 Validity Constraint: Fixed Attribute Default
-            //    If an attribute has a default value declared with the #FIXED keyword,
-            //    instances of that attribute must match the default value.
-            // §3.3.2 (text): the #FIXED keyword states that the attribute must always have the default value.
-            if (attrDef && attrDef.defaultType === 'FIXED') {
-               const attrDefaultText = getAttributeValueText(attrDef);
-               if (attrText !== attrDefaultText) {
-                  this.pushValidityError(
-                     ValidityError.ID.ELEMENTSTART_FIXED_NOT_RIGHT,
-                     [elStart.name, attrName, attrDefaultText, attrText],
-                     pTokenOpen,
-                  );
-               }
-            }
-         }
-      }
-
       for (const attribute of attributes) {
          // §2.9
          this.checkAttributeValueStandaloneability(
