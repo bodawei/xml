@@ -31,6 +31,8 @@ describe('conditionalEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
    });
@@ -48,6 +50,8 @@ describe('conditionalEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
    });

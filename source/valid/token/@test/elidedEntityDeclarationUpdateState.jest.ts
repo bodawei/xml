@@ -6,7 +6,7 @@ import { ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { makeParameterEntityDeclaration } from 'token-test';
 
-import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
+import { ElidedEntityDeclarationPToken } from 'token';
 
 import { ValidateState } from '../../validateState';
 import { elidedEntityDeclarationUpdateState } from '../elidedEntityDeclarationUpdateState';
@@ -22,11 +22,8 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
       state = new ValidateState();
    });
 
-   it('adds a elided token to the state', () => {
-      const elided = new ElidedEntityDeclarationPToken(
-         paramDecl,
-         paramDecl.value as EntityValuePToken,
-      ); // typehack
+   it('adds an elided token to the state', () => {
+      const elided = new ElidedEntityDeclarationPToken(paramDecl, paramDecl.value); // typehack
       const nextState = parameterEntityDeclarationUpdateState(paramDecl, state);
 
       const result = elidedEntityDeclarationUpdateState(elided, nextState);
@@ -35,23 +32,24 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             parameterEntities: {
                entityName: {
-                  isInternal: true,
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
+                  replacementText: paramDecl.value,
                   token: paramDecl,
-                  replacementText: paramDecl.value as EntityValuePToken, // typehack
                },
             },
          }),
       );
    });
 
-   it('adds a elided token to the state', () => {
+   it('adds an elided token to the state for an external parameter entity', () => {
       const other = new ParameterEntityDeclarationPToken({
-         open: toSToken('<!'),
-         name: toSToken('entityName'),
          externalId: {},
+         name: toSToken('entityName'),
+         open: toSToken('<!'),
       });
-      const elided = new ElidedEntityDeclarationPToken(other, paramDecl.value as EntityValuePToken); // typehack
-      const nextState = parameterEntityDeclarationUpdateState(paramDecl, state);
+      const elided = new ElidedEntityDeclarationPToken(other, other.value);
+      const nextState = parameterEntityDeclarationUpdateState(other, state);
 
       const result = elidedEntityDeclarationUpdateState(elided, nextState);
 
@@ -59,9 +57,10 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             parameterEntities: {
                entityName: {
-                  isInternal: true,
-                  token: paramDecl,
-                  replacementText: paramDecl.value as EntityValuePToken, // typehack,
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: false,
+                  replacementText: other.value,
+                  token: other,
                },
             },
          }),

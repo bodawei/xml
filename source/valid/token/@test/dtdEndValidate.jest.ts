@@ -419,14 +419,14 @@ describe('dtdEndValidate (unit)', () => {
          state = new ValidateState({
             generalEntities: {
                withNData: {
+                  isInternalValue: true,
                   token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     name: toSToken('withNData'),
-                     value: [],
-                     nDataName: toSToken('someNotation'),
                      close: toSToken('>'),
+                     name: toSToken('withNData'),
+                     nDataName: toSToken('someNotation'),
+                     open: toSToken('<!'),
+                     value: [],
                   }),
-                  isInternal: true,
                },
             },
             notationDeclarations: {},
@@ -454,7 +454,7 @@ describe('dtdEndValidate (unit)', () => {
                      nDataName: toSToken('notationName'),
                      close: toSToken('>'),
                   }),
-                  isInternal: true,
+                  isInternalValue: true,
                },
             },
             notationDeclarations: {
@@ -477,7 +477,7 @@ describe('dtdEndValidate (unit)', () => {
                      value: [],
                      close: toSToken('>'),
                   }),
-                  isInternal: true,
+                  isInternalValue: true,
                },
             },
             notationDeclarations: {

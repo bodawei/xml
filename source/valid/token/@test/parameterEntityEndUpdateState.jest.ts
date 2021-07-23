@@ -15,8 +15,6 @@ import { parameterEntityEndUpdateState } from '../parameterEntityEndUpdateState'
 describe('parameterEntityEndUpdateState (unit)', () => {
    let state: ValidateState;
 
-   beforeEach(async () => {});
-
    it('removes back to before the start of the enclosingStack', () => {
       const ref = makeParameterEntityReference();
       const start = new ParameterEntityStartPToken(ref);
@@ -33,6 +31,8 @@ describe('parameterEntityEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: true,
+            inExternalSubset: false,
          },
       });
    });
@@ -55,6 +55,8 @@ describe('parameterEntityEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: true,
+            inExternalSubset: false,
          },
       });
    });
@@ -74,6 +76,54 @@ describe('parameterEntityEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [makeDocTypeStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
+         },
+      });
+   });
+
+   it('marks as not in external markup context when not in external subset and there are no more parameter entity starts on the stack', () => {
+      const ref = makeParameterEntityReference();
+      const start = new ParameterEntityStartPToken(ref);
+      const end = new ParameterEntityEndPToken(ref);
+      state = new ValidateState({
+         dtdContext: {
+            enclosingStack: [start],
+            inExternalSubset: false,
+         },
+      });
+
+      const newState = parameterEntityEndUpdateState(end, state);
+
+      expect(newState).toEqual({
+         ...state,
+         dtdContext: {
+            enclosingStack: [],
+            inExternalMarkupContext: true,
+            inExternalSubset: false,
+         },
+      });
+   });
+
+   it('marks as in external markup context when in external subset but there are no more parameter entity starts on the stack', () => {
+      const ref = makeParameterEntityReference();
+      const start = new ParameterEntityStartPToken(ref);
+      const end = new ParameterEntityEndPToken(ref);
+      state = new ValidateState({
+         dtdContext: {
+            enclosingStack: [start],
+            inExternalSubset: true,
+         },
+      });
+
+      const newState = parameterEntityEndUpdateState(end, state);
+
+      expect(newState).toEqual({
+         ...state,
+         dtdContext: {
+            enclosingStack: [],
+            inExternalMarkupContext: true,
+            inExternalSubset: true,
          },
       });
    });

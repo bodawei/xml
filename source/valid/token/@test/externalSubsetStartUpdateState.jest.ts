@@ -21,7 +21,11 @@ describe('externalSubsetStartUpdateState (unit)', () => {
 
       expect(newState).toEqual({
          ...state,
-         inExternalSubset: true,
+         dtdContext: {
+            ...state.dtdContext,
+            inExternalMarkupContext: true,
+            inExternalSubset: true,
+         },
       });
    });
 });

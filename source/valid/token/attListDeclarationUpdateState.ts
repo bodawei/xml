@@ -18,7 +18,7 @@ function attListDeclarationUpdateState(
       if (!defs[attName]) {
          defs[attName] = {
             def,
-            isExternal: state.inExternalSubset,
+            isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
          };
       }
    }

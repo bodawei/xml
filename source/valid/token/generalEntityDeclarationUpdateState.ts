@@ -20,8 +20,9 @@ function generalEntityDeclarationUpdateState(
       generalEntities: {
          ...state.generalEntities,
          [elName]: {
+            isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
+            isInternalValue: !el.externalId,
             token: el,
-            isInternal: !el.externalId,
          },
       },
    };

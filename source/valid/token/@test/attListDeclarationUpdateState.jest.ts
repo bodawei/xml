@@ -27,7 +27,7 @@ describe('attListDeclarationUpdateState (unit)', () => {
             elStart: {
                att1: {
                   def: attListDecl.attDefs[0],
-                  isExternal: false,
+                  isExternalMarkupDeclaration: false,
                },
             },
          },
@@ -48,13 +48,13 @@ describe('attListDeclarationUpdateState (unit)', () => {
          ...state,
          attributeDefs: {
             elStart: {
-               foo: {
-                  def: def1,
-                  isExternal: false,
-               },
                bar: {
                   def: def2,
-                  isExternal: false,
+                  isExternalMarkupDeclaration: false,
+               },
+               foo: {
+                  def: def1,
+                  isExternalMarkupDeclaration: false,
                },
             },
          },
@@ -81,20 +81,20 @@ describe('attListDeclarationUpdateState (unit)', () => {
          ...state,
          attributeDefs: {
             elStart: {
-               foo: {
-                  def: def1a,
-                  isExternal: false,
-               },
                bar: {
                   def: def2,
-                  isExternal: false,
+                  isExternalMarkupDeclaration: false,
+               },
+               foo: {
+                  def: def1a,
+                  isExternalMarkupDeclaration: false,
                },
             },
          },
       });
    });
 
-   it('marks attributes that are added while in the external subset as such in the state', () => {
+   it('marks attributes that are added while in an external markup region as such in the state', () => {
       const def1a = { name: toSToken('foo'), value: [] };
       const def1b = { name: toSToken('foo'), nameSpace: toSToken(' '), value: [] };
       const def2 = { name: toSToken('bar'), value: [] };
@@ -106,9 +106,21 @@ describe('attListDeclarationUpdateState (unit)', () => {
       const attListDeclTwo = new AttListDeclarationPToken(second, {
          attDefs: [def1b, def2],
       });
-      const firstState = new ValidateState({ ...state, inExternalSubset: true });
+      const firstState = new ValidateState({
+         ...state,
+         dtdContext: {
+            ...state.dtdContext,
+            inExternalSubset: true,
+         },
+      });
       const secondState = attListDeclarationUpdateState(attListDecl, firstState);
-      const thirdState = new ValidateState({ ...secondState, inExternalSubset: false });
+      const thirdState = new ValidateState({
+         ...secondState,
+         dtdContext: {
+            ...secondState.dtdContext,
+            inExternalMarkupContext: true,
+         },
+      });
 
       const newState = attListDeclarationUpdateState(attListDeclTwo, thirdState);
 
@@ -116,15 +128,19 @@ describe('attListDeclarationUpdateState (unit)', () => {
          ...state,
          attributeDefs: {
             elStart: {
-               foo: {
-                  def: attListDecl.attDefs[0],
-                  isExternal: true, // <-- here
-               },
                bar: {
                   def: attListDeclTwo.attDefs[1],
-                  isExternal: false,
+                  isExternalMarkupDeclaration: true, // <-- here
+               },
+               foo: {
+                  def: attListDecl.attDefs[0],
+                  isExternalMarkupDeclaration: false,
                },
             },
+         },
+         dtdContext: {
+            ...secondState.dtdContext,
+            inExternalMarkupContext: true,
          },
       });
    });

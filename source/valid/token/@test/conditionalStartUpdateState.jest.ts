@@ -23,6 +23,8 @@ describe('conditionalStartUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [start],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
    });

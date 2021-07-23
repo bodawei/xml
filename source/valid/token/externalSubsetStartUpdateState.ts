@@ -10,7 +10,11 @@ function externalSubsetStartUpdateState(
 ): ValidateState {
    return {
       ...state,
-      inExternalSubset: true,
+      dtdContext: {
+         ...state.dtdContext,
+         inExternalMarkupContext: true,
+         inExternalSubset: true,
+      },
    };
 }
 

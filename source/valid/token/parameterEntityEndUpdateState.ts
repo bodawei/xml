@@ -9,6 +9,7 @@ function parameterEntityEndUpdateState(
    state: ValidateState,
 ): ValidateState {
    let newStack = state.dtdContext.enclosingStack;
+   let inParameterEntityRef = false;
 
    for (let index = state.dtdContext.enclosingStack.length - 1; index >= 0; index--) {
       const item = state.dtdContext.enclosingStack[index];
@@ -21,11 +22,19 @@ function parameterEntityEndUpdateState(
       }
    }
 
+   for (const element of state.dtdContext.enclosingStack) {
+      if (element.type === PARAMETER_ENTITY_START_PTOKEN) {
+         inParameterEntityRef = true;
+         break;
+      }
+   }
+
    return {
       ...state,
       dtdContext: {
          ...state.dtdContext,
          enclosingStack: newStack,
+         inExternalMarkupContext: state.dtdContext.inExternalSubset || inParameterEntityRef,
       },
    };
 }

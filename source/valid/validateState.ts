@@ -27,31 +27,36 @@ enum ElDeclType {
 interface AnyDetails {
    token: ElementDeclarationPToken;
    type: ElDeclType.ANY;
+   isExternalMarkupDeclaration: boolean;
 }
 
 interface EmptyDetails {
    token: ElementDeclarationPToken;
    type: ElDeclType.EMPTY;
+   isExternalMarkupDeclaration: boolean;
 }
 
 interface MixedDetails {
    token: ElementDeclarationPToken;
    type: ElDeclType.MIXED;
    names: Array<string>;
+   isExternalMarkupDeclaration: boolean;
 }
 
 interface ElementDetails {
    token: ElementDeclarationPToken;
    type: ElDeclType.ELEMENT;
    graph: CmGraph;
+   isExternalMarkupDeclaration: boolean;
 }
 
 type DeclarationDetails = AnyDetails | EmptyDetails | MixedDetails | ElementDetails;
 
 interface ParameterEntityDetails {
-   isInternal: boolean;
+   isInternalValue: boolean;
    token: ParameterEntityDeclarationPToken;
    replacementText?: EntityValuePToken;
+   isExternalMarkupDeclaration: boolean;
 }
 
 interface ElementContext {
@@ -62,7 +67,8 @@ interface ElementContext {
 
 interface GeneralEntityDetails {
    token: GeneralEntityDeclarationPToken;
-   isInternal: boolean;
+   isInternalValue: boolean;
+   isExternalMarkupDeclaration: boolean;
 }
 
 type ReadonlyGeneralEntityDetails = Readonly<GeneralEntityDetails>;
@@ -105,13 +111,14 @@ interface ValidateStateProps {
    };
 
    dtdContext?: {
+      inExternalSubset?: boolean;
+      inExternalMarkupContext?: boolean;
       enclosingStack: ReadonlyArray<
          DocTypeStartPToken | ParameterEntityStartPToken | ConditionalPToken
       >;
       lastPToken?: ParseToken;
    };
 
-   inExternalSubset?: boolean;
    isStandalone?: boolean;
    confVer?: ConformanceVersion;
 }
@@ -120,7 +127,7 @@ interface AttributeDefs {
    [attName: string]:
       | {
            readonly def: AttDefinitionP;
-           readonly isExternal: boolean;
+           readonly isExternalMarkupDeclaration: boolean;
         }
       | undefined;
 }
@@ -141,8 +148,6 @@ interface IdRefMap {
 
 class ValidateState {
    readonly docType?: string;
-
-   readonly inExternalSubset: boolean;
 
    readonly attributeDefs: {
       readonly [elementName: string]: AttributeDefs | undefined;
@@ -165,7 +170,7 @@ class ValidateState {
    };
 
    readonly parameterEntities: {
-      readonly [elementName: string]: ReadonlyParameterEntityDetails;
+      readonly [elementName: string]: ReadonlyParameterEntityDetails | undefined;
    };
 
    elementContext: {
@@ -175,9 +180,11 @@ class ValidateState {
    };
 
    readonly dtdContext: {
+      readonly inExternalSubset: boolean;
       readonly enclosingStack: ReadonlyArray<
          DocTypeStartPToken | ParameterEntityStartPToken | ConditionalPToken
       >;
+      readonly inExternalMarkupContext: boolean;
       readonly lastPToken?: ParseToken;
    };
 
@@ -185,7 +192,7 @@ class ValidateState {
 
    confVer: ConformanceVersion;
 
-   constructor(otherState?: ValidateStateProps) {
+   constructor(otherState?: ValidateStateProps | ValidateState) {
       this.docType = otherState?.docType;
       this.attributeDefs = otherState?.attributeDefs || {};
       this.elementDeclarations = otherState?.elementDeclarations || {};
@@ -208,10 +215,11 @@ class ValidateState {
       };
       this.dtdContext = {
          enclosingStack: otherState?.dtdContext?.enclosingStack ?? [],
+         inExternalMarkupContext: !!otherState?.dtdContext?.inExternalMarkupContext,
+         inExternalSubset: otherState?.dtdContext?.inExternalSubset ?? false,
          lastPToken: otherState?.dtdContext?.lastPToken,
       };
       this.isStandalone = otherState?.isStandalone ?? false;
-      this.inExternalSubset = otherState?.inExternalSubset ?? false;
       this.confVer = otherState?.confVer ?? new ConformanceVersion(1, 5);
    }
 }

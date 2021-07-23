@@ -81,7 +81,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
          </root>`,
          ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
-         done!,
+         done,
       );
    });
 

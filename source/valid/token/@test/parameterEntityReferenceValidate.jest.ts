@@ -21,9 +21,9 @@ describe('parameterEntityReferenceValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             entityName: {
-               isInternal: true,
-               token: makeParameterEntityDeclaration(),
+               isInternalValue: true,
                replacementText: undefined,
+               token: makeParameterEntityDeclaration(),
             },
          },
       });
@@ -39,7 +39,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
          parameterEntities: {
             frog: {
                token: makeParameterEntityDeclaration(),
-               isInternal: true,
+               isInternalValue: true,
             },
          },
       });

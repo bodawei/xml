@@ -23,6 +23,8 @@ describe('parameterEntityStartUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [start],
+            inExternalMarkupContext: true,
+            inExternalSubset: false,
          },
       });
    });

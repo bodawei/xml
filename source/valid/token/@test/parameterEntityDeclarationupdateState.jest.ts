@@ -3,7 +3,6 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ParameterEntityDeclarationPToken } from 'pToken';
-import { EntityValuePToken } from 'token';
 import { makeParameterEntityDeclaration } from 'token-test';
 
 import { ValidateState } from '../../validateState';
@@ -25,8 +24,9 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             parameterEntities: {
                entityName: {
-                  isInternal: true,
-                  replacementText: decl.value as EntityValuePToken, // typehack
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
+                  replacementText: decl.value, // typehack
                   token: decl,
                },
             },
@@ -45,8 +45,38 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             parameterEntities: {
                entityName: {
-                  isInternal: false,
-                  replacementText: decl.value as EntityValuePToken, // typehack
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: false,
+                  replacementText: decl.value,
+                  token: decl,
+               },
+            },
+         }),
+      );
+   });
+
+   it('marks a declaration as external an external markup declaration if this is currently in external markup', () => {
+      const decl = makeParameterEntityDeclaration();
+      state = new ValidateState({
+         dtdContext: {
+            enclosingStack: [],
+            inExternalMarkupContext: true,
+         },
+      });
+
+      const result = parameterEntityDeclarationUpdateState(decl, state);
+
+      expect(result).toEqual(
+         new ValidateState({
+            dtdContext: {
+               enclosingStack: [],
+               inExternalMarkupContext: true,
+            },
+            parameterEntities: {
+               entityName: {
+                  isExternalMarkupDeclaration: true,
+                  isInternalValue: true,
+                  replacementText: decl.value,
                   token: decl,
                },
             },
@@ -67,8 +97,9 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             parameterEntities: {
                entityName: {
-                  isInternal: true,
-                  replacementText: decl.value as EntityValuePToken, // typehack
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
+                  replacementText: decl.value, // typehack
                   token: decl,
                },
             },

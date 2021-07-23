@@ -23,7 +23,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       state = new ValidateState({
          generalEntities: {
             testRef: {
-               isInternal: true,
+               isInternalValue: true,
             },
          },
       });
@@ -38,7 +38,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       state = new ValidateState({
          generalEntities: {
             frog: {
-               isInternal: true,
+               isInternalValue: true,
             },
          },
       });
@@ -62,7 +62,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       state = new ValidateState({
          generalEntities: {
             amp: {
-               isInternal: true,
+               isInternalValue: true,
             },
          },
       });
@@ -80,7 +80,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       state = new ValidateState({
          generalEntities: {
             frog: {
-               isInternal: true,
+               isInternalValue: true,
             },
          },
       });

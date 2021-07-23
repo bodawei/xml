@@ -57,6 +57,7 @@ describe('elementStartUpdateState (unit)', () => {
       state = new ValidateState({
          elementDeclarations: {
             elementName: {
+               isExternalMarkupDeclaration: false,
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
@@ -67,6 +68,7 @@ describe('elementStartUpdateState (unit)', () => {
    it('adds a context to the stack and makes it active for the specified element', () => {
       const expectedContext: ElementContext = {
          declDetails: {
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
@@ -94,6 +96,7 @@ describe('elementStartUpdateState (unit)', () => {
       });
       const expectedContext: ElementContext = {
          declDetails: {
+            isExternalMarkupDeclaration: false,
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
          },
@@ -113,11 +116,51 @@ describe('elementStartUpdateState (unit)', () => {
       });
    });
 
+   it('adds a context to the stack with a fake token with the appropriate isExternalMarkupDeclaration value if no details could be found', () => {
+      state = new ValidateState({
+         dtdContext: {
+            enclosingStack: [],
+            inExternalMarkupContext: true,
+         },
+      });
+      const unmatched = new ElementStartPToken({
+         close: toSToken('>'),
+         name: toSToken('unmatched'),
+         open: toSToken('<!'),
+      });
+      const expectedContext: ElementContext = {
+         declDetails: {
+            isExternalMarkupDeclaration: true,
+            token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
+            type: ElDeclType.ANY,
+         },
+         parentName: 'unmatched',
+         stateId: 0,
+      };
+
+      const newState = elementStartUpdateState(unmatched, state);
+
+      expect(newState).toEqual({
+         ...state,
+         dtdContext: {
+            enclosingStack: [],
+            inExternalMarkupContext: true,
+            inExternalSubset: false,
+         },
+         elementContext: {
+            activeContext: expectedContext,
+            contextStack: [expectedContext],
+            pastEnd: false,
+         },
+      });
+   });
+
    it('adds a context to the stack with a fake token if no details could be found', () => {
       state = new ValidateState({
          elementDeclarations: {
             elementName: {
                graph: { endId: 10, startId: 9, states: {} },
+               isExternalMarkupDeclaration: false,
                token: elementDeclaration,
                type: ElDeclType.ELEMENT,
             },
@@ -126,6 +169,7 @@ describe('elementStartUpdateState (unit)', () => {
       const expectedContext: ElementContext = {
          declDetails: {
             graph: { endId: 10, startId: 9, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
@@ -149,6 +193,7 @@ describe('elementStartUpdateState (unit)', () => {
       const activeContext: ElementContext = {
          declDetails: {
             graph,
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
@@ -165,6 +210,7 @@ describe('elementStartUpdateState (unit)', () => {
          elementDeclarations: {
             elementName: {
                graph,
+               isExternalMarkupDeclaration: false,
                token: elementDeclaration,
                type: ElDeclType.ELEMENT,
             },
@@ -173,6 +219,7 @@ describe('elementStartUpdateState (unit)', () => {
       const expectedContext: ElementContext = {
          declDetails: {
             graph,
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
@@ -196,6 +243,7 @@ describe('elementStartUpdateState (unit)', () => {
       const activeContext: ElementContext = {
          declDetails: {
             graph,
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
@@ -211,6 +259,7 @@ describe('elementStartUpdateState (unit)', () => {
          elementDeclarations: {
             elementName: {
                graph,
+               isExternalMarkupDeclaration: false,
                token: elementDeclaration,
                type: ElDeclType.ELEMENT,
             },
@@ -223,6 +272,7 @@ describe('elementStartUpdateState (unit)', () => {
       });
       const expectedContext: ElementContext = {
          declDetails: {
+            isExternalMarkupDeclaration: false,
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
          },
@@ -262,6 +312,7 @@ describe('elementStartUpdateState (unit)', () => {
             contextStack: [
                {
                   declDetails: {
+                     isExternalMarkupDeclaration: false,
                      token: elementDeclaration,
                      type: ElDeclType.ANY,
                   },
@@ -289,6 +340,7 @@ describe('elementStartUpdateState (unit)', () => {
                      value: [],
                   },
                   isExternal: true,
+                  isExternalMarkupDeclaration: false,
                },
             },
          },
@@ -331,6 +383,7 @@ describe('elementStartUpdateState (unit)', () => {
                      value: [],
                   },
                   isExternal: true,
+                  isExternalMarkupDeclaration: false,
                },
             },
          },
@@ -380,6 +433,7 @@ describe('elementStartUpdateState (unit)', () => {
                         value: [],
                      },
                      isExternal: true,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
@@ -423,6 +477,7 @@ describe('elementStartUpdateState (unit)', () => {
                         value: [],
                      },
                      isExternal: true,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
@@ -471,6 +526,7 @@ describe('elementStartUpdateState (unit)', () => {
                         value: [],
                      },
                      isExternal: true,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },

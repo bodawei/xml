@@ -13,6 +13,7 @@ function parameterEntityStartUpdateState(
       dtdContext: {
          ...state.dtdContext,
          enclosingStack: [...state.dtdContext.enclosingStack, startPToken],
+         inExternalMarkupContext: true,
       },
    };
 }

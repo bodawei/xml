@@ -27,6 +27,8 @@ describe('docTypeEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
    });
@@ -45,6 +47,8 @@ describe('docTypeEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
    });

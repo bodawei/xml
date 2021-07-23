@@ -24,6 +24,8 @@ describe('docTypeStartUpdateState (unit)', () => {
          docType: 'root',
          dtdContext: {
             enclosingStack: [start],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
    });

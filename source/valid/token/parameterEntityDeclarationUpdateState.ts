@@ -2,7 +2,6 @@
 
 import { ParameterEntityDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
 
 import { ValidateState } from '../validateState';
 
@@ -16,15 +15,15 @@ function parameterEntityDeclarationUpdateState(
       return state;
    }
 
-   // Not sure this is right.
-   const replacementText = el.value as EntityValuePToken; // typehack
+   const replacementText = el.value;
 
    return {
       ...state,
       parameterEntities: {
          ...state.parameterEntities,
          [elName]: {
-            isInternal: !el.externalId,
+            isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
+            isInternalValue: !el.externalId,
             replacementText,
             token: el,
          },

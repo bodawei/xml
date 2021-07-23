@@ -72,17 +72,17 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          parameterEntities: {
             close: {
-               isInternal: true,
+               isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken(')') })],
                token: peDecl,
             },
             delimiter: {
-               isInternal: true,
+               isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('|') })],
                token: peDecl,
             },
             empty: {
-               isInternal: true,
+               isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('') })],
                token: peDecl,
             },
@@ -534,7 +534,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('(') })],
                token: peDecl,
             },
@@ -572,7 +572,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: true,
+               isInternalValue: true,
                replacementText: [
                   new TextPToken({ text: toSToken('( foo | bar | ( baz | ginger))') }),
                ],
@@ -610,7 +610,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: true,
+               isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('( foo | ( bar )') })],
                token: peDecl,
             },
@@ -652,7 +652,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: true,
+               isInternalValue: true,
                replacementText: [
                   new CharRefPToken({ digits: toSToken('65'), open: toSToken('&#') }),
                   new TextPToken({ text: toSToken('|') }),
@@ -697,7 +697,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: true,
+               isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('   ') })],
                token: peDecl,
             },
@@ -735,7 +735,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('   ') })],
                token: peDecl,
             },
@@ -802,7 +802,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [
                   new ParameterEntityReferencePToken({
                      open: toSToken('&'),
@@ -845,7 +845,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('()') })],
                token: peDecl,
             },
@@ -908,7 +908,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('  ') })], // note this would be an error if in the content model
                token: peDecl,
             },
@@ -944,7 +944,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken(')') })],
                token: peDecl,
             },
@@ -980,7 +980,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('foo') })],
                token: peDecl,
             },
@@ -1016,7 +1016,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('  ') })],
                token: peDecl,
             },
@@ -1054,7 +1054,7 @@ describe('elementDeclarationValidate (unit)', () => {
       state = new ValidateState({
          parameterEntities: {
             x: {
-               isInternal: false,
+               isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('  ') })],
                token: peDecl,
             },

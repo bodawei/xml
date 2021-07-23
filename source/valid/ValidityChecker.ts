@@ -130,7 +130,7 @@ class ValidityChecker {
             this.state = docTypeEndUpdateState(token, this.state);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
-            const declDetails = elementDeclarationPreprocess(token);
+            const declDetails = elementDeclarationPreprocess(token, this.state);
             elementDeclarationValidate(token, declDetails, this.state, ec, this.version);
             this.state = elementDeclarationUpdateState(token, declDetails, this.state);
             break;

@@ -277,7 +277,7 @@ function checkAttributes(
       ec.setPos(attr.name);
 
       if (state.isStandalone && isAugmentedAttribute(attr)) {
-         if (!details.isExternal) {
+         if (!details.isExternalMarkupDeclaration) {
             continue;
          }
 

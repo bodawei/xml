@@ -122,6 +122,7 @@ function elementStartUpdateState(
          // @@@@ this seems like we should be reporting an error here.  What error is that?
          context = {
             declDetails: {
+               isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
                // Add a dummy declaration to keep the types happy.
                token: new ElementDeclarationPToken({
                   open: new SToken('<!', '<!', []),
@@ -145,8 +146,9 @@ function elementStartUpdateState(
 
    return {
       ...newState,
-      ...attrState,
       elementContext,
+      idRefs: attrState.idRefs ?? newState.idRefs,
+      ids: attrState.ids ?? newState.ids,
    };
 }
 

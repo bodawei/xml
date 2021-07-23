@@ -24,8 +24,37 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             generalEntities: {
                geDecl: {
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
                   token: decl,
-                  isInternal: true,
+               },
+            },
+         }),
+      );
+   });
+
+   it('marks a declaration as isExternalMarkupDeclaration when the state is in external markup', () => {
+      const decl = makeGeneralEntityDeclaration();
+      state = new ValidateState({
+         dtdContext: {
+            enclosingStack: [],
+            inExternalMarkupContext: true,
+         },
+      });
+
+      const result = generalEntityDeclarationUpdateState(decl, state);
+
+      expect(result).toEqual(
+         new ValidateState({
+            dtdContext: {
+               enclosingStack: [],
+               inExternalMarkupContext: true,
+            },
+            generalEntities: {
+               geDecl: {
+                  isExternalMarkupDeclaration: true,
+                  isInternalValue: true,
+                  token: decl,
                },
             },
          }),
@@ -43,8 +72,9 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             generalEntities: {
                geDecl: {
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: false,
                   token: decl,
-                  isInternal: false,
                },
             },
          }),
@@ -64,8 +94,9 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
          new ValidateState({
             generalEntities: {
                geDecl: {
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
                   token: decl,
-                  isInternal: true,
                },
             },
          }),
