@@ -17,6 +17,7 @@ function charDataValidate(token: CharDataPToken, state: ValidateState, ec: Error
    ) {
       return;
    }
+   const details = state.elementContext.activeContext.declDetails;
 
    ec.setPos(token.text);
 
@@ -27,6 +28,19 @@ function charDataValidate(token: CharDataPToken, state: ValidateState, ec: Error
     */
    if (!S_REGEXP.test(strOrBlank(token.text))) {
       ec.report(VID.ELEMENT_CONTENT_BAD_SPACE, [strOrBlank(token.text)]);
+   } else {
+      // §2.9.0 Validity constraint: Standalone Document Declaration
+      //    The standalone document declaration must have the value "no" if any external markup
+      //    declarations contain declarations of:
+      //       - element types with element content, if white space occurs directly within any instance of those types
+      // Note: This is because in this circumstance, something parsing this as non-validated will not know
+      // whether those spaces are content or throwaway S.
+
+      ec.check(
+         state.isStandalone && details.isExternalMarkupDeclaration,
+         VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         [strOrBlank(details.token.name)],
+      );
    }
 }
 

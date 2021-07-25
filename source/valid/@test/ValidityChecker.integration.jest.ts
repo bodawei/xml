@@ -274,6 +274,32 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error when a document marked as standalone has an element with element content, that element is declaraed with an external markup declaration, and whitespace appears in the element (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ENTITY % elementDecl "<!ELEMENT root (other)>">
+            <!ELEMENT other ANY>
+            %elementDecl;
+         ]>
+         <root><other></other> </root>`,
+         VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a document marked as standalone has an element with element content, that element is declaraed in the external subset, and whitespace appears in the element (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root SYSTEM "./source/valid/@test/@entities/externalElementDeclaration.xml" [
+            <!ELEMENT other ANY>
+         ]>
+         <root><other></other> </root>`,
+         VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         done!,
+      );
+   });
+
    it('reports an error when a general entity declaration has a NDATA name that has not been declared (§4.2.2)', (done) => {
       expectError(
          `<?xml version="1.0"?>

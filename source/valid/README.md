@@ -45,6 +45,10 @@ The spec doesn't mention this, but it seems like this could apply to conditional
 #### Some interesting cases to keep in mind
 * `&foo; <!ENTITY bar 'foo'>">` (`foo` contains `<!ENTITY % whatever "`).
 
+### §2.9.0 Standalone Document Declaration
+In the standard, these cases can be a little hard to follow why they are important.
+
+- If an element contains whitespace between child elements, then without validation (that is, attending to the content model), we do not know whether that whitespace is significant or not (in the case of an element with element content, there should be no char data between the child elements, and so the white space is not significant).  If we are validating, then we know to ignore the whitespace. However, if the document was marked as "standalone=yes", and the declaration for that element type was an "external markupp declaration", then the standalone declaration was in error... this isn't a standalone document (it requires processing the so-called external markup declarations in order to correctly interpret the docuent -- that is, identify that the white space is not significant)
 
 ### §3.2.0 Unique Element Type Declaration
 No commentary.

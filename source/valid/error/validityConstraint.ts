@@ -79,6 +79,11 @@ const validityConstraint = new ErrorCodes({
          'The default type for attribute "{1}" of attribute list declaration "{0}" must be "#IMPLIED" or "#REQUIRED" (§3.3.1). Found: "{2}".',
    },
 
+   ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED: {
+      code: 1136,
+      message:
+         'Found whitespace in element content for an element "{0}" that was externally declared when standalone=yes (§2.9.0).',
+   },
    ELEMENT_EXTRA_DECLARATION: {
       code: 1125,
       message:

@@ -2354,33 +2354,33 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
             });
 
-            it('reports an error if an element with element content is externally declared and standalone=yes (§2.9)', (done) => {
-               validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-               validator.write(new ExternalSubsetStartToken());
-               validator.write(
-                  new ElementDeclarationXToken('extDeclaredElement', ContentSpecType.ELEMENT, {
-                     particles: [
-                        {
-                           name: 'child',
-                           repeat: CpRepeat.ONE,
-                        },
-                     ],
-                     listType: CpType.CHOICE,
-                     repeat: CpRepeat.ONE,
-                  }),
-               );
-               validator.write(new ExternalSubsetEndToken());
-               validator.write(new ElementStartXToken('extDeclaredElement', []));
-               validator.write(new SpaceXToken('  '));
-               validator.write(new ElementEndXToken('extDeclaredElement'));
-               validator.end();
+            // it('reports an error if an element with element content is externally declared and standalone=yes (§2.9)', (done) => {
+            //    validator.write(new XmlDeclarationXToken(1.0, undefined, true));
+            //    validator.write(new ExternalSubsetStartToken());
+            //    validator.write(
+            //       new ElementDeclarationXToken('extDeclaredElement', ContentSpecType.ELEMENT, {
+            //          particles: [
+            //             {
+            //                name: 'child',
+            //                repeat: CpRepeat.ONE,
+            //             },
+            //          ],
+            //          listType: CpType.CHOICE,
+            //          repeat: CpRepeat.ONE,
+            //       }),
+            //    );
+            //    validator.write(new ExternalSubsetEndToken());
+            //    validator.write(new ElementStartXToken('extDeclaredElement', []));
+            //    validator.write(new SpaceXToken('  '));
+            //    validator.write(new ElementEndXToken('extDeclaredElement'));
+            //    validator.end();
 
-               const expected = new ValidityError(
-                  ValidityError.ID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
-                  ['extDeclaredElement'],
-               );
-               expectStream(validator, expected, done);
-            });
+            //    const expected = new ValidityError(
+            //       ValidityError.ID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+            //       ['extDeclaredElement'],
+            //    );
+            //    expectStream(validator, expected, done);
+            // });
          });
       });
    });
