@@ -78,6 +78,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'The default type for attribute "{1}" of attribute list declaration "{0}" must be "#IMPLIED" or "#REQUIRED" (§3.3.1). Found: "{2}".',
    },
+   ATTLISTDECL_TYPE_EXTERNAL_DECLARED: {
+      code: 1137,
+      message:
+         'The attribute "{1}" for element type "{0}" was declared externally, and its value will not be able to be accurately reported when standalone="yes" (§2.9.0).',
+   },
 
    ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED: {
       code: 1136,
@@ -98,6 +103,11 @@ const validityConstraint = new ErrorCodes({
       code: 1124,
       message:
          'The Mixed content spec for element declaration "{0}" must not have the same type specified multiple times (§3.2.2). Found: "{1}".',
+   },
+   ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED: {
+      code: 1138,
+      message:
+         'The attribute "{1}" on element "{0}" was declared externally, but the document is marked as standalone="yes" (§2.9.0). Found: "{0}".',
    },
    ELEMENTSTART_ENTITIES_NO_ENTITY: {
       code: 1108,

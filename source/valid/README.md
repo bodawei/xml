@@ -50,6 +50,21 @@ In the standard, these cases can be a little hard to follow why they are importa
 
 - If an element contains whitespace between child elements, then without validation (that is, attending to the content model), we do not know whether that whitespace is significant or not (in the case of an element with element content, there should be no char data between the child elements, and so the white space is not significant).  If we are validating, then we know to ignore the whitespace. However, if the document was marked as "standalone=yes", and the declaration for that element type was an "external markupp declaration", then the standalone declaration was in error... this isn't a standalone document (it requires processing the so-called external markup declarations in order to correctly interpret the docuent -- that is, identify that the white space is not significant)
 
+- If an element has an attribute added to it through the defaulting process, and the
+declaration for that attribute is in an external markup declaration, and the document
+is marked as standalone, then this is also an error, since we would have needed to read
+the external markup declaration in order to know that the element should have that
+attribute.
+
+- If an element has an attribute whose value would change through normalization, that
+attribute was declared in an external markup declaration, and the document was marked
+as standalone, then this is an error, since the normalization could not have been
+identified without that external declaration.  Note that if the attribute would not
+have changed due to normalization processes, it is not an error.
+
+
+
+
 ### §3.2.0 Unique Element Type Declaration
 No commentary.
 

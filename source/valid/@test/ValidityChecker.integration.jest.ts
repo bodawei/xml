@@ -72,19 +72,6 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
-   it('reports an Element Start error', (done) => {
-      expectError(
-         `<?xml version="1.0" standalone="yes"?>
-         <!DOCTYPE root SYSTEM "./source/valid/@test/@entities/defaultAttributes.xml" [
-            <!ELEMENT root ANY>
-         ]>
-         <root>
-         </root>`,
-         ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
-         done,
-      );
-   });
-
    it('reports a general entity reference error', (done) => {
       expectError(
          `<?xml version="1.0"?>
@@ -296,6 +283,34 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><other></other> </root>`,
          VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an Element Start with an attribute added through defaulting, but the element declaration was external markup and the document is standalone (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root SYSTEM "./source/valid/@test/@entities/defaultAttributes.xml" [
+            <!ELEMENT root ANY>
+         ]>
+         <root>
+         </root>`,
+         VID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an Element Start with an attribute that changed due to normalization, but the element declaration was external markup and the document is standalone (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % foo "<!ATTLIST root attr1 NMTOKENS >">
+            %foo;
+         ]>
+         <root attr1="  one   two three  ">
+         </root>`,
+         VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
          done!,
       );
    });

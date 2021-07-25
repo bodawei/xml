@@ -291,10 +291,7 @@ function checkAttributes(
          // an attribute that was declared as having a default value, and that declaration was
          // an external declaration, then we have a validity error. (We can't just check this
          // at declaration time, since if it isn't used it is not an error).
-         ec.check(attr.defaulted, OLD_VID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED, [
-            elName,
-            attName,
-         ]);
+         ec.check(attr.defaulted, VID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED, [elName, attName]);
 
          // §2.9 Validity constraint: Standalone Document Declaration
          // The standalone document declaration must have the value "no" if any external markup
@@ -302,9 +299,10 @@ function checkAttributes(
          // - attributes with tokenized types, where the attribute appears in the document
          //   with a value such that normalization will produce a different value from that
          //   which would be produced in the absence of the declaration
+
          ec.check(
             attr.normalized && attr.dtdChangedNormalization,
-            OLD_VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
+            VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
             [elName, attName],
          );
       }

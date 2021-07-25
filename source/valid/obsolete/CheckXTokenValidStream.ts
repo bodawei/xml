@@ -555,20 +555,6 @@ class CheckXTokenValidStream extends Transform {
                }
                break;
             case SPACE_XTOKEN:
-               //    // §2.9 Validity constraint: Standalone Document Declaration
-               //    //    The standalone document declaration must have the value "no" if any external markup
-               //    //    declarations contain declarations of:
-               //    //       - element types with element content, if white space occurs directly within any instance of those types
-               //    // Note: This is because in this circumstance, something parsing this as non-validated will not know
-               //    // whether those spaces are content or throwaway S.
-
-               //    if (this.standalone && declInfo.externallyDeclared) {
-               //       this.pushValidityError(
-               //          ValidityError.ID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
-               //          [declInfo.token.name],
-               //          sToken,
-               //       );
-               //    }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
                const piInEntity = context.elementContentEntityRefStack.length > 0;
