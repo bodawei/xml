@@ -4,14 +4,16 @@ import { isAugmentedAttribute } from 'attFixer';
 import { ErrorCollector, isName, isNmToken } from 'basic';
 import { AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
-import { ElementStartPToken, ElementEmptyPToken } from 'token';
+import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } from 'token';
 
 import { ValidityError } from '../error/ValidityError';
 import { validityConstraint } from '../error/validityConstraint';
 import { ElDeclType, ValidateState } from '../validateState';
+import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
 const VID = validityConstraint.id;
 const OLD_VID = ValidityError.ID;
+const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 type LocalDetials = Record<string, AttInfo | undefined>;
 interface AttInfo {
@@ -249,6 +251,35 @@ function fixedAttributesCheck(
    }
 }
 
+function checkValue(
+   el: ElementStartPToken | ElementEmptyPToken,
+   state: ValidateState,
+   ec: ErrorCollector,
+): void {
+   for (const att of el.attributes) {
+      for (const element of att.value) {
+         if (element.type === GENERAL_ENTITY_START_PTOKEN) {
+            const name = strOrBlank(element.referencePToken.name);
+            const isPredefined = PREDEFINED_ENTITIES.includes(name);
+            const details = state.generalEntities[name];
+
+            ec.setPos(element.referencePToken.open);
+
+            // §2.9.0 Validity Constraint: Standalone Document Declaration
+            //    ...entities (other than amp, lt, gt, apos, quot), if references to
+            //    those entities appear in the document...
+            ec.check(
+               details?.isExternalMarkupDeclaration && state.isStandalone && !isPredefined,
+               VID.ENTITYREF_EXTERNALLY_DECLARED,
+               [name],
+            );
+
+            ancestorPERefsValidate(element, state, ec);
+         }
+      }
+   }
+}
+
 function checkAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
    elName: string,
@@ -342,6 +373,8 @@ function checkAttributes(
             break;
       }
    }
+
+   checkValue(el, state, ec);
 
    ec.setPos(el.close);
 

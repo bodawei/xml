@@ -66,11 +66,13 @@ import { elementEndValidate } from './token/elementEndValidate';
 import { generalEntityDeclarationUpdateState } from './token/generalEntityDeclarationUpdateState';
 import { dtdEndValidate } from './token/dtdEndValidate';
 import { generalEntityReferenceValidate } from './token/generalEntityReferenceValidate';
+import { generalEntityStartValidate } from './token/generalEntityStartValidate';
 import { parameterEntityDeclarationUpdateState } from './token/parameterEntityDeclarationUpdateState';
 import { parameterEntityEndUpdateState } from './token/parameterEntityEndUpdateState';
 import { parameterEntityEndValidate } from './token/parameterEntityEndValidate';
 import { parameterEntityReferenceValidate } from './token/parameterEntityReferenceValidate';
 import { parameterEntityStartUpdateState } from './token/parameterEntityStartUpdateState';
+import { parameterEntityStartValidate } from './token/parameterEntityStartValidate';
 import { spaceValidate } from './token/spaceValidate';
 import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
 import { docTypeEndUpdateState } from './token/docTypeEndUpdateState';
@@ -159,6 +161,9 @@ class ValidityChecker {
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             generalEntityReferenceValidate(token, this.state, ec);
             break;
+         case GENERAL_ENTITY_START_PTOKEN:
+            generalEntityStartValidate(token, this.state, ec);
+            break;
          case NOTATION_DECLARATION_PTOKEN:
             notationDeclarationValidate(token, this.state, ec);
             this.state = notationDeclarationUpdateState(token, this.state);
@@ -175,6 +180,7 @@ class ValidityChecker {
             parameterEntityReferenceValidate(token, this.state, ec);
             break;
          case PARAMETER_ENTITY_START_PTOKEN:
+            parameterEntityStartValidate(token, this.state, ec);
             this.state = parameterEntityStartUpdateState(token, this.state);
             break;
          case SPACE_PTOKEN:

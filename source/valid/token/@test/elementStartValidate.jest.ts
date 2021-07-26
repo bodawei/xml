@@ -2,18 +2,36 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
-import { ElementDeclarationPToken, GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
+import {
+   ElementDeclarationPToken,
+   GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
+   TextPToken,
+} from 'pToken';
 import { toSToken } from 'sToken';
+import {
+   ElementStartPToken,
+   GeneralEntityEndPToken,
+   GeneralEntityStartPToken,
+   NOTATION_PTOKEN,
+} from 'token';
+import {
+   makeElementDeclaration,
+   makeGeneralEntityDeclaration,
+   makeGeneralEntityEnd,
+   makeGeneralEntityStart,
+} from 'token-test';
 
 import { elementStartValidate } from '../elementStartValidate';
 import { ValidityError } from '../../error/ValidityError';
 import { validityConstraint } from '../../error/validityConstraint';
 import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
-import { ElementStartPToken, NOTATION_PTOKEN } from 'token';
 import { CmGraph } from '../../contentModal/cmGraphTypes';
-import { makeElementDeclaration } from 'token-test';
+import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
 
 const VID = validityConstraint.id;
+
+jest.mock('../ancestorPERefsValidate');
 
 describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
@@ -34,12 +52,12 @@ describe('elementStartValidate (unit)', () => {
          openSpace: undefined,
       });
       elementStart = new ElementStartPToken({
-         open: toSToken('</'),
          name: toSToken('elementName'),
+         open: toSToken('</'),
       });
       graph = {
-         startId: 0,
          endId: 0,
+         startId: 0,
          states: {
             '4': {
                id: 4,
@@ -59,9 +77,9 @@ describe('elementStartValidate (unit)', () => {
       };
       const currentContext: ElementContext = {
          declDetails: {
+            graph,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
-            graph,
          },
          parentName: 'elementName',
          stateId: 4,
@@ -69,19 +87,19 @@ describe('elementStartValidate (unit)', () => {
       state = new ValidateState({
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.ELEMENT,
+               graph,
                token: new ElementDeclarationPToken({
-                  open: toSToken('<!'),
+                  close: toSToken('>'),
                   declType: toSToken('ELEMENT'),
                   name: toSToken('elementName'),
-                  close: toSToken('>'),
+                  open: toSToken('<!'),
                }),
-               graph,
+               type: ElDeclType.ELEMENT,
             },
          },
          elementContext: {
-            contextStack: [currentContext],
             activeContext: currentContext,
+            contextStack: [currentContext],
             pastEnd: false,
          },
       });
@@ -97,9 +115,9 @@ describe('elementStartValidate (unit)', () => {
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
          id: VID.ELEMENT_MISMATCH_ROOT_TYPE,
+         lastPosition: undefined,
          params: ['rootType', 'elementName'],
          position: elementStart.name,
-         lastPosition: undefined,
       });
    });
 
@@ -1562,5 +1580,156 @@ describe('elementStartValidate (unit)', () => {
       elementStartValidate(elementStart, state, mockErrorCollector);
 
       expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   describe('Standalone Document Declaration (§2.9.0)', () => {
+      [
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: true,
+            isPredefined: false,
+            isStandalone: true,
+            pass: false,
+            start: makeGeneralEntityStart(),
+         },
+         {
+            end: new GeneralEntityEndPToken(
+               new GeneralEntityReferencePToken({
+                  name: toSToken('lt'),
+                  open: toSToken('&'),
+               }),
+            ),
+            isExternalMarkupDeclaration: true,
+            isPredefined: true,
+            isStandalone: true,
+            pass: true,
+            start: new GeneralEntityStartPToken(
+               new GeneralEntityReferencePToken({
+                  name: toSToken('lt'),
+                  open: toSToken('&'),
+               }),
+            ),
+         },
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: false,
+            isPredefined: false,
+            isStandalone: true,
+            pass: true,
+            start: makeGeneralEntityStart(),
+         },
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: true,
+            isPredefined: false,
+            isStandalone: false,
+            pass: true,
+            start: makeGeneralEntityStart(),
+         },
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: false,
+            isPredefined: false,
+            isStandalone: false,
+            pass: true,
+            start: makeGeneralEntityStart(),
+         },
+      ].forEach((params) => {
+         const { isExternalMarkupDeclaration, isPredefined, isStandalone, pass, start, end } =
+            params;
+         const testDescription = `reports an error if a general entity reference is found in the default value, and the entity was${
+            isExternalMarkupDeclaration ? '' : ' not'
+         } externally declared, the document was${
+            isStandalone ? '' : ' not'
+         } standalone and the entity is${isPredefined ? '' : ' not'} a predefined entity (§2.9.0)`;
+
+         it(testDescription, () => {
+            const geDecl = makeGeneralEntityDeclaration();
+            state = new ValidateState({
+               attributeDefs: {
+                  elementName: {
+                     att1: {
+                        def: {
+                           name: toSToken('att1'),
+                           value: [],
+                        },
+                        isExternalMarkupDeclaration: false,
+                     },
+                  },
+               },
+               elementDeclarations: {
+                  elementName: {
+                     isExternalMarkupDeclaration: false,
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+               },
+               generalEntities: {
+                  testRef: {
+                     isExternalMarkupDeclaration,
+                     isInternalValue: true,
+                     token: geDecl,
+                  },
+               },
+               isStandalone,
+            });
+            const elmentStart = new ElementStartPToken({
+               attributes: [
+                  {
+                     name: toSToken('att1'),
+                     type: toSToken('CDATA'),
+                     value: [start, end],
+                  },
+               ],
+               name: toSToken('elementName'),
+               open: toSToken('<!'),
+            });
+
+            elementStartValidate(elmentStart, state, mockErrorCollector);
+
+            if (pass) {
+               expect(mockErrorCollector.errors).toEqual([]);
+            } else {
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportValidityError({
+                  id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+                  lastPosition: undefined,
+                  params: [start.referencePToken.name?.str],
+                  position: makeGeneralEntityStart().referencePToken.open,
+               });
+            }
+         });
+      });
+
+      it('calls ancestorPERefsValidate() to validate ancestors for each geref found (§2.9.0)', () => {
+         const geDecl = makeGeneralEntityDeclaration();
+         const end = makeGeneralEntityEnd();
+         const start = makeGeneralEntityStart();
+         state = new ValidateState({
+            generalEntities: {
+               testRef: {
+                  isExternalMarkupDeclaration: true,
+                  isInternalValue: true,
+                  token: geDecl,
+               },
+            },
+            isStandalone: true,
+         });
+         const elmentStart = new ElementStartPToken({
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('CDATA'),
+                  value: [start, end],
+               },
+            ],
+            name: toSToken('elementName'),
+            open: toSToken('<!'),
+         });
+
+         elementStartValidate(elmentStart, state, mockErrorCollector);
+
+         expect(ancestorPERefsValidate).toHaveBeenCalledWith(start, state, mockErrorCollector);
+      });
    });
 });

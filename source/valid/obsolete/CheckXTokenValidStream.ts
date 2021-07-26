@@ -27,7 +27,6 @@ import {
    PROCESSING_INSTRUCTION_XTOKEN,
    SPACE_XTOKEN,
    TEXTDECL_XTOKEN,
-   XMLDECL_XTOKEN,
    AttListDeclarationXToken,
    AttDefinitionXToken,
    ContentModelX,
@@ -48,18 +47,11 @@ import {
    ParameterEntityDeclarationXToken,
    isTextXToken,
    TextXToken,
-   PARAMETER_ENTITY_START_XTOKEN,
-   PARAMETER_ENTITY_END_XTOKEN,
    NOTATION_DECLARATION_XTOKEN,
 } from 'xToken';
 import { ValidityError } from 'valid';
 
-import {
-   EXTERNAL_SUBSET_START_TOKEN,
-   EXTERNAL_SUBSET_END_TOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
-} from 'token';
+import { INTERNAL_SUBSET_START_TOKEN, INTERNAL_SUBSET_END_TOKEN } from 'token';
 
 import { ContentSpecType } from 'xToken';
 import { LiteralValueX } from 'xToken';
@@ -77,7 +69,6 @@ interface ElementAttributes {
 
 interface AttInfo {
    def: AttDefinitionXToken;
-   externallyDeclared: boolean; // §2.9
 }
 
 interface AttDefinitions {
@@ -104,7 +95,6 @@ interface MixedContentDeclInfo {
 
 interface ElementContentDeclInfo {
    type: 'ELEMENT_CONTENT';
-   externallyDeclared: boolean; // §2.9
    token: ElementDeclarationXToken;
 }
 
@@ -122,14 +112,11 @@ interface ContentContext {
 }
 interface EntityInfo {
    token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken;
-   externallyDeclared: boolean; // §2.9
 }
 
 interface EntityInfoMap {
    [entityName: string]: EntityInfo;
 }
-
-const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 function getAttributeValueText(attribute: any): string {
    const rawValue = attribute.value;
@@ -152,8 +139,6 @@ class CheckXTokenValidStream extends Transform {
 
    private entityInfo: EntityInfoMap = {};
 
-   private docType: XToken | undefined;
-
    private notations: { [name: string]: XToken };
 
    private attrDefsByElementName: ElementAttributes;
@@ -166,46 +151,17 @@ class CheckXTokenValidStream extends Transform {
 
    private confVer: ConformanceVersion = new ConformanceVersion();
 
-   private standalone = false;
-
-   private externalDeclarations = false;
-
-   private inInternalSubset = false;
-
-   private internalEntityDepth = 0; // Istanbul is confused by node transpilation
-
-   /* istanbul ignore next */ constructor() {
+   /* istanbul ignore next */
+   constructor() {
       super({
          objectMode: true,
       });
 
-      this.docType = undefined;
       this.notations = {};
       this.attrDefsByElementName = {};
       this.elementDeclarations = {};
       this.contentStack = [];
       this.currentContext = undefined;
-   }
-
-   /*
-    * §2.9 Validity constraint: Standalone Document Declaration
-    * The standalone document declaration must have the value "no" if any external markup
-    * declarations contain declarations of:
-    * - entities (other than amp, lt, gt, apos, quot), if references to those entities
-    *   appear in the document, or ...
-    *
-    * Translation: If this was marked as standalone="yes", and we find an entity reference
-    * where the referenced entity was declared "externally", then it is an error.
-    */
-   private isInvalidEntityReference(
-      item: GeneralEntityStartXToken | ParameterEntityStartXToken | string,
-   ): boolean {
-      const entityName = typeof item === 'string' ? item : item.name;
-      const entityInfo = this.entityInfo[entityName];
-      const isExternallyDeclared = entityInfo && entityInfo.externallyDeclared;
-      const isException = PROTECTED_ENTITIES.indexOf(entityName) !== -1;
-
-      return this.standalone && isExternallyDeclared && !isException;
    }
 
    /*
@@ -255,53 +211,6 @@ class CheckXTokenValidStream extends Transform {
       }
 
       return newValue;
-   }
-
-   private checkAttributeValueStandaloneability(
-      attrName: string,
-      value: LiteralValueX,
-      pTokenOpen: any,
-      elementAttribute: boolean,
-   ) {
-      let depth = 0;
-      let invalidAt = -1;
-
-      value.forEach((part) => {
-         if (
-            part.type === GENERAL_ENTITY_START_XTOKEN ||
-            part.type === PARAMETER_ENTITY_START_XTOKEN
-         ) {
-            if (invalidAt === -1 && this.isInvalidEntityReference(part)) {
-               let errorId: string;
-               invalidAt = depth;
-
-               if (elementAttribute) {
-                  if (part.type === PARAMETER_ENTITY_START_XTOKEN) {
-                     errorId = ValidityError.ID.ATTRIBUTE_PARAMENTITY_EXTERNAL_DECLARED;
-                  } else {
-                     errorId = ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED;
-                  }
-               } else if (part.type === PARAMETER_ENTITY_START_XTOKEN) {
-                  errorId = ValidityError.ID.ATTLISTDECL_PARAMENTITY_EXTERNAL_DECLARED;
-               } else {
-                  errorId = ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED;
-               }
-
-               this.pushValidityError(errorId, [part.name, attrName], pTokenOpen);
-            }
-
-            depth++;
-         } else if (
-            part.type === GENERAL_ENTITY_END_XTOKEN ||
-            part.type === PARAMETER_ENTITY_END_XTOKEN
-         ) {
-            depth--;
-
-            if (invalidAt === depth) {
-               invalidAt = -1;
-            }
-         }
-      });
    }
 
    private pushValidityError(
@@ -361,37 +270,15 @@ class CheckXTokenValidStream extends Transform {
          //       data , CDATA sections, comments, PIs and child elements whose types
          //       have been declared.
          const isRestrictiveVersion = this.confVer.version === 1 && this.confVer.edition < 3;
-         const isTolerantVersion =
-            (this.confVer.version === 1 && this.confVer.edition > 3) ||
-            (this.confVer.version === 1.1 && this.confVer.edition > 1);
-         const notAllowedParams = [
-            declInfo.token.name,
-            this.confVer.version.toString(),
-            this.confVer.edition.toString(),
-         ];
 
          switch (xToken.type) {
             case TEXTDECL_XTOKEN:
-               // no problem here.
-               break;
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
-               // dead
-               break;
             case ELEMENT_END_XTOKEN:
-               // always ok
-               break;
             case COMMENT_XTOKEN:
-               // called out by valid/P43/ibm43v01.xml as OK
-               // if (!isTolerantVersion) {
-               //    this.pushValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
-               // }
-               break;
             case CDATA_SECTION_XTOKEN:
-               // called out by valid/P43/ibm43v01.xml as OK
-               // if (!isTolerantVersion) {
-               //    this.pushValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
-               // }
+               // dead
                break;
             case CHARREF_XTOKEN:
             case CHARDATA_XTOKEN:
@@ -407,10 +294,6 @@ class CheckXTokenValidStream extends Transform {
                }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
-               // called out by valid/P43/ibm43v01.xml as OK
-               // if (!isTolerantVersion) {
-               //    this.pushValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, sToken);
-               // }
                break;
             default:
                this.pushValidityError(
@@ -434,26 +317,15 @@ class CheckXTokenValidStream extends Transform {
          //       of character data (including CDATA sections), comments, PIs and child
          //       elements whose types match names in the content model.
          const isRestrictiveVersion = this.confVer.version === 1 && this.confVer.edition < 3;
-         const isTolerantVersion =
-            (this.confVer.version === 1 && this.confVer.edition > 3) ||
-            (this.confVer.version === 1.1 && this.confVer.edition > 1);
 
          switch (xToken.type) {
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
-               // dead
-               break;
             case CHARREF_XTOKEN:
             case CHARDATA_XTOKEN:
             case ELEMENT_END_XTOKEN:
-               // always ok
-               break;
             case CDATA_SECTION_XTOKEN:
-               // IBM valid/P19/ibm19v01.xml says that this isn't an error.
-               // if (!isTolerantVersion) {
-               //    this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
-               //       [declInfo.token.name], sToken);
-               // }
+               // dead
                break;
             case TEXTDECL_XTOKEN: // note this and things below we're not checking that they're well formed (e.g. in the right place)
             case COMMENT_XTOKEN:
@@ -629,26 +501,6 @@ class CheckXTokenValidStream extends Transform {
          this.checkContextValidity(xToken, pToken, context);
       }
 
-      if (xToken.type === EXTERNAL_SUBSET_START_TOKEN) {
-         this.externalDeclarations = true;
-      }
-
-      if (xToken.type === EXTERNAL_SUBSET_END_TOKEN) {
-         this.externalDeclarations = false;
-      }
-
-      if (xToken.type === INTERNAL_SUBSET_START_TOKEN) {
-         this.inInternalSubset = true;
-      }
-
-      if (xToken.type === INTERNAL_SUBSET_END_TOKEN) {
-         this.inInternalSubset = false;
-      }
-
-      if (xToken.type === XMLDECL_XTOKEN) {
-         this.standalone = xToken.standalone;
-      }
-
       /*
        * §4.1: Validity Constraint: Entity Declared
        *    In a document with an external subset or external parameter entities
@@ -673,55 +525,28 @@ class CheckXTokenValidStream extends Transform {
          if (!this.entityInfo[xToken.name]) {
             this.entityInfo[xToken.name] = {
                token: xToken,
-               externallyDeclared: this.externalDeclarations,
             };
          }
          this.checkEntityDeclaration(xToken);
       } else if (xToken instanceof GeneralEntityStartXToken) {
-         if (this.isInvalidEntityReference(xToken)) {
-            this.pushValidityError(
-               ValidityError.ID.ENTITY_EXTERNAL_DECLARED,
-               [xToken.name],
-               pToken,
-            );
-         }
       } else if (xToken instanceof ParameterEntityStartXToken) {
-         if (this.isInvalidEntityReference(xToken)) {
-            this.pushValidityError(
-               ValidityError.ID.PARAMENTITY_EXTERNAL_DECLARED,
-               [xToken.name],
-               pToken,
-            );
-         }
-
-         if (this.inInternalSubset) {
-            this.internalEntityDepth++;
-            this.externalDeclarations = true;
-         }
       } else if (xToken instanceof ParameterEntityEndXToken) {
-         if (this.inInternalSubset) {
-            this.internalEntityDepth--;
-
-            if (this.internalEntityDepth === 0) {
-               this.externalDeclarations = false;
-            }
-         }
       } else if (xToken instanceof ElementDeclarationXToken) {
          this.validateElementDecl(xToken);
       } else if (xToken instanceof DocTypeStartXToken) {
-         this.docType = xToken;
       } else if (xToken instanceof ElementStartXToken || xToken instanceof ElementEmptyXToken) {
          if (xToken instanceof ElementStartXToken) {
             if (this.elementDeclarations[xToken.name]) {
                this.currentContext = {
-                  declInfo: this.elementDeclarations[xToken.name],
-                  stateId: 0,
                   atElementContentStart: true,
-                  lastElementContentValue: '',
+                  declInfo: this.elementDeclarations[xToken.name],
                   elementContentEntityRefStack: [],
+                  lastElementContentValue: '',
+                  stateId: 0,
                };
             } else {
                this.currentContext = {
+                  atElementContentStart: true,
                   declInfo: {
                      token: new ElementDeclarationXToken(
                         xToken.name,
@@ -730,10 +555,9 @@ class CheckXTokenValidStream extends Transform {
                      ),
                      type: 'ANY_CONTENT',
                   },
-                  stateId: 0,
-                  atElementContentStart: true,
-                  lastElementContentValue: '',
                   elementContentEntityRefStack: [],
+                  lastElementContentValue: '',
+                  stateId: 0,
                };
             }
 
@@ -827,7 +651,6 @@ class CheckXTokenValidStream extends Transform {
             //   declarations are ignored. ...
             attrDefs.attributes[attDef.name] = {
                def: attDef,
-               externallyDeclared: this.externalDeclarations,
             };
          } else {
             // §3.3.0: ... For interoperability, an XML processor may at user option
@@ -888,9 +711,6 @@ class CheckXTokenValidStream extends Transform {
          }
       }
 
-      // §2.9
-      this.checkAttributeValueStandaloneability(attDef.name, attDef.value, pToken.open, false);
-
       // §4.1: Validity Constraint: Entity Declared
       //    ...Similarly, the declaration of a general entity must precede any attribute-list
       //    declaration containing a default value with a direct or indirect reference
@@ -902,30 +722,6 @@ class CheckXTokenValidStream extends Transform {
          attList.elementName,
          pToken.open,
       );
-
-      // §2.9
-      if (type === 'ENTITY' && this.isInvalidEntityReference(defaultText)) {
-         this.pushValidityError(
-            ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED,
-            [defaultText, attDef.name],
-            pToken.open,
-         );
-      } else if (type === 'ENTITIES') {
-         if (defaultText) {
-            const names = defaultText.split(/ +/);
-
-            for (const name of names) {
-               // §2.9
-               if (this.isInvalidEntityReference(name)) {
-                  this.pushValidityError(
-                     ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED,
-                     [name, attDef.name],
-                     pToken.open,
-                  );
-               }
-            }
-         }
-      }
    }
 
    private checkAttributeValueForUnexpandedReferences(
@@ -970,19 +766,7 @@ class CheckXTokenValidStream extends Transform {
    }
 
    private validateElementDecl(elDecl: ElementDeclarationXToken): void {
-      // const openSToken = elDecl.pToken && elDecl.pToken.open;
       let isMixed = false;
-
-      // Validity Constraint: §3.2.0: Validity constraint: Unique Element Type Declaration
-      //    An element type must not be declared more than once.
-      // if (this.elementDeclarations[elDecl.name]) {
-      //    this.pushValidityError(
-      //       ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
-      //       [elDecl.name],
-      //       openSToken,
-      //    );
-      //    return;
-      // }
 
       if (elDecl.contentSpec === 'EMPTY') {
          this.elementDeclarations[elDecl.name] = {
@@ -996,8 +780,8 @@ class CheckXTokenValidStream extends Transform {
          };
       } else {
          const children: ContentModelX | undefined = elDecl.contentModel || {
-            particles: [],
             listType: CpType.CHOICE,
+            particles: [],
             repeat: CpRepeat.ONE,
          };
 
@@ -1024,7 +808,6 @@ class CheckXTokenValidStream extends Transform {
                this.elementDeclarations[elDecl.name] = {
                   token: elDecl,
                   type: 'ELEMENT_CONTENT',
-                  externallyDeclared: this.externalDeclarations, // §2.9
                } as any;
             }
          }
@@ -1050,13 +833,6 @@ class CheckXTokenValidStream extends Transform {
       }
 
       for (const attribute of attributes) {
-         // §2.9
-         this.checkAttributeValueStandaloneability(
-            attribute.name,
-            attribute.value,
-            pTokenOpen,
-            true,
-         );
          // §4.1: Validity Constraint: Entity Declared
          //    ...the Name given in the entity reference must match that in an entity declaration...
          this.checkAttributeValueForUnexpandedReferences(

@@ -89,6 +89,7 @@ describe('parameterEntityEndUpdateState (unit)', () => {
       state = new ValidateState({
          dtdContext: {
             enclosingStack: [start],
+            inExternalMarkupContext: true,
             inExternalSubset: false,
          },
       });
@@ -99,7 +100,7 @@ describe('parameterEntityEndUpdateState (unit)', () => {
          ...state,
          dtdContext: {
             enclosingStack: [],
-            inExternalMarkupContext: true,
+            inExternalMarkupContext: false,
             inExternalSubset: false,
          },
       });

@@ -3,14 +3,16 @@
 import { ErrorCollector, isName, isNmToken } from 'basic';
 import { AttListDeclarationPToken, AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { getFirstSToken } from 'token';
+import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken } from 'token';
 
 import { validityConstraint } from '../error/validityConstraint';
 import { ValidityError } from '../error/ValidityError';
 import { ValidateState } from '../validateState';
+import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
 const OLD_VID = ValidityError.ID;
 const VID = validityConstraint.id;
+const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 const CODEMAP: Record<string, string> = {
    ENTITIES: VID.ATTLISTDECL_BAD_ENTITIES_DEFAULT,
@@ -66,6 +68,27 @@ function checkDefaultValue(
    state: ValidateState,
    ec: ErrorCollector,
 ): void {
+   for (const element of attDef.value) {
+      if (element.type === GENERAL_ENTITY_START_PTOKEN) {
+         const name = strOrBlank(element.referencePToken.name);
+         const isPredefined = PREDEFINED_ENTITIES.includes(name);
+         const details = state.generalEntities[name];
+
+         ec.setPos(element.referencePToken.open);
+
+         // §2.9.0 Validity Constraint: Standalone Document Declaration
+         //    ...entities (other than amp, lt, gt, apos, quot), if references to
+         //    those entities appear in the document...
+         ec.check(
+            details?.isExternalMarkupDeclaration && state.isStandalone && !isPredefined,
+            VID.ENTITYREF_EXTERNALLY_DECLARED,
+            [name],
+         );
+
+         ancestorPERefsValidate(element, state, ec);
+      }
+   }
+
    const actualType = attType === '' ? 'ENUMERATION' : attType;
    if (attDef.value.length === 0 || !CODEMAP[actualType]) {
       return;

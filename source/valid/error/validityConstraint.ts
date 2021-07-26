@@ -201,6 +201,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'The declaration of the entity "{0}" must not have an undeclared NDATA value (§4.2.2). Found "{1}".',
    },
+   ENTITYREF_EXTERNALLY_DECLARED: {
+      code: 1138,
+      message:
+         'The entity "{0}" was declared externally, but was referenced in this document which is standalone="yes" (§2.9.0).',
+   },
    NOTATION_XTRA_DECLARATION: {
       code: 1102,
       message: 'Must not declare a NOTATION more than once (§4.7.0). Found "{0}".',

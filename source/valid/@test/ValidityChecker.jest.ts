@@ -17,9 +17,11 @@ import {
    makeExternalSubsetStart,
    makeGeneralEntityDeclaration,
    makeGeneralEntityReference,
+   makeGeneralEntityStart,
    makeNotationDeclaration,
    makeParameterEntityDeclaration,
    makeParameterEntityReference,
+   makeParameterEntityStart,
    makeXmlDecl,
 } from 'token-test';
 
@@ -32,6 +34,7 @@ import { conditionalEndValidate } from '../token/conditionalEndValidate';
 import { conditionalStartUpdateState } from '../token/conditionalStartUpdateState';
 import { conditionalStartValidate } from '../token/conditionalStartValidate';
 import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
+import { dtdEndValidate } from '../token/dtdEndValidate';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
 import { elementDeclarationPreprocess } from '../token/elementDeclarationPreprocess';
 import { elementDeclarationValidate } from '../token/elementDeclarationValidate';
@@ -44,12 +47,13 @@ import { entityDeclarationValidate } from '../token/entityDeclarationValidate';
 import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpdateState';
 import { externalSubsetEndUpdateState } from '../token/externalSubsetEndUpdateState';
 import { generalEntityDeclarationUpdateState } from '../token/generalEntityDeclarationUpdateState';
-import { dtdEndValidate } from '../token/dtdEndValidate';
 import { generalEntityReferenceValidate } from '../token/generalEntityReferenceValidate';
+import { generalEntityStartValidate } from '../token/generalEntityStartValidate';
 import { notationDeclarationUpdateState } from '../token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from '../token/notationDeclarationValidate';
 import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityDeclarationUpdateState';
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
+import { parameterEntityStartValidate } from '../token/parameterEntityStartValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 
 jest.mock('../token/attListDeclarationValidate');
@@ -73,10 +77,12 @@ jest.mock('../token/externalSubsetEndUpdateState');
 jest.mock('../token/externalSubsetStartUpdateState');
 jest.mock('../token/generalEntityDeclarationUpdateState');
 jest.mock('../token/generalEntityReferenceValidate');
+jest.mock('../token/generalEntityStartValidate');
 jest.mock('../token/notationDeclarationUpdateState');
 jest.mock('../token/notationDeclarationValidate');
 jest.mock('../token/parameterEntityDeclarationUpdateState');
 jest.mock('../token/parameterEntityReferenceValidate');
+jest.mock('../token/parameterEntityStartValidate');
 jest.mock('../token/xmlDeclarationUpdateState');
 
 describe('ValidityChecker (unit)', () => {
@@ -346,6 +352,31 @@ describe('ValidityChecker (unit)', () => {
       );
    });
 
+   it('validates a general entity declaration', () => {
+      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      const peDecl = makeParameterEntityDeclaration();
+
+      checker.checkPToken(peDecl, ec);
+
+      expect(entityDeclarationValidate).toHaveBeenCalledWith(peDecl, expect.any(Object), ec);
+   });
+
+   it('validates an general entity start', () => {
+      const geStart = makeGeneralEntityStart();
+
+      checker.checkPToken(geStart, ec);
+
+      expect(generalEntityStartValidate).toHaveBeenCalledWith(geStart, expect.any(Object), ec);
+   });
+
+   it('validates an parameter entity reference', () => {
+      const peRef = makeParameterEntityReference();
+
+      checker.checkPToken(peRef, ec);
+
+      expect(parameterEntityReferenceValidate).toHaveBeenCalledWith(peRef, expect.any(Object), ec);
+   });
+
    it('updates the state when passed a parameter entity declaration', () => {
       (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
       const peDecl = makeParameterEntityDeclaration();
@@ -358,21 +389,12 @@ describe('ValidityChecker (unit)', () => {
       );
    });
 
-   it('validates a general entity declaration', () => {
-      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
-      const peDecl = makeParameterEntityDeclaration();
+   it('validates an parameter entity start', () => {
+      const peStart = makeParameterEntityStart();
 
-      checker.checkPToken(peDecl, ec);
+      checker.checkPToken(peStart, ec);
 
-      expect(entityDeclarationValidate).toHaveBeenCalledWith(peDecl, expect.any(Object), ec);
-   });
-
-   it('validates an parameter entity reference', () => {
-      const peRef = makeParameterEntityReference();
-
-      checker.checkPToken(peRef, ec);
-
-      expect(parameterEntityReferenceValidate).toHaveBeenCalledWith(peRef, expect.any(Object), ec);
+      expect(parameterEntityStartValidate).toHaveBeenCalledWith(peStart, expect.any(Object), ec);
    });
 
    it('updates the state when passed an XML Declaration', () => {

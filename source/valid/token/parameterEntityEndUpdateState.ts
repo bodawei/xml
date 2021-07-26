@@ -22,7 +22,7 @@ function parameterEntityEndUpdateState(
       }
    }
 
-   for (const element of state.dtdContext.enclosingStack) {
+   for (const element of newStack) {
       if (element.type === PARAMETER_ENTITY_START_PTOKEN) {
          inParameterEntityRef = true;
          break;

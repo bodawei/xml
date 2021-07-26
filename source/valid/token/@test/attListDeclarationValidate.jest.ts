@@ -4,13 +4,30 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 
 import { MockErrorCollector } from 'basic-test';
-import { AttListDeclarationPToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
+import {
+   AttListDeclarationPToken,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
+   TextPToken,
+} from 'pToken';
 import { toSToken } from 'sToken';
-import { NOTATION_PTOKEN, ENUMERATION_PTOKEN } from 'token';
+import {
+   NOTATION_PTOKEN,
+   ENUMERATION_PTOKEN,
+   GeneralEntityStartPToken,
+   GeneralEntityEndPToken,
+} from 'token';
+import {
+   makeGeneralEntityDeclaration,
+   makeGeneralEntityEnd,
+   makeGeneralEntityStart,
+} from 'token-test';
 
 import { validityConstraint } from '../../error/validityConstraint';
 import { ValidateState } from '../../validateState';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
+// jest.mock goes crazy if I try to mock the file
+import * as ancestor from '../ancestorPERefsValidate';
 
 const VID = validityConstraint.id;
 
@@ -79,6 +96,147 @@ describe('attListDeclarationValidate (unit)', () => {
 
          attListDeclarationValidate(attListDecl, state, mockErrorCollector);
          expect(mockErrorCollector.errors).toEqual([]);
+      });
+   });
+
+   describe('Standalone Document Declaration (§2.9.0)', () => {
+      [
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: true,
+            isPredefined: false,
+            isStandalone: true,
+            pass: false,
+            start: makeGeneralEntityStart(),
+         },
+         {
+            end: new GeneralEntityEndPToken(
+               new GeneralEntityReferencePToken({
+                  name: toSToken('lt'),
+                  open: toSToken('&'),
+               }),
+            ),
+            isExternalMarkupDeclaration: true,
+            isPredefined: true,
+            isStandalone: true,
+            pass: true,
+            start: new GeneralEntityStartPToken(
+               new GeneralEntityReferencePToken({
+                  name: toSToken('lt'),
+                  open: toSToken('&'),
+               }),
+            ),
+         },
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: false,
+            isPredefined: false,
+            isStandalone: true,
+            pass: true,
+            start: makeGeneralEntityStart(),
+         },
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: true,
+            isPredefined: false,
+            isStandalone: false,
+            pass: true,
+            start: makeGeneralEntityStart(),
+         },
+         {
+            end: makeGeneralEntityEnd(),
+            isExternalMarkupDeclaration: false,
+            isPredefined: false,
+            isStandalone: false,
+            pass: true,
+            start: makeGeneralEntityStart(),
+         },
+      ].forEach((params) => {
+         const { isExternalMarkupDeclaration, isPredefined, isStandalone, pass, start, end } =
+            params;
+
+         it(`reports an error if a general entity reference is found in the default value, and the entity was${
+            isExternalMarkupDeclaration ? '' : ' not'
+         } externally declared, the document was${
+            isStandalone ? '' : ' not'
+         } standalone and the entity is${
+            isPredefined ? '' : ' not'
+         } a predefined entity (§2.9.0)`, () => {
+            const geDecl = makeGeneralEntityDeclaration();
+            state = new ValidateState({
+               generalEntities: {
+                  testRef: {
+                     isExternalMarkupDeclaration,
+                     isInternalValue: true,
+                     token: geDecl,
+                  },
+               },
+               isStandalone,
+            });
+            const attListDecl = new AttListDeclarationPToken({
+               attDefs: [
+                  {
+                     name: toSToken('att1'),
+                     type: toSToken('CDATA'),
+                     value: [start, end],
+                  },
+               ],
+               elementName: toSToken('elName'),
+               extra: toSToken('>'),
+               open: toSToken('<!'),
+            });
+
+            attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+            if (pass) {
+               expect(mockErrorCollector.errors).toEqual([]);
+            } else {
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportValidityError({
+                  id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+                  lastPosition: undefined,
+                  params: [start.referencePToken.name?.str],
+                  position: makeGeneralEntityStart().referencePToken.open,
+               });
+            }
+         });
+      });
+
+      it('calls ancestorPERefsValidate() to validate ancestors for each geref found (§2.9.0)', () => {
+         const geDecl = makeGeneralEntityDeclaration();
+         const end = makeGeneralEntityEnd();
+         const start = makeGeneralEntityStart();
+         state = new ValidateState({
+            generalEntities: {
+               testRef: {
+                  isExternalMarkupDeclaration: true,
+                  isInternalValue: true,
+                  token: geDecl,
+               },
+            },
+            isStandalone: true,
+         });
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('CDATA'),
+                  value: [start, end],
+               },
+            ],
+            elementName: toSToken('elName'),
+            extra: toSToken('>'),
+            open: toSToken('<!'),
+         });
+         jest.spyOn(ancestor, 'ancestorPERefsValidate');
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         expect(ancestor.ancestorPERefsValidate).toHaveBeenCalledWith(
+            start,
+            state,
+            mockErrorCollector,
+         );
       });
    });
 

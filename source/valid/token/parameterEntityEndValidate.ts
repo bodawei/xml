@@ -9,12 +9,7 @@ import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
 } from 'pToken';
-import {
-   COMMENT_PTOKEN,
-   CONDITIONAL_PTOKEN,
-   ParameterEntityEndPToken,
-   PARAMETER_ENTITY_START_PTOKEN,
-} from 'token';
+import { COMMENT_PTOKEN, CONDITIONAL_PTOKEN, ParameterEntityEndPToken } from 'token';
 
 import { ValidateState } from '../validateState';
 import { validityConstraint } from '../error/validityConstraint';

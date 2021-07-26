@@ -62,6 +62,8 @@ as standalone, then this is an error, since the normalization could not have bee
 identified without that external declaration.  Note that if the attribute would not
 have changed due to normalization processes, it is not an error.
 
+- If a parameter entity reference in the DTD, or a general entity reference in the content references an entity that was an external markup declaration, and the document is standalone (and, if a general entity reference, is not one of the five predefined entities) then this is also a valitity error, since a non-validating processor would not have been able to expand the entity and the resulting document would have been different. (crucially, if an entity is never referenced, we do not care. Similarly, we do not care if an entity is named in an attribute value (e.g. an attribute of type ENTITY or ENTITIES) since whether that is or is not declared in an external markup declaration, since that will not affect the interpretation of the document).
+   - Relatedly, if any of the referenced entities themselves contain entity references that were declared in external markup declarations, those are errors.
 
 
 

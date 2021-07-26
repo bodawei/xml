@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 
@@ -39,6 +39,7 @@ describe('ValidityChecker (integration)', () => {
       pTokenStream.pipe(entityExpander).pipe(attFixer);
 
       gatherStreamResults<ParseToken>(attFixer, (results) => {
+         // console.json(results);
          for (const result of results) {
             ec = new ErrorCollector(
                'open' in result ? result.open : toSToken('foo'),
@@ -312,6 +313,156 @@ describe('ValidityChecker (integration)', () => {
          </root>`,
          VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
          done!,
+      );
+   });
+
+   it('reports when a general entity is externally declared and is referenced in a document that is standalone (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % foo "<!ENTITY external "blah" >">
+            %foo;
+         ]>
+         <root>
+         &external;
+         </root>`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports when a parameter entity is externally declared and is referenced in a document that is standalone (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % foo "<!ENTITY &#37; external '<!ELEMENT blah ANY>' >">
+            %foo;
+            %external;
+         ]>
+         <root>
+         </root>`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when an entity in an attribute is declared with an external markup declaration, and is referenced in the document (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root SYSTEM "./source/valid/@test/@entities/externalGeneralEntity.xml" [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               att1 CDATA
+            >
+         ]>
+         <root att1="foo &external; foo">
+         </root>`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when an entity in an attribute is declared with an external markup declaration, and is referenced in the document (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % stuff "
+               <!ENTITY external 'this is an external markup declartion'>
+               <!ATTLIST root
+                  att1 CDATA 'foo &external; foo'
+               >
+            ">
+            %stuff;
+         ]>
+         <root>
+         </root>`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a general entity references another general entity which was declared in an external markup declartion and the document is standalone (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % stuff "
+               <!ENTITY external 'this is an external markup declartion'>
+            ">
+            %stuff;
+            <!ENTITY level2 '&external;'>
+            <!ENTITY level1 '[&level2;]'>
+         ]>
+         <root>
+         &level1;
+         </root>`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when an attribute has a general entity that references another general entity which was declared in an external markup declartion and the document is standalone (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % stuff "
+               <!ENTITY external 'this is an external markup declartion'>
+            ">
+            %stuff;
+            <!ATTLIST root
+               att1 CDATA
+             >
+            <!ENTITY level2 '&external;'>
+            <!ENTITY level1 '[&level2;]'>
+         ]>
+         <root att1="&level1;" />`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a general entity references an external parameter entity (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % stuff "
+               <!ENTITY &#37; external 'this is an external markup declartion'>
+            ">
+            %stuff;
+            <!ENTITY % level2 '%external;'>
+            <!ENTITY level1 '[%level2;]'>
+         ]>
+         <root>
+         &level1;
+         </root>`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done,
+      );
+   });
+
+   it('reports an error when an attribute has a general entity that references a parameter entity which was declared in an external markup declartion and the document is standalone (§2.9.0)', (done) => {
+      expectError(
+         `<?xml version="1.0" standalone="yes"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % stuff "
+               <!ENTITY &#37; external 'this is an external markup declartion'>
+            ">
+            %stuff;
+            <!ATTLIST root
+               att1 CDATA
+             >
+            <!ENTITY % level2 '%external;'>
+            <!ENTITY level1 '[%level2;]'>
+         ]>
+         <root att1="&level1;" />`,
+         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         done,
       );
    });
 
