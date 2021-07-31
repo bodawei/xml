@@ -83,10 +83,24 @@ const validityConstraint = new ErrorCodes({
       message:
          'The attribute "{1}" for element type "{0}" was declared externally, and its value will not be able to be accurately reported when standalone="yes" (§2.9.0).',
    },
-
+   CONTENT_CONTAINS_INVALID_ELEMENT: {
+      code: 1140,
+      message:
+         'Found an element type, "{1}" in an "{0}" elment at a position it is not allowed (§3.0.0).',
+   },
+   CONTENT_IN_ELEMENT_ELEMENT: {
+      code: 1141,
+      message:
+         'Found invalid syntax in the element type "{0}", which is not allowed there in XML {1}/{2} (§3.0.0). Found {3}.',
+   },
    CONTENT_IN_EMPTY_ELEMENT: {
       code: 1139,
       message: 'Found content in an element that should be empty ("{0}") (§3.0.0).',
+   },
+   CONTENT_XTRA_SPACE: {
+      code: 1142,
+      message:
+         'Must not have space before the first child element or after the last child element of a "{0}" in version 1.0/1. (§3.0.0).',
    },
    ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED: {
       code: 1136,

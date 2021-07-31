@@ -72,6 +72,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
+         lastToken: undefined,
          parentName: 'elementName',
          stateId: 0,
       };
@@ -100,6 +101,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
          },
+         lastToken: undefined,
          parentName: 'unmatched',
          stateId: 0,
       };
@@ -134,6 +136,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
          },
+         lastToken: undefined,
          parentName: 'unmatched',
          stateId: 0,
       };
@@ -173,6 +176,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
+         lastToken: undefined,
          parentName: 'elementName',
          stateId: 9,
       };
@@ -197,6 +201,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
+         lastToken: undefined,
          parentName: 'elementName',
          stateId: 4,
       };
@@ -223,6 +228,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
+         lastToken: undefined,
          parentName: 'elementName',
          stateId: 0,
       };
@@ -247,6 +253,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
+         lastToken: undefined,
          parentName: 'elementName',
          stateId: 4,
       };
@@ -276,6 +283,7 @@ describe('elementStartUpdateState (unit)', () => {
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
          },
+         lastToken: undefined,
          parentName: 'noTransition',
          stateId: 0,
       };
@@ -316,6 +324,7 @@ describe('elementStartUpdateState (unit)', () => {
                      token: elementDeclaration,
                      type: ElDeclType.ANY,
                   },
+                  lastToken: undefined,
                   parentName: 'elementName',
                   stateId: 0,
                },
@@ -339,7 +348,6 @@ describe('elementStartUpdateState (unit)', () => {
                      type: toSToken('ID'),
                      value: [],
                   },
-                  isExternal: true,
                   isExternalMarkupDeclaration: false,
                },
             },
@@ -382,7 +390,6 @@ describe('elementStartUpdateState (unit)', () => {
                      type: toSToken('ID'),
                      value: [],
                   },
-                  isExternal: true,
                   isExternalMarkupDeclaration: false,
                },
             },
@@ -432,7 +439,6 @@ describe('elementStartUpdateState (unit)', () => {
                         type: toSToken('IDREF'),
                         value: [],
                      },
-                     isExternal: true,
                      isExternalMarkupDeclaration: false,
                   },
                },
@@ -476,7 +482,6 @@ describe('elementStartUpdateState (unit)', () => {
                         type: toSToken('IDREFS'),
                         value: [],
                      },
-                     isExternal: true,
                      isExternalMarkupDeclaration: false,
                   },
                },
@@ -525,7 +530,6 @@ describe('elementStartUpdateState (unit)', () => {
                         type: toSToken('IDREFS'),
                         value: [],
                      },
-                     isExternal: true,
                      isExternalMarkupDeclaration: false,
                   },
                },

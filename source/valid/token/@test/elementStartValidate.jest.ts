@@ -163,6 +163,7 @@ describe('elementStartValidate (unit)', () => {
             ...state.elementContext,
             activeContext: {
                declDetails: {
+                  isExternalMarkupDeclaration: false,
                   token: elementDeclaration,
                   type: ElDeclType.ANY,
                },
@@ -172,8 +173,8 @@ describe('elementStartValidate (unit)', () => {
          },
       });
       elementStart = new ElementStartPToken({
-         open: toSToken('</'),
          name: toSToken('other'),
+         open: toSToken('</'),
       });
 
       elementStartValidate(elementStart, state, mockErrorCollector);
@@ -181,9 +182,9 @@ describe('elementStartValidate (unit)', () => {
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.UNDECLARED_ELEMENT,
+         lastPosition: undefined,
          params: ['other'],
          position: elementStart.name,
-         lastPosition: undefined,
       });
    });
 
@@ -193,10 +194,10 @@ describe('elementStartValidate (unit)', () => {
             ...state.elementContext,
             activeContext: {
                declDetails: {
+                  isExternalMarkupDeclaration: false,
+                  names: ['foo'],
                   token: elementDeclaration,
                   type: ElDeclType.MIXED,
-                  names: ['foo'],
-                  duplicateNames: [],
                },
                parentName: 'parentName',
                stateId: 0,
@@ -235,10 +236,10 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.INVALID_ELEMENT_IN_CONTENT,
+         id: VID.CONTENT_CONTAINS_INVALID_ELEMENT,
+         lastPosition: undefined,
          params: ['parentName', 'elementName'],
          position: elementStart.name,
-         lastPosition: undefined,
       });
    });
 

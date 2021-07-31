@@ -61,6 +61,7 @@ interface ParameterEntityDetails {
 
 interface ElementContext {
    declDetails: DeclarationDetails;
+   lastToken: ParseToken | undefined;
    parentName: string;
    stateId: number;
 }

@@ -115,6 +115,7 @@ function elementStartUpdateState(
       if (declDetails) {
          context = {
             declDetails,
+            lastToken: undefined,
             parentName: elName,
             stateId: declDetails.type === ElDeclType.ELEMENT ? declDetails.graph.startId : 0,
          };
@@ -129,6 +130,7 @@ function elementStartUpdateState(
                }),
                type: ElDeclType.ANY,
             },
+            lastToken: undefined,
             parentName: elName,
             stateId: 0,
          };

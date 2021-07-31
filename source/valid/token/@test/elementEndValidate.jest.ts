@@ -1,16 +1,16 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
 import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
+import { ElementEndPToken } from 'token';
 
-import { elementEndValidate } from '../elementEndValidate';
+import { CmGraph } from '../../contentModal/cmGraphTypes';
 import { ValidityError } from '../../error/ValidityError';
 import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
-import { ElementEndPToken } from 'token';
-import { CmGraph } from '../../contentModal/cmGraphTypes';
+import { elementEndValidate } from '../elementEndValidate';
 
 describe('elementEndValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
@@ -22,20 +22,21 @@ describe('elementEndValidate (unit)', () => {
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
       elementDeclaration = new ElementDeclarationPToken({
-         open: toSToken('<!'),
-         openSpace: undefined,
+         close: toSToken('>'),
          declType: toSToken('ELEMENT'),
          declTypeSpace: toSToken(' '),
          name: toSToken('elementName'),
          nameSpace: toSToken(' '),
-         close: toSToken('>'),
+         open: toSToken('<!'),
+         openSpace: undefined,
       });
-      elementEnd = new ElementEndPToken({ open: toSToken('</'), name: toSToken('elementName') });
+      elementEnd = new ElementEndPToken({ name: toSToken('elementName'), open: toSToken('</') });
       graph = {
-         startId: 0,
          endId: 0,
+         startId: 0,
          states: {
             '4': {
+               done: false,
                id: 4,
                trans: {
                   one: {
@@ -47,36 +48,38 @@ describe('elementEndValidate (unit)', () => {
                      stateId: 6,
                   },
                },
-               done: false,
             },
          },
       };
       const currentContext: ElementContext = {
          declDetails: {
+            graph,
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
-            graph,
          },
+         lastToken: undefined,
          parentName: 'elementName',
          stateId: 4,
       };
       state = new ValidateState({
+         elementContext: {
+            activeContext: currentContext,
+            contextStack: [currentContext],
+            pastEnd: false,
+         },
          elementDeclarations: {
             elementName: {
-               type: ElDeclType.ELEMENT,
+               graph,
+               isExternalMarkupDeclaration: false,
                token: new ElementDeclarationPToken({
-                  open: toSToken('<!'),
+                  close: toSToken('>'),
                   declType: toSToken('ELEMENT'),
                   name: toSToken('elementName'),
-                  close: toSToken('>'),
+                  open: toSToken('<!'),
                }),
-               graph,
+               type: ElDeclType.ELEMENT,
             },
-         },
-         elementContext: {
-            contextStack: [currentContext],
-            activeContext: currentContext,
-            pastEnd: false,
          },
       });
    });
@@ -87,9 +90,9 @@ describe('elementEndValidate (unit)', () => {
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
          id: ValidityError.ID.ELEMENT_CONTENT_UNEXPECTED_END,
+         lastPosition: undefined,
          params: ['elementName', 'one, two'],
          position: elementDeclaration.name,
-         lastPosition: undefined,
       });
    });
 
@@ -136,9 +139,11 @@ describe('elementEndValidate (unit)', () => {
             ...state.elementContext,
             activeContext: {
                declDetails: {
+                  isExternalMarkupDeclaration: false,
                   token: elementDeclaration,
                   type: ElDeclType.ANY,
                },
+               lastToken: undefined,
                parentName: 'elementName',
                stateId: 4,
             },

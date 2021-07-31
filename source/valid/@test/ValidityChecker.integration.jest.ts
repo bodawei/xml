@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ErrorCollector, XmlErrorToken } from 'basic';
+import { ConformanceVersion, ErrorCollector, ErrorToken } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ContextType, ParseToken } from 'pToken';
 import { PTokenStream } from '../../pTokenStream';
@@ -25,10 +25,16 @@ describe('ValidityChecker (integration)', () => {
       checker = new ValidityChecker();
    });
 
-   function expectError(input: string, errorCode: string, done: () => void): void {
-      const finalResults: Array<XmlErrorToken> = [];
+   function expectError(
+      input: string,
+      errorCode: string,
+      done: () => void,
+      confVer?: ConformanceVersion,
+   ): void {
+      const finalResults: Array<ErrorToken> = [];
 
       pTokenStream = new PTokenStream(new STokenSource(), {
+         confVer,
          context: ContextType.DOCUMENT,
       });
       pTokenStream.addText(input);
@@ -48,7 +54,7 @@ describe('ValidityChecker (integration)', () => {
 
             checker.checkPToken(result, ec);
 
-            finalResults.push(...(ec.errors as any));
+            finalResults.push(...(ec.errors as Array<ErrorToken>));
          }
 
          const targetError = finalResults.find((err) => err.id === errorCode);
@@ -475,6 +481,64 @@ describe('ValidityChecker (integration)', () => {
          <root><!-- not even this! --></root>`,
          VID.CONTENT_IN_EMPTY_ELEMENT,
          done!,
+      );
+   });
+
+   it('reports an error when the sequence of child elements does not match the syntax for child elements in an element decalred with element content (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (a,a,b)>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+         ]>
+         <root><a/><b/></root>`,
+         VID.CONTENT_CONTAINS_INVALID_ELEMENT,
+         done!,
+      );
+   });
+
+   it('reports an error when a char ref (or other syntax) appears between child elements in an element with element content (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (a,a,b)>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+         ]>
+         <root><a/>&#20;<a/><b/></root>`,
+         VID.CONTENT_IN_ELEMENT_ELEMENT,
+         done!,
+      );
+   });
+
+   it('reports an error when a space appears before the element close in 1.0/1 (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (a,a,b)>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+         ]>
+         <root><a/><a/><b/> </root>`,
+         VID.CONTENT_XTRA_SPACE,
+         done!,
+         new ConformanceVersion(1.0, 1),
+      );
+   });
+
+   it('reports an error when a space appears after the element open in 1.0/1 (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (a,a,b)>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+         ]>
+         <root> <a/><a/><b/></root>`,
+         VID.CONTENT_XTRA_SPACE,
+         done!,
+         new ConformanceVersion(1.0, 1),
       );
    });
 

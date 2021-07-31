@@ -118,6 +118,7 @@ function validateEntities(
       let seenCloseParen = false;
 
       for (const char of replacementText) {
+         // IS THIS use of isSpace() correct?  Spce is generally not 0x0085 by this point.  we may want to remove this, or modify isSpace() and repalce the various S regexp's we have.
          if (isSpace(char, version.version)) {
             space++;
          } else {

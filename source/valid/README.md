@@ -65,6 +65,13 @@ have changed due to normalization processes, it is not an error.
 - If a parameter entity reference in the DTD, or a general entity reference in the content references an entity that was an external markup declaration, and the document is standalone (and, if a general entity reference, is not one of the five predefined entities) then this is also a valitity error, since a non-validating processor would not have been able to expand the entity and the resulting document would have been different. (crucially, if an entity is never referenced, we do not care. Similarly, we do not care if an entity is named in an attribute value (e.g. an attribute of type ENTITY or ENTITIES) since whether that is or is not declared in an external markup declaration, since that will not affect the interpretation of the document).
    - Relatedly, if any of the referenced entities themselves contain entity references that were declared in external markup declarations, those are errors.
 
+### §3.0.0: Element Valid
+- EMPTY case: The wording of this changed in 1.0/3 and beyond, but I think it would have reasonably been interpreted the same way in either case.  Note that this implementation will report any PToken that appears between a start and end tag that corresponds directly to some original bit of XML text. However, it ignores Errors, and the various metadata tokens that flow through.
+- ELEMENT: This has three wording variations (1.0/1, 1.0/2 and 1.0/3 and beyond). THey all agree that the child elements must match the grammar in the element content model. As for the non-child-element content within the element, they say:
+   - The first says that whitespace is allowed only between between child elements (but not before the first and after the second).
+   - The second says that whitespace is allowed before the first and after the second (and repeats that CDATA section are not allowed)
+   - The third also allows comments and PI's. It also allows entity references whose replacement text is just white space. Furthermore, several xmlconf tests, including ibm-1-1-valid-P77-ibm77v11.xml, allow entity references that contain elements.
+Personally, I find the last a little puzzling, for why shouldn't comments, PI's and empty entity references be allowed in EMPTY elements? For that matter, why not allow character references that are to white space characters? Oh well.
 
 
 ### §3.2.0 Unique Element Type Declaration

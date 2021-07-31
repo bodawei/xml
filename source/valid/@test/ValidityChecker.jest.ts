@@ -1,4 +1,4 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
@@ -22,11 +22,10 @@ import {
    makeParameterEntityDeclaration,
    makeParameterEntityReference,
    makeParameterEntityStart,
-   makeProcessingInstruction,
    makeXmlDecl,
 } from 'token-test';
 
-import { ElDeclType, ValidateState } from '../validateState';
+import { ValidateState } from '../validateState';
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from '../token/attListDeclarationValidate';
@@ -56,10 +55,8 @@ import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityD
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
 import { parameterEntityStartValidate } from '../token/parameterEntityStartValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
-import { validityConstraint } from '../error/validityConstraint';
-import { ElementDeclarationPToken } from 'pToken';
-
-const VID = validityConstraint.id;
+import { contentValidate } from '../contentValidate';
+import { contentUpdateState } from '../contentUpdateState';
 
 jest.mock('../token/attListDeclarationValidate');
 jest.mock('../token/attListDeclarationUpdateState');
@@ -89,6 +86,8 @@ jest.mock('../token/parameterEntityDeclarationUpdateState');
 jest.mock('../token/parameterEntityReferenceValidate');
 jest.mock('../token/parameterEntityStartValidate');
 jest.mock('../token/xmlDeclarationUpdateState');
+jest.mock('../contentValidate');
+jest.mock('../contentUpdateState');
 
 describe('ValidityChecker (unit)', () => {
    let version: ConformanceVersion;
@@ -112,9 +111,13 @@ describe('ValidityChecker (unit)', () => {
       conditionalEndUpdateStateMock = conditionalEndUpdateState as jest.MockedFunction<
          typeof conditionalEndUpdateState
       >;
+      const contentUpdateStateMock = contentUpdateState as jest.MockedFunction<
+         typeof conditionalEndUpdateState
+      >;
       elementDeclarationUpdateStateMock.mockImplementation((token, details, state) => state);
       conditionalEndUpdateStateMock.mockImplementation((token, state) => state);
       conditionalStartUpdateStateMock.mockImplementation((token, state) => state);
+      contentUpdateStateMock.mockImplementation((token, state) => state);
    });
 
    it('stores the version passed to it and pass that on to other validations', () => {
@@ -134,78 +137,6 @@ describe('ValidityChecker (unit)', () => {
       );
    });
 
-   it('reports an error when the context is EMPTY, and any non-element end token is delivered (§3.0.0)', () => {
-      const newState = new ValidateState({
-         elementContext: {
-            activeContext: {
-               declDetails: {
-                  isExternalMarkupDeclaration: false,
-                  token: new ElementDeclarationPToken({
-                     declType: toSToken('EMPTY'),
-                     name: toSToken('elementName'),
-                     open: toSToken('<!'),
-                  }),
-                  type: ElDeclType.EMPTY,
-               },
-               parentName: 'elementName',
-               stateId: 0,
-            },
-            contextStack: [],
-            pastEnd: false,
-         },
-      });
-      (
-         elementStartUpdateState as jest.MockedFunction<typeof elementStartUpdateState>
-      ).mockReturnValue(newState);
-      (elementEndUpdateState as jest.MockedFunction<typeof elementEndUpdateState>).mockReturnValue(
-         newState,
-      );
-
-      checker.checkPToken(makeElementStart(), ec);
-      checker.checkPToken(makeProcessingInstruction(), ec);
-
-      // @ts-expect-error 2329/matchers
-      expect(ec).toReportValidityError({
-         id: VID.CONTENT_IN_EMPTY_ELEMENT,
-         lastPosition: undefined,
-         params: ['elementName'],
-         position: makeProcessingInstruction().open,
-      });
-   });
-
-   it('reports no error when the context is EMPTY, and an element end token is delivered (§3.0.0)', () => {
-      const newState = new ValidateState({
-         elementContext: {
-            activeContext: {
-               declDetails: {
-                  isExternalMarkupDeclaration: false,
-                  token: new ElementDeclarationPToken({
-                     declType: toSToken('EMPTY'),
-                     name: toSToken('elementName'),
-                     open: toSToken('<!'),
-                  }),
-                  type: ElDeclType.EMPTY,
-               },
-               parentName: 'elementName',
-               stateId: 0,
-            },
-            contextStack: [],
-            pastEnd: false,
-         },
-      });
-      (
-         elementStartUpdateState as jest.MockedFunction<typeof elementStartUpdateState>
-      ).mockReturnValue(newState);
-      (elementEndUpdateState as jest.MockedFunction<typeof elementEndUpdateState>).mockReturnValue(
-         newState,
-      );
-
-      checker.checkPToken(makeElementStart(), ec);
-      checker.checkPToken(makeElementEnd(), ec);
-
-      expect(ec.errors).toEqual([]);
-   });
-
    it('stores only the first version passed to it', () => {
       (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
@@ -222,6 +153,22 @@ describe('ValidityChecker (unit)', () => {
          ec,
          version,
       );
+   });
+
+   it('validates the content on every token (§3.0.0)', () => {
+      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+
+      checker.checkPToken(conditional, ec);
+
+      expect(contentValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
+   });
+
+   it('updates the state on every token (§3.0.0)', () => {
+      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+
+      checker.checkPToken(conditional, ec);
+
+      expect(contentUpdateState).toHaveBeenCalledWith(conditional, expect.any(Object));
    });
 
    it('validates an ATTLIST declaration', () => {

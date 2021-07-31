@@ -42,10 +42,9 @@ import {
    GENERAL_ENTITY_START_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
-   getFirstSToken,
 } from 'token';
 
-import { ElDeclType, ValidateState } from './validateState';
+import { ValidateState } from './validateState';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from './token/attListDeclarationValidate';
 import { charDataValidate } from './token/charDataValidate';
@@ -81,47 +80,9 @@ import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from './token/notationDeclarationValidate';
 import { elementDeclarationPreprocess } from './token/elementDeclarationPreprocess';
-import { strOrBlank } from 'sToken';
-import { validityConstraint } from './error/validityConstraint';
-
-const VID = validityConstraint.id;
-
-// Identifies a token if it in some way represents original XML Data
-function isXmlData(token: ParseToken): boolean {
-   switch (token.type) {
-      case ATTLIST_DECLARATION_PTOKEN:
-      case CDATA_PTOKEN:
-      case CHARDATA_PTOKEN:
-      case CHARREF_PTOKEN:
-      case COMMENT_PTOKEN:
-      case CONDITIONAL_PTOKEN:
-      case CONDITIONAL_CLOSE_PTOKEN:
-      case DOCTYPE_END_PTOKEN:
-      case DOCTYPE_START_PTOKEN:
-      case ELEMENT_DECLARATION_PTOKEN:
-      case ELEMENT_EMPTY_PTOKEN:
-      case ELEMENT_END_PTOKEN:
-      case ELEMENT_START_PTOKEN:
-      case GENERAL_ENTITY_DECLARATION_PTOKEN:
-      case GENERAL_ENTITY_END_PTOKEN:
-      case GENERAL_ENTITY_REFERENCE_PTOKEN:
-      case GENERAL_ENTITY_START_PTOKEN:
-      case NOTATION_DECLARATION_PTOKEN:
-      case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-      case PARAMETER_ENTITY_END_PTOKEN:
-      case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-      case PARAMETER_ENTITY_START_PTOKEN:
-      case PROCESSING_INSTRUCTION_PTOKEN:
-      case SPACE_PTOKEN:
-      case TEXT_PTOKEN:
-      case TEXTDECL_PTOKEN:
-      case UNKNOWNDECL_PTOKEN:
-      case XMLDECL_PTOKEN:
-         return true;
-      default:
-         return false;
-   }
-}
+import { isXmlData } from './isXmlData';
+import { contentUpdateState } from './contentUpdateState';
+import { contentValidate } from './contentValidate';
 
 class ValidityChecker {
    private version: ConformanceVersion;
@@ -142,22 +103,9 @@ class ValidityChecker {
    checkPToken(token: ParseToken, ec: ErrorCollector): void {
       // Shouldn't THIS be creating the error collector and making sure the context is correct?
       const wasAtEndBefore = this.state.elementContext.pastEnd;
-      const isXml = isXmlData(token);
-      const declDetails = this.state.elementContext.activeContext?.declDetails;
 
-      // §3.0.0 Validity Constraint: Element Valid
-      //     1.0/1-2: 1. The declaration matches EMPTY and the element has no content.
-      //     Other: The declaration matches EMPTY and the element has no content (not
-      //        even entity references, comments, PIs or white space).
-      //  [Note: we will never get here if an ElementEmpty was enccountered)
-      if (declDetails?.type === ElDeclType.EMPTY) {
-         ec.check(
-            isXml && token.type !== ELEMENT_END_PTOKEN,
-            VID.CONTENT_IN_EMPTY_ELEMENT,
-            [strOrBlank(declDetails.token.name)],
-            getFirstSToken(token),
-         );
-      }
+      contentValidate(token, this.state, ec);
+      this.state = contentUpdateState(token, this.state);
 
       switch (token.type) {
          case CONFORMANCE_VERSION:
@@ -272,7 +220,7 @@ class ValidityChecker {
          docEndValidate(this.state, ec);
       }
 
-      if (isXml) {
+      if (isXmlData(token)) {
          this.state = {
             ...this.state,
             dtdContext: {

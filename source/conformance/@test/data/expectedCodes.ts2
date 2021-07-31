@@ -44,19 +44,19 @@ const expectedInvalidCodes: IdToErrorMap = {
    'inv-not-sa14': 'CHILDREN_XTRA_CONTENT', // CDATA sections containing only whitespace do not match the nonterminal S, and cannot appear in these positions.
 
    optional01: 'CHILDREN_UNEXPECTED_END', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one is required.
-   optional02: 'INVALID_ELEMENT_IN_CONTENT', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing two children where one is required.
+   optional02: 'CONTENT_CONTAINS_INVALID_ELEMENT', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing two children where one is required.
    optional03: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where two are required.
-   optional04: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where two are required.
+   optional04: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where two are required.
    optional05: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (one construction of that model).
    optional06: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a second construction of that model).
    optional07: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a third construction of that model).
    optional08: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fourth construction of that model).
    optional09: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fifth construction of that model).
-   optional10: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a basic construction of that model).
-   optional11: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a second construction of that model).
-   optional12: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a third construction of that model).
-   optional13: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fourth construction of that model).
-   optional14: 'INVALID_ELEMENT_IN_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fifth construction of that model).
+   optional10: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a basic construction of that model).
+   optional11: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a second construction of that model).
+   optional12: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a third construction of that model).
+   optional13: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fourth construction of that model).
+   optional14: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fifth construction of that model).
    optional20: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a sixth construction of that model).
    optional21: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a seventh construction of that model).
    optional22: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (an eigth construction of that model).

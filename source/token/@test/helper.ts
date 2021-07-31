@@ -72,9 +72,9 @@ function makeAttListDeclaration(type = 'CDATA'): AttListDeclarationPToken {
    });
 }
 
-function makeCharData(): CharDataPToken {
+function makeCharData(text: string = 'test text'): CharDataPToken {
    return new CharDataPToken({
-      text: toSToken('test text'),
+      text: toSToken(text),
    });
 }
 
