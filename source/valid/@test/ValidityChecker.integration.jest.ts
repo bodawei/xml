@@ -441,7 +441,7 @@ describe('ValidityChecker (integration)', () => {
          &level1;
          </root>`,
          VID.ENTITYREF_EXTERNALLY_DECLARED,
-         done,
+         done!,
       );
    });
 
@@ -462,7 +462,19 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root att1="&level1;" />`,
          VID.ENTITYREF_EXTERNALLY_DECLARED,
-         done,
+         done!,
+      );
+   });
+
+   it('reports an error when anything, even a comment, appears between the start and end tags of an element declared to be empty (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root EMPTY>
+         ]>
+         <root><!-- not even this! --></root>`,
+         VID.CONTENT_IN_EMPTY_ELEMENT,
+         done!,
       );
    });
 

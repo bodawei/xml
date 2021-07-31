@@ -157,32 +157,6 @@ describe('elementStartValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error when the context is EMPTY', () => {
-      state = new ValidateState({
-         elementContext: {
-            ...state.elementContext,
-            activeContext: {
-               declDetails: {
-                  token: elementDeclaration,
-                  type: ElDeclType.EMPTY,
-               },
-               parentName: 'parentName',
-               stateId: 0,
-            },
-         },
-      });
-
-      elementStartValidate(elementStart, state, mockErrorCollector);
-
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
-         params: ['parentName'],
-         position: elementStart.name,
-         lastPosition: undefined,
-      });
-   });
-
    it('reports an error when the context is ANY, and the name is not a declared element', () => {
       state = new ValidateState({
          elementContext: {

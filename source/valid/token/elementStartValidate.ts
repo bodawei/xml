@@ -411,9 +411,6 @@ function elementStartValidate(
 
       if (context) {
          switch (context.declDetails.type) {
-            case ElDeclType.EMPTY:
-               ec.report(OLD_VID.CONTENT_IN_EMPTY_ELEMENT, [context.parentName]);
-               break;
             case ElDeclType.ANY:
                // §3.0.0 Validity Constraint: Element Valid
                //     4. The declaration matches ANY, and the types of any child

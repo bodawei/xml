@@ -22,10 +22,11 @@ import {
    makeParameterEntityDeclaration,
    makeParameterEntityReference,
    makeParameterEntityStart,
+   makeProcessingInstruction,
    makeXmlDecl,
 } from 'token-test';
 
-import { ValidateState } from '../validateState';
+import { ElDeclType, ValidateState } from '../validateState';
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from '../token/attListDeclarationValidate';
@@ -55,6 +56,10 @@ import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityD
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
 import { parameterEntityStartValidate } from '../token/parameterEntityStartValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
+import { validityConstraint } from '../error/validityConstraint';
+import { ElementDeclarationPToken } from 'pToken';
+
+const VID = validityConstraint.id;
 
 jest.mock('../token/attListDeclarationValidate');
 jest.mock('../token/attListDeclarationUpdateState');
@@ -127,6 +132,78 @@ describe('ValidityChecker (unit)', () => {
          ec,
          version,
       );
+   });
+
+   it('reports an error when the context is EMPTY, and any non-element end token is delivered (§3.0.0)', () => {
+      const newState = new ValidateState({
+         elementContext: {
+            activeContext: {
+               declDetails: {
+                  isExternalMarkupDeclaration: false,
+                  token: new ElementDeclarationPToken({
+                     declType: toSToken('EMPTY'),
+                     name: toSToken('elementName'),
+                     open: toSToken('<!'),
+                  }),
+                  type: ElDeclType.EMPTY,
+               },
+               parentName: 'elementName',
+               stateId: 0,
+            },
+            contextStack: [],
+            pastEnd: false,
+         },
+      });
+      (
+         elementStartUpdateState as jest.MockedFunction<typeof elementStartUpdateState>
+      ).mockReturnValue(newState);
+      (elementEndUpdateState as jest.MockedFunction<typeof elementEndUpdateState>).mockReturnValue(
+         newState,
+      );
+
+      checker.checkPToken(makeElementStart(), ec);
+      checker.checkPToken(makeProcessingInstruction(), ec);
+
+      // @ts-expect-error 2329/matchers
+      expect(ec).toReportValidityError({
+         id: VID.CONTENT_IN_EMPTY_ELEMENT,
+         lastPosition: undefined,
+         params: ['elementName'],
+         position: makeProcessingInstruction().open,
+      });
+   });
+
+   it('reports no error when the context is EMPTY, and an element end token is delivered (§3.0.0)', () => {
+      const newState = new ValidateState({
+         elementContext: {
+            activeContext: {
+               declDetails: {
+                  isExternalMarkupDeclaration: false,
+                  token: new ElementDeclarationPToken({
+                     declType: toSToken('EMPTY'),
+                     name: toSToken('elementName'),
+                     open: toSToken('<!'),
+                  }),
+                  type: ElDeclType.EMPTY,
+               },
+               parentName: 'elementName',
+               stateId: 0,
+            },
+            contextStack: [],
+            pastEnd: false,
+         },
+      });
+      (
+         elementStartUpdateState as jest.MockedFunction<typeof elementStartUpdateState>
+      ).mockReturnValue(newState);
+      (elementEndUpdateState as jest.MockedFunction<typeof elementEndUpdateState>).mockReturnValue(
+         newState,
+      );
+
+      checker.checkPToken(makeElementStart(), ec);
+      checker.checkPToken(makeElementEnd(), ec);
+
+      expect(ec.errors).toEqual([]);
    });
 
    it('stores only the first version passed to it', () => {

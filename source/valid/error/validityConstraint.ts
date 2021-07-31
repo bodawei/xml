@@ -84,6 +84,10 @@ const validityConstraint = new ErrorCodes({
          'The attribute "{1}" for element type "{0}" was declared externally, and its value will not be able to be accurately reported when standalone="yes" (§2.9.0).',
    },
 
+   CONTENT_IN_EMPTY_ELEMENT: {
+      code: 1139,
+      message: 'Found content in an element that should be empty ("{0}") (§3.0.0).',
+   },
    ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED: {
       code: 1136,
       message:

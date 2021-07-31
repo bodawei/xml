@@ -246,18 +246,6 @@ class CheckXTokenValidStream extends Transform {
       const declInfo = context.declInfo;
 
       if (declInfo.type === 'EMPTY_CONTENT') {
-         // §3.0.0 Validity Constraint: Element Valid
-         //     1.0/1-2: 1. The declaration matches EMPTY and the element has no content.
-         //     Other: The declaration matches EMPTY and the element has no content (not
-         //        even entity references, comments, PIs or white space).
-         //  [Note: we will never get here if an ElementEmpty was enccountered)
-         if (!(xToken.type === ELEMENT_END_XTOKEN)) {
-            this.pushValidityError(
-               ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
-               [declInfo.token.name],
-               sToken,
-            );
-         }
       } else if (declInfo.type === 'ANY_CONTENT') {
          // §3.0.0 Validity Constraint: Element Valid
          //  1.0/1-2: 4. The declaration matches ANY, and the types of any child
