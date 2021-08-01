@@ -128,6 +128,9 @@ It is worth calling out that the spec doesn't require that an ID attribute with 
 ### §3.3.2 Validity Constraint: Fixed Attribute Default
 No notes
 
+### §3.4.0 Proper Conditional Section/PE Nesting
+This is remarkably similar to the §2.8.0 validity constraint "Proper Declaration/PE Nesting", but this time applied to conditional sections. In the implementation, they share a certain amount of code. Aside from this, no notes.
+
 ### §4.2.2 Notation Declared
 This states that the NDATA name must match the declared name of a notation.
 

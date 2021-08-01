@@ -240,19 +240,6 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
-   it('reports an error when a parameter entity value does not include the whole of a conditional section (§2.8.0)', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-         <!DOCTYPE root [
-            <!ENTITY % problem "<![INCLUDE[ foo> ">
-            %problem; ]]>
-         ]>
-         <root/>`,
-         VID.PEREF_INVALID_CONDITIONAL_START_NESTING,
-         done!,
-      );
-   });
-
    it('reports an error when a document marked as standalone has an element with element content, that element is declaraed with an external markup declaration, and whitespace appears in the element (§2.9.0)', (done) => {
       expectError(
          `<?xml version="1.0" standalone="yes"?>
@@ -1026,6 +1013,71 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root attr1="bad" />`,
          VID.ELEMENTSTART_INVALID_FIXED,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include the whole of a conditional section (§3.4.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "<![INCLUDE[ foo> ">
+            %problem; ]]>
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_CONDITIONAL_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity value does not include only the close of a conditional section (§3.4.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "<![INCLUDE ">
+            %problem; [ foo ]]>
+         ]>
+         <root/>`,
+         VID.PEREF_INVALID_CONDITIONAL_START_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when the "[" of a conditional section start is in a parameter entity reference (§3.4.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "[ foo ]]>">
+            <![INCLUDE %problem; 
+         ]>
+         <root/>`,
+         VID.CONDITIONAL_BAD_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when the PE reference in a conditional section start includes the "[" and the "]]>" (§3.4.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "INCLUDE [ foo ]]>">
+            <![ %problem; 
+         ]>
+         <root/>`,
+         VID.CONDITIONAL_BAD_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when the PE reference in a conditional section start includes the "[" (§3.4.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % problem "INCLUDE [ foo ">
+            <![ %problem; ]]>
+         ]>
+         <root/>`,
+         VID.CONDITIONAL_BAD_NESTING,
          done!,
       );
    });

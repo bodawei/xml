@@ -134,14 +134,14 @@ class ConditionalStartExpander {
                newStart = {
                   ...newToken,
                   unexpanded: {
+                     includedBracket: true,
                      peRef: newToken.unexpanded.peRef,
                      propName: newToken.unexpanded.propName,
                      secondPropName: newToken.unexpanded.secondPropName,
-                     includedBracket: true,
                   },
                };
             }
-            this.done({ done: true, newStart, extraText: this.source });
+            this.done({ done: true, extraText: this.source, newStart });
          } else {
             this.source.continueText(); // eek
             this.done({ done: false, hack: this });

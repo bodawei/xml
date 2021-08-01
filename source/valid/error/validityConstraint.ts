@@ -83,6 +83,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'The attribute "{1}" for element type "{0}" was declared externally, and its value will not be able to be accurately reported when standalone="yes" (§2.9.0).',
    },
+   CONDITIONAL_BAD_NESTING: {
+      code: 1150,
+      message:
+         'Must not include "[" in the replacement text for a parameter entity (§3.4.0). Found in "{0}"',
+   },
    CONTENT_CONTAINS_INVALID_ELEMENT: {
       code: 1140,
       message:
@@ -255,12 +260,12 @@ const validityConstraint = new ErrorCodes({
    PEREF_INVALID_CONDITIONAL_END_NESTING: {
       code: 1131,
       message:
-         'The last character of a conditional section must not be found in the replacement text of a parameter entity reference when the first was not also there (§2.8.0).',
+         'The last character of a conditional section must not be found in the replacement text of a parameter entity reference when the first was not also there (§3.4.0).',
    },
    PEREF_INVALID_CONDITIONAL_START_NESTING: {
       code: 1132,
       message:
-         'The first character ("<") of a conditional section must not be found in the replacement text of a parameter entity reference when the last (">") was not also there (§2.8.0).',
+         'The first character ("<") of a conditional section must not be found in the replacement text of a parameter entity reference when the last (">") was not also there (§3.4.0).',
    },
    PEREF_INVALID_END_NESTING: {
       code: 1126,

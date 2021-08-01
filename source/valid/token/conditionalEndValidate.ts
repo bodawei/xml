@@ -14,13 +14,11 @@ function conditionalEndValidate(
    ec: ErrorCollector,
 ): void {
    ec.setPos(token.open);
-   // §2.8.0 733 Proper Declaration/PE nesting
-   //   Parameter-entity replacement text must be properly nested
-   //   with markup declarations. That is to say, if either
-   //   the first character or the last character of a markup declaration
-   //   (markupdecl above) is contained in the replacement text for
-   //   a parameter-entity reference, both must be contained in the
-   //   same replacement text.
+   // §3.4.0 Proper Conditional Section/PE Nesting
+   //    If any of the "<![", "[", or "]]>" of a conditional section is
+   //    contained in the replacement text for a parameter-entity
+   //    reference, all of them must be contained in the same
+   //    replacement text.
    const item = state.dtdContext.enclosingStack[state.dtdContext.enclosingStack.length - 1];
 
    if (item.type !== CONDITIONAL_PTOKEN) {
