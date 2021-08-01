@@ -5,11 +5,13 @@ import { warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { makeGeneralEntityReference } from 'token-test';
+import { makeGeneralEntityDeclaration, makeGeneralEntityReference } from 'token-test';
 
 import { generalEntityReferenceValidate } from '../generalEntityReferenceValidate';
-import { ValidityError } from '../../error/ValidityError';
 import { ValidateState } from '../../validateState';
+import { validityConstraint } from '../../error/validityConstraint';
+
+const VID = validityConstraint.id;
 
 describe('generalEntityReferenceValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -23,7 +25,9 @@ describe('generalEntityReferenceValidate (unit)', () => {
       state = new ValidateState({
          generalEntities: {
             testRef: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
             },
          },
       });
@@ -33,38 +37,106 @@ describe('generalEntityReferenceValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error when the declaration is not defined', () => {
+   it('reports no error when the declaration is not defined and standalone is set', () => {
       const ref = makeGeneralEntityReference();
       state = new ValidateState({
          generalEntities: {
             frog: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
             },
          },
+         isStandalone: true,
+      });
+
+      generalEntityReferenceValidate(ref, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('reports no error when the declaration is not defined and there is no external subset or perefs', () => {
+      const ref = makeGeneralEntityReference();
+      state = new ValidateState({
+         generalEntities: {
+            frog: {
+               isExternalMarkupDeclaration: false,
+               isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
+            },
+         },
+         hasExternalSubset: false,
+         hasPeRefs: false,
+         isStandalone: false,
+      });
+
+      generalEntityReferenceValidate(ref, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
+   });
+
+   it('reports an error when the declaration is not defined and there is an external subset', () => {
+      const ref = makeGeneralEntityReference();
+      state = new ValidateState({
+         generalEntities: {
+            frog: {
+               isExternalMarkupDeclaration: false,
+               isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
+            },
+         },
+         hasExternalSubset: true,
       });
 
       generalEntityReferenceValidate(ref, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.GEREF_UNDEFINED,
+         id: VID.GENERAL_ENTITY_UNDECLARED,
+         lastPosition: undefined,
          params: ['testRef'],
          position: ref.name,
+      });
+   });
+
+   it('reports an error when the declaration is not defined and there is are PE refs', () => {
+      const ref = makeGeneralEntityReference();
+      state = new ValidateState({
+         generalEntities: {
+            frog: {
+               isExternalMarkupDeclaration: false,
+               isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
+            },
+         },
+         hasPeRefs: true,
+      });
+
+      generalEntityReferenceValidate(ref, state, mockErrorCollector);
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportValidityError({
+         id: VID.GENERAL_ENTITY_UNDECLARED,
          lastPosition: undefined,
+         params: ['testRef'],
+         position: ref.name,
       });
    });
 
    it('reports no warning if a predefined entity has been declared', () => {
       const ref = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
          name: toSToken('amp'),
+         open: toSToken('&'),
       });
       state = new ValidateState({
          generalEntities: {
             amp: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
             },
          },
+         isStandalone: true,
       });
 
       generalEntityReferenceValidate(ref, state, mockErrorCollector);
@@ -74,15 +146,19 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
    it('reports a warning if a predefined entity has not been declared', () => {
       const ref = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
          name: toSToken('lt'),
+         open: toSToken('&'),
       });
       state = new ValidateState({
          generalEntities: {
             frog: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
             },
          },
+         hasExternalSubset: true,
+         isStandalone: false,
       });
 
       generalEntityReferenceValidate(ref, state, mockErrorCollector);
@@ -90,9 +166,9 @@ describe('generalEntityReferenceValidate (unit)', () => {
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
          id: warning.id.PREDEFINED_UNDECLARED,
+         lastPosition: undefined,
          params: ['lt'],
          position: ref.name,
-         lastPosition: undefined,
       });
    });
 });

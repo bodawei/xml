@@ -3,11 +3,11 @@
 import { ErrorCollector } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { validityConstraint } from '../error/validityConstraint';
 
-import { ValidityError } from '../error/ValidityError';
 import { ValidateState } from '../validateState';
 
-const VID = ValidityError.ID;
+const VID = validityConstraint.id;
 
 function parameterEntityReferenceValidate(
    token: ParameterEntityReferencePToken,
@@ -25,7 +25,13 @@ function parameterEntityReferenceValidate(
     *    in an entity declaration. ... The declaration of a parameter entity must
     *    precede any reference to it...
     */
-   ec.check(!state.parameterEntities[peDeclName], VID.PEREF_UNDEFINED, [peDeclName]);
+   // Theoretically we should check whether there is an external subset or PE refs...
+   // But, this IS a PERef, so there are some.
+   const applies = !state.isStandalone;
+
+   ec.check(!state.parameterEntities[peDeclName] && applies, VID.PARAMETER_ENTITY_UNDECLARED, [
+      peDeclName,
+   ]);
 }
 
 export { parameterEntityReferenceValidate };

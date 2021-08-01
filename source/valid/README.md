@@ -129,7 +129,14 @@ It is worth calling out that the spec doesn't require that an ID attribute with 
 No notes
 
 ### §3.4.0 Proper Conditional Section/PE Nesting
-This is remarkably similar to the §2.8.0 validity constraint "Proper Declaration/PE Nesting", but this time applied to conditional sections. In the implementation, they share a certain amount of code. Aside from this, no notes.
+This is remarkably similar to the §2.8.0 validity constraint "Proper Declaration/PE Nesting", but this time applied to conditional sections. No other notes.
+
+### §4.1.0 Entity Declared
+Although there are several different wordsing of this, the changes are minor, and this implementation doesn't consider them different.
+
+- 1.0/2 (and 1.1/1) specify that any direct or indirect GE references must precede the ATTLIST declaration. This follows from our implementation and I think is implicit from the start.
+- 1.0/4 and 1.1/2 alter the wording from "external subset or external parameter entities" to "external subset or parameter entity references". This, too, seems likely to have been interpreted this way all along.
+- 1.0/5 and 1.1/3 states that one does not have to explicitly state "standalong='yes'".
 
 ### §4.2.2 Notation Declared
 This states that the NDATA name must match the declared name of a notation.

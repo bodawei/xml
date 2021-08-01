@@ -18,6 +18,7 @@ function docTypeStartUpdateState(
          ...state.dtdContext,
          enclosingStack: [...state.dtdContext.enclosingStack, docTypePToken],
       },
+      hasExternalSubset: !!docTypePToken.externalId,
    };
 }
 

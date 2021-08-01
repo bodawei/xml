@@ -26,6 +26,7 @@ describe('parameterEntityStartUpdateState (unit)', () => {
             inExternalMarkupContext: true,
             inExternalSubset: false,
          },
+         hasPeRefs: true,
       });
    });
 });

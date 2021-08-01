@@ -45,6 +45,7 @@ import {
 } from 'token';
 
 import { ValidateState } from './validateState';
+import { entityDeclarationValueValidate } from './common/entityDeclarationValueValidate';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from './token/attListDeclarationValidate';
 import { charDataValidate } from './token/charDataValidate';
@@ -152,6 +153,7 @@ class ValidityChecker {
             this.state = elementStartUpdateState(token, this.state);
             break;
          case ELIDED_ENTITY_DECLARATION_PTOKEN:
+            entityDeclarationValueValidate(token, this.state, ec);
             this.state = elidedEntityDeclarationUpdateState(token, this.state);
             break;
          case EXTERNAL_SUBSET_END_TOKEN:

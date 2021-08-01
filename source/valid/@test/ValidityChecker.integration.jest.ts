@@ -64,33 +64,6 @@ describe('ValidityChecker (integration)', () => {
       });
    }
 
-   it('reports a general entity reference error', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-         <!DOCTYPE root [
-            <!ELEMENT root ANY>
-         ]>
-         <root>
-           &I-Am-Not-Defined;
-         </root>`,
-         ValidityError.ID.GEREF_UNDEFINED,
-         done!,
-      );
-   });
-
-   it('reports a parameter entity reference error', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-         <!DOCTYPE root [
-            <!ELEMENT root ANY>
-            %I-Am-Not-Defined;
-         ]>
-         <root/>`,
-         ValidityError.ID.PEREF_UNDEFINED,
-         done!,
-      );
-   });
-
    it('reports an error when the doctype does not match the root element (§2.8.0)', (done) => {
       expectError(
          `<?xml version="1.0"?>
@@ -1078,6 +1051,108 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.CONDITIONAL_BAD_NESTING,
+         done!,
+      );
+   });
+
+   it('reports an error when a general entity is not declared (§4.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % forceAPeRef "">
+            %forceAPeRef;
+         ]>
+         <root>
+           &I-Am-Not-Defined;
+         </root>`,
+         VID.GENERAL_ENTITY_UNDECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a general entity referenced from an attribute is not declared (§4.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               att1 CDATA>
+            <!ENTITY % forceAPeRef "">
+            %forceAPeRef;
+         ]>
+         <root att1="&I-Am-Not-Defined;" />`,
+         VID.GENERAL_ENTITY_UNDECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a general entity referenced from an ATTLIST is not declared (§4.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ATTLIST root
+               att1 CDATA "&I-Am-Not-Defined;">
+            <!ENTITY % forceAPeRef "">
+            %forceAPeRef;
+            ]>
+         <root/>`,
+         VID.GENERAL_ENTITY_UNDECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a parameter entity is not declared (§4.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            %I-Am-Not-Defined;
+         ]>
+         <root/>`,
+         VID.PARAMETER_ENTITY_UNDECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a PE referenced from another PE is not declared (§4.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % I-Am-Declared "%I-Am-NOT;">
+            %I-Am-Declared;
+         ]>
+         <root/>`,
+         VID.PARAMETER_ENTITY_UNDECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a PE referenced from a GE declaration is not declared (§4.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY I-Am-Declared "%I-Am-NOT;">
+         ]>
+         <root>&I-Am-Declared;</root>`,
+         VID.PARAMETER_ENTITY_UNDECLARED,
+         done!,
+      );
+   });
+
+   it('reports an error when a PE referenced from a PE from a GE declaration is not declared (§4.1.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ENTITY % I-Am-Also "%I-Am-NOT;">
+            <!ENTITY I-Am-Declared "%I-Am-Also;">
+         ]>
+         <root>&I-Am-Declared;</root>`,
+         VID.PARAMETER_ENTITY_UNDECLARED,
          done!,
       );
    });

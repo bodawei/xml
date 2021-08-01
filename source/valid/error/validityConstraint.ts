@@ -253,9 +253,19 @@ const validityConstraint = new ErrorCodes({
       message:
          'The entity "{0}" was declared externally, but was referenced in this document which is standalone="yes" (§2.9.0).',
    },
+   GENERAL_ENTITY_UNDECLARED: {
+      code: 1151,
+      message:
+         'The general entity named "{0}" was referenced, but it has no corresponding declaration (§4.1.0).',
+   },
    NOTATION_XTRA_DECLARATION: {
       code: 1102,
       message: 'Must not declare a NOTATION more than once (§4.7.0). Found "{0}".',
+   },
+   PARAMETER_ENTITY_UNDECLARED: {
+      code: 1151,
+      message:
+         'The parameter entity named "{0}" was referenced, but it has no corresponding declaration (§4.1.0).',
    },
    PEREF_INVALID_CONDITIONAL_END_NESTING: {
       code: 1131,

@@ -25,6 +25,7 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
+import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
 import { ValidateState } from '../validateState';
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
@@ -58,6 +59,7 @@ import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 import { contentValidate } from '../contentValidate';
 import { contentUpdateState } from '../contentUpdateState';
 
+jest.mock('../common/entityDeclarationValueValidate');
 jest.mock('../token/attListDeclarationValidate');
 jest.mock('../token/attListDeclarationUpdateState');
 jest.mock('../token/conditionalEndUpdateState');
@@ -297,11 +299,20 @@ describe('ValidityChecker (unit)', () => {
    it('updates the state when passed an elided entity declaration', () => {
       (elidedEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
       const peDecl = makeParameterEntityDeclaration();
-      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value); // typehack
+      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value);
 
       checker.checkPToken(elided, ec);
 
       expect(elidedEntityDeclarationUpdateState).toHaveBeenCalledWith(elided, expect.any(Object));
+   });
+
+   it('updates the state when passed an elided entity declaration', () => {
+      const peDecl = makeParameterEntityDeclaration();
+      const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value);
+
+      checker.checkPToken(elided, ec);
+
+      expect(entityDeclarationValueValidate).toHaveBeenCalledWith(elided, expect.any(Object), ec);
    });
 
    it('updates the state when passed an external subset end', () => {

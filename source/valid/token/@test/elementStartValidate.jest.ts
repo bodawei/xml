@@ -28,10 +28,12 @@ import { validityConstraint } from '../../error/validityConstraint';
 import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
 import { CmGraph } from '../../contentModal/cmGraphTypes';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
+import { attributeValueValidate } from '../../common/attributeValueValidate';
 
 const VID = validityConstraint.id;
 
 jest.mock('../ancestorPERefsValidate');
+jest.mock('../../common/attributeValueValidate');
 
 describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
@@ -1652,7 +1654,7 @@ describe('elementStartValidate (unit)', () => {
                },
                isStandalone,
             });
-            const elmentStart = new ElementStartPToken({
+            elementStart = new ElementStartPToken({
                attributes: [
                   {
                      name: toSToken('att1'),
@@ -1664,7 +1666,7 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('<!'),
             });
 
-            elementStartValidate(elmentStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, mockErrorCollector);
 
             if (pass) {
                expect(mockErrorCollector.errors).toEqual([]);
@@ -1678,6 +1680,29 @@ describe('elementStartValidate (unit)', () => {
                });
             }
          });
+      });
+
+      it('calls attributeValueValidate() for each attribute value (§4.1.0)', () => {
+         state = new ValidateState();
+         elementStart = new ElementStartPToken({
+            attributes: [
+               {
+                  name: toSToken('att1'),
+                  type: toSToken('CDATA'),
+                  value: [],
+               },
+            ],
+            name: toSToken('elementName'),
+            open: toSToken('<!'),
+         });
+
+         elementStartValidate(elementStart, state, mockErrorCollector);
+
+         expect(attributeValueValidate).toHaveBeenCalledWith(
+            elementStart.attributes[0].value,
+            state,
+            mockErrorCollector,
+         );
       });
 
       it('calls ancestorPERefsValidate() to validate ancestors for each geref found (§2.9.0)', () => {

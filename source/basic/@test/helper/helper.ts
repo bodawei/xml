@@ -51,7 +51,7 @@ class MockErrorCollector extends ErrorCollector {
       this.report = jasmine.createSpy('reportSpy').and.callFake(this.report);
    }
 
-   setPos(sToken?: SToken) {
+   setPos(sToken?: SToken): void {
       if (sToken) {
          this._lastNotNull = sToken;
       }
@@ -59,7 +59,7 @@ class MockErrorCollector extends ErrorCollector {
       this._lastPos = sToken;
    }
 
-   report(id: string, params?: Array<string>, position?: Position) {
+   report(id: string, params?: Array<string>, position?: Position): void {
       const info: ErrorInfo = {
          position: position || this._lastPos,
          id,
@@ -72,7 +72,7 @@ class MockErrorCollector extends ErrorCollector {
       this.errors.push(info);
    }
 
-   check(condition: any, id: string, params?: Array<string>, position?: Position) {
+   check(condition: any, id: string, params?: Array<string>, position?: Position): void {
       if (condition) {
          if (params) {
             this.report(id, params, position);
@@ -82,8 +82,13 @@ class MockErrorCollector extends ErrorCollector {
       }
    }
 
-   reportError(id: string, constructor: ErrConstFunc, params: Array<string>, position?: Position) {
-      this.report(id, params);
+   reportError(
+      id: string,
+      constructor: ErrConstFunc,
+      params: Array<string>,
+      position?: Position,
+   ): void {
+      this.report(id, params, position);
    }
 }
 

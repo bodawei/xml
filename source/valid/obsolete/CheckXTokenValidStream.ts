@@ -6,8 +6,6 @@ import { warning, WarningToken } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
 import {
-   GENERAL_ENTITY_REFERENCE_XTOKEN,
-   PARAMETER_ENTITY_REFERENCE_XTOKEN,
    AttListDeclarationXToken,
    AttDefinitionXToken,
    ContentModelX,
@@ -29,7 +27,6 @@ import {
 import { ValidityError } from 'valid';
 
 import { ContentSpecType } from 'xToken';
-import { LiteralValueX } from 'xToken';
 
 interface XToken {
    type: string;
@@ -139,20 +136,6 @@ class CheckXTokenValidStream extends Transform {
    }
 
    _transform(xToken: XToken, _: string, done: StreamCallback) {
-      const pToken = (xToken.pToken || {}).open;
-
-      /*
-       * §4.1: Validity Constraint: Entity Declared
-       *    In a document with an external subset or external parameter entities
-       *    with "standalone='no'", the Name given in the entity reference must
-       *    match that in an entity declaration.
-       */
-      if (xToken.type === GENERAL_ENTITY_REFERENCE_XTOKEN) {
-         this.pushValidityError(ValidityError.ID.GEREF_UNDEFINED, [xToken.name], pToken);
-      } else if (xToken.type === PARAMETER_ENTITY_REFERENCE_XTOKEN) {
-         this.pushValidityError(ValidityError.ID.PEREF_UNDEFINED, [xToken.name], pToken);
-      }
-
       if (xToken.type === NOTATION_DECLARATION_XTOKEN) {
       } else if (xToken instanceof AttListDeclarationXToken) {
          this.validateAttListDecl(xToken);
@@ -342,39 +325,6 @@ class CheckXTokenValidStream extends Transform {
             }
          }
       }
-
-      // §4.1: Validity Constraint: Entity Declared
-      //    ...Similarly, the declaration of a general entity must precede any attribute-list
-      //    declaration containing a default value with a direct or indirect reference
-      //    to that general entity.
-      this.checkAttributeValueForUnexpandedReferences(
-         attDef.value,
-         ValidityError.ID.ATTLISTDECL_REFERENCE_UNDEFINED,
-         attDef.name,
-         attList.elementName,
-         pToken.open,
-      );
-   }
-
-   private checkAttributeValueForUnexpandedReferences(
-      value: LiteralValueX,
-      errorId: string,
-      attrName: string,
-      elementName: string,
-      context?: SToken,
-   ) {
-      for (const element of value) {
-         if (
-            element.type === GENERAL_ENTITY_REFERENCE_XTOKEN ||
-            element.type === PARAMETER_ENTITY_REFERENCE_XTOKEN
-         ) {
-            this.pushValidityError(
-               errorId,
-               [(element as any).name, attrName, elementName],
-               context,
-            );
-         }
-      }
    }
 
    private validateElementDecl(elDecl: ElementDeclarationXToken): void {
@@ -428,20 +378,7 @@ class CheckXTokenValidStream extends Transform {
 
    private validateElementStart(elStart: ElementStartXToken | ElementEmptyXToken) {
       const elementDecl = this.elementDeclarations[elStart.name];
-      const attributes = elStart.attributes;
       const pTokenOpen = elStart.pToken && elStart.pToken.open;
-
-      for (const attribute of attributes) {
-         // §4.1: Validity Constraint: Entity Declared
-         //    ...the Name given in the entity reference must match that in an entity declaration...
-         this.checkAttributeValueForUnexpandedReferences(
-            attribute.value,
-            ValidityError.ID.ELEMENTSTART_REFERENCE_UNDEFINED,
-            attribute.name,
-            elStart.name,
-            pTokenOpen,
-         );
-      }
 
       if (!elementDecl) {
          return;

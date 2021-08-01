@@ -26,7 +26,8 @@ import {
 import { validityConstraint } from '../../error/validityConstraint';
 import { ValidateState } from '../../validateState';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
-// jest.mock goes crazy if I try to mock the file
+// jest.mock goes crazy if I try to mock these functions
+import * as validator from '../../common/attributeValueValidate';
 import * as ancestor from '../ancestorPERefsValidate';
 
 const VID = validityConstraint.id;
@@ -165,6 +166,11 @@ describe('attListDeclarationValidate (unit)', () => {
             const geDecl = makeGeneralEntityDeclaration();
             state = new ValidateState({
                generalEntities: {
+                  lt: {
+                     isExternalMarkupDeclaration,
+                     isInternalValue: true,
+                     token: geDecl,
+                  },
                   testRef: {
                      isExternalMarkupDeclaration,
                      isInternalValue: true,
@@ -238,6 +244,33 @@ describe('attListDeclarationValidate (unit)', () => {
             mockErrorCollector,
          );
       });
+   });
+
+   it('calls attributeValueValidate() to validate entity references (§4.1.0)', () => {
+      const end = makeGeneralEntityEnd();
+      const start = makeGeneralEntityStart();
+      state = new ValidateState({});
+      const attListDecl = new AttListDeclarationPToken({
+         attDefs: [
+            {
+               name: toSToken('att1'),
+               type: toSToken('CDATA'),
+               value: [start, end],
+            },
+         ],
+         elementName: toSToken('elName'),
+         extra: toSToken('>'),
+         open: toSToken('<!'),
+      });
+      jest.spyOn(validator, 'attributeValueValidate');
+
+      attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+      expect(validator.attributeValueValidate).toHaveBeenCalledWith(
+         attListDecl.attDefs[0].value,
+         state,
+         mockErrorCollector,
+      );
    });
 
    describe('ID Attribute Default (§3.3.1)', () => {

@@ -15,6 +15,7 @@ function parameterEntityStartUpdateState(
          enclosingStack: [...state.dtdContext.enclosingStack, startPToken],
          inExternalMarkupContext: true,
       },
+      hasPeRefs: true,
    };
 }
 

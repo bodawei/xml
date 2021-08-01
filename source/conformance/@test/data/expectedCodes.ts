@@ -182,34 +182,34 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P60-ibm60i03.xml': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // great
    'ibm-invalid-P60-ibm60i04.xml': 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', //great
    'ibm-invalid-P68-ibm-not-wf-P67-ibm68i01.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      id: 'GENERAL_ENTITY_UNDECLARED',
       message: /entity "ge2" was/,
    },
    'ibm-invalid-P68-ibm-not-wf-P67-ibm68i02.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      id: 'GENERAL_ENTITY_UNDECLARED',
       message: /entity "ge1" was/,
    },
    'ibm-invalid-P68-ibm-not-wf-P67-ibm68i03.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      id: 'GENERAL_ENTITY_UNDECLARED',
       message: /entity "ge2" was/,
    },
    'ibm-invalid-P68-ibm-not-wf-P67-ibm68i04.xml': {
-      id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
+      id: 'GENERAL_ENTITY_UNDECLARED',
       message: /entity "ge1" was/,
    },
    'ibm-invalid-P69-ibm-not-wf-P69-ibm69i01.xml': {
-      id: 'PEREF_UNDEFINED',
+      id: 'PARAMETER_ENTITY_UNDECLARED',
       message: /named "pe2" was/,
    },
    'ibm-invalid-P69-ibm-not-wf-P69-ibm69i02.xml': {
-      id: 'PEREF_UNDEFINED',
+      id: 'PARAMETER_ENTITY_UNDECLARED',
       message: /named "pe1" was/,
    },
    'ibm-invalid-P69-ibm-not-wf-P69-ibm69i03.xml': {
-      id: 'PEREF_UNDEFINED',
+      id: 'PARAMETER_ENTITY_UNDECLARED',
       message: /named "pe3" was/,
    },
-   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i04.xml': 'PEREF_UNDEFINED',
+   'ibm-invalid-P69-ibm-not-wf-P69-ibm69i04.xml': 'PARAMETER_ENTITY_UNDECLARED',
    'ibm-invalid-P76-ibm76i01.xml': 'ENTITYDECL_UNDECLARED_NOTATION',
    'ibm-invalid-P89-ibm89n06.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
    'ibm-invalid-P89-ibm89n07.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
@@ -234,7 +234,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-e3e-06g': 'ATTLISTDECL_BAD_NOTATION_DEFAULT', // Default values for NOTATION attributes must match one of the enumerated values.
    'rmt-e3e-06h': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // Default values for enumerated attributes must match one of the enumerated values.
    'rmt-e2e-9b': 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // great - An attribute default must be syntactically correct even if unused
-   'rmt-e3e-13': 'GEREF_UNDEFINED', // good - Even internal parameter entity references are enough to make undeclared entities into mere validity errors rather than well-formedness errors.
+   'rmt-e3e-13': 'GENERAL_ENTITY_UNDECLARED', // good - Even internal parameter entity references are enough to make undeclared entities into mere validity errors rather than well-formedness errors.
 
    'rmt-e2e-14': 'ATTLISTDECL_EXTRA_TEXT', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
    'rmt-e2e-15a': 'CONTENT_IN_EMPTY_ELEMENT', // OK (but twice) Empty content can't contain an entity reference
@@ -2261,15 +2261,15 @@ const expectedNotWfCodes: IdToErrorMap = {
 };
 
 const expectedErrorCodes: IdToErrorMap = {
-   'not-wf-not-sa-005': 'PEREF_UNDEFINED', // Tests the_Entity Declared_VC by referring to an undefined parameter entity within an external entity.
-   'ibm-invalid-P68-ibm68i01.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge2" is referred in the file ibm68i01.dtd", but not declared.
-   'ibm-invalid-P68-ibm68i02.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge1" is referred before declared in the file ibm68i01.dtd".
-   'ibm-invalid-P68-ibm68i03.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge2" is referred in the file ibm68i03.ent", but not declared.
-   'ibm-invalid-P68-ibm68i04.xml': 'ATTLISTDECL_REFERENCE_UNDEFINED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge1" is referred before declared in the file ibm68i04.ent".
-   'ibm-invalid-P69-ibm69i01.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The Name "pe2" in the PEReference in the file ibm69i01.dtd does not match the Name of any declared PE.
-   'ibm-invalid-P69-ibm69i02.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe1" is referred before declared in the file ibm69i02.dtd
-   'ibm-invalid-P69-ibm69i03.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The Name "pe3" in the PEReference in the file ibm69i03.ent does not match the Name of any declared PE.
-   'ibm-invalid-P69-ibm69i04.xml': 'PEREF_UNDEFINED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe2" is referred before declared in the file ibm69i04.ent.
+   'not-wf-not-sa-005': 'PARAMETER_ENTITY_UNDECLARED', // Tests the_Entity Declared_VC by referring to an undefined parameter entity within an external entity.
+   'ibm-invalid-P68-ibm68i01.xml': 'GENERAL_ENTITY_UNDECLARED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge2" is referred in the file ibm68i01.dtd", but not declared.
+   'ibm-invalid-P68-ibm68i02.xml': 'GENERAL_ENTITY_UNDECLARED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge1" is referred before declared in the file ibm68i01.dtd".
+   'ibm-invalid-P68-ibm68i03.xml': 'GENERAL_ENTITY_UNDECLARED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge2" is referred in the file ibm68i03.ent", but not declared.
+   'ibm-invalid-P68-ibm68i04.xml': 'GENERAL_ENTITY_UNDECLARED', // Tests invalid EntityRef which is against P68 VC: Entity Declared. The GE with the name "ge1" is referred before declared in the file ibm68i04.ent".
+   'ibm-invalid-P69-ibm69i01.xml': 'PARAMETER_ENTITY_UNDECLARED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The Name "pe2" in the PEReference in the file ibm69i01.dtd does not match the Name of any declared PE.
+   'ibm-invalid-P69-ibm69i02.xml': 'PARAMETER_ENTITY_UNDECLARED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe1" is referred before declared in the file ibm69i02.dtd
+   'ibm-invalid-P69-ibm69i03.xml': 'PARAMETER_ENTITY_UNDECLARED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The Name "pe3" in the PEReference in the file ibm69i03.ent does not match the Name of any declared PE.
+   'ibm-invalid-P69-ibm69i04.xml': 'PARAMETER_ENTITY_UNDECLARED', // Tests invalid PEReference which is against P69 VC: Entity Declared. The PE with the name "pe2" is referred before declared in the file ibm69i04.ent.
    'ibm-not-wf-P69-ibm69n05.xml': 'REFERENCE_NO_DECLARATION', // good - Based on E29 substantial source: minutes XML-Syntax 1999-02-24 E38 in XML 1.0 Errata, this WFC does not apply to P69, but the VC Entity declared still apply. Tests PEReference which is against P69 WFC: Entity Declared. The PE with the name "paaa" is referred before declared in the DTD.
    'rmt-e2e-34': 'ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC', // A non-deterministic content model is an error even if the element type is not used.
    'rmt-e2e-55': 'REFERENCE_INVALID_UNPARSED', // ok - Has a UTF-8 LSEP in the XML declaration (to be made an error in PR)

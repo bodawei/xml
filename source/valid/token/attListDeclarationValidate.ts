@@ -4,6 +4,7 @@ import { ErrorCollector, isName, isNmToken } from 'basic';
 import { AttListDeclarationPToken, AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken } from 'token';
+import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validityConstraint } from '../error/validityConstraint';
 import { ValidityError } from '../error/ValidityError';
@@ -88,6 +89,8 @@ function checkDefaultValue(
          ancestorPERefsValidate(element, state, ec);
       }
    }
+
+   attributeValueValidate(attDef.value, state, ec);
 
    const actualType = attType === '' ? 'ENUMERATION' : attType;
    if (attDef.value.length === 0 || !CODEMAP[actualType]) {

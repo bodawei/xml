@@ -5,6 +5,7 @@ import { ErrorCollector, isName, isNmToken } from 'basic';
 import { AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } from 'token';
+import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validityConstraint } from '../error/validityConstraint';
 import { ElDeclType, ValidateState } from '../validateState';
@@ -275,6 +276,8 @@ function checkValue(
             ancestorPERefsValidate(element, state, ec);
          }
       }
+
+      attributeValueValidate(att.value, state, ec);
    }
 }
 

@@ -120,6 +120,8 @@ interface ValidateStateProps {
       lastPToken?: ParseToken;
    };
 
+   hasExternalSubset?: boolean;
+   hasPeRefs?: boolean;
    isStandalone?: boolean;
    confVer?: ConformanceVersion;
 }
@@ -191,6 +193,10 @@ class ValidateState {
 
    readonly isStandalone: boolean;
 
+   readonly hasExternalSubset: boolean;
+
+   readonly hasPeRefs: boolean;
+
    confVer: ConformanceVersion;
 
    constructor(otherState?: ValidateStateProps | ValidateState) {
@@ -220,6 +226,8 @@ class ValidateState {
          inExternalSubset: otherState?.dtdContext?.inExternalSubset ?? false,
          lastPToken: otherState?.dtdContext?.lastPToken,
       };
+      this.hasExternalSubset = otherState?.hasExternalSubset ?? false;
+      this.hasPeRefs = otherState?.hasPeRefs ?? false;
       this.isStandalone = otherState?.isStandalone ?? false;
       this.confVer = otherState?.confVer ?? new ConformanceVersion(1, 5);
    }

@@ -1,6 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { ExternalIdP } from 'pToken';
+import { toSToken } from 'sToken';
+import { DocTypeStartPToken } from 'token';
 
 import { makeDocTypeStart } from 'token-test';
 
@@ -27,6 +30,21 @@ describe('docTypeStartUpdateState (unit)', () => {
             inExternalMarkupContext: false,
             inExternalSubset: false,
          },
+         hasExternalSubset: false,
       });
+   });
+
+   it('adds whether there is an external subset to the state', () => {
+      const start = new DocTypeStartPToken({
+         declType: toSToken('DOCTYPE'),
+         externalId: new ExternalIdP({}),
+         name: toSToken('root'),
+         open: toSToken('<!'),
+         openSubset: toSToken('['),
+      });
+
+      const newState = docTypeStartUpdateState(start, state);
+
+      expect(newState.hasExternalSubset).toEqual(true);
    });
 });

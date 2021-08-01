@@ -19,12 +19,8 @@ import {
    NotationDeclarationXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
-   ParameterEntityReferenceXToken,
-   GeneralEntityReferenceXToken,
    XmlDeclarationXToken,
 } from 'xToken';
-
-import { InternalSubsetStartToken, InternalSubsetEndToken } from 'token';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 
@@ -201,26 +197,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.end();
 
             expectNoErrorsOrWarnings(validator, done);
-         });
-
-         it('reports an error if an attribute value has a reference to an entity that has no declaration (§4.1)', (done) => {
-            const startToken = new ElementStartXToken('testEl', [
-               {
-                  name: 'anAttr',
-                  value: [new GeneralEntityReferenceXToken('undeclared')],
-               },
-            ]);
-
-            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(startToken);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_REFERENCE_UNDEFINED, [
-               'undeclared',
-               'anAttr',
-               'testEl',
-            ]);
-            expectStream(validator, expected, done);
          });
       });
 
@@ -742,33 +718,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             ]);
             expectStream(validator, expected, done);
          });
-
-         it('reports an error if an attribute default has no declaration for a reference (§4.1)', (done) => {
-            const elDecl1 = new ElementDeclarationXToken('testEl', ContentSpecType.ANY, undefined);
-            const attListDecl1 = new AttListDeclarationXToken('testEl', [
-               {
-                  name: 'textAttr',
-                  type: AttDefinitionType.CDATA,
-                  value: [new GeneralEntityReferenceXToken('foo')],
-                  enumeration: undefined,
-                  defaultType: undefined,
-               },
-            ]);
-
-            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new InternalSubsetStartToken());
-            validator.write(elDecl1);
-            validator.write(attListDecl1);
-            validator.write(new InternalSubsetEndToken());
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_REFERENCE_UNDEFINED, [
-               'foo',
-               'textAttr',
-               'testEl',
-            ]);
-            expectStream(validator, expected, done);
-         });
       });
 
       describe('ENTITY', () => {
@@ -818,26 +767,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.end();
 
             expectNoErrorsOrWarnings(validator, done);
-         });
-      });
-
-      describe('entity reference', () => {
-         it('reports an error if a general entity reference is found, but there is no declaration for it (§4.1)', (done) => {
-            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new GeneralEntityReferenceXToken('undeclared'));
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.GEREF_UNDEFINED, ['undeclared']);
-            expectStream(validator, expected, done);
-         });
-
-         it('reports an error if a parameter entity reference is found, but there is no declaration for it (§4.1)', (done) => {
-            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-            validator.write(new ParameterEntityReferenceXToken('undeclared'));
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.PEREF_UNDEFINED, ['undeclared']);
-            expectStream(validator, expected, done);
          });
       });
 

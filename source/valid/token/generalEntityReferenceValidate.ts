@@ -3,12 +3,12 @@
 import { ErrorCollector, warning, WarningToken } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { validityConstraint } from '../error/validityConstraint';
 
-import { ValidityError } from '../error/ValidityError';
 import { ValidateState } from '../validateState';
 
 const PREDEFINED = ['lt', 'gt', 'quot', 'apos', 'amp'];
-const VEID = ValidityError.ID;
+const VID = validityConstraint.id;
 const WARNID = warning.id;
 
 function generalEntityReferenceValidate(
@@ -18,8 +18,9 @@ function generalEntityReferenceValidate(
 ): void {
    const geDeclName = strOrBlank(token.name);
    const isDeclared = !!state.generalEntities[geDeclName];
+   const hasExtSubsetOrPeRefs = state.hasExternalSubset || state.hasPeRefs;
 
-   if (isDeclared) {
+   if (isDeclared || !hasExtSubsetOrPeRefs || state.isStandalone) {
       return;
    }
 
@@ -32,7 +33,7 @@ function generalEntityReferenceValidate(
     *    in an entity declaration. ...
     */
    if (!PREDEFINED.includes(geDeclName)) {
-      ec.report(VEID.GEREF_UNDEFINED, [geDeclName]);
+      ec.report(VID.GENERAL_ENTITY_UNDECLARED, [geDeclName]);
    } else {
       /*
        * §4.1.0: Validity Constraint: Entity Declared

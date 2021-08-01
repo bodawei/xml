@@ -1,7 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityDeclarationPToken } from 'pToken';
+import { ParameterEntityDeclarationPToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
 import { ValidateState } from '../validateState';
 
@@ -11,14 +12,26 @@ function parameterEntityDeclarationUpdateState(
 ): ValidateState {
    const elName = strOrBlank(el.name);
 
-   if (state.parameterEntities[elName] || elName === '') {
-      return state;
+   const replacementText = el.value;
+   let hasPeRefs = false;
+
+   for (const element of replacementText) {
+      hasPeRefs =
+         hasPeRefs ||
+         element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN ||
+         element.type === PARAMETER_ENTITY_START_PTOKEN;
    }
 
-   const replacementText = el.value;
+   if (state.parameterEntities[elName] || elName === '') {
+      return {
+         ...state,
+         hasPeRefs: state.hasPeRefs || hasPeRefs,
+      };
+   }
 
    return {
       ...state,
+      hasPeRefs: state.hasPeRefs || hasPeRefs,
       parameterEntities: {
          ...state.parameterEntities,
          [elName]: {

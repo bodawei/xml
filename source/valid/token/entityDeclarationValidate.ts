@@ -6,6 +6,7 @@ import { strOrBlank } from 'sToken';
 
 import { ValidateState } from '../validateState';
 import { validityConstraint } from '../error/validityConstraint';
+import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
 
 const VID = validityConstraint.id;
 
@@ -27,6 +28,8 @@ function entityDeclarationValidate(
 
       ec.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ENTITY']);
    }
+
+   entityDeclarationValueValidate(token, state, ec);
 }
 
 export { entityDeclarationValidate };
