@@ -23,7 +23,7 @@ function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollec
    ec.setPos(token.text);
 
    /*
-    * §3.2.1: An element type has element content when elements of that type must
+    * §3.0.0: An element type has element content when elements of that type must
     *    contain only child elements (no character data), optionally separated by
     *    white space (characters matching the nonterminal S).]
     */

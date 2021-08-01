@@ -2,18 +2,10 @@
 
 import { Transform } from 'stream';
 
-import {
-   ConformanceVersion,
-   isSpace,
-   ERROR_TYPE,
-   warning,
-   WarningToken,
-   CONFORMANCE_VERSION,
-} from 'basic';
+import { warning, WarningToken } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
 import {
-   CHARDATA_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
    AttListDeclarationXToken,
@@ -29,13 +21,9 @@ import {
    GeneralEntityDeclarationXToken,
    GeneralEntityStartXToken,
    isContentNameX,
-   NotationDeclarationXToken,
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
-   SpaceXToken,
    ParameterEntityDeclarationXToken,
-   isTextXToken,
-   TextXToken,
    NOTATION_DECLARATION_XTOKEN,
 } from 'xToken';
 import { ValidityError } from 'valid';
@@ -109,8 +97,6 @@ class CheckXTokenValidStream extends Transform {
 
    private entityInfo: EntityInfoMap = {};
 
-   private notations: { [name: string]: XToken };
-
    private attrDefsByElementName: ElementAttributes;
 
    private elementDeclarations: { [name: string]: ElementDeclInfo };
@@ -119,68 +105,15 @@ class CheckXTokenValidStream extends Transform {
 
    private currentContext: ContentContext | undefined;
 
-   private confVer: ConformanceVersion = new ConformanceVersion();
-
-   /* istanbul ignore next */
    constructor() {
       super({
          objectMode: true,
       });
 
-      this.notations = {};
       this.attrDefsByElementName = {};
       this.elementDeclarations = {};
       this.contentStack = [];
       this.currentContext = undefined;
-   }
-
-   /*
-    * §3.3.3: Attribute value normalization.
-    * This should be done whether or not we are validating.
-    */
-   normalizeAttributeValue(attribute: any, attInfo: AttInfo | undefined): any {
-      // typeHack
-      const attrDef: AttDefinitionXToken | undefined = attInfo ? attInfo.def : undefined;
-      const isCData = !attrDef || attrDef.type === 'CDATA';
-      let prevHadTrailingSpace = true; // consider the start to already be space terminated
-      let prevPiece: { text: string } | undefined;
-      const newValue = [];
-
-      for (let index = 0; index < attribute.value.length; index++) {
-         const piece = attribute.value[index];
-
-         if (!isTextXToken(piece)) {
-            newValue.push(piece);
-            continue;
-         }
-
-         let str = piece.text;
-         const cDataText = str.replace(/[ \r\n\t]/g, ' ');
-
-         if (isCData) {
-            str = cDataText;
-         } else {
-            str = str.replace(/[ \r\n\t]+/g, ' ');
-
-            if (prevHadTrailingSpace) {
-               str = str.replace(/^ /, '');
-            }
-
-            prevHadTrailingSpace = str.endsWith(' ');
-         }
-
-         const newPiece = new TextXToken(str);
-         newValue.push(newPiece);
-         if (!isCData) {
-            prevPiece = newPiece;
-         }
-      }
-
-      if (prevHadTrailingSpace && prevPiece) {
-         prevPiece.text = prevPiece.text.replace(/ $/, ''); // typeHack
-      }
-
-      return newValue;
    }
 
    private pushValidityError(
@@ -207,26 +140,6 @@ class CheckXTokenValidStream extends Transform {
 
    _transform(xToken: XToken, _: string, done: StreamCallback) {
       const pToken = (xToken.pToken || {}).open;
-      const context = this.currentContext;
-
-      if (xToken.type !== ERROR_TYPE) {
-         /*
-          * §3.2.1
-          *    An element type has **element content** when elements of that type
-          *    must contain only child elements (no character data), optionally
-          *    separated by white space (characters matching the nonterminal S)
-          * Because of this we convert any CHARDATA types which contain only whitespace here into spaces
-          */
-         if (
-            xToken.type === CHARDATA_XTOKEN &&
-            context &&
-            context.declInfo.type === 'ELEMENT_CONTENT'
-         ) {
-            if (isSpace(xToken.text, this.confVer.version)) {
-               xToken = new SpaceXToken(xToken.text);
-            }
-         }
-      }
 
       /*
        * §4.1: Validity Constraint: Entity Declared
@@ -241,8 +154,6 @@ class CheckXTokenValidStream extends Transform {
       }
 
       if (xToken.type === NOTATION_DECLARATION_XTOKEN) {
-         const notationDecl = xToken as NotationDeclarationXToken;
-         this.notations[notationDecl.name] = notationDecl;
       } else if (xToken instanceof AttListDeclarationXToken) {
          this.validateAttListDecl(xToken);
       } else if (
@@ -297,10 +208,6 @@ class CheckXTokenValidStream extends Transform {
       } else if (xToken instanceof ElementEndXToken) {
          this.contentStack.pop();
          this.currentContext = this.contentStack[this.contentStack.length - 1];
-      }
-
-      if (xToken.type === CONFORMANCE_VERSION) {
-         this.confVer = xToken as any;
       }
 
       this.push(xToken);
@@ -520,22 +427,9 @@ class CheckXTokenValidStream extends Transform {
    }
 
    private validateElementStart(elStart: ElementStartXToken | ElementEmptyXToken) {
-      const elemAttrDef = this.attrDefsByElementName[elStart.name];
       const elementDecl = this.elementDeclarations[elStart.name];
       const attributes = elStart.attributes;
       const pTokenOpen = elStart.pToken && elStart.pToken.open;
-
-      // §3.3.3: Normalization
-      for (let index = 0; index < attributes.length; index++) {
-         const attrName = attributes[index].name;
-         const attrInfo = elemAttrDef && elemAttrDef.attributes[attrName];
-
-         // eeek
-         (attributes[index] as any).value = this.normalizeAttributeValue(
-            attributes[index],
-            attrInfo,
-         );
-      }
 
       for (const attribute of attributes) {
          // §4.1: Validity Constraint: Entity Declared

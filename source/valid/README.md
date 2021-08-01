@@ -77,12 +77,16 @@ Personally, I find the last a little puzzling, for why shouldn't comments, PI's 
    - The second says CharData, general entity references, comments and processing instructions (implicitly, that expand to other allowed values)
    - The third adds to the second CDATA sections.
 Interestingly, CharRefs are never explicitly allowed. This assumes they are OK in the third case, because we have xmlconf tests like ibm-1-1-valid-P77-ibm77v30.xml which enforce this.  To be honest, that this was not allowed before is implausible, and like CDATA and the Mixed stuff, it seems profoundly likely that this was intended from the start.  Yet, as with this whole constraint, the wording across the four clauses is inconsistent and hard to build a strict implementation from.
+- ANY This has the same variations as MIXED, with the same constraints about what can and can not appear in it.
 
 ### §3.2.0 Unique Element Type Declaration
 No commentary.
 
 ### §3.1.0 Attribute Value Type
 This particular constraint says "The attribute must have been declared; the value must be of the type declared for it." The first portion (that the attribute has been declared) is straight forward. However, it is not at all clear to this validator how to enforce the second part beyond the various validity constraints from §3.3.1.
+
+### §3.2.1 Proper Group/PE Nesting
+No commentary.
 
 ### §3.2.2 No Duplicate Types
 No commentary.

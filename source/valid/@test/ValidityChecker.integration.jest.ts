@@ -64,21 +64,6 @@ describe('ValidityChecker (integration)', () => {
       });
    }
 
-   it('reports an error the current context is a ELEMENT context, but we are not at the end', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-      <!DOCTYPE root [
-         <!ELEMENT one ANY>
-         <!ELEMENT two ANY>
-         <!ENTITY % CM '(one | two'>
-         <!ELEMENT root %CM;>
-      ]>
-      <root/>`,
-         ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-         done!,
-      );
-   });
-
    it('reports a general entity reference error', (done) => {
       expectError(
          `<?xml version="1.0"?>
@@ -599,45 +584,6 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
-   it('reports an error when a general entity declaration has a NDATA name that has not been declared (§4.2.2)', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-         <!DOCTYPE root [
-            <!NOTATION bar SYSTEM "http://somewhere.com">
-            <!ENTITY bar SYSTEM "http://somewhere-else.com" NDATA baz>
-         ]>
-         <root/>`,
-         VID.ENTITYDECL_UNDECLARED_NOTATION,
-         done!,
-      );
-   });
-
-   it('reports an error when a notation name is declared more than once (§4.7.0)', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-         <!DOCTYPE root [
-            <!NOTATION bar SYSTEM "http://somewhere.com">
-            <!NOTATION bar SYSTEM "http://somewhere-else.com">
-         ]>
-         <root/>`,
-         VID.NOTATION_XTRA_DECLARATION,
-         done!,
-      );
-   });
-
-   it('reports an error when a MIXED element declaration (§3.2.0)', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
-         <!DOCTYPE root [
-            <!ELEMENT root ANY>
-            <!ELEMENT root ANY>
-         ]>
-         <root />`,
-         VID.ELEMENT_EXTRA_DECLARATION,
-         done!,
-      );
-   });
-
    it('reports an error when an attribute has not been declared (§3.1.0)', (done) => {
       expectError(
          `<?xml version="1.0"?>
@@ -646,6 +592,34 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root foo="bar"/>`,
          VID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+         done!,
+      );
+   });
+
+   it('reports an error when a MIXED element declaration (§3.2.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+            <!DOCTYPE root [
+               <!ELEMENT root ANY>
+               <!ELEMENT root ANY>
+            ]>
+            <root />`,
+         VID.ELEMENT_EXTRA_DECLARATION,
+         done!,
+      );
+   });
+
+   it('reports an error the current context is a ELEMENT context, but we are not at the end (§3.2.1)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+      <!DOCTYPE root [
+         <!ELEMENT one ANY>
+         <!ELEMENT two ANY>
+         <!ENTITY % CM '(one | two'>
+         <!ELEMENT root %CM;>
+      ]>
+      <root/>`,
+         VID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
          done!,
       );
    });
@@ -1052,6 +1026,32 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root attr1="bad" />`,
          VID.ELEMENTSTART_INVALID_FIXED,
+         done!,
+      );
+   });
+
+   it('reports an error when a general entity declaration has a NDATA name that has not been declared (§4.2.2)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!NOTATION bar SYSTEM "http://somewhere.com">
+            <!ENTITY bar SYSTEM "http://somewhere-else.com" NDATA baz>
+         ]>
+         <root/>`,
+         VID.ENTITYDECL_UNDECLARED_NOTATION,
+         done!,
+      );
+   });
+
+   it('reports an error when a notation name is declared more than once (§4.7.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!NOTATION bar SYSTEM "http://somewhere.com">
+            <!NOTATION bar SYSTEM "http://somewhere-else.com">
+         ]>
+         <root/>`,
+         VID.NOTATION_XTRA_DECLARATION,
          done!,
       );
    });

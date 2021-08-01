@@ -22,7 +22,6 @@ import {
    ParameterEntityReferenceXToken,
    GeneralEntityReferenceXToken,
    XmlDeclarationXToken,
-   TextXToken,
 } from 'xToken';
 
 import { InternalSubsetStartToken, InternalSubsetEndToken } from 'token';
@@ -222,109 +221,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                'testEl',
             ]);
             expectStream(validator, expected, done);
-         });
-
-         describe('normalization', () => {
-            it('replaces non-space white characters with spaces in CDATA', (done) => {
-               const elDecl1 = new ElementDeclarationXToken(
-                  'testEl',
-                  ContentSpecType.ANY,
-                  undefined,
-               );
-               const attListDecl1 = new AttListDeclarationXToken('testEl', [
-                  {
-                     name: 'textAttr',
-                     type: AttDefinitionType.CDATA,
-                     enumeration: undefined,
-                     value: [],
-                     defaultType: AttDefaultType.REQUIRED,
-                  },
-               ]);
-               const startToken1 = new ElementStartXToken('testEl', [
-                  {
-                     name: 'textAttr',
-                     value: [
-                        new TextXToken('  this\tis\nfun. \t\n but a\rcan not actually happen  '),
-                     ],
-                  },
-               ]);
-
-               validator.write(elDecl1);
-               validator.write(attListDecl1);
-               validator.write(startToken1);
-               validator.end();
-
-               gatherStreamResults<any>(validator, (tokens) => {
-                  expect(tokens[2].attributes[0].value[0].text).toEqual(
-                     '  this is fun.    but a can not actually happen  ',
-                  );
-                  done();
-               });
-            });
-
-            it('replaces non-space white characters with spaces in a non-CDATA attribute', (done) => {
-               const elDecl1 = new ElementDeclarationXToken(
-                  'testEl',
-                  ContentSpecType.ANY,
-                  undefined,
-               );
-               const attListDecl1 = new AttListDeclarationXToken('testEl', [
-                  {
-                     name: 'idRefs',
-                     type: AttDefinitionType.IDREFS,
-                     enumeration: undefined,
-                     value: [],
-                     defaultType: AttDefaultType.REQUIRED,
-                  },
-               ]);
-               const startToken1 = new ElementStartXToken('testEl', [
-                  {
-                     name: 'idRefs',
-                     value: [
-                        new TextXToken('   one\ttwo'),
-                        new TextXToken('\nthree '),
-                        new TextXToken('four '),
-                     ],
-                  },
-               ]);
-
-               validator.write(elDecl1);
-               validator.write(attListDecl1);
-               validator.write(startToken1);
-               validator.end();
-
-               gatherStreamResults<any>(validator, (tokens) => {
-                  expect(tokens[2].attributes[0].value).toEqual([
-                     new TextXToken('one two'),
-                     new TextXToken(' three '),
-                     new TextXToken('four'),
-                  ]);
-                  done();
-               });
-            });
-
-            it('treats an attribute on an element without an ATTLIST as CDATA', (done) => {
-               const elDecl1 = new ElementDeclarationXToken(
-                  'testEl',
-                  ContentSpecType.ANY,
-                  undefined,
-               );
-               const startToken1 = new ElementStartXToken('testEl', [
-                  {
-                     name: 'undefinedAttribute',
-                     value: [new TextXToken('   one\ttwo \nthree four')],
-                  },
-               ]);
-
-               validator.write(elDecl1);
-               validator.write(startToken1);
-               validator.end();
-
-               gatherStreamResults<any>(validator, (tokens) => {
-                  expect(tokens[1].attributes[0].value[0].text).toEqual('   one two  three four');
-                  done();
-               });
-            });
          });
       });
 

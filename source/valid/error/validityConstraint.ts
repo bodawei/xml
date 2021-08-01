@@ -141,6 +141,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'The Mixed content spec for element declaration "{0}" must not have the same type specified multiple times (§3.2.2). Found: "{1}".',
    },
+   ELEMENTDECL_PEREF_PARENS_UNBALANCED: {
+      code: 1148,
+      message:
+         'The replacement text for the parameter entity "{1}" was not properly nested in the element declaration "{0}" (§3.2.1).',
+   },
    ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED: {
       code: 1138,
       message:

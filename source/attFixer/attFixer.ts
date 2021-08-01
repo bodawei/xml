@@ -223,12 +223,57 @@ function normalizeAttr(
    }
 
    return {
-      value: newValue,
-      normalized,
       dtdChangedNormalization,
+      normalized,
+      value: newValue,
    };
 }
 
+// CheckXTokenValidStream noralization.. is same?
+// normalizeAttributeValue(attribute: any, attInfo: AttInfo | undefined): any {
+//    // typeHack
+//    const attrDef: AttDefinitionXToken | undefined = attInfo ? attInfo.def : undefined;
+//    const isCData = !attrDef || attrDef.type === 'CDATA';
+//    let prevHadTrailingSpace = true; // consider the start to already be space terminated
+//    let prevPiece: { text: string } | undefined;
+//    const newValue = [];
+
+//    for (let index = 0; index < attribute.value.length; index++) {
+//       const piece = attribute.value[index];
+
+//       if (!isTextXToken(piece)) {
+//          newValue.push(piece);
+//          continue;
+//       }
+
+//       let str = piece.text;
+//       const cDataText = str.replace(/[ \r\n\t]/g, ' ');
+
+//       if (isCData) {
+//          str = cDataText;
+//       } else {
+//          str = str.replace(/[ \r\n\t]+/g, ' ');
+
+//          if (prevHadTrailingSpace) {
+//             str = str.replace(/^ /, '');
+//          }
+
+//          prevHadTrailingSpace = str.endsWith(' ');
+//       }
+
+//       const newPiece = new TextXToken(str);
+//       newValue.push(newPiece);
+//       if (!isCData) {
+//          prevPiece = newPiece;
+//       }
+//    }
+
+//    if (prevHadTrailingSpace && prevPiece) {
+//       prevPiece.text = prevPiece.text.replace(/ $/, ''); // typeHack
+//    }
+
+//    return newValue;
+// }
 /*
  * Go through each attribute and normalize its values
  */

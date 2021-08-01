@@ -551,7 +551,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+         id: VID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
          lastPosition: undefined,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,

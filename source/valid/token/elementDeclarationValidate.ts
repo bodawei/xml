@@ -20,7 +20,6 @@ import {
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ValidityError } from '../error/ValidityError';
 import { validityConstraint } from '../error/validityConstraint';
 import { DeclarationDetails, ElDeclType, ValidateState } from '../validateState';
 
@@ -145,7 +144,7 @@ function validateEntities(
       //    contained in the replacement text for a parameter entity, both
       //    must be contained in the same replacement text.
       if (depth !== 0) {
-         ec.report(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED, [elName, entityName]);
+         ec.report(VID.ELEMENTDECL_PEREF_PARENS_UNBALANCED, [elName, entityName]);
       }
 
       // §3.2.1 For interoperability, if a parameter-entity reference appears
