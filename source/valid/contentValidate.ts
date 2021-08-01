@@ -119,8 +119,9 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
       ) {
          ec.report(VID.CONTENT_XTRA_SPACE, [strOrBlank(token.name)], lastToken.text);
       }
-   } else if (declDetails?.type === ElDeclType.MIXED) {
+   } else if (declDetails?.type === ElDeclType.MIXED || declDetails?.type === ElDeclType.ANY) {
       // §3.0.0 Validity Constraint: Element Valid
+      //    For Mixed
       //    1.0/1: The declaration matches Mixed and the content consists of
       //       character data and child elements whose types match names in the content model.
       //    1.0/3 and 1.1/1: The declaration matches Mixed and the content (after
@@ -131,6 +132,16 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
       //       replacing any entity references with their replacement text) consists
       //       of character data (including CDATA sections), comments, PIs and
       //       child elements whose types match names in the content model.
+      //    For ANY (this is effectively the same as MIXED as far as these are concerned.
+      //    1.0/1: The declaration matches ANY, and the types of any child elements
+      //       have been declared.
+      //    1.0/3 and 1.1/1: The declaration matches ANY, and the content (after
+      //       replacing any entity references with their replacement text) consists
+      //       of character data and child elements whose types have been declared.
+      //    1.0/4 and 1.1/2: The declaration matches ANY, and the content (after
+      //       replacing any entity references with their replacement text) consists
+      //       of character data, CDATA sections, comments, PIs and child elements
+      //       whose types have been declared.
       const allowsComments = (ver === 1.0 && ed >= 3) || ver === 1.1;
       const allowsCdata = (ver === 1.0 && ed >= 4) || (ver === 1.1 && ed >= 2);
       let okType =
@@ -156,7 +167,9 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
 
       ec.check(
          isXml && !okType,
-         VID.CONTENT_IN_MIXED_ELEMENT,
+         declDetails.type === ElDeclType.MIXED
+            ? VID.CONTENT_IN_MIXED_ELEMENT
+            : VID.CONTENT_IN_ANY_ELEMENT,
          [strOrBlank(declDetails.token.name), String(ver), String(ed), token.type],
          getFirstSToken(token),
       );

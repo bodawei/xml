@@ -88,6 +88,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'Found an element type, "{1}" in an "{0}" elment at a position it is not allowed (§3.0.0).',
    },
+   CONTENT_IN_ANY_ELEMENT: {
+      code: 1144,
+      message:
+         'Found invalid syntax in an ANY element "{0}", which is not allowed there in XML {1}/{2} (§3.0.0). Found {3}.',
+   },
    CONTENT_IN_ELEMENT_ELEMENT: {
       code: 1141,
       message:
@@ -126,6 +131,10 @@ const validityConstraint = new ErrorCodes({
       code: 1101,
       message:
          'The name of the root element must match the type "{0}" in the document type declaration (§2.8.0). Found "{1}".',
+   },
+   ELEMENT_UNDECLARED: {
+      code: 1147,
+      message: ' Element found without a corresponding declaration (§3.0.0). Found "{0}".',
    },
    ELEMENTDECL_MIXED_DUPLICATE_NAME: {
       code: 1124,

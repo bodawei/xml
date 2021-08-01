@@ -472,6 +472,18 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error an element start named an element that has not been declared (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+         ]>
+         <root><a/></root>`,
+         VID.ELEMENT_UNDECLARED,
+         done!,
+      );
+   });
+
    it('reports an error when anything, even a comment, appears between the start and end tags of an element declared to be empty (§3.0.0)', (done) => {
       expectError(
          `<?xml version="1.0"?>
@@ -567,6 +579,21 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root> <a/><a/><![CDATA[wow]]><b/></root>`,
          VID.CONTENT_IN_MIXED_ELEMENT,
+         done!,
+         new ConformanceVersion(1.0, 1),
+      );
+   });
+
+   it('reports an error a CDATA section is found in an ANY element 1.0/1 (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root ANY>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+         ]>
+         <root> <a/><a/><![CDATA[wow]]><b/></root>`,
+         VID.CONTENT_IN_ANY_ELEMENT,
          done!,
          new ConformanceVersion(1.0, 1),
       );

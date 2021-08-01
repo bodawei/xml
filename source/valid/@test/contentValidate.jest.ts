@@ -392,6 +392,45 @@ describe('conentValidate (unit)', () => {
                expect(ec.errors).toEqual([]);
             }
          });
+
+         it(`${pass ? 'does not report' : 'reports'} an error when a ${
+            token.type
+         } token is found in an element with an ANY content in ${version}/${edition} (§3.0.0)`, () => {
+            const state = new ValidateState({
+               confVer: new ConformanceVersion(version, edition),
+               elementContext: {
+                  activeContext: {
+                     declDetails: {
+                        isExternalMarkupDeclaration: false,
+                        token: new ElementDeclarationPToken({
+                           name: toSToken('elementName'),
+                           open: toSToken('<!'),
+                        }),
+                        type: ElDeclType.ANY,
+                     },
+                     lastToken: undefined,
+                     parentName: 'elementName',
+                     stateId: 0,
+                  },
+                  contextStack: [],
+                  pastEnd: false,
+               },
+            });
+
+            contentValidate(token, state, ec);
+
+            if (!pass) {
+               // @ts-expect-error 2329/matchers
+               expect(ec).toReportValidityError({
+                  id: VID.CONTENT_IN_ANY_ELEMENT,
+                  lastPosition: undefined,
+                  params: ['elementName', String(version), String(edition), token.type],
+                  position: getFirstSToken(token),
+               });
+            } else {
+               expect(ec.errors).toEqual([]);
+            }
+         });
       });
    });
 });

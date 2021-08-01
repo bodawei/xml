@@ -14,7 +14,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'inv-dtd01': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC
    'inv-dtd02': 'ENTITYDECL_UNDECLARED_NOTATION', // Tests the "Notation Declared" VC by using an undeclared notation name.
    'inv-dtd03': 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the "Element Valid" VC (clause 2) by omitting a required element.
-   el01: 'UNDECLARED_ELEMENT', // Tests the Element Valid VC (clause 4) by including an undeclared child element.
+   el01: 'ELEMENT_UNDECLARED', // Tests the Element Valid VC (clause 4) by including an undeclared child element.
    el02: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1) by including elements in an EMPTY content model.
    el03: 'CONTENT_MIXED_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 3) by including a child element not permitted by a mixed content model.
    el04: 'ELEMENT_EXTRA_DECLARATION', // Tests the Unique Element Type Declaration VC.
@@ -88,59 +88,59 @@ const expectedInvalidCodes: IdToErrorMap = {
    utf16l: 'error', // Tests reading an invalid "little endian" UTF-16 document
    empty: 'CONTENT_IN_ELEMENT_ELEMENT', // CDATA section containing only white space does not match the nonterminal S, and cannot appear in these positions.
 
-   'o-p01pass1': 'UNDECLARED_ELEMENT', // no prolog
-   'o-p01pass3': 'UNDECLARED_ELEMENT', // Misc items after the document
-   'o-p03pass1': 'UNDECLARED_ELEMENT', // all valid S characters
-   'o-p04pass1': 'UNDECLARED_ELEMENT', // names with all valid ASCII characters, and one from each other class in NameChar
-   'o-p05pass1': 'UNDECLARED_ELEMENT', // various valid Name constructions
-   'o-p10pass1': 'UNDECLARED_ELEMENT', // But this is not what it is trying to show -  valid attribute values
+   'o-p01pass1': 'ELEMENT_UNDECLARED', // no prolog
+   'o-p01pass3': 'ELEMENT_UNDECLARED', // Misc items after the document
+   'o-p03pass1': 'ELEMENT_UNDECLARED', // all valid S characters
+   'o-p04pass1': 'ELEMENT_UNDECLARED', // names with all valid ASCII characters, and one from each other class in NameChar
+   'o-p05pass1': 'ELEMENT_UNDECLARED', // various valid Name constructions
+   'o-p10pass1': 'ELEMENT_UNDECLARED', // But this is not what it is trying to show -  valid attribute values
    'o-p06fail1': 'ELEMENTSTART_IDREFS_NOT_NAME', // meh - Requires at least one name.
    'o-p08fail1': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // at least one Nmtoken is required.
    'o-p08fail2': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // an invalid Nmtoken character.
-   'o-p14pass1': 'UNDECLARED_ELEMENT', // valid CharData
-   'o-p15pass1': 'UNDECLARED_ELEMENT', // valid comments
+   'o-p14pass1': 'ELEMENT_UNDECLARED', // valid CharData
+   'o-p15pass1': 'ELEMENT_UNDECLARED', // valid comments
    'o-p16pass1': 'PI_TARGET_HAS_XML', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p16pass2': 'UNDECLARED_ELEMENT', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p16pass3': 'UNDECLARED_ELEMENT', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p18pass1': 'UNDECLARED_ELEMENT', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
-   'o-p22pass1': 'UNDECLARED_ELEMENT', // prolog can be empty
-   'o-p22pass2': 'UNDECLARED_ELEMENT', // XML declaration only
-   'o-p22pass3': 'UNDECLARED_ELEMENT', // XML decl and Misc
-   'o-p23pass1': 'UNDECLARED_ELEMENT', // Test shows a valid XML declaration along with version info.
-   'o-p23pass2': 'UNDECLARED_ELEMENT', // Test shows a valid XML declaration along with encoding declaration.
-   'o-p23pass3': 'UNDECLARED_ELEMENT', // Test shows a valid XML declaration along with Standalone Document Declaration.
-   'o-p23pass4': 'UNDECLARED_ELEMENT', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
-   'o-p24pass1': 'UNDECLARED_ELEMENT', // Test shows a prolog that has the VersionInfo delimited by double quotes.
-   'o-p24pass2': 'UNDECLARED_ELEMENT', // Test shows a prolog that has the VersionInfo delimited by single quotes.
-   'o-p24pass3': 'UNDECLARED_ELEMENT', // Test shows whitespace is allowed in prolog before version info.
-   'o-p24pass4': 'UNDECLARED_ELEMENT', // Test shows whitespace is allowed in prolog on both sides of equal sign.
-   'o-p25pass1': 'UNDECLARED_ELEMENT', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
-   'o-p25pass2': 'UNDECLARED_ELEMENT', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
-   'o-p26pass1': 'UNDECLARED_ELEMENT', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
-   'o-p27pass1': 'UNDECLARED_ELEMENT', // Comments are valid as the Misc part of the prolog.
-   'o-p27pass2': 'UNDECLARED_ELEMENT', // Processing Instructions are valid as the Misc part of the prolog.
-   'o-p27pass3': 'UNDECLARED_ELEMENT', // Whitespace is valid as the Misc part of the prolog.
-   'o-p27pass4': 'UNDECLARED_ELEMENT', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
-   'o-p32pass1': 'UNDECLARED_ELEMENT', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
-   'o-p32pass2': 'UNDECLARED_ELEMENT', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
-   'o-p39pass1': 'UNDECLARED_ELEMENT', // Empty element tag may be used for any element which has no content.
-   'o-p39pass2': 'UNDECLARED_ELEMENT', // Character data is valid element content.
-   'o-p40pass1': 'UNDECLARED_ELEMENT', // Elements content can be empty.
-   'o-p40pass2': 'UNDECLARED_ELEMENT', // Whitespace is valid within a Start-tag.
-   'o-p40pass3': 'UNDECLARED_ELEMENT', // Attributes are valid within a Start-tag.
-   'o-p40pass4': 'UNDECLARED_ELEMENT', // Whitespace and Multiple Attributes are valid within a Start-tag.
-   'o-p41pass1': 'UNDECLARED_ELEMENT', // Attributes are valid within a Start-tag.
-   'o-p41pass2': 'UNDECLARED_ELEMENT', // Whitespace is valid within a Start-tags Attribute.
-   'o-p42pass1': 'UNDECLARED_ELEMENT', // Test shows proper syntax for an End-tag.
-   'o-p42pass2': 'UNDECLARED_ELEMENT', // Whitespace is valid after name in End-tag.
-   'o-p44pass1': 'UNDECLARED_ELEMENT', // Valid display of an Empty Element Tag.
-   'o-p44pass2': 'UNDECLARED_ELEMENT', // Empty Element Tags can contain an Attribute.
-   'o-p44pass3': 'UNDECLARED_ELEMENT', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
-   'o-p44pass4': 'UNDECLARED_ELEMENT', // Whitespace is valid after the name in an Empty Element Tag.
-   'o-p44pass5': 'UNDECLARED_ELEMENT', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
-   'o-p66pass1': 'UNDECLARED_ELEMENT', // valid character references
-   'o-p74pass1': 'UNDECLARED_ELEMENT', // PEDef is either an entity value or an external id
-   'o-p75pass1': 'UNDECLARED_ELEMENT', // valid external identifiers
+   'o-p16pass2': 'ELEMENT_UNDECLARED', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+   'o-p16pass3': 'ELEMENT_UNDECLARED', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+   'o-p18pass1': 'ELEMENT_UNDECLARED', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
+   'o-p22pass1': 'ELEMENT_UNDECLARED', // prolog can be empty
+   'o-p22pass2': 'ELEMENT_UNDECLARED', // XML declaration only
+   'o-p22pass3': 'ELEMENT_UNDECLARED', // XML decl and Misc
+   'o-p23pass1': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration along with version info.
+   'o-p23pass2': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration along with encoding declaration.
+   'o-p23pass3': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration along with Standalone Document Declaration.
+   'o-p23pass4': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
+   'o-p24pass1': 'ELEMENT_UNDECLARED', // Test shows a prolog that has the VersionInfo delimited by double quotes.
+   'o-p24pass2': 'ELEMENT_UNDECLARED', // Test shows a prolog that has the VersionInfo delimited by single quotes.
+   'o-p24pass3': 'ELEMENT_UNDECLARED', // Test shows whitespace is allowed in prolog before version info.
+   'o-p24pass4': 'ELEMENT_UNDECLARED', // Test shows whitespace is allowed in prolog on both sides of equal sign.
+   'o-p25pass1': 'ELEMENT_UNDECLARED', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
+   'o-p25pass2': 'ELEMENT_UNDECLARED', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
+   'o-p26pass1': 'ELEMENT_UNDECLARED', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
+   'o-p27pass1': 'ELEMENT_UNDECLARED', // Comments are valid as the Misc part of the prolog.
+   'o-p27pass2': 'ELEMENT_UNDECLARED', // Processing Instructions are valid as the Misc part of the prolog.
+   'o-p27pass3': 'ELEMENT_UNDECLARED', // Whitespace is valid as the Misc part of the prolog.
+   'o-p27pass4': 'ELEMENT_UNDECLARED', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
+   'o-p32pass1': 'ELEMENT_UNDECLARED', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p32pass2': 'ELEMENT_UNDECLARED', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p39pass1': 'ELEMENT_UNDECLARED', // Empty element tag may be used for any element which has no content.
+   'o-p39pass2': 'ELEMENT_UNDECLARED', // Character data is valid element content.
+   'o-p40pass1': 'ELEMENT_UNDECLARED', // Elements content can be empty.
+   'o-p40pass2': 'ELEMENT_UNDECLARED', // Whitespace is valid within a Start-tag.
+   'o-p40pass3': 'ELEMENT_UNDECLARED', // Attributes are valid within a Start-tag.
+   'o-p40pass4': 'ELEMENT_UNDECLARED', // Whitespace and Multiple Attributes are valid within a Start-tag.
+   'o-p41pass1': 'ELEMENT_UNDECLARED', // Attributes are valid within a Start-tag.
+   'o-p41pass2': 'ELEMENT_UNDECLARED', // Whitespace is valid within a Start-tags Attribute.
+   'o-p42pass1': 'ELEMENT_UNDECLARED', // Test shows proper syntax for an End-tag.
+   'o-p42pass2': 'ELEMENT_UNDECLARED', // Whitespace is valid after name in End-tag.
+   'o-p44pass1': 'ELEMENT_UNDECLARED', // Valid display of an Empty Element Tag.
+   'o-p44pass2': 'ELEMENT_UNDECLARED', // Empty Element Tags can contain an Attribute.
+   'o-p44pass3': 'ELEMENT_UNDECLARED', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
+   'o-p44pass4': 'ELEMENT_UNDECLARED', // Whitespace is valid after the name in an Empty Element Tag.
+   'o-p44pass5': 'ELEMENT_UNDECLARED', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
+   'o-p66pass1': 'ELEMENT_UNDECLARED', // valid character references
+   'o-p74pass1': 'ELEMENT_UNDECLARED', // PEDef is either an entity value or an external id
+   'o-p75pass1': 'ELEMENT_UNDECLARED', // valid external identifiers
    'o-e2': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Validity Constraint: No duplicate tokens
    'ibm-invalid-P28-ibm28i01.xml': 'ELEMENT_MISMATCH_ROOT_TYPE', // great
    'ibm-invalid-P32-ibm32i01.xml': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // great
@@ -149,7 +149,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P39-ibm39i01.xml': 'CONTENT_IN_EMPTY_ELEMENT', // great
    'ibm-invalid-P39-ibm39i02.xml': 'CONTENT_IN_ELEMENT_ELEMENT', // good
    'ibm-invalid-P39-ibm39i03.xml': 'CONTENT_MIXED_CONTAINS_INVALID_ELEMENT', // great
-   'ibm-invalid-P39-ibm39i04.xml': 'UNDECLARED_ELEMENT', // great
+   'ibm-invalid-P39-ibm39i04.xml': 'ELEMENT_UNDECLARED', // great
    'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
    'ibm-invalid-P41-ibm41i02.xml': 'ELEMENTSTART_INVALID_FIXED', // great
    'ibm-invalid-P45-ibm45i01.xml': 'ELEMENT_EXTRA_DECLARATION', // great
@@ -211,13 +211,13 @@ const expectedInvalidCodes: IdToErrorMap = {
    },
    'ibm-invalid-P69-ibm-not-wf-P69-ibm69i04.xml': 'PEREF_UNDEFINED',
    'ibm-invalid-P76-ibm76i01.xml': 'ENTITYDECL_UNDECLARED_NOTATION',
-   'ibm-invalid-P89-ibm89n06.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n07.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n08.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n09.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n10.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n11.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n12.xml': 'UNDECLARED_ELEMENT', // good - Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n06.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n07.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n08.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n09.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n10.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n11.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n12.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
 
    'ibm-1-1-valid-P46-ibm46i01.xml': 'ELEMENT_CONTENT_BAD_SPACE', // ok - An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
    'ibm-1-1-valid-P46-ibm46i02.xml': 'ELEMENT_CONTENT_BAD_SPACE', // ok - An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
@@ -244,9 +244,9 @@ const expectedInvalidCodes: IdToErrorMap = {
    'rmt-e2e-15g': 'CONTENT_IN_ELEMENT_ELEMENT', // ok - Element content can't contain character reference to whitespace
    'rmt-e2e-15h': 'CONTENT_IN_ELEMENT_ELEMENT', // ok - Element content can't contain entity reference if replacement text is character reference to whitespace
    'rmt-e2e-20': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // Tokens, after normalization, must be separated by space, not other whitespace characters
-   'rmt-015': 'UNDECLARED_ELEMENT', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-017': 'UNDECLARED_ELEMENT', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-018': 'UNDECLARED_ELEMENT', // ok - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-015': 'ELEMENT_UNDECLARED', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-017': 'ELEMENT_UNDECLARED', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-018': 'ELEMENT_UNDECLARED', // ok - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
    'rmt-030': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-032': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-036': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
@@ -283,11 +283,11 @@ const expectedInvalidCodes: IdToErrorMap = {
    'invalid-bo-5': 'error', // Two byte order marks in general entity produce only one (little-endian)
    'invalid-bo-6': 'error', // Two byte order marks in general entity produce only one (utf-8)
    // These are not inalid as of the specified version, but they are not well formed. Why i nthis list?
-   'invalid-sa-140': 'UNDECLARED_ELEMENT', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
-   'invalid-sa-141': 'UNDECLARED_ELEMENT', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
-   'x-rmt5-014': 'UNDECLARED_ELEMENT', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-   'x-rmt5-016': 'UNDECLARED_ELEMENT', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-   'x-rmt5-019': 'UNDECLARED_ELEMENT', // ok - Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
+   'invalid-sa-140': 'ELEMENT_UNDECLARED', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
+   'invalid-sa-141': 'ELEMENT_UNDECLARED', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
+   'x-rmt5-014': 'ELEMENT_UNDECLARED', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-016': 'ELEMENT_UNDECLARED', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-019': 'ELEMENT_UNDECLARED', // ok - Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
    'hst-bh-005': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:xml is an attribute as far as validation is concerned and must be declared
    'hst-bh-006': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:foo is an attribute as far as validation is concerned and must be declared
 };

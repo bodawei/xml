@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { isAugmentedAttribute } from 'attFixer';
 import { ErrorCollector, isName, isNmToken } from 'basic';
@@ -6,13 +6,11 @@ import { AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } from 'token';
 
-import { ValidityError } from '../error/ValidityError';
 import { validityConstraint } from '../error/validityConstraint';
 import { ElDeclType, ValidateState } from '../validateState';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
 const VID = validityConstraint.id;
-const OLD_VID = ValidityError.ID;
 const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 type LocalDetials = Record<string, AttInfo | undefined>;
@@ -393,7 +391,10 @@ function elementStartValidate(
 
    ec.setPos(el.name);
 
-   ec.check(!state.elementDeclarations[elName], OLD_VID.UNDECLARED_ELEMENT, [elName]);
+   // §3.0.0 Validity Constraint: Element Valid
+   //     An element is valid if there is a declaration matching elementdecl where
+   //     the Name matches the element type, ...
+   ec.check(!state.elementDeclarations[elName], VID.ELEMENT_UNDECLARED, [elName]);
 
    // If we aren't in any context, then there's nothing to validate
    if (!state.elementContext.pastEnd) {
@@ -411,6 +412,8 @@ function elementStartValidate(
 
       if (context) {
          switch (context.declDetails.type) {
+            case ElDeclType.EMPTY:
+            // §3.0.0 No validity concerned handled here. These are handled in contentValidate
             case ElDeclType.ANY:
                // §3.0.0 Validity Constraint: Element Valid
                //     4. The declaration matches ANY, and the types of any child

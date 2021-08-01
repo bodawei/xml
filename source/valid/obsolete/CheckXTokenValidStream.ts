@@ -13,19 +13,9 @@ import {
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
 import {
-   CDATA_SECTION_XTOKEN,
    CHARDATA_XTOKEN,
-   CHARREF_XTOKEN,
-   COMMENT_XTOKEN,
-   ELEMENT_EMPTY_XTOKEN,
-   ELEMENT_END_XTOKEN,
-   ELEMENT_START_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
-   GENERAL_ENTITY_END_XTOKEN,
-   GENERAL_ENTITY_START_XTOKEN,
    PARAMETER_ENTITY_REFERENCE_XTOKEN,
-   PROCESSING_INSTRUCTION_XTOKEN,
-   TEXTDECL_XTOKEN,
    AttListDeclarationXToken,
    AttDefinitionXToken,
    ContentModelX,
@@ -110,20 +100,6 @@ interface EntityInfo {
 
 interface EntityInfoMap {
    [entityName: string]: EntityInfo;
-}
-
-function getAttributeValueText(attribute: any): string {
-   const rawValue = attribute.value;
-   let newValue = '';
-
-   rawValue.forEach((value: any) => {
-      // typeHack
-      if (isTextXToken(value) || value.type === CHARDATA_XTOKEN) {
-         newValue += value.text;
-      }
-   });
-
-   return newValue;
 }
 
 class CheckXTokenValidStream extends Transform {
@@ -229,112 +205,6 @@ class CheckXTokenValidStream extends Transform {
       this.push(warning);
    }
 
-   private checkContextValidity(
-      xToken: XToken,
-      sToken: SToken | undefined,
-      context: ContentContext | undefined,
-   ) {
-      if (!context) {
-         return;
-      }
-      const declInfo = context.declInfo;
-
-      if (declInfo.type === 'EMPTY_CONTENT') {
-      } else if (declInfo.type === 'ANY_CONTENT') {
-         // §3.0.0 Validity Constraint: Element Valid
-         //  1.0/1-2: 4. The declaration matches ANY, and the types of any child
-         //       elements have been declared.
-         //  1.0/3&1.1/1: 4. The declaration matches ANY, and the content (after
-         //       replacing any entity references with their replacement text) consists
-         //       of character data and child elements whose types have been declared.
-         //  Other: (tolerant) The declaration matches ANY, and the content (after replacing any
-         //       entity references with their replacement text) consists of character
-         //       data , CDATA sections, comments, PIs and child elements whose types
-         //       have been declared.
-         const isRestrictiveVersion = this.confVer.version === 1 && this.confVer.edition < 3;
-
-         switch (xToken.type) {
-            case TEXTDECL_XTOKEN:
-            case ELEMENT_START_XTOKEN:
-            case ELEMENT_EMPTY_XTOKEN:
-            case ELEMENT_END_XTOKEN:
-            case COMMENT_XTOKEN:
-            case CDATA_SECTION_XTOKEN:
-               // dead
-               break;
-            case CHARREF_XTOKEN:
-            case CHARDATA_XTOKEN:
-            case GENERAL_ENTITY_REFERENCE_XTOKEN:
-            case GENERAL_ENTITY_START_XTOKEN:
-            case GENERAL_ENTITY_END_XTOKEN:
-               if (isRestrictiveVersion) {
-                  this.pushValidityError(
-                     ValidityError.ID.ANY_XTRA_MARKUP,
-                     [declInfo.token.name],
-                     sToken,
-                  );
-               }
-               break;
-            case PROCESSING_INSTRUCTION_XTOKEN:
-               break;
-            default:
-               this.pushValidityError(
-                  ValidityError.ID.ANY_XTRA_MARKUP,
-                  [declInfo.token.name],
-                  sToken,
-               );
-               break;
-         }
-      } else if (declInfo.type === 'MIXED_CONTENT') {
-         // §3.0.0 Validity Constraint: Element Valid
-         //  1.0/1-2: 3. The declaration matches Mixed and the content consists of
-         //       character data and child elements whose types match names in the
-         //       content model.
-         //  1.0/3 & 1.1/1: 3. The declaration matches Mixed and the content (after
-         //       replacing any entity references with their replacement text) consists
-         //       of character data, comments, PIs and child elements whose types match
-         //       names in the content model.
-         //  Other: 3. The declaration matches Mixed, and the content (after
-         //       replacing any entity references with their replacement text) consists
-         //       of character data (including CDATA sections), comments, PIs and child
-         //       elements whose types match names in the content model.
-         const isRestrictiveVersion = this.confVer.version === 1 && this.confVer.edition < 3;
-
-         switch (xToken.type) {
-            case ELEMENT_START_XTOKEN:
-            case ELEMENT_EMPTY_XTOKEN:
-            case CHARREF_XTOKEN:
-            case CHARDATA_XTOKEN:
-            case ELEMENT_END_XTOKEN:
-            case CDATA_SECTION_XTOKEN:
-               // dead
-               break;
-            case TEXTDECL_XTOKEN: // note this and things below we're not checking that they're well formed (e.g. in the right place)
-            case COMMENT_XTOKEN:
-            case GENERAL_ENTITY_REFERENCE_XTOKEN:
-            case GENERAL_ENTITY_START_XTOKEN:
-            case GENERAL_ENTITY_END_XTOKEN:
-            case PROCESSING_INSTRUCTION_XTOKEN:
-               if (isRestrictiveVersion) {
-                  this.pushValidityError(
-                     ValidityError.ID.MIXED_XTRA_MARKUP,
-                     [declInfo.token.name],
-                     sToken,
-                  );
-               }
-               break;
-            default:
-               this.pushValidityError(
-                  ValidityError.ID.MIXED_XTRA_MARKUP,
-                  [declInfo.token.name],
-                  sToken,
-               );
-               break;
-         }
-      } else {
-      }
-   }
-
    _transform(xToken: XToken, _: string, done: StreamCallback) {
       const pToken = (xToken.pToken || {}).open;
       const context = this.currentContext;
@@ -356,8 +226,6 @@ class CheckXTokenValidStream extends Transform {
                xToken = new SpaceXToken(xToken.text);
             }
          }
-
-         this.checkContextValidity(xToken, pToken, context);
       }
 
       /*
@@ -526,9 +394,7 @@ class CheckXTokenValidStream extends Transform {
    }
 
    private validateAttrDef(attList: AttListDeclarationXToken, attDef: AttDefinitionXToken): void {
-      const type = attDef.type.toUpperCase();
       const pToken = attList.pToken || ({} as AttListDeclarationPToken); // typeHack
-      const defaultText = getAttributeValueText(attDef);
 
       // §2.10: concerning xml:space:
       //    it must be given as an enumerated type whose values are one or both of "default"
@@ -602,26 +468,6 @@ class CheckXTokenValidStream extends Transform {
             );
          }
       }
-   }
-
-   private findDuplicateNamesInEnumeration(names: ReadonlyArray<string>): Array<string> {
-      const nameCounts: { [name: string]: number } = {};
-      const duplicates: Array<string> = [];
-
-      for (let index = 0; index < names.length; index++) {
-         const notationName = names[index];
-
-         nameCounts[notationName] = nameCounts[notationName] || 0;
-         nameCounts[notationName]++;
-      }
-
-      Object.keys(nameCounts).forEach((name) => {
-         if (nameCounts[name] > 1) {
-            duplicates.push(name);
-         }
-      });
-
-      return duplicates;
    }
 
    private validateElementDecl(elDecl: ElementDeclarationXToken): void {

@@ -157,7 +157,7 @@ describe('elementStartValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error when the context is ANY, and the name is not a declared element', () => {
+   it('reports an error when element start is not a declared element (§3.0.0)', () => {
       state = new ValidateState({
          elementContext: {
             ...state.elementContext,
@@ -167,6 +167,7 @@ describe('elementStartValidate (unit)', () => {
                   token: elementDeclaration,
                   type: ElDeclType.ANY,
                },
+               lastToken: undefined,
                parentName: 'parentName',
                stateId: 0,
             },
@@ -181,7 +182,7 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.UNDECLARED_ELEMENT,
+         id: ValidityError.ID.ELEMENT_UNDECLARED,
          lastPosition: undefined,
          params: ['other'],
          position: elementStart.name,
@@ -199,6 +200,7 @@ describe('elementStartValidate (unit)', () => {
                   token: elementDeclaration,
                   type: ElDeclType.MIXED,
                },
+               lastToken: undefined,
                parentName: 'parentName',
                stateId: 0,
             },
