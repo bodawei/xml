@@ -209,10 +209,10 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.INVALID_ELEMENT_IN_MIXED,
+         id: VID.CONTENT_MIXED_CONTAINS_INVALID_ELEMENT,
+         lastPosition: undefined,
          params: ['parentName', 'elementName'],
          position: elementStart.name,
-         lastPosition: undefined,
       });
    });
 
@@ -222,10 +222,12 @@ describe('elementStartValidate (unit)', () => {
             ...state.elementContext,
             activeContext: {
                declDetails: {
+                  graph,
+                  isExternalMarkupDeclaration: false,
                   token: elementDeclaration,
                   type: ElDeclType.ELEMENT,
-                  graph,
                },
+               lastToken: undefined,
                parentName: 'parentName',
                stateId: 4,
             },

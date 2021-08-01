@@ -72,7 +72,11 @@ have changed due to normalization processes, it is not an error.
    - The second says that whitespace is allowed before the first and after the second (and repeats that CDATA section are not allowed)
    - The third also allows comments and PI's. It also allows entity references whose replacement text is just white space. Furthermore, several xmlconf tests, including ibm-1-1-valid-P77-ibm77v11.xml, allow entity references that contain elements.
 Personally, I find the last a little puzzling, for why shouldn't comments, PI's and empty entity references be allowed in EMPTY elements? For that matter, why not allow character references that are to white space characters? Oh well.
-
+- MIXED This has three wordsings in 1.0/1, 1.0/3 (also 1.1/1) and 1.0/4-6 (also 1.1/2-3).  All agree that the element must have been declared, and that its children elements must have been named in the content model of the declaration.  They difer on what is allowed between the child elements:
+   - The first says CharData, of course.
+   - The second says CharData, general entity references, comments and processing instructions (implicitly, that expand to other allowed values)
+   - The third adds to the second CDATA sections.
+Interestingly, CharRefs are never explicitly allowed. This assumes they are OK in the third case, because we have xmlconf tests like ibm-1-1-valid-P77-ibm77v30.xml which enforce this.  To be honest, that this was not allowed before is implausible, and like CDATA and the Mixed stuff, it seems profoundly likely that this was intended from the start.  Yet, as with this whole constraint, the wording across the four clauses is inconsistent and hard to build a strict implementation from.
 
 ### §3.2.0 Unique Element Type Declaration
 No commentary.

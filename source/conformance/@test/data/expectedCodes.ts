@@ -16,7 +16,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'inv-dtd03': 'ELEMENT_CONTENT_UNEXPECTED_END', // Tests the "Element Valid" VC (clause 2) by omitting a required element.
    el01: 'UNDECLARED_ELEMENT', // Tests the Element Valid VC (clause 4) by including an undeclared child element.
    el02: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1) by including elements in an EMPTY content model.
-   el03: 'INVALID_ELEMENT_IN_MIXED', // Tests the Element Valid VC (clause 3) by including a child element not permitted by a mixed content model.
+   el03: 'CONTENT_MIXED_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 3) by including a child element not permitted by a mixed content model.
    el04: 'ELEMENT_EXTRA_DECLARATION', // Tests the Unique Element Type Declaration VC.
    el05: 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC.
    el06: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1), using one of the predefined internal entities inside an EMPTY content model.
@@ -148,7 +148,7 @@ const expectedInvalidCodes: IdToErrorMap = {
    'ibm-invalid-P32-ibm32i04.xml': 'ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED', // great
    'ibm-invalid-P39-ibm39i01.xml': 'CONTENT_IN_EMPTY_ELEMENT', // great
    'ibm-invalid-P39-ibm39i02.xml': 'CONTENT_IN_ELEMENT_ELEMENT', // good
-   'ibm-invalid-P39-ibm39i03.xml': 'INVALID_ELEMENT_IN_MIXED', // great
+   'ibm-invalid-P39-ibm39i03.xml': 'CONTENT_MIXED_CONTAINS_INVALID_ELEMENT', // great
    'ibm-invalid-P39-ibm39i04.xml': 'UNDECLARED_ELEMENT', // great
    'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
    'ibm-invalid-P41-ibm41i02.xml': 'ELEMENTSTART_INVALID_FIXED', // great

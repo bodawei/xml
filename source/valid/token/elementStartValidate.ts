@@ -423,7 +423,7 @@ function elementStartValidate(
                //     content model.
                const allowedChild = context.declDetails.names.includes(elName);
 
-               ec.check(!allowedChild, OLD_VID.INVALID_ELEMENT_IN_MIXED, [
+               ec.check(!allowedChild, VID.CONTENT_MIXED_CONTAINS_INVALID_ELEMENT, [
                   context.parentName,
                   elName,
                ]);

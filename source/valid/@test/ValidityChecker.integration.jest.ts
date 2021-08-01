@@ -542,6 +542,36 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error a MIXED element contains an element type not in its declaration (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (#PCDATA|a|b)>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+            <!ELEMENT c EMPTY>
+         ]>
+         <root><a/><b/><c/></root>`,
+         VID.CONTENT_MIXED_CONTAINS_INVALID_ELEMENT,
+         done!,
+      );
+   });
+
+   it('reports an error a CDATA section is found in a MIXED element 1.0/1 (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (#PCDATA|a|b)>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+         ]>
+         <root> <a/><a/><![CDATA[wow]]><b/></root>`,
+         VID.CONTENT_IN_MIXED_ELEMENT,
+         done!,
+         new ConformanceVersion(1.0, 1),
+      );
+   });
+
    it('reports an error when a general entity declaration has a NDATA name that has not been declared (§4.2.2)', (done) => {
       expectError(
          `<?xml version="1.0"?>

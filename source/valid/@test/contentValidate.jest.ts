@@ -140,34 +140,34 @@ describe('conentValidate (unit)', () => {
    });
 
    const dataItems: Array<[ParseToken, Array<boolean>]> = [
-      [makeAttListDeclaration(), [true, true, true]],
-      [makeCdata(), [true, true, true]],
-      [makeCharData(), [true, true, true]],
-      [makeCharData('  \t \n \r '), [false, false, false]],
-      [makeCharRef(), [true, true, true]],
-      [makeComment(), [true, false, false]],
-      [makeConditionalSection(), [true, true, true]],
-      [makeConditionalClose(), [true, true, true]],
-      [makeDocTypeStart(), [true, true, true]],
-      [makeDocTypeEnd(), [true, true, true]],
-      [makeElementDeclaration(), [true, true, true]],
-      [makeElementEmpty(), [false, false, false]],
-      [makeElementEnd(), [false, false, false]],
-      [makeElementStart(), [false, false, false]],
-      [makeGeneralEntityEnd(), [true, false, false]],
-      [makeGeneralEntityDeclaration(), [true, true, true]],
-      [makeGeneralEntityReference(), [true, true, true]],
-      [makeGeneralEntityStart(), [true, false, false]],
-      [makeNotationDeclaration(), [true, true, true]],
-      [makeParameterEntityDeclaration(), [true, true, true]],
-      [makeParameterEntityEnd(), [true, true, true]],
-      [makeParameterEntityReference(), [true, true, true]],
-      [makeParameterEntityStart(), [true, true, true]],
-      [makeProcessingInstruction(), [true, false, false]],
-      [makeSpace(), [false, false, false]],
-      [makeTextPToken('xxx'), [true, true, true]],
-      [makeTextDecl(), [true, false, false]],
-      [makeXmlDecl(), [true, true, true]],
+      [makeAttListDeclaration(), [false, false, false]],
+      [makeCdata(), [false, false, false]],
+      [makeCharData(), [false, false, false]],
+      [makeCharData('  \t \n \r '), [true, true, true]],
+      [makeCharRef(), [false, false, false]],
+      [makeComment(), [false, true, true]],
+      [makeConditionalSection(), [false, false, false]],
+      [makeConditionalClose(), [false, false, false]],
+      [makeDocTypeStart(), [false, false, false]],
+      [makeDocTypeEnd(), [false, false, false]],
+      [makeElementDeclaration(), [false, false, false]],
+      [makeElementEmpty(), [true, true, true]],
+      [makeElementEnd(), [true, true, true]],
+      [makeElementStart(), [true, true, true]],
+      [makeGeneralEntityEnd(), [false, true, true]],
+      [makeGeneralEntityDeclaration(), [false, false, false]],
+      [makeGeneralEntityReference(), [false, false, false]],
+      [makeGeneralEntityStart(), [false, true, true]],
+      [makeNotationDeclaration(), [false, false, false]],
+      [makeParameterEntityDeclaration(), [false, false, false]],
+      [makeParameterEntityEnd(), [false, false, false]],
+      [makeParameterEntityReference(), [false, false, false]],
+      [makeParameterEntityStart(), [false, false, false]],
+      [makeProcessingInstruction(), [false, true, true]],
+      [makeSpace(), [true, true, true]],
+      [makeTextPToken('xxx'), [false, false, false]],
+      [makeTextDecl(), [false, true, true]],
+      [makeXmlDecl(), [false, false, false]],
    ];
    dataItems.forEach((items) => {
       const [token, versions] = items;
@@ -178,8 +178,8 @@ describe('conentValidate (unit)', () => {
          [1.0, 5, v10e5],
          [1.1, 1, v11e1],
       ];
-      edition.forEach(([version, edition, hasError]) => {
-         it(`${hasError ? 'reports' : 'does not report'} an error when a ${
+      edition.forEach(([version, edition, pass]) => {
+         it(`${pass ? 'does not report' : 'reports'} an error when a ${
             token.type
          } token is found in an element with element content in ${version}/${edition} (§3.0.0)`, () => {
             const state = new ValidateState({
@@ -207,7 +207,7 @@ describe('conentValidate (unit)', () => {
 
             contentValidate(token, state, ec);
 
-            if (hasError) {
+            if (!pass) {
                // @ts-expect-error 2329/matchers
                expect(ec).toReportValidityError({
                   id: VID.CONTENT_IN_ELEMENT_ELEMENT,
@@ -311,5 +311,87 @@ describe('conentValidate (unit)', () => {
       contentValidate(makeElementEnd(), state, ec);
 
       expect(ec.errors).toEqual([]);
+   });
+
+   const mixedDataItems: Array<[ParseToken, Array<boolean>]> = [
+      [makeAttListDeclaration(), [false, false, false]],
+      [makeCdata(), [false, false, true]],
+      [makeCharData(), [true, true, true]],
+      [makeCharData('  \t \n \r '), [true, true, true]],
+      [makeCharRef(), [false, false, true]],
+      [makeComment(), [false, true, true]],
+      [makeConditionalSection(), [false, false, false]],
+      [makeConditionalClose(), [false, false, false]],
+      [makeDocTypeStart(), [false, false, false]],
+      [makeDocTypeEnd(), [false, false, false]],
+      [makeElementDeclaration(), [false, false, false]],
+      [makeElementEmpty(), [true, true, true]],
+      [makeElementEnd(), [true, true, true]],
+      [makeElementStart(), [true, true, true]],
+      [makeGeneralEntityEnd(), [false, true, true]],
+      [makeGeneralEntityDeclaration(), [false, false, false]],
+      [makeGeneralEntityReference(), [false, false, false]],
+      [makeGeneralEntityStart(), [false, true, true]],
+      [makeNotationDeclaration(), [false, false, false]],
+      [makeParameterEntityDeclaration(), [false, false, false]],
+      [makeParameterEntityEnd(), [false, false, false]],
+      [makeParameterEntityReference(), [false, false, false]],
+      [makeParameterEntityStart(), [false, false, false]],
+      [makeProcessingInstruction(), [false, true, true]],
+      [makeSpace(), [true, true, true]],
+      [makeTextPToken('xxx'), [false, false, false]],
+      [makeTextDecl(), [false, true, true]],
+      [makeXmlDecl(), [false, false, false]],
+   ];
+   mixedDataItems.forEach((items) => {
+      const [token, versions] = items;
+      const [v10e1, v10e3, v11e2] = versions;
+
+      const edition: Array<[XmlVersion, XmlEdition, boolean]> = [
+         [1.0, 1, v10e1],
+         [1.0, 3, v10e3],
+         [1.1, 2, v11e2],
+      ];
+      edition.forEach(([version, edition, pass]) => {
+         it(`${pass ? 'does not report' : 'reports'} an error when a ${
+            token.type
+         } token is found in an element with MIXED content in ${version}/${edition} (§3.0.0)`, () => {
+            const state = new ValidateState({
+               confVer: new ConformanceVersion(version, edition),
+               elementContext: {
+                  activeContext: {
+                     declDetails: {
+                        isExternalMarkupDeclaration: false,
+                        names: [],
+                        token: new ElementDeclarationPToken({
+                           name: toSToken('elementName'),
+                           open: toSToken('<!'),
+                        }),
+                        type: ElDeclType.MIXED,
+                     },
+                     lastToken: undefined,
+                     parentName: 'elementName',
+                     stateId: 0,
+                  },
+                  contextStack: [],
+                  pastEnd: false,
+               },
+            });
+
+            contentValidate(token, state, ec);
+
+            if (!pass) {
+               // @ts-expect-error 2329/matchers
+               expect(ec).toReportValidityError({
+                  id: VID.CONTENT_IN_MIXED_ELEMENT,
+                  lastPosition: undefined,
+                  params: ['elementName', String(version), String(edition), token.type],
+                  position: getFirstSToken(token),
+               });
+            } else {
+               expect(ec.errors).toEqual([]);
+            }
+         });
+      });
    });
 });

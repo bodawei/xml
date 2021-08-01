@@ -97,6 +97,16 @@ const validityConstraint = new ErrorCodes({
       code: 1139,
       message: 'Found content in an element that should be empty ("{0}") (§3.0.0).',
    },
+   CONTENT_IN_MIXED_ELEMENT: {
+      code: 1143,
+      message:
+         'Found syntax in a MIXED element "{0}" that is not allowed in {1}/{2} (§3.0.0). Found {3}.',
+   },
+   CONTENT_MIXED_CONTAINS_INVALID_ELEMENT: {
+      code: 1142,
+      message:
+         'Found an element that was not declared in the "{0}" element declaration (§3.0.0). Found "{1}".',
+   },
    CONTENT_XTRA_SPACE: {
       code: 1142,
       message:
