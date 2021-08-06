@@ -407,7 +407,10 @@ class MarkupDeclChecker implements MarkupChecker {
             checkDeclaration(pToken, this.state, errorCollector);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
+            const type = strOrBlank(pToken.contentSpec).toUpperCase();
             checkDeclaration(pToken, this.state, errorCollector);
+            this.checkState.elementDecl[strOrBlank(pToken.name)] =
+               type === 'EMPTY' ? 'EMPTY' : undefined;
             break;
          case NOTATION_DECLARATION_PTOKEN:
             checkDeclaration(pToken, this.state, errorCollector);

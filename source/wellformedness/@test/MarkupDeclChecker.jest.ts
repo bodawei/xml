@@ -5,6 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 import {
    AttListDeclarationPToken,
+   ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
@@ -747,6 +748,31 @@ describe('MarkupDeclChecker (unit)', () => {
                position: generalEntityStart.referencePToken.open,
             });
          });
+      });
+   });
+
+   describe('ELEMENT', () => {
+      it('records when an element declaration was not for an EMPTY element in the check state', () => {
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, []);
+
+         checker.check(makeElementDeclaration(), ec);
+
+         expect(checkState.elementDecl.elementName).toEqual(undefined);
+      });
+
+      it('records when an element declaration was for an EMPTY element in the check state', () => {
+         checker = new MarkupDeclChecker(internalSubsetStart, ec, checkState, []);
+
+         checker.check(
+            new ElementDeclarationPToken({
+               contentSpec: toSToken('empty'),
+               name: toSToken('foo'),
+               open: toSToken('<!'),
+            }),
+            ec,
+         );
+
+         expect(checkState.elementDecl.foo).toEqual('EMPTY');
       });
    });
 

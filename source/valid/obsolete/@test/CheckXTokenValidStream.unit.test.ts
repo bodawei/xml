@@ -159,18 +159,6 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectNoErrorsOrWarnings(validator, done);
          });
 
-         it('reports a warning if an empty element tag is used for an element not declared to be empty', (done) => {
-            const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ANY, undefined);
-            const emptyTag = new ElementEmptyXToken('one', []);
-
-            validator.write(elementDecl);
-            validator.write(emptyTag);
-            validator.end();
-
-            const expected = new WarningToken(warning.id.ELEMENT_EMPTY_WITH_NONEMPTY_DECL, ['one']);
-            expectStream(validator, expected, done);
-         });
-
          it('reports no error if a required attribute was specified', (done) => {
             const elementDecl = new ElementDeclarationXToken('one', ContentSpecType.ANY, undefined);
             attListDecl = new AttListDeclarationXToken(attListDecl.elementName, [
@@ -213,18 +201,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                   defaultType: undefined,
                },
             ]);
-         });
-
-         it('reports a warning if the ELEMENT declaration indicates that this element does not need to be EMPTY', (done) => {
-            element = new ElementDeclarationXToken('one', ContentSpecType.ANY, undefined);
-            const startToken = new ElementEmptyXToken('one', []);
-
-            validator.write(element);
-            validator.write(startToken);
-            validator.end();
-
-            const expected = new WarningToken(warning.id.ELEMENT_EMPTY_WITH_NONEMPTY_DECL, ['one']);
-            expectStream(validator, expected, done);
          });
       });
 

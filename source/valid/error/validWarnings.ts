@@ -32,11 +32,11 @@ const validWarnings = {
       message:
          'The element declaration "{0}" references an element type "{1}" which has not been declared (§3.2.0).',
    },
-   ELEMENT_EMPTY_WITH_NONEMPTY_DECL: {
-      code: 208,
-      message:
-         'Should not use empty elements unless the element type "{0}" is declared as EMPTY (§3.1.0).',
-   },
+   // ELEMENT_EMPTY_WITH_NONEMPTY_DECL: {
+   //    code: 208,
+   //    message:
+   //       'Should not use empty elements unless the element type "{0}" is declared as EMPTY (§3.1.0).',
+   // },
    ELEMENT_WITH_EMPTY_DECL: {
       code: 209,
       message:

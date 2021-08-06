@@ -1,6 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { ErrorCollector, warning, WarningToken } from 'basic';
 import {
    CHARREF_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -50,6 +50,7 @@ interface StateTable {
 }
 
 const WFID = WellFormedError.ID;
+const WARNID = warning.id;
 
 const transitionsByState: StateTable = {
    [State.PRE]: {
@@ -184,6 +185,18 @@ class ContentChecker implements IContentChecker {
             );
             break;
          case ELEMENT_EMPTY_PTOKEN:
+            // §3.1: For interoperability, the empty-element tag should be
+            //    used, and should only be used, for elements which are declared EMPTY.
+            const emptyName = strOrBlank(pToken.name);
+            if (this.checkState.elementDecl[emptyName] !== 'EMPTY') {
+               errorCollector.reportError(
+                  WARNID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
+                  WarningToken,
+                  [emptyName],
+                  pToken.open,
+               );
+            }
+
             scanAttributeValues(
                pToken.attributes,
                this.checkState.generalDecls,

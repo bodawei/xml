@@ -174,8 +174,6 @@ class CheckXTokenValidStream extends Transform {
                this.contentStack.push(this.currentContext);
             }
          }
-
-         this.validateElementStart(xToken);
       } else if (xToken instanceof ElementEndXToken) {
          this.contentStack.pop();
          this.currentContext = this.contentStack[this.contentStack.length - 1];
@@ -315,31 +313,6 @@ class CheckXTokenValidStream extends Transform {
                } as any;
             }
          }
-      }
-   }
-
-   private validateElementStart(elStart: ElementStartXToken | ElementEmptyXToken) {
-      const elementDecl = this.elementDeclarations[elStart.name];
-      const pTokenOpen = elStart.pToken && elStart.pToken.open;
-
-      if (!elementDecl) {
-         return;
-      }
-
-      // Interoperability: §3.1: For interoperability, the empty-element tag should be
-      //    used, and should only be used, for elements which are declared EMPTY.
-      const tokenIsEmptyType = elStart instanceof ElementEmptyXToken;
-      const declarationIsEmpty = elementDecl.type === 'EMPTY_CONTENT';
-      let warningId;
-
-      if (tokenIsEmptyType && !declarationIsEmpty) {
-         warningId = warning.id.ELEMENT_EMPTY_WITH_NONEMPTY_DECL;
-      } else if (!tokenIsEmptyType && declarationIsEmpty) {
-         // warningId = warning.id.ELEMENT_WITH_EMPTY_DECL;
-      }
-
-      if (warningId) {
-         this.pushWarning(warningId, [elStart.name], pTokenOpen, pTokenOpen);
       }
    }
 }
