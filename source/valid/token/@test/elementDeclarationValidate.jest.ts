@@ -19,7 +19,9 @@ import { DeclarationDetails, ElDeclType, ValidateState } from '../../validateSta
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 import { validityConstraint } from '../../error/validityConstraint';
+import { validError } from '../../error/validError';
 
+const EID = validError.id;
 const VID = validityConstraint.id;
 
 describe('elementDeclarationValidate (unit)', () => {
@@ -513,7 +515,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: error.id.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
+         id: EID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
          lastPosition: undefined,
          params: ['elementName', 'last (/4,/99),first (/2/1,/3)'],
          position: elementDeclaration.contentModel?.open,

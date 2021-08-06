@@ -10,6 +10,7 @@ import { validityConstraint } from '../error/validityConstraint';
 import { ValidityError } from '../error/ValidityError';
 import { ValidateState } from '../validateState';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
+import { xmlSpaceValidate } from './xmlSpaceValidate';
 
 const OLD_VID = ValidityError.ID;
 const VID = validityConstraint.id;
@@ -224,6 +225,7 @@ function attListDeclarationValidate(
       ec.setPos(attDef.type);
 
       checkEnumeration(attDef, elName, attName, attType, state, ec);
+      xmlSpaceValidate(attDef, elName, attName, ec);
 
       if (isId) {
          const defaultType = strOrBlank(attDef.defaultType).toUpperCase();

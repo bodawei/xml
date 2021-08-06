@@ -4,7 +4,6 @@ import {
    ErrorCollector,
    ConformanceVersion,
    isSpace,
-   error,
    ErrorToken,
    warning,
    WarningToken,
@@ -22,7 +21,9 @@ import { strOrBlank } from 'sToken';
 
 import { validityConstraint } from '../error/validityConstraint';
 import { DeclarationDetails, ElDeclType, ValidateState } from '../validateState';
+import { validError } from '../error/validError';
 
+const EID = validError.id;
 const VID = validityConstraint.id;
 
 function getElementNames(contentModel: ContentModelP): Array<string> {
@@ -265,7 +266,7 @@ function elementDeclarationValidate(
       }
 
       if (cases.length > 0) {
-         ec.reportError(error.id.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC, ErrorToken, [
+         ec.reportError(EID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC, ErrorToken, [
             elName,
             cases.join(','),
          ]);

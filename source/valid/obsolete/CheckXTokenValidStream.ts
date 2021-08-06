@@ -3,7 +3,6 @@
 import { Transform } from 'stream';
 
 import { warning, WarningToken } from 'basic';
-import { AttListDeclarationPToken } from 'pToken';
 import { SToken } from 'sToken';
 import {
    AttListDeclarationXToken,
@@ -111,17 +110,6 @@ class CheckXTokenValidStream extends Transform {
       this.elementDeclarations = {};
       this.contentStack = [];
       this.currentContext = undefined;
-   }
-
-   private pushValidityError(
-      id: string,
-      params: Array<string>,
-      pos?: SToken | undefined,
-      context?: SToken | undefined,
-   ) {
-      const error = new ValidityError(id, params, pos, context);
-
-      this.push(error);
    }
 
    private pushWarning(
@@ -259,8 +247,6 @@ class CheckXTokenValidStream extends Transform {
       for (let index = 0; index < attListDecl.attDefs.length; index++) {
          const attDef = attListDecl.attDefs[index];
 
-         this.validateAttrDef(attListDecl, attDef);
-
          if (!attrDefs.attributes[attDef.name]) {
             // §3.3.0: When more than one AttlistDecl is provided for a given element type, the contents of
             //   all those provided are merged. When more than one definition is provided for the same
@@ -279,50 +265,6 @@ class CheckXTokenValidStream extends Transform {
                openSToken,
                openSToken,
             );
-         }
-      }
-   }
-
-   private validateAttrDef(attList: AttListDeclarationXToken, attDef: AttDefinitionXToken): void {
-      const pToken = attList.pToken || ({} as AttListDeclarationPToken); // typeHack
-
-      // §2.10: concerning xml:space:
-      //    it must be given as an enumerated type whose values are one or both of "default"
-      //    and "preserve". ... It is an error for other values to be specified; the XML
-      //    processor may report the error or may recover by ignoring the attribute
-      //    specification or by reporting the (erroneous) value to the application.
-      //    Applications may ignore or reject erroneous values.
-      if (attDef.name.toLowerCase() === 'xml:space') {
-         if (attDef.name !== 'xml:space') {
-            this.pushValidityError(
-               ValidityError.ID.ATTLISTDECL_SPACE_BAD_CASE,
-               [attList.elementName, attDef.name],
-               pToken.open,
-            );
-         }
-
-         if (attDef.type !== 'ENUMERATION' || !attDef.enumeration) {
-            this.pushValidityError(
-               ValidityError.ID.ATTLISTDECL_SPACE_BAD_TYPE,
-               [attList.elementName],
-               pToken.open,
-            );
-         } else if (attDef.enumeration.length === 0) {
-            this.pushValidityError(
-               ValidityError.ID.ATTLISTDECL_SPACE_MISSING_ENUMRATION,
-               [attList.elementName],
-               pToken.open,
-            );
-         } else {
-            for (const element of attDef.enumeration) {
-               if (element !== 'preserve' && element !== 'default') {
-                  this.pushValidityError(
-                     ValidityError.ID.ATTLISTDECL_SPACE_BAD_ENUMRATION,
-                     [attList.elementName, element],
-                     pToken.open,
-                  );
-               }
-            }
          }
       }
    }

@@ -29,6 +29,7 @@ import { attListDeclarationValidate } from '../attListDeclarationValidate';
 // jest.mock goes crazy if I try to mock these functions
 import * as validator from '../../common/attributeValueValidate';
 import * as ancestor from '../ancestorPERefsValidate';
+import * as xmlSpace from '../xmlSpaceValidate';
 
 const VID = validityConstraint.id;
 
@@ -775,5 +776,31 @@ describe('attListDeclarationValidate (unit)', () => {
             position: toSToken('foo'),
          });
       });
+   });
+
+   it('calls xmlSpaceValidate() for each attr (§2.10.0)', () => {
+      state = new ValidateState();
+      const attListDecl = new AttListDeclarationPToken({
+         attDefs: [
+            {
+               name: toSToken('xml:space'),
+               type: toSToken('CDATA'),
+               value: [],
+            },
+         ],
+         elementName: toSToken('elName'),
+         extra: toSToken('>'),
+         open: toSToken('<!'),
+      });
+      jest.spyOn(xmlSpace, 'xmlSpaceValidate');
+
+      attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+      expect(xmlSpace.xmlSpaceValidate).toHaveBeenCalledWith(
+         attListDecl.attDefs[0],
+         'elName',
+         'xml:space',
+         mockErrorCollector,
+      );
    });
 });
