@@ -2,36 +2,41 @@
 
 import { Transform } from 'stream';
 import {
-   XToken,
-   CHARREF_XTOKEN,
-   CDATA_SECTION_XTOKEN,
-   CHARDATA_XTOKEN,
-   DOCTYPE_END_XTOKEN,
-   DOCTYPE_START_XTOKEN,
-   ELEMENT_END_XTOKEN,
-   NOTATION_DECLARATION_XTOKEN,
-   PROCESSING_INSTRUCTION_XTOKEN,
-   ELEMENT_START_XTOKEN,
-   ELEMENT_EMPTY_XTOKEN,
-   SPACE_XTOKEN,
-   TEXT_XTOKEN,
-   XMLDECL_XTOKEN,
-   ExternalIdX,
-   DocTypeStartXToken,
-} from 'xToken';
-import { AttributeXToken } from '../../../token/common/attribute';
+   CHARREF_PTOKEN,
+   ExternalIdP,
+   NOTATION_DECLARATION_PTOKEN,
+   ParseToken,
+   PROCESSING_INSTRUCTION_PTOKEN,
+   pTokenArrayToString,
+   TEXT_PTOKEN,
+   XMLDECL_PTOKEN,
+} from 'pToken';
+import { strOrBlank } from 'sToken';
+import {
+   CDATA_PTOKEN,
+   CHARDATA_PTOKEN,
+   DocTypeStartPToken,
+   DOCTYPE_END_PTOKEN,
+   DOCTYPE_START_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_END_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   SPACE_PTOKEN,
+   AttributePToken,
+} from 'token';
 
-function formatExternalId(externalId?: ExternalIdX): string {
+function formatExternalId(externalId?: ExternalIdP): string {
    if (!externalId) {
       return '';
    }
 
-   if (externalId.publicId) {
-      return `PUBLIC '${externalId.publicId}'${
-         externalId.systemId ? ` '${externalId.systemId}'` : ''
-      }`;
+   const publicId = pTokenArrayToString(externalId.public?.value);
+   const systemId = pTokenArrayToString(externalId.system?.value);
+
+   if (publicId) {
+      return `PUBLIC '${publicId}'${systemId ? ` '${systemId}'` : ''}`;
    } else {
-      return `SYSTEM '${externalId.systemId}'`;
+      return `SYSTEM '${systemId}'`;
    }
 }
 
@@ -54,28 +59,28 @@ function formatText(text: string): string {
    );
 }
 
-function formatAttrs(attrs?: ReadonlyArray<AttributeXToken>): string {
+function formatAttrs(attrs?: ReadonlyArray<AttributePToken>): string {
    if (!attrs) {
       return '';
    }
 
    const sortedAttrs = [...attrs].sort((left, right) => {
-      const a = left.name;
-      const b = right.name;
+      const a = strOrBlank(left.name);
+      const b = strOrBlank(right.name);
       return a === b ? 0 : a > b ? 1 : -1;
    });
 
    const attrStrings = sortedAttrs.map((attr) => {
       const value = attr.value.map((element) => {
-         if (element.type === TEXT_XTOKEN) {
-            return formatText(element.text);
-         } else if (element.type === CHARREF_XTOKEN) {
+         if (element.type === TEXT_PTOKEN) {
+            return formatText(strOrBlank(element.text));
+         } else if (element.type === CHARREF_PTOKEN) {
             return formatText(element.char);
          }
 
          return '';
       });
-      return `${attr.name}="${value.join('')}"`;
+      return `${strOrBlank(attr.name)}="${value.join('')}"`;
    });
 
    const attributesAsString = attrStrings.join(' ');
@@ -88,15 +93,15 @@ function formatAttrs(attrs?: ReadonlyArray<AttributeXToken>): string {
 }
 
 /*
- * In theory, this takes a stream of XTokens and produces a stream of strings that
+ * In theory, this takes a stream of PTokens and produces a stream of strings that
  * Collectively represent the Canonical XML version of the data.
  *
  * In practice, this only does enough of the canonicalization needed to make the xmlconf
  * processing to pass.
  * See: https://www.w3.org/TR/xml-c14n11/
  */
-class XTokenToXmlStream extends Transform {
-   private doctypeStart?: DocTypeStartXToken;
+class PTokenToXmlStream extends Transform {
+   private doctypeStart?: DocTypeStartPToken;
 
    private notations: { [name: string]: string } = {};
 
@@ -110,62 +115,74 @@ class XTokenToXmlStream extends Transform {
       });
    }
 
-   _transform(xToken: XToken, _: string, done: () => void): void {
+   _transform(xToken: ParseToken, _: string, done: () => void): void {
       switch (xToken.type) {
-         case XMLDECL_XTOKEN:
-            if (xToken.version === 1.1) {
+         case XMLDECL_PTOKEN:
+            let version = '1.0';
+
+            for (const param of xToken.fields) {
+               if (strOrBlank(param.name) === 'version') {
+                  version = strOrBlank(param.value);
+               }
+            }
+
+            if (version === '1.1') {
                this.push('<?xml version="1.1"?>');
             }
             break;
-         case SPACE_XTOKEN:
+         case SPACE_PTOKEN:
             if (this.inElement) {
-               this.push(formatText(xToken.text));
+               this.push(formatText(strOrBlank(xToken.text)));
             }
             break;
-         case DOCTYPE_START_XTOKEN:
+         case DOCTYPE_START_PTOKEN:
             this.doctypeStart = xToken;
             break;
-         case NOTATION_DECLARATION_XTOKEN:
-            this.notations[xToken.name] = `<!NOTATION ${xToken.name} ${formatExternalId(
-               xToken.externalId,
-            )}>\n`;
+         case NOTATION_DECLARATION_PTOKEN:
+            this.notations[strOrBlank(xToken.name)] = `<!NOTATION ${strOrBlank(
+               xToken.name,
+            )} ${formatExternalId(xToken.externalId)}>\n`;
             break;
-         case DOCTYPE_END_XTOKEN:
+         case DOCTYPE_END_PTOKEN:
             const keys = Object.keys(this.notations).sort();
 
             if (keys.length > 0) {
-               this.push(`<!DOCTYPE ${this.doctypeStart?.name || ''} [\n`);
+               this.push(`<!DOCTYPE ${strOrBlank(this.doctypeStart?.name) || ''} [\n`);
                keys.forEach((key) => {
                   this.push(this.notations[key]);
                });
                this.push(']>\n');
             }
             break;
-         case PROCESSING_INSTRUCTION_XTOKEN:
-            this.push(`<?${xToken.target} ${xToken.instruction}?>`);
+         case PROCESSING_INSTRUCTION_PTOKEN:
+            this.push(`<?${strOrBlank(xToken.target)} ${strOrBlank(xToken.instruction)}?>`);
             break;
-         case ELEMENT_EMPTY_XTOKEN:
-            this.push(`<${xToken.name}${formatAttrs(xToken.attributes)}></${xToken.name}>`);
+         case ELEMENT_EMPTY_PTOKEN:
+            this.push(
+               `<${strOrBlank(xToken.name)}${formatAttrs(xToken.attributes)}></${strOrBlank(
+                  xToken.name,
+               )}>`,
+            );
             break;
-         case ELEMENT_START_XTOKEN:
-            this.push(`<${xToken.name}${formatAttrs(xToken.attributes)}>`);
+         case ELEMENT_START_PTOKEN:
+            this.push(`<${strOrBlank(xToken.name)}${formatAttrs(xToken.attributes)}>`);
             this.inElement = true;
-            this.elementStack.push(xToken.name);
+            this.elementStack.push(strOrBlank(xToken.name));
             break;
-         case ELEMENT_END_XTOKEN:
-            this.push(`</${xToken.name}>`);
+         case ELEMENT_END_PTOKEN:
+            this.push(`</${strOrBlank(xToken.name)}>`);
             this.elementStack.pop();
 
             if (this.elementStack.length === 0) {
                this.inElement = false;
             }
             break;
-         case CHARREF_XTOKEN:
+         case CHARREF_PTOKEN:
             this.push(formatText(xToken.char));
             break;
-         case CDATA_SECTION_XTOKEN:
-         case CHARDATA_XTOKEN:
-            this.push(formatText(xToken.text));
+         case CDATA_PTOKEN:
+         case CHARDATA_PTOKEN:
+            this.push(formatText(strOrBlank(xToken.text)));
             break;
          default:
             break;
@@ -175,4 +192,4 @@ class XTokenToXmlStream extends Transform {
    }
 }
 
-export { XTokenToXmlStream };
+export { PTokenToXmlStream };

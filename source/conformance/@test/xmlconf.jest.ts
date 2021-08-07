@@ -4,11 +4,10 @@ import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { AttFixerStream, CheckWellFormed, PToXTokenStream } from 'node';
+import { AttFixerStream, CheckWellFormed } from 'node';
 import { ContextType, ParseToken } from 'pToken';
 import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
-import { CheckXTokenValidStream } from 'valid';
 
 import metadata from './data/xmlconf.json';
 import { TestDetails, prepareTestDetails } from './helper/prepareTestDetails';
@@ -16,7 +15,7 @@ import { installMatchers } from './helper/customMatchers';
 import { makeAllDone } from './helper/makeAllDone';
 import { TestSuite } from './helper/types';
 import { TestExpanderStream } from './helper/TestExpanderStream';
-import { XTokenToXmlStream } from './helper/XTokenToXmlStream';
+import { PTokenToXmlStream } from './helper/PTokenToXmlStream';
 import CheckValidityStream from '../../node/CheckValidityStream';
 
 installMatchers();
@@ -31,8 +30,8 @@ function setupWellFormedStream(
 } {
    const sTokenSource = new STokenSource();
    const pTokenStream = new PTokenStream(sTokenSource, {
-      context: ContextType.DOCUMENT,
       confVer: ver && edition ? new ConformanceVersion(ver, edition) : undefined,
+      context: ContextType.DOCUMENT,
    });
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
@@ -49,15 +48,13 @@ function setupWellFormedStream(
 function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlEdition): Transform {
    const { pTokenStream, wellFormedStream } = setupWellFormedStream(test, ver, rev);
    const checkValidity = new CheckValidityStream();
-   const toXToken = new PToXTokenStream();
-   const checkValid = new CheckXTokenValidStream();
 
-   wellFormedStream.pipe(checkValidity).pipe(toXToken).pipe(checkValid);
+   wellFormedStream.pipe(checkValidity);
 
    pTokenStream.addText(test.testData || '');
    pTokenStream.endText();
 
-   return checkValid;
+   return checkValidity;
 }
 
 describe('XML Conformance tests', () => {
@@ -84,7 +81,7 @@ describe('XML Conformance tests', () => {
 
             // If the test details includes output, then we should test that the output matches
             if (hasOutput) {
-               const toXmlStream = testStream.pipe(new XTokenToXmlStream());
+               const toXmlStream = testStream.pipe(new PTokenToXmlStream());
 
                gatherStreamResults<string>(toXmlStream, (results) => {
                   // @ts-expect-error 2329/matchers
