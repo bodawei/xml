@@ -15,6 +15,10 @@ import { toSToken } from 'sToken';
 import { CheckState } from '../../checkUtils';
 import { dtdEndCheck } from '../dtdEndCheck';
 
+import { warning } from 'basic';
+
+const WARNID = warning.id;
+
 describe('dtdEndCheck()', () => {
    let mockErrorCollector: MockErrorCollector;
    let confVer: ConformanceVersion;
@@ -310,6 +314,33 @@ describe('dtdEndCheck()', () => {
          id: error.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar3'],
          position: text2.text,
+      });
+   });
+
+   it('reports a warning when an ATTLIST is declared for an element that was not (§3.3.0)', () => {
+      fakeState = {
+         atts: {
+            el1: {
+               att1: true,
+            },
+         },
+         confVer,
+         elementDecl: {},
+         generalDecls: {},
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
+         paramDecls: {},
+         peRefCount: 0,
+      };
+
+      dtdEndCheck(fakeState, mockErrorCollector);
+
+      // @ts-expect-error 2329/matchers
+      expect(mockErrorCollector).toReportWarning({
+         id: WARNID.ATTLISTDECL_NO_ELEMENTDECL,
+         params: ['el1'],
+         position: undefined,
       });
    });
 });

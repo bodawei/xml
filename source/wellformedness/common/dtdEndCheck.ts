@@ -7,6 +7,8 @@ import {
    ErrorToken,
    FatalErrorToken,
    fatalError,
+   warning,
+   WarningToken,
 } from 'basic';
 import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
@@ -14,6 +16,7 @@ import { LiteralValuePToken } from 'token';
 import { CheckState, GeneralEntitiesInfo } from '../checkUtils';
 
 const GE_REF_REGEXP = /&([^;]*);/g;
+const WARNID = warning.id;
 
 function checkEntity(
    value: LiteralValuePToken,
@@ -67,6 +70,19 @@ function dtdEndCheck(state: CheckState, ec: ErrorCollector): void {
    for (const entry of peValues) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       checkEntity(entry!.value, state.generalDecls, ec, state.confVer);
+   }
+
+   for (const elName of Object.keys(state.atts ?? {})) {
+      if (!state.elementDecl[elName]) {
+         // §4.2 If the same entity is declared more than once, ... at user option,
+         // an XML processor may issue a warning if entities are declared multiple times.
+         ec.reportError(
+            WARNID.ATTLISTDECL_NO_ELEMENTDECL,
+            WarningToken,
+            [elName],
+            undefined, // seems like a prolem
+         );
+      }
    }
 }
 

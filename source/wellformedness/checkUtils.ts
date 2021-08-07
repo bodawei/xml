@@ -37,7 +37,7 @@ type MarkupStart =
    | ConditionalPToken;
 
 interface ElementDeclInfo {
-   [name: string]: 'EMPTY' | undefined;
+   [name: string]: 'EMPTY' | 'OTHER' | undefined;
 }
 
 interface GeneralEntitiesInfo {

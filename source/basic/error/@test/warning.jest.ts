@@ -11,9 +11,9 @@ describe('warning', () => {
              "ATTLISTDECL_ATTR_NAME_DUPLICATE": 415,
              "ATTLISTDECL_ATTR_NAME_XMLCOLON_RESERVED": 410,
              "ATTLISTDECL_ATTR_NAME_XML_RESERVED": 409,
-             "ATTLISTDECL_ATTR_XTRA_DECLARATION": 203,
-             "ATTLISTDECL_ELEMENT_XTRA_DECLARATION": 201,
-             "ATTLISTDECL_NO_ELEMENTDECL": 202,
+             "ATTLISTDECL_ATTR_XTRA_DECLARATION": 421,
+             "ATTLISTDECL_ELEMENT_XTRA_DECLARATION": 420,
+             "ATTLISTDECL_NO_ELEMENTDECL": 422,
              "ATTRIBUTE_NAME_XMLCOLON_RESERVED": 408,
              "ATTRIBUTE_NAME_XML_RESERVED": 407,
              "CHARDATA_DISCOURAGED_CHAR": 416,
@@ -22,13 +22,13 @@ describe('warning', () => {
              "ELEMENTDECL_PEREF_EMPTY": 204,
              "ELEMENTDECL_PEREF_TRAILING_CONNECTOR": 205,
              "ELEMENT_CHILD_UNDECLARED": 207,
-             "ELEMENT_EMPTY_WITH_NONEMPTY_DECL": 208,
+             "ELEMENT_EMPTY_WITH_NONEMPTY_DECL": 418,
              "ELEMENT_NAME_XMLCOLON_RESERVED": 402,
              "ELEMENT_NAME_XML_RESERVED": 401,
              "ELEMENT_WITH_EMPTY_DECL": 209,
              "ENTITYDECL_NAME_XMLDASH_RESERVED": 406,
              "ENTITYDECL_NAME_XML_RESERVED": 405,
-             "ENTITYDECL_XRA_DECLARATION": 206,
+             "ENTITYDECL_XRA_DECLARATION": 419,
              "NOTATIONDECL_NAME_XMLDASH_RESERVED": 412,
              "NOTATIONDECL_NAME_XML_RESERVED": 411,
              "PI_TARGET_XMLDASH_RESERVED": 414,
@@ -79,15 +79,15 @@ describe('warning', () => {
                "message": "Attribute names should not start with [Xx][Mm][Ll] (§2.3.0). Found \\"{0}\\"",
              },
              "ATTLISTDECL_ATTR_XTRA_DECLARATION": Object {
-               "code": 203,
+               "code": 421,
                "message": "Should not declare the attribute \\"{1}\\" of element type \\"{0}\\" multiple times (§3.3.0).",
              },
              "ATTLISTDECL_ELEMENT_XTRA_DECLARATION": Object {
-               "code": 201,
+               "code": 420,
                "message": "Should not declare an ATTLIST for the element \\"{0}\\" multiple times (§3.3.0)",
              },
              "ATTLISTDECL_NO_ELEMENTDECL": Object {
-               "code": 202,
+               "code": 422,
                "message": "Missing the ELEMENT declaration for the element type \\"{0}\\" used in an ATTLIST declaration (§3.3.0).",
              },
              "ATTRIBUTE_NAME_XMLCOLON_RESERVED": Object {
@@ -123,7 +123,7 @@ describe('warning', () => {
                "message": "The element declaration \\"{0}\\" references an element type \\"{1}\\" which has not been declared (§3.2.0).",
              },
              "ELEMENT_EMPTY_WITH_NONEMPTY_DECL": Object {
-               "code": 208,
+               "code": 418,
                "message": "Should not use empty elements unless the element type \\"{0}\\" is declared as EMPTY (§3.1.0).",
              },
              "ELEMENT_NAME_XMLCOLON_RESERVED": Object {
@@ -147,7 +147,7 @@ describe('warning', () => {
                "message": "Entity names should not start with [Xx][Mm][Ll] (§2.3.0). Found \\"{0}\\"",
              },
              "ENTITYDECL_XRA_DECLARATION": Object {
-               "code": 206,
+               "code": 419,
                "message": "Should not declare the entity \\"{0}\\" multiple times (§4.2.0).",
              },
              "NOTATIONDECL_NAME_XMLDASH_RESERVED": Object {

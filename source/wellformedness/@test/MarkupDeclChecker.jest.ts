@@ -867,7 +867,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(makeElementDeclaration(), ec);
 
-         expect(checkState.elementDecl.elementName).toEqual(undefined);
+         expect(checkState.elementDecl.elementName).toEqual('OTHER');
       });
 
       it('records when an element declaration was for an EMPTY element in the check state', () => {

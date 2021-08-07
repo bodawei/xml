@@ -17,6 +17,11 @@ const wellFormedWarnings = {
       message:
          'Should not declare the attribute "{1}" of element type "{0}" multiple times (§3.3.0).',
    },
+   ATTLISTDECL_NO_ELEMENTDECL: {
+      code: 422,
+      message:
+         'Missing the ELEMENT declaration for the element type "{0}" used in an ATTLIST declaration (§3.3.0).',
+   },
    ELEMENT_NAME_XML_RESERVED: {
       code: 401,
       message: 'Element names should not start with [Xx][Mm][Ll] (§2.3.0 - XML 1.0/6). Found "{0}"',

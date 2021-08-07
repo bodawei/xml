@@ -2,14 +2,14 @@
 
 import { describe, expect, it } from '@jest/globals';
 
+import { error } from 'basic';
 import { toSToken } from 'sToken';
 import { MockErrorCollector } from 'basic-test';
 
 import { xmlSpaceValidate } from '../xmlSpaceValidate';
 import { ENUMERATION_PTOKEN } from 'token';
-import { validError } from '../../error/validError';
 
-const EID = validError.id;
+const EID = error.id;
 
 describe('xmlSpaceValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;

@@ -2,14 +2,12 @@
 /* eslint-env jasmine */
 
 import { gatherStreamResults } from 'basic-test';
-import { ConformanceVersion, warning, WarningToken } from 'basic';
-import { SToken } from 'sToken';
+import { ConformanceVersion } from 'basic';
 import {
    AttDefinitionType,
    AttDefaultType,
    AttListDeclarationXToken,
    ContentSpecType,
-   DocTypeEndXToken,
    DocTypeStartXToken,
    ElementDeclarationXToken,
    ElementStartXToken,
@@ -26,31 +24,9 @@ describe('CheckXTokenValidStream (unit)', () => {
       validator = new CheckXTokenValidStream();
    });
 
-   function expectStream(validator: CheckXTokenValidStream, expected: any, done: () => void) {
-      gatherStreamResults<any>(validator, (tokens) => {
-         let arrayExpected: Array<any> = [];
-
-         if (!Array.isArray(expected)) {
-            arrayExpected = [expected];
-         }
-
-         for (const expectedVal of arrayExpected) {
-            (expect(tokens) as any).toHaveError(expectedVal); // typeHack
-         }
-         done();
-      });
-   }
-
    function expectNoErrorsOrWarnings(validator: CheckXTokenValidStream, done: () => void) {
       gatherStreamResults<any>(validator, (tokens) => {
          (expect(tokens) as any).toBeErrorAndWarningFree(); // typeHack
-         done();
-      });
-   }
-
-   function expectNoErrors(validator: CheckXTokenValidStream, done: () => void) {
-      gatherStreamResults<any>(validator, (tokens) => {
-         (expect(tokens) as any).toBeErrorFree(); // typeHack
          done();
       });
    }
@@ -197,35 +173,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                   defaultType: undefined,
                },
             ]);
-         });
-      });
-
-      describe('ATTLIST', () => {
-         it('reports no warnings if the related ELEMENT declaration is already present', (done) => {
-            const elDecl = new ElementDeclarationXToken(
-               'elementType',
-               ContentSpecType.EMPTY,
-               undefined,
-            );
-            const attDecl = new AttListDeclarationXToken('elementType', []);
-
-            validator.write(elDecl);
-            validator.write(attDecl);
-            validator.end();
-
-            expectNoErrorsOrWarnings(validator, done);
-         });
-
-         it('reports a warning if the related ELEMENT declaration is not present', (done) => {
-            const attListDecl = new AttListDeclarationXToken('elementType', []);
-
-            validator.write(attListDecl);
-            validator.end();
-
-            const expected = new WarningToken(warning.id.ATTLISTDECL_NO_ELEMENTDECL, [
-               'elementType',
-            ]);
-            expectStream(validator, expected, done);
          });
       });
    });

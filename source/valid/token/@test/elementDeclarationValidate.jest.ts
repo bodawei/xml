@@ -19,9 +19,8 @@ import { DeclarationDetails, ElDeclType, ValidateState } from '../../validateSta
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 import { validityConstraint } from '../../error/validityConstraint';
-import { validError } from '../../error/validError';
 
-const EID = validError.id;
+const EID = error.id;
 const VID = validityConstraint.id;
 
 describe('elementDeclarationValidate (unit)', () => {
@@ -433,7 +432,7 @@ describe('elementDeclarationValidate (unit)', () => {
       });
    });
 
-   it('reports a well formed error if the graph is non-deterministic', () => {
+   it('reports an error if the graph is non-deterministic', () => {
       elementDeclaration = new ElementDeclarationPToken({
          close: toSToken('>'),
          contentModel: {

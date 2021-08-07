@@ -1,12 +1,10 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ErrorToken } from 'basic';
+import { error, ErrorCollector, ErrorToken } from 'basic';
 import { AttDefinitionP } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { validError } from '../error/validError';
-
-const EID = validError.id;
+const EID = error.id;
 
 function xmlSpaceValidate(
    attDef: AttDefinitionP,

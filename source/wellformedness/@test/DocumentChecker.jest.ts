@@ -95,6 +95,7 @@ describe('DocumentChecker (unit)', () => {
          subState = checkState;
          this.lastSeen = start;
       }
+
       inSecondPassContxt: boolean;
 
       check(...args: Array<unknown>): undefined | typeof CHECKER_DONE {
@@ -128,6 +129,7 @@ describe('DocumentChecker (unit)', () => {
          this.lastSeen = start;
          this.allDone = start.type === ELEMENT_EMPTY_PTOKEN;
       }
+
       inSecondPassContxt: boolean;
 
       get isDone() {
