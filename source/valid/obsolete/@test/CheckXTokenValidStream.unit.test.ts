@@ -2,8 +2,7 @@
 /* eslint-env jasmine */
 
 import { gatherStreamResults } from 'basic-test';
-import { ConformanceVersion, ERROR_TYPE, warning, WarningToken } from 'basic';
-import { WellFormedError } from 'wellformedness';
+import { ConformanceVersion, warning, WarningToken } from 'basic';
 import { SToken } from 'sToken';
 import {
    AttDefinitionType,
@@ -13,11 +12,8 @@ import {
    DocTypeEndXToken,
    DocTypeStartXToken,
    ElementDeclarationXToken,
-   ElementEmptyXToken,
    ElementStartXToken,
    NotationDeclarationXToken,
-   GeneralEntityDeclarationXToken,
-   ParameterEntityDeclarationXToken,
    XmlDeclarationXToken,
 } from 'xToken';
 
@@ -516,75 +512,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                'anAttribute',
             ]);
             expectStream(validator, expected, done);
-         });
-      });
-
-      describe('ENTITY', () => {
-         it('reports a warning if multiple ENTITY declarations with the same name are given', (done) => {
-            const peDecl1 = new ParameterEntityDeclarationXToken('one', []);
-            const peDecl2 = new ParameterEntityDeclarationXToken('one', []);
-            const expected = new WarningToken(warning.id.ENTITYDECL_XRA_DECLARATION, ['one']);
-
-            validator.write(peDecl1);
-            validator.write(peDecl2);
-            validator.end();
-
-            expectStream(validator, expected, done);
-         });
-
-         it('reports a warning if multiple ENTITY declarations with the same name are given', (done) => {
-            const geDecl1 = new GeneralEntityDeclarationXToken('one', []);
-            const geDecl2 = new GeneralEntityDeclarationXToken('one', []);
-            const expected = new WarningToken(warning.id.ENTITYDECL_XRA_DECLARATION, ['one']);
-
-            validator.write(geDecl1);
-            validator.write(geDecl2);
-            validator.end();
-
-            expectStream(validator, expected, done);
-         });
-      });
-
-      describe('ELEMENT', () => {
-         it('reports no errors if multiple ELEMENT declarations are provided', (done) => {
-            const elDecl1 = new ElementDeclarationXToken('one', ContentSpecType.EMPTY, undefined);
-            const elDecl2 = new ElementDeclarationXToken('two', ContentSpecType.EMPTY, undefined);
-
-            validator.write(elDecl1);
-            validator.write(elDecl2);
-            validator.end();
-
-            expectNoErrorsOrWarnings(validator, done);
-         });
-
-         it('reports no errors if the element has no pToken', (done) => {
-            const elDecl1 = new ElementDeclarationXToken('one', ContentSpecType.EMPTY, undefined);
-            const elDecl2 = new ElementDeclarationXToken('two', ContentSpecType.EMPTY, undefined);
-
-            validator.write(elDecl1);
-            validator.write(elDecl2);
-            validator.end();
-
-            expectNoErrorsOrWarnings(validator, done);
-         });
-      });
-
-      describe('Error tokens', () => {
-         it('ignores Errors when doing overall contextual checking', (done) => {
-            const elDecl1 = new ElementDeclarationXToken('one', ContentSpecType.ANY, undefined);
-            const startToken = new ElementStartXToken('one', []);
-
-            validator.write(elDecl1);
-            validator.write(startToken);
-            validator.write(new WellFormedError(WellFormedError.ID.ELEMENTDECL_NO_NAME, ['x']));
-            validator.end();
-
-            gatherStreamResults<any>(validator, (tokens) => {
-               const errors = tokens.filter((token: any) => token.type === ERROR_TYPE);
-
-               expect(errors.length).toBe(1);
-               done();
-            });
          });
       });
    });

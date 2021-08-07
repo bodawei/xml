@@ -23,10 +23,10 @@ const validWarnings = {
       message:
          'The element declaration "{1}" shoud not have replacement text for the parameter entity "{1}" that ends with "|" or "," in the content model (§3.2.1).',
    },
-   ENTITYDECL_XRA_DECLARATION: {
-      code: 206,
-      message: 'Should not declare the entity "{0}" multiple times (§4.2.0).',
-   },
+   // ENTITYDECL_XRA_DECLARATION: {
+   //    code: 206,
+   //    message: 'Should not declare the entity "{0}" multiple times (§4.2.0).',
+   // },
    ELEMENT_CHILD_UNDECLARED: {
       code: 207,
       message:

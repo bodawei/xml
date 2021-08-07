@@ -11,6 +11,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextDeclarationPToken,
+   TextPToken,
 } from 'pToken';
 import { strOrBlank, toSToken } from 'sToken';
 import {
@@ -51,6 +52,10 @@ import {
    makeNotationDeclaration,
    makeElementDeclaration,
 } from 'token-test';
+
+import { warning } from 'basic';
+
+const WARNID = warning.id;
 
 describe('MarkupDeclChecker (unit)', () => {
    let ec: MockErrorCollector;
@@ -105,7 +110,18 @@ describe('MarkupDeclChecker (unit)', () => {
       checker.check(makeAttListDeclaration(), ec);
       checker.check(makeElementDeclaration(), ec);
       checker.check(makeGeneralEntityDeclaration(), ec);
-      checker.check(makeParameterEntityDeclaration(), ec);
+      const otherPeDecl = new ParameterEntityDeclarationPToken({
+         close: toSToken('>'),
+         closeQuote: toSToken('"'),
+         name: toSToken('other'),
+         nameSpace: toSToken(' '),
+         open: toSToken('<!'),
+         openQuote: toSToken('"'),
+         parameter: toSToken('%'),
+         parameterSpace: toSToken(' '),
+         value: [new TextPToken({ text: toSToken('value') })],
+      });
+      checker.check(otherPeDecl, ec);
       checker.check(makeNotationDeclaration(), ec);
    }
 
@@ -183,6 +199,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no errors when all DTD tokens appear', () => {
+            console.log('checker', checker.checkState);
             addAllTokens(checker, ec);
 
             expect(ec.errors).toEqual([]);
@@ -799,6 +816,21 @@ describe('MarkupDeclChecker (unit)', () => {
          expect(checkState.generalDecls[name]?.token).toBe(generalEntityDeclaration);
          expect(checkState.generalDecls[name]?.declaredInInternalSubset).toEqual(true);
       });
+
+      it('reports a warning when there is a second declaration of an entity with the same name (¶4.2.0)', () => {
+         const firstDeclaration = makeGeneralEntityDeclaration();
+         const secondDeclaration = makeGeneralEntityDeclaration();
+
+         checker.check(firstDeclaration, ec);
+         checker.check(secondDeclaration, ec);
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWarning({
+            id: WARNID.ENTITYDECL_XRA_DECLARATION,
+            params: ['geDecl'],
+            position: secondDeclaration.open,
+         });
+      });
    });
 
    describe('parameter entity reference', () => {
@@ -894,6 +926,21 @@ describe('MarkupDeclChecker (unit)', () => {
             id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
             params: ['testEntity'],
             position: refToTestEnity.open,
+         });
+      });
+
+      it('reports a warning when there is a second declaration of an entity with the same name (¶4.2.0)', () => {
+         const firstDeclaration = makeParameterEntityDeclaration();
+         const secondDeclaration = makeParameterEntityDeclaration();
+
+         checker.check(firstDeclaration, ec);
+         checker.check(secondDeclaration, ec);
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWarning({
+            id: WARNID.ENTITYDECL_XRA_DECLARATION,
+            params: ['entityName'],
+            position: secondDeclaration.open,
          });
       });
    });

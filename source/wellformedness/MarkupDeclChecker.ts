@@ -1,6 +1,6 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { ErrorCollector, warning, WarningToken } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -60,6 +60,7 @@ enum States {
 }
 
 const WFID = WellFormedError.ID;
+const WARNID = warning.id;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
 interface StateTable {
@@ -440,19 +441,39 @@ class MarkupDeclChecker implements MarkupChecker {
             const inInternalSubset =
                this.state === States.PARAM_START_INTERNAL_SUBSET ||
                this.state === States.INTERNAL_SUBSET;
+            const geDeclName = strOrBlank(pToken.name);
 
-            if (!this.checkState.generalDecls[strOrBlank(pToken.name)]) {
-               this.checkState.generalDecls[strOrBlank(pToken.name)] = {
-                  token: pToken,
+            if (!this.checkState.generalDecls[geDeclName]) {
+               this.checkState.generalDecls[geDeclName] = {
                   declaredInInternalSubset: inInternalSubset,
+                  token: pToken,
                };
+            } else {
+               // §4.2 If the same entity is declared more than once, ... at user option,
+               // an XML processor may issue a warning if entities are declared multiple times.
+               errorCollector.reportError(
+                  WARNID.ENTITYDECL_XRA_DECLARATION,
+                  WarningToken,
+                  [geDeclName],
+                  pToken.open,
+               );
             }
             checkDeclaration(pToken, this.state, errorCollector);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            const peDeclName = strOrBlank(pToken.name);
             checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
-            if (!this.checkState.paramDecls[strOrBlank(pToken.name)]) {
-               this.checkState.paramDecls[strOrBlank(pToken.name)] = pToken;
+            if (!this.checkState.paramDecls[peDeclName]) {
+               this.checkState.paramDecls[peDeclName] = pToken;
+            } else {
+               // §4.2 If the same entity is declared more than once, ... at user option,
+               // an XML processor may issue a warning if entities are declared multiple times.
+               errorCollector.reportError(
+                  WARNID.ENTITYDECL_XRA_DECLARATION,
+                  WarningToken,
+                  [peDeclName],
+                  pToken.open,
+               );
             }
             checkDeclaration(pToken, this.state, errorCollector);
             break;

@@ -4,6 +4,10 @@ const wellFormedWarnings = {
       message:
          'Should not use empty elements unless the element type "{0}" is declared as EMPTY (§3.1.0).',
    },
+   ENTITYDECL_XRA_DECLARATION: {
+      code: 419,
+      message: 'Should not declare the entity "{0}" multiple times (§4.2.0).',
+   },
    ELEMENT_NAME_XML_RESERVED: {
       code: 401,
       message: 'Element names should not start with [Xx][Mm][Ll] (§2.3.0 - XML 1.0/6). Found "{0}"',

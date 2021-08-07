@@ -23,7 +23,6 @@ import {
    ParameterEntityDeclarationXToken,
    NOTATION_DECLARATION_XTOKEN,
 } from 'xToken';
-import { ValidityError } from 'valid';
 
 import { ContentSpecType } from 'xToken';
 
@@ -78,21 +77,8 @@ interface ContentContext {
    declInfo: ElementDeclInfo;
    stateId: number;
 }
-interface EntityInfo {
-   token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken;
-}
-
-interface EntityInfoMap {
-   [entityName: string]: EntityInfo;
-}
 
 class CheckXTokenValidStream extends Transform {
-   private paramEntitiesSeen: { [name: string]: any } = {}; // ick
-
-   private generalEntitiesSeen: { [name: string]: any } = {};
-
-   private entityInfo: EntityInfoMap = {};
-
    private attrDefsByElementName: ElementAttributes;
 
    private elementDeclarations: { [name: string]: ElementDeclInfo };
@@ -131,12 +117,6 @@ class CheckXTokenValidStream extends Transform {
          xToken instanceof GeneralEntityDeclarationXToken ||
          xToken instanceof ParameterEntityDeclarationXToken
       ) {
-         if (!this.entityInfo[xToken.name]) {
-            this.entityInfo[xToken.name] = {
-               token: xToken,
-            };
-         }
-         this.checkEntityDeclaration(xToken);
       } else if (xToken instanceof GeneralEntityStartXToken) {
       } else if (xToken instanceof ParameterEntityStartXToken) {
       } else if (xToken instanceof ParameterEntityEndXToken) {
@@ -182,25 +162,6 @@ class CheckXTokenValidStream extends Transform {
       this.push(xToken);
 
       done();
-   }
-
-   private checkEntityDeclaration(
-      xToken: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken,
-   ) {
-      const name = xToken.name;
-      const seen =
-         xToken instanceof ParameterEntityDeclarationXToken
-            ? this.paramEntitiesSeen
-            : this.generalEntitiesSeen;
-
-      // §4.2 If the same entity is declared more than once, ... at user option,
-      // an XML processor may issue a warning if entities are declared multiple times.
-      if (seen[name]) {
-         const warningToken = new WarningToken(warning.id.ENTITYDECL_XRA_DECLARATION, [name]);
-         this.push(warningToken);
-      }
-
-      seen[name] = xToken;
    }
 
    private validateAttListDecl(attListDecl: AttListDeclarationXToken) {

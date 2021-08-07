@@ -80,4 +80,30 @@ describe('DocumentChecker (integration)', () => {
          done!,
       );
    });
+
+   it('reports a warning there is a second declaration of an existing general entity (§4.2.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY bar "goo">
+            <!ENTITY bar "boo">
+         ]>
+         <bar/>`,
+         WARNID.ENTITYDECL_XRA_DECLARATION,
+         done!,
+      );
+   });
+
+   it('reports a warning there is a second declaration of an existing parameter entity (§4.2.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ENTITY % bar "goo">
+            <!ENTITY % bar "boo">
+         ]>
+         <bar/>`,
+         WARNID.ENTITYDECL_XRA_DECLARATION,
+         done!,
+      );
+   });
 });
