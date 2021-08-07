@@ -311,6 +311,49 @@ function checkDeclaration(
    }
 }
 
+function checkAttlistContext(
+   pToken: AttListDeclarationPToken,
+   state: CheckState,
+   ec: ErrorCollector,
+): void {
+   const elName = strOrBlank(pToken.elementName);
+
+   const elDetails = state.atts[elName] ?? {};
+
+   if (state.atts[elName]) {
+      // §3.3: For interoperability, writers of DTDs may choose to provide at most one
+      //   attribute-list declaration for a given element type ... For interoperability,
+      //   an XML processor may at user option issue a warning when more than one
+      //   attribute-list declaration is provided for a given element type,
+      ec.reportError(
+         WARNID.ATTLISTDECL_ELEMENT_XTRA_DECLARATION,
+         WarningToken,
+         [elName],
+         pToken.elementName,
+      );
+   }
+
+   for (const def of pToken.attDefs) {
+      const attName = strOrBlank(def.name);
+
+      if (elDetails[attName]) {
+         // §3.3.0: ... For interoperability, an XML processor may at user option
+         //   issue a warning when ... more than one attribute definition is provided for a given
+         //   attribute, but this is not an error.
+         ec.reportError(
+            WARNID.ATTLISTDECL_ATTR_XTRA_DECLARATION,
+            WarningToken,
+            [elName, attName],
+            def.name,
+         );
+      }
+
+      elDetails[attName] = true;
+   }
+
+   state.atts[elName] = elDetails;
+}
+
 /*
  * This class checks well-formedness constraints on PTokens within a DTD portion of an
  * XML document (See §2.8.0 [28b, 29, 30, 31]).
@@ -405,6 +448,7 @@ class MarkupDeclChecker implements MarkupChecker {
                [], // not possible to have general entity context here
                errorCollector,
             );
+            checkAttlistContext(pToken, this.checkState, errorCollector);
             checkDeclaration(pToken, this.state, errorCollector);
             break;
          case ELEMENT_DECLARATION_PTOKEN:

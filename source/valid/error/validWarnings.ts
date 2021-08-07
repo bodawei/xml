@@ -1,18 +1,18 @@
 const validWarnings = {
-   ATTLISTDECL_ELEMENT_XTRA_DECLARATION: {
-      code: 201,
-      message: 'Should not declare an ATTLIST for the element "{0}" multiple times (§3.3.0)',
-   },
+   // ATTLISTDECL_ELEMENT_XTRA_DECLARATION: {
+   //    code: 201,
+   //    message: 'Should not declare an ATTLIST for the element "{0}" multiple times (§3.3.0)',
+   // },
    ATTLISTDECL_NO_ELEMENTDECL: {
       code: 202,
       message:
          'Missing the ELEMENT declaration for the element type "{0}" used in an ATTLIST declaration (§3.3.0).',
    },
-   ATTLISTDECL_ATTR_XTRA_DECLARATION: {
-      code: 203,
-      message:
-         'Should not declare the attribute "{1}" of element type "{0}" multiple times (§3.3.0).',
-   },
+   // ATTLISTDECL_ATTR_XTRA_DECLARATION: {
+   //    code: 203,
+   //    message:
+   //       'Should not declare the attribute "{1}" of element type "{0}" multiple times (§3.3.0).',
+   // },
    ELEMENTDECL_PEREF_EMPTY: {
       code: 204,
       message:

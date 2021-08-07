@@ -90,6 +90,8 @@ const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 class CheckState {
    public confVer: ConformanceVersion = new ConformanceVersion();
 
+   public atts: { [elName: string]: { [attName: string]: boolean | undefined } | undefined } = {};
+
    public elementDecl: ElementDeclInfo = {};
 
    public generalDecls: GeneralEntitiesInfo = {};

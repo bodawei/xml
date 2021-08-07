@@ -199,7 +199,6 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no errors when all DTD tokens appear', () => {
-            console.log('checker', checker.checkState);
             addAllTokens(checker, ec);
 
             expect(ec.errors).toEqual([]);
@@ -562,10 +561,104 @@ describe('MarkupDeclChecker (unit)', () => {
          expect(spy).toHaveBeenCalledWith(
             attributeListDeclaration.attDefs,
             {},
-            new CheckState(),
+            expect.any(Object),
             [],
             ec,
          );
+      });
+
+      it('reports a warning when there are multiple ATTLIST declarations for the same element (§3.3.0)', () => {
+         const firstDeclaration = new AttListDeclarationPToken({
+            elementName: toSToken('one'),
+            open: toSToken('<!'),
+         });
+         const secondDeclaration = new AttListDeclarationPToken({
+            elementName: toSToken('one'),
+            open: toSToken('<!'),
+         });
+
+         checker.check(firstDeclaration, ec);
+         checker.check(secondDeclaration, ec);
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWarning({
+            id: WARNID.ATTLISTDECL_ELEMENT_XTRA_DECLARATION,
+            params: ['one'],
+            position: secondDeclaration.elementName,
+         });
+      });
+
+      it('reports a warning when there are multiple att declarations with the same name across att defs (§3.3.0)', () => {
+         const firstDeclaration = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  value: [],
+               },
+            ],
+            elementName: toSToken('one'),
+            open: toSToken('<!'),
+         });
+         const secondDeclaration = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  value: [],
+               },
+            ],
+            elementName: toSToken('one'),
+            open: toSToken('<!'),
+         });
+
+         checker.check(firstDeclaration, ec);
+         checker.check(secondDeclaration, ec);
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWarning({
+            id: WARNID.ATTLISTDECL_ATTR_XTRA_DECLARATION,
+            params: ['one', 'att1'],
+            position: toSToken('att1'),
+         });
+      });
+
+      it('reports a warning when there are multiple att declarations with the same name within one attdef (§3.3.0)', () => {
+         const firstDeclaration = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  value: [],
+               },
+               {
+                  name: toSToken('att1'),
+                  value: [],
+               },
+            ],
+            elementName: toSToken('one'),
+            open: toSToken('<!'),
+         });
+
+         checker.check(firstDeclaration, ec);
+
+         // @ts-expect-error 2329/matchers
+         expect(ec).toReportWarning({
+            id: WARNID.ATTLISTDECL_ATTR_XTRA_DECLARATION,
+            params: ['one', 'att1'],
+            position: toSToken('att1'),
+         });
+      });
+
+      it('updates the state with information about which attributes have been seen', () => {
+         checker = new MarkupDeclChecker(parameterEntityStart, ec, checkState, []);
+
+         checker.check(attributeListDeclaration, ec);
+
+         expect(checkState).toMatchObject({
+            atts: {
+               elStart: {
+                  att1: true,
+               },
+            },
+         });
       });
 
       describe('attribute content', () => {

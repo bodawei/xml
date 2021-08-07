@@ -176,16 +176,16 @@ class CheckXTokenValidStream extends Transform {
       // attribute-list declaration.
 
       if (attrDefs) {
-         // §3.3: For interoperability, writers of DTDs may choose to provide at most one
-         //   attribute-list declaration for a given element type ... For interoperability,
-         //   an XML processor may at user option issue a warning when more than one
-         //   attribute-list declaration is provided for a given element type,
-         this.pushWarning(
-            warning.id.ATTLISTDECL_ELEMENT_XTRA_DECLARATION,
-            [elName],
-            openSToken,
-            openSToken,
-         );
+         // // §3.3: For interoperability, writers of DTDs may choose to provide at most one
+         // //   attribute-list declaration for a given element type ... For interoperability,
+         // //   an XML processor may at user option issue a warning when more than one
+         // //   attribute-list declaration is provided for a given element type,
+         // this.pushWarning(
+         //    warning.id.ATTLISTDECL_ELEMENT_XTRA_DECLARATION,
+         //    [elName],
+         //    openSToken,
+         //    openSToken,
+         // );
          attrDefs.tokens.push(attListDecl);
       } else {
          attrDefs = {
@@ -218,12 +218,12 @@ class CheckXTokenValidStream extends Transform {
             // §3.3.0: ... For interoperability, an XML processor may at user option
             //   issue a warning when ... more than one attribute definition is provided for a given
             //   attribute, but this is not an error.
-            this.pushWarning(
-               warning.id.ATTLISTDECL_ATTR_XTRA_DECLARATION,
-               [elName, attDef.name],
-               openSToken,
-               openSToken,
-            );
+            // this.pushWarning(
+            //    warning.id.ATTLISTDECL_ATTR_XTRA_DECLARATION,
+            //    [elName, attDef.name],
+            //    openSToken,
+            //    openSToken,
+            // );
          }
       }
    }
