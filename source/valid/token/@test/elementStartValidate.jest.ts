@@ -142,15 +142,15 @@ describe('elementStartValidate (unit)', () => {
    it('reports no error when element is the first/root element, does not match the docType, but we are past the end', () => {
       state = new ValidateState({
          docType: 'bogusName',
+         elementContext: {
+            contextStack: [],
+            pastEnd: true,
+         },
          elementDeclarations: {
             elementName: {
                token: makeElementDeclaration(),
                type: ElDeclType.ANY,
             },
-         },
-         elementContext: {
-            contextStack: [],
-            pastEnd: true,
          },
       });
 
@@ -184,7 +184,7 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.ELEMENT_UNDECLARED,
+         id: VID.ELEMENT_UNDECLARED,
          lastPosition: undefined,
          params: ['other'],
          position: elementStart.name,
@@ -301,7 +301,7 @@ describe('elementStartValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+            id: VID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
             lastPosition: undefined,
             params: ['elementName', 'att1'],
             position: toSToken('att1'),
@@ -340,7 +340,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
+               id: VID.ELEMENTSTART_ID_NAME_INVALID,
                lastPosition: undefined,
                params: ['elementName', 'att1', '$BOGUS'],
                position: toSToken('att1'),
@@ -423,7 +423,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               id: VID.ELEMENTSTART_ID_DUPLICATE,
                lastPosition: undefined,
                params: ['elementName', 'att1', 'otherElement', 'otherAttribute', 'reused'],
                position: toSToken('att1'),
@@ -475,7 +475,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               id: VID.ELEMENTSTART_ID_DUPLICATE,
                lastPosition: undefined,
                params: ['elementName', 'att2', 'elementName', 'att1', 'reused'],
                position: toSToken('att2'),
@@ -515,7 +515,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME,
+               id: VID.ELEMENTSTART_IDREF_NOT_NAME,
                lastPosition: undefined,
                params: ['elementName', 'att1', '$BOGUS'],
                position: toSToken('att1'),
@@ -553,7 +553,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME,
+               id: VID.ELEMENTSTART_IDREFS_NOT_NAME,
                lastPosition: undefined,
                params: ['elementName', 'att1', '$BOGUS, $BAD'],
                position: toSToken('att1'),
@@ -631,7 +631,7 @@ describe('elementStartValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
+            id: VID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
             lastPosition: undefined,
             params: ['', 'elementName', 'att1'],
             position: toSToken('att1'),
@@ -753,7 +753,7 @@ describe('elementStartValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+            id: VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
             lastPosition: undefined,
             params: ['fooo$$bar', 'elementName', 'att1'],
             position: toSToken('att1'),
@@ -1112,7 +1112,7 @@ describe('elementStartValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
+            id: VID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
             lastPosition: undefined,
             params: ['elementName', 'att1'],
             position: toSToken('att1'),
@@ -1228,7 +1228,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+               id: VID.ELEMENTSTART_NOTATION_NOT_DECLARED,
                lastPosition: undefined,
                params: ['elementName', 'att1', 'first|second', 'bad'],
                position: toSToken('att1'),
@@ -1266,7 +1266,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+               id: VID.ELEMENTSTART_NOTATION_NOT_DECLARED,
                lastPosition: undefined,
                params: ['elementName', 'att1', '', 'bad'],
                position: toSToken('att1'),
@@ -1363,7 +1363,7 @@ describe('elementStartValidate (unit)', () => {
 
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+               id: VID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
                lastPosition: undefined,
                params: ['elementName', 'att1', 'first|second', 'bad'],
                position: toSToken('att1'),
@@ -1490,7 +1490,7 @@ describe('elementStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
+         id: VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
          lastPosition: undefined,
          params: ['elementName', 'att1'],
          position: toSToken('att1'),

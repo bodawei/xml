@@ -544,6 +544,20 @@ describe('ValidityChecker (integration)', () => {
       );
    });
 
+   it('reports an error when an element ends before its content modal says it may (§3.0.0)', (done) => {
+      expectError(
+         `<?xml version="1.0"?>
+         <!DOCTYPE root [
+            <!ELEMENT root (a,a,b)>
+            <!ELEMENT a EMPTY>
+            <!ELEMENT b EMPTY>
+         ]>
+         <root><a/><a/></root>`,
+         VID.CONTENT_UNEXPECTED_END,
+         done!,
+      );
+   });
+
    it('reports an error when an attribute has not been declared (§3.1.0)', (done) => {
       expectError(
          `<?xml version="1.0"?>

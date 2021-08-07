@@ -117,6 +117,11 @@ const validityConstraint = new ErrorCodes({
       message:
          'Found an element that was not declared in the "{0}" element declaration (§3.0.0). Found "{1}".',
    },
+   CONTENT_UNEXPECTED_END: {
+      code: 1151,
+      message:
+         'Found the end of element type "{0}", but expected other elements (any of: {1}) (§3.0.0).',
+   },
    CONTENT_XTRA_SPACE: {
       code: 1142,
       message:
@@ -139,7 +144,7 @@ const validityConstraint = new ErrorCodes({
    },
    ELEMENT_UNDECLARED: {
       code: 1147,
-      message: ' Element found without a corresponding declaration (§3.0.0). Found "{0}".',
+      message: 'Element found without a corresponding declaration (§3.0.0). Found "{0}".',
    },
    ELEMENTDECL_MIXED_DUPLICATE_NAME: {
       code: 1124,
@@ -162,12 +167,12 @@ const validityConstraint = new ErrorCodes({
          'The ENTITIES value for attribute "{2}" of element "{1}" names one or more entities that were not declared (§3.3.1). Found: "{0}".',
    },
    ELEMENTSTART_ENTITIES_NOT_NAME: {
-      code: 0,
+      code: 1109,
       message:
          'The ENTITIES value for attribute "{2}" of element "{1}" must match the syntax for names (§3.3.1). Found "{0}".',
    },
    ELEMENTSTART_ENTITIES_PARSED_ENTITY: {
-      code: 1109,
+      code: 1152,
       message:
          'The ENTITIES value for attribute "{2}" of element "{1}" names one or more parsed entities (§3.3.1). Found unparsed: "{0}".',
    },
@@ -177,7 +182,7 @@ const validityConstraint = new ErrorCodes({
          'The ENTITY value for attribute "{2}" of element "{1}" must name an unparsed declared entity (§3.3.1). Found "{0}".',
    },
    ELEMENTSTART_ENTITY_NOT_NAME: {
-      code: 0,
+      code: 1153,
       message:
          'The ENTITY value for attribute "{2}" of element "{1}" must match the syntax for names (§3.3.1). Found "{0}".',
    },

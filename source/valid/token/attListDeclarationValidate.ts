@@ -7,12 +7,10 @@ import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken } from 'token';
 import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validityConstraint } from '../error/validityConstraint';
-import { ValidityError } from '../error/ValidityError';
 import { ValidateState } from '../validateState';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 import { xmlSpaceValidate } from './xmlSpaceValidate';
 
-const OLD_VID = ValidityError.ID;
 const VID = validityConstraint.id;
 const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
@@ -43,8 +41,8 @@ function checkEnumeration(
    const seenWords: Record<string, boolean> = {};
    const code =
       attType === 'NOTATION'
-         ? OLD_VID.ATTLISTDECL_DUPLICATE_NOTATION
-         : OLD_VID.ATTLISTDECL_DUPLICATE_ENUMERATION;
+         ? VID.ATTLISTDECL_DUPLICATE_NOTATION
+         : VID.ATTLISTDECL_DUPLICATE_ENUMERATION;
 
    ec.setPos(attDef.enumeration.open);
 
@@ -211,7 +209,7 @@ function attListDeclarationValidate(
    if (token.unexpanded && token.extra) {
       const extraText = strOrBlank(token.extra);
 
-      ec.check(extraText.indexOf('>') !== -1, OLD_VID.PEREF_INVALID_END_NESTING, ['ATTLIST']);
+      ec.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ATTLIST']);
    }
 
    ec.setPos(token.elementName);
@@ -234,7 +232,7 @@ function attListDeclarationValidate(
 
          ec.check(
             defaultType !== '#REQUIRED' && defaultType !== '#IMPLIED',
-            OLD_VID.ATTLISTDECL_ID_BAD_DEFAULT,
+            VID.ATTLISTDECL_ID_BAD_DEFAULT,
             [elName, attName, defaultType],
          );
       }

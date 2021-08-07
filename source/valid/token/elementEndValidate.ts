@@ -1,15 +1,12 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
-import { strOrBlank } from 'sToken';
-import { CHARDATA_PTOKEN, ElementEndPToken, SPACE_PTOKEN } from 'token';
+import { ElementEndPToken } from 'token';
 
 import { validityConstraint } from '../error/validityConstraint';
-import { ValidityError } from '../error/ValidityError';
 import { ElDeclType, ValidateState } from '../validateState';
 
 const VID = validityConstraint.id;
-const S_REGEXP = /^[\t\n\r ]*$/;
 
 function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: ErrorCollector): void {
    const context = state.elementContext.activeContext;
@@ -33,7 +30,7 @@ function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: Erro
    //     model, ...
    ec.check(
       !currentState.done,
-      ValidityError.ID.ELEMENT_CONTENT_UNEXPECTED_END,
+      VID.CONTENT_UNEXPECTED_END,
       [context.parentName, Object.keys(currentState.trans).join(', ')],
       el.name,
    );

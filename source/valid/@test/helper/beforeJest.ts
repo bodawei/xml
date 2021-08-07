@@ -1,21 +1,17 @@
 import { expect } from '@jest/globals';
-import { StringBundle } from 'basic';
-import { makeErrorMatcher } from 'basic-test';
 
-import validityMessages from '../../error/derive/ValidityError.json';
-
-import { ValidityError } from '../../error/ValidityError';
 import { error, warning } from 'basic';
+import { makeNewErrorMatcher } from 'basic-test';
+
 import { validWarnings } from '../../error/validWarnings';
 import { validError } from '../../error/validError';
+import { validityConstraint } from '../../error/validityConstraint';
 
 warning.addMapping(validWarnings);
 error.addMapping(validError);
 
 expect.extend({
-   toReportValidityError: makeErrorMatcher(ValidityError, {
-      ValidityError: new StringBundle(validityMessages.message),
-   }),
+   toReportValidityError: makeNewErrorMatcher(validityConstraint),
 });
 
 // declare global {
@@ -26,4 +22,4 @@ expect.extend({
 //    }
 // }
 
-export { ValidityError };
+export { validityConstraint };

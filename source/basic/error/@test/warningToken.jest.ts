@@ -12,9 +12,9 @@ describe('warningToken()', () => {
       const result = new WarningToken('ATTLISTDECL_ATTR_NAME_DUPLICATE');
 
       expect(result).toEqual({
-         id: 'ATTLISTDECL_ATTR_NAME_DUPLICATE',
          code: 415,
          context: undefined,
+         id: 'ATTLISTDECL_ATTR_NAME_DUPLICATE',
          message:
             'Attribute names should not be listed multiple times in an ATTLIST declaration (§3.3.0). Found "{0}".',
          place: undefined,
@@ -32,9 +32,9 @@ describe('warningToken()', () => {
       );
 
       expect(result).toEqual({
-         id: 'ATTLISTDECL_ATTR_NAME_DUPLICATE',
          code: 415,
          context: new Offset(new EntityId(), 12, 3, 4),
+         id: 'ATTLISTDECL_ATTR_NAME_DUPLICATE',
          message:
             'Attribute names should not be listed multiple times in an ATTLIST declaration (§3.3.0). Found "a".',
          place: new Offset(new EntityId(), 0, 0, 0),

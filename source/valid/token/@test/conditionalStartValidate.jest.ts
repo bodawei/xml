@@ -3,13 +3,15 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
+import { toSToken } from 'sToken';
+import { ConditionalPToken } from 'token';
 import { makeElementDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { conditionalStartValidate } from '../conditionalStartValidate';
-import { ValidityError } from '../../error/ValidityError';
 import { ElDeclType, ValidateState } from '../../validateState';
-import { ConditionalPToken } from 'token';
-import { toSToken } from 'sToken';
+import { validityConstraint } from '../../error/validityConstraint';
+
+const VID = validityConstraint.id;
 
 describe('conditionalStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -23,9 +25,11 @@ describe('conditionalStartValidate (unit)', () => {
             activeContext: {
                declDetails: {
                   graph: { endId: 0, startId: 0, states: {} },
+                  isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
                   type: ElDeclType.ELEMENT,
                },
+               lastToken: undefined,
                parentName: 'foo',
                stateId: 0,
             },
@@ -50,7 +54,7 @@ describe('conditionalStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: ValidityError.ID.CONDITIONAL_BAD_NESTING,
+         id: VID.CONDITIONAL_BAD_NESTING,
          lastPosition: undefined,
          params: ['entityName'],
          position: peRef.open,

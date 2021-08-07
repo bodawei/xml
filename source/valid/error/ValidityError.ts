@@ -1,27 +1,37 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { StringBundle } from 'basic';
-import { BaseError, ErrorLocale, MessageCache, Position } from 'basic';
-
-import validtyErrorStrings from './derive/ValidityError.json';
-
-const messagesAndStrings: ErrorLocale = validtyErrorStrings;
+import { makeOffset, XmlErrorToken } from 'basic';
+import { XML_ERROR_TOKEN, Offset, XmlErrorPosition } from 'basic';
+import { validityConstraint } from './validityConstraint';
 
 const VALIDITY_ERROR_SUBTYPE = 'VALIDITY_ERROR';
-const messages: MessageCache = {
-   code: messagesAndStrings.code,
-   message: new StringBundle(messagesAndStrings.message),
-};
 
-class ValidityError extends BaseError {
-   public static readonly ID: { [id: string]: string } = messagesAndStrings.id;
+class ValidityError implements XmlErrorToken {
+   public readonly code: number;
 
-   public static readonly MSG_BUNDLE = messages.message;
+   public readonly context?: Offset;
+
+   public readonly id: string;
+
+   public readonly message: string;
+
+   public readonly place?: Offset;
 
    public readonly subtype: typeof VALIDITY_ERROR_SUBTYPE = VALIDITY_ERROR_SUBTYPE;
 
-   constructor(id: string, params?: Array<string>, place?: Position, contextOffset?: Position) {
-      super(messages, id, params, place, contextOffset);
+   public readonly type: typeof XML_ERROR_TOKEN = XML_ERROR_TOKEN;
+
+   constructor(
+      id: string,
+      params?: ReadonlyArray<string | number | boolean>,
+      place?: XmlErrorPosition,
+      context?: XmlErrorPosition,
+   ) {
+      this.id = id;
+      this.code = validityConstraint.codeFor(id);
+      this.context = makeOffset(context);
+      this.message = validityConstraint.messageFor(id, params);
+      this.place = makeOffset(place);
    }
 }
 

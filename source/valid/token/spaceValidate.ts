@@ -4,10 +4,10 @@ import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { SpacePToken } from 'token';
 
-import { ValidityError } from '../error/ValidityError';
+import { validityConstraint } from '../error/validityConstraint';
 import { ElDeclType, ValidateState } from '../validateState';
 
-const VID = ValidityError.ID;
+const VID = validityConstraint.id;
 const S_REGEXP = /^[\t\n\r ]*$/;
 
 function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollector): void {
@@ -27,15 +27,7 @@ function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollec
     *    contain only child elements (no character data), optionally separated by
     *    white space (characters matching the nonterminal S).]
     */
-   if (!S_REGEXP.test(spaceText)) {
-      const chars = spaceText.split('');
-
-      for (const char of chars) {
-         if (!S_REGEXP.test(char)) {
-            ec.report(VID.ELEMENT_CONTENT_BAD_SPACE, [char]);
-         }
-      }
-   } else {
+   if (S_REGEXP.test(spaceText)) {
       // §2.9.0 Validity constraint: Standalone Document Declaration
       //    The standalone document declaration must have the value "no" if any external markup
       //    declarations contain declarations of:

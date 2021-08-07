@@ -1,43 +1,41 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
+import { EntityId, Offset, XML_ERROR_TOKEN } from 'basic';
+import { toSToken } from 'sToken';
 
-import { ValidityError } from '../ValidityError';
+import { VALIDITY_ERROR_SUBTYPE, ValidityError } from '../ValidityError';
 
-describe('ValidityCheckError', () => {
-   describe('class values', () => {
-      it('populates the ID property', () => {
-         expect(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).toEqual('ELEMENT_MISMATCH_ROOT_TYPE');
+describe('ValidityError()', () => {
+   it('constructs an instance with just an id', () => {
+      const result = new ValidityError('ELEMENT_UNDECLARED');
+
+      expect(result).toEqual({
+         code: 1147,
+         context: undefined,
+         id: 'ELEMENT_UNDECLARED',
+         message: 'Element found without a corresponding declaration (§3.0.0). Found "{0}".',
+         place: undefined,
+         subtype: VALIDITY_ERROR_SUBTYPE,
+         type: XML_ERROR_TOKEN,
       });
    });
 
-   describe('construction', () => {
-      it('throws no error when constructed', () => {
-         expect(() => {
-            new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE);
-         }).not.toThrow();
-      });
+   it('constructs an instance with all parameters', () => {
+      const result = new ValidityError(
+         'ELEMENT_UNDECLARED',
+         ['a'],
+         toSToken('foo'),
+         new Offset(new EntityId(), 12, 3, 4),
+      );
 
-      it('throws an error if the code is not a known one', () => {
-         expect(() => {
-            new ValidityError('BOGUS');
-         }).toThrowError('The Error id "BOGUS" is not a legal id.');
-      });
-
-      it('sets the id', () => {
-         expect(new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).id).toEqual(
-            ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE,
-         );
-      });
-
-      it('sets the code', () => {
-         expect(new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).code).toEqual(10001);
-      });
-
-      it('sets the message', () => {
-         expect(new ValidityError(ValidityError.ID.ELEMENT_MISMATCH_ROOT_TYPE).message).toEqual(
-            'The name of the root element must match the type "{0}" in the document type declaration (§2.8.0). Found "{1}".',
-         );
+      expect(result).toEqual({
+         code: 1147,
+         context: new Offset(new EntityId(), 12, 3, 4),
+         id: 'ELEMENT_UNDECLARED',
+         message: 'Element found without a corresponding declaration (§3.0.0). Found "a".',
+         place: new Offset(new EntityId(), 0, 0, 0),
+         subtype: VALIDITY_ERROR_SUBTYPE,
+         type: XML_ERROR_TOKEN,
       });
    });
 });

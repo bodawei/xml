@@ -7,7 +7,7 @@ const validWarnings = {
    ELEMENTDECL_PEREF_TRAILING_CONNECTOR: {
       code: 205,
       message:
-         'The element declaration "{1}" shoud not have replacement text for the parameter entity "{1}" that ends with "|" or "," in the content model (§3.2.1).',
+         'The element declaration "{0}" shoud not have replacement text for the parameter entity "{1}" that ends with "|" or "," in the content model (§3.2.1).',
    },
    ELEMENT_CHILD_UNDECLARED: {
       code: 207,

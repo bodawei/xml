@@ -68,11 +68,11 @@ function makeErrorMatcher(errorCodes: ErrorCodes) {
                break;
             } else {
                let count = 0;
-               let offset = errMsg.indexOf('{');
+               let offset = errMsg.indexOf('{0}');
 
                while (offset !== -1) {
                   count++;
-                  offset = errMsg.indexOf('{', offset + 1);
+                  offset = errMsg.indexOf(`{${count}}`);
                }
 
                const params = actual.params || [];
