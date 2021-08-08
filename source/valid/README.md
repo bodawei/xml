@@ -1,12 +1,62 @@
 # Valid
 
-## Overview
+## Purpose
+
+The "valid" system scans a series of PTokens, and identifies a set of "validity" problems.  When such a problem is encountered, it introduces an ErrorToken into the series, generally immediately before the token that allowed it to identify the problem.
+
+The problems this identifies are primarily the 26 validity constraints from the XML standard. Beyond these, it also reports a few errors and warnings. The errors are all the `errors` mentioned in the standard (not `fatal errors`) and warnings that seem to depend on the same level of understanding of the document as the validity constraints.
+
+The other errors are:
+
+* When an element declaration's content model is non-deterministic
+* If an `xml:space` attribute is the wrong case
+* If an `xml:space` attribute does not have at least one of `default` or `preserve` as values  (§2.10.0)
+* If an `xml:space` attribute has something other than `default` or `preserve` as values  (§2.10.0)
+
+The warnings are
+
+* When an ordinary start tag is used for an element that was declared as EMPTY (§3.1.0)
+* If the replacement text of a parameter entity is empty when used in a element's content model (§3.2.1)
+* If the replacement text of a parameter entity ends with an `|` or `,` when used in a element's content model (§3.2.1)
+* If a content model references an element type that has not been declared (§3.2.0)
+* When a predefined entity was not declared (§4.1.0)
+
+It is important to note that this only pays attention to the following PTokens and the ConformanceVersion. Any other values in the stream will be ignored and passed through unexamined. As always, this will assume a version of 1.0/5 unless the first ConformanceVersion token it finds has a different version, in which case it will do subsequent validation using that.
+
+The tokens this examines are:
+
+*  `AttListDeclarationPToken` 
+*  `CdataPToken` 
+*  `CharDataPToken` 
+*  `CharRefPToken` 
+*  `CommentPToken` 
+*  `ConditionalEndPToken` 
+*  `ConditionalStartPToken` 
+*  `DeclarationPToken`
+*  `DocTypeEndPToken` 
+*  `DocTypeStartPToken` 
+*  `ElementDeclarationPToken` 
+*  `ElementEmptyPToken` 
+*  `ElementEndPToken` 
+*  `ElementStartPToken` 
+*  `GeneralEntityEndPToken` 
+*  `GeneralEntityStartPToken` 
+*  `GeneralEntityDeclarationPToken` 
+*  `GeneralEntityReferencePToken` 
+*  `NotationDeclarationPToken` 
+*  `ParameterEntityEndPToken` 
+*  `ParameterEntityStartToken` 
+*  `ParamterEntityDeclarationPToken` 
+*  `ParamterEntityReferencePToken` 
+*  `ProcessingInstructionPToken` 
+*  `SpacePToken` 
+*  `TextPToken` 
+*  `TextDeclarationPToken` 
+*  `XmlDeclarationPToken` 
+
+This does try to be flexible and cope with grossly malformed documents. However, if your DTD is in the wrong place or if the external comes before the internal subset, it will get confused (this should just result in more error tokens, however, not any kind of outright bugs.  This should never crash or throw any errors (as with other systems, there is no circumstance where this will deliberately throw an error) no matter what is passed to it and in what order.
 
 ## Commentary on individual constraints
-
-x 745 3.3.1 name token
-x 744 3.3.1 entity name
-
 
 ### §2.8.0 Root element type
 No commentary.
@@ -103,6 +153,12 @@ No commentary.
 ### §3.3.1 IDREF
 Note that idref's can be "forward" or "backward" references.  Thus, many may not actually be resolvable until the end of the document.
 
+### §3.3.1 Entity Name
+No commentary
+
+### §3.3.1 Name Token
+No commentary
+
 ### §3.3.1 Notation Attributes
 This says "all notation names in the declaration must be declared". Note that one of these notations can be declared after the ATTLIST
 
@@ -154,17 +210,24 @@ Note also that this is not enforced in 1.0/1, since that edition did not have th
 
 ## Architecture
 
-The wellformedness check system approached checking by having a global context which is checked in the main routine, and then having token-specific checking routines.  The notion was that there is a bunch of more "global" state (bigger than individual tokens) that needs coordinateing.  As a result we had "global" state and "global" processing, as well as local processing.
+This contains a core class, `ValidityChecker`. Once instantiated, its `checkPToken()` function can be called with new tokens and an error collector instance. This routine does not actually do any checks, itself, instead deferring to other routines.  Internally, it keeps a `state` property which maintains tables of declarations it has seen, along with a certain amount of state of the processing in either the DTD or content so it can correctly interpret the situation. This state is passed along into each of the other routines.
 
-The downsides to this is that that global state and code is relatively complex to read, write and test.  Though it isn't going to happen, adding another token type is complex.
+The bulk of the processing is done on individual tokens. That is, when receiving a `FooPToken`, this calls a `fooValidate()` routine to validate that token itself, as well as its relationship to the overall `state`. Often, this then calls another routine `fooUpdateState()` which will modify the state given the information from the `FooToken` (most commonly, adding it to one of the tables).
 
-The first draft of validation ended up with a huge file with a lot of complex state and functionality spread around. Some parts could have been extracted into individual routines, but it has the same problems that the wellformedness checks.
+There is some processing that happens in other routines. Judging whether the content of elements matches their declarations is handled in a `contentValidate()` routine.  Theoretically this could be handled in the individual token validation routines, but it would involve a disturbing amount of repetition of code.
 
-In an effort to cut down on complex "global" logic, this is experimenting with doing all validation only at the element level.  This will produce some duplication, and entails having some pretty detailed global state. otoh, we had pretty detailed global state before.
+Note that earlier versions of this system tried to do more validation in a single large file (with the thought (seen in hindsight) that this would involve a simpler collection of state information).  In practice, given the number of constraints, it got too complex to easily understand or maintain.  Fragmenting this into a few dozen validate and update state routines made the individual validation code easier to understand, though at the cost of being in several dozen files (and thus more lines of code) rather than a single one.
+
+One of the more complex aspects of this system is that of the graphs representing an element declaration's content model. This is discussed in more detail below.
+
+### Specific token details
+
+#### Element end
+* If this encounters an unbalanced end, it will ignore the end element.
+   * Like wellformedness, this does not try to auto-close parent elements.
 
 
-
-## ContentModelGraphs
+### ContentModelGraphs
 In order to validate whether the elements in a particular model conform to the content model description in an element declaration, this converts a content model in to a graph representation.  
 
 Content models are described by the `children` production in §3.2.1:
@@ -184,7 +247,7 @@ The point of the graph conversion is to turn something like `(head, (p | list | 
    head
    head list
 ```
-### High level data structure
+#### High level data structure
 We turn any content model into one of a set of `CmState`s.  Each `CmState` has this form:
 
 ```
@@ -207,13 +270,13 @@ We trandition (`trans`) through the graph by encountering an element name, looki
 
 The `ref` property is used to keep track of where this transition was in the content model, for reporting to any errors to the user.  Thus, in the `(head, (p | list | note)*, div2*)`, the transition when encountering `head` is `/1`, the transition with `(p | list | note)` is `/2` etc.  The `ref`s are hierarchical, representing the hierarchy in a content model. Thus, the transition for `p` is `/2/1` Note that if a choice `cp` has multiple of the same name, we represent this in the `ref` property as `/1,/3` (in the case of `(foo|bar|foo)`).
 
-### Autotrans
+#### Autotrans
 
 In the first stage of conversion (`cmToCmGraph`) the graph states have an additional property: `autoTrans`. This represents the cases where `*` or `?` is the repeat, and indicates that you could ignore this state and automatically transition to the state with the specified state id.
 
 The auto-trans array may have multiple ids and, and the ids can have multiple values.
 
-### Introduced states
+#### Introduced states
 
 The first stage of processing may also introduce states that don't have an obvious representation in the original content model. This is for repetitions (`*` and `+`) For instance:
 
@@ -259,7 +322,7 @@ will produce:
 ```
 
 
-## Collapsing autoTrans
+#### Collapsing autoTrans
 
 The second phase of processing rewrites the graph to replace the `autoTrans` values with additional states. The point is to allow later processing to walk decisively through a graph, and not need to maintain multiple pointers ("I could be here, or there").
 
@@ -313,23 +376,16 @@ For exaple, the graph, above, is rewritten to the following. Notice how state 4 
 
 Note that in some cases, this may combined multiple states. in this case the ref will contain multiple values separated by commas (e.g. `/1,/2/3`). These represent non-deterministic places in the content model, which becomes important for validation.
 
-### Pruning the graph
+#### Pruning the graph
 
 The last processing phase does two things:
 
 * It removes the (now empty) `autoTrans` properties from the graph.
 * The collapsing process may leave some "orphan" states (e.g. #3, above).  These can simply be removed.
 
-### Implementation note
+#### Implementation note
 * The graph processing all works with mutable data structures. It might be nice to switch this to working more with immutable structures.
 * We probably ought to have a different internal structure and external structure, so the `autoTrans` property is never seen outside.
-
-## Specific token details
-
-### Element end
-* If this encounters an unbalanced end, it will ignore the end element.
-   * Like wellformedness, this does not try to auto-close parent elements.
-
 
 ## Code style
 * A comment should be placed before each check for a valitity error that lists the section, and the portion of the text from the spec that describes the constraint.  This should be done with line comments.
