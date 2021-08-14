@@ -7,11 +7,11 @@ import { toSToken } from 'sToken';
 
 import { elementDeclarationPreprocess } from '../elementDeclarationPreprocess';
 import { ElDeclType, ValidateState } from '../../validateState';
-import * as makeCmGraphModule from '../../contentModal/makeCmGraph';
+import * as makeCmGraphModule from '../../contentModel/makeCmGraph';
 
-import { makeCmGraph } from '../../contentModal/makeCmGraph';
+import { makeCmGraph } from '../../contentModel/makeCmGraph';
 
-jest.mock('../../contentModal/makeCmGraph');
+jest.mock('../../contentModel/makeCmGraph');
 
 describe('elementDeclarationPreprocess (unit)', () => {
    let makeCmGraphMock: jest.MockedFunction<typeof makeCmGraphModule.makeCmGraph>;

@@ -1,7 +1,7 @@
 import { ElementDeclarationPToken, isContentModelP } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { makeCmGraph } from '../contentModal/makeCmGraph';
+import { makeCmGraph } from '../contentModel/makeCmGraph';
 import { ElDeclType, ValidateState } from '../validateState';
 
 import { DeclarationDetails } from '../validateState';

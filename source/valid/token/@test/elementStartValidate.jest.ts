@@ -26,7 +26,7 @@ import { elementStartValidate } from '../elementStartValidate';
 import { ValidityError } from '../../error/ValidityError';
 import { validityConstraint } from '../../error/validityConstraint';
 import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
-import { CmGraph } from '../../contentModal/cmGraphTypes';
+import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
 import { attributeValueValidate } from '../../common/attributeValueValidate';
 

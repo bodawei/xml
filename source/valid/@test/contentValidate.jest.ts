@@ -38,7 +38,7 @@ import {
 import { ElDeclType, ValidateState } from '../validateState';
 import { validityConstraint } from '../error/validityConstraint';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
-import { makeCmGraph } from '../contentModal/makeCmGraph';
+import { makeCmGraph } from '../contentModel/makeCmGraph';
 import { contentValidate } from '../contentValidate';
 
 const VID = validityConstraint.id;

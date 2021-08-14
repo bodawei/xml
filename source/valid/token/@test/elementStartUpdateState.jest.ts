@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ElementDeclarationPToken, TextPToken } from 'pToken';
-import { CmGraph } from 'source/valid/contentModal/cmGraphTypes';
+import { CmGraph } from 'source/valid/contentModel/cmGraphTypes';
 import { SToken, toSToken } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 

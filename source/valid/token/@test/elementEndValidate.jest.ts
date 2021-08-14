@@ -7,7 +7,7 @@ import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
-import { CmGraph } from '../../contentModal/cmGraphTypes';
+import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { validityConstraint } from '../../error/validityConstraint';
 import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
 import { elementEndValidate } from '../elementEndValidate';
