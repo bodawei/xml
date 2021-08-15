@@ -3,7 +3,7 @@
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function notationDeclarationUpdateState(
    el: NotationDeclarationPToken,

@@ -35,42 +35,42 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
-import { ElDeclType, ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { ElDeclType, ValidateState } from '../../common/validateState';
+import { validCodes } from '../../error/validCodes';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
-import { makeCmGraph } from '../contentModel/makeCmGraph';
+import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { contentValidate } from '../contentValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
-jest.mock('../token/attListDeclarationValidate');
-jest.mock('../token/attListDeclarationUpdateState');
-jest.mock('../token/conditionalEndUpdateState');
-jest.mock('../token/conditionalEndValidate');
-jest.mock('../token/conditionalStartUpdateState');
-jest.mock('../token/conditionalStartValidate');
-jest.mock('../token/docTypeStartUpdateState');
-jest.mock('../token/dtdEndValidate');
-jest.mock('../token/elementDeclarationUpdateState');
-jest.mock('../token/elementDeclarationPreprocess');
-jest.mock('../token/elementDeclarationValidate');
-jest.mock('../token/elementEndUpdateState');
-jest.mock('../token/elementEndValidate');
-jest.mock('../token/elementStartUpdateState');
-jest.mock('../token/elementStartValidate');
-jest.mock('../token/elidedEntityDeclarationUpdateState');
-jest.mock('../token/entityDeclarationValidate');
-jest.mock('../token/externalSubsetEndUpdateState');
-jest.mock('../token/externalSubsetStartUpdateState');
-jest.mock('../token/generalEntityDeclarationUpdateState');
-jest.mock('../token/generalEntityReferenceValidate');
-jest.mock('../token/generalEntityStartValidate');
-jest.mock('../token/notationDeclarationUpdateState');
-jest.mock('../token/notationDeclarationValidate');
-jest.mock('../token/parameterEntityDeclarationUpdateState');
-jest.mock('../token/parameterEntityReferenceValidate');
-jest.mock('../token/parameterEntityStartValidate');
-jest.mock('../token/xmlDeclarationUpdateState');
+jest.mock('../../token/attListDeclarationValidate');
+jest.mock('../../token/attListDeclarationUpdateState');
+jest.mock('../../token/conditionalEndUpdateState');
+jest.mock('../../token/conditionalEndValidate');
+jest.mock('../../token/conditionalStartUpdateState');
+jest.mock('../../token/conditionalStartValidate');
+jest.mock('../../token/docTypeStartUpdateState');
+jest.mock('../../token/dtdEndValidate');
+jest.mock('../../token/elementDeclarationUpdateState');
+jest.mock('../../token/elementDeclarationPreprocess');
+jest.mock('../../token/elementDeclarationValidate');
+jest.mock('../../token/elementEndUpdateState');
+jest.mock('../../token/elementEndValidate');
+jest.mock('../../token/elementStartUpdateState');
+jest.mock('../../token/elementStartValidate');
+jest.mock('../../token/elidedEntityDeclarationUpdateState');
+jest.mock('../../token/entityDeclarationValidate');
+jest.mock('../../token/externalSubsetEndUpdateState');
+jest.mock('../../token/externalSubsetStartUpdateState');
+jest.mock('../../token/generalEntityDeclarationUpdateState');
+jest.mock('../../token/generalEntityReferenceValidate');
+jest.mock('../../token/generalEntityStartValidate');
+jest.mock('../../token/notationDeclarationUpdateState');
+jest.mock('../../token/notationDeclarationValidate');
+jest.mock('../../token/parameterEntityDeclarationUpdateState');
+jest.mock('../../token/parameterEntityReferenceValidate');
+jest.mock('../../token/parameterEntityStartValidate');
+jest.mock('../../token/xmlDeclarationUpdateState');
 
 describe('conentValidate (unit)', () => {
    let ec: MockErrorCollector;
@@ -105,7 +105,7 @@ describe('conentValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(ec).toReportValidityError({
-         id: VID.CONTENT_IN_EMPTY_ELEMENT,
+         id: VID.CONTENTEMPTY_INVALID_SYNTAX,
          lastPosition: undefined,
          params: ['elementName'],
          position: makeProcessingInstruction().open,
@@ -210,7 +210,7 @@ describe('conentValidate (unit)', () => {
             if (!pass) {
                // @ts-expect-error 2329/matchers
                expect(ec).toReportValidityError({
-                  id: VID.CONTENT_IN_ELEMENT_ELEMENT,
+                  id: VID.CONTENTELEMENT_INVALID_SYNTAX,
                   lastPosition: undefined,
                   params: ['elementName', String(version), String(edition), token.type],
                   position: getFirstSToken(token),
@@ -250,7 +250,7 @@ describe('conentValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(ec).toReportValidityError({
-         id: VID.CONTENT_XTRA_SPACE,
+         id: VID.CONTENTELEMENT_XTRA_SPACE,
          lastPosition: undefined,
          params: ['elementName'],
          position: makeSpace().text,
@@ -281,7 +281,7 @@ describe('conentValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(ec).toReportValidityError({
-         id: VID.CONTENT_XTRA_SPACE,
+         id: VID.CONTENTELEMENT_XTRA_SPACE,
          lastPosition: undefined,
          params: ['elStart'],
          position: makeSpace().text,
@@ -383,7 +383,7 @@ describe('conentValidate (unit)', () => {
             if (!pass) {
                // @ts-expect-error 2329/matchers
                expect(ec).toReportValidityError({
-                  id: VID.CONTENT_IN_MIXED_ELEMENT,
+                  id: VID.CONTENTMIXED_INVALID_SYNTAX,
                   lastPosition: undefined,
                   params: ['elementName', String(version), String(edition), token.type],
                   position: getFirstSToken(token),
@@ -422,7 +422,7 @@ describe('conentValidate (unit)', () => {
             if (!pass) {
                // @ts-expect-error 2329/matchers
                expect(ec).toReportValidityError({
-                  id: VID.CONTENT_IN_ANY_ELEMENT,
+                  id: VID.CONTENTANY_INVALID_SYNTAX,
                   lastPosition: undefined,
                   params: ['elementName', String(version), String(edition), token.type],
                   position: getFirstSToken(token),

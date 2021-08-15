@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { GeneralEntityDeclarationPToken } from 'pToken';
 import { makeGeneralEntityDeclaration } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { generalEntityDeclarationUpdateState } from '../generalEntityDeclarationUpdateState';
 
 describe('generalEntityDeclarationUpdateState (unit)', () => {

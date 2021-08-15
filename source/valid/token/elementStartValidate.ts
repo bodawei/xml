@@ -7,11 +7,11 @@ import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } from 'token';
 import { attributeValueValidate } from '../common/attributeValueValidate';
 
-import { validityConstraint } from '../error/validityConstraint';
-import { ElDeclType, ValidateState } from '../validateState';
+import { validCodes } from '../error/validCodes';
+import { ElDeclType, ValidateState } from '../common/validateState';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 type LocalDetials = Record<string, AttInfo | undefined>;
@@ -30,8 +30,8 @@ function enumeratedValueCheck(
 ): void {
    const isNotation = strOrBlank(attDef.type).toUpperCase() === 'NOTATION';
    const code = isNotation
-      ? VID.ELEMENTSTART_NOTATION_NOT_DECLARED
-      : VID.ELEMENTSTART_ENUMERATION_NOT_DECLARED;
+      ? VID.ELEMENTSTART_ATT_NOTATION_NO_DECLARATION
+      : VID.ELEMENTSTART_ATT_ENUMERATION_NO_DECLARATION;
    let foundDeclaration = false;
    const allWords: Array<string> = [];
    // If this is a notation att OR we have an enumeration, then do the check.
@@ -72,14 +72,14 @@ function entityCheck(
 ): void {
    const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
    const notNameId = isPlural
-      ? VID.ELEMENTSTART_ENTITIES_NOT_NAME
-      : VID.ELEMENTSTART_ENTITY_NOT_NAME;
+      ? VID.ELEMENTSTART_ATT_INVALID_ENTITIES_NAME
+      : VID.ELEMENTSTART_ATT_INVALID_ENTITY_NAME;
    const undeclId = isPlural
-      ? VID.ELEMENTSTART_ENTITIES_NO_ENTITY
-      : VID.ELEMENTSTART_ENTITY_NO_ENTITY;
+      ? VID.ELEMENTSTART_ATT_ENTITIES_NO_DECLARATION
+      : VID.ELEMENTSTART_ATT_ENTITY_NO_DECLARATION;
    const parsedId = isPlural
-      ? VID.ELEMENTSTART_ENTITIES_PARSED_ENTITY
-      : VID.ELEMENTSTART_ENTITY_PARSED_ENTITY;
+      ? VID.ELEMENTSTART_ATT_PARSED_ENTITIES
+      : VID.ELEMENTSTART_ATT_PARSED_ENTITY;
    const badNames: Array<string> = [];
    const undeclared: Array<string> = [];
    const parsed: Array<string> = [];
@@ -123,7 +123,7 @@ function idCheck(
    //    Values of type **ID** must match the Name production.
    ec.check(
       !isName(attValue),
-      VID.ELEMENTSTART_ID_NAME_INVALID,
+      VID.ELEMENTSTART_ATT_INVALID_ID_NAME,
       [elName, attName, attValue],
       nameSToken,
    );
@@ -134,7 +134,7 @@ function idCheck(
    //    identify the elements which bear them.
    if (idDetails || local) {
       ec.report(
-         VID.ELEMENTSTART_ID_DUPLICATE,
+         VID.ELEMENTSTART_ATT_XTRA_ID,
          [
             elName,
             attName,
@@ -162,8 +162,8 @@ function nmtokenCheck(
 ): void {
    const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
    const code = isPlural
-      ? VID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN
-      : VID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN;
+      ? VID.ELEMENTSTART_ATT_INVALID_NMTOKENS
+      : VID.ELEMENTSTART_ATT_INVALID_NMTOKEN;
    const badNames: Array<string> = [];
 
    // §3.3.1: Validity Constraint: Name Token
@@ -188,7 +188,9 @@ function idRefCheck(
    state: ValidateState,
 ): void {
    const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
-   const code = isPlural ? VID.ELEMENTSTART_IDREFS_NOT_NAME : VID.ELEMENTSTART_IDREF_NOT_NAME;
+   const code = isPlural
+      ? VID.ELEMENTSTART_ATT_INVALID_IDREFS_NAME
+      : VID.ELEMENTSTART_ATT_INVALID_IDREF_NAME;
    const badNames: Array<string> = [];
 
    // §3.3.1: Validity Constraint: IDREF
@@ -241,7 +243,7 @@ function fixedAttributesCheck(
    if (strOrBlank(attDetails?.def.defaultType).toUpperCase() === '#FIXED') {
       const defValue = pTokenArrayToString(attDetails?.def.value);
 
-      ec.check(defValue.trim() !== attValue.trim(), VID.ELEMENTSTART_INVALID_FIXED, [
+      ec.check(defValue.trim() !== attValue.trim(), VID.ELEMENTSTART_ATT_INVALID_FIXED, [
          elName,
          attName,
          defValue,
@@ -269,7 +271,7 @@ function checkValue(
             //    those entities appear in the document...
             ec.check(
                details?.isExternalMarkupDeclaration && state.isStandalone && !isPredefined,
-               VID.ENTITYREF_EXTERNALLY_DECLARED,
+               VID.ENTITYREF_EXTERNAL,
                [name],
             );
 
@@ -299,7 +301,7 @@ function checkAttributes(
       if (!details) {
          // §3.1.0: Validity constraint: Attribute Value Type
          //    The attribute must have been declared; ...
-         ec.report(VID.ELEMENTSTART_UNDECLARED_ATTRIBUTE, [elName, attName], attr.name);
+         ec.report(VID.ELEMENTSTART_ATT_UNDECLARED, [elName, attName], attr.name);
          continue;
       }
 
@@ -323,7 +325,7 @@ function checkAttributes(
          // an attribute that was declared as having a default value, and that declaration was
          // an external declaration, then we have a validity error. (We can't just check this
          // at declaration time, since if it isn't used it is not an error).
-         ec.check(attr.defaulted, VID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED, [elName, attName]);
+         ec.check(attr.defaulted, VID.ELEMENTSTART_ATT_DEFAULT_EXTERNAL, [elName, attName]);
 
          // §2.9 Validity constraint: Standalone Document Declaration
          // The standalone document declaration must have the value "no" if any external markup
@@ -332,11 +334,10 @@ function checkAttributes(
          //   with a value such that normalization will produce a different value from that
          //   which would be produced in the absence of the declaration
 
-         ec.check(
-            attr.normalized && attr.dtdChangedNormalization,
-            VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
-            [elName, attName],
-         );
+         ec.check(attr.normalized && attr.dtdChangedNormalization, VID.ATTLISTDECL_ATT_EXTERNAL, [
+            elName,
+            attName,
+         ]);
       }
 
       ec.setPos(attr.openQuote);
@@ -397,7 +398,7 @@ function elementStartValidate(
    // §3.0.0 Validity Constraint: Element Valid
    //     An element is valid if there is a declaration matching elementdecl where
    //     the Name matches the element type, ...
-   ec.check(!state.elementDeclarations[elName], VID.ELEMENT_UNDECLARED, [elName]);
+   ec.check(!state.elementDeclarations[elName], VID.ELEMENT_NO_DECLARATION, [elName]);
 
    // If we aren't in any context, then there's nothing to validate
    if (!state.elementContext.pastEnd) {
@@ -407,7 +408,7 @@ function elementStartValidate(
       if (state.docType && !state.elementContext.activeContext) {
          ec.check(
             state.docType !== elName,
-            VID.ELEMENT_MISMATCH_ROOT_TYPE,
+            VID.ELEMENT_DOCTYPE_MISMATCH,
             [state.docType, elName],
             el.name,
          );
@@ -429,7 +430,7 @@ function elementStartValidate(
                //     content model.
                const allowedChild = context.declDetails.names.includes(elName);
 
-               ec.check(!allowedChild, VID.CONTENT_MIXED_CONTAINS_INVALID_ELEMENT, [
+               ec.check(!allowedChild, VID.CONTENTMIXED_CHILD_UNEXPECTED, [
                   context.parentName,
                   elName,
                ]);
@@ -442,7 +443,7 @@ function elementStartValidate(
                const currentState = context.declDetails.graph.states[context.stateId];
                const destState = currentState.trans[elName];
 
-               ec.check(!destState, VID.CONTENT_CONTAINS_INVALID_ELEMENT, [
+               ec.check(!destState, VID.CONTENTELEMENT_CHILD_UNEXPECTED, [
                   context.parentName,
                   elName,
                ]);

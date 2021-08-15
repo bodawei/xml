@@ -8,10 +8,10 @@ import { ConditionalPToken } from 'token';
 import { makeElementDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { conditionalStartValidate } from '../conditionalStartValidate';
-import { ElDeclType, ValidateState } from '../../validateState';
-import { validityConstraint } from '../../error/validityConstraint';
+import { ElDeclType, ValidateState } from '../../common/validateState';
+import { validCodes } from '../../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('conditionalStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -54,7 +54,7 @@ describe('conditionalStartValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.CONDITIONAL_BAD_NESTING,
+         id: VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
          lastPosition: undefined,
          params: ['entityName'],
          position: peRef.open,

@@ -9,7 +9,7 @@ import {
    makeParameterEntityStart,
 } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { conditionalEndUpdateState } from '../conditionalEndUpdateState';
 
 describe('conditionalEndUpdateState (unit)', () => {

@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeNotationDeclaration } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { notationDeclarationUpdateState } from '../notationDeclarationUpdateState';
 
 describe('notationDeclarationUpdateState (unit)', () => {

@@ -7,7 +7,7 @@ import { CmGraph } from 'source/valid/contentModel/cmGraphTypes';
 import { SToken, toSToken } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
-import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
+import { ElDeclType, ElementContext, ValidateState } from '../../common/validateState';
 import { elementStartUpdateState } from '../elementStartUpdateState';
 
 describe('elementStartUpdateState (unit)', () => {

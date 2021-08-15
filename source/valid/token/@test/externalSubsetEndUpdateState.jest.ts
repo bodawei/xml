@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeExternalSubsetEnd } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { externalSubsetEndUpdateState } from '../externalSubsetEndUpdateState';
 
 describe('externalSubsetEndUpdateState (unit)', () => {

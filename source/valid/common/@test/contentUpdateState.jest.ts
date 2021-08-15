@@ -33,7 +33,7 @@ import {
 
 import { ElDeclType, ValidateState } from '../validateState';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
-import { makeCmGraph } from '../contentModel/makeCmGraph';
+import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { contentUpdateState } from '../contentUpdateState';
 import { ConformanceVersion } from 'basic';
 

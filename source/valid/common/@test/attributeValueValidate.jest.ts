@@ -12,10 +12,10 @@ import {
 } from 'token-test';
 
 import { attributeValueValidate } from '../attributeValueValidate';
-import { ValidateState } from '../../validateState';
-import { validityConstraint } from '../../error/validityConstraint';
+import { ValidateState } from '../validateState';
+import { validCodes } from '../../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('attributeValueValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -58,7 +58,7 @@ describe('attributeValueValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.GENERAL_ENTITY_UNDECLARED,
+         id: VID.GENERALENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['testRef'],
          position: ref.open,
@@ -82,7 +82,7 @@ describe('attributeValueValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.GENERAL_ENTITY_UNDECLARED,
+         id: VID.GENERALENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['testRef'],
          position: ref.open,
@@ -148,7 +148,7 @@ describe('attributeValueValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.PREDEFINED_UNDECLARED,
+         id: warning.id.ENTITY_PREDEFINED_NO_DECLARATION,
          lastPosition: undefined,
          params: ['lt'],
          position: ref.open,

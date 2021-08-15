@@ -4,7 +4,7 @@ import { ParameterEntityDeclarationPToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } f
 import { strOrBlank } from 'sToken';
 import { PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function parameterEntityDeclarationUpdateState(
    el: ParameterEntityDeclarationPToken,

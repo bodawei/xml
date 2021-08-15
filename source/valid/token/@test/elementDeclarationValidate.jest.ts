@@ -14,13 +14,13 @@ import {
 import { toSToken } from 'sToken';
 
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
-import { DeclarationDetails, ElDeclType, ValidateState } from '../../validateState';
+import { DeclarationDetails, ElDeclType, ValidateState } from '../../common/validateState';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
-import { validityConstraint } from '../../error/validityConstraint';
+import { validCodes } from '../../error/validCodes';
 
 const EID = error.id;
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('elementDeclarationValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
@@ -205,7 +205,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ELEMENT_EXTRA_DECLARATION,
+         id: VID.ELEMENT_XTRA_DECLARATION,
          lastPosition: undefined,
          params: ['elementName'],
          position: elementDeclaration.name,
@@ -424,7 +424,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
+         id: VID.ELEMENTDECL_XTRA_MIXED_NAME,
          lastPosition: undefined,
          params: ['elementName', 'foo,bar'],
          position: elementDeclaration.contentModel?.open,
@@ -513,7 +513,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: EID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
+         id: EID.ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC,
          lastPosition: undefined,
          params: ['elementName', 'last (/4,/99),first (/2/1,/3)'],
          position: elementDeclaration.contentModel?.open,
@@ -551,7 +551,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+         id: VID.PEREF_PARENS_UNBALANCED,
          lastPosition: undefined,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -631,7 +631,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+         id: VID.PEREF_PARENS_UNBALANCED,
          lastPosition: undefined,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -676,7 +676,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+         id: warning.id.PEREF_NO_TRAILING_CONNECTOR,
          lastPosition: undefined,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -714,7 +714,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
          lastPosition: undefined,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -752,7 +752,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).not.toReportWarning({
-         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
          lastPosition: undefined,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,
@@ -781,7 +781,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
          lastPosition: undefined,
          params: ['elementName', 'empty'],
          position: elementDeclaration.contentModel?.open,
@@ -1033,7 +1033,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.ELEMENTDECL_PEREF_EMPTY,
+         id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
          lastPosition: undefined,
          params: ['elementName', 'x'],
          position: elementDeclaration.contentModel?.open,

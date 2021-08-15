@@ -2,7 +2,7 @@
 
 import { ParameterEntityEndPToken, PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function parameterEntityEndUpdateState(
    endPToken: ParameterEntityEndPToken,

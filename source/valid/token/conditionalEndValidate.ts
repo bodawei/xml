@@ -3,10 +3,10 @@
 import { ErrorCollector } from 'basic';
 import { ConditionalClosePToken, CONDITIONAL_PTOKEN } from 'token';
 
-import { validityConstraint } from '../error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 import { ValidateState } from '../validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function conditionalEndValidate(
    token: ConditionalClosePToken,
@@ -22,7 +22,7 @@ function conditionalEndValidate(
    const item = state.dtdContext.enclosingStack[state.dtdContext.enclosingStack.length - 1];
 
    if (item.type !== CONDITIONAL_PTOKEN) {
-      ec.report(VID.PEREF_INVALID_CONDITIONAL_END_NESTING, []);
+      ec.report(VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING, []);
    }
 }
 

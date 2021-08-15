@@ -3,11 +3,11 @@
 import { ErrorCollector } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { validityConstraint } from '../error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function parameterEntityReferenceValidate(
    token: ParameterEntityReferencePToken,
@@ -29,7 +29,7 @@ function parameterEntityReferenceValidate(
    // But, this IS a PERef, so there are some.
    const applies = !state.isStandalone;
 
-   ec.check(!state.parameterEntities[peDeclName] && applies, VID.PARAMETER_ENTITY_UNDECLARED, [
+   ec.check(!state.parameterEntities[peDeclName] && applies, VID.PARAMETERENTITY_NO_DECLARATION, [
       peDeclName,
    ]);
 }

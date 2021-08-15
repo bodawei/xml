@@ -5,13 +5,13 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 
 import { entityDeclarationValidate } from '../entityDeclarationValidate';
-import { ValidateState } from '../../validateState';
-import { validityConstraint } from '../../error/validityConstraint';
+import { ValidateState } from '../../common/validateState';
+import { validCodes } from '../../error/validCodes';
 import { GeneralEntityDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { entityDeclarationValueValidate } from '../../common/entityDeclarationValueValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 jest.mock('../../common/entityDeclarationValueValidate');
 

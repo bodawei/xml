@@ -7,12 +7,12 @@ import { toSToken } from 'sToken';
 import { ParameterEntityStartPToken } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityStart } from 'token-test';
 
-import { validityConstraint } from '../../error/validityConstraint';
-import { ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ValidateState } from '../../common/validateState';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
 import { parameterEntityStartValidate } from '../parameterEntityStartValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 jest.mock('../ancestorPERefsValidate');
 
@@ -96,7 +96,7 @@ describe('parameterEntityStartValidate (unit)', () => {
             } else {
                // @ts-expect-error 2329/matchers
                expect(mockErrorCollector).toReportValidityError({
-                  id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+                  id: VID.ENTITYREF_EXTERNAL,
                   lastPosition: undefined,
                   params: [peStart.referencePToken.name?.str],
                   position: peStart.referencePToken.open,

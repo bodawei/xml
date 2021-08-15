@@ -2,10 +2,10 @@
 
 import { ErrorCollector } from 'basic';
 
-import { IdRefDetails, ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { IdRefDetails, ValidateState } from '../common/validateState';
+import { validCodes } from '../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function docEndValidate(state: ValidateState, ec: ErrorCollector): void {
    const refValues = Object.keys(state.idRefs);
@@ -25,7 +25,7 @@ function docEndValidate(state: ValidateState, ec: ErrorCollector): void {
       //    some ID attribute.
       ec.check(
          !idMap[refValue],
-         VID.ELEMENTSTART_IDREF_NO_ID,
+         VID.ELEMENTSTART_ATT_IDREF_NO_ID,
          [details.elName, details.attName, refValue],
          details.sToken,
       );

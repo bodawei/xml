@@ -5,7 +5,7 @@ import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { makeXmlDecl } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { xmlDeclarationUpdateState } from '../xmlDeclarationUpdateState';
 
 describe('xmlDeclarationUpdateState (unit)', () => {

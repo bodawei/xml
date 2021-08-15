@@ -6,10 +6,10 @@ import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
 import { docEndValidate } from '../docEndValidate';
-import { validityConstraint } from '../../error/validityConstraint';
-import { ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ValidateState } from '../../common/validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('docEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -36,7 +36,7 @@ describe('docEndValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ELEMENTSTART_IDREF_NO_ID,
+            id: VID.ELEMENTSTART_ATT_IDREF_NO_ID,
             lastPosition: undefined,
             params: ['otherElement', 'otherAtt', 'value1'],
             position: toSToken('otherAtt'),

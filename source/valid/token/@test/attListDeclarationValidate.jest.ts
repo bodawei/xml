@@ -23,15 +23,15 @@ import {
    makeGeneralEntityStart,
 } from 'token-test';
 
-import { validityConstraint } from '../../error/validityConstraint';
-import { ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ValidateState } from '../../common/validateState';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
 // jest.mock goes crazy if I try to mock these functions
 import * as validator from '../../common/attributeValueValidate';
 import * as ancestor from '../ancestorPERefsValidate';
 import * as xmlSpace from '../xmlSpaceValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 jest.mock('basic', () => ({
    ...jest.requireActual('basic'),
@@ -200,7 +200,7 @@ describe('attListDeclarationValidate (unit)', () => {
             } else {
                // @ts-expect-error 2329/matchers
                expect(mockErrorCollector).toReportValidityError({
-                  id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+                  id: VID.ENTITYREF_EXTERNAL,
                   lastPosition: undefined,
                   params: [start.referencePToken.name?.str],
                   position: makeGeneralEntityStart().referencePToken.open,
@@ -292,7 +292,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_ID_BAD_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
             lastPosition: toSToken('ID'),
             params: ['elName', 'att1', ''],
             position: undefined,
@@ -317,7 +317,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_ID_BAD_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '#FIXED'],
             position: toSToken('#FIXED'),
@@ -393,7 +393,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_DUPLICATE_NOTATION,
+            id: VID.ATTLISTDECL_ATT_XTRA_NOTATION_VALUE,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one'],
             position: toSToken('one'),
@@ -428,7 +428,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_DUPLICATE_ENUMERATION,
+            id: VID.ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one'],
             position: toSToken('one'),
@@ -573,7 +573,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_IDREF_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_IDREF_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
             position: toSToken('$bad'),
@@ -597,7 +597,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_IDREFS_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_IDREFS_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
             position: toSToken('boo ba $bad bing'),
@@ -621,7 +621,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_ENTITY_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
             position: toSToken('$bad'),
@@ -645,7 +645,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_ENTITIES_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
             position: toSToken('boo ba $bad bing'),
@@ -669,7 +669,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
             position: toSToken('$bad'),
@@ -693,7 +693,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_NMTOKENS_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
             position: toSToken('boo ba $bad bing'),
@@ -732,7 +732,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_NOTATION_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one,two,three', 'foo'],
             position: toSToken('foo'),
@@ -770,7 +770,7 @@ describe('attListDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
+            id: VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one,two,three', 'foo'],
             position: toSToken('foo'),

@@ -7,11 +7,11 @@ import { toSToken } from 'sToken';
 import { ConditionalClosePToken } from 'token';
 import { makeConditionalSection, makeParameterEntityStart } from 'token-test';
 
-import { validityConstraint } from '../../error/validityConstraint';
-import { ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ValidateState } from '../../common/validateState';
 import { conditionalEndValidate } from '../conditionalEndValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('conditionalEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -36,7 +36,7 @@ describe('conditionalEndValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.PEREF_INVALID_CONDITIONAL_END_NESTING,
+         id: VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING,
          lastPosition: undefined,
          params: [],
          position: conditional.open,

@@ -4,7 +4,12 @@ import { ElementDeclarationPToken, pTokenArrayToString } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, ELEMENT_EMPTY_PTOKEN } from 'token';
 
-import { ElementContext, ElDeclType, ValidateState, ValidateStateProps } from '../validateState';
+import {
+   ElementContext,
+   ElDeclType,
+   ValidateState,
+   ValidateStateProps,
+} from '../common/validateState';
 
 function updateFromAttributes(
    el: ElementStartPToken | ElementEmptyPToken,

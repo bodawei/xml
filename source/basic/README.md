@@ -46,6 +46,7 @@ Teramisu only rarely throws Error instances, or reports Errors through the strea
 By convention, all error codes are unique. These are arranged in the following bands:
 
 * 100-599: Warnings
+   - 200-250 are validity warnings
 * 1000-1099: General errors
 * 1100-1599: Validity errors
 * 1600-1999: "User defined errors"

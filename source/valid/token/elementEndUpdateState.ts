@@ -3,7 +3,7 @@
 import { strOrBlank } from 'sToken';
 import { ElementEndPToken } from 'token';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function elementEndUpdateState(el: ElementEndPToken, state: ValidateState): ValidateState {
    const elName = strOrBlank(el.name);

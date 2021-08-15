@@ -117,7 +117,7 @@ In section 3.0.0 says that an elment with EMPTY contenttype may have no content.
 "this means not even...". This processor does interpert 1.0/1 to mean none of the above `content` values may be found (which happens to match subsequent versions). So, anything, even whitespace, or an entity reference that expands to nothing (`<!ENTITY foo "">  <isEmpty>&foo;</isEmpty>`), or a CDATA with nothing in it (`<isEmpty><![CDATA[]]></isEmpty>`), is considered an error.
 
 
-Section 3.1 does say that (for interoperability), if you have an element declared as EMPTY, then you should use an empty tag. But using a start tag immediately by an end tag is acceptable. This project reports a warning if a start and empty tag are used (ELEMENT_WITH_EMPTY_DECL).
+Section 3.1 does say that (for interoperability), if you have an element declared as EMPTY, then you should use an empty tag. But using a start tag immediately by an end tag is acceptable. This project reports a warning if a start and empty tag are used (ELEMENT_START_USED_FOR_EMPTY_DECL).
 
 ### Mixed content
 What is considerd "Mixed" content varies across versions:

@@ -2,7 +2,7 @@
 
 import { ExternalSubsetStartToken } from 'token';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function externalSubsetStartUpdateState(
    el: ExternalSubsetStartToken,

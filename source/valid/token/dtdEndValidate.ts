@@ -4,10 +4,10 @@ import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { WordListPToken } from 'token';
 
-import { ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { ValidateState } from '../common/validateState';
+import { validCodes } from '../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function notationValidate(
    enumeration: WordListPToken | undefined,
@@ -27,7 +27,7 @@ function notationValidate(
       //    ...all notation names in the declaration must be declared.
       ec.check(
          !state.notationDeclarations[wordStr],
-         VID.ATTLISTDECL_BAD_NOTATION,
+         VID.ATTLISTDECL_ATT_NOTATION_NO_DECLARATION,
          [elName, attName, wordStr],
          wordEntry.word,
       );
@@ -60,8 +60,8 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
             //    An element type must not have more than one NOTATION attribute specified
             ec.check(
                seenNotationAttr && !isVer1Ed1,
-               VID.ATTLISTDECL_EXTRA_NOTATION,
-               [elName, attName],
+               VID.ATTLISTDECL_ATT_XTRA_NOTATION,
+               [elName, attName], // @@@ better if we listed the last one we saw
                attInfo?.def.type,
             );
 
@@ -73,7 +73,7 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
             //    An element type must not have more than one ID attribute specified.
             ec.check(
                firstIdAtt,
-               VID.ATTLISTDECL_EXTRA_ID,
+               VID.ATTLISTDECL_ATT_XTRA_ID,
                [elName, attName, firstIdAtt as string],
                attInfo?.def.type,
             );
@@ -85,7 +85,7 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
          //    not be declared on an element declared EMPTY.
          ec.check(
             elementIsEmpty && isNotation && !isVer1Ed1,
-            VID.ATTLISTDECL_EMPTY_NOTATION,
+            VID.ATTLISTDECL_ATT_INVALID_NOTATION_ON_EMPTY,
             [elName, attName],
             attInfo?.def.type,
          );
@@ -111,7 +111,10 @@ function dtdEndValidate(state: ValidateState, ec: ErrorCollector): void {
           * §4.2.2: Validity constraint: Notation Declared
           *    The Name must match the declared name of a notation.
           */
-         ec.check(!notationDeclared, VID.ENTITYDECL_UNDECLARED_NOTATION, [geDeclName, nDataName]);
+         ec.check(!notationDeclared, VID.ENTITYDECL_NO_NOTATION_DECLARATION, [
+            geDeclName,
+            nDataName,
+         ]);
       }
    }
 }

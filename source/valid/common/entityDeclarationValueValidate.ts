@@ -8,11 +8,11 @@ import {
 } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { ElidedEntityDeclarationPToken, PARAMETER_ENTITY_START_PTOKEN } from 'token';
-import { validityConstraint } from '../error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from './validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function entityDeclarationValueValidate(
    el:
@@ -51,7 +51,7 @@ function entityDeclarationValueValidate(
       // or there is no standalone declaration), then the Name given in the
       // entity reference must match that in an entity declaration. ...
       // The declaration of a parameter entity must precede any reference to it. ...
-      ec.check(!elementDetails, VID.PARAMETER_ENTITY_UNDECLARED, [elementName], open);
+      ec.check(!elementDetails, VID.PARAMETERENTITY_NO_DECLARATION, [elementName], open);
    }
 }
 

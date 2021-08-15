@@ -15,7 +15,7 @@ import {
    EntityValuePToken,
    ParameterEntityStartPToken,
 } from 'token';
-import { CmGraph } from './contentModel/cmGraphTypes';
+import { CmGraph } from '../contentModel/cmGraphTypes';
 
 enum ElDeclType {
    ANY,

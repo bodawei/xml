@@ -11,10 +11,10 @@ import {
    PARAMETER_ENTITY_START_PTOKEN,
 } from 'token';
 
-import { ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { ValidateState } from '../common/validateState';
+import { validCodes } from '../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function ancestorPERefsValidate(
    startPToken:
@@ -66,7 +66,7 @@ function ancestorPERefsValidate(
          // §2.9.0 Validity Constraint: Standalone Document Declaration
          //    ...entities (other than amp, lt, gt, apos, quot), if references to
          //    those entities appear in the document...
-         ec.report(VID.ENTITYREF_EXTERNALLY_DECLARED, [elementName], open);
+         ec.report(VID.ENTITYREF_EXTERNAL, [elementName], open);
       } else {
          ancestorPERefsValidate(element, state, ec);
       }

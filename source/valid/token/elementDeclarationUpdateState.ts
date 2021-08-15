@@ -3,7 +3,7 @@
 import { ElementDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { DeclarationDetails, ValidateState } from '../validateState';
+import { DeclarationDetails, ValidateState } from '../common/validateState';
 
 function elementDeclarationUpdateState(
    elDecl: ElementDeclarationPToken,

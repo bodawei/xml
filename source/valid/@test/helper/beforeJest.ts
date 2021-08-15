@@ -3,15 +3,15 @@ import { expect } from '@jest/globals';
 import { error, warning } from 'basic';
 import { makeNewErrorMatcher } from 'basic-test';
 
-import { validWarnings } from '../../error/validWarnings';
-import { validError } from '../../error/validError';
-import { validityConstraint } from '../../error/validityConstraint';
+import { warningCodes } from '../../error/warningCodes';
+import { errorCodes } from '../../error/errorCodes';
+import { validCodes } from '../../error/validCodes';
 
-warning.addMapping(validWarnings);
-error.addMapping(validError);
+warning.addMapping(warningCodes);
+error.addMapping(errorCodes);
 
 expect.extend({
-   toReportValidityError: makeNewErrorMatcher(validityConstraint),
+   toReportValidityError: makeNewErrorMatcher(validCodes),
 });
 
 // declare global {
@@ -22,4 +22,4 @@ expect.extend({
 //    }
 // }
 
-export { validityConstraint };
+export { validCodes };

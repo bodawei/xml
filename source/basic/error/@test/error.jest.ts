@@ -8,31 +8,29 @@ describe('error', () => {
       expect(error).toMatchInlineSnapshot(`
          ErrorCodes {
            "code": Object {
-             "ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC": 1200,
+             "ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC": 1200,
              "REFERENCE_INVALID_UNPARSED": 1304,
              "SYSTEMLITERAL_NO_FRAGMENT": 1301,
              "TEXTDECL_VERSION_INVALID": 1302,
              "XMLDECL_VERSION_INVALID": 1303,
              "XMLSPACE_INVALID_VALUE": 1300,
-             "XML_SPACE_BAD_CASE": 1201,
-             "XML_SPACE_BAD_DECLARATION": 1202,
-             "XML_SPACE_BAD_ENUMRATION": 1203,
+             "XMLSPACE_NO_ENUMERATED_VALUES": 1201,
+             "XMLSPACE_XTRA_ENUMERATED_VALUE": 1201,
            },
            "id": Object {
-             "ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC": "ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC",
+             "ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC": "ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC",
              "REFERENCE_INVALID_UNPARSED": "REFERENCE_INVALID_UNPARSED",
              "SYSTEMLITERAL_NO_FRAGMENT": "SYSTEMLITERAL_NO_FRAGMENT",
              "TEXTDECL_VERSION_INVALID": "TEXTDECL_VERSION_INVALID",
              "XMLDECL_VERSION_INVALID": "XMLDECL_VERSION_INVALID",
              "XMLSPACE_INVALID_VALUE": "XMLSPACE_INVALID_VALUE",
-             "XML_SPACE_BAD_CASE": "XML_SPACE_BAD_CASE",
-             "XML_SPACE_BAD_DECLARATION": "XML_SPACE_BAD_DECLARATION",
-             "XML_SPACE_BAD_ENUMRATION": "XML_SPACE_BAD_ENUMRATION",
+             "XMLSPACE_NO_ENUMERATED_VALUES": "XMLSPACE_NO_ENUMERATED_VALUES",
+             "XMLSPACE_XTRA_ENUMERATED_VALUE": "XMLSPACE_XTRA_ENUMERATED_VALUE",
            },
            "mapping": Object {
-             "ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC": Object {
+             "ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC": Object {
                "code": 1200,
-               "message": "Element declarations must not have non-deterministic content models. In element \\"{0}\\" found {1}.",
+               "message": "The declaration for \\"{0}\\" must have a deterministic content model (§3.2.1). Found {1}.",
              },
              "REFERENCE_INVALID_UNPARSED": Object {
                "code": 1304,
@@ -54,17 +52,13 @@ describe('error', () => {
                "code": 1300,
                "message": "The \\"xml:space\\" attribute must have either the value \\"preserve\\" or \\"default\\" (§2.10.0). Found \\"{0}\\".",
              },
-             "XML_SPACE_BAD_CASE": Object {
+             "XMLSPACE_NO_ENUMERATED_VALUES": Object {
                "code": 1201,
-               "message": "The \\"xml:space\\" attribute for \\"{0}\\" must be lower case (§2.10.0). Found \\"{1}\\".",
+               "message": "Missing either \\"default\\" or \\"preserve\\" (or both) as enumerated values for the \\"xml:space\\" attribute for the element \\"{0}\\" (§2.10.0).",
              },
-             "XML_SPACE_BAD_DECLARATION": Object {
-               "code": 1202,
-               "message": "The \\"xml:space\\" attribute for \\"{0}\\" must have at least one of \\"default\\" and \\"preserve\\" as enumerated values (§2.10.0).",
-             },
-             "XML_SPACE_BAD_ENUMRATION": Object {
-               "code": 1203,
-               "message": "The \\"xml:space\\" attribute for \\"{0}\\" must have only \\"default\\" and/or \\"preserve\\" as values (§2.10.0). Found \\"{1}\\".",
+             "XMLSPACE_XTRA_ENUMERATED_VALUE": Object {
+               "code": 1201,
+               "message": "Must not have values other than \\"default\\" and \\"preserve\\" in the enumeration for the \\"xml:space\\" attribute for \\"{0}\\" (§2.10.0). Found \\"{1}\\".",
              },
            },
          }

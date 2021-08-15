@@ -20,11 +20,11 @@ import {
    makeParameterEntityStart,
 } from 'token-test';
 
-import { validityConstraint } from '../../error/validityConstraint';
-import { ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ValidateState } from '../../common/validateState';
 import { parameterEntityEndValidate } from '../parameterEntityEndValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('parameterEntityEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -170,7 +170,7 @@ describe('parameterEntityEndValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.PEREF_INVALID_CONDITIONAL_START_NESTING,
+         id: VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING,
          lastPosition: undefined,
          params: [],
          position: makeConditionalSection().open,

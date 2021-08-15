@@ -2,7 +2,7 @@
 
 import { ConditionalPToken } from 'token';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function conditionalStartUpdateState(
    token: ConditionalPToken,

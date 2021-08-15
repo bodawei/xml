@@ -30,17 +30,13 @@ function xmlSpaceValidate(
    //    processor may report the error or may recover by ignoring the attribute
    //    specification or by reporting the (erroneous) value to the application.
    //    Applications may ignore or reject erroneous values.
-   if (attName !== 'xml:space') {
-      ec.reportError(EID.XML_SPACE_BAD_CASE, ErrorToken, [elName, attName]);
-   }
-
    if (names.length === 0) {
-      ec.reportError(EID.XML_SPACE_BAD_DECLARATION, ErrorToken, [elName]);
+      ec.reportError(EID.XMLSPACE_NO_ENUMERATED_VALUES, ErrorToken, [elName]);
    }
 
    for (const aName of names) {
       if (aName !== 'preserve' && aName !== 'default') {
-         ec.reportError(EID.XML_SPACE_BAD_ENUMRATION, ErrorToken, [elName, aName]);
+         ec.reportError(EID.XMLSPACE_XTRA_ENUMERATED_VALUE, ErrorToken, [elName, aName]);
       }
    }
 }

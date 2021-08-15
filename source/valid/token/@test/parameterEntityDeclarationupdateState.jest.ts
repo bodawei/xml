@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ParameterEntityDeclarationPToken } from 'pToken';
 import { makeParameterEntityDeclaration } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { parameterEntityDeclarationUpdateState } from '../parameterEntityDeclarationUpdateState';
 
 describe('parameterEntityDeclarationUpdateState (unit)', () => {

@@ -7,7 +7,7 @@ import { DocTypeStartPToken } from 'token';
 
 import { makeDocTypeStart } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { docTypeStartUpdateState } from '../docTypeStartUpdateState';
 
 describe('docTypeStartUpdateState (unit)', () => {

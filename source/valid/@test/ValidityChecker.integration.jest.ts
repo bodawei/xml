@@ -12,9 +12,9 @@ import { AttFixerStream, EntityExpanderStream } from 'node';
 
 import { ValidityChecker } from '../ValidityChecker';
 import { ValidityError } from '../error/ValidityError';
-import { validityConstraint } from '../error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('ValidityChecker (integration)', () => {
    let ec: ErrorCollector;
@@ -71,7 +71,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT bar ANY>
          ]>
          <bar/>`,
-         VID.ELEMENT_MISMATCH_ROOT_TYPE,
+         VID.ELEMENT_DOCTYPE_MISMATCH,
          done!,
       );
    });
@@ -222,7 +222,7 @@ describe('ValidityChecker (integration)', () => {
             %elementDecl;
          ]>
          <root><other></other> </root>`,
-         VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
          done!,
       );
    });
@@ -234,7 +234,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT other ANY>
          ]>
          <root><other></other> </root>`,
-         VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
          done!,
       );
    });
@@ -247,7 +247,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root>
          </root>`,
-         VID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
+         VID.ELEMENTSTART_ATT_DEFAULT_EXTERNAL,
          done!,
       );
    });
@@ -262,7 +262,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root attr1="  one   two three  ">
          </root>`,
-         VID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
+         VID.ATTLISTDECL_ATT_EXTERNAL,
          done!,
       );
    });
@@ -278,7 +278,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
          &external;
          </root>`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -294,7 +294,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root>
          </root>`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -310,7 +310,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root att1="foo &external; foo">
          </root>`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -330,7 +330,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root>
          </root>`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -350,7 +350,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
          &level1;
          </root>`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -371,7 +371,7 @@ describe('ValidityChecker (integration)', () => {
             <!ENTITY level1 '[&level2;]'>
          ]>
          <root att1="&level1;" />`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -391,7 +391,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
          &level1;
          </root>`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -412,7 +412,7 @@ describe('ValidityChecker (integration)', () => {
             <!ENTITY level1 '[%level2;]'>
          ]>
          <root att1="&level1;" />`,
-         VID.ENTITYREF_EXTERNALLY_DECLARED,
+         VID.ENTITYREF_EXTERNAL,
          done!,
       );
    });
@@ -424,7 +424,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT root ANY>
          ]>
          <root><a/></root>`,
-         VID.ELEMENT_UNDECLARED,
+         VID.ELEMENT_NO_DECLARATION,
          done!,
       );
    });
@@ -436,7 +436,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT root EMPTY>
          ]>
          <root><!-- not even this! --></root>`,
-         VID.CONTENT_IN_EMPTY_ELEMENT,
+         VID.CONTENTEMPTY_INVALID_SYNTAX,
          done!,
       );
    });
@@ -450,7 +450,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT b EMPTY>
          ]>
          <root><a/><b/></root>`,
-         VID.CONTENT_CONTAINS_INVALID_ELEMENT,
+         VID.CONTENTELEMENT_CHILD_UNEXPECTED,
          done!,
       );
    });
@@ -464,7 +464,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT b EMPTY>
          ]>
          <root><a/>&#20;<a/><b/></root>`,
-         VID.CONTENT_IN_ELEMENT_ELEMENT,
+         VID.CONTENTELEMENT_INVALID_SYNTAX,
          done!,
       );
    });
@@ -478,7 +478,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT b EMPTY>
          ]>
          <root><a/><a/><b/> </root>`,
-         VID.CONTENT_XTRA_SPACE,
+         VID.CONTENTELEMENT_XTRA_SPACE,
          done!,
          new ConformanceVersion(1.0, 1),
       );
@@ -493,7 +493,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT b EMPTY>
          ]>
          <root> <a/><a/><b/></root>`,
-         VID.CONTENT_XTRA_SPACE,
+         VID.CONTENTELEMENT_XTRA_SPACE,
          done!,
          new ConformanceVersion(1.0, 1),
       );
@@ -509,7 +509,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT c EMPTY>
          ]>
          <root><a/><b/><c/></root>`,
-         VID.CONTENT_MIXED_CONTAINS_INVALID_ELEMENT,
+         VID.CONTENTMIXED_CHILD_UNEXPECTED,
          done!,
       );
    });
@@ -523,7 +523,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT b EMPTY>
          ]>
          <root> <a/><a/><![CDATA[wow]]><b/></root>`,
-         VID.CONTENT_IN_MIXED_ELEMENT,
+         VID.CONTENTMIXED_INVALID_SYNTAX,
          done!,
          new ConformanceVersion(1.0, 1),
       );
@@ -538,7 +538,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT b EMPTY>
          ]>
          <root> <a/><a/><![CDATA[wow]]><b/></root>`,
-         VID.CONTENT_IN_ANY_ELEMENT,
+         VID.CONTENTANY_INVALID_SYNTAX,
          done!,
          new ConformanceVersion(1.0, 1),
       );
@@ -553,7 +553,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT b EMPTY>
          ]>
          <root><a/><a/></root>`,
-         VID.CONTENT_UNEXPECTED_END,
+         VID.CONTENT_PREMATURE_END,
          done!,
       );
    });
@@ -565,7 +565,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT root ANY>
          ]>
          <root foo="bar"/>`,
-         VID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+         VID.ELEMENTSTART_ATT_UNDECLARED,
          done!,
       );
    });
@@ -578,7 +578,7 @@ describe('ValidityChecker (integration)', () => {
                <!ELEMENT root ANY>
             ]>
             <root />`,
-         VID.ELEMENT_EXTRA_DECLARATION,
+         VID.ELEMENT_XTRA_DECLARATION,
          done!,
       );
    });
@@ -593,7 +593,7 @@ describe('ValidityChecker (integration)', () => {
          <!ELEMENT root %CM;>
       ]>
       <root/>`,
-         VID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+         VID.PEREF_PARENS_UNBALANCED,
          done!,
       );
    });
@@ -605,7 +605,7 @@ describe('ValidityChecker (integration)', () => {
             <!ELEMENT root (#PCDATA one two three four one five)>
          ]>
          <root />`,
-         VID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
+         VID.ELEMENTDECL_XTRA_MIXED_NAME,
          done!,
       );
    });
@@ -620,7 +620,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root id="$BAD"  />`,
-         VID.ELEMENTSTART_ID_NAME_INVALID,
+         VID.ELEMENTSTART_ATT_INVALID_ID_NAME,
          done!,
       );
    });
@@ -641,7 +641,7 @@ describe('ValidityChecker (integration)', () => {
          <root id="one">
             <body id="one">
          </root>`,
-         VID.ELEMENTSTART_ID_DUPLICATE,
+         VID.ELEMENTSTART_ATT_XTRA_ID,
          done!,
       );
    });
@@ -662,7 +662,7 @@ describe('ValidityChecker (integration)', () => {
          <root id="one">
             <body id="one">
          </root>`,
-         VID.ELEMENTSTART_ID_DUPLICATE,
+         VID.ELEMENTSTART_ATT_XTRA_ID,
          done!,
       );
    });
@@ -680,7 +680,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root />`,
-         VID.ATTLISTDECL_EXTRA_ID,
+         VID.ATTLISTDECL_ATT_XTRA_ID,
          done!,
       );
    });
@@ -695,7 +695,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root />`,
-         VID.ATTLISTDECL_ID_BAD_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
          done!,
       );
    });
@@ -710,7 +710,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root ref="$BAD"/>`,
-         VID.ELEMENTSTART_IDREF_NOT_NAME,
+         VID.ELEMENTSTART_ATT_INVALID_IDREF_NAME,
          done!,
       );
    });
@@ -725,7 +725,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root ref="OTHER"/>`,
-         VID.ELEMENTSTART_IDREF_NO_ID,
+         VID.ELEMENTSTART_ATT_IDREF_NO_ID,
          done!,
       );
    });
@@ -741,7 +741,7 @@ describe('ValidityChecker (integration)', () => {
             <!ENTITY foo "hi">
          ]>
          <root unparsed="  foo bar   "  />`,
-         VID.ELEMENTSTART_ENTITIES_PARSED_ENTITY,
+         VID.ELEMENTSTART_ATT_PARSED_ENTITIES,
          done!,
       );
    });
@@ -757,7 +757,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <emptyElement/>`,
-         VID.ATTLISTDECL_EMPTY_NOTATION,
+         VID.ATTLISTDECL_ATT_INVALID_NOTATION_ON_EMPTY,
          done!,
       );
    });
@@ -772,7 +772,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root/>`,
-         VID.ATTLISTDECL_BAD_NOTATION,
+         VID.ATTLISTDECL_ATT_NOTATION_NO_DECLARATION,
          done!,
       );
    });
@@ -787,7 +787,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root notationAttr="bad"/>`,
-         VID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+         VID.ELEMENTSTART_ATT_NOTATION_NO_DECLARATION,
          done!,
       );
    });
@@ -804,7 +804,7 @@ describe('ValidityChecker (integration)', () => {
             <!NOTATION two SYSTEM 'http://somewhere.in.time'>
          ]>
          <root/>`,
-         VID.ATTLISTDECL_DUPLICATE_NOTATION,
+         VID.ATTLISTDECL_ATT_XTRA_NOTATION_VALUE,
          done!,
       );
    });
@@ -821,7 +821,7 @@ describe('ValidityChecker (integration)', () => {
             <!NOTATION two SYSTEM 'http://somewhere.in.time'>
          ]>
          <root/>`,
-         VID.ATTLISTDECL_DUPLICATE_ENUMERATION,
+         VID.ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE,
          done!,
       );
    });
@@ -842,7 +842,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root/>`,
-         VID.ATTLISTDECL_EXTRA_NOTATION,
+         VID.ATTLISTDECL_ATT_XTRA_NOTATION,
          done!,
       );
    });
@@ -857,7 +857,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root enumerationAtt= 'bad' />`,
-         VID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+         VID.ELEMENTSTART_ATT_ENUMERATION_NO_DECLARATION,
          done!,
       );
    });
@@ -886,7 +886,7 @@ describe('ValidityChecker (integration)', () => {
                idref IDREF "$FOO"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_IDREF_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_IDREF_DEFAULT,
          done!,
       );
    });
@@ -900,7 +900,7 @@ describe('ValidityChecker (integration)', () => {
                entity ENTITY "$FOO"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_ENTITY_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT,
          done!,
       );
    });
@@ -914,7 +914,7 @@ describe('ValidityChecker (integration)', () => {
                idref IDREFS "$FOO bar"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_IDREFS_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_IDREFS_DEFAULT,
          done!,
       );
    });
@@ -928,7 +928,7 @@ describe('ValidityChecker (integration)', () => {
                entity ENTITIES "$FOO BAZ"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_ENTITIES_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT,
          done!,
       );
    });
@@ -942,7 +942,7 @@ describe('ValidityChecker (integration)', () => {
                entity NMTOKEN "$FOO"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT,
          done!,
       );
    });
@@ -956,7 +956,7 @@ describe('ValidityChecker (integration)', () => {
                entity NMTOKENS "$FOO BAR"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_NMTOKENS_DEFAULT,
          done!,
       );
    });
@@ -970,7 +970,7 @@ describe('ValidityChecker (integration)', () => {
                notation NOTATION (a b c) "d"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_NOTATION_DEFAULT,
          done!,
       );
    });
@@ -984,7 +984,7 @@ describe('ValidityChecker (integration)', () => {
                enumeration (a b c) "d"
             >
          ]>`,
-         VID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
+         VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
          done!,
       );
    });
@@ -999,7 +999,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>
          <root attr1="bad" />`,
-         VID.ELEMENTSTART_INVALID_FIXED,
+         VID.ELEMENTSTART_ATT_INVALID_FIXED,
          done!,
       );
    });
@@ -1012,7 +1012,7 @@ describe('ValidityChecker (integration)', () => {
             %problem; ]]>
          ]>
          <root/>`,
-         VID.PEREF_INVALID_CONDITIONAL_START_NESTING,
+         VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING,
          done!,
       );
    });
@@ -1025,7 +1025,7 @@ describe('ValidityChecker (integration)', () => {
             %problem; [ foo ]]>
          ]>
          <root/>`,
-         VID.PEREF_INVALID_CONDITIONAL_START_NESTING,
+         VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING,
          done!,
       );
    });
@@ -1038,7 +1038,7 @@ describe('ValidityChecker (integration)', () => {
             <![INCLUDE %problem; 
          ]>
          <root/>`,
-         VID.CONDITIONAL_BAD_NESTING,
+         VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
          done!,
       );
    });
@@ -1051,7 +1051,7 @@ describe('ValidityChecker (integration)', () => {
             <![ %problem; 
          ]>
          <root/>`,
-         VID.CONDITIONAL_BAD_NESTING,
+         VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
          done!,
       );
    });
@@ -1064,7 +1064,7 @@ describe('ValidityChecker (integration)', () => {
             <![ %problem; ]]>
          ]>
          <root/>`,
-         VID.CONDITIONAL_BAD_NESTING,
+         VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
          done!,
       );
    });
@@ -1080,7 +1080,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
            &I-Am-Not-Defined;
          </root>`,
-         VID.GENERAL_ENTITY_UNDECLARED,
+         VID.GENERALENTITY_NO_DECLARATION,
          done!,
       );
    });
@@ -1096,7 +1096,7 @@ describe('ValidityChecker (integration)', () => {
             %forceAPeRef;
          ]>
          <root att1="&I-Am-Not-Defined;" />`,
-         VID.GENERAL_ENTITY_UNDECLARED,
+         VID.GENERALENTITY_NO_DECLARATION,
          done!,
       );
    });
@@ -1112,7 +1112,7 @@ describe('ValidityChecker (integration)', () => {
             %forceAPeRef;
             ]>
          <root/>`,
-         VID.GENERAL_ENTITY_UNDECLARED,
+         VID.GENERALENTITY_NO_DECLARATION,
          done!,
       );
    });
@@ -1125,7 +1125,7 @@ describe('ValidityChecker (integration)', () => {
             %I-Am-Not-Defined;
          ]>
          <root/>`,
-         VID.PARAMETER_ENTITY_UNDECLARED,
+         VID.PARAMETERENTITY_NO_DECLARATION,
          done!,
       );
    });
@@ -1139,7 +1139,7 @@ describe('ValidityChecker (integration)', () => {
             %I-Am-Declared;
          ]>
          <root/>`,
-         VID.PARAMETER_ENTITY_UNDECLARED,
+         VID.PARAMETERENTITY_NO_DECLARATION,
          done!,
       );
    });
@@ -1152,7 +1152,7 @@ describe('ValidityChecker (integration)', () => {
             <!ENTITY I-Am-Declared "%I-Am-NOT;">
          ]>
          <root>&I-Am-Declared;</root>`,
-         VID.PARAMETER_ENTITY_UNDECLARED,
+         VID.PARAMETERENTITY_NO_DECLARATION,
          done!,
       );
    });
@@ -1166,7 +1166,7 @@ describe('ValidityChecker (integration)', () => {
             <!ENTITY I-Am-Declared "%I-Am-Also;">
          ]>
          <root>&I-Am-Declared;</root>`,
-         VID.PARAMETER_ENTITY_UNDECLARED,
+         VID.PARAMETERENTITY_NO_DECLARATION,
          done!,
       );
    });
@@ -1179,7 +1179,7 @@ describe('ValidityChecker (integration)', () => {
             <!ENTITY bar SYSTEM "http://somewhere-else.com" NDATA baz>
          ]>
          <root/>`,
-         VID.ENTITYDECL_UNDECLARED_NOTATION,
+         VID.ENTITYDECL_NO_NOTATION_DECLARATION,
          done!,
       );
    });

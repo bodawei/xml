@@ -4,11 +4,11 @@ import { ErrorCollector } from 'basic';
 import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { ValidateState } from '../common/validateState';
+import { validCodes } from '../error/validCodes';
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function entityDeclarationValidate(
    token: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,

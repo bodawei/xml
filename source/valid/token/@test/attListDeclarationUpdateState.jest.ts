@@ -6,7 +6,7 @@ import { AttListDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { makeAttListDeclaration } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { attListDeclarationUpdateState } from '../attListDeclarationUpdateState';
 
 describe('attListDeclarationUpdateState (unit)', () => {

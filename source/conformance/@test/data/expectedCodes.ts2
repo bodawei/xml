@@ -7,56 +7,56 @@ interface IdToErrorMap {
 }
 
 const expectedInvalidCodes: IdToErrorMap = {
-   'invalid--002': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // Tests the "Proper Group/PE Nesting" validity constraint by fragmenting a content model between two parameter entities.
+   'invalid--002': 'PEREF_PARENS_UNBALANCED', // Tests the "Proper Group/PE Nesting" validity constraint by fragmenting a content model between two parameter entities.
    'invalid--005': 'ELEMENTDECL_EXTRA_TEXT', // ok - Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
    'invalid--006': 'ELEMENTDECL_EXTRA_TEXT', // Tests the "Proper Declaration/PE Nesting" validity constraint by fragmenting an element declaration between two parameter entities.
    'invalid-not-sa-022': 'CONDITIONAL_UNKNOWN', // Test the "Proper Conditional Section/ PE Nesting" validity constraint.
-   'inv-dtd01': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC
-   'inv-dtd02': 'ENTITYDECL_UNDECLARED_NOTATION', // Tests the "Notation Declared" VC by using an undeclared notation name.
+   'inv-dtd01': 'ELEMENTDECL_XTRA_MIXED_NAME', // Tests the No Duplicate Types VC
+   'inv-dtd02': 'ENTITYDECL_NO_NOTATION_DECLARATION', // Tests the "Notation Declared" VC by using an undeclared notation name.
    'inv-dtd03': 'CHILDREN_UNEXPECTED_END', // Tests the "Element Valid" VC (clause 2) by omitting a required element.
-   el01: 'ELEMENT_UNDECLARED', // Tests the Element Valid VC (clause 4) by including an undeclared child element.
-   el02: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1) by including elements in an EMPTY content model.
-   el03: 'CONTENT_MIXED_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 3) by including a child element not permitted by a mixed content model.
-   el04: 'ELEMENT_EXTRA_DECLARATION', // Tests the Unique Element Type Declaration VC.
-   el05: 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // Tests the No Duplicate Types VC.
-   el06: 'CONTENT_IN_EMPTY_ELEMENT', // Tests the Element Valid VC (clause 1), using one of the predefined internal entities inside an EMPTY content model.
-   id01: 'ELEMENTSTART_ID_NAME_INVALID', // Tests the ID (is a Name) VC
-   id02: 'ELEMENTSTART_ID_DUPLICATE', // Tests the ID (appears once) VC
-   id03: 'ATTLISTDECL_EXTRA_ID', // Tests the One ID per Element Type VC
-   id04: 'ATTLISTDECL_ID_BAD_DEFAULT', // meh - Tests the ID Attribute Default VC
-   id05: 'ATTLISTDECL_ID_BAD_DEFAULT', // great Tests the ID Attribute Default VC
-   id06: 'ELEMENTSTART_IDREF_NOT_NAME', // Tests the IDREF (is a Name) VC
-   id07: 'ELEMENTSTART_IDREFS_NOT_NAME', // Tests the IDREFS (is a Names) VC
-   id08: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (matches an ID) VC
-   id09: 'ELEMENTSTART_IDREF_NO_ID', // Tests the IDREF (IDREFS matches an ID) VC
+   el01: 'ELEMENT_NO_DECLARATION', // Tests the Element Valid VC (clause 4) by including an undeclared child element.
+   el02: 'CONTENTEMPTY_INVALID_SYNTAX', // Tests the Element Valid VC (clause 1) by including elements in an EMPTY content model.
+   el03: 'CONTENTMIXED_CHILD_UNEXPECTED', // Tests the Element Valid VC (clause 3) by including a child element not permitted by a mixed content model.
+   el04: 'ELEMENT_XTRA_DECLARATION', // Tests the Unique Element Type Declaration VC.
+   el05: 'ELEMENTDECL_XTRA_MIXED_NAME', // Tests the No Duplicate Types VC.
+   el06: 'CONTENTEMPTY_INVALID_SYNTAX', // Tests the Element Valid VC (clause 1), using one of the predefined internal entities inside an EMPTY content model.
+   id01: 'ELEMENTSTART_ATT_INVALID_ID_NAME', // Tests the ID (is a Name) VC
+   id02: 'ELEMENTSTART_ATT_XTRA_ID', // Tests the ID (appears once) VC
+   id03: 'ATTLISTDECL_ATT_XTRA_ID', // Tests the One ID per Element Type VC
+   id04: 'ATTLISTDECL_ATT_INVALID_ID_DEFAULT', // meh - Tests the ID Attribute Default VC
+   id05: 'ATTLISTDECL_ATT_INVALID_ID_DEFAULT', // great Tests the ID Attribute Default VC
+   id06: 'ELEMENTSTART_ATT_INVALID_IDREF_NAME', // Tests the IDREF (is a Name) VC
+   id07: 'ELEMENTSTART_ATT_INVALID_IDREFS_NAME', // Tests the IDREFS (is a Names) VC
+   id08: 'ELEMENTSTART_ATT_IDREF_NO_ID', // Tests the IDREF (matches an ID) VC
+   id09: 'ELEMENTSTART_ATT_IDREF_NO_ID', // Tests the IDREF (IDREFS matches an ID) VC
    'inv-not-sa01': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that optional whitespace causes a validity error.
-   'inv-not-sa02': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that attributes needing normalization cause a validity error.
-   'inv-not-sa04': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that attributes needing defaulting cause a validity error.
-   'inv-not-sa05': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that a token attribute that needs normalization causes a validity error.
-   'inv-not-sa06': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that a NOTATION attribute that needs normalization causes a validity error.
-   'inv-not-sa07': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an NMTOKEN attribute needing normalization causes a validity error.
-   'inv-not-sa08': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an NMTOKENS attribute needing normalization causes a validity error.
-   'inv-not-sa09': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ID attribute needing normalization causes a validity error.
-   'inv-not-sa10': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an IDREF attribute needing normalization causes a validity error.
-   'inv-not-sa11': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an IDREFS attribute needing normalization causes a validity error.
-   'inv-not-sa12': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ENTITY attribute needing normalization causes a validity error.
-   'inv-not-sa13': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // Tests the Standalone Document Declaration VC, ensuring that an ENTITIES attribute needing normalization causes a validity error.
+   'inv-not-sa02': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that attributes needing normalization cause a validity error.
+   'inv-not-sa04': 'ELEMENTSTART_ATT_DEFAULT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that attributes needing defaulting cause a validity error.
+   'inv-not-sa05': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that a token attribute that needs normalization causes a validity error.
+   'inv-not-sa06': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that a NOTATION attribute that needs normalization causes a validity error.
+   'inv-not-sa07': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that an NMTOKEN attribute needing normalization causes a validity error.
+   'inv-not-sa08': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that an NMTOKENS attribute needing normalization causes a validity error.
+   'inv-not-sa09': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that an ID attribute needing normalization causes a validity error.
+   'inv-not-sa10': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that an IDREF attribute needing normalization causes a validity error.
+   'inv-not-sa11': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that an IDREFS attribute needing normalization causes a validity error.
+   'inv-not-sa12': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that an ENTITY attribute needing normalization causes a validity error.
+   'inv-not-sa13': 'ATTLISTDECL_ATT_EXTERNAL', // Tests the Standalone Document Declaration VC, ensuring that an ENTITIES attribute needing normalization causes a validity error.
    'inv-not-sa14': 'CHILDREN_XTRA_CONTENT', // CDATA sections containing only whitespace do not match the nonterminal S, and cannot appear in these positions.
 
    optional01: 'CHILDREN_UNEXPECTED_END', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one is required.
-   optional02: 'CONTENT_CONTAINS_INVALID_ELEMENT', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing two children where one is required.
+   optional02: 'CONTENTELEMENT_CHILD_UNEXPECTED', // ok - Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing two children where one is required.
    optional03: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where two are required.
-   optional04: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where two are required.
+   optional04: 'CONTENTELEMENT_CHILD_UNEXPECTED', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where two are required.
    optional05: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (one construction of that model).
    optional06: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a second construction of that model).
    optional07: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a third construction of that model).
    optional08: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fourth construction of that model).
    optional09: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or two are required (a fifth construction of that model).
-   optional10: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a basic construction of that model).
-   optional11: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a second construction of that model).
-   optional12: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a third construction of that model).
-   optional13: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fourth construction of that model).
-   optional14: 'CONTENT_CONTAINS_INVALID_ELEMENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fifth construction of that model).
+   optional10: 'CONTENTELEMENT_CHILD_UNEXPECTED', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a basic construction of that model).
+   optional11: 'CONTENTELEMENT_CHILD_UNEXPECTED', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a second construction of that model).
+   optional12: 'CONTENTELEMENT_CHILD_UNEXPECTED', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a third construction of that model).
+   optional13: 'CONTENTELEMENT_CHILD_UNEXPECTED', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fourth construction of that model).
+   optional14: 'CONTENTELEMENT_CHILD_UNEXPECTED', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing three children where one or two are required (a fifth construction of that model).
    optional20: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a sixth construction of that model).
    optional21: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a seventh construction of that model).
    optional22: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (an eigth construction of that model).
@@ -64,124 +64,124 @@ const expectedInvalidCodes: IdToErrorMap = {
    optional24: 'CHILDREN_UNEXPECTED_END', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing no children where one or more are required (a tenth construction of that model).
    optional25: 'CHILDREN_XTRA_CONTENT', // Tests the Element Valid VC (clause 2) for one instance of "children" content model, providing text content where one or more elements are required.
    'inv-required00': 'ELEMENTSTART_NO_REQUIRED', // Tests the Required Attribute VC.
-   'inv-required01': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
-   'inv-required02': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
+   'inv-required01': 'ELEMENTSTART_ATT_UNDECLARED', // Tests the Attribute Value Type (declared) VC for the xml:space attribute
+   'inv-required02': 'ELEMENTSTART_ATT_UNDECLARED', // Tests the Attribute Value Type (declared) VC for the xml:lang attribute
 
-   root: 'ELEMENT_MISMATCH_ROOT_TYPE', // Tests the Root Element Type VC
-   attr01: 'ELEMENTSTART_ENTITY_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITY attribute type.
-   attr02: 'ELEMENTSTART_ENTITIES_NO_ENTITY', // Tests the "Entity Name" VC for the ENTITIES attribute type.
-   attr03: 'ELEMENTSTART_NOTATION_NOT_DECLARED', // ok - Tests the "Notation Attributes" VC for the NOTATION attribute type, first clause: value must be one of the ones that's declared.
-   attr04: 'ATTLISTDECL_BAD_NOTATION', // ok - Tests the "Notation Attributes" VC for the NOTATION attribute type, second clause: the names in the declaration must all be declared.
-   attr05: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great - Tests the "Name Token" VC for the NMTOKEN attribute type.
-   attr06: 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN', // great Tests the "Name Token" VC for the NMTOKENS attribute type.
-   attr07: 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great Tests the "Enumeration" VC by providing a value which wasn't one of the choices.
+   root: 'ELEMENT_DOCTYPE_MISMATCH', // Tests the Root Element Type VC
+   attr01: 'ELEMENTSTART_ATT_ENTITY_NO_DECLARATION', // Tests the "Entity Name" VC for the ENTITY attribute type.
+   attr02: 'ELEMENTSTART_ATT_ENTITIES_NO_DECLARATION', // Tests the "Entity Name" VC for the ENTITIES attribute type.
+   attr03: 'ELEMENTSTART_ATT_NOTATION_NO_DECLARATION', // ok - Tests the "Notation Attributes" VC for the NOTATION attribute type, first clause: value must be one of the ones that's declared.
+   attr04: 'ATTLISTDECL_ATT_NOTATION_NO_DECLARATION', // ok - Tests the "Notation Attributes" VC for the NOTATION attribute type, second clause: the names in the declaration must all be declared.
+   attr05: 'ELEMENTSTART_ATT_INVALID_NMTOKEN', // great - Tests the "Name Token" VC for the NMTOKEN attribute type.
+   attr06: 'ELEMENTSTART_ATT_INVALID_NMTOKEN', // great Tests the "Name Token" VC for the NMTOKENS attribute type.
+   attr07: 'ELEMENTSTART_ATT_ENUMERATION_NO_DECLARATION', // great Tests the "Enumeration" VC by providing a value which wasn't one of the choices.
    attr08: 'ELEMENTSTART_FIXED_NOT_RIGHT', // great - Tests the "Fixed Attribute Default" VC by providing the wrong value.
-   attr09: 'ATTLISTDECL_BAD_IDREF_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREF value.
-   attr10: 'ATTLISTDECL_BAD_IDREFS_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREFS value.
-   attr11: 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal ENTITY value.
-   attr12: 'ATTLISTDECL_BAD_ENTITIES_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal ENTITIES value.
-   attr13: 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NMTOKEN value.
-   attr14: 'ATTLISTDECL_BAD_NMTOKENS_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NMTOKENS value.
-   attr15: 'ATTLISTDECL_BAD_NOTATION_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NOTATIONS value.
-   attr16: 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal enumeration value.
+   attr09: 'ATTLISTDECL_ATT_INVALID_IDREF_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREF value.
+   attr10: 'ATTLISTDECL_ATT_INVALID_IDREFS_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal IDREFS value.
+   attr11: 'ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal ENTITY value.
+   attr12: 'ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal ENTITIES value.
+   attr13: 'ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NMTOKEN value.
+   attr14: 'ATTLISTDECL_ATT_INVALID_NMTOKENS_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NMTOKENS value.
+   attr15: 'ATTLISTDECL_ATT_INVALID_NOTATION_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal NOTATIONS value.
+   attr16: 'ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT', // Tests the "Attribute Default Legal" VC by providing an illegal enumeration value.
    utf16b: 'error', // Tests reading an invalid "big endian" UTF-16 document
    utf16l: 'error', // Tests reading an invalid "little endian" UTF-16 document
    empty: 'CHILDREN_XTRA_CONTENT', // CDATA section containing only white space does not match the nonterminal S, and cannot appear in these positions.
 
-   'o-p01pass1': 'ELEMENT_UNDECLARED', // no prolog
-   'o-p01pass3': 'ELEMENT_UNDECLARED', // Misc items after the document
-   'o-p03pass1': 'ELEMENT_UNDECLARED', // all valid S characters
-   'o-p04pass1': 'ELEMENT_UNDECLARED', // names with all valid ASCII characters, and one from each other class in NameChar
-   'o-p05pass1': 'ELEMENT_UNDECLARED', // various valid Name constructions
-   'o-p10pass1': 'ELEMENT_UNDECLARED', // But this is not what it is trying to show -  valid attribute values
-   'o-p06fail1': 'ELEMENTSTART_IDREFS_NOT_NAME', // meh - Requires at least one name.
-   'o-p08fail1': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // at least one Nmtoken is required.
-   'o-p08fail2': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // an invalid Nmtoken character.
-   'o-p14pass1': 'ELEMENT_UNDECLARED', // valid CharData
-   'o-p15pass1': 'ELEMENT_UNDECLARED', // valid comments
+   'o-p01pass1': 'ELEMENT_NO_DECLARATION', // no prolog
+   'o-p01pass3': 'ELEMENT_NO_DECLARATION', // Misc items after the document
+   'o-p03pass1': 'ELEMENT_NO_DECLARATION', // all valid S characters
+   'o-p04pass1': 'ELEMENT_NO_DECLARATION', // names with all valid ASCII characters, and one from each other class in NameChar
+   'o-p05pass1': 'ELEMENT_NO_DECLARATION', // various valid Name constructions
+   'o-p10pass1': 'ELEMENT_NO_DECLARATION', // But this is not what it is trying to show -  valid attribute values
+   'o-p06fail1': 'ELEMENTSTART_ATT_INVALID_IDREFS_NAME', // meh - Requires at least one name.
+   'o-p08fail1': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // at least one Nmtoken is required.
+   'o-p08fail2': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // an invalid Nmtoken character.
+   'o-p14pass1': 'ELEMENT_NO_DECLARATION', // valid CharData
+   'o-p15pass1': 'ELEMENT_NO_DECLARATION', // valid comments
    'o-p16pass1': 'PI_TARGET_HAS_XML', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p16pass2': 'ELEMENT_UNDECLARED', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p16pass3': 'ELEMENT_UNDECLARED', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
-   'o-p18pass1': 'ELEMENT_UNDECLARED', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
-   'o-p22pass1': 'ELEMENT_UNDECLARED', // prolog can be empty
-   'o-p22pass2': 'ELEMENT_UNDECLARED', // XML declaration only
-   'o-p22pass3': 'ELEMENT_UNDECLARED', // XML decl and Misc
-   'o-p23pass1': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration along with version info.
-   'o-p23pass2': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration along with encoding declaration.
-   'o-p23pass3': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration along with Standalone Document Declaration.
-   'o-p23pass4': 'ELEMENT_UNDECLARED', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
-   'o-p24pass1': 'ELEMENT_UNDECLARED', // Test shows a prolog that has the VersionInfo delimited by double quotes.
-   'o-p24pass2': 'ELEMENT_UNDECLARED', // Test shows a prolog that has the VersionInfo delimited by single quotes.
-   'o-p24pass3': 'ELEMENT_UNDECLARED', // Test shows whitespace is allowed in prolog before version info.
-   'o-p24pass4': 'ELEMENT_UNDECLARED', // Test shows whitespace is allowed in prolog on both sides of equal sign.
-   'o-p25pass1': 'ELEMENT_UNDECLARED', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
-   'o-p25pass2': 'ELEMENT_UNDECLARED', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
-   'o-p26pass1': 'ELEMENT_UNDECLARED', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
-   'o-p27pass1': 'ELEMENT_UNDECLARED', // Comments are valid as the Misc part of the prolog.
-   'o-p27pass2': 'ELEMENT_UNDECLARED', // Processing Instructions are valid as the Misc part of the prolog.
-   'o-p27pass3': 'ELEMENT_UNDECLARED', // Whitespace is valid as the Misc part of the prolog.
-   'o-p27pass4': 'ELEMENT_UNDECLARED', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
-   'o-p32pass1': 'ELEMENT_UNDECLARED', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
-   'o-p32pass2': 'ELEMENT_UNDECLARED', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
-   'o-p39pass1': 'ELEMENT_UNDECLARED', // Empty element tag may be used for any element which has no content.
-   'o-p39pass2': 'ELEMENT_UNDECLARED', // Character data is valid element content.
-   'o-p40pass1': 'ELEMENT_UNDECLARED', // Elements content can be empty.
-   'o-p40pass2': 'ELEMENT_UNDECLARED', // Whitespace is valid within a Start-tag.
-   'o-p40pass3': 'ELEMENT_UNDECLARED', // Attributes are valid within a Start-tag.
-   'o-p40pass4': 'ELEMENT_UNDECLARED', // Whitespace and Multiple Attributes are valid within a Start-tag.
-   'o-p41pass1': 'ELEMENT_UNDECLARED', // Attributes are valid within a Start-tag.
-   'o-p41pass2': 'ELEMENT_UNDECLARED', // Whitespace is valid within a Start-tags Attribute.
-   'o-p42pass1': 'ELEMENT_UNDECLARED', // Test shows proper syntax for an End-tag.
-   'o-p42pass2': 'ELEMENT_UNDECLARED', // Whitespace is valid after name in End-tag.
-   'o-p44pass1': 'ELEMENT_UNDECLARED', // Valid display of an Empty Element Tag.
-   'o-p44pass2': 'ELEMENT_UNDECLARED', // Empty Element Tags can contain an Attribute.
-   'o-p44pass3': 'ELEMENT_UNDECLARED', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
-   'o-p44pass4': 'ELEMENT_UNDECLARED', // Whitespace is valid after the name in an Empty Element Tag.
-   'o-p44pass5': 'ELEMENT_UNDECLARED', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
-   'o-p66pass1': 'ELEMENT_UNDECLARED', // valid character references
-   'o-p74pass1': 'ELEMENT_UNDECLARED', // PEDef is either an entity value or an external id
-   'o-p75pass1': 'ELEMENT_UNDECLARED', // valid external identifiers
-   'o-e2': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Validity Constraint: No duplicate tokens
-   'ibm-invalid-P28-ibm28i01.xml': 'ELEMENT_MISMATCH_ROOT_TYPE', // great
-   'ibm-invalid-P32-ibm32i01.xml': 'ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED', // great
-   'ibm-invalid-P32-ibm32i03.xml': 'ATTLISTDECL_TYPE_EXTERNAL_DECLARED', // great
+   'o-p16pass2': 'ELEMENT_NO_DECLARATION', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+   'o-p16pass3': 'ELEMENT_NO_DECLARATION', // Valid form of Processing Instruction. Shows that whitespace character data is valid before end of processing instruction.
+   'o-p18pass1': 'ELEMENT_NO_DECLARATION', // valid CDSect's. Note that a CDStart in a CDSect is not recognized as such
+   'o-p22pass1': 'ELEMENT_NO_DECLARATION', // prolog can be empty
+   'o-p22pass2': 'ELEMENT_NO_DECLARATION', // XML declaration only
+   'o-p22pass3': 'ELEMENT_NO_DECLARATION', // XML decl and Misc
+   'o-p23pass1': 'ELEMENT_NO_DECLARATION', // Test shows a valid XML declaration along with version info.
+   'o-p23pass2': 'ELEMENT_NO_DECLARATION', // Test shows a valid XML declaration along with encoding declaration.
+   'o-p23pass3': 'ELEMENT_NO_DECLARATION', // Test shows a valid XML declaration along with Standalone Document Declaration.
+   'o-p23pass4': 'ELEMENT_NO_DECLARATION', // Test shows a valid XML declaration, encoding declarationand Standalone Document Declaration.
+   'o-p24pass1': 'ELEMENT_NO_DECLARATION', // Test shows a prolog that has the VersionInfo delimited by double quotes.
+   'o-p24pass2': 'ELEMENT_NO_DECLARATION', // Test shows a prolog that has the VersionInfo delimited by single quotes.
+   'o-p24pass3': 'ELEMENT_NO_DECLARATION', // Test shows whitespace is allowed in prolog before version info.
+   'o-p24pass4': 'ELEMENT_NO_DECLARATION', // Test shows whitespace is allowed in prolog on both sides of equal sign.
+   'o-p25pass1': 'ELEMENT_NO_DECLARATION', // Test shows whitespace is NOT necessary before or after equal sign of versioninfo.
+   'o-p25pass2': 'ELEMENT_NO_DECLARATION', // Test shows whitespace can be used on both sides of equal sign of versioninfo.
+   'o-p26pass1': 'ELEMENT_NO_DECLARATION', // The valid version number. We cannot test others because a 1.0 processor is allowed to fail them.
+   'o-p27pass1': 'ELEMENT_NO_DECLARATION', // Comments are valid as the Misc part of the prolog.
+   'o-p27pass2': 'ELEMENT_NO_DECLARATION', // Processing Instructions are valid as the Misc part of the prolog.
+   'o-p27pass3': 'ELEMENT_NO_DECLARATION', // Whitespace is valid as the Misc part of the prolog.
+   'o-p27pass4': 'ELEMENT_NO_DECLARATION', // A combination of comments, whitespaces and processing instructions are valid as the Misc part of the prolog.
+   'o-p32pass1': 'ELEMENT_NO_DECLARATION', // Double quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p32pass2': 'ELEMENT_NO_DECLARATION', // Single quotes can be used as delimeters for the value of a Standalone Document Declaration.
+   'o-p39pass1': 'ELEMENT_NO_DECLARATION', // Empty element tag may be used for any element which has no content.
+   'o-p39pass2': 'ELEMENT_NO_DECLARATION', // Character data is valid element content.
+   'o-p40pass1': 'ELEMENT_NO_DECLARATION', // Elements content can be empty.
+   'o-p40pass2': 'ELEMENT_NO_DECLARATION', // Whitespace is valid within a Start-tag.
+   'o-p40pass3': 'ELEMENT_NO_DECLARATION', // Attributes are valid within a Start-tag.
+   'o-p40pass4': 'ELEMENT_NO_DECLARATION', // Whitespace and Multiple Attributes are valid within a Start-tag.
+   'o-p41pass1': 'ELEMENT_NO_DECLARATION', // Attributes are valid within a Start-tag.
+   'o-p41pass2': 'ELEMENT_NO_DECLARATION', // Whitespace is valid within a Start-tags Attribute.
+   'o-p42pass1': 'ELEMENT_NO_DECLARATION', // Test shows proper syntax for an End-tag.
+   'o-p42pass2': 'ELEMENT_NO_DECLARATION', // Whitespace is valid after name in End-tag.
+   'o-p44pass1': 'ELEMENT_NO_DECLARATION', // Valid display of an Empty Element Tag.
+   'o-p44pass2': 'ELEMENT_NO_DECLARATION', // Empty Element Tags can contain an Attribute.
+   'o-p44pass3': 'ELEMENT_NO_DECLARATION', // Whitespace is valid in an Empty Element Tag following the end of the attribute value.
+   'o-p44pass4': 'ELEMENT_NO_DECLARATION', // Whitespace is valid after the name in an Empty Element Tag.
+   'o-p44pass5': 'ELEMENT_NO_DECLARATION', // Whitespace and Multiple Attributes are valid in an Empty Element Tag.
+   'o-p66pass1': 'ELEMENT_NO_DECLARATION', // valid character references
+   'o-p74pass1': 'ELEMENT_NO_DECLARATION', // PEDef is either an entity value or an external id
+   'o-p75pass1': 'ELEMENT_NO_DECLARATION', // valid external identifiers
+   'o-e2': 'ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE', // great - Validity Constraint: No duplicate tokens
+   'ibm-invalid-P28-ibm28i01.xml': 'ELEMENT_DOCTYPE_MISMATCH', // great
+   'ibm-invalid-P32-ibm32i01.xml': 'ELEMENTSTART_ATT_DEFAULT_EXTERNAL', // great
+   'ibm-invalid-P32-ibm32i03.xml': 'ATTLISTDECL_ATT_EXTERNAL', // great
    'ibm-invalid-P32-ibm32i04.xml': 'CHILDREN_SPACE_EXTERNAL_DECLARED', // great
-   'ibm-invalid-P39-ibm39i01.xml': 'CONTENT_IN_EMPTY_ELEMENT', // great
+   'ibm-invalid-P39-ibm39i01.xml': 'CONTENTEMPTY_INVALID_SYNTAX', // great
    'ibm-invalid-P39-ibm39i02.xml': 'CHILDREN_XTRA_CONTENT', // good
-   'ibm-invalid-P39-ibm39i03.xml': 'CONTENT_MIXED_CONTAINS_INVALID_ELEMENT', // great
-   'ibm-invalid-P39-ibm39i03.xml': 'CONTENT_MIXED_CONTAINS_INVALID_ELEMENT', // great
-   'ibm-invalid-P39-ibm39i04.xml': 'ELEMENT_UNDECLARED', // great
-   'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // great
+   'ibm-invalid-P39-ibm39i03.xml': 'CONTENTMIXED_CHILD_UNEXPECTED', // great
+   'ibm-invalid-P39-ibm39i03.xml': 'CONTENTMIXED_CHILD_UNEXPECTED', // great
+   'ibm-invalid-P39-ibm39i04.xml': 'ELEMENT_NO_DECLARATION', // great
+   'ibm-invalid-P41-ibm41i01.xml': 'ELEMENTSTART_ATT_UNDECLARED', // great
    'ibm-invalid-P41-ibm41i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
-   'ibm-invalid-P45-ibm45i01.xml': 'ELEMENT_EXTRA_DECLARATION', // great
-   'ibm-invalid-P49-ibm49i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
-   'ibm-invalid-P50-ibm50i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
-   'ibm-invalid-P51-ibm51i01.xml': 'ELEMENTDECL_PEREF_PARENS_UNBALANCED', // OK
-   'ibm-invalid-P51-ibm51i03.xml': 'ELEMENTDECL_MIXED_DUPLICATE_NAME', // great
-   'ibm-invalid-P56-ibm56i01.xml': 'ELEMENTSTART_ID_NAME_INVALID', // great
-   'ibm-invalid-P56-ibm56i02.xml': 'ELEMENTSTART_ID_DUPLICATE', // great
-   'ibm-invalid-P56-ibm56i03.xml': 'ATTLISTDECL_ID_BAD_DEFAULT', // good
-   'ibm-invalid-P56-ibm56i05.xml': 'ATTLISTDECL_ID_BAD_DEFAULT', // good
-   'ibm-invalid-P56-ibm56i06.xml': 'ATTLISTDECL_EXTRA_ID', // good
-   'ibm-invalid-P56-ibm56i07.xml': 'ELEMENTSTART_IDREF_NOT_NAME', // good
-   'ibm-invalid-P56-ibm56i08.xml': 'ELEMENTSTART_IDREF_NO_ID', // great
-   'ibm-invalid-P56-ibm56i09.xml': 'ELEMENTSTART_IDREFS_NOT_NAME', // good
-   'ibm-invalid-P56-ibm56i10.xml': 'ELEMENTSTART_IDREF_NO_ID', // great
-   'ibm-invalid-P56-ibm56i11.xml': 'ELEMENTSTART_ENTITY_NO_ENTITY', // ok
-   'ibm-invalid-P56-ibm56i12.xml': 'ELEMENTSTART_ENTITY_NO_ENTITY', // ok
-   'ibm-invalid-P56-ibm56i13.xml': 'ELEMENTSTART_ENTITY_PARSED_ENTITY', // great
-   'ibm-invalid-P56-ibm56i14.xml': 'ELEMENTSTART_ENTITIES_NOT_NAME', // great
-   'ibm-invalid-P56-ibm56i15.xml': 'ELEMENTSTART_ENTITIES_NO_ENTITY', // great
-   'ibm-invalid-P56-ibm56i16.xml': 'ELEMENTSTART_ENTITIES_PARSED_ENTITY', // ok
-   'ibm-invalid-P56-ibm56i17.xml': 'ELEMENTSTART_NMTOKEN_NOT_NMTOKEN',
-   'ibm-invalid-P56-ibm56i18.xml': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // great
-   'ibm-invalid-P58-ibm58i01.xml': 'ELEMENTSTART_NOTATION_NOT_DECLARED', // great
-   'ibm-invalid-P58-ibm58i02.xml': 'ATTLISTDECL_BAD_NOTATION', // great
-   'ibm-invalid-P59-ibm59i01.xml': 'ELEMENTSTART_ENUMERATION_NOT_DECLARED', // great
+   'ibm-invalid-P45-ibm45i01.xml': 'ELEMENT_XTRA_DECLARATION', // great
+   'ibm-invalid-P49-ibm49i01.xml': 'PEREF_PARENS_UNBALANCED', // OK
+   'ibm-invalid-P50-ibm50i01.xml': 'PEREF_PARENS_UNBALANCED', // OK
+   'ibm-invalid-P51-ibm51i01.xml': 'PEREF_PARENS_UNBALANCED', // OK
+   'ibm-invalid-P51-ibm51i03.xml': 'ELEMENTDECL_XTRA_MIXED_NAME', // great
+   'ibm-invalid-P56-ibm56i01.xml': 'ELEMENTSTART_ATT_INVALID_ID_NAME', // great
+   'ibm-invalid-P56-ibm56i02.xml': 'ELEMENTSTART_ATT_XTRA_ID', // great
+   'ibm-invalid-P56-ibm56i03.xml': 'ATTLISTDECL_ATT_INVALID_ID_DEFAULT', // good
+   'ibm-invalid-P56-ibm56i05.xml': 'ATTLISTDECL_ATT_INVALID_ID_DEFAULT', // good
+   'ibm-invalid-P56-ibm56i06.xml': 'ATTLISTDECL_ATT_XTRA_ID', // good
+   'ibm-invalid-P56-ibm56i07.xml': 'ELEMENTSTART_ATT_INVALID_IDREF_NAME', // good
+   'ibm-invalid-P56-ibm56i08.xml': 'ELEMENTSTART_ATT_IDREF_NO_ID', // great
+   'ibm-invalid-P56-ibm56i09.xml': 'ELEMENTSTART_ATT_INVALID_IDREFS_NAME', // good
+   'ibm-invalid-P56-ibm56i10.xml': 'ELEMENTSTART_ATT_IDREF_NO_ID', // great
+   'ibm-invalid-P56-ibm56i11.xml': 'ELEMENTSTART_ATT_ENTITY_NO_DECLARATION', // ok
+   'ibm-invalid-P56-ibm56i12.xml': 'ELEMENTSTART_ATT_ENTITY_NO_DECLARATION', // ok
+   'ibm-invalid-P56-ibm56i13.xml': 'ELEMENTSTART_ATT_PARSED_ENTITY', // great
+   'ibm-invalid-P56-ibm56i14.xml': 'ELEMENTSTART_ATT_INVALID_ENTITIES_NAME', // great
+   'ibm-invalid-P56-ibm56i15.xml': 'ELEMENTSTART_ATT_ENTITIES_NO_DECLARATION', // great
+   'ibm-invalid-P56-ibm56i16.xml': 'ELEMENTSTART_ATT_PARSED_ENTITIES', // ok
+   'ibm-invalid-P56-ibm56i17.xml': 'ELEMENTSTART_ATT_INVALID_NMTOKEN',
+   'ibm-invalid-P56-ibm56i18.xml': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // great
+   'ibm-invalid-P58-ibm58i01.xml': 'ELEMENTSTART_ATT_NOTATION_NO_DECLARATION', // great
+   'ibm-invalid-P58-ibm58i02.xml': 'ATTLISTDECL_ATT_NOTATION_NO_DECLARATION', // great
+   'ibm-invalid-P59-ibm59i01.xml': 'ELEMENTSTART_ATT_ENUMERATION_NO_DECLARATION', // great
    'ibm-invalid-P60-ibm60i01.xml': 'ELEMENTSTART_NO_REQUIRED', // great
    'ibm-invalid-P60-ibm60i02.xml': 'ELEMENTSTART_FIXED_NOT_RIGHT', // great
-   'ibm-invalid-P60-ibm60i03.xml': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // great
-   'ibm-invalid-P60-ibm60i04.xml': 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', //great
+   'ibm-invalid-P60-ibm60i03.xml': 'ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT', // great
+   'ibm-invalid-P60-ibm60i04.xml': 'ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT', //great
    'ibm-invalid-P68-ibm-not-wf-P67-ibm68i01.xml': {
       id: 'ATTLISTDECL_REFERENCE_UNDEFINED',
       message: /entity "ge2" was/,
@@ -211,47 +211,47 @@ const expectedInvalidCodes: IdToErrorMap = {
       message: /named "pe3" was/,
    },
    'ibm-invalid-P69-ibm-not-wf-P69-ibm69i04.xml': 'PEREF_UNDEFINED',
-   'ibm-invalid-P76-ibm76i01.xml': 'ENTITYDECL_UNDECLARED_NOTATION',
-   'ibm-invalid-P89-ibm89n06.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n07.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n08.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n09.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n10.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n11.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
-   'ibm-invalid-P89-ibm89n12.xml': 'ELEMENT_UNDECLARED', // good - Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P76-ibm76i01.xml': 'ENTITYDECL_NO_NOTATION_DECLARATION',
+   'ibm-invalid-P89-ibm89n06.xml': 'ELEMENT_NO_DECLARATION', // good - Tests Extender with an only legal per 5th edition character. The character #x0EC7 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n07.xml': 'ELEMENT_NO_DECLARATION', // good - Tests Extender with an only legal per 5th edition character. The character #x3006 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n08.xml': 'ELEMENT_NO_DECLARATION', // good - Tests Extender with an only legal per 5th edition character. The character #x3030 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n09.xml': 'ELEMENT_NO_DECLARATION', // good - Tests Extender with an only legal per 5th edition character. The character #x3036 occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n10.xml': 'ELEMENT_NO_DECLARATION', // good - Tests Extender with an only legal per 5th edition character. The character #x309C occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n11.xml': 'ELEMENT_NO_DECLARATION', // good - Tests Extender with an only legal per 5th edition character. The character #x309F occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
+   'ibm-invalid-P89-ibm89n12.xml': 'ELEMENT_NO_DECLARATION', // good - Tests Extender with an only legal per 5th edition character. The character #x30FF occurs as the second character in the PITarget in the PI in the prolog, and in an element name.
 
    'ibm-1-1-valid-P46-ibm46i01.xml': 'CHILDREN_BAD_SPACE', // ok - An element with Element-Only content contains the character #x85 (NEL not a whitespace character as defined by S).
    'ibm-1-1-valid-P46-ibm46i02.xml': 'CHILDREN_BAD_SPACE', // ok - An element with Element-Only content contains the character #x2028 (LESP not a whitespace character as defined by S).
 
-   'rmt-e2e-2a': 'ATTLISTDECL_DUPLICATE_ENUMERATION', // great - Duplicate token in enumerated attribute declaration
-   'rmt-e2e-2b': 'ATTLISTDECL_DUPLICATE_NOTATION', // great - Duplicate token in NOTATION attribute declaration
+   'rmt-e2e-2a': 'ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE', // great - Duplicate token in enumerated attribute declaration
+   'rmt-e2e-2b': 'ATTLISTDECL_ATT_XTRA_NOTATION_VALUE', // great - Duplicate token in NOTATION attribute declaration
 
-   'rmt-e3e-06a': 'ATTLISTDECL_BAD_IDREF_DEFAULT', // Default values for IDREF attributes must match Name.
-   'rmt-e3e-06b': 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // Default values for ENTITY attributes must match Name.
-   'rmt-e3e-06c': 'ATTLISTDECL_BAD_IDREFS_DEFAULT', // Default values for IDREFS attributes must match Names.
-   'rmt-e3e-06d': 'ATTLISTDECL_BAD_ENTITIES_DEFAULT', // Default values for ENTITIES attributes must match Names.
-   'rmt-e3e-06e': 'ATTLISTDECL_BAD_NMTOKEN_DEFAULT', // Default values for NMTOKEN attributes must match Nmtoken.
-   'rmt-e3e-06f': 'ATTLISTDECL_BAD_NMTOKENS_DEFAULT', // Default values for NMTOKENS attributes must match Nmtokens.
-   'rmt-e3e-06g': 'ATTLISTDECL_BAD_NOTATION_DEFAULT', // Default values for NOTATION attributes must match one of the enumerated values.
-   'rmt-e3e-06h': 'ATTLISTDECL_BAD_ENUMERATION_DEFAULT', // Default values for enumerated attributes must match one of the enumerated values.
-   'rmt-e2e-9b': 'ATTLISTDECL_BAD_ENTITY_DEFAULT', // great - An attribute default must be syntactically correct even if unused
+   'rmt-e3e-06a': 'ATTLISTDECL_ATT_INVALID_IDREF_DEFAULT', // Default values for IDREF attributes must match Name.
+   'rmt-e3e-06b': 'ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT', // Default values for ENTITY attributes must match Name.
+   'rmt-e3e-06c': 'ATTLISTDECL_ATT_INVALID_IDREFS_DEFAULT', // Default values for IDREFS attributes must match Names.
+   'rmt-e3e-06d': 'ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT', // Default values for ENTITIES attributes must match Names.
+   'rmt-e3e-06e': 'ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT', // Default values for NMTOKEN attributes must match Nmtoken.
+   'rmt-e3e-06f': 'ATTLISTDECL_ATT_INVALID_NMTOKENS_DEFAULT', // Default values for NMTOKENS attributes must match Nmtokens.
+   'rmt-e3e-06g': 'ATTLISTDECL_ATT_INVALID_NOTATION_DEFAULT', // Default values for NOTATION attributes must match one of the enumerated values.
+   'rmt-e3e-06h': 'ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT', // Default values for enumerated attributes must match one of the enumerated values.
+   'rmt-e2e-9b': 'ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT', // great - An attribute default must be syntactically correct even if unused
    'rmt-e3e-13': 'GEREF_UNDEFINED', // good - Even internal parameter entity references are enough to make undeclared entities into mere validity errors rather than well-formedness errors.
 
    'rmt-e2e-14': 'ATTLISTDECL_EXTRA_TEXT', // Declarations mis-nested wrt parameter entities are just validity errors (but note that some parsers treat some such errors as fatal)
-   'rmt-e2e-15a': 'CONTENT_IN_EMPTY_ELEMENT', // OK (but twice) Empty content can't contain an entity reference
-   'rmt-e2e-15b': 'CONTENT_IN_EMPTY_ELEMENT', // meh - Empty content can't contain a comment
-   'rmt-e2e-15c': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain a PI
-   'rmt-e2e-15d': 'CONTENT_IN_EMPTY_ELEMENT', // ok - Empty content can't contain whitespace
+   'rmt-e2e-15a': 'CONTENTEMPTY_INVALID_SYNTAX', // OK (but twice) Empty content can't contain an entity reference
+   'rmt-e2e-15b': 'CONTENTEMPTY_INVALID_SYNTAX', // meh - Empty content can't contain a comment
+   'rmt-e2e-15c': 'CONTENTEMPTY_INVALID_SYNTAX', // ok - Empty content can't contain a PI
+   'rmt-e2e-15d': 'CONTENTEMPTY_INVALID_SYNTAX', // ok - Empty content can't contain whitespace
    'rmt-e2e-15g': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain character reference to whitespace
    'rmt-e2e-15h': 'CHILDREN_XTRA_CONTENT', // ok - Element content can't contain entity reference if replacement text is character reference to whitespace
-   'rmt-e2e-20': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // Tokens, after normalization, must be separated by space, not other whitespace characters
-   'rmt-015': 'ELEMENT_UNDECLARED', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-017': 'ELEMENT_UNDECLARED', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-018': 'ELEMENT_UNDECLARED', // ok - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
-   'rmt-030': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-032': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
-   'rmt-036': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // ok - Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
-   'rmt-037': 'ELEMENTSTART_NMTOKENS_NOT_NMTOKEN', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-e2e-20': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // Tokens, after normalization, must be separated by space, not other whitespace characters
+   'rmt-015': 'ELEMENT_NO_DECLARATION', // Has a "long s" in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-017': 'ELEMENT_NO_DECLARATION', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-018': 'ELEMENT_NO_DECLARATION', // ok - Has the last legal namechar in XML 1.1, illegal in XML 1.0 thru 4th edition
+   'rmt-030': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // ok - Has a NEL character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-032': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // ok - Has an LSEP character in an NMTOKENS attribute; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
+   'rmt-036': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // ok - Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
+   'rmt-037': 'ELEMENTSTART_ATT_INVALID_NMTOKENS', // Has an NMTOKENS attribute containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
    'rmt-048': 'CHILDREN_XTRA_CONTENT', // meh - Has an LSEP character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-046': 'CHILDREN_XTRA_CONTENT', // meh - Has a NEL character in element content whitespace; well-formed in both XML 1.0 and 1.1, but valid only in 1.1
    'rmt-052': 'CHILDREN_XTRA_CONTENT', // Has element content whitespace containing a NEL character that comes from a character reference in an internal entity. Because NEL is not in the S production (even though real NELs are converted to LF on input), this is invalid in both XML 1.0 and 1.1.
@@ -284,13 +284,13 @@ const expectedInvalidCodes: IdToErrorMap = {
    'invalid-bo-5': 'error', // Two byte order marks in general entity produce only one (little-endian)
    'invalid-bo-6': 'error', // Two byte order marks in general entity produce only one (utf-8)
    // These are not inalid as of the specified version, but they are not well formed. Why i nthis list?
-   'invalid-sa-140': 'ELEMENT_UNDECLARED', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
-   'invalid-sa-141': 'ELEMENT_UNDECLARED', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
-   'x-rmt5-014': 'ELEMENT_UNDECLARED', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-   'x-rmt5-016': 'ELEMENT_UNDECLARED', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
-   'x-rmt5-019': 'ELEMENT_UNDECLARED', // ok - Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
-   'hst-bh-005': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:xml is an attribute as far as validation is concerned and must be declared
-   'hst-bh-006': 'ELEMENTSTART_UNDECLARED_ATTRIBUTE', // xmlns:foo is an attribute as far as validation is concerned and must be declared
+   'invalid-sa-140': 'ELEMENT_NO_DECLARATION', // Character '#x309a;' is a CombiningChar, not a Letter, but as of 5th edition, may begin a name (c.f. xmltest/not-wf/sa/140.xml).
+   'invalid-sa-141': 'ELEMENT_NO_DECLARATION', // As of 5th edition, character #x0E5C is legal in XML names (c.f. xmltest/not-wf/sa/141.xml).
+   'x-rmt5-014': 'ELEMENT_NO_DECLARATION', // Has a "long s" in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-016': 'ELEMENT_NO_DECLARATION', // ok - Has a Byzantine Musical Symbol Kratimata in a name, legal in XML 1.1, legal in XML 1.0 5th edition
+   'x-rmt5-019': 'ELEMENT_NO_DECLARATION', // ok - Has the last legal namechar in XML 1.1, legal in XML 1.0 5th edition
+   'hst-bh-005': 'ELEMENTSTART_ATT_UNDECLARED', // xmlns:xml is an attribute as far as validation is concerned and must be declared
+   'hst-bh-006': 'ELEMENTSTART_ATT_UNDECLARED', // xmlns:foo is an attribute as far as validation is concerned and must be declared
 };
 
 const expectedNotWfCodes: IdToErrorMap = {
@@ -420,7 +420,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-080': 'REFERENCE_INVALID_RECURSION', // great - ENTITY can't reference itself directly or indirectly.
    'not-wf-sa-081': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
    'not-wf-sa-082': 'ATTRIBUTE_INVALID_REFERENCE', // great - This tests the_No External Entity References_WFC, since the entity is referred to within an attribute.
-   'not-wf-sa-083': 'ENTITYDECL_UNDECLARED_NOTATION', // great - Undefined NOTATION n.
+   'not-wf-sa-083': 'ENTITYDECL_NO_NOTATION_DECLARATION', // great - Undefined NOTATION n.
    'not-wf-sa-084': 'REFERENCE_UNPARSED_NO_USE', // great - Tests the_Parsed Entity_WFC by referring to an unparsed entity. (This precedes the error of not declaring that entity's notation, which may be detected any time before the DTD parsing is completed.)
    'not-wf-sa-085': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
    'not-wf-sa-086': 'EXTERNALID_PUBLIC_INVALID_CHARS', // great - Public IDs may not contain "[".
@@ -644,14 +644,14 @@ const expectedNotWfCodes: IdToErrorMap = {
    encoding04: 'XMLDECL_ENCODING_INVALID', // Illegal character ":" in encoding name
    encoding05: 'XMLDECL_ENCODING_INVALID', // Illegal character "@" in encoding name
    encoding06: 'XMLDECL_ENCODING_INVALID', // Illegal character "+" in encoding name
-   encoding07: 'CONTENT_IN_EMPTY_ELEMENT', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
+   encoding07: 'CONTENTEMPTY_INVALID_SYNTAX', // Text declarations (which optionally begin any external entity) are required to have "encoding=...".
    pi: 'PI_TARGET_NAME_INVALID', // No space between PI target name and data
    pubid01: 'EXTERNALID_PUBLIC_INVALID_CHARS', // Illegal entity ref in public ID
    pubid02: 'EXTERNALID_PUBLIC_INVALID_CHARS', // Illegal characters in public ID
    pubid03: 'EXTERNALID_PUBLIC_INVALID_CHARS', // Illegal characters in public ID
    pubid04: 'EXTERNALID_PUBLIC_INVALID_CHARS', // Illegal characters in public ID
    pubid05: 'EXTERNALID_MISSING_SYSTEM_VALUE', // ok - SGML-ism: public ID without system ID
-   sgml01: 'CONTENT_IN_EMPTY_ELEMENT', // SGML-ism: omitted end tag for EMPTY content
+   sgml01: 'CONTENTEMPTY_INVALID_SYNTAX', // SGML-ism: omitted end tag for EMPTY content
    sgml02: {
       // XML declaration must be at the very beginning of a document; it"s not a processing instruction
       id: 'TOKEN_INVALID_CONTEXT',
@@ -2274,7 +2274,7 @@ const expectedErrorCodes: IdToErrorMap = {
    'ibm-not-wf-P69-ibm69n05.xml': 'REFERENCE_NO_DECLARATION', // good - Based on E29 substantial source: minutes XML-Syntax 1999-02-24 E38 in XML 1.0 Errata, this WFC does not apply to P69, but the VC Entity declared still apply. Tests PEReference which is against P69 WFC: Entity Declared. The PE with the name "paaa" is referred before declared in the DTD.
    'rmt-008': 'XMLDECL_VERSION_INVALD', // an implausibly-versioned document
    'rmt-009': 'TEXTDECL_VERSION_INVALD', // External general entity has implausible version number
-   'rmt-e2e-34': 'ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC', // A non-deterministic content model is an error even if the element type is not used.
+   'rmt-e2e-34': 'ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC', // A non-deterministic content model is an error even if the element type is not used.
    'x-rmt-008': 'XMLDECL_VERSION_INVALD', // a document with version=1.7, illegal in XML 1.0 through 4th edition
    'x-rmt-008--V1R1': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1
    'x-rmt-008--V1R2': 'DECL_VERSION_PROBLEM', // This input is actually just fine for 1.0/1

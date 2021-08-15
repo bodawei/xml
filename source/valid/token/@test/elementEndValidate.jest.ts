@@ -8,11 +8,11 @@ import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
 import { CmGraph } from '../../contentModel/cmGraphTypes';
-import { validityConstraint } from '../../error/validityConstraint';
-import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ElDeclType, ElementContext, ValidateState } from '../../common/validateState';
 import { elementEndValidate } from '../elementEndValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('elementEndValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
@@ -91,7 +91,7 @@ describe('elementEndValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.CONTENT_UNEXPECTED_END,
+         id: VID.CONTENT_PREMATURE_END,
          lastPosition: undefined,
          params: ['elementName', 'one, two'],
          position: elementDeclaration.name,

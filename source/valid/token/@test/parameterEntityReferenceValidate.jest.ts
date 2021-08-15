@@ -6,10 +6,10 @@ import { MockErrorCollector } from 'basic-test';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { parameterEntityReferenceValidate } from '../parameterEntityReferenceValidate';
-import { ValidateState } from '../../validateState';
-import { validityConstraint } from '../../error/validityConstraint';
+import { ValidateState } from '../../common/validateState';
+import { validCodes } from '../../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('parameterEntityReferenceValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -54,7 +54,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.PARAMETER_ENTITY_UNDECLARED,
+         id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],
          position: ref.name,
@@ -79,7 +79,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.PARAMETER_ENTITY_UNDECLARED,
+         id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],
          position: ref.name,

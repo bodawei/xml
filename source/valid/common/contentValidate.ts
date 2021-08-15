@@ -16,11 +16,11 @@ import {
    CDATA_PTOKEN,
 } from 'token';
 
-import { validityConstraint } from './error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 import { isXmlData } from './isXmlData';
 import { ElDeclType, ValidateState } from './validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 const S_REGEXP = /^[\t\n\r ]*$/;
 
 function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorCollector): void {
@@ -37,7 +37,7 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
       //  [Note: we will never get here if an ElementEmpty was enccountered)
       ec.check(
          isXml && token.type !== ELEMENT_END_PTOKEN,
-         VID.CONTENT_IN_EMPTY_ELEMENT,
+         VID.CONTENTEMPTY_INVALID_SYNTAX,
          [strOrBlank(declDetails.token.name)],
          getFirstSToken(token),
       );
@@ -92,14 +92,14 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
          isNoLeadingTrailingSpaceVersion &&
             isWhitespace &&
             !state.elementContext.activeContext?.lastToken,
-         VID.CONTENT_XTRA_SPACE,
+         VID.CONTENTELEMENT_XTRA_SPACE,
          [strOrBlank(declDetails.token.name)],
          getFirstSToken(token),
       );
 
       ec.check(
          isXml && !okType,
-         VID.CONTENT_IN_ELEMENT_ELEMENT,
+         VID.CONTENTELEMENT_INVALID_SYNTAX,
          [strOrBlank(declDetails.token.name), String(ver), String(ed), token.type],
          getFirstSToken(token),
       );
@@ -117,7 +117,7 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
          (lastToken?.type === SPACE_PTOKEN ||
             (lastToken?.type === CHARDATA_PTOKEN && S_REGEXP.test(strOrBlank(lastToken.text))))
       ) {
-         ec.report(VID.CONTENT_XTRA_SPACE, [strOrBlank(token.name)], lastToken.text);
+         ec.report(VID.CONTENTELEMENT_XTRA_SPACE, [strOrBlank(token.name)], lastToken.text);
       }
    } else if (declDetails?.type === ElDeclType.MIXED || declDetails?.type === ElDeclType.ANY) {
       // §3.0.0 Validity Constraint: Element Valid
@@ -168,8 +168,8 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
       ec.check(
          isXml && !okType,
          declDetails.type === ElDeclType.MIXED
-            ? VID.CONTENT_IN_MIXED_ELEMENT
-            : VID.CONTENT_IN_ANY_ELEMENT,
+            ? VID.CONTENTMIXED_INVALID_SYNTAX
+            : VID.CONTENTANY_INVALID_SYNTAX,
          [strOrBlank(declDetails.token.name), String(ver), String(ed), token.type],
          getFirstSToken(token),
       );

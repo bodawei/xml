@@ -5,9 +5,9 @@ import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function notationDeclarationValidate(
    token: NotationDeclarationPToken,

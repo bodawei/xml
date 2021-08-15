@@ -26,7 +26,7 @@ import {
 } from 'token-test';
 
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 import { ValidityChecker } from '../ValidityChecker';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from '../token/attListDeclarationValidate';
@@ -56,8 +56,8 @@ import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityD
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
 import { parameterEntityStartValidate } from '../token/parameterEntityStartValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
-import { contentValidate } from '../contentValidate';
-import { contentUpdateState } from '../contentUpdateState';
+import { contentValidate } from '../common/contentValidate';
+import { contentUpdateState } from '../common/contentUpdateState';
 
 jest.mock('../common/entityDeclarationValueValidate');
 jest.mock('../token/attListDeclarationValidate');
@@ -88,8 +88,8 @@ jest.mock('../token/parameterEntityDeclarationUpdateState');
 jest.mock('../token/parameterEntityReferenceValidate');
 jest.mock('../token/parameterEntityStartValidate');
 jest.mock('../token/xmlDeclarationUpdateState');
-jest.mock('../contentValidate');
-jest.mock('../contentUpdateState');
+jest.mock('../common/contentValidate');
+jest.mock('../common/contentUpdateState');
 
 describe('ValidityChecker (unit)', () => {
    let version: ConformanceVersion;

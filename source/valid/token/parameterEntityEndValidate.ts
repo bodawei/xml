@@ -11,11 +11,11 @@ import {
 } from 'pToken';
 import { COMMENT_PTOKEN, CONDITIONAL_PTOKEN, ParameterEntityEndPToken } from 'token';
 
-import { ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { ValidateState } from '../common/validateState';
+import { validCodes } from '../error/validCodes';
 import { SToken } from 'sToken';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function parameterEntityEndValidate(
    endPToken: ParameterEntityEndPToken,
@@ -61,7 +61,7 @@ function parameterEntityEndValidate(
    const item = state.dtdContext.enclosingStack[state.dtdContext.enclosingStack.length - 1];
 
    if (item.type === CONDITIONAL_PTOKEN) {
-      ec.report(VID.PEREF_INVALID_CONDITIONAL_START_NESTING, [], item.open);
+      ec.report(VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING, [], item.open);
    }
 }
 

@@ -2,7 +2,7 @@
 
 import { XmlDeclarationPToken, isXmlDeclStandalone } from 'pToken';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function xmlDeclarationUpdateState(el: XmlDeclarationPToken, state: ValidateState): ValidateState {
    return {

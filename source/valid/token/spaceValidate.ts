@@ -4,10 +4,10 @@ import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { SpacePToken } from 'token';
 
-import { validityConstraint } from '../error/validityConstraint';
-import { ElDeclType, ValidateState } from '../validateState';
+import { validCodes } from '../error/validCodes';
+import { ElDeclType, ValidateState } from '../common/validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 const S_REGEXP = /^[\t\n\r ]*$/;
 
 function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollector): void {
@@ -37,7 +37,7 @@ function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollec
 
       ec.check(
          state.isStandalone && details.isExternalMarkupDeclaration,
-         VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
          [strOrBlank(details.token.name)],
       );
    }

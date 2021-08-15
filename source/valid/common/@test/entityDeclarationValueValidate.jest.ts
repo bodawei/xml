@@ -11,10 +11,10 @@ import {
 } from 'token-test';
 
 import { entityDeclarationValueValidate } from '../entityDeclarationValueValidate';
-import { ValidateState } from '../../validateState';
-import { validityConstraint } from '../../error/validityConstraint';
+import { ValidateState } from '../validateState';
+import { validCodes } from '../../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('entityDeclarationValueValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -78,7 +78,7 @@ describe('entityDeclarationValueValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.PARAMETER_ENTITY_UNDECLARED,
+         id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],
          position: makeParameterEntityReference().open,
@@ -100,7 +100,7 @@ describe('entityDeclarationValueValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.PARAMETER_ENTITY_UNDECLARED,
+         id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],
          position: makeParameterEntityReference().open,
@@ -122,7 +122,7 @@ describe('entityDeclarationValueValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.PARAMETER_ENTITY_UNDECLARED,
+         id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],
          position: makeParameterEntityStart().referencePToken.open,

@@ -44,7 +44,7 @@ import {
    INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
-import { ValidateState } from './validateState';
+import { ValidateState } from './common/validateState';
 import { entityDeclarationValueValidate } from './common/entityDeclarationValueValidate';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from './token/attListDeclarationValidate';
@@ -81,9 +81,9 @@ import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from './token/notationDeclarationValidate';
 import { elementDeclarationPreprocess } from './token/elementDeclarationPreprocess';
-import { isXmlData } from './isXmlData';
-import { contentUpdateState } from './contentUpdateState';
-import { contentValidate } from './contentValidate';
+import { isXmlData } from './common/isXmlData';
+import { contentUpdateState } from './common/contentUpdateState';
+import { contentValidate } from './common/contentValidate';
 
 class ValidityChecker {
    private version: ConformanceVersion;

@@ -3,7 +3,7 @@
 import { strOrBlank } from 'sToken';
 import { DocTypeStartPToken } from 'token';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function docTypeStartUpdateState(
    docTypePToken: DocTypeStartPToken,

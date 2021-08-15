@@ -2,9 +2,9 @@ import { ElementDeclarationPToken, isContentModelP } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { makeCmGraph } from '../contentModel/makeCmGraph';
-import { ElDeclType, ValidateState } from '../validateState';
+import { ElDeclType, ValidateState } from '../common/validateState';
 
-import { DeclarationDetails } from '../validateState';
+import { DeclarationDetails } from '../common/validateState';
 
 function elementDeclarationPreprocess(
    elDecl: ElementDeclarationPToken,

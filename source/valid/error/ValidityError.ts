@@ -2,7 +2,7 @@
 
 import { makeOffset, XmlErrorToken } from 'basic';
 import { XML_ERROR_TOKEN, Offset, XmlErrorPosition } from 'basic';
-import { validityConstraint } from './validityConstraint';
+import { validCodes } from './validCodes';
 
 const VALIDITY_ERROR_SUBTYPE = 'VALIDITY_ERROR';
 
@@ -28,9 +28,9 @@ class ValidityError implements XmlErrorToken {
       context?: XmlErrorPosition,
    ) {
       this.id = id;
-      this.code = validityConstraint.codeFor(id);
+      this.code = validCodes.codeFor(id);
       this.context = makeOffset(context);
-      this.message = validityConstraint.messageFor(id, params);
+      this.message = validCodes.messageFor(id, params);
       this.place = makeOffset(place);
    }
 }

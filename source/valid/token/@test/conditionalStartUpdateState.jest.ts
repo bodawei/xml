@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeConditionalSection } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { conditionalStartUpdateState } from '../conditionalStartUpdateState';
 
 describe('conditionalStartUpdateState (unit)', () => {

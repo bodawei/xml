@@ -7,12 +7,12 @@ import { MockErrorCollector } from 'basic-test';
 import { makeNotationDeclaration } from 'token-test';
 
 import { notationDeclarationValidate } from '../notationDeclarationValidate';
-import { ValidateState } from '../../validateState';
-import { validityConstraint } from '../../error/validityConstraint';
+import { ValidateState } from '../../common/validateState';
+import { validCodes } from '../../error/validCodes';
 import { NotationDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('notationDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;

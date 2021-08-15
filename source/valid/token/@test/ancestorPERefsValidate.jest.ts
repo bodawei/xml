@@ -17,11 +17,11 @@ import {
 } from 'token-test';
 
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { ParameterEntityStartPToken } from 'token';
-import { validityConstraint } from '../../error/validityConstraint';
+import { validCodes } from '../../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('ancestorPERefsValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -85,7 +85,7 @@ describe('ancestorPERefsValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+         id: VID.ENTITYREF_EXTERNAL,
          lastPosition: undefined,
          params: ['peRef'],
          position: peRef.open,
@@ -113,7 +113,7 @@ describe('ancestorPERefsValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+         id: VID.ENTITYREF_EXTERNAL,
          lastPosition: undefined,
          params: ['peRef'],
          position: peRefTwo.open,
@@ -125,7 +125,7 @@ describe('ancestorPERefsValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+         id: VID.ENTITYREF_EXTERNAL,
          lastPosition: undefined,
          params: ['peRef'],
          position: toSToken('<!'),
@@ -180,7 +180,7 @@ describe('ancestorPERefsValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.ENTITYREF_EXTERNALLY_DECLARED,
+         id: VID.ENTITYREF_EXTERNAL,
          lastPosition: undefined,
          params: ['second'],
          position: toSToken('%'),

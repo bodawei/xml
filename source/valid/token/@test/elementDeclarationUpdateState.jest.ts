@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { ElementDeclarationPToken } from 'pToken';
 
-import { DeclarationDetails, ElDeclType, ValidateState } from '../../validateState';
+import { DeclarationDetails, ElDeclType, ValidateState } from '../../common/validateState';
 import { elementDeclarationUpdateState } from '../elementDeclarationUpdateState';
 
 describe('elementDeclarationUpdateState (unit)', () => {

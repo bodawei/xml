@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeDocTypeEnd, makeDocTypeStart, makeParameterEntityStart } from 'token-test';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { docTypeEndUpdateState } from '../docTypeEndUpdateState';
 
 describe('docTypeEndUpdateState (unit)', () => {

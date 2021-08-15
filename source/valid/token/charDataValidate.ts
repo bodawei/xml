@@ -4,10 +4,10 @@ import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { CharDataPToken } from 'token';
 
-import { ElDeclType, ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { ElDeclType, ValidateState } from '../common/validateState';
+import { validCodes } from '../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 const S_REGEXP = /^[\t\n\r ]*$/;
 
@@ -37,7 +37,7 @@ function charDataValidate(token: CharDataPToken, state: ValidateState, ec: Error
 
       ec.check(
          state.isStandalone && details.isExternalMarkupDeclaration,
-         VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+         VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
          [strOrBlank(details.token.name)],
       );
    }

@@ -10,10 +10,10 @@ import { NOTATION_PTOKEN } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
 import { dtdEndValidate } from '../dtdEndValidate';
-import { validityConstraint } from '../../error/validityConstraint';
-import { ElDeclType, ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ElDeclType, ValidateState } from '../../common/validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('dtdEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -52,7 +52,7 @@ describe('dtdEndValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_EXTRA_ID,
+            id: VID.ATTLISTDECL_ATT_XTRA_ID,
             lastPosition: undefined,
             params: ['anElement', 'other', 'id'],
             position: toSToken('ID'),
@@ -108,7 +108,7 @@ describe('dtdEndValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_EMPTY_NOTATION,
+            id: VID.ATTLISTDECL_ATT_INVALID_NOTATION_ON_EMPTY,
             lastPosition: undefined,
             params: ['emptyEl', 'notationAttr'],
             position: toSToken('NOTATION'),
@@ -246,7 +246,7 @@ describe('dtdEndValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_BAD_NOTATION,
+            id: VID.ATTLISTDECL_ATT_NOTATION_NO_DECLARATION,
             params: ['someElement', 'notationAttr', 'undeclared'],
             position: toSToken('undeclared'),
             lastPosition: undefined,
@@ -349,7 +349,7 @@ describe('dtdEndValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ATTLISTDECL_EXTRA_NOTATION,
+            id: VID.ATTLISTDECL_ATT_XTRA_NOTATION,
             params: ['someElement', 'notationAttr2'],
             position: toSToken('NOTATION'),
             lastPosition: undefined,
@@ -436,7 +436,7 @@ describe('dtdEndValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
-            id: VID.ENTITYDECL_UNDECLARED_NOTATION,
+            id: VID.ENTITYDECL_NO_NOTATION_DECLARATION,
             params: ['withNData', 'someNotation'],
             position: toSToken('someNotation'),
             lastPosition: undefined,

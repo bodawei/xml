@@ -3,7 +3,7 @@
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { AttributeDefs, ValidateState } from '../validateState';
+import { AttributeDefs, ValidateState } from '../common/validateState';
 
 function attListDeclarationUpdateState(
    el: AttListDeclarationPToken,

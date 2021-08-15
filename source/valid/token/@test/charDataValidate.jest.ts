@@ -6,12 +6,12 @@ import { MockErrorCollector } from 'basic-test';
 import { makeElementDeclaration } from 'token-test';
 
 import { charDataValidate } from '../charDataValidate';
-import { ElDeclType, ValidateState } from '../../validateState';
+import { ElDeclType, ValidateState } from '../../common/validateState';
 import { CharDataPToken } from 'token';
 import { toSToken } from 'sToken';
-import { validityConstraint } from '../../error/validityConstraint';
+import { validCodes } from '../../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('charDataValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -75,7 +75,7 @@ describe('charDataValidate (unit)', () => {
          if (error) {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+               id: VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
                lastPosition: undefined,
                params: ['elementName'],
                position: charData.text,

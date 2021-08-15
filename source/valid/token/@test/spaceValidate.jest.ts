@@ -7,11 +7,11 @@ import { toSToken } from 'sToken';
 import { SpacePToken } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
-import { validityConstraint } from '../../error/validityConstraint';
-import { ElDeclType, ValidateState } from '../../validateState';
+import { validCodes } from '../../error/validCodes';
+import { ElDeclType, ValidateState } from '../../common/validateState';
 import { spaceValidate } from '../spaceValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('spaceValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -75,7 +75,7 @@ describe('spaceValidate (unit)', () => {
          if (error) {
             // @ts-expect-error 2329/matchers
             expect(mockErrorCollector).toReportValidityError({
-               id: VID.ELEMENT_CONTENT_SPACE_EXTERNAL_DECLARED,
+               id: VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
                lastPosition: undefined,
                params: ['elementName'],
                position: space.text,

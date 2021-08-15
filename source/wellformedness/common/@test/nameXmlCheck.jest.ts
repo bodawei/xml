@@ -16,7 +16,7 @@ describe('nameXmlCheck()', () => {
       ec = new MockErrorCollector();
       confVer = new ConformanceVersion();
       WARN1 = warning.id.ENTITYDECL_XRA_DECLARATION;
-      WARN2 = warning.id.ELEMENT_WITH_EMPTY_DECL;
+      WARN2 = warning.id.ELEMENT_START_USED_FOR_EMPTY_DECL;
    });
 
    it('adds no errors if a name is not passed in', () => {

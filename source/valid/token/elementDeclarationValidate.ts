@@ -20,11 +20,11 @@ import {
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { validityConstraint } from '../error/validityConstraint';
-import { DeclarationDetails, ElDeclType, ValidateState } from '../validateState';
+import { validCodes } from '../error/validCodes';
+import { DeclarationDetails, ElDeclType, ValidateState } from '../common/validateState';
 
 const EID = error.id;
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function getElementNames(contentModel: ContentModelP): Array<string> {
    const childNames: Array<string> = [];
@@ -145,7 +145,7 @@ function validateEntities(
       //    contained in the replacement text for a parameter entity, both
       //    must be contained in the same replacement text.
       if (depth !== 0) {
-         ec.report(VID.ELEMENTDECL_PEREF_PARENS_UNBALANCED, [elName, entityName]);
+         ec.report(VID.PEREF_PARENS_UNBALANCED, [elName, entityName]);
       }
 
       // §3.2.1 For interoperability, if a parameter-entity reference appears
@@ -158,16 +158,13 @@ function validateEntities(
             nonSpace === 0);
 
       if (cmEndFound && hasEmptyContent) {
-         ec.reportError(warning.id.ELEMENTDECL_PEREF_EMPTY, WarningToken, [elName, entityName]);
+         ec.reportError(warning.id.PEREF_NO_EMPTY_IN_MODEL, WarningToken, [elName, entityName]);
       }
 
       // §3.2.1 For interoperability, ... neither the first nor last non-blank character
       //    of the replacement text should be a connector (| or ,).
       if (cmEndFound && trailingDelimiter) {
-         ec.reportError(warning.id.ELEMENTDECL_PEREF_TRAILING_CONNECTOR, WarningToken, [
-            elName,
-            entityName,
-         ]);
+         ec.reportError(warning.id.PEREF_NO_TRAILING_CONNECTOR, WarningToken, [elName, entityName]);
       }
 
       cmDepth += depth;
@@ -202,7 +199,7 @@ function elementDeclarationValidate(
    }
 
    ec.setPos(elDecl.name);
-   ec.check(state.elementDeclarations[elName], VID.ELEMENT_EXTRA_DECLARATION, [elName]);
+   ec.check(state.elementDeclarations[elName], VID.ELEMENT_XTRA_DECLARATION, [elName]);
 
    if (!elDecl.contentModel) {
       return;
@@ -242,7 +239,7 @@ function elementDeclarationValidate(
          }
       }
 
-      ec.check(duplicateNames.length > 0, VID.ELEMENTDECL_MIXED_DUPLICATE_NAME, [
+      ec.check(duplicateNames.length > 0, VID.ELEMENTDECL_XTRA_MIXED_NAME, [
          elName,
          duplicateNames.join(','),
       ]);
@@ -266,7 +263,7 @@ function elementDeclarationValidate(
       }
 
       if (cases.length > 0) {
-         ec.reportError(EID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC, ErrorToken, [
+         ec.reportError(EID.ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC, ErrorToken, [
             elName,
             cases.join(','),
          ]);

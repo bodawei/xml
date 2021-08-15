@@ -3,7 +3,7 @@
 import { strOrBlank } from 'sToken';
 import { ElidedEntityDeclarationPToken } from 'token';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 function elidedEntityDeclarationUpdateState(
    el: ElidedEntityDeclarationPToken,

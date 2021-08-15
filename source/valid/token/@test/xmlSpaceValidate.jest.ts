@@ -67,35 +67,6 @@ describe('xmlSpaceValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error when the xml:space is the wrong case (§2.10.0)', () => {
-      xmlSpaceValidate(
-         {
-            enumeration: {
-               open: toSToken('('),
-               type: ENUMERATION_PTOKEN,
-               words: [
-                  {
-                     word: toSToken('preserve'),
-                  },
-               ],
-            },
-            name: toSToken('xml:SPACE'),
-            value: [],
-         },
-         'elOne',
-         'xml:SPACE',
-         mockErrorCollector,
-      );
-
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
-         id: EID.XML_SPACE_BAD_CASE,
-         lastPosition: undefined,
-         params: ['elOne', 'xml:SPACE'],
-         position: toSToken('xml:SPACE'),
-      });
-   });
-
    it('reports an error when the xml:space has no enumeration (§2.10.0)', () => {
       xmlSpaceValidate(
          {
@@ -109,7 +80,7 @@ describe('xmlSpaceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: EID.XML_SPACE_BAD_DECLARATION,
+         id: EID.XMLSPACE_NO_ENUMERATED_VALUES,
          lastPosition: undefined,
          params: ['elOne'],
          position: toSToken('xml:space'),
@@ -144,7 +115,7 @@ describe('xmlSpaceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: EID.XML_SPACE_BAD_ENUMRATION,
+         id: EID.XMLSPACE_XTRA_ENUMERATED_VALUE,
          lastPosition: undefined,
          params: ['elOne', 'outch'],
          position: toSToken('xml:space'),

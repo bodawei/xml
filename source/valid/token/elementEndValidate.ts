@@ -3,10 +3,10 @@
 import { ErrorCollector } from 'basic';
 import { ElementEndPToken } from 'token';
 
-import { validityConstraint } from '../error/validityConstraint';
-import { ElDeclType, ValidateState } from '../validateState';
+import { validCodes } from '../error/validCodes';
+import { ElDeclType, ValidateState } from '../common/validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: ErrorCollector): void {
    const context = state.elementContext.activeContext;
@@ -30,7 +30,7 @@ function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: Erro
    //     model, ...
    ec.check(
       !currentState.done,
-      VID.CONTENT_UNEXPECTED_END,
+      VID.CONTENT_PREMATURE_END,
       [context.parentName, Object.keys(currentState.trans).join(', ')],
       el.name,
    );

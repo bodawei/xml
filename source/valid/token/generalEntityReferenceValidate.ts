@@ -3,12 +3,12 @@
 import { ErrorCollector, warning, WarningToken } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { validityConstraint } from '../error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
 const PREDEFINED = ['lt', 'gt', 'quot', 'apos', 'amp'];
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 const WARNID = warning.id;
 
 function generalEntityReferenceValidate(
@@ -33,14 +33,14 @@ function generalEntityReferenceValidate(
     *    in an entity declaration. ...
     */
    if (!PREDEFINED.includes(geDeclName)) {
-      ec.report(VID.GENERAL_ENTITY_UNDECLARED, [geDeclName]);
+      ec.report(VID.GENERALENTITY_NO_DECLARATION, [geDeclName]);
    } else {
       /*
        * §4.1.0: Validity Constraint: Entity Declared
        *    For interoperability, valid documents should declare the entities
        *    amp, lt, gt, apos, quot, in the form specified in 4.6 Predefined Entities.
        */
-      ec.reportError(WARNID.PREDEFINED_UNDECLARED, WarningToken, [geDeclName]);
+      ec.reportError(WARNID.ENTITY_PREDEFINED_NO_DECLARATION, WarningToken, [geDeclName]);
    }
 }
 

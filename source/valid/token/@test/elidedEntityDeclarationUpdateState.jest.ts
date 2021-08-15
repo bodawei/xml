@@ -8,7 +8,7 @@ import { makeParameterEntityDeclaration } from 'token-test';
 
 import { ElidedEntityDeclarationPToken } from 'token';
 
-import { ValidateState } from '../../validateState';
+import { ValidateState } from '../../common/validateState';
 import { elidedEntityDeclarationUpdateState } from '../elidedEntityDeclarationUpdateState';
 import { parameterEntityDeclarationUpdateState } from '../parameterEntityDeclarationUpdateState';
 

@@ -6,23 +6,23 @@ import { strOrBlank } from 'sToken';
 import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken } from 'token';
 import { attributeValueValidate } from '../common/attributeValueValidate';
 
-import { validityConstraint } from '../error/validityConstraint';
-import { ValidateState } from '../validateState';
+import { validCodes } from '../error/validCodes';
+import { ValidateState } from '../common/validateState';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 import { xmlSpaceValidate } from './xmlSpaceValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 const CODEMAP: Record<string, string> = {
-   ENTITIES: VID.ATTLISTDECL_BAD_ENTITIES_DEFAULT,
-   ENTITY: VID.ATTLISTDECL_BAD_ENTITY_DEFAULT,
-   ENUMERATION: VID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
-   IDREF: VID.ATTLISTDECL_BAD_IDREF_DEFAULT,
-   IDREFS: VID.ATTLISTDECL_BAD_IDREFS_DEFAULT,
-   NMTOKEN: VID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
-   NMTOKENS: VID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
-   NOTATION: VID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
+   ENTITIES: VID.ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT,
+   ENTITY: VID.ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT,
+   ENUMERATION: VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
+   IDREF: VID.ATTLISTDECL_ATT_INVALID_IDREF_DEFAULT,
+   IDREFS: VID.ATTLISTDECL_ATT_INVALID_IDREFS_DEFAULT,
+   NMTOKEN: VID.ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT,
+   NMTOKENS: VID.ATTLISTDECL_ATT_INVALID_NMTOKENS_DEFAULT,
+   NOTATION: VID.ATTLISTDECL_ATT_INVALID_NOTATION_DEFAULT,
 };
 
 function checkEnumeration(
@@ -41,8 +41,8 @@ function checkEnumeration(
    const seenWords: Record<string, boolean> = {};
    const code =
       attType === 'NOTATION'
-         ? VID.ATTLISTDECL_DUPLICATE_NOTATION
-         : VID.ATTLISTDECL_DUPLICATE_ENUMERATION;
+         ? VID.ATTLISTDECL_ATT_XTRA_NOTATION_VALUE
+         : VID.ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE;
 
    ec.setPos(attDef.enumeration.open);
 
@@ -81,7 +81,7 @@ function checkDefaultValue(
          //    those entities appear in the document...
          ec.check(
             details?.isExternalMarkupDeclaration && state.isStandalone && !isPredefined,
-            VID.ENTITYREF_EXTERNALLY_DECLARED,
+            VID.ENTITYREF_EXTERNAL,
             [name],
          );
 
@@ -232,7 +232,7 @@ function attListDeclarationValidate(
 
          ec.check(
             defaultType !== '#REQUIRED' && defaultType !== '#IMPLIED',
-            VID.ATTLISTDECL_ID_BAD_DEFAULT,
+            VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
             [elName, attName, defaultType],
          );
       }

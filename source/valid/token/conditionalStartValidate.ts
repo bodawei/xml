@@ -3,11 +3,11 @@
 import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { ConditionalPToken } from 'token';
-import { validityConstraint } from '../error/validityConstraint';
+import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from '../validateState';
+import { ValidateState } from '../common/validateState';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function conditionalStartValidate(
    token: ConditionalPToken,
@@ -25,7 +25,7 @@ function conditionalStartValidate(
    //    replacement text.
    ec.setPos(token.unexpanded.peRef.open);
 
-   ec.check(token.unexpanded.includedBracket, VID.CONDITIONAL_BAD_NESTING, [
+   ec.check(token.unexpanded.includedBracket, VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET, [
       strOrBlank(token.unexpanded.peRef.name),
    ]);
 }

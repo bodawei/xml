@@ -8,10 +8,10 @@ import { toSToken } from 'sToken';
 import { makeGeneralEntityDeclaration, makeGeneralEntityReference } from 'token-test';
 
 import { generalEntityReferenceValidate } from '../generalEntityReferenceValidate';
-import { ValidateState } from '../../validateState';
-import { validityConstraint } from '../../error/validityConstraint';
+import { ValidateState } from '../../common/validateState';
+import { validCodes } from '../../error/validCodes';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 describe('generalEntityReferenceValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -92,7 +92,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.GENERAL_ENTITY_UNDECLARED,
+         id: VID.GENERALENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['testRef'],
          position: ref.name,
@@ -116,7 +116,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
-         id: VID.GENERAL_ENTITY_UNDECLARED,
+         id: VID.GENERALENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['testRef'],
          position: ref.name,
@@ -165,7 +165,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.PREDEFINED_UNDECLARED,
+         id: warning.id.ENTITY_PREDEFINED_NO_DECLARATION,
          lastPosition: undefined,
          params: ['lt'],
          position: ref.name,

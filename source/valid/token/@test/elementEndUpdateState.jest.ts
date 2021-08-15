@@ -6,7 +6,7 @@ import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
-import { ElDeclType, ElementContext, ValidateState } from '../../validateState';
+import { ElDeclType, ElementContext, ValidateState } from '../../common/validateState';
 import { elementEndUpdateState } from '../elementEndUpdateState';
 
 describe('elementEndUpdateState (unit)', () => {

@@ -4,11 +4,11 @@ import { ErrorCollector } from 'basic';
 import { ParameterEntityStartPToken } from 'token';
 import { strOrBlank } from 'sToken';
 
-import { ValidateState } from '../validateState';
-import { validityConstraint } from '../error/validityConstraint';
+import { ValidateState } from '../common/validateState';
+import { validCodes } from '../error/validCodes';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
-const VID = validityConstraint.id;
+const VID = validCodes.id;
 
 function parameterEntityStartValidate(
    startPToken: ParameterEntityStartPToken,
@@ -25,7 +25,7 @@ function parameterEntityStartValidate(
 
    ec.check(
       details?.isExternalMarkupDeclaration && state.isStandalone,
-      VID.ENTITYREF_EXTERNALLY_DECLARED,
+      VID.ENTITYREF_EXTERNAL,
       [name],
       startPToken.referencePToken.open,
    );
