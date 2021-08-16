@@ -11,7 +11,7 @@ import {
    PARAMETER_ENTITY_START_PTOKEN,
 } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
@@ -21,7 +21,7 @@ function ancestorPERefsValidate(
       | GeneralEntityStartPToken
       | ParameterEntityStartPToken
       | ParameterEntityReferencePToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    if (!state.isStandalone) {

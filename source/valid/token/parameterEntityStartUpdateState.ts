@@ -2,12 +2,12 @@
 
 import { ParameterEntityStartPToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function parameterEntityStartUpdateState(
    startPToken: ParameterEntityStartPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    return {
       ...state,
       dtdContext: {

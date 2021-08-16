@@ -23,9 +23,8 @@ import {
 } from 'token-test';
 
 import { elementStartValidate } from '../elementStartValidate';
-import { ValidityError } from '../../error/ValidityError';
 import { validCodes } from '../../error/validCodes';
-import { ElDeclType, ElementContext, ValidateState } from '../../common/validateState';
+import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
 import { attributeValueValidate } from '../../common/attributeValueValidate';
@@ -38,7 +37,7 @@ jest.mock('../../common/attributeValueValidate');
 describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
    let elementStart: ElementStartPToken;
    let graph: CmGraph;
 
@@ -62,6 +61,7 @@ describe('elementStartValidate (unit)', () => {
          startId: 0,
          states: {
             '4': {
+               done: false,
                id: 4,
                trans: {
                   one: {
@@ -73,12 +73,11 @@ describe('elementStartValidate (unit)', () => {
                      stateId: 6,
                   },
                },
-               done: false,
             },
          },
       };
       const currentContext: ElementContext = {
-         declDetails: {
+         details: {
             graph,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
@@ -86,10 +85,11 @@ describe('elementStartValidate (unit)', () => {
          parentName: 'elementName',
          stateId: 4,
       };
-      state = new ValidateState({
-         elementDeclarations: {
+      state = new ValidityState({
+         elements: {
             elementName: {
                graph,
+               isExternalMarkupDeclaration: false,
                token: new ElementDeclarationPToken({
                   close: toSToken('>'),
                   declType: toSToken('ELEMENT'),
@@ -108,7 +108,7 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports an error when element is the first/root element, and it does not match the docType', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          docType: 'rootType',
       });
 
@@ -124,10 +124,11 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports no error when element is the first/root element, and it does match the docType', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          docType: 'elementName',
-         elementDeclarations: {
+         elements: {
             elementName: {
+               isExternalMarkupDeclaration: false,
                token: makeElementDeclaration(),
                type: ElDeclType.ANY,
             },
@@ -140,14 +141,15 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports no error when element is the first/root element, does not match the docType, but we are past the end', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          docType: 'bogusName',
          elementContext: {
             contextStack: [],
             pastEnd: true,
          },
-         elementDeclarations: {
+         elements: {
             elementName: {
+               isExternalMarkupDeclaration: false,
                token: makeElementDeclaration(),
                type: ElDeclType.ANY,
             },
@@ -160,11 +162,11 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports an error when element start is not a declared element (§3.0.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             ...state.elementContext,
             activeContext: {
-               declDetails: {
+               details: {
                   isExternalMarkupDeclaration: false,
                   token: elementDeclaration,
                   type: ElDeclType.ANY,
@@ -192,11 +194,11 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports an error when the context is MIXED, and the name is not a known name', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             ...state.elementContext,
             activeContext: {
-               declDetails: {
+               details: {
                   isExternalMarkupDeclaration: false,
                   names: ['foo'],
                   token: elementDeclaration,
@@ -221,11 +223,11 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports an error when the context is ELEMENT, and there is no transition from this state', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             ...state.elementContext,
             activeContext: {
-               declDetails: {
+               details: {
                   graph,
                   isExternalMarkupDeclaration: false,
                   token: elementDeclaration,
@@ -279,8 +281,8 @@ describe('elementStartValidate (unit)', () => {
 
    describe('attributes', () => {
       it('reports an error when an attribute has not been declared (§3.1.0)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {},
             },
          });
@@ -310,8 +312,8 @@ describe('elementStartValidate (unit)', () => {
 
       describe('ID (§3.3.1)', () => {
          it('reports an error when an ID attribute is not a name (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -348,8 +350,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports no error when an ID attribute is a name (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -361,7 +363,7 @@ describe('elementStartValidate (unit)', () => {
                      },
                   },
                },
-               elementDeclarations: {
+               elements: {
                   elementName: {
                      isExternalMarkupDeclaration: false,
                      token: makeElementDeclaration(),
@@ -387,8 +389,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports an error when an ID value has been used before (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -431,8 +433,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports an error when an ID value has been used twice in the same element (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -485,8 +487,8 @@ describe('elementStartValidate (unit)', () => {
 
       describe('IDREF (§3.3.1)', () => {
          it('reports an error when an IDREF attribute is not a name (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -523,8 +525,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports an error when an IDREFS attribute contains non-names (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -561,8 +563,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports no error when an IDREF attribute is a name (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -574,7 +576,7 @@ describe('elementStartValidate (unit)', () => {
                      },
                   },
                },
-               elementDeclarations: {
+               elements: {
                   elementName: {
                      isExternalMarkupDeclaration: false,
                      token: makeElementDeclaration(),
@@ -601,8 +603,8 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when a NMTOKEN value is empty (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -639,8 +641,8 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when a NMTOKENS value is empty (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -678,8 +680,8 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when a NMTOKENS value is not a name token (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -722,8 +724,8 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when a NMTOKENS value is not a name token, but trims leading and trailing whitespace when calculating that (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -797,8 +799,8 @@ describe('elementStartValidate (unit)', () => {
 
          describe(`${type} attribute type`, () => {
             beforeEach(() => {
-               state = new ValidateState({
-                  attributeDefs: {
+               state = new ValidityState({
+                  attributes: {
                      elementName: {
                         att1: {
                            def: {
@@ -898,9 +900,9 @@ describe('elementStartValidate (unit)', () => {
             });
 
             it(`reports no error when an ${type} value references an unparsed entity (§3.3.1)`, () => {
-               state = new ValidateState({
+               state = new ValidityState({
                   ...state,
-                  elementDeclarations: {
+                  elements: {
                      elementName: {
                         isExternalMarkupDeclaration: false,
                         token: makeElementDeclaration(),
@@ -937,9 +939,9 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when a required attribute is not specified (§3.3.2)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             ...state,
-            attributeDefs: {
+            attributes: {
                elementName: {
                   req1: {
                      def: {
@@ -951,7 +953,7 @@ describe('elementStartValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: {
+            elements: {
                elementName: {
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
@@ -985,9 +987,9 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when a required attribute is not specified, even when #REQUIRED has the wrong case (§3.3.2)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             ...state,
-            attributeDefs: {
+            attributes: {
                elementName: {
                   req1: {
                      def: {
@@ -999,7 +1001,7 @@ describe('elementStartValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: {
+            elements: {
                elementName: {
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
@@ -1033,9 +1035,9 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when a #FIXED attribute is not given that value (§3.3.2)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             ...state,
-            attributeDefs: {
+            attributes: {
                elementName: {
                   fixed1: {
                      def: {
@@ -1047,7 +1049,7 @@ describe('elementStartValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: {
+            elements: {
                elementName: {
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
@@ -1082,8 +1084,8 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports an error when an attribute is defaulted from an external ATTLIST declaration, and the document is standalone', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -1120,8 +1122,8 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports no error when an attribute is defaulted from an internal ATTLIST declaration, and the document is standalone', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -1132,7 +1134,7 @@ describe('elementStartValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: state.elementDeclarations,
+            elements: state.elements,
             isStandalone: true,
          });
          elementStart = new ElementStartPToken({
@@ -1153,8 +1155,8 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('reports no error when an attribute is defaulted from an external ATTLIST declaration, and the document is not standalone', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -1165,7 +1167,7 @@ describe('elementStartValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: state.elementDeclarations,
+            elements: state.elements,
             isStandalone: false,
          });
          elementStart = new ElementStartPToken({
@@ -1187,8 +1189,8 @@ describe('elementStartValidate (unit)', () => {
 
       describe('Notation Attributes (§3.3.1)', () => {
          it('reports an error when the value of a notation in the element start is not found in the ATTLIST declaration (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -1236,8 +1238,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports an error when the ATTLIST has no values in the enumeration (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -1274,8 +1276,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports no error when the value of a notation in the element start is found in the ATTLIST declaration (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -1296,7 +1298,7 @@ describe('elementStartValidate (unit)', () => {
                      },
                   },
                },
-               elementDeclarations: {
+               elements: {
                   elementName: {
                      isExternalMarkupDeclaration: false,
                      token: makeElementDeclaration(),
@@ -1323,8 +1325,8 @@ describe('elementStartValidate (unit)', () => {
 
       describe('Enumeration (§3.3.1)', () => {
          it('reports an error when the value of an enumeration in the element start is not found in the ATTLIST declaration (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -1371,8 +1373,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports no error when the ATTLIST has no enumeration (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -1385,7 +1387,7 @@ describe('elementStartValidate (unit)', () => {
                      },
                   },
                },
-               elementDeclarations: {
+               elements: {
                   elementName: {
                      isExternalMarkupDeclaration: false,
                      token: makeElementDeclaration(),
@@ -1410,8 +1412,8 @@ describe('elementStartValidate (unit)', () => {
          });
 
          it('reports no error when the value of a enumeration in the element start is found in the ATTLIST declaration (§3.3.1)', () => {
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -1431,7 +1433,7 @@ describe('elementStartValidate (unit)', () => {
                      },
                   },
                },
-               elementDeclarations: {
+               elements: {
                   elementName: {
                      isExternalMarkupDeclaration: false,
                      token: makeElementDeclaration(),
@@ -1458,8 +1460,8 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports an error if an attribute changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
-      state = new ValidateState({
-         attributeDefs: {
+      state = new ValidityState({
+         attributes: {
             elementName: {
                att1: {
                   def: {
@@ -1470,7 +1472,7 @@ describe('elementStartValidate (unit)', () => {
                },
             },
          },
-         elementDeclarations: state.elementDeclarations,
+         elements: state.elements,
          isStandalone: true,
       });
       elementStart = new ElementStartPToken({
@@ -1498,8 +1500,8 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports no error if an attribute changed through normalization, but the declaration was not external and the document is standalone (§2.9.0)', () => {
-      state = new ValidateState({
-         attributeDefs: {
+      state = new ValidityState({
+         attributes: {
             elementName: {
                att1: {
                   def: {
@@ -1510,7 +1512,7 @@ describe('elementStartValidate (unit)', () => {
                },
             },
          },
-         elementDeclarations: state.elementDeclarations,
+         elements: state.elements,
          isStandalone: true,
       });
       elementStart = new ElementStartPToken({
@@ -1532,8 +1534,8 @@ describe('elementStartValidate (unit)', () => {
    });
 
    it('reports no error if an attribute was not changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
-      state = new ValidateState({
-         attributeDefs: {
+      state = new ValidityState({
+         attributes: {
             elementName: {
                att1: {
                   def: {
@@ -1544,7 +1546,7 @@ describe('elementStartValidate (unit)', () => {
                },
             },
          },
-         elementDeclarations: state.elementDeclarations,
+         elements: state.elements,
          isStandalone: true,
       });
       elementStart = new ElementStartPToken({
@@ -1626,8 +1628,8 @@ describe('elementStartValidate (unit)', () => {
 
          it(testDescription, () => {
             const geDecl = makeGeneralEntityDeclaration();
-            state = new ValidateState({
-               attributeDefs: {
+            state = new ValidityState({
+               attributes: {
                   elementName: {
                      att1: {
                         def: {
@@ -1638,7 +1640,7 @@ describe('elementStartValidate (unit)', () => {
                      },
                   },
                },
-               elementDeclarations: {
+               elements: {
                   elementName: {
                      isExternalMarkupDeclaration: false,
                      token: makeElementDeclaration(),
@@ -1683,7 +1685,7 @@ describe('elementStartValidate (unit)', () => {
       });
 
       it('calls attributeValueValidate() for each attribute value (§4.1.0)', () => {
-         state = new ValidateState();
+         state = new ValidityState();
          elementStart = new ElementStartPToken({
             attributes: [
                {
@@ -1709,7 +1711,7 @@ describe('elementStartValidate (unit)', () => {
          const geDecl = makeGeneralEntityDeclaration();
          const end = makeGeneralEntityEnd();
          const start = makeGeneralEntityStart();
-         state = new ValidateState({
+         state = new ValidityState({
             generalEntities: {
                testRef: {
                   isExternalMarkupDeclaration: true,

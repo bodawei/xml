@@ -2,14 +2,14 @@ import { ElementDeclarationPToken, isContentModelP } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { makeCmGraph } from '../contentModel/makeCmGraph';
-import { ElDeclType, ValidateState } from '../common/validateState';
+import { ElDeclType, ValidityState } from '../common/validityState';
 
-import { DeclarationDetails } from '../common/validateState';
+import { ContentDetails } from '../common/validityState';
 
 function elementDeclarationPreprocess(
    elDecl: ElementDeclarationPToken,
-   state: ValidateState,
-): DeclarationDetails {
+   state: ValidityState,
+): ContentDetails {
    const names: Array<string> = [];
    let hasContentModel = false;
    let hasPcData = false;

@@ -2,12 +2,12 @@
 
 import { DocTypeEndPToken, DOCTYPE_START_PTOKEN } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function docTypeEndUpdateState(
    docTypeEndPToken: DocTypeEndPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    let newStack = state.dtdContext.enclosingStack;
 
    for (let index = state.dtdContext.enclosingStack.length - 1; index >= 0; index--) {

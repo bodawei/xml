@@ -4,11 +4,11 @@ import { ErrorCollector } from 'basic';
 import { ElementEndPToken } from 'token';
 
 import { validCodes } from '../error/validCodes';
-import { ElDeclType, ValidateState } from '../common/validateState';
+import { ElDeclType, ValidityState } from '../common/validityState';
 
 const VID = validCodes.id;
 
-function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: ErrorCollector): void {
+function elementEndValidate(el: ElementEndPToken, state: ValidityState, ec: ErrorCollector): void {
    const context = state.elementContext.activeContext;
 
    // if no context, then nothing to validate
@@ -16,13 +16,13 @@ function elementEndValidate(el: ElementEndPToken, state: ValidateState, ec: Erro
       return;
    }
 
-   const declDetails = context.declDetails;
+   const details = context.details;
 
-   if (declDetails.type !== ElDeclType.ELEMENT) {
+   if (details.type !== ElDeclType.ELEMENT) {
       return;
    }
 
-   const currentState = declDetails.graph.states[context.stateId];
+   const currentState = details.graph.states[context.stateId];
 
    // §3.0.0 Validity Constraint: Element Valid
    //     2. The declaration matches children and the sequence of child elements

@@ -8,19 +8,19 @@ import { ConditionalClosePToken } from 'token';
 import { makeConditionalSection, makeParameterEntityStart } from 'token-test';
 
 import { validCodes } from '../../error/validCodes';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { conditionalEndValidate } from '../conditionalEndValidate';
 
 const VID = validCodes.id;
 
 describe('conditionalEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
 
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
          },
@@ -47,7 +47,7 @@ describe('conditionalEndValidate (unit)', () => {
       const conditional = new ConditionalClosePToken({
          open: toSToken('<!['),
       });
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeConditionalSection()],
          },

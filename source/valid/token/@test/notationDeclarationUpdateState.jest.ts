@@ -4,14 +4,14 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeNotationDeclaration } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { notationDeclarationUpdateState } from '../notationDeclarationUpdateState';
 
 describe('notationDeclarationUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('adds a declaration to the state', () => {
@@ -20,8 +20,8 @@ describe('notationDeclarationUpdateState (unit)', () => {
       const result = notationDeclarationUpdateState(decl, state);
 
       expect(result).toEqual(
-         new ValidateState({
-            notationDeclarations: {
+         new ValidityState({
+            notations: {
                notationName: true,
             },
          }),

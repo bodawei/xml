@@ -5,14 +5,14 @@ import { describe, expect, it } from '@jest/globals';
 import { GeneralEntityDeclarationPToken } from 'pToken';
 import { makeGeneralEntityDeclaration } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { generalEntityDeclarationUpdateState } from '../generalEntityDeclarationUpdateState';
 
 describe('generalEntityDeclarationUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('adds a declaration to the state', () => {
@@ -21,7 +21,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
       const result = generalEntityDeclarationUpdateState(decl, state);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             generalEntities: {
                geDecl: {
                   isExternalMarkupDeclaration: false,
@@ -35,7 +35,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
 
    it('marks a declaration as isExternalMarkupDeclaration when the state is in external markup', () => {
       const decl = makeGeneralEntityDeclaration();
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [],
             inExternalMarkupContext: true,
@@ -45,7 +45,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
       const result = generalEntityDeclarationUpdateState(decl, state);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             dtdContext: {
                enclosingStack: [],
                inExternalMarkupContext: true,
@@ -69,7 +69,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
       const result = generalEntityDeclarationUpdateState(decl, state);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             generalEntities: {
                geDecl: {
                   isExternalMarkupDeclaration: false,
@@ -91,7 +91,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
       const result = generalEntityDeclarationUpdateState(decl2, state1);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             generalEntities: {
                geDecl: {
                   isExternalMarkupDeclaration: false,

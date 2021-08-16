@@ -3,18 +3,18 @@
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function notationDeclarationUpdateState(
    el: NotationDeclarationPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    const notationName = strOrBlank(el.name);
 
    return {
       ...state,
-      notationDeclarations: {
-         ...state.notationDeclarations,
+      notations: {
+         ...state.notations,
          [notationName]: true,
       },
    };

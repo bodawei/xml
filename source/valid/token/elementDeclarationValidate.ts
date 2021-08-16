@@ -21,7 +21,7 @@ import {
 import { strOrBlank } from 'sToken';
 
 import { validCodes } from '../error/validCodes';
-import { DeclarationDetails, ElDeclType, ValidateState } from '../common/validateState';
+import { ContentDetails, ElDeclType, ValidityState } from '../common/validityState';
 
 const EID = error.id;
 const VID = validCodes.id;
@@ -53,7 +53,7 @@ function getElementNames(contentModel: ContentModelP): Array<string> {
 function validateEntities(
    elDecl: ElementDeclarationPToken,
    elName: string,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
    version: ConformanceVersion,
 ): void {
@@ -174,13 +174,13 @@ function validateEntities(
 
 function elementDeclarationValidate(
    elDecl: ElementDeclarationPToken,
-   declInfo: DeclarationDetails,
-   state: ValidateState,
+   declInfo: ContentDetails,
+   state: ValidityState,
    ec: ErrorCollector,
-   version: ConformanceVersion,
 ): void {
    const openSToken = elDecl.open;
    const elName = strOrBlank(elDecl.name);
+   const version = state.confVer;
 
    // §3.2.0: Validity constraint: Unique Element Type Declaration
    //    An element type must not be declared more than once.
@@ -199,7 +199,7 @@ function elementDeclarationValidate(
    }
 
    ec.setPos(elDecl.name);
-   ec.check(state.elementDeclarations[elName], VID.ELEMENT_XTRA_DECLARATION, [elName]);
+   ec.check(state.elements[elName], VID.ELEMENT_XTRA_DECLARATION, [elName]);
 
    if (!elDecl.contentModel) {
       return;
@@ -211,7 +211,7 @@ function elementDeclarationValidate(
    ec.setPos(elDecl.contentModel.open);
 
    for (const name of contentNames) {
-      if (!state.elementDeclarations[name] && name !== elName) {
+      if (!state.elements[name] && name !== elName) {
          undeclaredNames.push(name);
       }
    }

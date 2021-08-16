@@ -12,21 +12,21 @@ import {
 } from 'token-test';
 
 import { attributeValueValidate } from '../attributeValueValidate';
-import { ValidateState } from '../validateState';
+import { ValidityState } from '../validityState';
 import { validCodes } from '../../error/validCodes';
 
 const VID = validCodes.id;
 
 describe('attributeValueValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
    });
 
    it('reports no error when the declaration is defined (§4.1.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             testRef: {
                isExternalMarkupDeclaration: false,
@@ -43,7 +43,7 @@ describe('attributeValueValidate (unit)', () => {
 
    it('reports an error when a general entity start references a declaration is not declared and the doc has an external subset (§4.1.0)', () => {
       const ref = makeGeneralEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,
@@ -67,7 +67,7 @@ describe('attributeValueValidate (unit)', () => {
 
    it('reports an error when a general entity start references a declaration is not declared and the doc has perefs (§4.1.0)', () => {
       const ref = makeGeneralEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,
@@ -91,7 +91,7 @@ describe('attributeValueValidate (unit)', () => {
 
    it('reports no error when the declaration is not declared and standalone is yes (§4.1.0)', () => {
       const ref = makeGeneralEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,
@@ -112,7 +112,7 @@ describe('attributeValueValidate (unit)', () => {
          name: toSToken('amp'),
          open: toSToken('&'),
       });
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             amp: {
                isExternalMarkupDeclaration: false,
@@ -133,7 +133,7 @@ describe('attributeValueValidate (unit)', () => {
          name: toSToken('lt'),
          open: toSToken('&'),
       });
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,

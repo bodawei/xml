@@ -18,18 +18,18 @@ import {
 
 import { validCodes } from '../error/validCodes';
 import { isXmlData } from './isXmlData';
-import { ElDeclType, ValidateState } from './validateState';
+import { ElDeclType, ValidityState } from './validityState';
 
 const VID = validCodes.id;
 const S_REGEXP = /^[\t\n\r ]*$/;
 
-function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorCollector): void {
-   const declDetails = state.elementContext.activeContext?.declDetails;
+function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorCollector): void {
+   const details = state.elementContext.activeContext?.details;
    const isXml = isXmlData(token);
    const ver = state.confVer.version;
    const ed = state.confVer.edition;
 
-   if (declDetails?.type === ElDeclType.EMPTY) {
+   if (details?.type === ElDeclType.EMPTY) {
       // §3.0.0 Validity Constraint: Element Valid
       //     1.0/1-2: 1. The declaration matches EMPTY and the element has no content.
       //     Other: The declaration matches EMPTY and the element has no content (not
@@ -38,10 +38,10 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
       ec.check(
          isXml && token.type !== ELEMENT_END_PTOKEN,
          VID.CONTENTEMPTY_INVALID_SYNTAX,
-         [strOrBlank(declDetails.token.name)],
+         [strOrBlank(details.token.name)],
          getFirstSToken(token),
       );
-   } else if (declDetails?.type === ElDeclType.ELEMENT) {
+   } else if (details?.type === ElDeclType.ELEMENT) {
       // §3.0.0 Validity Constraint: Element Valid
       //     1.0/1: ...with optional white space (characters matching the nonterminal S)
       //         between each pair of child elements.
@@ -93,14 +93,14 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
             isWhitespace &&
             !state.elementContext.activeContext?.lastToken,
          VID.CONTENTELEMENT_XTRA_SPACE,
-         [strOrBlank(declDetails.token.name)],
+         [strOrBlank(details.token.name)],
          getFirstSToken(token),
       );
 
       ec.check(
          isXml && !okType,
          VID.CONTENTELEMENT_INVALID_SYNTAX,
-         [strOrBlank(declDetails.token.name), String(ver), String(ed), token.type],
+         [strOrBlank(details.token.name), String(ver), String(ed), token.type],
          getFirstSToken(token),
       );
 
@@ -119,7 +119,7 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
       ) {
          ec.report(VID.CONTENTELEMENT_XTRA_SPACE, [strOrBlank(token.name)], lastToken.text);
       }
-   } else if (declDetails?.type === ElDeclType.MIXED || declDetails?.type === ElDeclType.ANY) {
+   } else if (details?.type === ElDeclType.MIXED || details?.type === ElDeclType.ANY) {
       // §3.0.0 Validity Constraint: Element Valid
       //    For Mixed
       //    1.0/1: The declaration matches Mixed and the content consists of
@@ -167,10 +167,10 @@ function contentValidate(token: ParseToken, state: ValidateState, ec: ErrorColle
 
       ec.check(
          isXml && !okType,
-         declDetails.type === ElDeclType.MIXED
+         details.type === ElDeclType.MIXED
             ? VID.CONTENTMIXED_INVALID_SYNTAX
             : VID.CONTENTANY_INVALID_SYNTAX,
-         [strOrBlank(declDetails.token.name), String(ver), String(ed), token.type],
+         [strOrBlank(details.token.name), String(ver), String(ed), token.type],
          getFirstSToken(token),
       );
    }

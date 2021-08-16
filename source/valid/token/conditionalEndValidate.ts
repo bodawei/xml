@@ -4,13 +4,13 @@ import { ErrorCollector } from 'basic';
 import { ConditionalClosePToken, CONDITIONAL_PTOKEN } from 'token';
 
 import { validCodes } from '../error/validCodes';
-import { ValidateState } from '../validateState';
+import { ValidityState } from '../common/validityState';
 
 const VID = validCodes.id;
 
 function conditionalEndValidate(
    token: ConditionalClosePToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    ec.setPos(token.open);

@@ -9,19 +9,21 @@ import {
    makeParameterEntityStart,
 } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { conditionalEndUpdateState } from '../conditionalEndUpdateState';
 
 describe('conditionalEndUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {});
 
    it('removes back to before the start of the conditional section', () => {
       const start = makeDocTypeStart();
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart(), makeConditionalSection(), start],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
 
@@ -38,9 +40,11 @@ describe('conditionalEndUpdateState (unit)', () => {
    });
 
    it('does not change the enclosingStack state property if there is no start in the stack', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
 

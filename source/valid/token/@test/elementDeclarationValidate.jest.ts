@@ -14,7 +14,7 @@ import {
 import { toSToken } from 'sToken';
 
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
-import { DeclarationDetails, ElDeclType, ValidateState } from '../../common/validateState';
+import { ContentDetails, ElDeclType, ValidityState } from '../../common/validityState';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 import { validCodes } from '../../error/validCodes';
@@ -25,14 +25,13 @@ const VID = validCodes.id;
 describe('elementDeclarationValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
-   let version: ConformanceVersion;
+   let state: ValidityState;
    let peDecl: ParameterEntityDeclarationPToken;
    let peRefEmpty: ParameterEntityReferencePToken;
    let peRefX: ParameterEntityReferencePToken;
    let peRefDelimiter: ParameterEntityReferencePToken;
    let textClose: TextPToken;
-   let childrenDetails: DeclarationDetails;
+   let childrenDetails: ContentDetails;
 
    beforeEach(() => {
       peDecl = new ParameterEntityDeclarationPToken({ open: toSToken('<!') });
@@ -61,27 +60,30 @@ describe('elementDeclarationValidate (unit)', () => {
       });
       childrenDetails = {
          graph: { endId: 0, startId: 0, states: {} },
+         isExternalMarkupDeclaration: false,
          token: elementDeclaration,
          type: ElDeclType.ELEMENT,
       };
-      version = new ConformanceVersion();
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             contextStack: [],
             pastEnd: false,
          },
          parameterEntities: {
             close: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken(')') })],
                token: peDecl,
             },
             delimiter: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('|') })],
                token: peDecl,
             },
             empty: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('') })],
                token: peDecl,
@@ -108,12 +110,12 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       // @ts-expect-error 2329/matchers
@@ -142,12 +144,12 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -171,25 +173,27 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
    it('reports an error if there is more than one ELEMENT declaration for the same element type', () => {
-      state.elementDeclarations.elementName = {
+      state.elements.elementName = {
+         isExternalMarkupDeclaration: false,
          token: elementDeclaration,
          type: ElDeclType.ANY,
       };
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             token: new ElementDeclarationPToken({
                close: toSToken('>'),
                declType: toSToken('ELEMENT'),
@@ -200,7 +204,6 @@ describe('elementDeclarationValidate (unit)', () => {
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       // @ts-expect-error 2329/matchers
@@ -239,12 +242,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       // @ts-expect-error 2329/matchers
@@ -282,13 +285,13 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             names: [],
             token: elementDeclaration,
             type: ElDeclType.MIXED,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       // @ts-expect-error 2329/matchers
@@ -335,13 +338,7 @@ describe('elementDeclarationValidate (unit)', () => {
          open: toSToken('<!'),
       });
 
-      elementDeclarationValidate(
-         elementDeclaration,
-         childrenDetails,
-         state,
-         mockErrorCollector,
-         version,
-      );
+      elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
@@ -363,13 +360,13 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             names: [],
             token: elementDeclaration,
             type: ElDeclType.MIXED,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -390,13 +387,13 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             names: [],
             token: elementDeclaration,
             type: ElDeclType.MIXED,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -413,13 +410,13 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             names: ['foo', 'bar', 'baz', 'foo', 'bar'],
             token: elementDeclaration,
             type: ElDeclType.MIXED,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       // @ts-expect-error 2329/matchers
@@ -442,7 +439,7 @@ describe('elementDeclarationValidate (unit)', () => {
          name: toSToken('elementName'),
          open: toSToken('<!'),
       });
-      const declDetails: DeclarationDetails = {
+      const details: ContentDetails = {
          graph: {
             endId: 1,
             startId: 0,
@@ -499,17 +496,12 @@ describe('elementDeclarationValidate (unit)', () => {
                },
             },
          },
+         isExternalMarkupDeclaration: false,
          token: elementDeclaration,
          type: ElDeclType.ELEMENT,
       };
 
-      elementDeclarationValidate(
-         elementDeclaration,
-         declDetails,
-         state,
-         mockErrorCollector,
-         version,
-      );
+      elementDeclarationValidate(elementDeclaration, details, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
@@ -531,9 +523,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('(') })],
                token: peDecl,
@@ -541,13 +534,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
       });
 
-      elementDeclarationValidate(
-         elementDeclaration,
-         childrenDetails,
-         state,
-         mockErrorCollector,
-         version,
-      );
+      elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportValidityError({
@@ -569,9 +556,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
                replacementText: [
                   new TextPToken({ text: toSToken('( foo | bar | ( baz | ginger))') }),
@@ -585,12 +573,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -607,9 +595,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('( foo | ( bar )') })],
                token: peDecl,
@@ -620,13 +609,13 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             names: [],
             token: elementDeclaration,
             type: ElDeclType.MIXED,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       // @ts-expect-error 2329/matchers
@@ -649,9 +638,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX, textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
                replacementText: [
                   new CharRefPToken({ digits: toSToken('65'), open: toSToken('&#') }),
@@ -666,12 +656,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       // @ts-expect-error 2329/matchers
@@ -694,9 +684,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX, textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: true,
                replacementText: [new TextPToken({ text: toSToken('   ') })],
                token: peDecl,
@@ -704,13 +695,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
       });
 
-      elementDeclarationValidate(
-         elementDeclaration,
-         childrenDetails,
-         state,
-         mockErrorCollector,
-         version,
-      );
+      elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
@@ -732,9 +717,11 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX, textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
+         confVer: new ConformanceVersion(1, 1),
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('   ') })],
                token: peDecl,
@@ -742,13 +729,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
       });
 
-      elementDeclarationValidate(
-         elementDeclaration,
-         childrenDetails,
-         state,
-         mockErrorCollector,
-         new ConformanceVersion(1, 1),
-      );
+      elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).not.toReportWarning({
@@ -774,9 +755,11 @@ describe('elementDeclarationValidate (unit)', () => {
       elementDeclarationValidate(
          elementDeclaration,
          childrenDetails,
-         state,
+         {
+            ...state,
+            confVer: new ConformanceVersion(1, 1),
+         },
          mockErrorCollector,
-         new ConformanceVersion(1, 1),
       );
 
       // @ts-expect-error 2329/matchers
@@ -799,9 +782,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX, textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [
                   new ParameterEntityReferencePToken({
@@ -820,12 +804,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -842,9 +826,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [new TextPToken({ text: toSToken('(') }), peRefX],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('()') })],
                token: peDecl,
@@ -856,12 +841,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -883,12 +868,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -905,9 +890,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX, new TextPToken({ text: toSToken('(') }), textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('  ') })], // note this would be an error if in the content model
                token: peDecl,
@@ -919,12 +905,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -941,9 +927,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX, new TextPToken({ text: toSToken('(') }), textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken(')') })],
                token: peDecl,
@@ -955,12 +942,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -977,9 +964,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [new TextPToken({ text: toSToken('(') }), peRefX, textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('foo') })],
                token: peDecl,
@@ -991,12 +979,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -1013,9 +1001,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [new TextPToken({ text: toSToken('(') }), peRefX, textClose],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('  ') })],
                token: peDecl,
@@ -1023,13 +1012,7 @@ describe('elementDeclarationValidate (unit)', () => {
          },
       });
 
-      elementDeclarationValidate(
-         elementDeclaration,
-         childrenDetails,
-         state,
-         mockErrorCollector,
-         version,
-      );
+      elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
@@ -1051,9 +1034,10 @@ describe('elementDeclarationValidate (unit)', () => {
             tokens: [peRefX, peRefDelimiter],
          },
       });
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             x: {
+               isExternalMarkupDeclaration: false,
                isInternalValue: false,
                replacementText: [new TextPToken({ text: toSToken('  ') })],
                token: peDecl,
@@ -1065,12 +1049,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);
@@ -1092,12 +1076,12 @@ describe('elementDeclarationValidate (unit)', () => {
          elementDeclaration,
          {
             graph: { endId: 0, startId: 0, states: {} },
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
          state,
          mockErrorCollector,
-         version,
       );
 
       expect(mockErrorCollector.errors).toEqual([]);

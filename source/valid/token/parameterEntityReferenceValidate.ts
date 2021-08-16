@@ -5,13 +5,13 @@ import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 const VID = validCodes.id;
 
 function parameterEntityReferenceValidate(
    token: ParameterEntityReferencePToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const peDeclName = strOrBlank(token.name);

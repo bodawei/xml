@@ -4,12 +4,12 @@ import { GeneralEntityDeclarationPToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } fro
 import { strOrBlank } from 'sToken';
 import { PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function generalEntityDeclarationUpdateState(
    el: GeneralEntityDeclarationPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    const elName = strOrBlank(el.name);
 
    const replacementText = el.value;

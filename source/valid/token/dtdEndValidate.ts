@@ -4,7 +4,7 @@ import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { WordListPToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
@@ -13,7 +13,7 @@ function notationValidate(
    enumeration: WordListPToken | undefined,
    elName: string,
    attName: string,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    if (!enumeration) {
@@ -26,7 +26,7 @@ function notationValidate(
       // §3.3.1: Notation Attributes
       //    ...all notation names in the declaration must be declared.
       ec.check(
-         !state.notationDeclarations[wordStr],
+         !state.notations[wordStr],
          VID.ATTLISTDECL_ATT_NOTATION_NO_DECLARATION,
          [elName, attName, wordStr],
          wordEntry.word,
@@ -34,12 +34,12 @@ function notationValidate(
    }
 }
 
-function attListValidate(state: ValidateState, ec: ErrorCollector): void {
-   const attlists = Object.entries(state.attributeDefs);
+function attListValidate(state: ValidityState, ec: ErrorCollector): void {
+   const attlists = Object.entries(state.attributes);
    const isVer1Ed1 = state.confVer.version !== 1.1 && state.confVer.edition === 1;
 
    for (const [elName, allAtts] of attlists) {
-      const elementDetails = state.elementDeclarations[elName];
+      const elementDetails = state.elements[elName];
       const elType = strOrBlank(elementDetails?.token.contentSpec);
       const elementIsEmpty = elType.toLocaleLowerCase() === 'empty';
       let seenNotationAttr = false;
@@ -93,7 +93,7 @@ function attListValidate(state: ValidateState, ec: ErrorCollector): void {
    }
 }
 
-function dtdEndValidate(state: ValidateState, ec: ErrorCollector): void {
+function dtdEndValidate(state: ValidityState, ec: ErrorCollector): void {
    attListValidate(state, ec);
 
    const generalEntityDetails = Object.entries(state.generalEntities);
@@ -102,7 +102,7 @@ function dtdEndValidate(state: ValidateState, ec: ErrorCollector): void {
       const nDataName = strOrBlank(info?.token.nDataName);
 
       if (nDataName !== '') {
-         const notationDeclared = state.notationDeclarations[nDataName];
+         const notationDeclared = state.notations[nDataName];
 
          ec.setPos(info?.token.name);
          ec.setPos(info?.token.nDataName);

@@ -7,19 +7,19 @@ import { ElementStartPToken, ElementEmptyPToken, ELEMENT_EMPTY_PTOKEN } from 'to
 import {
    ElementContext,
    ElDeclType,
-   ValidateState,
-   ValidateStateProps,
-} from '../common/validateState';
+   ValidityState,
+   ValidityStateProps,
+} from '../common/validityState';
 
 function updateFromAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
-   state: ValidateState,
-): ValidateStateProps {
+   state: ValidityState,
+): ValidityStateProps {
    const ids = { ...state.ids };
    const idRefs = { ...state.idRefs };
 
    const elName = strOrBlank(el.name);
-   const attDefs = state.attributeDefs[elName];
+   const attDefs = state.attributes[elName];
 
    if (!attDefs) {
       return { idRefs, ids };
@@ -69,11 +69,11 @@ function updateFromAttributes(
    };
 }
 
-function updateCurrentElContext(elName: string, state: ValidateState): ValidateState {
+function updateCurrentElContext(elName: string, state: ValidityState): ValidityState {
    const activeContext = state.elementContext.activeContext;
 
-   if (activeContext?.declDetails.type === ElDeclType.ELEMENT) {
-      const currentState = activeContext.declDetails.graph.states[activeContext.stateId];
+   if (activeContext?.details.type === ElDeclType.ELEMENT) {
+      const currentState = activeContext.details.graph.states[activeContext.stateId];
       const destState = currentState.trans[elName];
 
       if (destState) {
@@ -98,11 +98,11 @@ function updateCurrentElContext(elName: string, state: ValidateState): ValidateS
 
 function elementStartUpdateState(
    el: ElementStartPToken | ElementEmptyPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    const elName = strOrBlank(el.name);
-   const declDetails = state.elementDeclarations[elName];
-   const newState: ValidateState = updateCurrentElContext(elName, state);
+   const details = state.elements[elName];
+   const newState: ValidityState = updateCurrentElContext(elName, state);
    let context: ElementContext;
    let elementContext = newState.elementContext;
 
@@ -117,17 +117,17 @@ function elementStartUpdateState(
          };
       }
    } else {
-      if (declDetails) {
+      if (details) {
          context = {
-            declDetails,
+            details,
             lastToken: undefined,
             parentName: elName,
-            stateId: declDetails.type === ElDeclType.ELEMENT ? declDetails.graph.startId : 0,
+            stateId: details.type === ElDeclType.ELEMENT ? details.graph.startId : 0,
          };
       } else {
          // @@@@ this seems like we should be reporting an error here.  What error is that?
          context = {
-            declDetails: {
+            details: {
                isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
                // Add a dummy declaration to keep the types happy.
                token: new ElementDeclarationPToken({

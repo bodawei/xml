@@ -6,7 +6,7 @@ import { MockErrorCollector } from 'basic-test';
 import { makeElementDeclaration } from 'token-test';
 
 import { charDataValidate } from '../charDataValidate';
-import { ElDeclType, ValidateState } from '../../common/validateState';
+import { ElDeclType, ValidityState } from '../../common/validityState';
 import { CharDataPToken } from 'token';
 import { toSToken } from 'sToken';
 import { validCodes } from '../../error/validCodes';
@@ -15,7 +15,7 @@ const VID = validCodes.id;
 
 describe('charDataValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
@@ -50,10 +50,10 @@ describe('charDataValidate (unit)', () => {
       } standalone and the enclosing element was${
          isExternalMarkupDeclaration ? '' : ' not'
       } externally declared`, () => {
-         state = new ValidateState({
+         state = new ValidityState({
             elementContext: {
                activeContext: {
-                  declDetails: {
+                  details: {
                      graph: { endId: 0, startId: 0, states: {} },
                      isExternalMarkupDeclaration,
                      token: makeElementDeclaration(),
@@ -87,10 +87,10 @@ describe('charDataValidate (unit)', () => {
    });
 
    it('reports no error when the charData token has only S characters in it', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   graph: { endId: 0, startId: 0, states: {} },
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
@@ -112,10 +112,10 @@ describe('charDataValidate (unit)', () => {
    });
 
    it('reports no error when the charData token has non-S characters in it but we are not in element content', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
                   type: ElDeclType.ANY,

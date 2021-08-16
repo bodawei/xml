@@ -2,12 +2,12 @@
 
 import { ConditionalPToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function conditionalStartUpdateState(
    token: ConditionalPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    return {
       ...state,
       dtdContext: {

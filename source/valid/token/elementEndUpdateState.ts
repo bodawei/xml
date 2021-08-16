@@ -3,9 +3,9 @@
 import { strOrBlank } from 'sToken';
 import { ElementEndPToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
-function elementEndUpdateState(el: ElementEndPToken, state: ValidateState): ValidateState {
+function elementEndUpdateState(el: ElementEndPToken, state: ValidityState): ValidityState {
    const elName = strOrBlank(el.name);
    const context = state.elementContext.activeContext;
 

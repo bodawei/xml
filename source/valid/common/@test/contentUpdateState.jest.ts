@@ -31,7 +31,7 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
-import { ElDeclType, ValidateState } from '../validateState';
+import { ElDeclType, ValidityState } from '../validityState';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
 import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { contentUpdateState } from '../contentUpdateState';
@@ -74,10 +74,10 @@ describe('contentUpdateState (unit)', () => {
       it(`${updates ? 'adds' : 'does not add'} a token to the state for ${
          token.type
       } tokens (§3.0.0)`, () => {
-         const state = new ValidateState({
+         const state = new ValidityState({
             elementContext: {
                activeContext: {
-                  declDetails: {
+                  details: {
                      graph: makeCmGraph(new ContentModelP()),
                      isExternalMarkupDeclaration: false,
                      token: new ElementDeclarationPToken({
@@ -105,10 +105,10 @@ describe('contentUpdateState (unit)', () => {
    });
 
    it('does not update the state if this is not an ELEMENT type (§3.0.0)', () => {
-      const state = new ValidateState({
+      const state = new ValidityState({
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   isExternalMarkupDeclaration: false,
                   token: new ElementDeclarationPToken({
                      open: toSToken('<!'),

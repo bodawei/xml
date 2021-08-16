@@ -3,14 +3,14 @@
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { AttributeDefs, ValidateState } from '../common/validateState';
+import { AttributeDetails, ValidityState } from '../common/validityState';
 
 function attListDeclarationUpdateState(
    el: AttListDeclarationPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    const elName = strOrBlank(el.elementName);
-   const defs: AttributeDefs = state.attributeDefs[elName] || {};
+   const defs: AttributeDetails = state.attributes[elName] || {};
 
    for (const def of el.attDefs) {
       const attName = strOrBlank(def.name);
@@ -25,8 +25,8 @@ function attListDeclarationUpdateState(
 
    return {
       ...state,
-      attributeDefs: {
-         ...state.attributeDefs,
+      attributes: {
+         ...state.attributes,
          [elName]: defs,
       },
    };

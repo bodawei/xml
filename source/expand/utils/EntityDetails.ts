@@ -161,7 +161,7 @@ class EntityDetails {
    public loadingEntity(
       declaration: ParameterEntityDeclarationPToken | GeneralEntityDeclarationPToken,
    ): void {
-      const details = this.getDeclarationDetails(declaration);
+      const details = this.getContentDetails(declaration);
 
       if (!details) {
          throw new Error(
@@ -176,7 +176,7 @@ class EntityDetails {
       declaration: ParameterEntityDeclarationPToken | GeneralEntityDeclarationPToken,
       callback: LoadingCallback,
    ): void {
-      const details = this.getDeclarationDetails(declaration);
+      const details = this.getContentDetails(declaration);
 
       if (!details || !details.isLoading) {
          setTimeout(() => callback({ details, byproducts: [] }), 0);
@@ -191,7 +191,7 @@ class EntityDetails {
       newValue: EntityValuePToken | undefined,
       byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>,
    ): void {
-      const details = this.getDeclarationDetails(declaration);
+      const details = this.getContentDetails(declaration);
 
       if (!details) {
          throw new Error('Internal error: A value was loaded for an unknown entity.');
@@ -255,7 +255,7 @@ class EntityDetails {
       return this.peDetails[name];
    }
 
-   private getDeclarationDetails(
+   private getContentDetails(
       reference: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
    ): PrivateGEDetails | PrivatePEDetails | undefined {
       const isPERef = reference instanceof ParameterEntityDeclarationPToken;

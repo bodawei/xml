@@ -3,12 +3,12 @@
 import { strOrBlank } from 'sToken';
 import { DocTypeStartPToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function docTypeStartUpdateState(
    docTypePToken: DocTypeStartPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    const docTypeName = strOrBlank(docTypePToken.name);
 
    return {

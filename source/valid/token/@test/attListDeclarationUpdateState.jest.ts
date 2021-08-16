@@ -6,14 +6,14 @@ import { AttListDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { makeAttListDeclaration } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { attListDeclarationUpdateState } from '../attListDeclarationUpdateState';
 
 describe('attListDeclarationUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('adds attributes from the ATTLIST declaration into the state', () => {
@@ -23,7 +23,7 @@ describe('attListDeclarationUpdateState (unit)', () => {
 
       expect(newState).toEqual({
          ...state,
-         attributeDefs: {
+         attributes: {
             elStart: {
                att1: {
                   def: attListDecl.attDefs[0],
@@ -46,7 +46,7 @@ describe('attListDeclarationUpdateState (unit)', () => {
 
       expect(newState).toEqual({
          ...state,
-         attributeDefs: {
+         attributes: {
             elStart: {
                bar: {
                   def: def2,
@@ -79,7 +79,7 @@ describe('attListDeclarationUpdateState (unit)', () => {
 
       expect(newState).toEqual({
          ...state,
-         attributeDefs: {
+         attributes: {
             elStart: {
                bar: {
                   def: def2,
@@ -106,7 +106,7 @@ describe('attListDeclarationUpdateState (unit)', () => {
       const attListDeclTwo = new AttListDeclarationPToken(second, {
          attDefs: [def1b, def2],
       });
-      const firstState = new ValidateState({
+      const firstState = new ValidityState({
          ...state,
          dtdContext: {
             ...state.dtdContext,
@@ -114,7 +114,7 @@ describe('attListDeclarationUpdateState (unit)', () => {
          },
       });
       const secondState = attListDeclarationUpdateState(attListDecl, firstState);
-      const thirdState = new ValidateState({
+      const thirdState = new ValidityState({
          ...secondState,
          dtdContext: {
             ...secondState.dtdContext,
@@ -126,7 +126,7 @@ describe('attListDeclarationUpdateState (unit)', () => {
 
       expect(newState).toEqual({
          ...state,
-         attributeDefs: {
+         attributes: {
             elStart: {
                bar: {
                   def: attListDeclTwo.attDefs[1],

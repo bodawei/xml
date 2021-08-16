@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 
 import { entityDeclarationValidate } from '../entityDeclarationValidate';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { validCodes } from '../../error/validCodes';
 import { GeneralEntityDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -17,11 +17,11 @@ jest.mock('../../common/entityDeclarationValueValidate');
 
 describe('entityDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    describe('Proper Declaration/PE Nesting (§2.8.0)', () => {

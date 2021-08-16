@@ -4,14 +4,14 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeExternalSubsetStart } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { externalSubsetStartUpdateState } from '../externalSubsetStartUpdateState';
 
 describe('externalSubsetStartUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('sets inExternalSubset to true when called with the subset start token', () => {

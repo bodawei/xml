@@ -6,29 +6,30 @@ import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
-import { ElDeclType, ElementContext, ValidateState } from '../../common/validateState';
+import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { elementEndUpdateState } from '../elementEndUpdateState';
 
 describe('elementEndUpdateState (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let elementEnd: ElementEndPToken;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
       elementEnd = new ElementEndPToken({
-         open: toSToken('</'),
-         name: toSToken('elementName'),
          close: toSToken('>'),
+         name: toSToken('elementName'),
+         open: toSToken('</'),
       });
       elementDeclaration = new ElementDeclarationPToken({
-         open: toSToken('<!'),
+         close: toSToken('>'),
          declType: toSToken('ELEMENT'),
          name: toSToken('elementName'),
-         close: toSToken('>'),
+         open: toSToken('<!'),
       });
-      state = new ValidateState({
-         elementDeclarations: {
+      state = new ValidityState({
+         elements: {
             elementName: {
+               isExternalMarkupDeclaration: false,
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
@@ -38,7 +39,8 @@ describe('elementEndUpdateState (unit)', () => {
 
    it('removes the context from the stack if the name matches', () => {
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
@@ -46,24 +48,26 @@ describe('elementEndUpdateState (unit)', () => {
          stateId: 0,
       };
       const otherContext: ElementContext = {
-         declDetails: {
+         details: {
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
          parentName: 'elementName',
          stateId: 0,
       };
-      state = new ValidateState({
-         elementDeclarations: {
+      state = new ValidityState({
+         elementContext: {
+            activeContext: otherContext,
+            contextStack: [expectedContext, otherContext],
+            pastEnd: false,
+         },
+         elements: {
             elementName: {
+               isExternalMarkupDeclaration: false,
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
-         },
-         elementContext: {
-            contextStack: [expectedContext, otherContext],
-            activeContext: otherContext,
-            pastEnd: false,
          },
       });
 
@@ -81,23 +85,23 @@ describe('elementEndUpdateState (unit)', () => {
 
    it('marks the document as done and emppties the active context if this ends the topmost context', () => {
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
             token: elementDeclaration,
             type: ElDeclType.ANY,
          },
          parentName: 'elementName',
          stateId: 0,
       };
-      state = new ValidateState({
-         elementDeclarations: {
+      state = new ValidityState({
+         elements: {
             elementName: {
                token: elementDeclaration,
                type: ElDeclType.ANY,
             },
          },
          elementContext: {
-            contextStack: [expectedContext],
             activeContext: expectedContext,
+            contextStack: [expectedContext],
             pastEnd: false,
          },
       });
@@ -107,8 +111,8 @@ describe('elementEndUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            contextStack: [],
             activeContext: undefined,
+            contextStack: [],
             pastEnd: true,
          },
       });
@@ -122,7 +126,7 @@ describe('elementEndUpdateState (unit)', () => {
 
    it('changes nothing if the end does not match the context on the stack', () => {
       const currentContext: ElementContext = {
-         declDetails: {
+         details: {
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
             graph: { startId: 9, endId: 10, states: {} },
@@ -130,8 +134,8 @@ describe('elementEndUpdateState (unit)', () => {
          parentName: 'elementName',
          stateId: 9,
       };
-      state = new ValidateState({
-         elementDeclarations: {
+      state = new ValidityState({
+         elements: {
             elementName: {
                token: elementDeclaration,
                type: ElDeclType.ELEMENT,
@@ -139,8 +143,8 @@ describe('elementEndUpdateState (unit)', () => {
             },
          },
          elementContext: {
-            contextStack: [currentContext],
             activeContext: currentContext,
+            contextStack: [currentContext],
             pastEnd: false,
          },
       });

@@ -8,21 +8,21 @@ import { toSToken } from 'sToken';
 import { makeGeneralEntityDeclaration, makeGeneralEntityReference } from 'token-test';
 
 import { generalEntityReferenceValidate } from '../generalEntityReferenceValidate';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { validCodes } from '../../error/validCodes';
 
 const VID = validCodes.id;
 
 describe('generalEntityReferenceValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
    });
 
    it('reports no error when the declaration is defined', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             testRef: {
                isExternalMarkupDeclaration: false,
@@ -39,7 +39,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
    it('reports no error when the declaration is not defined and standalone is set', () => {
       const ref = makeGeneralEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,
@@ -57,7 +57,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
    it('reports no error when the declaration is not defined and there is no external subset or perefs', () => {
       const ref = makeGeneralEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,
@@ -77,7 +77,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
    it('reports an error when the declaration is not defined and there is an external subset', () => {
       const ref = makeGeneralEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,
@@ -101,7 +101,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
 
    it('reports an error when the declaration is not defined and there is are PE refs', () => {
       const ref = makeGeneralEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,
@@ -128,7 +128,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
          name: toSToken('amp'),
          open: toSToken('&'),
       });
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             amp: {
                isExternalMarkupDeclaration: false,
@@ -149,7 +149,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
          name: toSToken('lt'),
          open: toSToken('&'),
       });
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             frog: {
                isExternalMarkupDeclaration: false,

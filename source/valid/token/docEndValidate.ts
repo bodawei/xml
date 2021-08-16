@@ -2,12 +2,12 @@
 
 import { ErrorCollector } from 'basic';
 
-import { IdRefDetails, ValidateState } from '../common/validateState';
+import { IdRefDetails, ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
-function docEndValidate(state: ValidateState, ec: ErrorCollector): void {
+function docEndValidate(state: ValidityState, ec: ErrorCollector): void {
    const refValues = Object.keys(state.idRefs);
    const idvalues = Object.keys(state.ids);
    const idMap: Record<string, boolean> = {};

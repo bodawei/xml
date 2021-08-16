@@ -4,21 +4,21 @@ import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { CharDataPToken } from 'token';
 
-import { ElDeclType, ValidateState } from '../common/validateState';
+import { ElDeclType, ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
 const S_REGEXP = /^[\t\n\r ]*$/;
 
-function charDataValidate(token: CharDataPToken, state: ValidateState, ec: ErrorCollector): void {
+function charDataValidate(token: CharDataPToken, state: ValidityState, ec: ErrorCollector): void {
    if (
       !state.elementContext.activeContext ||
-      state.elementContext.activeContext.declDetails.type !== ElDeclType.ELEMENT
+      state.elementContext.activeContext.details.type !== ElDeclType.ELEMENT
    ) {
       return;
    }
-   const details = state.elementContext.activeContext.declDetails;
+   const details = state.elementContext.activeContext.details;
 
    ec.setPos(token.text);
 

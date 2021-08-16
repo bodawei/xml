@@ -10,7 +10,7 @@ import { SToken, strOrBlank } from 'sToken';
 import { ElidedEntityDeclarationPToken, PARAMETER_ENTITY_START_PTOKEN } from 'token';
 import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from './validateState';
+import { ValidityState } from './validityState';
 
 const VID = validCodes.id;
 
@@ -19,7 +19,7 @@ function entityDeclarationValueValidate(
       | ParameterEntityDeclarationPToken
       | GeneralEntityDeclarationPToken
       | ElidedEntityDeclarationPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const replacementText = el.value;

@@ -22,6 +22,14 @@ function gatherStreamResults<ElemenType>(
    });
 }
 
+// declare global {
+//    namespace jasmine {
+//       interface Matchers<T> {
+//          toReportValidityError(errorProps: ErrorProps): void;
+//       }
+//    }
+// }
+
 export {
    gatherStreamResults,
    makeErrorMatcher,

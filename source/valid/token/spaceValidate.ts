@@ -5,20 +5,20 @@ import { strOrBlank } from 'sToken';
 import { SpacePToken } from 'token';
 
 import { validCodes } from '../error/validCodes';
-import { ElDeclType, ValidateState } from '../common/validateState';
+import { ElDeclType, ValidityState } from '../common/validityState';
 
 const VID = validCodes.id;
 const S_REGEXP = /^[\t\n\r ]*$/;
 
-function spaceValidate(token: SpacePToken, state: ValidateState, ec: ErrorCollector): void {
+function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollector): void {
    if (
       !state.elementContext.activeContext ||
-      state.elementContext.activeContext.declDetails.type !== ElDeclType.ELEMENT
+      state.elementContext.activeContext.details.type !== ElDeclType.ELEMENT
    ) {
       return;
    }
    const spaceText = strOrBlank(token.text);
-   const details = state.elementContext.activeContext.declDetails;
+   const details = state.elementContext.activeContext.details;
 
    ec.setPos(token.text);
 

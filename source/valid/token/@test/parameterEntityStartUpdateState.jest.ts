@@ -4,14 +4,14 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeParameterEntityStart } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { parameterEntityStartUpdateState } from '../parameterEntityStartUpdateState';
 
 describe('parameterEntityStartUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState({});
+      state = new ValidityState({});
    });
 
    it('adds the ptoken name to the enclosingStack', () => {

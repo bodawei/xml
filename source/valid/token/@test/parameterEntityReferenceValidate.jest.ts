@@ -6,21 +6,21 @@ import { MockErrorCollector } from 'basic-test';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { parameterEntityReferenceValidate } from '../parameterEntityReferenceValidate';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { validCodes } from '../../error/validCodes';
 
 const VID = validCodes.id;
 
 describe('parameterEntityReferenceValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
    });
 
    it('reports no error when the declaration is defined', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          parameterEntities: {
             entityName: {
                isExternalMarkupDeclaration: false,
@@ -38,7 +38,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
 
    it('reports an error when the reference has not been declared (and not standalone and has external subset) (§4.1.0)', () => {
       const ref = makeParameterEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          hasExternalSubset: true,
          isStandalone: false,
          parameterEntities: {
@@ -63,7 +63,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
 
    it('reports an error when the reference has not been declared (and not standalone and has external subset) (§4.1.0)', () => {
       const ref = makeParameterEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          hasExternalSubset: false,
          isStandalone: false,
          parameterEntities: {
@@ -88,7 +88,7 @@ describe('parameterEntityReferenceValidate (unit)', () => {
 
    it('reports no error when the reference has not been declared but the document is standalone (§4.1.0)', () => {
       const ref = makeParameterEntityReference();
-      state = new ValidateState({
+      state = new ValidityState({
          hasExternalSubset: false,
          isStandalone: true,
          parameterEntities: {

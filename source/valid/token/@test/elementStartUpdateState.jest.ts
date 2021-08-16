@@ -3,18 +3,18 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ElementDeclarationPToken, TextPToken } from 'pToken';
-import { CmGraph } from 'source/valid/contentModel/cmGraphTypes';
+import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { SToken, toSToken } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
-import { ElDeclType, ElementContext, ValidateState } from '../../common/validateState';
+import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { elementStartUpdateState } from '../elementStartUpdateState';
 
 describe('elementStartUpdateState (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let elementStart: ElementStartPToken;
    let elementEmpty: ElementEmptyPToken;
-   let state: ValidateState;
+   let state: ValidityState;
    let graph: CmGraph;
 
    beforeEach(async () => {
@@ -54,8 +54,8 @@ describe('elementStartUpdateState (unit)', () => {
          name: toSToken('elementName'),
          open: toSToken('<!'),
       });
-      state = new ValidateState({
-         elementDeclarations: {
+      state = new ValidityState({
+         elements: {
             elementName: {
                isExternalMarkupDeclaration: false,
                token: elementDeclaration,
@@ -67,7 +67,7 @@ describe('elementStartUpdateState (unit)', () => {
 
    it('adds a context to the stack and makes it active for the specified element', () => {
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
             isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ANY,
@@ -96,7 +96,7 @@ describe('elementStartUpdateState (unit)', () => {
          open: toSToken('<!'),
       });
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
             isExternalMarkupDeclaration: false,
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
@@ -119,10 +119,11 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('adds a context to the stack with a fake token with the appropriate isExternalMarkupDeclaration value if no details could be found', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [],
             inExternalMarkupContext: true,
+            inExternalSubset: false,
          },
       });
       const unmatched = new ElementStartPToken({
@@ -131,7 +132,7 @@ describe('elementStartUpdateState (unit)', () => {
          open: toSToken('<!'),
       });
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
             isExternalMarkupDeclaration: true,
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
@@ -159,8 +160,8 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('adds a context to the stack with a fake token if no details could be found', () => {
-      state = new ValidateState({
-         elementDeclarations: {
+      state = new ValidityState({
+         elements: {
             elementName: {
                graph: { endId: 10, startId: 9, states: {} },
                isExternalMarkupDeclaration: false,
@@ -170,7 +171,7 @@ describe('elementStartUpdateState (unit)', () => {
          },
       });
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
             graph: { endId: 10, startId: 9, states: {} },
             isExternalMarkupDeclaration: false,
             token: elementDeclaration,
@@ -195,7 +196,7 @@ describe('elementStartUpdateState (unit)', () => {
 
    it('transitions the activeContext to a new state, when context is ELEMENT', () => {
       const activeContext: ElementContext = {
-         declDetails: {
+         details: {
             graph,
             isExternalMarkupDeclaration: false,
             token: elementDeclaration,
@@ -206,13 +207,13 @@ describe('elementStartUpdateState (unit)', () => {
          stateId: 4,
       };
       const modifiedActive = { ...activeContext, stateId: 5 };
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             activeContext: activeContext,
             contextStack: [activeContext],
             pastEnd: false,
          },
-         elementDeclarations: {
+         elements: {
             elementName: {
                graph,
                isExternalMarkupDeclaration: false,
@@ -222,7 +223,7 @@ describe('elementStartUpdateState (unit)', () => {
          },
       });
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
             graph,
             isExternalMarkupDeclaration: false,
             token: elementDeclaration,
@@ -247,7 +248,7 @@ describe('elementStartUpdateState (unit)', () => {
 
    it('does not transition to a new state, when context is ELEMENT, but the graph has no transition for this', () => {
       const activeContext: ElementContext = {
-         declDetails: {
+         details: {
             graph,
             isExternalMarkupDeclaration: false,
             token: elementDeclaration,
@@ -257,13 +258,13 @@ describe('elementStartUpdateState (unit)', () => {
          parentName: 'elementName',
          stateId: 4,
       };
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             activeContext: activeContext,
             contextStack: [activeContext],
             pastEnd: false,
          },
-         elementDeclarations: {
+         elements: {
             elementName: {
                graph,
                isExternalMarkupDeclaration: false,
@@ -278,7 +279,7 @@ describe('elementStartUpdateState (unit)', () => {
          open: toSToken('<'),
       });
       const expectedContext: ElementContext = {
-         declDetails: {
+         details: {
             isExternalMarkupDeclaration: false,
             token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
             type: ElDeclType.ANY,
@@ -314,12 +315,12 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('changes nothing if it encounters an empty element while in the body of the document', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             activeContext: undefined,
             contextStack: [
                {
-                  declDetails: {
+                  details: {
                      isExternalMarkupDeclaration: false,
                      token: elementDeclaration,
                      type: ElDeclType.ANY,
@@ -339,8 +340,8 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('adds info about each ID value to the state (§3.3.1)', () => {
-      state = new ValidateState({
-         attributeDefs: {
+      state = new ValidityState({
+         attributes: {
             elementName: {
                att1: {
                   def: {
@@ -381,8 +382,8 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('does not replace an existing entry for an id (§3.3.1)', () => {
-      state = new ValidateState({
-         attributeDefs: {
+      state = new ValidityState({
+         attributes: {
             elementName: {
                att1: {
                   def: {
@@ -430,8 +431,8 @@ describe('elementStartUpdateState (unit)', () => {
 
    describe('IDREFS constraing (§3.3.1)', () => {
       it('adds info about each IDREF value to the state (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -473,8 +474,8 @@ describe('elementStartUpdateState (unit)', () => {
       });
 
       it('adds info about each IDREFS value to the state (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {
@@ -521,8 +522,8 @@ describe('elementStartUpdateState (unit)', () => {
       });
 
       it('does not add info about an IDREF value if the id is already in the state (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                elementName: {
                   att1: {
                      def: {

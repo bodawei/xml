@@ -4,7 +4,7 @@ import { ErrorCollector } from 'basic';
 import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
 
@@ -12,7 +12,7 @@ const VID = validCodes.id;
 
 function entityDeclarationValidate(
    token: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    ec.setPos(token.open);

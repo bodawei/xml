@@ -7,14 +7,14 @@ import { DocTypeStartPToken } from 'token';
 
 import { makeDocTypeStart } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { docTypeStartUpdateState } from '../docTypeStartUpdateState';
 
 describe('docTypeStartUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState({});
+      state = new ValidityState({});
    });
 
    it('adds the docType name to the state', () => {

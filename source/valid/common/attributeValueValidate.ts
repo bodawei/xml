@@ -5,7 +5,7 @@ import { GENERAL_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { GENERAL_ENTITY_START_PTOKEN, LiteralValuePToken } from 'token';
 import { validCodes } from '../error/validCodes';
-import { ValidateState } from './validateState';
+import { ValidityState } from './validityState';
 
 const VID = validCodes.id;
 const WARNID = warning.id;
@@ -13,7 +13,7 @@ const PREDEFINED = ['lt', 'gt', 'quot', 'apos', 'amp'];
 
 function attributeValueValidate(
    attValue: LiteralValuePToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    if ((!state.hasExternalSubset && !state.hasPeRefs) || state.isStandalone) {

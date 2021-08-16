@@ -17,7 +17,7 @@ import {
 } from 'token-test';
 
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { ParameterEntityStartPToken } from 'token';
 import { validCodes } from '../../error/validCodes';
 
@@ -25,7 +25,7 @@ const VID = validCodes.id;
 
 describe('ancestorPERefsValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
    let peRef: ParameterEntityReferencePToken;
 
    beforeEach(() => {
@@ -36,7 +36,7 @@ describe('ancestorPERefsValidate (unit)', () => {
          open: toSToken('<!'),
       });
 
-      state = new ValidateState({
+      state = new ValidityState({
          generalEntities: {
             testRef: {
                isExternalMarkupDeclaration: false,
@@ -93,7 +93,7 @@ describe('ancestorPERefsValidate (unit)', () => {
    });
 
    it('reports no error when a general entity references a peref that is declared externally but the document is not standalone (§2.9.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          ...state,
          isStandalone: false,
       });
@@ -133,7 +133,7 @@ describe('ancestorPERefsValidate (unit)', () => {
    });
 
    it('reports an error a problematic reference is found through several indirections (§2.9.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          isStandalone: true,
          parameterEntities: {
             entityName: {
@@ -188,7 +188,7 @@ describe('ancestorPERefsValidate (unit)', () => {
    });
 
    it('reports no error when there is no declaraton for the general entity reference (§2.9.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          isStandalone: true,
       });
 
@@ -198,7 +198,7 @@ describe('ancestorPERefsValidate (unit)', () => {
    });
 
    it('reports no error when there is no declaraton for the parameter entity start reference (§2.9.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          isStandalone: true,
       });
 
@@ -208,7 +208,7 @@ describe('ancestorPERefsValidate (unit)', () => {
    });
 
    it('reports no error when there is no declaraton for the parameter entity reference (§2.9.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          isStandalone: true,
       });
 

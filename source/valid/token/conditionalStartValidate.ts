@@ -5,13 +5,13 @@ import { strOrBlank } from 'sToken';
 import { ConditionalPToken } from 'token';
 import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 const VID = validCodes.id;
 
 function conditionalStartValidate(
    token: ConditionalPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    if (!token.unexpanded) {

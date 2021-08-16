@@ -14,12 +14,4 @@ expect.extend({
    toReportValidityError: makeNewErrorMatcher(validCodes),
 });
 
-// declare global {
-//    namespace jasmine {
-//       interface Matchers<T> {
-//          toReportValidityError(errorProps: ErrorProps): void;
-//       }
-//    }
-// }
-
 export { validCodes };

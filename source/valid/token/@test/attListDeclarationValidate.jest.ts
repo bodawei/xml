@@ -24,7 +24,7 @@ import {
 } from 'token-test';
 
 import { validCodes } from '../../error/validCodes';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
 // jest.mock goes crazy if I try to mock these functions
 import * as validator from '../../common/attributeValueValidate';
@@ -41,11 +41,11 @@ jest.mock('basic', () => ({
 
 describe('attListDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
-      state = new ValidateState({});
+      state = new ValidityState({});
    });
 
    describe('Proper Declaration/PE Nesting (§2.8.0)', () => {
@@ -165,7 +165,7 @@ describe('attListDeclarationValidate (unit)', () => {
             isPredefined ? '' : ' not'
          } a predefined entity (§2.9.0)`, () => {
             const geDecl = makeGeneralEntityDeclaration();
-            state = new ValidateState({
+            state = new ValidityState({
                generalEntities: {
                   lt: {
                      isExternalMarkupDeclaration,
@@ -213,7 +213,7 @@ describe('attListDeclarationValidate (unit)', () => {
          const geDecl = makeGeneralEntityDeclaration();
          const end = makeGeneralEntityEnd();
          const start = makeGeneralEntityStart();
-         state = new ValidateState({
+         state = new ValidityState({
             generalEntities: {
                testRef: {
                   isExternalMarkupDeclaration: true,
@@ -250,7 +250,7 @@ describe('attListDeclarationValidate (unit)', () => {
    it('calls attributeValueValidate() to validate entity references (§4.1.0)', () => {
       const end = makeGeneralEntityEnd();
       const start = makeGeneralEntityStart();
-      state = new ValidateState({});
+      state = new ValidityState({});
       const attListDecl = new AttListDeclarationPToken({
          attDefs: [
             {
@@ -436,7 +436,7 @@ describe('attListDeclarationValidate (unit)', () => {
       });
 
       it('reports no errors when a value is repeated in a NOTATION attribute declaration, but this is 1.0/2 (§3.3.1)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             confVer: new ConformanceVersion(1.0, 2),
          });
          const attListDecl = new AttListDeclarationPToken({
@@ -779,7 +779,7 @@ describe('attListDeclarationValidate (unit)', () => {
    });
 
    it('calls xmlSpaceValidate() for each attr (§2.10.0)', () => {
-      state = new ValidateState();
+      state = new ValidityState();
       const attListDecl = new AttListDeclarationPToken({
          attDefs: [
             {

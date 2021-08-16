@@ -8,7 +8,7 @@ import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } f
 import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validCodes } from '../error/validCodes';
-import { ElDeclType, ValidateState } from '../common/validateState';
+import { ElDeclType, ValidityState } from '../common/validityState';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
 const VID = validCodes.id;
@@ -68,7 +68,7 @@ function entityCheck(
    isPlural: boolean,
    nameSToken: SToken,
    ec: ErrorCollector,
-   state: ValidateState,
+   state: ValidityState,
 ): void {
    const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
    const notNameId = isPlural
@@ -113,7 +113,7 @@ function idCheck(
    attValue: string,
    nameSToken: SToken,
    ec: ErrorCollector,
-   state: ValidateState,
+   state: ValidityState,
    localInfo: Record<string, AttInfo | undefined>,
 ): Record<string, AttInfo | undefined> {
    const idDetails = state.ids[attValue];
@@ -158,7 +158,7 @@ function nmtokenCheck(
    isPlural: boolean,
    nameSToken: SToken,
    ec: ErrorCollector,
-   state: ValidateState,
+   state: ValidityState,
 ): void {
    const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
    const code = isPlural
@@ -185,7 +185,7 @@ function idRefCheck(
    isPlural: boolean,
    nameSToken: SToken,
    ec: ErrorCollector,
-   state: ValidateState,
+   state: ValidityState,
 ): void {
    const names = isPlural ? attValue.trim().split(/ +/) : [attValue];
    const code = isPlural
@@ -208,10 +208,10 @@ function idRefCheck(
 function requiredAttributesCheck(
    attNames: Record<string, boolean>,
    elName: string,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
-   const attrs = state.attributeDefs[elName] ?? {};
+   const attrs = state.attributes[elName] ?? {};
    const attNameAndDetails = Object.entries(attrs);
 
    // §3.3.2: Validity Constraint: Required Attribute
@@ -231,10 +231,10 @@ function fixedAttributesCheck(
    elName: string,
    attName: string,
    attValue: string,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
-   const attrs = state.attributeDefs[elName] ?? {};
+   const attrs = state.attributes[elName] ?? {};
    const attDetails = attrs[attName];
 
    // §3.3.2: Validity Constraint: Fixed Attribute Default**
@@ -254,7 +254,7 @@ function fixedAttributesCheck(
 
 function checkValue(
    el: ElementStartPToken | ElementEmptyPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    for (const att of el.attributes) {
@@ -286,7 +286,7 @@ function checkValue(
 function checkAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
    elName: string,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const attributes = el.attributes;
@@ -295,7 +295,7 @@ function checkAttributes(
 
    for (const attr of attributes) {
       const attName = strOrBlank(attr.name);
-      const details = state.attributeDefs[elName]?.[attName];
+      const details = state.attributes[elName]?.[attName];
       attrNames[attName] = true;
 
       if (!details) {
@@ -385,7 +385,7 @@ function checkAttributes(
 
 function elementStartValidate(
    el: ElementStartPToken | ElementEmptyPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const elName = strOrBlank(el.name);
@@ -398,7 +398,7 @@ function elementStartValidate(
    // §3.0.0 Validity Constraint: Element Valid
    //     An element is valid if there is a declaration matching elementdecl where
    //     the Name matches the element type, ...
-   ec.check(!state.elementDeclarations[elName], VID.ELEMENT_NO_DECLARATION, [elName]);
+   ec.check(!state.elements[elName], VID.ELEMENT_NO_DECLARATION, [elName]);
 
    // If we aren't in any context, then there's nothing to validate
    if (!state.elementContext.pastEnd) {
@@ -415,7 +415,7 @@ function elementStartValidate(
       }
 
       if (context) {
-         switch (context.declDetails.type) {
+         switch (context.details.type) {
             case ElDeclType.EMPTY:
             // §3.0.0 No validity concerned handled here. These are handled in contentValidate
             case ElDeclType.ANY:
@@ -428,7 +428,7 @@ function elementStartValidate(
                //     3. The declaration matches Mixed and the content consists of
                //     character data and child elements whose types match names in the
                //     content model.
-               const allowedChild = context.declDetails.names.includes(elName);
+               const allowedChild = context.details.names.includes(elName);
 
                ec.check(!allowedChild, VID.CONTENTMIXED_CHILD_UNEXPECTED, [
                   context.parentName,
@@ -440,7 +440,7 @@ function elementStartValidate(
                //     2. The declaration matches children and the sequence of child elements
                //     belongs to the language generated by the regular expression in the content
                //     model, ...
-               const currentState = context.declDetails.graph.states[context.stateId];
+               const currentState = context.details.graph.states[context.stateId];
                const destState = currentState.trans[elName];
 
                ec.check(!destState, VID.CONTENTELEMENT_CHILD_UNEXPECTED, [

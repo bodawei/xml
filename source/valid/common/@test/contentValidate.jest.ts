@@ -35,7 +35,7 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
-import { ElDeclType, ValidateState } from '../../common/validateState';
+import { ElDeclType, ValidityState } from '../validityState';
 import { validCodes } from '../../error/validCodes';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
 import { makeCmGraph } from '../../contentModel/makeCmGraph';
@@ -80,10 +80,10 @@ describe('conentValidate (unit)', () => {
    });
 
    it('reports an error when the context is EMPTY, and any non-element end token is delivered (§3.0.0)', () => {
-      const state = new ValidateState({
+      const state = new ValidityState({
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   isExternalMarkupDeclaration: false,
                   token: new ElementDeclarationPToken({
                      declType: toSToken('EMPTY'),
@@ -113,10 +113,10 @@ describe('conentValidate (unit)', () => {
    });
 
    it('reports no error when the context is EMPTY, and an element end token is delivered (§3.0.0)', () => {
-      const state = new ValidateState({
+      const state = new ValidityState({
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   isExternalMarkupDeclaration: false,
                   token: new ElementDeclarationPToken({
                      declType: toSToken('EMPTY'),
@@ -182,11 +182,11 @@ describe('conentValidate (unit)', () => {
          it(`${pass ? 'does not report' : 'reports'} an error when a ${
             token.type
          } token is found in an element with element content in ${version}/${edition} (§3.0.0)`, () => {
-            const state = new ValidateState({
+            const state = new ValidityState({
                confVer: new ConformanceVersion(version, edition),
                elementContext: {
                   activeContext: {
-                     declDetails: {
+                     details: {
                         graph: makeCmGraph(new ContentModelP()),
                         isExternalMarkupDeclaration: false,
                         token: new ElementDeclarationPToken({
@@ -223,11 +223,11 @@ describe('conentValidate (unit)', () => {
    });
 
    it('reports an error when the element context is ELEMENT, the version is 1.0/1 and a space is found before the first other thing (§3.0.0)', () => {
-      const state = new ValidateState({
+      const state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 1),
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   graph: makeCmGraph(new ContentModelP()),
                   isExternalMarkupDeclaration: false,
                   token: new ElementDeclarationPToken({
@@ -258,11 +258,11 @@ describe('conentValidate (unit)', () => {
    });
 
    it('reports an error when the token preceeding the end was whitespace and this is version 1.0/1 (§3.0.0)', () => {
-      const state = new ValidateState({
+      const state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 1),
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   graph: makeCmGraph(new ContentModelP()),
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
@@ -289,11 +289,11 @@ describe('conentValidate (unit)', () => {
    });
 
    it('reports no error when the token preceeding the end was whitespace and this is version 1.0/1 (§3.0.0)', () => {
-      const state = new ValidateState({
+      const state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 2),
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   graph: makeCmGraph(new ContentModelP()),
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),
@@ -356,11 +356,11 @@ describe('conentValidate (unit)', () => {
          it(`${pass ? 'does not report' : 'reports'} an error when a ${
             token.type
          } token is found in an element with MIXED content in ${version}/${edition} (§3.0.0)`, () => {
-            const state = new ValidateState({
+            const state = new ValidityState({
                confVer: new ConformanceVersion(version, edition),
                elementContext: {
                   activeContext: {
-                     declDetails: {
+                     details: {
                         isExternalMarkupDeclaration: false,
                         names: [],
                         token: new ElementDeclarationPToken({
@@ -396,11 +396,11 @@ describe('conentValidate (unit)', () => {
          it(`${pass ? 'does not report' : 'reports'} an error when a ${
             token.type
          } token is found in an element with an ANY content in ${version}/${edition} (§3.0.0)`, () => {
-            const state = new ValidateState({
+            const state = new ValidityState({
                confVer: new ConformanceVersion(version, edition),
                elementContext: {
                   activeContext: {
-                     declDetails: {
+                     details: {
                         isExternalMarkupDeclaration: false,
                         token: new ElementDeclarationPToken({
                            name: toSToken('elementName'),

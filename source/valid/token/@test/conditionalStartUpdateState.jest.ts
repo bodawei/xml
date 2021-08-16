@@ -4,14 +4,14 @@ import { describe, expect, it } from '@jest/globals';
 
 import { makeConditionalSection } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { conditionalStartUpdateState } from '../conditionalStartUpdateState';
 
 describe('conditionalStartUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState({});
+      state = new ValidityState({});
    });
 
    it('adds the conditional start to the state', () => {

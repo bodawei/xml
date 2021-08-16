@@ -9,19 +9,21 @@ import {
    makeParameterEntityStart,
 } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { parameterEntityEndUpdateState } from '../parameterEntityEndUpdateState';
 
 describe('parameterEntityEndUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    it('removes back to before the start of the enclosingStack', () => {
       const ref = makeParameterEntityReference();
       const start = new ParameterEntityStartPToken(ref);
       const end = new ParameterEntityEndPToken(ref);
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart(), start],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
 
@@ -43,9 +45,11 @@ describe('parameterEntityEndUpdateState (unit)', () => {
       const start = new ParameterEntityStartPToken(ref);
       const start2 = new ParameterEntityStartPToken(ref2);
       const end = new ParameterEntityEndPToken(ref);
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart(), start, start2],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
 
@@ -64,9 +68,11 @@ describe('parameterEntityEndUpdateState (unit)', () => {
    it('does not change the enclosingStack state property if there is no start in the stack', () => {
       const ref = makeParameterEntityReference();
       const end = new ParameterEntityEndPToken(ref);
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeDocTypeStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
          },
       });
 
@@ -86,7 +92,7 @@ describe('parameterEntityEndUpdateState (unit)', () => {
       const ref = makeParameterEntityReference();
       const start = new ParameterEntityStartPToken(ref);
       const end = new ParameterEntityEndPToken(ref);
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [start],
             inExternalMarkupContext: true,
@@ -110,9 +116,10 @@ describe('parameterEntityEndUpdateState (unit)', () => {
       const ref = makeParameterEntityReference();
       const start = new ParameterEntityStartPToken(ref);
       const end = new ParameterEntityEndPToken(ref);
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [start],
+            inExternalMarkupContext: false,
             inExternalSubset: true,
          },
       });

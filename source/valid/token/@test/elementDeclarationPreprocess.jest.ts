@@ -6,7 +6,7 @@ import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { elementDeclarationPreprocess } from '../elementDeclarationPreprocess';
-import { ElDeclType, ValidateState } from '../../common/validateState';
+import { ElDeclType, ValidityState } from '../../common/validityState';
 import * as makeCmGraphModule from '../../contentModel/makeCmGraph';
 
 import { makeCmGraph } from '../../contentModel/makeCmGraph';
@@ -15,14 +15,14 @@ jest.mock('../../contentModel/makeCmGraph');
 
 describe('elementDeclarationPreprocess (unit)', () => {
    let makeCmGraphMock: jest.MockedFunction<typeof makeCmGraphModule.makeCmGraph>;
-   let state: ValidateState;
-   let externalState: ValidateState;
+   let state: ValidityState;
+   let externalState: ValidityState;
 
    beforeEach(async () => {
       makeCmGraphMock = makeCmGraph as jest.MockedFunction<typeof makeCmGraphModule.makeCmGraph>;
 
-      state = new ValidateState();
-      externalState = new ValidateState({
+      state = new ValidityState();
+      externalState = new ValidityState({
          dtdContext: {
             enclosingStack: [],
             inExternalMarkupContext: true,

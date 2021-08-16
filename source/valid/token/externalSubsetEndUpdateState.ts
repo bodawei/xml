@@ -2,12 +2,12 @@
 
 import { ExternalSubsetEndToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function externalSubsetEndUpdateState(
    el: ExternalSubsetEndToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    return {
       ...state,
       dtdContext: {

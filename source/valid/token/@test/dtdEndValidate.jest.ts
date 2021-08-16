@@ -11,13 +11,13 @@ import { makeElementDeclaration } from 'token-test';
 
 import { dtdEndValidate } from '../dtdEndValidate';
 import { validCodes } from '../../error/validCodes';
-import { ElDeclType, ValidateState } from '../../common/validateState';
+import { ElDeclType, ValidityState } from '../../common/validityState';
 
 const VID = validCodes.id;
 
 describe('dtdEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
@@ -25,8 +25,8 @@ describe('dtdEndValidate (unit)', () => {
 
    describe('One ID per Element Type constraint (§3.3.1)', () => {
       it('reports an error when a NOTATION attribute type is on an EMPTY element (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                anElement: {
                   id: {
                      def: {
@@ -60,8 +60,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when there is only one ID attribute (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                anElement: {
                   id: {
                      def: {
@@ -83,8 +83,8 @@ describe('dtdEndValidate (unit)', () => {
 
    describe('No Notation on Empty Element constraint (§3.3.1)', () => {
       it('reports an error when a NOTATION attribute type is on an EMPTY element (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                emptyEl: {
                   notationAttr: {
                      def: {
@@ -96,7 +96,7 @@ describe('dtdEndValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: {
+            elements: {
                emptyEl: {
                   token: makeElementDeclaration('EMPTY'),
                   type: ElDeclType.EMPTY,
@@ -116,8 +116,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when a NOTATION attribute type is on an EMPTY element in 1.0/1 (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                emptyEl: {
                   notationAttr: {
                      def: {
@@ -130,7 +130,7 @@ describe('dtdEndValidate (unit)', () => {
                },
             },
             confVer: new ConformanceVersion(1.0, 1),
-            elementDeclarations: {
+            elements: {
                emptyEl: {
                   token: makeElementDeclaration('EMPTY'),
                   type: ElDeclType.EMPTY,
@@ -144,8 +144,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when a CDATA attribute type is on an EMPTY element (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                emptyEl: {
                   notationAttr: {
                      def: {
@@ -157,7 +157,7 @@ describe('dtdEndValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: {
+            elements: {
                emptyEl: {
                   token: makeElementDeclaration('EMPTY'),
                   type: ElDeclType.EMPTY,
@@ -171,8 +171,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when a NOTATION attribute type is on an ANY element (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                emptyEl: {
                   notationAttr: {
                      def: {
@@ -184,7 +184,7 @@ describe('dtdEndValidate (unit)', () => {
                   },
                },
             },
-            elementDeclarations: {
+            elements: {
                emptyEl: {
                   token: makeElementDeclaration(''),
                   type: ElDeclType.EMPTY,
@@ -198,14 +198,14 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when the element or attribute details are undefined (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                emptyEl: {
                   notationAttr: undefined,
                },
                other: undefined,
             },
-            elementDeclarations: {
+            elements: {
                emptyEl: undefined,
             },
          });
@@ -218,8 +218,8 @@ describe('dtdEndValidate (unit)', () => {
 
    describe('Notation Attributes constraint (§3.3.1)', () => {
       it('reports an error when a NOTATION value has not been declared (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                someElement: {
                   notationAttr: {
                      def: {
@@ -254,8 +254,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when NOTATION value was declared (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                someElement: {
                   notationAttr: {
                      def: {
@@ -276,7 +276,7 @@ describe('dtdEndValidate (unit)', () => {
                   },
                },
             },
-            notationDeclarations: {
+            notations: {
                declared: true,
             },
          });
@@ -287,8 +287,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error for enumeration types (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                someElement: {
                   enumerationAttr: {
                      def: {
@@ -309,7 +309,7 @@ describe('dtdEndValidate (unit)', () => {
                   },
                },
             },
-            notationDeclarations: {},
+            notations: {},
          });
 
          dtdEndValidate(state, mockErrorCollector);
@@ -320,8 +320,8 @@ describe('dtdEndValidate (unit)', () => {
 
    describe('One Notation Per Element Type constraint (§3.3.1)', () => {
       it('reports an error when an element type has multiple notation attributes (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                someElement: {
                   notationAttr: {
                      def: {
@@ -357,8 +357,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when there is only one NOTATION attribute per element (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                someElement: {
                   notationAttr: {
                      def: {
@@ -371,7 +371,7 @@ describe('dtdEndValidate (unit)', () => {
                   },
                },
             },
-            notationDeclarations: {
+            notations: {
                declared: true,
             },
          });
@@ -382,8 +382,8 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when there are multiple NOTATION attribute per element, but the conformance version is 1.0/1 (§3.3.1)', () => {
-         state = new ValidateState({
-            attributeDefs: {
+         state = new ValidityState({
+            attributes: {
                someElement: {
                   notationAttr: {
                      def: {
@@ -416,7 +416,7 @@ describe('dtdEndValidate (unit)', () => {
 
    describe('Notation Declared constraint (§4.2.2)', () => {
       it('reports an error when a NDATA name has no corresponding notation declaration (§4.2.2)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             generalEntities: {
                withNData: {
                   isInternalValue: true,
@@ -429,7 +429,7 @@ describe('dtdEndValidate (unit)', () => {
                   }),
                },
             },
-            notationDeclarations: {},
+            notations: {},
          });
 
          dtdEndValidate(state, mockErrorCollector);
@@ -444,7 +444,7 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when a NDATA name has a corresponding notation declaration (§4.2.2)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             generalEntities: {
                withNData: {
                   token: new GeneralEntityDeclarationPToken({
@@ -457,7 +457,7 @@ describe('dtdEndValidate (unit)', () => {
                   isInternalValue: true,
                },
             },
-            notationDeclarations: {
+            notations: {
                notationName: true,
             },
          });
@@ -468,7 +468,7 @@ describe('dtdEndValidate (unit)', () => {
       });
 
       it('reports no error when there is no NDATA name  (§4.2.2)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             generalEntities: {
                withNData: {
                   token: new GeneralEntityDeclarationPToken({
@@ -480,7 +480,7 @@ describe('dtdEndValidate (unit)', () => {
                   isInternalValue: true,
                },
             },
-            notationDeclarations: {
+            notations: {
                notationName: true,
             },
          });

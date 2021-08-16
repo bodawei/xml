@@ -5,14 +5,14 @@ import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { makeXmlDecl } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { xmlDeclarationUpdateState } from '../xmlDeclarationUpdateState';
 
 describe('xmlDeclarationUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('sets standalone to be false if the xml declaration is not standalone', () => {

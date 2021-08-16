@@ -5,7 +5,7 @@ import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { validCodes } from '../error/validCodes';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 const PREDEFINED = ['lt', 'gt', 'quot', 'apos', 'amp'];
 const VID = validCodes.id;
@@ -13,7 +13,7 @@ const WARNID = warning.id;
 
 function generalEntityReferenceValidate(
    token: GeneralEntityReferencePToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const geDeclName = strOrBlank(token.name);

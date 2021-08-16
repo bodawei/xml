@@ -8,7 +8,7 @@ import { ParameterEntityStartPToken } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityStart } from 'token-test';
 
 import { validCodes } from '../../error/validCodes';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
 import { parameterEntityStartValidate } from '../parameterEntityStartValidate';
 
@@ -18,7 +18,7 @@ jest.mock('../ancestorPERefsValidate');
 
 describe('parameterEntityStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
@@ -64,7 +64,7 @@ describe('parameterEntityStartValidate (unit)', () => {
 
          it(testDescription, () => {
             const peDecl = makeParameterEntityDeclaration();
-            state = new ValidateState({
+            state = new ValidityState({
                isStandalone,
                parameterEntities: {
                   entityName: {
@@ -107,7 +107,7 @@ describe('parameterEntityStartValidate (unit)', () => {
 
       it('calls ancestorPERefsValidate() to validate ancestors (§2.9.0)', () => {
          const peDecl = makeParameterEntityDeclaration();
-         state = new ValidateState({
+         state = new ValidityState({
             isStandalone: true,
             parameterEntities: {
                testRef: {

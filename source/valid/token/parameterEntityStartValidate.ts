@@ -4,7 +4,7 @@ import { ErrorCollector } from 'basic';
 import { ParameterEntityStartPToken } from 'token';
 import { strOrBlank } from 'sToken';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
@@ -12,7 +12,7 @@ const VID = validCodes.id;
 
 function parameterEntityStartValidate(
    startPToken: ParameterEntityStartPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const name = strOrBlank(startPToken.referencePToken.name);

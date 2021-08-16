@@ -3,20 +3,20 @@
 import { ElementDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { DeclarationDetails, ValidateState } from '../common/validateState';
+import { ContentDetails, ValidityState } from '../common/validityState';
 
 function elementDeclarationUpdateState(
    elDecl: ElementDeclarationPToken,
-   declDetails: DeclarationDetails,
-   state: ValidateState,
-): ValidateState {
+   details: ContentDetails,
+   state: ValidityState,
+): ValidityState {
    const elName = strOrBlank(elDecl.name);
 
-   if (state.elementDeclarations[elName]) {
+   if (state.elements[elName]) {
       return state;
    }
 
-   state.elementDeclarations[elName] = declDetails;
+   state.elements[elName] = details;
 
    return state;
 }

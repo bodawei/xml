@@ -7,7 +7,7 @@ import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken } from 'token';
 import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validCodes } from '../error/validCodes';
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 import { xmlSpaceValidate } from './xmlSpaceValidate';
 
@@ -30,7 +30,7 @@ function checkEnumeration(
    elName: string,
    attName: string,
    attType: string,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    if (!attDef.enumeration) {
@@ -65,7 +65,7 @@ function checkDefaultValue(
    elName: string,
    attName: string,
    attType: string,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    for (const element of attDef.value) {
@@ -193,7 +193,7 @@ function checkDefaultValue(
 
 function attListDeclarationValidate(
    token: AttListDeclarationPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const elName = strOrBlank(token.elementName);

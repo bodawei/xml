@@ -4,7 +4,7 @@ import { ErrorCollector } from 'basic';
 import { GeneralEntityStartPToken } from 'token';
 import { strOrBlank } from 'sToken';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 import { ancestorPERefsValidate } from './ancestorPERefsValidate';
 
@@ -13,7 +13,7 @@ const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 function generalEntityStartValidate(
    startPToken: GeneralEntityStartPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const name = strOrBlank(startPToken.referencePToken.name);

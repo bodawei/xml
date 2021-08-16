@@ -5,14 +5,14 @@ import { describe, expect, it } from '@jest/globals';
 import { ParameterEntityDeclarationPToken } from 'pToken';
 import { makeParameterEntityDeclaration } from 'token-test';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { parameterEntityDeclarationUpdateState } from '../parameterEntityDeclarationUpdateState';
 
 describe('parameterEntityDeclarationUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('adds a declaration to the state', () => {
@@ -21,7 +21,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
       const result = parameterEntityDeclarationUpdateState(decl, state);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             parameterEntities: {
                entityName: {
                   isExternalMarkupDeclaration: false,
@@ -42,7 +42,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
       const result = parameterEntityDeclarationUpdateState(decl, state);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             parameterEntities: {
                entityName: {
                   isExternalMarkupDeclaration: false,
@@ -57,7 +57,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
 
    it('marks a declaration as external an external markup declaration if this is currently in external markup', () => {
       const decl = makeParameterEntityDeclaration();
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [],
             inExternalMarkupContext: true,
@@ -67,7 +67,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
       const result = parameterEntityDeclarationUpdateState(decl, state);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             dtdContext: {
                enclosingStack: [],
                inExternalMarkupContext: true,
@@ -94,7 +94,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
       const result = parameterEntityDeclarationUpdateState(decl2, state1);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             parameterEntities: {
                entityName: {
                   isExternalMarkupDeclaration: false,

@@ -9,7 +9,7 @@ import { ElementEndPToken } from 'token';
 
 import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { validCodes } from '../../error/validCodes';
-import { ElDeclType, ElementContext, ValidateState } from '../../common/validateState';
+import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { elementEndValidate } from '../elementEndValidate';
 
 const VID = validCodes.id;
@@ -17,7 +17,7 @@ const VID = validCodes.id;
 describe('elementEndValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
    let elementEnd: ElementEndPToken;
    let graph: CmGraph;
 
@@ -54,7 +54,7 @@ describe('elementEndValidate (unit)', () => {
          },
       };
       const currentContext: ElementContext = {
-         declDetails: {
+         details: {
             graph,
             isExternalMarkupDeclaration: false,
             token: elementDeclaration,
@@ -64,13 +64,13 @@ describe('elementEndValidate (unit)', () => {
          parentName: 'elementName',
          stateId: 4,
       };
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             activeContext: currentContext,
             contextStack: [currentContext],
             pastEnd: false,
          },
-         elementDeclarations: {
+         elements: {
             elementName: {
                graph,
                isExternalMarkupDeclaration: false,
@@ -140,7 +140,7 @@ describe('elementEndValidate (unit)', () => {
          elementContext: {
             ...state.elementContext,
             activeContext: {
-               declDetails: {
+               details: {
                   isExternalMarkupDeclaration: false,
                   token: elementDeclaration,
                   type: ElDeclType.ANY,

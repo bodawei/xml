@@ -26,8 +26,7 @@ import {
 } from 'token-test';
 
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
-import { ValidateState } from '../common/validateState';
-import { ValidityChecker } from '../ValidityChecker';
+import { ValidityState } from '../common/validityState';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from '../token/attListDeclarationValidate';
 import { conditionalEndUpdateState } from '../token/conditionalEndUpdateState';
@@ -58,6 +57,7 @@ import { parameterEntityStartValidate } from '../token/parameterEntityStartValid
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 import { contentValidate } from '../common/contentValidate';
 import { contentUpdateState } from '../common/contentUpdateState';
+import { ValidityChecker } from '../ValidityChecker';
 
 jest.mock('../common/entityDeclarationValueValidate');
 jest.mock('../token/attListDeclarationValidate');
@@ -124,37 +124,25 @@ describe('ValidityChecker (unit)', () => {
 
    it('stores the version passed to it and pass that on to other validations', () => {
       (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
 
       checker.checkPToken(version, ec);
       checker.checkPToken(elDecl, ec);
 
-      expect(elementDeclarationValidate).toHaveBeenCalledWith(
-         elDecl,
-         {},
-         expect.any(Object),
-         ec,
-         version,
-      );
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(elDecl, {}, expect.any(Object), ec);
    });
 
    it('stores only the first version passed to it', () => {
       (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
       checker.checkPToken(version, ec);
 
       checker.checkPToken(new ConformanceVersion(1, 2), ec);
       checker.checkPToken(elDecl, ec);
 
-      expect(elementDeclarationValidate).toHaveBeenCalledWith(
-         elDecl,
-         {},
-         expect.any(Object),
-         ec,
-         version,
-      );
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(elDecl, {}, expect.any(Object), ec);
    });
 
    it('validates the content on every token (§3.0.0)', () => {
@@ -174,7 +162,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates an ATTLIST declaration', () => {
-      (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const attListDecl = makeAttListDeclaration();
 
       checker.checkPToken(attListDecl, ec);
@@ -183,7 +171,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an ATTLIST declaration', () => {
-      (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const attListDecl = makeAttListDeclaration();
 
       checker.checkPToken(attListDecl, ec);
@@ -225,7 +213,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a docTypeStart', () => {
-      (docTypeStartUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (docTypeStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const docTypeStart = makeDocTypeStart();
 
       checker.checkPToken(docTypeStart, ec);
@@ -234,7 +222,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an element start', () => {
-      (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elementEmpty = makeElementEmpty();
 
       checker.checkPToken(elementEmpty, ec);
@@ -243,7 +231,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates an element start', () => {
-      (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elStart = makeElementStart();
 
       checker.checkPToken(elStart, ec);
@@ -253,7 +241,7 @@ describe('ValidityChecker (unit)', () => {
 
    it('updates the state when passed an element declaration', () => {
       (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
 
       checker.checkPToken(elDecl, ec);
@@ -263,23 +251,17 @@ describe('ValidityChecker (unit)', () => {
 
    it('validates an element declaration', () => {
       (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
       checker.checkPToken(version, ec);
 
       checker.checkPToken(elDecl, ec);
 
-      expect(elementDeclarationValidate).toHaveBeenCalledWith(
-         elDecl,
-         {},
-         expect.any(Object),
-         ec,
-         version,
-      );
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(elDecl, {}, expect.any(Object), ec);
    });
 
    it('updates the state when passed an element end', () => {
-      (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elementEnd = makeElementEnd();
 
       checker.checkPToken(elementEnd, ec);
@@ -288,7 +270,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates an element end', () => {
-      (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elementEnd = makeElementEnd();
 
       checker.checkPToken(elementEnd, ec);
@@ -297,7 +279,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an elided entity declaration', () => {
-      (elidedEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (elidedEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
       const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value);
 
@@ -316,7 +298,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an external subset end', () => {
-      (externalSubsetEndUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (externalSubsetEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const esSSEnd = makeExternalSubsetEnd();
 
       checker.checkPToken(esSSEnd, ec);
@@ -325,7 +307,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an external subset start', () => {
-      (externalSubsetStartUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (externalSubsetStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const esSSStart = makeExternalSubsetStart();
 
       checker.checkPToken(esSSStart, ec);
@@ -334,7 +316,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a general entity declaration', () => {
-      (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const geDecl = makeGeneralEntityDeclaration();
 
       checker.checkPToken(geDecl, ec);
@@ -343,7 +325,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a general entity declaration', () => {
-      (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const geDecl = makeGeneralEntityDeclaration();
 
       checker.checkPToken(geDecl, ec);
@@ -366,7 +348,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a notation declaration', () => {
-      (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const notationDecl = makeNotationDeclaration();
 
       checker.checkPToken(notationDecl, ec);
@@ -375,7 +357,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a notation declaration', () => {
-      (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const notationDecl = makeNotationDeclaration();
 
       checker.checkPToken(notationDecl, ec);
@@ -388,7 +370,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a general entity declaration', () => {
-      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
 
       checker.checkPToken(peDecl, ec);
@@ -413,7 +395,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a parameter entity declaration', () => {
-      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
 
       checker.checkPToken(peDecl, ec);
@@ -433,7 +415,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an XML Declaration', () => {
-      (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const xmlDecl = makeXmlDecl();
 
       checker.checkPToken(xmlDecl, ec);
@@ -442,7 +424,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('will not update the state twice when called with two XML Declarations', () => {
-      (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidateState());
+      (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const xmlDecl = makeXmlDecl();
 
       checker.checkPToken(xmlDecl, ec);

@@ -7,7 +7,7 @@ import { MockErrorCollector } from 'basic-test';
 import { makeNotationDeclaration } from 'token-test';
 
 import { notationDeclarationValidate } from '../notationDeclarationValidate';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { validCodes } from '../../error/validCodes';
 import { NotationDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -16,11 +16,11 @@ const VID = validCodes.id;
 
 describe('notationDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    describe('Proper Declaration/PE Nesting (§2.8.0)', () => {
@@ -62,8 +62,8 @@ describe('notationDeclarationValidate (unit)', () => {
    });
 
    it('reports no error when the declaration name has not been seen before', () => {
-      state = new ValidateState({
-         notationDeclarations: {
+      state = new ValidityState({
+         notations: {
             foo: true,
          },
       });
@@ -75,8 +75,8 @@ describe('notationDeclarationValidate (unit)', () => {
 
    it('reports an error when the declaration name has already been encountered defined', () => {
       const notationDecl = makeNotationDeclaration();
-      state = new ValidateState({
-         notationDeclarations: {
+      state = new ValidityState({
+         notations: {
             notationName: true,
          },
       });
@@ -94,9 +94,9 @@ describe('notationDeclarationValidate (unit)', () => {
 
    it('reports no error when the declaration has already been defined, but this is a 1.0 document', () => {
       const notationDecl = makeNotationDeclaration();
-      state = new ValidateState({
+      state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 1),
-         notationDeclarations: {
+         notations: {
             notationName: true,
          },
       });

@@ -4,14 +4,14 @@ import { ParseToken, TEXTDECL_PTOKEN } from 'pToken';
 import { GENERAL_ENTITY_END_PTOKEN, GENERAL_ENTITY_START_PTOKEN } from 'token';
 
 import { isXmlData } from './isXmlData';
-import { ElDeclType, ElementContext, ValidateState } from './validateState';
+import { ElDeclType, ElementContext, ValidityState } from './validityState';
 
-function contentUpdateState(token: ParseToken, state: ValidateState): ValidateState {
-   const declDetails = state.elementContext.activeContext?.declDetails;
+function contentUpdateState(token: ParseToken, state: ValidityState): ValidityState {
+   const details = state.elementContext.activeContext?.details;
 
    // §3.0.0 Validity Constraint: Element Valid
    //    Do state setup for a 1.0/1 oddball condition for the CONTENTELEMENT_XTRA_SPACE error
-   if (declDetails?.type === ElDeclType.ELEMENT) {
+   if (details?.type === ElDeclType.ELEMENT) {
       const isXml = isXmlData(token);
       const isIgnoredToken =
          token.type == GENERAL_ENTITY_START_PTOKEN ||

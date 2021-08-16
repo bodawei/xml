@@ -8,18 +8,18 @@ import { makeParameterEntityDeclaration } from 'token-test';
 
 import { ElidedEntityDeclarationPToken } from 'token';
 
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { elidedEntityDeclarationUpdateState } from '../elidedEntityDeclarationUpdateState';
 import { parameterEntityDeclarationUpdateState } from '../parameterEntityDeclarationUpdateState';
 
 describe('elidedEntityDeclarationUpdateState (unit)', () => {
-   let state: ValidateState;
+   let state: ValidityState;
    let paramDecl: ParameterEntityDeclarationPToken;
    // new ParameterEntityDeclarationPToken({ open: toSToken('<!') })
 
    beforeEach(async () => {
       paramDecl = makeParameterEntityDeclaration();
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('adds an elided token to the state', () => {
@@ -29,7 +29,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
       const result = elidedEntityDeclarationUpdateState(elided, nextState);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             parameterEntities: {
                entityName: {
                   isExternalMarkupDeclaration: false,
@@ -54,7 +54,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
       const result = elidedEntityDeclarationUpdateState(elided, nextState);
 
       expect(result).toEqual(
-         new ValidateState({
+         new ValidityState({
             parameterEntities: {
                entityName: {
                   isExternalMarkupDeclaration: false,

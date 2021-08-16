@@ -8,7 +8,7 @@ import { GeneralEntityStartPToken } from 'token';
 import { makeGeneralEntityDeclaration, makeGeneralEntityStart } from 'token-test';
 
 import { validCodes } from '../../error/validCodes';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
 import { generalEntityStartValidate } from '../generalEntityStartValidate';
 
@@ -18,7 +18,7 @@ jest.mock('../ancestorPERefsValidate');
 
 describe('generalEntityStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
@@ -66,7 +66,7 @@ describe('generalEntityStartValidate (unit)', () => {
 
          it(testDescription, () => {
             const geDecl = makeGeneralEntityDeclaration();
-            state = new ValidateState({
+            state = new ValidityState({
                generalEntities: {
                   testRef: {
                      isExternalMarkupDeclaration,
@@ -104,7 +104,7 @@ describe('generalEntityStartValidate (unit)', () => {
 
       it('calls ancestorPERefsValidate() to validate ancestors (§2.9.0)', () => {
          const geDecl = makeGeneralEntityDeclaration();
-         state = new ValidateState({
+         state = new ValidityState({
             generalEntities: {
                testRef: {
                   isExternalMarkupDeclaration: true,

@@ -1,10 +1,6 @@
-import {
-   ErrorCollector,
-   ConformanceVersion,
-   CONFORMANCE_VERSION,
-   ERROR_TYPE,
-   ENTITY_ID,
-} from 'basic';
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
+
+import { ErrorCollector, CONFORMANCE_VERSION, ERROR_TYPE, ENTITY_ID } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -14,11 +10,11 @@ import {
    NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   ParseToken,
    PROCESSING_INSTRUCTION_PTOKEN,
    TEXTDECL_PTOKEN,
    TEXT_PTOKEN,
    XMLDECL_PTOKEN,
+   ParseToken,
 } from 'pToken';
 import {
    CONDITIONAL_PTOKEN,
@@ -44,8 +40,11 @@ import {
    INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
-import { ValidateState } from './common/validateState';
+import { isXmlData } from './common/isXmlData';
+import { contentUpdateState } from './common/contentUpdateState';
+import { contentValidate } from './common/contentValidate';
 import { entityDeclarationValueValidate } from './common/entityDeclarationValueValidate';
+import { ValidityState } from './common/validityState';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from './token/attListDeclarationValidate';
 import { charDataValidate } from './token/charDataValidate';
@@ -81,22 +80,16 @@ import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from './token/notationDeclarationValidate';
 import { elementDeclarationPreprocess } from './token/elementDeclarationPreprocess';
-import { isXmlData } from './common/isXmlData';
-import { contentUpdateState } from './common/contentUpdateState';
-import { contentValidate } from './common/contentValidate';
 
 class ValidityChecker {
-   private version: ConformanceVersion;
-
-   private state: ValidateState;
+   private state: ValidityState;
 
    private seenXmlDecl: boolean;
 
    private seenVersion: boolean;
 
    constructor() {
-      this.version = new ConformanceVersion();
-      this.state = new ValidateState();
+      this.state = new ValidityState();
       this.seenXmlDecl = false;
       this.seenVersion = false;
    }
@@ -111,9 +104,10 @@ class ValidityChecker {
       switch (token.type) {
          case CONFORMANCE_VERSION:
             if (!this.seenVersion) {
-               this.version = token;
                this.seenVersion = true;
-               this.state.confVer = token;
+               this.state = new ValidityState(this.state, {
+                  confVer: token,
+               });
             }
             break;
          case ATTLIST_DECLARATION_PTOKEN:
@@ -139,9 +133,9 @@ class ValidityChecker {
             this.state = docTypeEndUpdateState(token, this.state);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
-            const declDetails = elementDeclarationPreprocess(token, this.state);
-            elementDeclarationValidate(token, declDetails, this.state, ec, this.version);
-            this.state = elementDeclarationUpdateState(token, declDetails, this.state);
+            const details = elementDeclarationPreprocess(token, this.state);
+            elementDeclarationValidate(token, details, this.state, ec);
+            this.state = elementDeclarationUpdateState(token, details, this.state);
             break;
          case ELEMENT_END_PTOKEN:
             elementEndValidate(token, this.state, ec);
@@ -223,13 +217,12 @@ class ValidityChecker {
       }
 
       if (isXmlData(token)) {
-         this.state = {
-            ...this.state,
+         this.state = new ValidityState(this.state, {
             dtdContext: {
                ...this.state.dtdContext,
                lastPToken: token,
             },
-         };
+         });
       }
    }
 }

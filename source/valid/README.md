@@ -220,12 +220,6 @@ Note that earlier versions of this system tried to do more validation in a singl
 
 One of the more complex aspects of this system is that of the graphs representing an element declaration's content model. This is discussed in more detail below.
 
-### Specific token details
-
-#### Element end
-* If this encounters an unbalanced end, it will ignore the end element.
-   * Like wellformedness, this does not try to auto-close parent elements.
-
 
 ### ContentModelGraphs
 In order to validate whether the elements in a particular model conform to the content model description in an element declaration, this converts a content model in to a graph representation.  
@@ -388,6 +382,17 @@ The last processing phase does two things:
 * We probably ought to have a different internal structure and external structure, so the `autoTrans` property is never seen outside.
 
 ## Code style
+* Filenames should start with lower case
 * A comment should be placed before each check for a valitity error that lists the section, and the portion of the text from the spec that describes the constraint.  This should be done with line comments.
 * Each test for a valitity constraint should list the section of the spec this test is checking.
 * Each group of tests for one validity constraint should be in its own `describe()` section.
+* This strives to treat the validityState as an immutable data structure.  The ValidityState type follows the same pattern of PTokens where you can merge two other objects by passing two arguments to the constructor.
+
+## Architecture notes 
+(move to the architecture section, above)
+
+### Specific token details
+
+#### Element end
+* If this encounters an unbalanced end, it will ignore the end element.
+   * Like wellformedness, this does not try to auto-close parent elements.

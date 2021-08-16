@@ -21,19 +21,19 @@ import {
 } from 'token-test';
 
 import { validCodes } from '../../error/validCodes';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 import { parameterEntityEndValidate } from '../parameterEntityEndValidate';
 
 const VID = validCodes.id;
 
 describe('parameterEntityEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
 
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
          },
@@ -114,7 +114,7 @@ describe('parameterEntityEndValidate (unit)', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 
       it(`reports an error when there was an incomplete ${type} declaration at the end of the parameter entity content`, () => {
-         state = new ValidateState({
+         state = new ValidityState({
             dtdContext: {
                enclosingStack: [makeParameterEntityStart()],
                lastPToken: token,
@@ -133,7 +133,7 @@ describe('parameterEntityEndValidate (unit)', () => {
       });
 
       it(`reports no error when there was a complete ${type} declaration at the end of the parameter entity content`, () => {
-         state = new ValidateState({
+         state = new ValidityState({
             dtdContext: {
                enclosingStack: [makeParameterEntityStart()],
                lastPToken: wholeToken,
@@ -147,7 +147,7 @@ describe('parameterEntityEndValidate (unit)', () => {
    });
 
    it('reports no error when there was another token at the end of the parameter entity content', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
             lastPToken: makeCharData(),
@@ -160,7 +160,7 @@ describe('parameterEntityEndValidate (unit)', () => {
    });
 
    it('reports an error when the previous thing in the enclosingStack is a conditional section start', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeConditionalSection()],
          },

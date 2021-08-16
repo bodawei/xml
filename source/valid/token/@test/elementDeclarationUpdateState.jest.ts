@@ -5,12 +5,12 @@ import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
 import { ElementDeclarationPToken } from 'pToken';
 
-import { DeclarationDetails, ElDeclType, ValidateState } from '../../common/validateState';
+import { ContentDetails, ElDeclType, ValidityState } from '../../common/validityState';
 import { elementDeclarationUpdateState } from '../elementDeclarationUpdateState';
 
 describe('elementDeclarationUpdateState (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(async () => {
       elementDeclaration = new ElementDeclarationPToken({
@@ -20,7 +20,7 @@ describe('elementDeclarationUpdateState (unit)', () => {
          open: toSToken('<!'),
       });
 
-      state = new ValidateState();
+      state = new ValidityState();
    });
 
    it('adds a declaration with a content spec or model to the state as an ANY type', () => {
@@ -34,8 +34,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   token: elementDeclaration,
                   type: ElDeclType.ANY,
@@ -63,8 +63,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   token: elementDeclaration,
                   type: ElDeclType.ANY,
@@ -85,6 +85,7 @@ describe('elementDeclarationUpdateState (unit)', () => {
       const result = elementDeclarationUpdateState(
          elementDeclaration,
          {
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.EMPTY,
          },
@@ -92,9 +93,10 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
+                  isExternalMarkupDeclaration: false,
                   token: elementDeclaration,
                   type: ElDeclType.EMPTY,
                },
@@ -111,17 +113,17 @@ describe('elementDeclarationUpdateState (unit)', () => {
          name: toSToken('elementName'),
          open: toSToken('<!'),
       });
-      const declDetails: DeclarationDetails = {
+      const details: ContentDetails = {
          token: elementDeclaration,
          type: ElDeclType.EMPTY,
       };
 
-      const result1 = elementDeclarationUpdateState(elementDeclaration, declDetails, state);
-      const result2 = elementDeclarationUpdateState(second, declDetails, result1);
+      const result1 = elementDeclarationUpdateState(elementDeclaration, details, state);
+      const result2 = elementDeclarationUpdateState(second, details, result1);
 
       expect(result2).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   token: elementDeclaration,
                   type: ElDeclType.EMPTY,
@@ -168,8 +170,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   names: ['one', 'two'],
                   token: elementDeclaration,
@@ -212,8 +214,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   names: ['one'],
                   token: elementDeclaration,
@@ -267,8 +269,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   names: ['one', 'one', 'one'],
                   token: elementDeclaration,
@@ -323,8 +325,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   names: ['one'],
                   token: elementDeclaration,
@@ -355,8 +357,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   token: elementDeclaration,
                   type: ElDeclType.EMPTY,
@@ -413,8 +415,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   graph: { endId: 0, startId: 0, states: {} },
                   token: elementDeclaration,
@@ -456,8 +458,8 @@ describe('elementDeclarationUpdateState (unit)', () => {
       );
 
       expect(result).toEqual(
-         new ValidateState({
-            elementDeclarations: {
+         new ValidityState({
+            elements: {
                elementName: {
                   graph: { endId: 0, startId: 0, states: {} },
                   token: elementDeclaration,

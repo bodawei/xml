@@ -7,13 +7,13 @@ import { toSToken } from 'sToken';
 
 import { docEndValidate } from '../docEndValidate';
 import { validCodes } from '../../error/validCodes';
-import { ValidateState } from '../../common/validateState';
+import { ValidityState } from '../../common/validityState';
 
 const VID = validCodes.id;
 
 describe('docEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
@@ -21,7 +21,7 @@ describe('docEndValidate (unit)', () => {
 
    describe('IDREF (§3.3.1)', () => {
       it('reports an error when an idref value has no corresponding id value (§3.3.1)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             idRefs: {
                value1: {
                   attName: 'otherAtt',
@@ -44,7 +44,7 @@ describe('docEndValidate (unit)', () => {
       });
 
       it('reports no error when an idref value has a corresponding id value (§3.3.1)', () => {
-         state = new ValidateState({
+         state = new ValidityState({
             idRefs: {
                value1: {
                   attName: 'otherAtt',

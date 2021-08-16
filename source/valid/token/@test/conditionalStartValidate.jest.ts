@@ -8,22 +8,22 @@ import { ConditionalPToken } from 'token';
 import { makeElementDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { conditionalStartValidate } from '../conditionalStartValidate';
-import { ElDeclType, ValidateState } from '../../common/validateState';
+import { ElDeclType, ValidityState } from '../../common/validityState';
 import { validCodes } from '../../error/validCodes';
 
 const VID = validCodes.id;
 
 describe('conditionalStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
 
-      state = new ValidateState({
+      state = new ValidityState({
          elementContext: {
             activeContext: {
-               declDetails: {
+               details: {
                   graph: { endId: 0, startId: 0, states: {} },
                   isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(),

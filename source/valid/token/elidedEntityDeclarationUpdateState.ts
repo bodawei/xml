@@ -3,12 +3,12 @@
 import { strOrBlank } from 'sToken';
 import { ElidedEntityDeclarationPToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function elidedEntityDeclarationUpdateState(
    el: ElidedEntityDeclarationPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    const elName = strOrBlank(el.name);
    const existingEntry = state.parameterEntities[elName];
 

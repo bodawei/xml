@@ -2,12 +2,12 @@
 
 import { ParameterEntityEndPToken, PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 
 function parameterEntityEndUpdateState(
    endPToken: ParameterEntityEndPToken,
-   state: ValidateState,
-): ValidateState {
+   state: ValidityState,
+): ValidityState {
    let newStack = state.dtdContext.enclosingStack;
    let inParameterEntityRef = false;
 

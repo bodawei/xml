@@ -11,21 +11,21 @@ import {
 } from 'token-test';
 
 import { entityDeclarationValueValidate } from '../entityDeclarationValueValidate';
-import { ValidateState } from '../validateState';
+import { ValidityState } from '../validityState';
 import { validCodes } from '../../error/validCodes';
 
 const VID = validCodes.id;
 
 describe('entityDeclarationValueValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
-   let state: ValidateState;
+   let state: ValidityState;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
    });
 
    it('reports no error when the declaration is defined (§4.1.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          hasExternalSubset: true,
          parameterEntities: {
             entityName: {
@@ -47,7 +47,7 @@ describe('entityDeclarationValueValidate (unit)', () => {
    });
 
    it('reports no error when the declaration is for a reference is not declared, but the document is standalone (§4.1.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          hasExternalSubset: false,
          isStandalone: true,
          parameterEntities: {},
@@ -64,7 +64,7 @@ describe('entityDeclarationValueValidate (unit)', () => {
    });
 
    it('reports an error when the declaration is for a reference is not declared and there is an external subset (§4.1.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          hasExternalSubset: true,
          parameterEntities: {},
       });
@@ -86,7 +86,7 @@ describe('entityDeclarationValueValidate (unit)', () => {
    });
 
    it('reports an error when the declaration is for a reference is not declared and there are perefs (§4.1.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          hasPeRefs: true,
          parameterEntities: {},
       });
@@ -108,7 +108,7 @@ describe('entityDeclarationValueValidate (unit)', () => {
    });
 
    it('reports an error when the declaration for a start is not declared (§4.1.0)', () => {
-      state = new ValidateState({
+      state = new ValidityState({
          hasExternalSubset: true,
          parameterEntities: {},
       });

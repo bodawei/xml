@@ -11,7 +11,7 @@ import {
 } from 'pToken';
 import { COMMENT_PTOKEN, CONDITIONAL_PTOKEN, ParameterEntityEndPToken } from 'token';
 
-import { ValidateState } from '../common/validateState';
+import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 import { SToken } from 'sToken';
 
@@ -19,7 +19,7 @@ const VID = validCodes.id;
 
 function parameterEntityEndValidate(
    endPToken: ParameterEntityEndPToken,
-   state: ValidateState,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
    const lastPToken = state.dtdContext.lastPToken;
