@@ -3,7 +3,7 @@
 import { EntityId, Offset, XML_ERROR_TOKEN } from 'basic';
 import { toSToken } from 'sToken';
 
-import { VALIDITY_ERROR_SUBTYPE, ValidityError } from '../ValidityError';
+import { VALIDITY_ERROR_SUBTYPE, ValidityError } from '../validityError';
 
 describe('ValidityError()', () => {
    it('constructs an instance with just an id', () => {

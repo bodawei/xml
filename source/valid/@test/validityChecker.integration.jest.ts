@@ -10,8 +10,8 @@ import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
 import { AttFixerStream, EntityExpanderStream } from 'node';
 
-import { ValidityChecker } from '../ValidityChecker';
-import { ValidityError } from '../error/ValidityError';
+import { ValidityChecker } from '../validityChecker';
+import { ValidityError } from '../error/validityError';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;

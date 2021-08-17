@@ -57,7 +57,7 @@ import { parameterEntityStartValidate } from '../token/parameterEntityStartValid
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 import { contentValidate } from '../common/contentValidate';
 import { contentUpdateState } from '../common/contentUpdateState';
-import { ValidityChecker } from '../ValidityChecker';
+import { ValidityChecker } from '../validityChecker';
 
 jest.mock('../common/entityDeclarationValueValidate');
 jest.mock('../token/attListDeclarationValidate');
