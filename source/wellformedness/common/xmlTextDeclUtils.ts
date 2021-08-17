@@ -82,7 +82,7 @@ function checkVersionString(
             ec.reportError(warning.id.XMLDECL_VERSION_INVALID, WarningToken, ['1.0', versionText]);
          } else {
             // We'd ike to consider this a warning too, but there are xmlconf tests which want an error in thise case
-            ec.reportError(code, WellFormedError, ['1.0', versionText]);
+            ec.reportError(code, WellFormedError as any, ['1.0', versionText]);
          }
       }
    } else {

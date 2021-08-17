@@ -2,9 +2,8 @@
 
 import { Transform } from 'stream';
 
-import { ErrorCollector } from 'basic';
-import { getFirstSToken, PToken } from 'token';
-import { ValidityError, ValidityChecker } from 'valid';
+import { PToken } from 'token';
+import { ValidityChecker } from 'valid';
 
 /*
  * Blah blah blah
@@ -19,10 +18,7 @@ class CheckValidityStream extends Transform {
    }
 
    _transform(pToken: PToken, encoding: string, done: () => void) {
-      const errorCollector = new ErrorCollector(getFirstSToken(pToken), ValidityError);
-      this.checker.checkPToken(pToken, errorCollector);
-
-      const errors = errorCollector.getErrors();
+      const errors = this.checker.check(pToken, );
 
       for (const error of errors) {
          this.push(error);

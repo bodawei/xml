@@ -5,6 +5,7 @@ import ErrorCollector from '../../ErrorCollector';
 import { SToken } from 'sToken';
 
 import { Position, BaseError } from '../../BaseError';
+import { XmlErrorToken } from 'source/basic/error/XmlErrorToken';
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace
@@ -38,7 +39,7 @@ class MockErrorCollector extends ErrorCollector {
 
    public _lastPosition?: SToken;
 
-   public errors: Array<ErrorInfo> = [];
+   public errors: Array<XmlErrorToken> = [];
 
    constructor() {
       super(SToken.fromString('test'), BaseError as any);
@@ -69,7 +70,7 @@ class MockErrorCollector extends ErrorCollector {
          info.lastPosition = this._lastNotNull;
       }
 
-      this.errors.push(info);
+      this.errors.push(info as any);
    }
 
    check(condition: any, id: string, params?: Array<string>, position?: Position): void {

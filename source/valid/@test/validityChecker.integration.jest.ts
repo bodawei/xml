@@ -2,24 +2,20 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector, ErrorToken } from 'basic';
+import { ConformanceVersion, XmlErrorToken } from 'basic';
 import { gatherStreamResults } from 'basic-test';
+import { AttFixerStream, EntityExpanderStream } from 'node';
 import { ContextType, ParseToken } from 'pToken';
 import { PTokenStream } from '../../pTokenStream';
-import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
-import { AttFixerStream, EntityExpanderStream } from 'node';
 
 import { ValidityChecker } from '../validityChecker';
-import { ValidityError } from '../error/validityError';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
 describe('ValidityChecker (integration)', () => {
-   let ec: ErrorCollector;
    let checker: ValidityChecker;
-   let pTokenStream: PTokenStream;
 
    beforeEach(() => {
       checker = new ValidityChecker();
@@ -31,35 +27,28 @@ describe('ValidityChecker (integration)', () => {
       done: () => void,
       confVer?: ConformanceVersion,
    ): void {
-      const finalResults: Array<ErrorToken> = [];
-
-      pTokenStream = new PTokenStream(new STokenSource(), {
+      const finalResults: Array<XmlErrorToken> = [];
+      const pTokenStream = new PTokenStream(new STokenSource(), {
          confVer,
          context: ContextType.DOCUMENT,
       });
-      pTokenStream.addText(input);
-      pTokenStream.endText();
       const entityExpander = new EntityExpanderStream(true);
       const attFixer = new AttFixerStream();
 
+      pTokenStream.addText(input);
+      pTokenStream.endText();
       pTokenStream.pipe(entityExpander).pipe(attFixer);
 
       gatherStreamResults<ParseToken>(attFixer, (results) => {
-         // console.json(results);
          for (const result of results) {
-            ec = new ErrorCollector(
-               'open' in result ? result.open : toSToken('foo'),
-               ValidityError,
-            );
+            const errors = checker.check(result);
 
-            checker.checkPToken(result, ec);
-
-            finalResults.push(...(ec.errors as Array<ErrorToken>));
+            finalResults.push(...errors);
          }
 
          const targetError = finalResults.find((err) => err.id === errorCode);
 
-         expect(targetError?.id).toEqual(errorCode || 'Unknown error code passed');
+         expect(targetError?.id).toEqual(errorCode);
          done();
       });
    }

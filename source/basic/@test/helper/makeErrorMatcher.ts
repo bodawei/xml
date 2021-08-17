@@ -32,7 +32,7 @@ function makeMatcher(ErrorClass: any) {
       let message = `No error with the id ${expectedError.id} reported.`;
 
       for (let index = 0; index < errors.length; index++) {
-         const actual = errors[index];
+         const actual: any = errors[index];
 
          if (expectedError.id === actual.id) {
             let errMsg;

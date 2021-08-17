@@ -14,7 +14,7 @@ describe('error helper', () => {
                   id: 'BOGUS_ERR',
                   params: undefined,
                   position: undefined,
-               });
+               }) as any;
             } catch (err) {
                expect(err.message).toEqual('Did not get a mock error collector as expected.');
             }
@@ -32,13 +32,13 @@ describe('error helper', () => {
                {
                   params: undefined,
                   position: undefined,
-               },
+               } as any,
             ];
             expect(
                toReportWFError({ equals: () => true }).compare(mock, {
                   params: undefined,
                   position: undefined,
-               } as any),
+               } as any) as any,
             ).toEqual({
                pass: false,
                message: 'The error undefined is not a legal error ID.',
@@ -52,14 +52,14 @@ describe('error helper', () => {
                   id: 'BOGUS_ERR',
                   params: undefined,
                   position: undefined,
-               },
+               } as any,
             ];
             expect(
                toReportWFError({ equals: () => true }).compare(mock, {
                   id: 'BOGUS_ERR',
                   params: undefined,
                   position: undefined,
-               }),
+               }) as any,
             ).toEqual({
                pass: false,
                message: 'The error BOGUS_ERR is not a legal error ID.',
@@ -73,7 +73,7 @@ describe('error helper', () => {
                   id: 'zzz',
                   params: undefined,
                   position: undefined,
-               },
+               } as any,
             ];
 
             expect(
@@ -81,7 +81,7 @@ describe('error helper', () => {
                   id: 'zzz',
                   params: undefined,
                   position: undefined,
-               }),
+               } as any),
             ).toEqual({
                pass: false,
                message: 'The error zzz is not a legal error ID.',
@@ -95,7 +95,7 @@ describe('error helper', () => {
                   id: 'XMLDECL_PARAM_INVALID_CASE', // only has 2 params
                   params: ['1', '2', '3'],
                   position: undefined,
-               },
+               } as any,
             ];
 
             expect(
@@ -103,7 +103,7 @@ describe('error helper', () => {
                   id: 'XMLDECL_PARAM_INVALID_CASE',
                   params: undefined,
                   position: undefined,
-               }),
+               }) as any,
             ).toEqual({
                pass: false,
                message: 'XMLDECL_PARAM_INVALID_CASE expects 2 parameters, but 3 found.',
@@ -117,14 +117,14 @@ describe('error helper', () => {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
                   position: undefined,
-               },
+               } as any,
             ];
             expect(
                toReportWFError({ equals: () => true }).compare(mock, {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
                   position: undefined,
-               }),
+               }) as any,
             ).toEqual({
                pass: true,
                message: 'Error matching XMLDECL_NO_CLOSE was found, but should not have been.',
@@ -138,14 +138,14 @@ describe('error helper', () => {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
                   position: undefined,
-               },
+               } as any,
             ];
             expect(
                toReportWFError({ equals: () => true }).compare(mock, {
                   id: 'XMLDECL_ENCODING_INVALID_ORDER',
                   params: undefined,
                   position: undefined,
-               }),
+               }) as any,
             ).toEqual({
                pass: false,
                message: 'No error with the id XMLDECL_ENCODING_INVALID_ORDER reported.',
@@ -159,7 +159,7 @@ describe('error helper', () => {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
                   position: undefined,
-               },
+               } as any,
             ];
 
             expect(
@@ -167,7 +167,7 @@ describe('error helper', () => {
                   id: 'XMLDECL_NO_CLOSE',
                   params: ['1'],
                   position: undefined,
-               }),
+               }) as any,
             ).toEqual({
                pass: false,
                message:
@@ -182,14 +182,14 @@ describe('error helper', () => {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
                   position: new Offset(new EntityId(), 1, 2, 3),
-               },
+               } as any,
             ];
             expect(
                toReportWFError({ equals: (a: any, b: any) => a === b }).compare(mock, {
                   id: 'XMLDECL_NO_CLOSE',
                   params: undefined,
                   position: new Offset(new EntityId(), 5, 6, 7),
-               }),
+               }) as any,
             ).toEqual({
                pass: false,
                message:
@@ -205,7 +205,7 @@ describe('error helper', () => {
                   params: undefined,
                   position: undefined,
                   lastPosition: new Offset(new EntityId(), 99, 88, 77),
-               },
+               } as any,
             ];
 
             expect(
@@ -214,7 +214,7 @@ describe('error helper', () => {
                   params: undefined,
                   position: undefined,
                   lastPosition: new Offset(new EntityId(), 99, 88, 11),
-               }),
+               }) as any,
             ).toEqual({
                pass: false,
                message:
@@ -230,7 +230,7 @@ describe('error helper', () => {
                   params: undefined,
                   position: undefined,
                   lastPosition: new Offset(new EntityId(), 1, 2, 3),
-               },
+               } as any,
             ];
 
             expect(
@@ -239,7 +239,7 @@ describe('error helper', () => {
                   params: undefined,
                   position: undefined,
                   lastPosition: undefined,
-               }),
+               }) as any,
             ).toEqual({
                pass: false,
                message:

@@ -60,7 +60,7 @@ class CheckWellFormed extends Transform {
    }
 
    _transform(pToken: PToken, encoding: string, done: () => void) {
-      const errorCollector = new ErrorCollector(getFirstSToken(pToken), WellFormedError);
+      const errorCollector = new ErrorCollector(getFirstSToken(pToken), WellFormedError as any);
       this.checker.check(pToken, errorCollector);
 
       const errors = errorCollector.getErrors();
@@ -74,7 +74,7 @@ class CheckWellFormed extends Transform {
    }
 
    _final(done: () => void) {
-      const errorCollector = new ErrorCollector(SToken.fromString(''), WellFormedError);
+      const errorCollector = new ErrorCollector(SToken.fromString(''), WellFormedError as any);
       this.checker.finish(errorCollector);
 
       const errors = errorCollector.getErrors();

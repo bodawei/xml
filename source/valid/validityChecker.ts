@@ -1,6 +1,6 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, CONFORMANCE_VERSION, ERROR_TYPE, ENTITY_ID } from 'basic';
+import { ErrorCollector, CONFORMANCE_VERSION, ERROR_TYPE, ENTITY_ID, XmlErrorToken } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -38,6 +38,7 @@ import {
    GENERAL_ENTITY_START_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
+   getFirstSToken,
 } from 'token';
 
 import { isXmlData } from './common/isXmlData';
@@ -80,6 +81,7 @@ import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from './token/notationDeclarationValidate';
 import { elementDeclarationPreprocess } from './token/elementDeclarationPreprocess';
+import { ValidityError } from './error/validityError';
 
 class ValidityChecker {
    private state: ValidityState;
@@ -94,8 +96,8 @@ class ValidityChecker {
       this.seenVersion = false;
    }
 
-   checkPToken(token: ParseToken, ec: ErrorCollector): void {
-      // Shouldn't THIS be creating the error collector and making sure the context is correct?
+   check(token: ParseToken): Array<XmlErrorToken> {
+      const ec = new ErrorCollector(getFirstSToken(token), ValidityError);
       const wasAtEndBefore = this.state.elementContext.pastEnd;
 
       contentValidate(token, this.state, ec);
@@ -224,6 +226,8 @@ class ValidityChecker {
             },
          });
       }
+
+      return ec.getErrors();
    }
 }
 

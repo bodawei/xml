@@ -1,8 +1,7 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { toSToken } from 'sToken';
 import { ConditionalClosePToken, ConditionalPToken, ElidedEntityDeclarationPToken } from 'token';
 import {
@@ -59,6 +58,8 @@ import { contentValidate } from '../common/contentValidate';
 import { contentUpdateState } from '../common/contentUpdateState';
 import { ValidityChecker } from '../validityChecker';
 
+jest.mock('../common/contentValidate');
+jest.mock('../common/contentUpdateState');
 jest.mock('../common/entityDeclarationValueValidate');
 jest.mock('../token/attListDeclarationValidate');
 jest.mock('../token/attListDeclarationUpdateState');
@@ -88,13 +89,10 @@ jest.mock('../token/parameterEntityDeclarationUpdateState');
 jest.mock('../token/parameterEntityReferenceValidate');
 jest.mock('../token/parameterEntityStartValidate');
 jest.mock('../token/xmlDeclarationUpdateState');
-jest.mock('../common/contentValidate');
-jest.mock('../common/contentUpdateState');
 
 describe('ValidityChecker (unit)', () => {
    let version: ConformanceVersion;
    let checker: ValidityChecker;
-   let ec: MockErrorCollector;
    let elementDeclarationUpdateStateMock: jest.MockedFunction<typeof elementDeclarationUpdateState>;
    let conditionalStartUpdateStateMock: jest.MockedFunction<typeof conditionalStartUpdateState>;
    let conditionalEndUpdateStateMock: jest.MockedFunction<typeof conditionalEndUpdateState>;
@@ -102,7 +100,6 @@ describe('ValidityChecker (unit)', () => {
    beforeEach(async () => {
       version = new ConformanceVersion();
       checker = new ValidityChecker();
-      ec = new MockErrorCollector();
 
       elementDeclarationUpdateStateMock = elementDeclarationUpdateState as jest.MockedFunction<
          typeof elementDeclarationUpdateState
@@ -127,36 +124,50 @@ describe('ValidityChecker (unit)', () => {
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
 
-      checker.checkPToken(version, ec);
-      checker.checkPToken(elDecl, ec);
+      checker.check(version);
+      checker.check(elDecl);
 
-      expect(elementDeclarationValidate).toHaveBeenCalledWith(elDecl, {}, expect.any(Object), ec);
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(
+         elDecl,
+         {},
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('stores only the first version passed to it', () => {
       (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
-      checker.checkPToken(version, ec);
+      checker.check(version);
 
-      checker.checkPToken(new ConformanceVersion(1, 2), ec);
-      checker.checkPToken(elDecl, ec);
+      checker.check(new ConformanceVersion(1, 2));
+      checker.check(elDecl);
 
-      expect(elementDeclarationValidate).toHaveBeenCalledWith(elDecl, {}, expect.any(Object), ec);
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(
+         elDecl,
+         {},
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('validates the content on every token (§3.0.0)', () => {
       const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
 
-      checker.checkPToken(conditional, ec);
+      checker.check(conditional);
 
-      expect(contentValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
+      expect(contentValidate).toHaveBeenCalledWith(
+         conditional,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state on every token (§3.0.0)', () => {
       const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
 
-      checker.checkPToken(conditional, ec);
+      checker.check(conditional);
 
       expect(contentUpdateState).toHaveBeenCalledWith(conditional, expect.any(Object));
    });
@@ -165,16 +176,20 @@ describe('ValidityChecker (unit)', () => {
       (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const attListDecl = makeAttListDeclaration();
 
-      checker.checkPToken(attListDecl, ec);
+      checker.check(attListDecl);
 
-      expect(attListDeclarationValidate).toHaveBeenCalledWith(attListDecl, expect.any(Object), ec);
+      expect(attListDeclarationValidate).toHaveBeenCalledWith(
+         attListDecl,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed an ATTLIST declaration', () => {
       (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const attListDecl = makeAttListDeclaration();
 
-      checker.checkPToken(attListDecl, ec);
+      checker.check(attListDecl);
 
       expect(attListDeclarationUpdateState).toHaveBeenCalledWith(attListDecl, expect.any(Object));
    });
@@ -182,7 +197,7 @@ describe('ValidityChecker (unit)', () => {
    it('updates the state for a conditional end', () => {
       const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
 
-      checker.checkPToken(conditional, ec);
+      checker.check(conditional);
 
       expect(conditionalEndUpdateState).toHaveBeenCalledWith(conditional, expect.any(Object));
    });
@@ -190,24 +205,32 @@ describe('ValidityChecker (unit)', () => {
    it('validates a conditional end', () => {
       const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
 
-      checker.checkPToken(conditional, ec);
+      checker.check(conditional);
 
-      expect(conditionalEndValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
+      expect(conditionalEndValidate).toHaveBeenCalledWith(
+         conditional,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('validates a conditional start', () => {
       const conditional = new ConditionalPToken({ open: toSToken('<![') });
-      checker.checkPToken(version, ec);
+      checker.check(version);
 
-      checker.checkPToken(conditional, ec);
+      checker.check(conditional);
 
-      expect(conditionalStartValidate).toHaveBeenCalledWith(conditional, expect.any(Object), ec);
+      expect(conditionalStartValidate).toHaveBeenCalledWith(
+         conditional,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state for a conditional start', () => {
       const conditional = new ConditionalPToken({ open: toSToken('<![') });
 
-      checker.checkPToken(conditional, ec);
+      checker.check(conditional);
 
       expect(conditionalStartUpdateState).toHaveBeenCalledWith(conditional, expect.any(Object));
    });
@@ -216,7 +239,7 @@ describe('ValidityChecker (unit)', () => {
       (docTypeStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const docTypeStart = makeDocTypeStart();
 
-      checker.checkPToken(docTypeStart, ec);
+      checker.check(docTypeStart);
 
       expect(docTypeStartUpdateState).toHaveBeenCalledWith(docTypeStart, expect.any(Object));
    });
@@ -225,7 +248,7 @@ describe('ValidityChecker (unit)', () => {
       (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elementEmpty = makeElementEmpty();
 
-      checker.checkPToken(elementEmpty, ec);
+      checker.check(elementEmpty);
 
       expect(elementStartUpdateState).toHaveBeenCalledWith(elementEmpty, expect.any(Object));
    });
@@ -234,9 +257,13 @@ describe('ValidityChecker (unit)', () => {
       (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elStart = makeElementStart();
 
-      checker.checkPToken(elStart, ec);
+      checker.check(elStart);
 
-      expect(elementStartValidate).toHaveBeenCalledWith(elStart, expect.any(Object), ec);
+      expect(elementStartValidate).toHaveBeenCalledWith(
+         elStart,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed an element declaration', () => {
@@ -244,7 +271,7 @@ describe('ValidityChecker (unit)', () => {
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
 
-      checker.checkPToken(elDecl, ec);
+      checker.check(elDecl);
 
       expect(elementDeclarationUpdateState).toHaveBeenCalledWith(elDecl, {}, expect.any(Object));
    });
@@ -253,18 +280,23 @@ describe('ValidityChecker (unit)', () => {
       (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
       (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
-      checker.checkPToken(version, ec);
+      checker.check(version);
 
-      checker.checkPToken(elDecl, ec);
+      checker.check(elDecl);
 
-      expect(elementDeclarationValidate).toHaveBeenCalledWith(elDecl, {}, expect.any(Object), ec);
+      expect(elementDeclarationValidate).toHaveBeenCalledWith(
+         elDecl,
+         {},
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed an element end', () => {
       (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elementEnd = makeElementEnd();
 
-      checker.checkPToken(elementEnd, ec);
+      checker.check(elementEnd);
 
       expect(elementEndUpdateState).toHaveBeenCalledWith(elementEnd, expect.any(Object));
    });
@@ -273,9 +305,13 @@ describe('ValidityChecker (unit)', () => {
       (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const elementEnd = makeElementEnd();
 
-      checker.checkPToken(elementEnd, ec);
+      checker.check(elementEnd);
 
-      expect(elementEndValidate).toHaveBeenCalledWith(elementEnd, expect.any(Object), ec);
+      expect(elementEndValidate).toHaveBeenCalledWith(
+         elementEnd,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed an elided entity declaration', () => {
@@ -283,7 +319,7 @@ describe('ValidityChecker (unit)', () => {
       const peDecl = makeParameterEntityDeclaration();
       const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value);
 
-      checker.checkPToken(elided, ec);
+      checker.check(elided);
 
       expect(elidedEntityDeclarationUpdateState).toHaveBeenCalledWith(elided, expect.any(Object));
    });
@@ -292,16 +328,20 @@ describe('ValidityChecker (unit)', () => {
       const peDecl = makeParameterEntityDeclaration();
       const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value);
 
-      checker.checkPToken(elided, ec);
+      checker.check(elided);
 
-      expect(entityDeclarationValueValidate).toHaveBeenCalledWith(elided, expect.any(Object), ec);
+      expect(entityDeclarationValueValidate).toHaveBeenCalledWith(
+         elided,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed an external subset end', () => {
       (externalSubsetEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const esSSEnd = makeExternalSubsetEnd();
 
-      checker.checkPToken(esSSEnd, ec);
+      checker.check(esSSEnd);
 
       expect(externalSubsetEndUpdateState).toHaveBeenCalledWith(esSSEnd, expect.any(Object));
    });
@@ -310,7 +350,7 @@ describe('ValidityChecker (unit)', () => {
       (externalSubsetStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const esSSStart = makeExternalSubsetStart();
 
-      checker.checkPToken(esSSStart, ec);
+      checker.check(esSSStart);
 
       expect(externalSubsetStartUpdateState).toHaveBeenCalledWith(esSSStart, expect.any(Object));
    });
@@ -319,39 +359,47 @@ describe('ValidityChecker (unit)', () => {
       (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const geDecl = makeGeneralEntityDeclaration();
 
-      checker.checkPToken(geDecl, ec);
+      checker.check(geDecl);
 
-      expect(entityDeclarationValidate).toHaveBeenCalledWith(geDecl, expect.any(Object), ec);
+      expect(entityDeclarationValidate).toHaveBeenCalledWith(
+         geDecl,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed a general entity declaration', () => {
       (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const geDecl = makeGeneralEntityDeclaration();
 
-      checker.checkPToken(geDecl, ec);
+      checker.check(geDecl);
 
       expect(generalEntityDeclarationUpdateState).toHaveBeenCalledWith(geDecl, expect.any(Object));
    });
 
    it('validates the state at the end of a DTD', () => {
-      checker.checkPToken(makeDocTypeEnd(), ec);
+      checker.check(makeDocTypeEnd());
 
-      expect(dtdEndValidate).toHaveBeenCalledWith(expect.any(Object), ec);
+      expect(dtdEndValidate).toHaveBeenCalledWith(expect.any(Object), expect.any(ErrorCollector));
    });
 
    it('validates an general entity reference', () => {
       const geRef = makeGeneralEntityReference();
 
-      checker.checkPToken(geRef, ec);
+      checker.check(geRef);
 
-      expect(generalEntityReferenceValidate).toHaveBeenCalledWith(geRef, expect.any(Object), ec);
+      expect(generalEntityReferenceValidate).toHaveBeenCalledWith(
+         geRef,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed a notation declaration', () => {
       (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const notationDecl = makeNotationDeclaration();
 
-      checker.checkPToken(notationDecl, ec);
+      checker.check(notationDecl);
 
       expect(notationDeclarationUpdateState).toHaveBeenCalledWith(notationDecl, expect.any(Object));
    });
@@ -360,12 +408,12 @@ describe('ValidityChecker (unit)', () => {
       (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const notationDecl = makeNotationDeclaration();
 
-      checker.checkPToken(notationDecl, ec);
+      checker.check(notationDecl);
 
       expect(notationDeclarationValidate).toHaveBeenCalledWith(
          notationDecl,
          expect.any(Object),
-         ec,
+         expect.any(ErrorCollector),
       );
    });
 
@@ -373,32 +421,44 @@ describe('ValidityChecker (unit)', () => {
       (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
 
-      checker.checkPToken(peDecl, ec);
+      checker.check(peDecl);
 
-      expect(entityDeclarationValidate).toHaveBeenCalledWith(peDecl, expect.any(Object), ec);
+      expect(entityDeclarationValidate).toHaveBeenCalledWith(
+         peDecl,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('validates an general entity start', () => {
       const geStart = makeGeneralEntityStart();
 
-      checker.checkPToken(geStart, ec);
+      checker.check(geStart);
 
-      expect(generalEntityStartValidate).toHaveBeenCalledWith(geStart, expect.any(Object), ec);
+      expect(generalEntityStartValidate).toHaveBeenCalledWith(
+         geStart,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('validates an parameter entity reference', () => {
       const peRef = makeParameterEntityReference();
 
-      checker.checkPToken(peRef, ec);
+      checker.check(peRef);
 
-      expect(parameterEntityReferenceValidate).toHaveBeenCalledWith(peRef, expect.any(Object), ec);
+      expect(parameterEntityReferenceValidate).toHaveBeenCalledWith(
+         peRef,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed a parameter entity declaration', () => {
       (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
 
-      checker.checkPToken(peDecl, ec);
+      checker.check(peDecl);
 
       expect(parameterEntityDeclarationUpdateState).toHaveBeenCalledWith(
          peDecl,
@@ -409,16 +469,20 @@ describe('ValidityChecker (unit)', () => {
    it('validates an parameter entity start', () => {
       const peStart = makeParameterEntityStart();
 
-      checker.checkPToken(peStart, ec);
+      checker.check(peStart);
 
-      expect(parameterEntityStartValidate).toHaveBeenCalledWith(peStart, expect.any(Object), ec);
+      expect(parameterEntityStartValidate).toHaveBeenCalledWith(
+         peStart,
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('updates the state when passed an XML Declaration', () => {
       (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const xmlDecl = makeXmlDecl();
 
-      checker.checkPToken(xmlDecl, ec);
+      checker.check(xmlDecl);
 
       expect(xmlDeclarationUpdateState).toHaveBeenCalledWith(xmlDecl, expect.any(Object));
    });
@@ -427,8 +491,8 @@ describe('ValidityChecker (unit)', () => {
       (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
       const xmlDecl = makeXmlDecl();
 
-      checker.checkPToken(xmlDecl, ec);
-      checker.checkPToken(xmlDecl, ec);
+      checker.check(xmlDecl);
+      checker.check(xmlDecl);
 
       expect(xmlDeclarationUpdateState).toHaveBeenCalledTimes(1);
    });

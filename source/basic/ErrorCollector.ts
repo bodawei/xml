@@ -3,15 +3,18 @@
 import { Offset, EntityId } from 'basic';
 
 import { SToken } from 'sToken';
+import { XmlErrorPosition, XmlErrorToken } from './error/XmlErrorToken';
 
 type Position = SToken | Offset | undefined;
 
-declare class ErrorToken {
-   public readonly id: string;
-   constructor(id: string, params: Array<string>, position: Position, context: Position);
+interface ErrConstFunc {
+   new (
+      id: string,
+      params?: ReadonlyArray<string | number | boolean>,
+      place?: XmlErrorPosition,
+      context?: XmlErrorPosition,
+   ): XmlErrorToken;
 }
-
-type ErrConstFunc = typeof ErrorToken;
 
 /**********************************************************************\
  An ErrorCollector collects a set of errors together in an array
@@ -51,7 +54,7 @@ class ErrorCollector {
 
    private posStart: boolean;
 
-   public errors: Array<ErrorToken>;
+   public errors: Array<XmlErrorToken>;
 
    constructor(context: SToken, ErrorConstructor: ErrConstFunc) {
       this.ErrorConstructor = ErrorConstructor;
@@ -69,7 +72,7 @@ class ErrorCollector {
       }
    }
 
-   getErrors(): Array<ErrorToken> {
+   getErrors(): Array<XmlErrorToken> {
       return this.errors;
    }
 
@@ -95,7 +98,7 @@ class ErrorCollector {
          posOffset = position.clone();
       } else if (position) {
          posOffset = position.ranges[0].getStartOffset();
-      } else if (this.position) {
+      } else if (this.position as any) {
          posOffset = this.posStart
             ? this.position.ranges[0].getStartOffset()
             : this.position.ranges[0].getEndOffset();

@@ -144,7 +144,7 @@ class DocumentChecker {
          // Report errors with the starting context of the DOCTYPE start
          const specialErrorCollector = new ErrorCollector(
             pToken.docTypeStartPToken.open,
-            WellFormedError,
+            WellFormedError as any,
          );
          docTypeEndCheck(pToken, specialErrorCollector);
          errorCollector.appendFrom(specialErrorCollector);

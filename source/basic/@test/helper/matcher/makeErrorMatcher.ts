@@ -51,7 +51,7 @@ function makeErrorMatcher(errorCodes: ErrorCodes) {
       let message = `No error with the id ${expectedErrorInfo.id} reported.`;
 
       for (let index = 0; index < errors.length; index++) {
-         const actual = errors[index];
+         const actual: any = errors[index];
 
          if (expectedErrorInfo.id === actual.id) {
             let errMsg;

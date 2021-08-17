@@ -58,7 +58,7 @@ describe('ErrorCollector', () => {
       it('adds an instance of the error to the set of errors', () => {
          ec.report(errorId, ['name'], errorStart);
 
-         expect(ec.getErrors()).toEqual([{ id: 'x' }]);
+         expect(ec.getErrors()).toEqual([{ id: 'x' }] as any);
       });
 
       it('passes the start position and the context to the error by default', () => {
@@ -117,7 +117,7 @@ describe('ErrorCollector', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
          ec.reportError('FOO', otherConstructorSpy as any, ['name'], errorStart); // typeHack
 
-         expect(ec.getErrors()).toEqual([{ id: 'x' }]);
+         expect(ec.getErrors()).toEqual([{ id: 'x' }] as any);
       });
 
       it('passes the start position and the context to the error by default', () => {
@@ -168,7 +168,7 @@ describe('ErrorCollector', () => {
 
          ec.appendFrom(ec2);
 
-         expect(ec.getErrors()).toEqual([{ id: 'constructorSpy' }, { id: 'x' }]);
+         expect(ec.getErrors()).toEqual([{ id: 'constructorSpy' }, { id: 'x' }] as any);
       });
    });
 });
