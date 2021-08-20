@@ -6,7 +6,7 @@ import { strOrBlank } from 'sToken';
 
 import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
-import { ancestorPERefsValidate } from './ancestorPERefsValidate';
+import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 
 const VID = validCodes.id;
 const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];

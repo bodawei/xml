@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
@@ -10,26 +10,29 @@ function attListDeclarationUpdateState(
    state: ValidityState,
 ): ValidityState {
    const elName = strOrBlank(el.elementName);
-   const defs: AttributeDetails = state.attributes[elName] || {};
+   const defs = state.attributes[elName] || {};
+   const newDefs: { [attName: string]: AttributeDetails } = {};
 
+   // Add the individual attribute declarations to the ones we already have for this element.
    for (const def of el.attDefs) {
       const attName = strOrBlank(def.name);
 
       if (!defs[attName]) {
-         defs[attName] = {
+         newDefs[attName] = {
             def,
             isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
          };
       }
    }
 
-   return {
-      ...state,
+   return new ValidityState(state, {
       attributes: {
-         ...state.attributes,
-         [elName]: defs,
+         [elName]: {
+            ...defs,
+            ...newDefs,
+         },
       },
-   };
+   });
 }
 
 export { attListDeclarationUpdateState };

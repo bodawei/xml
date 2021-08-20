@@ -3,16 +3,16 @@
 import { ErrorCollector, isName, isNmToken } from 'basic';
 import { AttListDeclarationPToken, AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken } from 'token';
-import { attributeValueValidate } from '../common/attributeValueValidate';
+import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken, WordListEntryPToken } from 'token';
 
-import { validCodes } from '../error/validCodes';
+import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
+import { attributeValueValidate } from '../common/attributeValueValidate';
+import { PREDEFINED_ENTITIES } from '../common/constants';
 import { ValidityState } from '../common/validityState';
-import { ancestorPERefsValidate } from './ancestorPERefsValidate';
+import { validCodes } from '../error/validCodes';
 import { xmlSpaceValidate } from './xmlSpaceValidate';
 
 const VID = validCodes.id;
-const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 const CODEMAP: Record<string, string> = {
    ENTITIES: VID.ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT,
@@ -60,6 +60,52 @@ function checkEnumeration(
    }
 }
 
+function checkEnumOrNotation(
+   value: string,
+   entries: ReadonlyArray<WordListEntryPToken>,
+): [boolean, Array<string>, string] {
+   const words: Array<string> = [];
+   let isValid = true;
+
+   for (const word of entries) {
+      const wordString = strOrBlank(word.word);
+
+      if (wordString !== '') {
+         words.push(wordString);
+      }
+   }
+
+   isValid = words.includes(value);
+
+   return [isValid, words, value];
+}
+
+function checkValue(
+   value: string,
+   attType: string,
+   state: ValidityState,
+): [boolean, Array<string>] {
+   const badItems: Array<string> = [];
+   const checkFn = attType === 'NMTOKEN' || attType === 'NMTOKENS' ? isNmToken : isName;
+   let isValid = true;
+   let valueSet: Array<string> = [value];
+
+   if (attType === 'IDREFS' || attType === 'ENTITIES' || attType === 'NMTOKENS') {
+      valueSet = value.trim().split(/[ \t\n]+/);
+   }
+
+   for (const element of valueSet) {
+      const thisIsValid = checkFn(element, state.confVer.version, state.confVer.edition);
+      isValid = isValid && thisIsValid;
+
+      if (!thisIsValid) {
+         badItems.push(element);
+      }
+   }
+
+   return [isValid, badItems];
+}
+
 function checkDefaultValue(
    attDef: AttDefinitionP,
    elName: string,
@@ -91,71 +137,12 @@ function checkDefaultValue(
 
    attributeValueValidate(attDef.value, state, ec);
 
-   const actualType = attType === '' ? 'ENUMERATION' : attType;
-   if (attDef.value.length === 0 || !CODEMAP[actualType]) {
+   if (attDef.value.length === 0 || !CODEMAP[attType]) {
       return;
    }
 
    const value = pTokenArrayToString(attDef.value);
-   let isValid = true;
-   const code = CODEMAP[actualType];
-   let valueSet: Array<string> = [value];
-   const words: Array<string> = [];
-
-   switch (actualType) {
-      case 'IDREFS':
-      case 'ENTITIES':
-      case 'NMTOKENS':
-         valueSet = value.trim().split(/[ \t\n]+/); // eek . need version
-         break;
-      case 'ENUMERATION':
-      case 'NOTATION':
-         for (const word of attDef.enumeration?.words ?? []) {
-            const wordString = strOrBlank(word.word);
-
-            if (wordString !== '') {
-               words.push(wordString);
-            }
-         }
-         break;
-   }
-
-   const badItems: Array<string> = [];
-
-   switch (actualType) {
-      case 'IDREF':
-      case 'IDREFS':
-      case 'ENTITY':
-      case 'ENTITIES':
-         for (const element of valueSet) {
-            const thisIsValid = isName(element, state.confVer.version, state.confVer.edition);
-            isValid = isValid && thisIsValid;
-
-            if (!thisIsValid) {
-               badItems.push(element);
-            }
-         }
-         break;
-      case 'NMTOKEN':
-      case 'NMTOKENS':
-         for (const element of valueSet) {
-            const thisIsValid = isNmToken(element, state.confVer.version, state.confVer.edition);
-            isValid = isValid && thisIsValid;
-
-            if (!thisIsValid) {
-               badItems.push(element);
-            }
-         }
-         break;
-      case 'ENUMERATION':
-      case 'NOTATION':
-         isValid = words.includes(value);
-
-         if (!isValid) {
-            badItems.push(value);
-         }
-         break;
-   }
+   const code = CODEMAP[attType];
 
    ec.setPos(getFirstSToken(attDef.value[0]));
 
@@ -184,9 +171,14 @@ function checkDefaultValue(
    //    parser only if an element without a specification for this attribute
    //    actually occurs.
 
-   if (actualType === 'ENUMERATION' || actualType === 'NOTATION') {
-      ec.check(!isValid, code, [elName, attName, words.join(','), badItems.join(',')]);
+   if (attType === 'ENUMERATION' || attType === 'NOTATION') {
+      const wordList = attDef.enumeration?.words ?? [];
+      const [isValid, words, badItem] = checkEnumOrNotation(value, wordList);
+
+      ec.check(!isValid, code, [elName, attName, words.join(','), badItem]);
    } else {
+      const [isValid, badItems] = checkValue(value, attType, state);
+
       ec.check(!isValid, code, [elName, attName, badItems.join(',')]);
    }
 }
@@ -216,13 +208,14 @@ function attListDeclarationValidate(
 
    for (const attDef of token.attDefs) {
       const attType = strOrBlank(attDef.type).toUpperCase();
+      const actualType = attType === '' ? 'ENUMERATION' : attType;
       const attName = strOrBlank(attDef.name);
-      const isId = attType === 'ID';
+      const isId = actualType === 'ID';
 
       ec.setPos(attDef.name);
       ec.setPos(attDef.type);
 
-      checkEnumeration(attDef, elName, attName, attType, state, ec);
+      checkEnumeration(attDef, elName, attName, actualType, state, ec);
       xmlSpaceValidate(attDef, elName, attName, ec);
 
       if (isId) {
@@ -230,6 +223,8 @@ function attListDeclarationValidate(
 
          ec.setPos(attDef.defaultType);
 
+         // §3.3.1: Validity Constraint: ID Attribute Default
+         //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
          ec.check(
             defaultType !== '#REQUIRED' && defaultType !== '#IMPLIED',
             VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
@@ -237,7 +232,7 @@ function attListDeclarationValidate(
          );
       }
 
-      checkDefaultValue(attDef, elName, attName, attType, state, ec);
+      checkDefaultValue(attDef, elName, attName, actualType, state, ec);
    }
 }
 

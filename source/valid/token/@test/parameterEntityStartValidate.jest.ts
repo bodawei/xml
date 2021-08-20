@@ -9,12 +9,12 @@ import { makeParameterEntityDeclaration, makeParameterEntityStart } from 'token-
 
 import { validCodes } from '../../error/validCodes';
 import { ValidityState } from '../../common/validityState';
-import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
+import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { parameterEntityStartValidate } from '../parameterEntityStartValidate';
 
 const VID = validCodes.id;
 
-jest.mock('../ancestorPERefsValidate');
+jest.mock('../../common/ancestorPERefsValidate');
 
 describe('parameterEntityStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;

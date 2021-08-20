@@ -9,7 +9,7 @@ import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validCodes } from '../error/validCodes';
 import { ElDeclType, ValidityState } from '../common/validityState';
-import { ancestorPERefsValidate } from './ancestorPERefsValidate';
+import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 
 const VID = validCodes.id;
 const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];

@@ -23,21 +23,18 @@ import {
    makeGeneralEntityStart,
 } from 'token-test';
 
-import { validCodes } from '../../error/validCodes';
 import { ValidityState } from '../../common/validityState';
+import { attributeValueValidate } from '../../common/attributeValueValidate';
+import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
+import { validCodes } from '../../error/validCodes';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
-// jest.mock goes crazy if I try to mock these functions
-import * as validator from '../../common/attributeValueValidate';
-import * as ancestor from '../ancestorPERefsValidate';
-import * as xmlSpace from '../xmlSpaceValidate';
+import { xmlSpaceValidate } from '../xmlSpaceValidate';
 
 const VID = validCodes.id;
 
-jest.mock('basic', () => ({
-   ...jest.requireActual('basic'),
-   isName: jest.fn().mockImplementation((item) => item !== '$bad'),
-   isNmToken: jest.fn().mockImplementation((item) => item !== '$bad'),
-}));
+jest.mock('../../common/attributeValueValidate');
+jest.mock('../../common/ancestorPERefsValidate');
+jest.mock('../xmlSpaceValidate');
 
 describe('attListDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -235,15 +232,10 @@ describe('attListDeclarationValidate (unit)', () => {
             extra: toSToken('>'),
             open: toSToken('<!'),
          });
-         jest.spyOn(ancestor, 'ancestorPERefsValidate');
 
          attListDeclarationValidate(attListDecl, state, mockErrorCollector);
 
-         expect(ancestor.ancestorPERefsValidate).toHaveBeenCalledWith(
-            start,
-            state,
-            mockErrorCollector,
-         );
+         expect(ancestorPERefsValidate).toHaveBeenCalledWith(start, state, mockErrorCollector);
       });
    });
 
@@ -263,11 +255,11 @@ describe('attListDeclarationValidate (unit)', () => {
          extra: toSToken('>'),
          open: toSToken('<!'),
       });
-      jest.spyOn(validator, 'attributeValueValidate');
+      // jest.spyOn(validator, 'attributeValueValidate');
 
       attListDeclarationValidate(attListDecl, state, mockErrorCollector);
 
-      expect(validator.attributeValueValidate).toHaveBeenCalledWith(
+      expect(attributeValueValidate).toHaveBeenCalledWith(
          attListDecl.attDefs[0].value,
          state,
          mockErrorCollector,
@@ -776,6 +768,67 @@ describe('attListDeclarationValidate (unit)', () => {
             position: toSToken('foo'),
          });
       });
+
+      it('ignores empty words (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  enumeration: {
+                     open: toSToken('('),
+                     type: ENUMERATION_PTOKEN,
+                     words: [
+                        {
+                           word: toSToken(''),
+                        },
+                        {
+                           word: toSToken('two'),
+                        },
+                        {
+                           word: toSToken('three'),
+                        },
+                     ],
+                  },
+                  name: toSToken('att1'),
+                  value: [new TextPToken(toSToken('foo'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', 'two,three', 'foo'],
+            position: toSToken('foo'),
+         });
+      });
+
+      it('reports an error when there is no enumeration at all (§3.3.2)', () => {
+         const attListDecl = new AttListDeclarationPToken({
+            attDefs: [
+               {
+                  name: toSToken('att1'),
+                  value: [new TextPToken(toSToken('foo'))],
+               },
+            ],
+            elementName: toSToken('elName'),
+            open: toSToken('<!'),
+         });
+
+         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
+            lastPosition: undefined,
+            params: ['elName', 'att1', '', 'foo'],
+            position: toSToken('foo'),
+         });
+      });
    });
 
    it('calls xmlSpaceValidate() for each attr (§2.10.0)', () => {
@@ -792,11 +845,10 @@ describe('attListDeclarationValidate (unit)', () => {
          extra: toSToken('>'),
          open: toSToken('<!'),
       });
-      jest.spyOn(xmlSpace, 'xmlSpaceValidate');
 
       attListDeclarationValidate(attListDecl, state, mockErrorCollector);
 
-      expect(xmlSpace.xmlSpaceValidate).toHaveBeenCalledWith(
+      expect(xmlSpaceValidate).toHaveBeenCalledWith(
          attListDecl.attDefs[0],
          'elName',
          'xml:space',

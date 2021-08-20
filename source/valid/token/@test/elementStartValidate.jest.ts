@@ -26,12 +26,12 @@ import { elementStartValidate } from '../elementStartValidate';
 import { validCodes } from '../../error/validCodes';
 import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { CmGraph } from '../../contentModel/cmGraphTypes';
-import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
+import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { attributeValueValidate } from '../../common/attributeValueValidate';
 
 const VID = validCodes.id;
 
-jest.mock('../ancestorPERefsValidate');
+jest.mock('../../common/ancestorPERefsValidate');
 jest.mock('../../common/attributeValueValidate');
 
 describe('elementStartValidate (unit)', () => {

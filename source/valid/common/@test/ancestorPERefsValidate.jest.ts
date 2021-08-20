@@ -17,7 +17,7 @@ import {
 } from 'token-test';
 
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
-import { ValidityState } from '../../common/validityState';
+import { ValidityState } from '../validityState';
 import { ParameterEntityStartPToken } from 'token';
 import { validCodes } from '../../error/validCodes';
 

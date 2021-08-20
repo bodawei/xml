@@ -393,6 +393,9 @@ The last processing phase does two things:
 
 ### Specific token details
 
+--- ATTLIST
+- If the default value is space padded ("   default"), is this an error?
+
 #### Element end
 * If this encounters an unbalanced end, it will ignore the end element.
    * Like wellformedness, this does not try to auto-close parent elements.

@@ -24,12 +24,12 @@ interface AnyDetails {
 }
 
 interface AttributeDetails {
-   readonly [attName: string]:
-      | {
-           readonly def: AttDefinitionP;
-           readonly isExternalMarkupDeclaration: boolean;
-        }
-      | undefined;
+   readonly def: AttDefinitionP;
+   readonly isExternalMarkupDeclaration: boolean;
+}
+
+interface AttListDetails {
+   readonly [attName: string]: AttributeDetails | undefined;
 }
 
 type ContentDetails = AnyDetails | EmptyDetails | MixedDetails | ElementDetails;
@@ -97,7 +97,7 @@ interface ParameterEntityDetails {
 
 interface ValidityStateProps {
    attributes?: {
-      [elementName: string]: AttributeDetails | undefined;
+      [elementName: string]: AttListDetails | undefined;
    };
 
    confVer?: ConformanceVersion;
@@ -152,7 +152,7 @@ interface ValidityStateProps {
 
 class ValidityState {
    readonly attributes: {
-      readonly [elementName: string]: AttributeDetails | undefined;
+      readonly [elementName: string]: AttListDetails | undefined;
    };
 
    readonly confVer: ConformanceVersion;
@@ -230,6 +230,7 @@ class ValidityState {
 }
 
 export {
+   AttListDetails,
    AttributeDetails,
    ContentDetails,
    ElementContext,

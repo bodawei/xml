@@ -9,12 +9,12 @@ import { makeGeneralEntityDeclaration, makeGeneralEntityStart } from 'token-test
 
 import { validCodes } from '../../error/validCodes';
 import { ValidityState } from '../../common/validityState';
-import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
+import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { generalEntityStartValidate } from '../generalEntityStartValidate';
 
 const VID = validCodes.id;
 
-jest.mock('../ancestorPERefsValidate');
+jest.mock('../../common/ancestorPERefsValidate');
 
 describe('generalEntityStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;

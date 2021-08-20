@@ -11,7 +11,7 @@ import {
    PARAMETER_ENTITY_START_PTOKEN,
 } from 'token';
 
-import { ValidityState } from '../common/validityState';
+import { ValidityState } from './validityState';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;

@@ -1,4 +1,4 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 
@@ -9,7 +9,7 @@ import { makeAttListDeclaration } from 'token-test';
 import { ValidityState } from '../../common/validityState';
 import { attListDeclarationUpdateState } from '../attListDeclarationUpdateState';
 
-describe('attListDeclarationUpdateState (unit)', () => {
+describe('attListDeclarationUpdateState() (unit)', () => {
    let state: ValidityState;
 
    beforeEach(async () => {
