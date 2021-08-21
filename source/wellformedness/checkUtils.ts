@@ -22,7 +22,7 @@ import {
    InternalSubsetStartToken,
    ExternalSubsetStartToken,
    ParameterEntityStartPToken,
-   ConditionalPToken,
+   ConditionalStartPToken,
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
 import { LiteralValuePToken } from '../token/common/literal';
@@ -34,7 +34,7 @@ type MarkupStart =
    | InternalSubsetStartToken
    | ExternalSubsetStartToken
    | ParameterEntityStartPToken
-   | ConditionalPToken;
+   | ConditionalStartPToken;
 
 interface ElementDeclInfo {
    [name: string]: 'EMPTY' | 'OTHER' | undefined;

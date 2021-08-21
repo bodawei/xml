@@ -2,15 +2,15 @@
 
 import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
-import { ConditionalPToken } from 'token';
-import { validCodes } from '../error/validCodes';
+import { ConditionalStartPToken } from 'token';
 
 import { ValidityState } from '../common/validityState';
+import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
 function conditionalStartValidate(
-   token: ConditionalPToken,
+   token: ConditionalStartPToken,
    state: ValidityState,
    ec: ErrorCollector,
 ): void {

@@ -11,7 +11,7 @@ import { xmlDeclarationUpdateState } from '../xmlDeclarationUpdateState';
 describe('xmlDeclarationUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState();
    });
 

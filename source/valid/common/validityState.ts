@@ -10,7 +10,7 @@ import {
 } from 'pToken';
 import { SToken } from 'sToken';
 import {
-   ConditionalPToken,
+   ConditionalStartPToken,
    DocTypeStartPToken,
    EntityValuePToken,
    ParameterEntityStartPToken,
@@ -108,7 +108,7 @@ interface ValidityStateProps {
       inExternalSubset: boolean;
       inExternalMarkupContext: boolean;
       enclosingStack: ReadonlyArray<
-         DocTypeStartPToken | ParameterEntityStartPToken | ConditionalPToken
+         DocTypeStartPToken | ParameterEntityStartPToken | ConditionalStartPToken
       >;
       lastPToken?: ParseToken;
    };
@@ -161,7 +161,7 @@ class ValidityState {
 
    readonly dtdContext: {
       readonly enclosingStack: ReadonlyArray<
-         DocTypeStartPToken | ParameterEntityStartPToken | ConditionalPToken
+         DocTypeStartPToken | ParameterEntityStartPToken | ConditionalStartPToken
       >;
       readonly inExternalMarkupContext: boolean;
       readonly inExternalSubset: boolean;

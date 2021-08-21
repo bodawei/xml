@@ -9,13 +9,13 @@ import { toSToken } from 'sToken';
 import { NOTATION_PTOKEN } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
-import { dtdEndValidate } from '../dtdEndValidate';
+import { docTypeEndValidate } from '../docTypeEndValidate';
 import { validCodes } from '../../error/validCodes';
 import { ElDeclType, ValidityState } from '../../common/validityState';
 
 const VID = validCodes.id;
 
-describe('dtdEndValidate (unit)', () => {
+describe('docTypeEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
    let state: ValidityState;
 
@@ -34,7 +34,7 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('ID'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                   other: {
                      def: {
@@ -42,13 +42,13 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('ID'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
@@ -69,13 +69,13 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('ID'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -92,19 +92,20 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('NOTATION'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
             elements: {
                emptyEl: {
+                  isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration('EMPTY'),
                   type: ElDeclType.EMPTY,
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
@@ -125,20 +126,21 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('NOTATION'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
             confVer: new ConformanceVersion(1.0, 1),
             elements: {
                emptyEl: {
+                  isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration('EMPTY'),
                   type: ElDeclType.EMPTY,
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -153,19 +155,20 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('CDATA'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
             elements: {
                emptyEl: {
+                  isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration('EMPTY'),
                   type: ElDeclType.EMPTY,
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -180,19 +183,20 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('NOTATION'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
             elements: {
                emptyEl: {
+                  isExternalMarkupDeclaration: false,
                   token: makeElementDeclaration(''),
                   type: ElDeclType.EMPTY,
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -210,7 +214,7 @@ describe('dtdEndValidate (unit)', () => {
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -236,20 +240,20 @@ describe('dtdEndValidate (unit)', () => {
                         type: toSToken('NOTATION'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ATTLISTDECL_ATT_NOTATION_NO_DECLARATION,
+            lastPosition: undefined,
             params: ['someElement', 'notationAttr', 'undeclared'],
             position: toSToken('undeclared'),
-            lastPosition: undefined,
          });
       });
 
@@ -259,20 +263,20 @@ describe('dtdEndValidate (unit)', () => {
                someElement: {
                   notationAttr: {
                      def: {
-                        name: toSToken('notationAttr'),
-                        type: toSToken('NOTATION'),
                         enumeration: {
-                           type: NOTATION_PTOKEN,
                            open: toSToken('('),
+                           type: NOTATION_PTOKEN,
                            words: [
                               {
                                  word: toSToken('declared'),
                               },
                            ],
                         },
+                        name: toSToken('notationAttr'),
+                        type: toSToken('NOTATION'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
@@ -281,7 +285,7 @@ describe('dtdEndValidate (unit)', () => {
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -292,27 +296,27 @@ describe('dtdEndValidate (unit)', () => {
                someElement: {
                   enumerationAttr: {
                      def: {
-                        name: toSToken('enumerationAttr'),
-                        type: toSToken('ENUMERATION'),
                         enumeration: {
-                           type: NOTATION_PTOKEN,
                            open: toSToken('('),
+                           type: NOTATION_PTOKEN,
                            words: [
                               {
                                  word: toSToken('unceclared'),
                               },
                            ],
                         },
+                        name: toSToken('enumerationAttr'),
+                        type: toSToken('ENUMERATION'),
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
             notations: {},
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -325,34 +329,34 @@ describe('dtdEndValidate (unit)', () => {
                someElement: {
                   notationAttr: {
                      def: {
+                        enumeration: undefined,
                         name: toSToken('notationAttr'),
                         type: toSToken('NOTATION'),
-                        enumeration: undefined,
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                   notationAttr2: {
                      def: {
+                        enumeration: undefined,
                         name: toSToken('notationAttr2'),
                         type: toSToken('NOTATION'),
-                        enumeration: undefined,
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ATTLISTDECL_ATT_XTRA_NOTATION,
+            lastPosition: undefined,
             params: ['someElement', 'notationAttr2'],
             position: toSToken('NOTATION'),
-            lastPosition: undefined,
          });
       });
 
@@ -362,12 +366,12 @@ describe('dtdEndValidate (unit)', () => {
                someElement: {
                   notationAttr: {
                      def: {
+                        enumeration: undefined,
                         name: toSToken('notationAttr'),
                         type: toSToken('NOTATION'),
-                        enumeration: undefined,
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
@@ -376,7 +380,7 @@ describe('dtdEndValidate (unit)', () => {
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -387,28 +391,28 @@ describe('dtdEndValidate (unit)', () => {
                someElement: {
                   notationAttr: {
                      def: {
+                        enumeration: undefined,
                         name: toSToken('notationAttr'),
                         type: toSToken('NOTATION'),
-                        enumeration: undefined,
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                   notationAttr2: {
                      def: {
+                        enumeration: undefined,
                         name: toSToken('notationAttr2'),
                         type: toSToken('NOTATION'),
-                        enumeration: undefined,
                         value: [],
                      },
-                     isExternal: false,
+                     isExternalMarkupDeclaration: false,
                   },
                },
             },
             confVer: new ConformanceVersion(1.0, 1),
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -419,6 +423,7 @@ describe('dtdEndValidate (unit)', () => {
          state = new ValidityState({
             generalEntities: {
                withNData: {
+                  isExternalMarkupDeclaration: false,
                   isInternalValue: true,
                   token: new GeneralEntityDeclarationPToken({
                      close: toSToken('>'),
@@ -432,14 +437,14 @@ describe('dtdEndValidate (unit)', () => {
             notations: {},
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
             id: VID.ENTITYDECL_NO_NOTATION_DECLARATION,
+            lastPosition: undefined,
             params: ['withNData', 'someNotation'],
             position: toSToken('someNotation'),
-            lastPosition: undefined,
          });
       });
 
@@ -447,14 +452,15 @@ describe('dtdEndValidate (unit)', () => {
          state = new ValidityState({
             generalEntities: {
                withNData: {
-                  token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     name: toSToken('withNData'),
-                     value: [],
-                     nDataName: toSToken('notationName'),
-                     close: toSToken('>'),
-                  }),
+                  isExternalMarkupDeclaration: false,
                   isInternalValue: true,
+                  token: new GeneralEntityDeclarationPToken({
+                     close: toSToken('>'),
+                     name: toSToken('withNData'),
+                     nDataName: toSToken('notationName'),
+                     open: toSToken('<!'),
+                     value: [],
+                  }),
                },
             },
             notations: {
@@ -462,7 +468,7 @@ describe('dtdEndValidate (unit)', () => {
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -471,13 +477,14 @@ describe('dtdEndValidate (unit)', () => {
          state = new ValidityState({
             generalEntities: {
                withNData: {
-                  token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     name: toSToken('withNData'),
-                     value: [],
-                     close: toSToken('>'),
-                  }),
+                  isExternalMarkupDeclaration: false,
                   isInternalValue: true,
+                  token: new GeneralEntityDeclarationPToken({
+                     close: toSToken('>'),
+                     name: toSToken('withNData'),
+                     open: toSToken('<!'),
+                     value: [],
+                  }),
                },
             },
             notations: {
@@ -485,7 +492,7 @@ describe('dtdEndValidate (unit)', () => {
             },
          });
 
-         dtdEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });

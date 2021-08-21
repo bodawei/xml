@@ -8,7 +8,7 @@ import { MockSTokenSource } from 'sToken-test';
 import { makeParameterEntityReference } from 'token-test';
 
 import { SectionStart } from '../bridge/section';
-import { ConditionalPToken, parseConditional, resumeParseConditional } from '../conditional';
+import { ConditionalStartPToken, parseConditional, resumeParseConditional } from '../conditionalStart';
 import * as pToken from '../../pToken/token/parameterEntityReference';
 
 describe('conditional (unit)', () => {
@@ -25,11 +25,11 @@ describe('conditional (unit)', () => {
       parseSpy = spyOn(pToken, 'parseParameterEntityReference');
    });
 
-   describe('ConditionalPToken()', () => {
+   describe('ConditionalStartPToken()', () => {
       it('populates values with undefined when not specified', () => {
-         expect(new ConditionalPToken({
+         expect(new ConditionalStartPToken({
             open: toSToken('<!['),
-         })).toEqualRangeless(new ConditionalPToken({
+         })).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             sectionType: undefined,
             bracket: undefined,
@@ -37,11 +37,11 @@ describe('conditional (unit)', () => {
       });
 
       it('populates values with a combination of the base value and the lose values', () => {
-         expect(new ConditionalPToken({
+         expect(new ConditionalStartPToken({
             open: toSToken('<!['),
          }, {
             sectionType: toSToken('FROG'),
-         })).toEqualRangeless(new ConditionalPToken({
+         })).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             sectionType: toSToken('FROG'),
             bracket: undefined,
@@ -68,7 +68,7 @@ describe('conditional (unit)', () => {
          parseConditional(mockSource, sectionStart, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(new ConditionalPToken({
+         expect(callback).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             sectionType: toSToken('IGNORE'),
             bracket: toSToken('['),
@@ -85,7 +85,7 @@ describe('conditional (unit)', () => {
          parseConditional(mockSource, sectionStart, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(new ConditionalPToken({
+         expect(callback).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             sectionType: toSToken('INCLUDE'),
             bracket: toSToken('['),
@@ -103,7 +103,7 @@ describe('conditional (unit)', () => {
          parseConditional(mockSource, sectionStart, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(new ConditionalPToken({
+         expect(callback).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             sectionType: toSToken('IGNORE'),
             unexpanded: {
@@ -123,7 +123,7 @@ describe('conditional (unit)', () => {
       });
 
       it('adds a section type and bracket if available', () => {
-         const oldConditional = new ConditionalPToken({
+         const oldConditional = new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' '),
             unexpanded: {
@@ -141,7 +141,7 @@ describe('conditional (unit)', () => {
          resumeParseConditional(mockSource, oldConditional, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(new ConditionalPToken({
+         expect(callback).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' \t'),
             sectionType: toSToken('test'),
@@ -155,7 +155,7 @@ describe('conditional (unit)', () => {
       });
 
       it('adds a section type and no bracket when not available', () => {
-         const oldConditional = new ConditionalPToken({
+         const oldConditional = new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' '),
             unexpanded: {
@@ -173,7 +173,7 @@ describe('conditional (unit)', () => {
          resumeParseConditional(mockSource, oldConditional, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(new ConditionalPToken({
+         expect(callback).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' \t'),
             sectionType: toSToken('test'),
@@ -188,7 +188,7 @@ describe('conditional (unit)', () => {
       });
 
       it('adds a bracket when secondPropName is "bracket"', () => {
-         const oldConditional = new ConditionalPToken({
+         const oldConditional = new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' '),
             sectionType: toSToken('test'),
@@ -207,7 +207,7 @@ describe('conditional (unit)', () => {
          resumeParseConditional(mockSource, oldConditional, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(new ConditionalPToken({
+         expect(callback).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' '),
             sectionType: toSToken('test'),
@@ -222,7 +222,7 @@ describe('conditional (unit)', () => {
       });
 
       it('adds a bracket when propName is "bracket"', () => {
-         const oldConditional = new ConditionalPToken({
+         const oldConditional = new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' '),
             sectionType: toSToken('test'),
@@ -240,7 +240,7 @@ describe('conditional (unit)', () => {
          resumeParseConditional(mockSource, oldConditional, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toEqualRangeless(new ConditionalPToken({
+         expect(callback).toEqualRangeless(new ConditionalStartPToken({
             open: toSToken('<!['),
             openSpace: toSToken(' '),
             sectionType: toSToken('test'),

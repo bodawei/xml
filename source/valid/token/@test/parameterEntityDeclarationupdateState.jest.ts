@@ -11,7 +11,7 @@ import { parameterEntityDeclarationUpdateState } from '../parameterEntityDeclara
 describe('parameterEntityDeclarationUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState();
    });
 

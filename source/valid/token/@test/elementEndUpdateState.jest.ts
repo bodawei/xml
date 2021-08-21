@@ -14,7 +14,7 @@ describe('elementEndUpdateState (unit)', () => {
    let elementEnd: ElementEndPToken;
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       elementEnd = new ElementEndPToken({
          close: toSToken('>'),
          name: toSToken('elementName'),

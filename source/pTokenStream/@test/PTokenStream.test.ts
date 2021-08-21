@@ -6,7 +6,7 @@ import { gatherStreamResults } from 'basic-test';
 import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ContextType } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import {
-   CONDITIONAL_PTOKEN, CONDITIONAL_CLOSE_PTOKEN,
+   CONDITIONAL_START_PTOKEN, CONDITIONAL_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ELEMENT_START_PTOKEN,
    ELEMENT_END_PTOKEN,
@@ -581,7 +581,7 @@ describe('PTokenStream (unit)', () => {
    
          gatherStreamResults<ParseToken>(pTokenStream, (pTokens) => {
             const tokenTypes = pTokens.map(token => token.type);
-            expect(tokenTypes).toEqual([CONFORMANCE_VERSION, ENTITY_ID, CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+            expect(tokenTypes).toEqual([CONFORMANCE_VERSION, ENTITY_ID, CONDITIONAL_START_PTOKEN, TEXT_PTOKEN, CONDITIONAL_END_PTOKEN]);
             done();
          });
       });
@@ -613,12 +613,12 @@ describe('PTokenStream (unit)', () => {
             expect(tokenTypes).toEqual([
                CONFORMANCE_VERSION,
                ENTITY_ID,
-               CONDITIONAL_PTOKEN,
+               CONDITIONAL_START_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
-               CONDITIONAL_PTOKEN,
+               CONDITIONAL_START_PTOKEN,
                TEXT_PTOKEN,
-               CONDITIONAL_CLOSE_PTOKEN,
-               CONDITIONAL_CLOSE_PTOKEN,
+               CONDITIONAL_END_PTOKEN,
+               CONDITIONAL_END_PTOKEN,
             ]);
             done();
          });
@@ -636,11 +636,11 @@ describe('PTokenStream (unit)', () => {
                ENTITY_ID,
                DOCTYPE_START_PTOKEN,
                INTERNAL_SUBSET_START_TOKEN,
-               CONDITIONAL_PTOKEN,
+               CONDITIONAL_START_PTOKEN,
                ELEMENT_DECLARATION_PTOKEN,
-               CONDITIONAL_PTOKEN,
+               CONDITIONAL_START_PTOKEN,
                TEXT_PTOKEN,
-               CONDITIONAL_CLOSE_PTOKEN,
+               CONDITIONAL_END_PTOKEN,
                INTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
                ELEMENT_START_PTOKEN,

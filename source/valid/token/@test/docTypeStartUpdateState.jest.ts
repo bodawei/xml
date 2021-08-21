@@ -4,7 +4,6 @@ import { describe, expect, it } from '@jest/globals';
 import { ExternalIdP } from 'pToken';
 import { toSToken } from 'sToken';
 import { DocTypeStartPToken } from 'token';
-
 import { makeDocTypeStart } from 'token-test';
 
 import { ValidityState } from '../../common/validityState';
@@ -13,7 +12,7 @@ import { docTypeStartUpdateState } from '../docTypeStartUpdateState';
 describe('docTypeStartUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState({});
    });
 

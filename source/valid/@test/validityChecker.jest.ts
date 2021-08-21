@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ErrorCollector } from 'basic';
 import { toSToken } from 'sToken';
-import { ConditionalClosePToken, ConditionalPToken, ElidedEntityDeclarationPToken } from 'token';
+import { ConditionalEndPToken, ConditionalStartPToken, ElidedEntityDeclarationPToken } from 'token';
 import {
    makeAttListDeclaration,
    makeDocTypeEnd,
@@ -33,7 +33,7 @@ import { conditionalEndValidate } from '../token/conditionalEndValidate';
 import { conditionalStartUpdateState } from '../token/conditionalStartUpdateState';
 import { conditionalStartValidate } from '../token/conditionalStartValidate';
 import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
-import { dtdEndValidate } from '../token/dtdEndValidate';
+import { docTypeEndValidate } from '../token/docTypeEndValidate';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
 import { elementDeclarationPreprocess } from '../token/elementDeclarationPreprocess';
 import { elementDeclarationValidate } from '../token/elementDeclarationValidate';
@@ -68,7 +68,7 @@ jest.mock('../token/conditionalEndValidate');
 jest.mock('../token/conditionalStartUpdateState');
 jest.mock('../token/conditionalStartValidate');
 jest.mock('../token/docTypeStartUpdateState');
-jest.mock('../token/dtdEndValidate');
+jest.mock('../token/docTypeEndValidate');
 jest.mock('../token/elementDeclarationUpdateState');
 jest.mock('../token/elementDeclarationPreprocess');
 jest.mock('../token/elementDeclarationValidate');
@@ -97,7 +97,7 @@ describe('ValidityChecker (unit)', () => {
    let conditionalStartUpdateStateMock: jest.MockedFunction<typeof conditionalStartUpdateState>;
    let conditionalEndUpdateStateMock: jest.MockedFunction<typeof conditionalEndUpdateState>;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       version = new ConformanceVersion();
       checker = new ValidityChecker();
 
@@ -153,7 +153,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates the content on every token (§3.0.0)', () => {
-      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+      const conditional = new ConditionalEndPToken({ open: toSToken('<![') });
 
       checker.check(conditional);
 
@@ -165,7 +165,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state on every token (§3.0.0)', () => {
-      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+      const conditional = new ConditionalEndPToken({ open: toSToken('<![') });
 
       checker.check(conditional);
 
@@ -195,7 +195,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state for a conditional end', () => {
-      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+      const conditional = new ConditionalEndPToken({ open: toSToken('<![') });
 
       checker.check(conditional);
 
@@ -203,7 +203,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a conditional end', () => {
-      const conditional = new ConditionalClosePToken({ open: toSToken('<![') });
+      const conditional = new ConditionalEndPToken({ open: toSToken('<![') });
 
       checker.check(conditional);
 
@@ -215,7 +215,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a conditional start', () => {
-      const conditional = new ConditionalPToken({ open: toSToken('<![') });
+      const conditional = new ConditionalStartPToken({ open: toSToken('<![') });
       checker.check(version);
 
       checker.check(conditional);
@@ -228,7 +228,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state for a conditional start', () => {
-      const conditional = new ConditionalPToken({ open: toSToken('<![') });
+      const conditional = new ConditionalStartPToken({ open: toSToken('<![') });
 
       checker.check(conditional);
 
@@ -380,7 +380,10 @@ describe('ValidityChecker (unit)', () => {
    it('validates the state at the end of a DTD', () => {
       checker.check(makeDocTypeEnd());
 
-      expect(dtdEndValidate).toHaveBeenCalledWith(expect.any(Object), expect.any(ErrorCollector));
+      expect(docTypeEndValidate).toHaveBeenCalledWith(
+         expect.any(Object),
+         expect.any(ErrorCollector),
+      );
    });
 
    it('validates an general entity reference', () => {

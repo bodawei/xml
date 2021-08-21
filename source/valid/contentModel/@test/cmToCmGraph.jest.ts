@@ -24,12 +24,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -38,10 +38,10 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -62,12 +62,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [1],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -76,10 +76,10 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -100,12 +100,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [1],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -114,10 +114,10 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [0],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -138,12 +138,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -152,10 +152,10 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [0],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -177,12 +177,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -191,10 +191,10 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -204,10 +204,10 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -221,12 +221,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [1],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -239,10 +239,10 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -252,10 +252,10 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -269,12 +269,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [1],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -287,14 +287,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [1],
+                  id: 2,
                   trans: {
                      second: {
                         ref: '/2',
@@ -310,10 +310,10 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -327,12 +327,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [], // no auto transition to end
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -345,14 +345,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [1],
+                  id: 2,
                   trans: {
                      second: {
                         ref: '/2',
@@ -363,16 +363,15 @@ describe('cmToCmGraph()', () => {
             },
          });
       });
-
       it('does not add multiple autotransitions (whitebox)', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                      repeat: toSToken('*'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -386,12 +385,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [1], // this has one entry, rather than several
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -404,14 +403,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [1],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/1',
@@ -420,8 +419,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [1],
+                  id: 3,
                   trans: {
                      second: {
                         ref: '/2',
@@ -439,10 +438,10 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -455,12 +454,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -469,14 +468,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      second: {
                         ref: '/2',
@@ -492,11 +491,11 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                      repeat: toSToken('?'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -510,12 +509,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -524,14 +523,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [1],
+                  id: 2,
                   trans: {
                      second: {
                         ref: '/2',
@@ -547,11 +546,11 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                      repeat: toSToken('*'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -565,12 +564,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -579,14 +578,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [1],
+                  id: 2,
                   trans: {
                      second: {
                         ref: '/2',
@@ -602,11 +601,11 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                      repeat: toSToken('+'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -620,12 +619,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -634,14 +633,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      second: {
                         ref: '/2',
@@ -650,8 +649,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [2],
+                  id: 3,
                   trans: {
                      first: {
                         ref: '/1',
@@ -660,8 +659,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [1],
+                  id: 4,
                   trans: {
                      second: {
                         ref: '/2',
@@ -679,10 +678,10 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -706,12 +705,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -724,14 +723,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -740,8 +739,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -752,10 +751,10 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -780,12 +779,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -798,14 +797,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [3],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -814,8 +813,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -826,12 +825,13 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      delimitedParticles: [
                         {
@@ -842,7 +842,6 @@ describe('cmToCmGraph()', () => {
                      ],
                      repeat: toSToken('*'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -855,12 +854,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -873,14 +872,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [3],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -889,8 +888,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [2, 1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -901,12 +900,13 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      delimitedParticles: [
                         {
@@ -917,7 +917,6 @@ describe('cmToCmGraph()', () => {
                      ],
                      repeat: toSToken('+'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -930,12 +929,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -948,14 +947,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -964,8 +963,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [2, 1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -978,12 +977,13 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
@@ -993,7 +993,6 @@ describe('cmToCmGraph()', () => {
                         },
                      ],
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1006,12 +1005,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1020,14 +1019,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1036,8 +1035,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1046,8 +1045,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [3],
+                  id: 4,
                   trans: {},
                },
             },
@@ -1058,12 +1057,13 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
@@ -1074,7 +1074,6 @@ describe('cmToCmGraph()', () => {
                      ],
                      repeat: toSToken('?'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1087,12 +1086,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1101,14 +1100,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [4],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1117,8 +1116,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1127,8 +1126,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [3],
+                  id: 4,
                   trans: {},
                },
             },
@@ -1139,12 +1138,13 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
@@ -1155,7 +1155,6 @@ describe('cmToCmGraph()', () => {
                      ],
                      repeat: toSToken('*'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1168,12 +1167,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1182,14 +1181,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [4],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1198,8 +1197,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1208,8 +1207,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [2, 3],
+                  id: 4,
                   trans: {},
                },
             },
@@ -1220,12 +1219,13 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
@@ -1236,7 +1236,6 @@ describe('cmToCmGraph()', () => {
                      ],
                      repeat: toSToken('+'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1249,12 +1248,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1263,14 +1262,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1279,8 +1278,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1289,8 +1288,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [2, 3],
+                  id: 4,
                   trans: {},
                },
             },
@@ -1303,12 +1302,13 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      delimitedParticles: [
                         {
@@ -1318,7 +1318,6 @@ describe('cmToCmGraph()', () => {
                         },
                      ],
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -1331,12 +1330,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1349,14 +1348,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1365,8 +1364,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -1377,24 +1376,24 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      delimitedParticles: [
                         {
+                           delimiter: toSToken(','),
                            particle: {
                               name: toSToken('first'),
                            },
-                           delimiter: toSToken(','),
                         },
                      ],
                      repeat: toSToken('?'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -1407,12 +1406,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1425,14 +1424,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [3],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1441,8 +1440,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -1453,24 +1452,24 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      delimitedParticles: [
                         {
+                           delimiter: toSToken(','),
                            particle: {
                               name: toSToken('first'),
                            },
-                           delimiter: toSToken(','),
                         },
                      ],
                      repeat: toSToken('*'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -1483,12 +1482,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1501,14 +1500,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [3],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1517,8 +1516,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [2, 1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -1529,24 +1528,24 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      delimitedParticles: [
                         {
+                           delimiter: toSToken(','),
                            particle: {
                               name: toSToken('first'),
                            },
-                           delimiter: toSToken(','),
                         },
                      ],
                      repeat: toSToken('+'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -1559,12 +1558,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [2],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1577,14 +1576,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1593,8 +1592,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [2, 1],
+                  id: 3,
                   trans: {},
                },
             },
@@ -1607,19 +1606,20 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
+                           delimiter: toSToken(','),
                            particle: {
                               name: toSToken('first'),
                            },
-                           delimiter: toSToken(','),
                         },
                         {
                            particle: {
@@ -1628,7 +1628,6 @@ describe('cmToCmGraph()', () => {
                         },
                      ],
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1641,12 +1640,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1655,14 +1654,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1671,8 +1670,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1681,13 +1680,13 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [3],
+                  id: 4,
                   trans: {},
                },
                5: {
-                  id: 5,
                   autoTrans: [],
+                  id: 5,
                   trans: {
                      second: {
                         ref: '/2/2',
@@ -1703,24 +1702,24 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
+                           delimiter: toSToken(','),
                            particle: {
                               name: toSToken('first'),
                            },
-                           delimiter: toSToken(','),
                         },
                      ],
                      repeat: toSToken('?'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1733,12 +1732,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1747,14 +1746,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [4],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1763,8 +1762,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1773,8 +1772,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [3],
+                  id: 4,
                   trans: {},
                },
             },
@@ -1785,24 +1784,24 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
+                           delimiter: toSToken(','),
                            particle: {
                               name: toSToken('first'),
                            },
-                           delimiter: toSToken(','),
                         },
                      ],
                      repeat: toSToken('*'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1815,12 +1814,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1829,14 +1828,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [4],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1845,8 +1844,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1855,8 +1854,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [2, 3],
+                  id: 4,
                   trans: {},
                },
             },
@@ -1867,24 +1866,24 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken(','),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken(','),
                },
                {
+                  delimiter: toSToken(','),
                   particle: {
                      delimitedParticles: [
                         {
+                           delimiter: toSToken(','),
                            particle: {
                               name: toSToken('first'),
                            },
-                           delimiter: toSToken(','),
                         },
                      ],
                      repeat: toSToken('+'),
                   },
-                  delimiter: toSToken(','),
                },
                {
                   particle: {
@@ -1897,12 +1896,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -1911,14 +1910,14 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -1927,8 +1926,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      last: {
                         ref: '/3',
@@ -1937,8 +1936,8 @@ describe('cmToCmGraph()', () => {
                   },
                },
                4: {
-                  id: 4,
                   autoTrans: [2, 3],
+                  id: 4,
                   trans: {},
                },
             },
@@ -1951,16 +1950,16 @@ describe('cmToCmGraph()', () => {
          const srcList: ContentModelP = {
             delimitedParticles: [
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
+                  delimiter: toSToken('|'),
                   particle: {
                      name: toSToken('first'),
                   },
-                  delimiter: toSToken('|'),
                },
                {
                   particle: {
@@ -1973,12 +1972,12 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1,/2,/3',
@@ -1987,10 +1986,10 @@ describe('cmToCmGraph()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -2004,19 +2003,19 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {},
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -2030,19 +2029,19 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {},
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });
@@ -2056,19 +2055,19 @@ describe('cmToCmGraph()', () => {
          const result = cmToCmGraph(srcList);
 
          expect(result).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {},
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
             },
          });

@@ -22,13 +22,14 @@ function pruneCmGraph(graph: CmGraph): CmGraph {
       const transMaps = Object.values(state.trans);
 
       for (const trans of transMaps) {
-         newStates[trans.stateId] = oldStates[trans.stateId];
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+         newStates[trans!.stateId] = oldStates[trans!.stateId];
       }
    }
 
    return {
-      startId: graph.startId,
       endId: graph.endId,
+      startId: graph.startId,
       states: newStates,
    };
 }

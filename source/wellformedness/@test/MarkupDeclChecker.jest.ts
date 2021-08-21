@@ -25,8 +25,8 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    ElidedEntityDeclarationPToken,
-   ConditionalPToken,
-   ConditionalClosePToken,
+   ConditionalStartPToken,
+   ConditionalEndPToken,
 } from 'token';
 
 import { WellFormedError } from '../error/WellFormedError';
@@ -249,7 +249,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('reports no error if a conditional section appears after an external parameter entity start', () => {
-            checker.check(new ConditionalPToken({ open: toSToken('<!') }), ec);
+            checker.check(new ConditionalStartPToken({ open: toSToken('<!') }), ec);
 
             expect(ec.errors).toEqual([]);
          });
@@ -414,10 +414,13 @@ describe('MarkupDeclChecker (unit)', () => {
       });
 
       describe('with conditional section', () => {
-         let conditionalSection: ConditionalPToken;
+         let conditionalSection: ConditionalStartPToken;
 
          beforeEach(() => {
-            conditionalSection = new ConditionalPToken({ open: toSToken('<!['), peRefPlus: [] });
+            conditionalSection = new ConditionalStartPToken({
+               open: toSToken('<!['),
+               peRefPlus: [],
+            });
          });
 
          it('an error if the end of the external subset happens', () => {
@@ -445,7 +448,7 @@ describe('MarkupDeclChecker (unit)', () => {
          });
 
          it('an error if the conditional end is delivered without an opening', () => {
-            const close = new ConditionalClosePToken({ open: toSToken(']>') });
+            const close = new ConditionalEndPToken({ open: toSToken(']>') });
 
             checker.check(close, ec);
 

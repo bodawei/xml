@@ -5,7 +5,7 @@ import { EntityId, WarningToken, warning, Range } from 'basic';
 import { ParseToken } from 'pToken';
 
 import { STokenSource, strOrBlank, toSToken } from 'sToken';
-import { CommentPToken, ConditionalClosePToken, ConditionalPToken } from 'token';
+import { CommentPToken, ConditionalEndPToken, ConditionalStartPToken } from 'token';
 import { makeTextPToken } from 'token-test';
 
 import { ConditionalBodyProcessor } from '../ConditionalBodyProcessor';
@@ -40,7 +40,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
    it('isDone returns true if a non-text / non-error token is handled', () => {
       const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
 
-      cbp.handleToken(new ConditionalClosePToken({ open: toSToken(']]>') }), () => {});
+      cbp.handleToken(new ConditionalEndPToken({ open: toSToken(']]>') }), () => {});
 
       expect(cbp.isDone).toEqual(true);
    });
@@ -59,7 +59,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
       const expanded = () => {};
       const token = makeTextPToken('foo');
       const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
-      cbp.handleToken(new ConditionalClosePToken({ open: toSToken(']]>') }), () => {});
+      cbp.handleToken(new ConditionalEndPToken({ open: toSToken(']]>') }), () => {});
 
       cbp.handleToken(token, expanded);
 
@@ -104,7 +104,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
 
       it('passes a conditional start through', () => {
          const handled = () => {};
-         const conditional = new ConditionalPToken({ open: toSToken('<![') });
+         const conditional = new ConditionalStartPToken({ open: toSToken('<![') });
          new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
          const handler = bodyProcessor.mock.calls[0][1];
 
@@ -127,7 +127,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
       it('delivers a previously terminating token once the end of the token stream has been reached', () => {
          const handled = jest.fn();
          const expanded = jest.fn();
-         const close = new ConditionalClosePToken({ open: toSToken(']]>') });
+         const close = new ConditionalEndPToken({ open: toSToken(']]>') });
          const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
          const handler = bodyProcessor.mock.calls[0][1];
          cbp.handleToken(close, expanded);
@@ -140,7 +140,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
       it('wraps up all callbacks once the end of the token stream has been reached after receiving an end', () => {
          const handled = jest.fn();
          const expanded = jest.fn();
-         const close = new ConditionalClosePToken({ open: toSToken(']]>') });
+         const close = new ConditionalEndPToken({ open: toSToken(']]>') });
          const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
          const handler = bodyProcessor.mock.calls[0][1];
          cbp.handleToken(close, expanded);

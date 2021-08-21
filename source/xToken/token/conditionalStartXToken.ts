@@ -1,15 +1,15 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
-import { ConditionalPToken } from 'token';
+import { ConditionalStartPToken } from 'token';
 
 const CONDITIONAL_SECTION_START_XTOKEN = 'CONDITIONAL_SECTION_START_XTOKEN';
 
 class ConditionalStartXToken {
    public readonly type: typeof CONDITIONAL_SECTION_START_XTOKEN = CONDITIONAL_SECTION_START_XTOKEN;
 
-   public pToken?: ConditionalPToken;
+   public pToken?: ConditionalStartPToken;
 
-   constructor(pToken?: ConditionalPToken) {
+   constructor(pToken?: ConditionalStartPToken) {
       this.pToken = pToken;
    }
 }

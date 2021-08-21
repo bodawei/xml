@@ -7,7 +7,7 @@ import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
-function docEndValidate(state: ValidityState, ec: ErrorCollector): void {
+function contentEndValidate(state: ValidityState, ec: ErrorCollector): void {
    const refValues = Object.keys(state.idRefs);
    const idvalues = Object.keys(state.ids);
    const idMap: Record<string, boolean> = {};
@@ -32,4 +32,4 @@ function docEndValidate(state: ValidityState, ec: ErrorCollector): void {
    }
 }
 
-export { docEndValidate };
+export { contentEndValidate };

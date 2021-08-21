@@ -14,8 +14,8 @@ import { DocTypeEndPToken } from './docTypeEnd';
 import { CdataPToken } from './cdata';
 import { CharDataPToken } from './charData';
 import { CommentPToken } from './comment';
-import { ConditionalPToken } from './conditional';
-import { ConditionalClosePToken } from './conditionalClose';
+import { ConditionalStartPToken } from './conditionalStart';
+import { ConditionalEndPToken } from './conditionalEnd';
 import { ElidedEntityDeclarationPToken } from './ElidedEntityDeclarationPToken';
 import { GeneralEntityStartPToken } from './marker/generalEntityStart';
 import { GeneralEntityEndPToken } from './marker/generalEntityEnd';
@@ -43,8 +43,8 @@ export * from './ElidedEntityDeclarationPToken';
 export * from './cdata';
 export * from './charData';
 export * from './comment';
-export * from './conditional';
-export * from './conditionalClose';
+export * from './conditionalStart';
+export * from './conditionalEnd';
 export * from './docTypeEnd';
 export * from './docTypeStart';
 export * from './elementEnd';
@@ -65,8 +65,8 @@ type PToken =
    | CdataPToken
    | CharDataPToken
    | CommentPToken
-   | ConditionalClosePToken
-   | ConditionalPToken
+   | ConditionalEndPToken
+   | ConditionalStartPToken
    | DeclarationPToken
    | DocTypeStartPToken
    | DocTypeEndPToken

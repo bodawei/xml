@@ -5,9 +5,9 @@ import { combineSTokens, SToken, STokenSource } from 'sToken';
 
 import { SectionStart } from './bridge/section';
 
-const CONDITIONAL_PTOKEN = 'CONDITIONAL_PTOKEN';
+const CONDITIONAL_START_PTOKEN = 'CONDITIONAL_START_PTOKEN';
 
-type DeliverPToken = (pToken: ConditionalPToken) => void;
+type DeliverPToken = (pToken: ConditionalStartPToken) => void;
 
 /**********************************************************************\
  The cdata namespace contains the usual tools for processing
@@ -33,13 +33,13 @@ type ConditionalCore = ConditionalProps & {
 };
 
 function isUnexpanded(
-   candidate: ConditionalPToken | SectionStart | ConditionalCore,
+   candidate: ConditionalStartPToken | SectionStart | ConditionalCore,
 ): candidate is ConditionalCore {
    return 'unexpanded' in candidate;
 }
 
-class ConditionalPToken {
-   public readonly type: typeof CONDITIONAL_PTOKEN = CONDITIONAL_PTOKEN;
+class ConditionalStartPToken {
+   public readonly type: typeof CONDITIONAL_START_PTOKEN = CONDITIONAL_START_PTOKEN;
 
    public readonly open: SToken;
 
@@ -59,7 +59,7 @@ class ConditionalPToken {
    public readonly bracket: SToken | undefined;
 
    constructor(
-      param: ConditionalPToken | SectionStart | ConditionalCore,
+      param: ConditionalStartPToken | SectionStart | ConditionalCore,
       other: ConditionalProps | undefined = {},
    ) {
       const start = other.open && other.open instanceof SToken ? other.open : undefined;
@@ -118,12 +118,12 @@ function parseConditional(
                     },
                  };
 
-            deliverPToken(new ConditionalPToken(sectionStart, extra));
+            deliverPToken(new ConditionalStartPToken(sectionStart, extra));
          });
       } else {
          source.extract('match', '[', (sToken) => {
             otherProps.bracket = sToken;
-            deliverPToken(new ConditionalPToken(sectionStart, otherProps));
+            deliverPToken(new ConditionalStartPToken(sectionStart, otherProps));
          });
       }
    });
@@ -131,7 +131,7 @@ function parseConditional(
 
 function resumeParseConditional(
    source: STokenSource,
-   oldConditional: ConditionalPToken,
+   oldConditional: ConditionalStartPToken,
    deliverPToken: DeliverPToken,
 ): void {
    const newCond: ConditionalProps = {
@@ -139,7 +139,7 @@ function resumeParseConditional(
    };
 
    if (!oldConditional.unexpanded) {
-      deliverPToken(new ConditionalPToken(oldConditional));
+      deliverPToken(new ConditionalStartPToken(oldConditional));
       return;
    }
    const peRef = oldConditional.unexpanded.peRef;
@@ -161,7 +161,7 @@ function resumeParseConditional(
             }
             newCond.openSpace = combineSTokens(newCond.openSpace, openSpace);
             newCond.bracket = sToken;
-            deliverPToken(new ConditionalPToken(oldConditional, newCond));
+            deliverPToken(new ConditionalStartPToken(oldConditional, newCond));
          });
       });
    } else if (
@@ -172,10 +172,15 @@ function resumeParseConditional(
          source.extract('match', '[', (sToken) => {
             newCond.sectionTypeSpace = combineSTokens(newCond.sectionTypeSpace, sectionTypeSpace);
             newCond.bracket = sToken;
-            deliverPToken(new ConditionalPToken(oldConditional, newCond));
+            deliverPToken(new ConditionalStartPToken(oldConditional, newCond));
          });
       });
    }
 }
 
-export { CONDITIONAL_PTOKEN, ConditionalPToken, parseConditional, resumeParseConditional };
+export {
+   CONDITIONAL_START_PTOKEN,
+   ConditionalStartPToken,
+   parseConditional,
+   resumeParseConditional,
+};

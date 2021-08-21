@@ -1,20 +1,19 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConditionalPToken } from 'token';
+import { ConditionalStartPToken } from 'token';
 
 import { ValidityState } from '../common/validityState';
 
 function conditionalStartUpdateState(
-   token: ConditionalPToken,
+   token: ConditionalStartPToken,
    state: ValidityState,
 ): ValidityState {
-   return {
-      ...state,
+   return new ValidityState(state, {
       dtdContext: {
          ...state.dtdContext,
          enclosingStack: [...state.dtdContext.enclosingStack, token],
       },
-   };
+   });
 }
 
 export { conditionalStartUpdateState };

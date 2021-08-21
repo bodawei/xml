@@ -2,7 +2,7 @@
 
 import { SToken } from 'sToken';
 
-const CONDITIONAL_CLOSE_PTOKEN = 'CONDITIONAL_CLOSE_PTOKEN';
+const CONDITIONAL_END_PTOKEN = 'CONDITIONAL_END_PTOKEN';
 
 type ConditionalProps = {
    open: SToken;
@@ -16,17 +16,17 @@ type ConditionalProps = {
     [63]  ignoreSect         ::= ...']]>'
 \**********************************************************************/
 
-class ConditionalClosePToken {
-   public readonly type: typeof CONDITIONAL_CLOSE_PTOKEN = CONDITIONAL_CLOSE_PTOKEN;
+class ConditionalEndPToken {
+   public readonly type: typeof CONDITIONAL_END_PTOKEN = CONDITIONAL_END_PTOKEN;
    public readonly open: SToken;
 
-   constructor(param: ConditionalClosePToken | ConditionalProps) {
+   constructor(param: ConditionalEndPToken | ConditionalProps) {
       this.open = param.open;
    }
 }
 
 export {
-   CONDITIONAL_CLOSE_PTOKEN,
+   CONDITIONAL_END_PTOKEN,
 
-   ConditionalClosePToken,
+   ConditionalEndPToken,
 };

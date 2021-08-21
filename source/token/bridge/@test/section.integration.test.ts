@@ -3,7 +3,7 @@
 
 import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
-import { CdataPToken, ConditionalPToken,  } from 'token';
+import { CdataPToken, ConditionalStartPToken,  } from 'token';
 
 import { parseSection } from '../section';
 
@@ -38,7 +38,7 @@ describe('section (integration)', () => {
          source.endText();
 
          parseSection(source, SToken.fromString('<!['), (parsing) => {
-            const expected = new ConditionalPToken({
+            const expected = new ConditionalStartPToken({
                open: SToken.fromString('<!['),
                openSpace: toSToken(' '),
                sectionType: toSToken('INCLUDE'),
@@ -64,7 +64,7 @@ describe('section (integration)', () => {
          source.endText();
 
          parseSection(source, SToken.fromString('<!['), (parsing) => {
-            const expected = new ConditionalPToken({
+            const expected = new ConditionalStartPToken({
                open: SToken.fromString('<!['),
                openSpace: toSToken(' '),
                unexpanded: {

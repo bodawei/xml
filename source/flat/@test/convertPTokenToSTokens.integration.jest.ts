@@ -9,7 +9,7 @@ import {
    makeCharRef,
    makeComment,
    makeConditionalClose,
-   makeConditionalSection,
+   makeConditionalStart,
    makeDocTypeEnd,
    makeDocTypeStart,
    makeElementDeclaration,
@@ -543,7 +543,7 @@ describe('convertPTokenToSTokens (integration)', () => {
    });
 
    it('returns a ConditionalStart', () => {
-      expect(convertPTokenToSTokens(makeConditionalSection())).toMatchInlineSnapshot(`
+      expect(convertPTokenToSTokens(makeConditionalStart())).toMatchInlineSnapshot(`
          Array [
            SToken {
              "originalStr": "<[",

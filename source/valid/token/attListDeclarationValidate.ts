@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, isName, isNmToken } from 'basic';
+import { SPACE_REGEX, ErrorCollector, isName, isNmToken } from 'basic';
 import { AttListDeclarationPToken, AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken, WordListEntryPToken } from 'token';
@@ -91,7 +91,7 @@ function checkValue(
    let valueSet: Array<string> = [value];
 
    if (attType === 'IDREFS' || attType === 'ENTITIES' || attType === 'NMTOKENS') {
-      valueSet = value.trim().split(/[ \t\n]+/);
+      valueSet = value.trim().split(SPACE_REGEX);
    }
 
    for (const element of valueSet) {

@@ -17,7 +17,7 @@ describe('elementStartUpdateState (unit)', () => {
    let state: ValidityState;
    let graph: CmGraph;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       graph = {
          endId: 0,
          startId: 0,

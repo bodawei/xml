@@ -16,11 +16,11 @@ import {
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
 import {
-   CONDITIONAL_PTOKEN,
+   CONDITIONAL_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ERROR_TYPE,
-   ConditionalPToken,
+   ConditionalStartPToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
    ElementStartPToken,
@@ -315,7 +315,7 @@ describe('EntityExpander (unit)', () => {
 
       describe('with incomplete conditional sections', () => {
          it('delivers doctype start, conditional section starts in the internal subset, and then doctype end', (done) => {
-            const condStart = new ConditionalPToken({ open: toSToken('<![') });
+            const condStart = new ConditionalStartPToken({ open: toSToken('<![') });
             docTypeStart = new DocTypeStartPToken({
                open: toSToken('<!'),
                name: toSToken('root'),
@@ -325,8 +325,8 @@ describe('EntityExpander (unit)', () => {
             doExpand([docTypeStart, condStart, condStart, docTypeEnd], false, (results) => {
                expect(harvestTypes(results)).toEqual([
                   DOCTYPE_START_PTOKEN,
-                  CONDITIONAL_PTOKEN,
-                  CONDITIONAL_PTOKEN,
+                  CONDITIONAL_START_PTOKEN,
+                  CONDITIONAL_START_PTOKEN,
                   DOCTYPE_END_PTOKEN,
                ]);
                done();
@@ -338,7 +338,7 @@ describe('EntityExpander (unit)', () => {
                streamParsedReplacementText,
                'streamParsedReplacementText',
             );
-            const condStart = new ConditionalPToken({ open: toSToken('<![') });
+            const condStart = new ConditionalStartPToken({ open: toSToken('<![') });
             docTypeStart = new DocTypeStartPToken({
                open: toSToken('<!'),
                name: toSToken('root'),
@@ -353,7 +353,7 @@ describe('EntityExpander (unit)', () => {
                   token,
                   params,
                   stack,
-                  cb: (token: ConditionalPToken | undefined, innerCb: () => void) => void,
+                  cb: (token: ConditionalStartPToken | undefined, innerCb: () => void) => void,
                ) => {
                   cb(condStart, () => {});
                   cb(condStart, () => {});
@@ -364,8 +364,8 @@ describe('EntityExpander (unit)', () => {
             doExpand([docTypeStart, docTypeEnd], true, (results) => {
                expect(harvestTypes(results)).toEqual([
                   DOCTYPE_START_PTOKEN,
-                  CONDITIONAL_PTOKEN,
-                  CONDITIONAL_PTOKEN,
+                  CONDITIONAL_START_PTOKEN,
+                  CONDITIONAL_START_PTOKEN,
                   DOCTYPE_END_PTOKEN,
                ]);
                done();
@@ -373,8 +373,8 @@ describe('EntityExpander (unit)', () => {
          });
 
          // it('delivers doctype start, with conditional sections with perefs, and then doctype end', (done) => {
-         //    const condStart = new ConditionalPToken({ open: toSToken('<![') });
-         //    const condStartWithRf = new ConditionalPToken({
+         //    const condStart = new ConditionalStartPToken({ open: toSToken('<![') });
+         //    const condStartWithRf = new ConditionalStartPToken({
          //       open: toSToken('<!['),
          //       peRef: new ParameterEntityReferencePToken({ open: toSToken('%') }),
          //    });
@@ -411,9 +411,9 @@ describe('EntityExpander (unit)', () => {
 
          //       expect(harvestTypes(results)).toEqual([
          //          DOCTYPE_START_PTOKEN,
-         //          CONDITIONAL_PTOKEN,
-         //          CONDITIONAL_PTOKEN,
-         //          CONDITIONAL_PTOKEN,
+         //          CONDITIONAL_START_PTOKEN,
+         //          CONDITIONAL_START_PTOKEN,
+         //          CONDITIONAL_START_PTOKEN,
          //          DOCTYPE_END_PTOKEN,
          //       ]);
          //       done();
@@ -923,17 +923,17 @@ describe('EntityExpander (unit)', () => {
    });
 
    // describe('conditional sections', () => {
-   //    let condStart: ConditionalPToken;
-   //    let condEnd: ConditionalClosePToken;
+   //    let condStart: ConditionalStartPToken;
+   //    let condEnd: ConditionalEndPToken;
 
    //    beforeEach(() => {
-   //       condEnd = new ConditionalClosePToken({
+   //       condEnd = new ConditionalEndPToken({
    //          open: toSToken(']]>'),
    //       });
    //    });
 
    //    it('passes all contents of an ignore conditional section through unchanged', (done) => {
-   //       condStart = new ConditionalPToken({
+   //       condStart = new ConditionalStartPToken({
    //          open: toSToken('<[!'),
    //          sectionType: toSToken('IGNORE'),
    //       });
@@ -941,13 +941,13 @@ describe('EntityExpander (unit)', () => {
    //       doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
    //          const types = results.map((item) => item.type);
 
-   //          expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+   //          expect(types).toEqual([CONDITIONAL_START_PTOKEN, TEXT_PTOKEN, CONDITIONAL_END_PTOKEN]);
    //          done();
    //       });
    //    });
 
    //    it('passes all contents of an unknown conditional section through unchanged', (done) => {
-   //       condStart = new ConditionalPToken({
+   //       condStart = new ConditionalStartPToken({
    //          open: toSToken('<[!'),
    //          sectionType: toSToken('OOPSIE'),
    //       });
@@ -955,13 +955,13 @@ describe('EntityExpander (unit)', () => {
    //       doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
    //          const types = results.map((item) => item.type);
 
-   //          expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+   //          expect(types).toEqual([CONDITIONAL_START_PTOKEN, TEXT_PTOKEN, CONDITIONAL_END_PTOKEN]);
    //          done();
    //       });
    //    });
 
    //    it('passes all contents of an include conditional section through unchanged', (done) => {
-   //       condStart = new ConditionalPToken({
+   //       condStart = new ConditionalStartPToken({
    //          open: toSToken('<[!'),
    //          sectionType: toSToken('INCLUDE'),
    //       });
@@ -969,13 +969,13 @@ describe('EntityExpander (unit)', () => {
    //       doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
    //          const types = results.map((item) => item.type);
 
-   //          expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+   //          expect(types).toEqual([CONDITIONAL_START_PTOKEN, TEXT_PTOKEN, CONDITIONAL_END_PTOKEN]);
    //          done();
    //       });
    //    });
 
    //    // it('passes all contents of an include conditional section through unchanged', (done) => {
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       sectionType: toSToken('INCLUDE'),
    //    //    });
@@ -983,14 +983,14 @@ describe('EntityExpander (unit)', () => {
    //    //    doExpand([condStart, new TextPToken(toSToken('foo')), condEnd], true, (results) => {
    //    //       const types = results.map((item) => item.type);
 
-   //    //       expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+   //    //       expect(types).toEqual([CONDITIONAL_START_PTOKEN, TEXT_PTOKEN, CONDITIONAL_END_PTOKEN]);
    //    //       done();
    //    //    });
    //    // });
 
    //    // it('passes a peRef and other parameters to setupConditional() when the peRef is present', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1014,7 +1014,7 @@ describe('EntityExpander (unit)', () => {
 
    //    // it('creates a new conditional start with the expanded section type added', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1037,7 +1037,7 @@ describe('EntityExpander (unit)', () => {
 
    //    // it('adds to the conditional stack with the value from setupConditional()', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1055,7 +1055,7 @@ describe('EntityExpander (unit)', () => {
 
    //    // it('pases text tokens from the expanded conditional without modification', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1070,7 +1070,7 @@ describe('EntityExpander (unit)', () => {
    //    //       setTimeout(() => {
    //    //          const types = results.map((item) => item.type);
 
-   //    //          expect(types).toEqual([CONDITIONAL_PTOKEN, TEXT_PTOKEN]);
+   //    //          expect(types).toEqual([CONDITIONAL_START_PTOKEN, TEXT_PTOKEN]);
    //    //          done();
    //    //       }, 0);
    //    //    });
@@ -1078,7 +1078,7 @@ describe('EntityExpander (unit)', () => {
 
    //    // it('nests multiple INCLUDE conditionals', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1104,7 +1104,7 @@ describe('EntityExpander (unit)', () => {
 
    //    // it('pases text tokens to the STokenSource', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1128,7 +1128,7 @@ describe('EntityExpander (unit)', () => {
 
    //    // it('a conditional end after a start with a peRef marks the source text as done', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1161,7 +1161,7 @@ describe('EntityExpander (unit)', () => {
 
    //    // it('a conditional end after a start sets up a finished callback which delivers the end', (done) => {
    //    //    const peRef = new ParameterEntityReferencePToken({ open: toSToken('%') });
-   //    //    condStart = new ConditionalPToken({
+   //    //    condStart = new ConditionalStartPToken({
    //    //       open: toSToken('<[!'),
    //    //       peRef,
    //    //    });
@@ -1189,7 +1189,7 @@ describe('EntityExpander (unit)', () => {
 
    //    //       const types = results.map((item) => item.type);
 
-   //    //       expect(types).toEqual([CONDITIONAL_PTOKEN, CONDITIONAL_CLOSE_PTOKEN]);
+   //    //       expect(types).toEqual([CONDITIONAL_START_PTOKEN, CONDITIONAL_END_PTOKEN]);
    //    //       done();
    //    //    });
    //    // });

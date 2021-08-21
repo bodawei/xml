@@ -5,13 +5,13 @@ import { describe, expect, it } from '@jest/globals';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
-import { docEndValidate } from '../docEndValidate';
+import { contentEndValidate } from '../contentEndValidate';
 import { validCodes } from '../../error/validCodes';
 import { ValidityState } from '../../common/validityState';
 
 const VID = validCodes.id;
 
-describe('docEndValidate (unit)', () => {
+describe('contentEndValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
    let state: ValidityState;
 
@@ -32,7 +32,7 @@ describe('docEndValidate (unit)', () => {
             ids: {},
          });
 
-         docEndValidate(state, mockErrorCollector);
+         contentEndValidate(state, mockErrorCollector);
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportValidityError({
@@ -60,7 +60,7 @@ describe('docEndValidate (unit)', () => {
             },
          });
 
-         docEndValidate(state, mockErrorCollector);
+         contentEndValidate(state, mockErrorCollector);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });

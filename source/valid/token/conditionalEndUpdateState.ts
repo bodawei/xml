@@ -1,11 +1,11 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConditionalClosePToken, CONDITIONAL_PTOKEN } from 'token';
+import { ConditionalEndPToken, CONDITIONAL_START_PTOKEN } from 'token';
 
 import { ValidityState } from '../common/validityState';
 
 function conditionalEndUpdateState(
-   token: ConditionalClosePToken,
+   token: ConditionalEndPToken,
    state: ValidityState,
 ): ValidityState {
    let newStack = state.dtdContext.enclosingStack;
@@ -13,19 +13,18 @@ function conditionalEndUpdateState(
    for (let index = state.dtdContext.enclosingStack.length - 1; index >= 0; index--) {
       const item = state.dtdContext.enclosingStack[index];
 
-      if (item.type === CONDITIONAL_PTOKEN) {
+      if (item.type === CONDITIONAL_START_PTOKEN) {
          newStack = state.dtdContext.enclosingStack.slice(0, index);
          break;
       }
    }
 
-   return {
-      ...state,
+   return new ValidityState(state, {
       dtdContext: {
          ...state.dtdContext,
          enclosingStack: newStack,
       },
-   };
+   });
 }
 
 export { conditionalEndUpdateState };

@@ -10,7 +10,7 @@ import { docTypeEndUpdateState } from '../docTypeEndUpdateState';
 describe('docTypeEndUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {});
+   beforeEach(() => {});
 
    it('removes back to before the start of the enclosingStack', () => {
       const start = makeDocTypeStart();
@@ -38,6 +38,7 @@ describe('docTypeEndUpdateState (unit)', () => {
    it('does not change the enclosingStack state property if there is no start in the stack', () => {
       const end = makeDocTypeEnd();
       state = new ValidityState({
+         docType: 'foo',
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
             inExternalMarkupContext: false,

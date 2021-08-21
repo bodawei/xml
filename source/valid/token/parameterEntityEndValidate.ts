@@ -9,7 +9,7 @@ import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
 } from 'pToken';
-import { COMMENT_PTOKEN, CONDITIONAL_PTOKEN, ParameterEntityEndPToken } from 'token';
+import { COMMENT_PTOKEN, CONDITIONAL_START_PTOKEN, ParameterEntityEndPToken } from 'token';
 
 import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
@@ -60,7 +60,7 @@ function parameterEntityEndValidate(
    //    replacement text.
    const item = state.dtdContext.enclosingStack[state.dtdContext.enclosingStack.length - 1];
 
-   if (item.type === CONDITIONAL_PTOKEN) {
+   if (item.type === CONDITIONAL_START_PTOKEN) {
       ec.report(VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING, [], item.open);
    }
 }

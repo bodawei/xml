@@ -1,18 +1,14 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import {
-   CmStateId,
-   CmState,
-   CnNameToCmTransitionMap,
-   CmStateIdToCmStateMap,
-   CmGraph,
-} from './cmGraphTypes';
+import { CmStateId, CmState, CmStateIdToCmStateMap, CmGraph } from './cmGraphTypes';
 
 interface VisitedMap {
-   [stateId: string]: true;
+   [stateId: string]: true | undefined;
 }
 
-let nextStateId: number;
+interface CollapseState {
+   nextStateId: number;
+}
 
 // Determine what stateId to use for any states we create.
 function findNextId(graph: CmGraph): number {
@@ -26,25 +22,31 @@ function findNextId(graph: CmGraph): number {
    return max + 1;
 }
 
-function addState(map: CmStateIdToCmStateMap): CmState {
+function addState(map: CmStateIdToCmStateMap, collapseState: CollapseState): CmState {
    const state: CmState = {
-      id: nextStateId,
       autoTrans: [],
+      id: collapseState.nextStateId,
       trans: {},
    };
 
-   map[nextStateId] = state;
+   map[collapseState.nextStateId] = state;
 
-   nextStateId++;
+   collapseState.nextStateId++;
 
    return state;
 }
 
-function addAllTransitions(base: CmState, originator: CmState, allStates: CmStateIdToCmStateMap) {
+function addAllTransitions(
+   base: CmState,
+   originator: CmState,
+   allStates: CmStateIdToCmStateMap,
+   collapseState: CollapseState,
+) {
    const names = Object.keys(originator.trans);
 
    for (const name of names) {
-      const originTrans = originator.trans[name];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const originTrans = originator.trans[name]!;
       const baseTrans = base.trans[name];
 
       if (!baseTrans) {
@@ -58,14 +60,14 @@ function addAllTransitions(base: CmState, originator: CmState, allStates: CmStat
 
       // Create a state that we will transition to when we see 'name'.
       // It will then contain the transitions that can be done from there.
-      const newState = addState(allStates);
+      const newState = addState(allStates, collapseState);
       const state1 = allStates[originTrans.stateId];
       const state2 = allStates[baseTrans.stateId];
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      replaceAutoTrans(state1, allStates);
+      replaceAutoTrans(state1, allStates, {}, collapseState);
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      replaceAutoTrans(state2, allStates);
+      replaceAutoTrans(state2, allStates, {}, collapseState);
 
       base.trans[name] = {
          ref: `${baseTrans.ref},${originTrans.ref}`,
@@ -73,14 +75,14 @@ function addAllTransitions(base: CmState, originator: CmState, allStates: CmStat
       };
 
       newState.autoTrans = (state1.autoTrans || []).concat(state2.autoTrans || []);
-      newState.trans = Object.assign({}, state1.trans) as CnNameToCmTransitionMap;
+      newState.trans = Object.assign({}, state1.trans);
       const newDone = state1.done || state2.done;
 
       if (newDone) {
          newState.done = true;
       }
 
-      addAllTransitions(newState, state2, allStates);
+      addAllTransitions(newState, state2, allStates, collapseState);
    }
 }
 
@@ -94,7 +96,8 @@ function addAllTransitions(base: CmState, originator: CmState, allStates: CmStat
 function replaceAutoTrans(
    currState: CmState,
    allStates: CmStateIdToCmStateMap,
-   traversed: VisitedMap = {},
+   traversed: VisitedMap,
+   collapseState: CollapseState,
 ): true | undefined {
    if (traversed[currState.id]) {
       return true;
@@ -111,7 +114,7 @@ function replaceAutoTrans(
    for (const oldATId of oldAutoTrans) {
       const transToState = allStates[oldATId];
 
-      const result = replaceAutoTrans(transToState, allStates, traversed);
+      const result = replaceAutoTrans(transToState, allStates, traversed, collapseState);
 
       if (result) {
          currState.autoTrans.push(transToState.id);
@@ -122,7 +125,7 @@ function replaceAutoTrans(
          currState.done = true;
       }
 
-      addAllTransitions(currState, transToState, allStates);
+      addAllTransitions(currState, transToState, allStates, collapseState);
    }
 }
 
@@ -156,22 +159,25 @@ function replaceAutoTrans(
 function collapseAutoTrans(graph: CmGraph): void {
    const todo: Array<CmStateId> = [];
    const queued: VisitedMap = {};
-
-   nextStateId = findNextId(graph);
+   const collapseState: CollapseState = {
+      nextStateId: findNextId(graph),
+   };
 
    todo.push(graph.startId);
 
    // Walk through the graph depth first, removing auto-transitions on each state
    while (todo.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const id = todo.pop()!;
       const targetState = graph.states[id];
 
-      replaceAutoTrans(targetState, graph.states);
+      replaceAutoTrans(targetState, graph.states, {}, collapseState);
 
       const allTrans = Object.values(targetState.trans);
 
       for (const transition of allTrans) {
-         const transToId = transition.stateId;
+         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+         const transToId = transition!.stateId;
 
          if (queued[transToId]) {
             continue;

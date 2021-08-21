@@ -93,7 +93,7 @@ function attListValidate(state: ValidityState, ec: ErrorCollector): void {
    }
 }
 
-function dtdEndValidate(state: ValidityState, ec: ErrorCollector): void {
+function docTypeEndValidate(state: ValidityState, ec: ErrorCollector): void {
    attListValidate(state, ec);
 
    const generalEntityDetails = Object.entries(state.generalEntities);
@@ -119,4 +119,4 @@ function dtdEndValidate(state: ValidityState, ec: ErrorCollector): void {
    }
 }
 
-export { dtdEndValidate };
+export { docTypeEndValidate };

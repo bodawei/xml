@@ -11,15 +11,14 @@ function docTypeStartUpdateState(
 ): ValidityState {
    const docTypeName = strOrBlank(docTypePToken.name);
 
-   return {
-      ...state,
+   return new ValidityState(state, {
       docType: docTypeName,
       dtdContext: {
          ...state.dtdContext,
          enclosingStack: [...state.dtdContext.enclosingStack, docTypePToken],
       },
       hasExternalSubset: !!docTypePToken.externalId,
-   };
+   });
 }
 
 export { docTypeStartUpdateState };

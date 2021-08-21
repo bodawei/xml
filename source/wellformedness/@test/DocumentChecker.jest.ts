@@ -32,7 +32,7 @@ import {
    InternalSubsetStartToken,
    SpacePToken,
    PToken,
-   ConditionalPToken,
+   ConditionalStartPToken,
 } from 'token';
 import {
    makeTextDecl,
@@ -228,7 +228,7 @@ describe('DocumentChecker (unit)', () => {
       });
 
       it('handles an ConditionalSection start with no problems', () => {
-         const conditional = new ConditionalPToken({
+         const conditional = new ConditionalStartPToken({
             open: toSToken('<!['),
             bracket: toSToken('['),
          });

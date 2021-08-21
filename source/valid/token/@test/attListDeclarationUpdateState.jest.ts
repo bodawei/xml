@@ -12,7 +12,7 @@ import { attListDeclarationUpdateState } from '../attListDeclarationUpdateState'
 describe('attListDeclarationUpdateState() (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState();
    });
 

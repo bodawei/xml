@@ -20,8 +20,8 @@ import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
    COMMENT_PTOKEN,
-   CONDITIONAL_CLOSE_PTOKEN,
-   CONDITIONAL_PTOKEN,
+   CONDITIONAL_END_PTOKEN,
+   CONDITIONAL_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
@@ -67,9 +67,9 @@ function convertPTokenToSTokens(pToken: ParseToken): Array<SToken> {
          return charRefToSTokens(pToken);
       case COMMENT_PTOKEN:
          return commentToSTokens(pToken);
-      case CONDITIONAL_PTOKEN:
+      case CONDITIONAL_START_PTOKEN:
          return conditionalStartToSTokens(pToken);
-      case CONDITIONAL_CLOSE_PTOKEN:
+      case CONDITIONAL_END_PTOKEN:
          return conditionalEndToSTokens(pToken);
       case DOCTYPE_END_PTOKEN:
          return docTypeEndToSTokens(pToken);

@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ParameterEntityReferencePToken } from 'pToken';
 
 import { toSToken } from 'sToken';
-import { ConditionalPToken } from 'token';
+import { ConditionalStartPToken } from 'token';
 
 import { conditionalStartToSTokens } from '../conditionalStartToSTokens';
 import { parameterEntityReferenceToSTokens } from '../parameterEntityReferenceToSTokens';
@@ -13,7 +13,7 @@ jest.mock('../parameterEntityReferenceToSTokens');
 
 describe('conditionalStartToSTokens()', () => {
    it('returns all tokens', () => {
-      const conditionalStart = new ConditionalPToken({
+      const conditionalStart = new ConditionalStartPToken({
          open: toSToken('<![>'),
          openSpace: toSToken(' '),
          sectionType: toSToken('INCLUDE'),
@@ -34,7 +34,7 @@ describe('conditionalStartToSTokens()', () => {
 
    it('returns all tokens when there are unexpanded values', () => {
       (parameterEntityReferenceToSTokens as jest.Mock).mockReturnValue([toSToken('%')]);
-      const conditionalStart = new ConditionalPToken({
+      const conditionalStart = new ConditionalStartPToken({
          open: toSToken('<![>'),
          openSpace: toSToken(' '),
          unexpanded: {

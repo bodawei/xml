@@ -18,13 +18,12 @@ function docTypeEndUpdateState(
       }
    }
 
-   return {
-      ...state,
+   return new ValidityState(state, {
       dtdContext: {
          ...state.dtdContext,
          enclosingStack: newStack,
       },
-   };
+   });
 }
 
 export { docTypeEndUpdateState };

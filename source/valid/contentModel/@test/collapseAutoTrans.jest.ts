@@ -24,12 +24,12 @@ describe('collapseAutoTrans()', () => {
       // (first, (first)*, last)
 
       const foo: CmGraph = {
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1',
@@ -38,14 +38,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [4],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -54,8 +54,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             3: {
-               id: 3,
                autoTrans: [],
+               id: 3,
                trans: {
                   last: {
                      ref: '/3',
@@ -64,8 +64,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             4: {
-               id: 4,
                autoTrans: [2, 3],
+               id: 4,
                trans: {},
             },
          },
@@ -74,12 +74,12 @@ describe('collapseAutoTrans()', () => {
       collapseAutoTrans(foo);
 
       expect(foo).toEqual({
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1',
@@ -88,14 +88,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -108,8 +108,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             3: {
-               id: 3,
                autoTrans: [],
+               id: 3,
                trans: {
                   last: {
                      ref: '/3',
@@ -118,8 +118,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             4: {
-               id: 4,
                autoTrans: [],
+               id: 4,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -139,12 +139,12 @@ describe('collapseAutoTrans()', () => {
       // (first, (first)+, last)
 
       const foo: CmGraph = {
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1',
@@ -153,14 +153,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -169,8 +169,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             3: {
-               id: 3,
                autoTrans: [],
+               id: 3,
                trans: {
                   last: {
                      ref: '/3',
@@ -179,8 +179,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             4: {
-               id: 4,
                autoTrans: [2, 3],
+               id: 4,
                trans: {},
             },
          },
@@ -189,12 +189,12 @@ describe('collapseAutoTrans()', () => {
       collapseAutoTrans(foo);
 
       expect(foo).toEqual({
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1',
@@ -203,14 +203,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -219,8 +219,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             3: {
-               id: 3,
                autoTrans: [],
+               id: 3,
                trans: {
                   last: {
                      ref: '/3',
@@ -229,8 +229,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             4: {
-               id: 4,
                autoTrans: [],
+               id: 4,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -250,12 +250,12 @@ describe('collapseAutoTrans()', () => {
       // (first, (first)+, first, last)
 
       const foo: CmGraph = {
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1',
@@ -264,14 +264,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -280,8 +280,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             3: {
-               id: 3,
                autoTrans: [],
+               id: 3,
                trans: {
                   last: {
                      ref: '/4',
@@ -290,8 +290,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             4: {
-               id: 4,
                autoTrans: [],
+               id: 4,
                trans: {
                   first: {
                      ref: '/3',
@@ -300,8 +300,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             5: {
-               id: 5,
                autoTrans: [2, 4],
+               id: 5,
                trans: {},
             },
          },
@@ -310,12 +310,12 @@ describe('collapseAutoTrans()', () => {
       collapseAutoTrans(foo);
 
       expect(foo).toEqual({
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1',
@@ -324,14 +324,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -340,8 +340,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             3: {
-               id: 3,
                autoTrans: [],
+               id: 3,
                trans: {
                   last: {
                      ref: '/4',
@@ -350,8 +350,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             4: {
-               id: 4,
                autoTrans: [],
+               id: 4,
                trans: {
                   first: {
                      ref: '/3',
@@ -360,8 +360,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             5: {
-               id: 5,
                autoTrans: [],
+               id: 5,
                trans: {
                   first: {
                      ref: '/2/1,/3',
@@ -370,8 +370,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             6: {
-               id: 6,
                autoTrans: [],
+               id: 6,
                trans: {
                   first: {
                      ref: '/2/1,/3',
@@ -392,12 +392,12 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -406,14 +406,14 @@ describe('collapseAutoTrans()', () => {
                   },
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      first: {
                         ref: '/2/1',
@@ -422,8 +422,8 @@ describe('collapseAutoTrans()', () => {
                   },
                },
                3: {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      first: {
                         ref: '/3',
@@ -431,19 +431,9 @@ describe('collapseAutoTrans()', () => {
                      },
                   },
                },
-               5: {
-                  id: 5,
-                  autoTrans: [],
-                  trans: {
-                     last: {
-                        ref: '/4',
-                        stateId: 1,
-                     },
-                  },
-               },
                4: {
-                  id: 4,
                   autoTrans: [],
+                  id: 4,
                   trans: {
                      first: {
                         ref: '/2/1,/3',
@@ -451,9 +441,19 @@ describe('collapseAutoTrans()', () => {
                      },
                   },
                },
-               6: {
-                  id: 6,
+               5: {
                   autoTrans: [],
+                  id: 5,
+                  trans: {
+                     last: {
+                        ref: '/4',
+                        stateId: 1,
+                     },
+                  },
+               },
+               6: {
+                  autoTrans: [],
+                  id: 6,
                   trans: {
                      first: {
                         ref: '/2/1,/3',
@@ -477,12 +477,13 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  done: true,
+                  id: 0,
                   trans: {
                      first: {
                         ref: '/1',
@@ -493,24 +494,23 @@ describe('collapseAutoTrans()', () => {
                         stateId: 1,
                      },
                   },
-                  done: true,
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  done: true,
+                  id: 2,
                   trans: {
                      last: {
                         ref: '/2',
                         stateId: 1,
                      },
                   },
-                  done: true,
                },
             },
          });
@@ -524,12 +524,13 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  done: true,
+                  id: 0,
                   trans: {
                      a: {
                         ref: '/1',
@@ -548,17 +549,17 @@ describe('collapseAutoTrans()', () => {
                         stateId: 3,
                      },
                   },
-                  done: true,
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  done: true,
+                  id: 2,
                   trans: {
                      c: {
                         ref: '/3/1',
@@ -569,24 +570,23 @@ describe('collapseAutoTrans()', () => {
                         stateId: 3,
                      },
                   },
-                  done: true,
                },
                3: {
-                  id: 3,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 3,
+                  trans: {},
                },
                4: {
-                  id: 4,
                   autoTrans: [],
+                  done: true,
+                  id: 4,
                   trans: {
                      d: {
                         ref: '/3/2',
                         stateId: 3,
                      },
                   },
-                  done: true,
                },
             },
          });
@@ -600,12 +600,13 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                0: {
-                  id: 0,
                   autoTrans: [],
+                  done: true,
+                  id: 0,
                   trans: {
                      a: {
                         ref: '/1',
@@ -620,34 +621,33 @@ describe('collapseAutoTrans()', () => {
                         stateId: 4,
                      },
                   },
-                  done: true,
                },
                1: {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                2: {
-                  id: 2,
                   autoTrans: [],
+                  done: true,
+                  id: 2,
                   trans: {
                      c: {
                         ref: '/3/1',
                         stateId: 4,
                      },
                   },
-                  done: true,
                },
                3: {
-                  id: 3,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 3,
+                  trans: {},
                },
                4: {
-                  id: 4,
                   autoTrans: [],
+                  id: 4,
                   trans: {
                      d: {
                         ref: '/3/2',
@@ -667,12 +667,13 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                '0': {
-                  id: 0,
                   autoTrans: [],
+                  done: true,
+                  id: 0,
                   trans: {
                      a: {
                         ref: '/1',
@@ -687,11 +688,11 @@ describe('collapseAutoTrans()', () => {
                         stateId: 4,
                      },
                   },
-                  done: true,
                },
                '1': {
-                  id: 1,
                   autoTrans: [],
+                  done: true,
+                  id: 1,
                   trans: {
                      a: {
                         ref: '/1',
@@ -706,11 +707,10 @@ describe('collapseAutoTrans()', () => {
                         stateId: 4,
                      },
                   },
-                  done: true,
                },
                '2': {
-                  id: 2,
                   autoTrans: [],
+                  id: 2,
                   trans: {
                      c: {
                         ref: '/3/1',
@@ -719,13 +719,10 @@ describe('collapseAutoTrans()', () => {
                   },
                },
                '3': {
-                  id: 3,
                   autoTrans: [],
+                  done: true,
+                  id: 3,
                   trans: {
-                     c: {
-                        ref: '/3/1',
-                        stateId: 4,
-                     },
                      a: {
                         ref: '/1',
                         stateId: 1,
@@ -734,12 +731,15 @@ describe('collapseAutoTrans()', () => {
                         ref: '/2',
                         stateId: 1,
                      },
+                     c: {
+                        ref: '/3/1',
+                        stateId: 4,
+                     },
                   },
-                  done: true,
                },
                '4': {
-                  id: 4,
                   autoTrans: [],
+                  id: 4,
                   trans: {
                      d: {
                         ref: '/3/2',
@@ -759,12 +759,13 @@ describe('collapseAutoTrans()', () => {
          collapseAutoTrans(graph);
 
          expect(graph).toEqual({
-            startId: 0,
             endId: 1,
+            startId: 0,
             states: {
                '0': {
-                  id: 0,
                   autoTrans: [],
+                  done: true,
+                  id: 0,
                   trans: {
                      a: {
                         ref: '/1,/3/1',
@@ -779,28 +780,27 @@ describe('collapseAutoTrans()', () => {
                         stateId: 6,
                      },
                   },
-                  done: true,
                },
                '1': {
-                  id: 1,
                   autoTrans: [],
-                  trans: {},
                   done: true,
+                  id: 1,
+                  trans: {},
                },
                '2': {
-                  id: 2,
                   autoTrans: [],
+                  done: true,
+                  id: 2,
                   trans: {
                      a: {
                         ref: '/1',
                         stateId: 2,
                      },
                   },
-                  done: true,
                },
                '3': {
-                  id: 3,
                   autoTrans: [],
+                  id: 3,
                   trans: {
                      a: {
                         ref: '/3/1',
@@ -817,8 +817,9 @@ describe('collapseAutoTrans()', () => {
                   },
                },
                '4': {
-                  id: 4,
                   autoTrans: [],
+                  done: true,
+                  id: 4,
                   trans: {
                      a: {
                         ref: '/3/1',
@@ -833,11 +834,10 @@ describe('collapseAutoTrans()', () => {
                         stateId: 6,
                      },
                   },
-                  done: true,
                },
                '5': {
-                  id: 5,
                   autoTrans: [],
+                  id: 5,
                   trans: {
                      b: {
                         ref: '/3/2/1',
@@ -850,8 +850,9 @@ describe('collapseAutoTrans()', () => {
                   },
                },
                '6': {
-                  id: 6,
                   autoTrans: [],
+                  done: true,
+                  id: 6,
                   trans: {
                      a: {
                         ref: '/3/1',
@@ -866,30 +867,30 @@ describe('collapseAutoTrans()', () => {
                         stateId: 6,
                      },
                   },
-                  done: true,
                },
                '7': {
-                  id: 7,
                   autoTrans: [],
+                  done: true,
+                  id: 7,
                   trans: {
-                     b: {
-                        ref: '/3/2/1',
-                        stateId: 6,
-                     },
-                     c: {
-                        ref: '/3/2/2',
-                        stateId: 6,
-                     },
                      a: {
                         ref: '/1',
                         stateId: 2,
                      },
+                     b: {
+                        ref: '/3/2/1',
+                        stateId: 6,
+                     },
+                     c: {
+                        ref: '/3/2/2',
+                        stateId: 6,
+                     },
                   },
-                  done: true,
                },
                '8': {
-                  id: 8,
                   autoTrans: [],
+                  done: true,
+                  id: 8,
                   trans: {
                      a: {
                         ref: '/3/1',
@@ -904,7 +905,6 @@ describe('collapseAutoTrans()', () => {
                         stateId: 6,
                      },
                   },
-                  done: true,
                },
             },
          });
@@ -917,12 +917,12 @@ describe('collapseAutoTrans()', () => {
       // (first, (first)*, last)
 
       const foo: CmGraph = {
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [4],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1',
@@ -931,14 +931,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [3],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1',
@@ -970,12 +970,12 @@ describe('collapseAutoTrans()', () => {
       collapseAutoTrans(foo);
 
       expect(foo).toEqual({
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             0: {
-               id: 0,
                autoTrans: [],
+               id: 0,
                trans: {
                   first: {
                      ref: '/1,/2/1',
@@ -984,14 +984,14 @@ describe('collapseAutoTrans()', () => {
                },
             },
             1: {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             2: {
-               id: 2,
                autoTrans: [],
+               id: 2,
                trans: {
                   first: {
                      ref: '/2/1,/3',
@@ -1018,8 +1018,8 @@ describe('collapseAutoTrans()', () => {
                },
             },
             5: {
-               id: 5,
                autoTrans: [],
+               id: 5,
                trans: {
                   first: {
                      ref: '/2/1,/2/1,/3',
@@ -1028,26 +1028,26 @@ describe('collapseAutoTrans()', () => {
                },
             },
             6: {
-               id: 6,
                autoTrans: [],
+               done: true,
+               id: 6,
                trans: {
                   first: {
                      ref: '/2/1',
                      stateId: 4,
                   },
                },
-               done: true,
             },
             7: {
-               id: 7,
                autoTrans: [],
+               done: true,
+               id: 7,
                trans: {
                   first: {
                      ref: '/2/1',
                      stateId: 4,
                   },
                },
-               done: true,
             },
          },
       });

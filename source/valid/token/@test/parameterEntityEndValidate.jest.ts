@@ -15,7 +15,7 @@ import { SToken, toSToken } from 'sToken';
 import { CommentPToken } from 'token';
 import {
    makeCharData,
-   makeConditionalSection,
+   makeConditionalStart,
    makeParameterEntityEnd,
    makeParameterEntityStart,
 } from 'token-test';
@@ -162,7 +162,7 @@ describe('parameterEntityEndValidate (unit)', () => {
    it('reports an error when the previous thing in the enclosingStack is a conditional section start', () => {
       state = new ValidityState({
          dtdContext: {
-            enclosingStack: [makeConditionalSection()],
+            enclosingStack: [makeConditionalStart()],
          },
       });
 
@@ -173,7 +173,7 @@ describe('parameterEntityEndValidate (unit)', () => {
          id: VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING,
          lastPosition: undefined,
          params: [],
-         position: makeConditionalSection().open,
+         position: makeConditionalStart().open,
       });
    });
 

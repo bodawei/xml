@@ -4,11 +4,11 @@ import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
-import { ConditionalClosePToken } from 'token';
-import { makeConditionalSection, makeParameterEntityStart } from 'token-test';
+import { ConditionalEndPToken } from 'token';
+import { makeConditionalStart, makeParameterEntityStart } from 'token-test';
 
-import { validCodes } from '../../error/validCodes';
 import { ValidityState } from '../../common/validityState';
+import { validCodes } from '../../error/validCodes';
 import { conditionalEndValidate } from '../conditionalEndValidate';
 
 const VID = validCodes.id;
@@ -23,12 +23,15 @@ describe('conditionalEndValidate (unit)', () => {
       state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
+            lastPToken: undefined,
          },
       });
    });
 
    it('reports an error when the previous thing in the enclosingStack is not a conditional start', () => {
-      const conditional = new ConditionalClosePToken({
+      const conditional = new ConditionalEndPToken({
          open: toSToken('<!['),
       });
 
@@ -44,12 +47,15 @@ describe('conditionalEndValidate (unit)', () => {
    });
 
    it('reports no error when the previous thing in the enclosingStack is a conditional start', () => {
-      const conditional = new ConditionalClosePToken({
+      const conditional = new ConditionalEndPToken({
          open: toSToken('<!['),
       });
       state = new ValidityState({
          dtdContext: {
-            enclosingStack: [makeConditionalSection()],
+            enclosingStack: [makeConditionalStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
+            lastPToken: undefined,
          },
       });
 

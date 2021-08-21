@@ -6,7 +6,7 @@ import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as cdata from '../../cdata';
-import * as conditional from '../../conditional';
+import * as conditional from '../../conditionalStart';
 import * as peReference from '../../../pToken/token/parameterEntityReference';
 
 import { SectionStart, parseSection } from '../section';

@@ -1,4 +1,4 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 type CmStateId = number;
 
@@ -17,14 +17,14 @@ interface CmTransition {
 }
 
 interface CmState {
-   id: CmStateId;
-   trans: CnNameToCmTransitionMap;
    autoTrans?: Array<CmStateId>;
    done?: boolean; // true if you can stop when you reach this Cmstate.
+   id: CmStateId;
+   trans: CnNameToCmTransitionMap;
 }
 
 interface CnNameToCmTransitionMap {
-   [name: string]: CmTransition;
+   [name: string]: CmTransition | undefined;
 }
 
 interface CmStateIdToCmStateMap {
@@ -32,16 +32,16 @@ interface CmStateIdToCmStateMap {
 }
 
 interface CmGraph {
-   startId: CmStateId;
    endId: CmStateId;
+   startId: CmStateId;
    states: CmStateIdToCmStateMap;
 }
 
 export {
-   CmStateId,
-   CmTransition,
-   CmState,
-   CnNameToCmTransitionMap,
-   CmStateIdToCmStateMap,
    CmGraph,
+   CnNameToCmTransitionMap,
+   CmState,
+   CmStateId,
+   CmStateIdToCmStateMap,
+   CmTransition,
 };

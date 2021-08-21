@@ -9,7 +9,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { ConditionalPToken, EntityValuePToken } from 'token';
+import { ConditionalStartPToken, EntityValuePToken } from 'token';
 
 import { ExpandParams } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';
@@ -27,7 +27,7 @@ describe('setupConditional() (unit)', () => {
    let pieceMealInclude: EntityValuePToken;
    let testDecl: ParameterEntityDeclarationPToken;
    let testRef: ParameterEntityReferencePToken;
-   let conditionalStart: ConditionalPToken;
+   let conditionalStart: ConditionalStartPToken;
 
    beforeEach(() => {
       testDecl = new ParameterEntityDeclarationPToken({
@@ -35,7 +35,7 @@ describe('setupConditional() (unit)', () => {
          name: toSToken('test'),
       });
       testRef = new ParameterEntityReferencePToken({ open: toSToken('%'), name: toSToken('test') });
-      conditionalStart = new ConditionalPToken({
+      conditionalStart = new ConditionalStartPToken({
          open: toSToken('<!['),
          peRef: testRef,
       });
@@ -136,7 +136,7 @@ describe('setupConditional() (unit)', () => {
          deliverSpy,
          (result) => {
             expect(result).toEqual({
-               newStart: new ConditionalPToken(conditionalStart, {
+               newStart: new ConditionalStartPToken(conditionalStart, {
                   sectionType: toSToken('IGNORE'),
                }),
             });
@@ -157,7 +157,7 @@ describe('setupConditional() (unit)', () => {
          deliverSpy,
          (result) => {
             expect(result).toEqual({
-               newStart: new ConditionalPToken(conditionalStart, {
+               newStart: new ConditionalStartPToken(conditionalStart, {
                   sectionType: testInclude.text,
                }),
             });

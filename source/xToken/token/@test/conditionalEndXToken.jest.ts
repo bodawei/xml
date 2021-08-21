@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
-import { ConditionalClosePToken } from 'token';
+import { ConditionalEndPToken } from 'token';
 
 import { ConditionalEndXToken } from '../conditionalEndXToken';
 
@@ -17,12 +17,12 @@ describe('ConditionalClose', () => {
 
    it('creates an XToken from a pToken', () => {
       const xToken = new ConditionalEndXToken(
-         new ConditionalClosePToken({ open: toSToken('<![') }),
+         new ConditionalEndPToken({ open: toSToken('<![') }),
       );
 
       expect(xToken).toEqual({
          type: 'CONDITIONAL_SECTION_END_XTOKEN',
-         pToken: new ConditionalClosePToken({ open: toSToken('<![') }),
+         pToken: new ConditionalEndPToken({ open: toSToken('<![') }),
       });
    });
 });

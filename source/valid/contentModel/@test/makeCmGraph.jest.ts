@@ -1,63 +1,51 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 
 import { ContentModelP } from 'pToken';
 
 import { makeCmGraph } from '../makeCmGraph';
-import * as cmToCmGraphModule from '../cmToCmGraph';
-import * as collapseAutoTransModule from '../collapseAutoTrans';
-import * as pruneCmGraphModule from '../pruneCmGraph';
+import { cmToCmGraph } from '../cmToCmGraph';
+import { collapseAutoTrans } from '../collapseAutoTrans';
+import { pruneCmGraph } from '../pruneCmGraph';
 
 jest.mock('../cmToCmGraph');
 jest.mock('../collapseAutoTrans');
 jest.mock('../pruneCmGraph');
 
-describe('nameList (unit)', () => {
-   beforeEach(() => {});
+describe('makeCmGraph (unit)', () => {
+   let cmToCmGraphMock: jest.MockedFunction<typeof cmToCmGraph>;
+   let collapseAutoTransMock: jest.MockedFunction<typeof collapseAutoTrans>;
+   let pruneCmGraphMock: jest.MockedFunction<typeof pruneCmGraph>;
 
-   describe('makeCmGraph()', () => {
-      let cmToCmGraph: jest.MockedFunction<typeof cmToCmGraphModule.cmToCmGraph>;
-      let collapseAutoTrans: jest.MockedFunction<typeof collapseAutoTransModule.collapseAutoTrans>;
-      let pruneCmGraph: jest.MockedFunction<typeof pruneCmGraphModule.pruneCmGraph>;
+   beforeEach(() => {
+      cmToCmGraphMock = cmToCmGraph as jest.MockedFunction<typeof cmToCmGraph>;
+      collapseAutoTransMock = collapseAutoTrans as jest.MockedFunction<typeof collapseAutoTrans>;
+      pruneCmGraphMock = pruneCmGraph as jest.MockedFunction<typeof pruneCmGraph>;
+   });
 
-      beforeEach(async () => {
-         ({ cmToCmGraph } = (await import('../cmToCmGraph')) as {
-            cmToCmGraph: jest.MockedFunction<typeof cmToCmGraphModule.cmToCmGraph>;
-         });
-         ({ collapseAutoTrans } = (await import('../collapseAutoTrans')) as {
-            collapseAutoTrans: jest.MockedFunction<
-               typeof collapseAutoTransModule.collapseAutoTrans
-            >;
-         });
-         ({ pruneCmGraph } = (await import('../pruneCmGraph')) as {
-            pruneCmGraph: jest.MockedFunction<typeof pruneCmGraphModule.pruneCmGraph>;
-         });
-      });
-
-      it('calls graph construction routines', () => {
-         const model: ContentModelP = {
-            delimitedParticles: [],
-         };
-         const graph = {
-            startId: 1,
-            endId: 1,
-            states: {
-               1: {
-                  id: 1,
-                  trans: {},
-               },
+   it('calls graph construction routines', () => {
+      const model: ContentModelP = {
+         delimitedParticles: [],
+      };
+      const graph = {
+         endId: 1,
+         startId: 1,
+         states: {
+            1: {
+               id: 1,
+               trans: {},
             },
-         };
-         cmToCmGraph.mockReturnValue(graph);
-         pruneCmGraph.mockImplementation((x) => x);
+         },
+      };
+      cmToCmGraphMock.mockReturnValue(graph);
+      pruneCmGraphMock.mockImplementation((x) => x);
 
-         const result = makeCmGraph(model);
+      const result = makeCmGraph(model);
 
-         expect(result).toEqual(graph);
-         expect(cmToCmGraph).toHaveBeenCalledWith(model);
-         expect(collapseAutoTrans).toHaveBeenCalledWith(graph);
-         expect(pruneCmGraph).toHaveBeenCalledWith(graph);
-      });
+      expect(result).toEqual(graph);
+      expect(cmToCmGraphMock).toHaveBeenCalledWith(model);
+      expect(collapseAutoTransMock).toHaveBeenCalledWith(graph);
+      expect(pruneCmGraphMock).toHaveBeenCalledWith(graph);
    });
 });

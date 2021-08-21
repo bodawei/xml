@@ -9,7 +9,7 @@ import {
    makeCharRef,
    makeComment,
    makeConditionalClose,
-   makeConditionalSection,
+   makeConditionalStart,
    makeDocTypeEnd,
    makeDocTypeStart,
    makeElementDeclarationWithContentModel,
@@ -185,7 +185,7 @@ describe('convertPTokenToXToken() (integration)', () => {
    });
 
    it('converts an ConditionalSection token', () => {
-      const pToken = makeConditionalSection();
+      const pToken = makeConditionalStart();
 
       const result = convertPTokenToXToken(pToken);
 

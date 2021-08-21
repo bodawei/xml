@@ -3,7 +3,7 @@
 
 import { STokenSource, SToken, toSToken } from 'sToken';
 
-import { ConditionalPToken, parseConditional, resumeParseConditional } from '../conditional';
+import { ConditionalStartPToken, parseConditional, resumeParseConditional } from '../conditionalStart';
 import { SectionStart } from '../bridge/section';
 import { ParameterEntityReferencePToken } from 'pToken';
 
@@ -23,7 +23,7 @@ describe('conditional (integration)', () => {
 
    describe('parse()', () => {
       it('parses an IGNORE with embedded values', (done) => {
-         const expected = new ConditionalPToken({
+         const expected = new ConditionalStartPToken({
             open: fromString('<!['),
             sectionType: fromString('IGNORE'),
             bracket: fromString('['),
@@ -39,7 +39,7 @@ describe('conditional (integration)', () => {
 
    describe('resumeParseConditional()', () => {
       it('adds section type and bracket', (done) => {
-         const start = new ConditionalPToken({
+         const start = new ConditionalStartPToken({
             open: fromString('<!['),
             openSpace: fromString(' '),
             unexpanded: {
@@ -47,7 +47,7 @@ describe('conditional (integration)', () => {
                propName: 'sectionType',
             }
          });
-         const expected = new ConditionalPToken({
+         const expected = new ConditionalStartPToken({
             open: fromString('<!['),
             openSpace: fromString('  '),
             sectionType: fromString('blah'),
@@ -67,7 +67,7 @@ describe('conditional (integration)', () => {
       });
 
       it('adds bracket', (done) => {
-         const start = new ConditionalPToken({
+         const start = new ConditionalStartPToken({
             open: fromString('<!['),
             openSpace: fromString(' '),
             sectionType: fromString('blah'),
@@ -81,7 +81,7 @@ describe('conditional (integration)', () => {
          source.addText('\t[<![two<![three]]>four]]>]]>');
 
          resumeParseConditional(source, start, (result) => {
-            expect(result).toEqualRangeless(new ConditionalPToken({
+            expect(result).toEqualRangeless(new ConditionalStartPToken({
                open: fromString('<!['),
                openSpace: fromString(' '),
                sectionType: fromString('blah'),

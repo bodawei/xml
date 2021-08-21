@@ -4,7 +4,7 @@ import { parseParameterEntityReference, ParameterEntityReferencePToken } from 'p
 import { STokenSource, SToken } from 'sToken';
 
 import { parseCdata, CdataPToken } from '../cdata';
-import { parseConditional, ConditionalPToken } from '../conditional';
+import { parseConditional, ConditionalStartPToken } from '../conditionalStart';
 
 interface SectionStart {
    open: SToken;
@@ -14,7 +14,7 @@ interface SectionStart {
    peRefPlus?: Array<ParameterEntityReferencePToken>;
    sectionTypeSpace?: SToken;
 }
-type DeliverSection = (section: CdataPToken | ConditionalPToken) => void;
+type DeliverSection = (section: CdataPToken | ConditionalStartPToken) => void;
 
 function continueToContent(
    source: STokenSource,
@@ -68,7 +68,7 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
                        propName: 'sectionType',
                     },
                  };
-            const conditionalPToken = new ConditionalPToken(sectionData, extra);
+            const conditionalPToken = new ConditionalStartPToken(sectionData, extra);
 
             deliverSection(conditionalPToken);
          });

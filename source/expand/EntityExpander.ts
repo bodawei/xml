@@ -40,9 +40,9 @@ import {
    InternalSubsetEndToken,
    ErrorToken,
    ElidedEntityDeclarationPToken,
-   CONDITIONAL_PTOKEN,
-   ConditionalPToken,
-   CONDITIONAL_CLOSE_PTOKEN,
+   CONDITIONAL_START_PTOKEN,
+   ConditionalStartPToken,
+   CONDITIONAL_END_PTOKEN,
    INTERNAL_SUBSET_START_TOKEN,
    INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
@@ -182,7 +182,7 @@ class EntityExpander {
                expanded();
             }
             break;
-         case CONDITIONAL_PTOKEN:
+         case CONDITIONAL_START_PTOKEN:
             if (!this.conditionalStartExpander) {
                this.handleConditional(pToken, expanded);
             }
@@ -203,7 +203,7 @@ class EntityExpander {
             this.handleEntityReference(pToken, expanded);
             break;
          case TEXT_PTOKEN:
-         case CONDITIONAL_CLOSE_PTOKEN:
+         case CONDITIONAL_END_PTOKEN:
          default:
             this.deliverToken(pToken);
             expanded();
@@ -292,7 +292,10 @@ class EntityExpander {
     * processing of any text which comes in afterwards. As that is processed, it will
     * be passed back through the 5th parameter which will deliver those values back through this.
     */
-   private handleConditional(startToken: ConditionalPToken, startHandled: PTokenExpanded): void {
+   private handleConditional(
+      startToken: ConditionalStartPToken,
+      startHandled: PTokenExpanded,
+   ): void {
       if (!startToken.unexpanded) {
          this.deliverToken(startToken);
          startHandled();

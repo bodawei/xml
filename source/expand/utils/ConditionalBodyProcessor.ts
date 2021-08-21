@@ -4,7 +4,7 @@ import { ERROR_TYPE } from 'basic';
 
 import { ParseToken, TEXT_PTOKEN } from 'pToken';
 import { STokenSource, strOrBlank } from 'sToken';
-import { CONDITIONAL_PTOKEN } from 'token';
+import { CONDITIONAL_START_PTOKEN } from 'token';
 type PTokenExpanded = () => void;
 type DeliverPToken = (token: ParseToken | undefined, expanded: PTokenExpanded) => void;
 type DoTextExpansion = (sTokenSource: STokenSource, handleNextToken: DeliverPToken) => void;
@@ -112,7 +112,7 @@ class ConditionalBodyProcessor {
          return;
       }
 
-      if (newToken.type !== CONDITIONAL_PTOKEN) {
+      if (newToken.type !== CONDITIONAL_START_PTOKEN) {
          this.expandToken(newToken, handled);
       } else {
          this.expandToken(newToken, handled);

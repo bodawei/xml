@@ -1,6 +1,6 @@
 import { ContextType, ParseToken } from 'pToken';
 import { STokenSource, strOrBlank } from 'sToken';
-import { ConditionalPToken, resumeParseConditional } from 'token';
+import { ConditionalStartPToken, resumeParseConditional } from 'token';
 
 import { ConditionalInfo, ExpandParams } from '../types';
 import { addProtoReplacementText } from './addProtoReplacementText';
@@ -10,7 +10,7 @@ import { EntityContextStack } from './EntityContextStack';
 type Done = (result: ConditionalInfo) => void;
 
 function setupConditional(
-   token: ConditionalPToken,
+   token: ConditionalStartPToken,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
    context: ContextType,

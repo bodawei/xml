@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+         <!DOCTYPE root [
+            <!ENTITY % stuff "
+               <!ENTITY &#37; external 'this is an external markup declartion'>
+            ">
+            %stuff;
+            <!ENTITY % level2 '%external;'>
+            <!ENTITY level1 '[%level2;]'>
+            <!ELEMENT root ANY>
+         ]>
+         <root>
+         &level1;
+         </root>

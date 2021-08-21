@@ -12,7 +12,7 @@ import {
    makeCharRef,
    makeComment,
    makeConditionalClose,
-   makeConditionalSection,
+   makeConditionalStart,
    makeDocTypeEnd,
    makeDocTypeStart,
    makeElementDeclaration,
@@ -50,7 +50,7 @@ jest.mock('../../token/conditionalEndValidate');
 jest.mock('../../token/conditionalStartUpdateState');
 jest.mock('../../token/conditionalStartValidate');
 jest.mock('../../token/docTypeStartUpdateState');
-jest.mock('../../token/dtdEndValidate');
+jest.mock('../../token/docTypeEndValidate');
 jest.mock('../../token/elementDeclarationUpdateState');
 jest.mock('../../token/elementDeclarationPreprocess');
 jest.mock('../../token/elementDeclarationValidate');
@@ -75,7 +75,7 @@ jest.mock('../../token/xmlDeclarationUpdateState');
 describe('conentValidate (unit)', () => {
    let ec: MockErrorCollector;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       ec = new MockErrorCollector();
    });
 
@@ -146,7 +146,7 @@ describe('conentValidate (unit)', () => {
       [makeCharData('  \t \n \r '), [true, true, true]],
       [makeCharRef(), [false, false, false]],
       [makeComment(), [false, true, true]],
-      [makeConditionalSection(), [false, false, false]],
+      [makeConditionalStart(), [false, false, false]],
       [makeConditionalClose(), [false, false, false]],
       [makeDocTypeStart(), [false, false, false]],
       [makeDocTypeEnd(), [false, false, false]],
@@ -320,7 +320,7 @@ describe('conentValidate (unit)', () => {
       [makeCharData('  \t \n \r '), [true, true, true]],
       [makeCharRef(), [false, false, true]],
       [makeComment(), [false, true, true]],
-      [makeConditionalSection(), [false, false, false]],
+      [makeConditionalStart(), [false, false, false]],
       [makeConditionalClose(), [false, false, false]],
       [makeDocTypeStart(), [false, false, false]],
       [makeDocTypeEnd(), [false, false, false]],

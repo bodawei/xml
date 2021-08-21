@@ -387,6 +387,7 @@ The last processing phase does two things:
 * Each test for a valitity constraint should list the section of the spec this test is checking.
 * Each group of tests for one validity constraint should be in its own `describe()` section.
 * This strives to treat the validityState as an immutable data structure.  The ValidityState type follows the same pattern of PTokens where you can merge two other objects by passing two arguments to the constructor.
+* 100% code coverage
 
 ## Architecture notes 
 (move to the architecture section, above)

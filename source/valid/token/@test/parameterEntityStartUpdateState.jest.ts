@@ -10,7 +10,7 @@ import { parameterEntityStartUpdateState } from '../parameterEntityStartUpdateSt
 describe('parameterEntityStartUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState({});
    });
 

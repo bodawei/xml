@@ -1,0 +1,6 @@
+            <!ENTITY % stuff "
+               <!ENTITY &#37; external 'this is an external markup declartion'>
+            ">
+            %stuff;
+            <!ENTITY % level2 '%external;'>
+            <!ENTITY level1 '[%level2;]'>

@@ -399,7 +399,7 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-063': {
       // meh - Conditional sections may only appear in the external DTD subset.
       id: 'MARKUPDECL_INVALID_TOKEN',
-      message: 'CONDITIONAL_PTOKEN',
+      message: 'CONDITIONAL_START_PTOKEN',
    },
    'not-wf-sa-064': 'ATTLISTDECL_ATTR_TYPE_NO_SPACE', // great - Space is required between attribute type and default values in!ATTLIST...>declarations.
    'not-wf-sa-065': 'ATTLISTDECL_ATTR_NAME_INVALID', // ok - Space is required between attribute name and type in!ATTLIST...>declarations.
@@ -844,12 +844,12 @@ const expectedNotWfCodes: IdToErrorMap = {
    'o-p43fail2': {
       // no conditional sections
       id: 'CONTENT_INVALID_TOKEN',
-      message: 'CONDITIONAL_PTOKEN',
+      message: 'CONDITIONAL_START_PTOKEN',
    },
    'o-p43fail3': {
       // no conditional sections
       id: 'CONTENT_INVALID_TOKEN',
-      message: 'CONDITIONAL_PTOKEN',
+      message: 'CONDITIONAL_START_PTOKEN',
    },
    'o-p44fail1': 'ELEMENT_XTRA_LEADING_SPACE', // Illegal space before Empty element tag.
    'o-p44fail2': 'ELEMENT_NAME_INVALID', // Illegal space after Empty element tag.

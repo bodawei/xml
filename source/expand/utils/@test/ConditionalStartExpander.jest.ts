@@ -6,7 +6,7 @@ import { ConformanceVersion, EntityId } from 'basic';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { ExpandParams, RetrieveResults } from 'source/expand/types';
 import { STokenSource, toSToken } from 'sToken';
-import { ConditionalPToken, ErrorToken, resumeParseConditional } from 'token';
+import { ConditionalStartPToken, ErrorToken, resumeParseConditional } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
 import { addProtoReplacementText } from '../addProtoReplacementText';
 import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
@@ -15,9 +15,9 @@ import { ConditionalStartExpander } from '../ConditionalStartExpander';
 import { EntityContextStack } from '../EntityContextStack';
 import { EntityDetails } from '../EntityDetails';
 
-jest.mock('../../../token/conditional', () => {
+jest.mock('../../../token/conditionalStart', () => {
    const realConditional: Record<string, unknown> = jest.requireActual(
-      '../../../token/conditional',
+      '../../../token/conditionalStart',
    );
    return {
       ...realConditional,
@@ -29,7 +29,7 @@ jest.mock('../entityValueToSTokenSource');
 
 describe('ConditionalStartExpander (unit)', () => {
    let expand: ExpandParams;
-   let start: ConditionalPToken;
+   let start: ConditionalStartPToken;
    let mockAddProtoReplacementText: jest.MockedFunction<typeof addProtoReplacementText>;
    let mockResumeParseConditional: jest.MockedFunction<typeof resumeParseConditional>;
    let mockEntityValueToSTokenSource: jest.MockedFunction<typeof entityValueToSTokenSource>;
@@ -56,7 +56,7 @@ describe('ConditionalStartExpander (unit)', () => {
          },
       };
 
-      start = new ConditionalPToken({
+      start = new ConditionalStartPToken({
          open: toSToken('<!['),
          unexpanded: {
             peRef: makeParameterEntityReference(),
@@ -84,7 +84,7 @@ describe('ConditionalStartExpander (unit)', () => {
 
    it('immediately declares itself as done when called with a conditional start without an unexpanded', () => {
       const done = jest.fn();
-      const start = new ConditionalPToken({
+      const start = new ConditionalStartPToken({
          open: toSToken('<!['),
       });
 
@@ -129,7 +129,7 @@ describe('ConditionalStartExpander (unit)', () => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);
       });
-      const start = new ConditionalPToken({
+      const start = new ConditionalStartPToken({
          open: toSToken('<!['),
          unexpanded: {
             peRef: new ParameterEntityReferencePToken({
@@ -161,7 +161,7 @@ describe('ConditionalStartExpander (unit)', () => {
       mockEntityValueToSTokenSource.mockReturnValue(source);
       mockResumeParseConditional.mockImplementation((y, z, cb) => {
          cb(
-            new ConditionalPToken({
+            new ConditionalStartPToken({
                open: toSToken('<!['),
                bracket: toSToken(']'),
                unexpanded: {
@@ -177,7 +177,7 @@ describe('ConditionalStartExpander (unit)', () => {
 
       expect(done).toHaveBeenCalledWith({
          done: true,
-         newStart: new ConditionalPToken({
+         newStart: new ConditionalStartPToken({
             open: toSToken('<!['),
             bracket: toSToken(']'),
             unexpanded: {
@@ -199,7 +199,7 @@ describe('ConditionalStartExpander (unit)', () => {
       });
       mockResumeParseConditional.mockImplementation((y, z, cb) => {
          cb(
-            new ConditionalPToken({
+            new ConditionalStartPToken({
                open: toSToken('<!['),
                unexpanded: {
                   peRef: makeParameterEntityReference(),
@@ -214,7 +214,7 @@ describe('ConditionalStartExpander (unit)', () => {
 
       expect(done).toHaveBeenCalledWith({
          done: true,
-         newStart: new ConditionalPToken({
+         newStart: new ConditionalStartPToken({
             open: toSToken('<!['),
             unexpanded: {
                peRef: makeParameterEntityReference(),
@@ -237,7 +237,7 @@ describe('ConditionalStartExpander (unit)', () => {
       mockEntityValueToSTokenSource.mockReturnValue(source);
       mockResumeParseConditional.mockImplementation((y, z, cb) => {
          cb(
-            new ConditionalPToken({
+            new ConditionalStartPToken({
                open: toSToken('<!['),
                unexpanded: {
                   peRef: makeParameterEntityReference(),
@@ -266,7 +266,7 @@ describe('ConditionalStartExpander (unit)', () => {
       mockEntityValueToSTokenSource.mockReturnValue(source);
       mockResumeParseConditional.mockImplementation((y, z, cb) => {
          cb(
-            new ConditionalPToken({
+            new ConditionalStartPToken({
                open: toSToken('<!['),
                unexpanded: {
                   peRef: makeParameterEntityReference(),
@@ -281,7 +281,7 @@ describe('ConditionalStartExpander (unit)', () => {
 
       expect(done).toHaveBeenCalledWith({
          done: true,
-         newStart: expect.any(ConditionalPToken),
+         newStart: expect.any(ConditionalStartPToken),
          extraText: expect.any(Object),
       });
    });
@@ -297,7 +297,7 @@ describe('ConditionalStartExpander (unit)', () => {
       mockEntityValueToSTokenSource.mockReturnValue(source);
       mockResumeParseConditional.mockImplementation((y, z, cb) => {
          cb(
-            new ConditionalPToken({
+            new ConditionalStartPToken({
                open: toSToken('<!['),
                unexpanded: {
                   peRef: makeParameterEntityReference(),
@@ -312,7 +312,7 @@ describe('ConditionalStartExpander (unit)', () => {
 
       expect(done).toHaveBeenCalledWith({
          done: true,
-         newStart: expect.any(ConditionalPToken),
+         newStart: expect.any(ConditionalStartPToken),
          extraText: expect.any(Object),
       });
    });
@@ -328,7 +328,7 @@ describe('ConditionalStartExpander (unit)', () => {
       mockEntityValueToSTokenSource.mockReturnValue(source);
       mockResumeParseConditional.mockImplementation((y, z, cb) => {
          cb(
-            new ConditionalPToken({
+            new ConditionalStartPToken({
                open: toSToken('<!['),
                unexpanded: {
                   peRef: makeParameterEntityReference(),

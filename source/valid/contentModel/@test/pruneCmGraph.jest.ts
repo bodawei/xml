@@ -9,12 +9,13 @@ import { pruneCmGraph } from '../pruneCmGraph';
 describe('pruneCmGraph()', () => {
    it('removes autoTrans and dead states', () => {
       const graph: CmGraph = {
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             '0': {
-               id: 0,
                autoTrans: [],
+               done: true,
+               id: 0,
                trans: {
                   a: {
                      ref: '/1,/3/1',
@@ -29,28 +30,27 @@ describe('pruneCmGraph()', () => {
                      stateId: 6,
                   },
                },
-               done: true,
             },
             '1': {
-               id: 1,
                autoTrans: [],
-               trans: {},
                done: true,
+               id: 1,
+               trans: {},
             },
             '2': {
-               id: 2,
                autoTrans: [],
+               done: true,
+               id: 2,
                trans: {
                   a: {
                      ref: '/1',
                      stateId: 2,
                   },
                },
-               done: true,
             },
             '3': {
-               id: 3,
                autoTrans: [],
+               id: 3,
                trans: {
                   a: {
                      ref: '/3/1',
@@ -67,8 +67,9 @@ describe('pruneCmGraph()', () => {
                },
             },
             '4': {
-               id: 4,
                autoTrans: [],
+               done: true,
+               id: 4,
                trans: {
                   a: {
                      ref: '/3/1',
@@ -83,11 +84,10 @@ describe('pruneCmGraph()', () => {
                      stateId: 6,
                   },
                },
-               done: true,
             },
             '5': {
-               id: 5,
                autoTrans: [],
+               id: 5,
                trans: {
                   b: {
                      ref: '/3/2/1',
@@ -100,8 +100,9 @@ describe('pruneCmGraph()', () => {
                },
             },
             '6': {
-               id: 6,
                autoTrans: [],
+               done: true,
+               id: 6,
                trans: {
                   a: {
                      ref: '/3/1',
@@ -116,30 +117,30 @@ describe('pruneCmGraph()', () => {
                      stateId: 6,
                   },
                },
-               done: true,
             },
             '7': {
-               id: 7,
                autoTrans: [],
+               done: true,
+               id: 7,
                trans: {
-                  b: {
-                     ref: '/3/2/1',
-                     stateId: 6,
-                  },
-                  c: {
-                     ref: '/3/2/2',
-                     stateId: 6,
-                  },
                   a: {
                      ref: '/1',
                      stateId: 2,
                   },
+                  b: {
+                     ref: '/3/2/1',
+                     stateId: 6,
+                  },
+                  c: {
+                     ref: '/3/2/2',
+                     stateId: 6,
+                  },
                },
-               done: true,
             },
             '8': {
-               id: 8,
                autoTrans: [],
+               done: true,
+               id: 8,
                trans: {
                   a: {
                      ref: '/3/1',
@@ -154,7 +155,6 @@ describe('pruneCmGraph()', () => {
                      stateId: 6,
                   },
                },
-               done: true,
             },
          },
       };
@@ -162,10 +162,11 @@ describe('pruneCmGraph()', () => {
       const result = pruneCmGraph(graph);
 
       expect(result).toEqual({
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             '0': {
+               done: true,
                id: 0,
                trans: {
                   a: {
@@ -181,14 +182,14 @@ describe('pruneCmGraph()', () => {
                      stateId: 6,
                   },
                },
-               done: true,
             },
             '1': {
+               done: true,
                id: 1,
                trans: {},
-               done: true,
             },
             '2': {
+               done: true,
                id: 2,
                trans: {
                   a: {
@@ -196,7 +197,6 @@ describe('pruneCmGraph()', () => {
                      stateId: 2,
                   },
                },
-               done: true,
             },
             '5': {
                id: 5,
@@ -212,6 +212,7 @@ describe('pruneCmGraph()', () => {
                },
             },
             '6': {
+               done: true,
                id: 6,
                trans: {
                   a: {
@@ -227,11 +228,15 @@ describe('pruneCmGraph()', () => {
                      stateId: 6,
                   },
                },
-               done: true,
             },
             '7': {
+               done: true,
                id: 7,
                trans: {
+                  a: {
+                     ref: '/1',
+                     stateId: 2,
+                  },
                   b: {
                      ref: '/3/2/1',
                      stateId: 6,
@@ -240,14 +245,10 @@ describe('pruneCmGraph()', () => {
                      ref: '/3/2/2',
                      stateId: 6,
                   },
-                  a: {
-                     ref: '/1',
-                     stateId: 2,
-                  },
                },
-               done: true,
             },
             '8': {
+               done: true,
                id: 8,
                trans: {
                   a: {
@@ -263,7 +264,6 @@ describe('pruneCmGraph()', () => {
                      stateId: 6,
                   },
                },
-               done: true,
             },
          },
       });
@@ -271,10 +271,11 @@ describe('pruneCmGraph()', () => {
 
    it('does nothing with a graph that has no autotrans', () => {
       const graph: CmGraph = {
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             '0': {
+               done: true,
                id: 0,
                trans: {
                   a: {
@@ -290,12 +291,11 @@ describe('pruneCmGraph()', () => {
                      stateId: 1,
                   },
                },
-               done: true,
             },
             '1': {
+               done: true,
                id: 1,
                trans: {},
-               done: true,
             },
          },
       };
@@ -303,10 +303,11 @@ describe('pruneCmGraph()', () => {
       const result = pruneCmGraph(graph);
 
       expect(result).toEqual({
-         startId: 0,
          endId: 1,
+         startId: 0,
          states: {
             '0': {
+               done: true,
                id: 0,
                trans: {
                   a: {
@@ -322,12 +323,11 @@ describe('pruneCmGraph()', () => {
                      stateId: 1,
                   },
                },
-               done: true,
             },
             '1': {
+               done: true,
                id: 1,
                trans: {},
-               done: true,
             },
          },
       });

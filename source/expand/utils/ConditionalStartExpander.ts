@@ -2,7 +2,7 @@
 
 import { STokenSource, strOrBlank } from 'sToken';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { ConditionalPToken, resumeParseConditional } from 'token';
+import { ConditionalStartPToken, resumeParseConditional } from 'token';
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import { ExpandParams } from '../types';
@@ -10,13 +10,13 @@ import { EntityContextStack } from './EntityContextStack';
 
 type ProcessingResult =
    | { done: false; hack: ConditionalStartExpander }
-   | { done: true; newStart: ConditionalPToken; extraText: STokenSource };
+   | { done: true; newStart: ConditionalStartPToken; extraText: STokenSource };
 
 type Done = (result: ProcessingResult) => void;
 type PTokenExpanded = () => void;
 
 class ConditionalStartExpander {
-   private start: ConditionalPToken;
+   private start: ConditionalStartPToken;
 
    private entityContextStack: EntityContextStack;
 
@@ -27,7 +27,7 @@ class ConditionalStartExpander {
    private done: Done;
 
    constructor(
-      conditionalStart: ConditionalPToken,
+      conditionalStart: ConditionalStartPToken,
       expandParams: ExpandParams,
       entityContextStack: EntityContextStack,
       done: Done,
@@ -126,7 +126,7 @@ class ConditionalStartExpander {
          this.start = newToken;
 
          if (this.start.bracket || !this.source.ended()) {
-            let newStart: ConditionalPToken = this.start;
+            let newStart: ConditionalStartPToken = this.start;
 
             this.source.continueText(); // eek
 

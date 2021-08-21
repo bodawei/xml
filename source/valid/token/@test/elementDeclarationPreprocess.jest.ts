@@ -18,7 +18,7 @@ describe('elementDeclarationPreprocess (unit)', () => {
    let state: ValidityState;
    let externalState: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       makeCmGraphMock = makeCmGraph as jest.MockedFunction<typeof makeCmGraphModule.makeCmGraph>;
 
       state = new ValidityState();

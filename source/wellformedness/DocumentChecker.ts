@@ -9,7 +9,7 @@ import {
 } from 'pToken';
 import {
    COMMENT_PTOKEN,
-   CONDITIONAL_PTOKEN,
+   CONDITIONAL_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
@@ -149,7 +149,7 @@ class DocumentChecker {
          docTypeEndCheck(pToken, specialErrorCollector);
          errorCollector.appendFrom(specialErrorCollector);
          dtdEndCheck(this.checkState, errorCollector);
-      } else if (pToken.type === CONDITIONAL_PTOKEN) {
+      } else if (pToken.type === CONDITIONAL_START_PTOKEN) {
          conditionalStartCheck(pToken, errorCollector);
       } else if (mapped) {
          mapped(

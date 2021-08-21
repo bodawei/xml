@@ -1,18 +1,18 @@
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
-import { ConditionalPToken } from 'token';
+import { ConditionalStartPToken } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
 import { conditionalStartCheck } from '../conditionalStartCheck';
 
 describe('checkWellFormed()', () => {
    let mockErrorCollector: MockErrorCollector;
-   let conditionalPToken: ConditionalPToken;
+   let conditionalPToken: ConditionalStartPToken;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
 
-      conditionalPToken = new ConditionalPToken({
+      conditionalPToken = new ConditionalStartPToken({
          open: toSToken('<!['),
          sectionType: toSToken('IGNORE'),
          bracket: toSToken('['),
@@ -26,7 +26,7 @@ describe('checkWellFormed()', () => {
    });
 
    it('reports an error if an unknown type is provided', () => {
-      conditionalPToken = new ConditionalPToken(conditionalPToken, {
+      conditionalPToken = new ConditionalStartPToken(conditionalPToken, {
          sectionType: toSToken('bogus'),
       });
 
@@ -41,7 +41,7 @@ describe('checkWellFormed()', () => {
    });
 
    it('reports an error if a type is the wrong case', () => {
-      conditionalPToken = new ConditionalPToken(conditionalPToken, {
+      conditionalPToken = new ConditionalStartPToken(conditionalPToken, {
          sectionType: toSToken('ignore'),
       });
 

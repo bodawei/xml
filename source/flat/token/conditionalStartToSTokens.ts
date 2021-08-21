@@ -1,10 +1,10 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { SToken, STokenArrayBuilder } from 'sToken';
-import { ConditionalPToken } from 'token';
+import { ConditionalStartPToken } from 'token';
 import { parameterEntityReferenceToSTokens } from './parameterEntityReferenceToSTokens';
 
-function conditionalStartToSTokens(pToken: ConditionalPToken): Array<SToken> {
+function conditionalStartToSTokens(pToken: ConditionalStartPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
 
    builder.add(pToken.open, pToken.openSpace, pToken.sectionType);

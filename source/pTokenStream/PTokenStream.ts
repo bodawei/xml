@@ -19,8 +19,8 @@ import {
    parseSpace,
    ELEMENT_START_PTOKEN,
    CharDataPToken,
-   ConditionalClosePToken,
-   ConditionalPToken,
+   ConditionalEndPToken,
+   ConditionalStartPToken,
 
    ElementStartPToken,
    InternalSubsetStartToken,
@@ -173,7 +173,7 @@ class PTokenStream extends Readable {
                      if (conditionalState === ConditionalState.INSIDE_IGNORE) {
                         deliverParse(new TextPToken({ text: sToken }));
                      } else {
-                        const conditionalClose = new ConditionalClosePToken({ open: sToken });
+                        const conditionalClose = new ConditionalEndPToken({ open: sToken });
                         deliverParse(conditionalClose);
                      }
                      break;
@@ -210,7 +210,7 @@ class PTokenStream extends Readable {
                   this._sTokenSource.extract('match', ']]>', (sToken) => {
                      if (sToken) {
                         this.conditionalStack.pop();
-                        const conditionalClose = new ConditionalClosePToken({ open: sToken });
+                        const conditionalClose = new ConditionalEndPToken({ open: sToken });
                         deliverParse(conditionalClose);
                      } else if (this.waitingForInternalClose) {
                         this.waitingForInternalClose = false;
@@ -297,7 +297,7 @@ class PTokenStream extends Readable {
                break;
             case '<![':
                parseSection(this._sTokenSource, markupStartSToken, (section) => {
-                  if (section instanceof ConditionalPToken) {
+                  if (section instanceof ConditionalStartPToken) {
                      const type = strOrBlank(section.sectionType);
 
                      if (type.toLocaleLowerCase() === 'include') {

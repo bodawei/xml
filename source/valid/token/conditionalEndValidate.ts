@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
-import { ConditionalClosePToken, CONDITIONAL_PTOKEN } from 'token';
+import { ConditionalEndPToken, CONDITIONAL_START_PTOKEN } from 'token';
 
 import { validCodes } from '../error/validCodes';
 import { ValidityState } from '../common/validityState';
@@ -9,7 +9,7 @@ import { ValidityState } from '../common/validityState';
 const VID = validCodes.id;
 
 function conditionalEndValidate(
-   token: ConditionalClosePToken,
+   token: ConditionalEndPToken,
    state: ValidityState,
    ec: ErrorCollector,
 ): void {
@@ -21,7 +21,7 @@ function conditionalEndValidate(
    //    replacement text.
    const item = state.dtdContext.enclosingStack[state.dtdContext.enclosingStack.length - 1];
 
-   if (item.type !== CONDITIONAL_PTOKEN) {
+   if (item.type !== CONDITIONAL_START_PTOKEN) {
       ec.report(VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING, []);
    }
 }

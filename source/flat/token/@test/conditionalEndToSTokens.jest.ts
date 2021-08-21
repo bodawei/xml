@@ -3,13 +3,13 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { toSToken } from 'sToken';
-import { ConditionalClosePToken } from 'token';
+import { ConditionalEndPToken } from 'token';
 
 import { conditionalEndToSTokens } from '../conditionalEndToSTokens';
 
 describe('conditionalEndToSTokens()', () => {
    it('returns all tokens', () => {
-      const conditionalEnd = new ConditionalClosePToken({
+      const conditionalEnd = new ConditionalEndPToken({
          open: toSToken(']]>'),
       });
 

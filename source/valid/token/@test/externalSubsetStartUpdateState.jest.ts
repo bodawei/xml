@@ -10,7 +10,7 @@ import { externalSubsetStartUpdateState } from '../externalSubsetStartUpdateStat
 describe('externalSubsetStartUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState();
    });
 

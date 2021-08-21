@@ -10,7 +10,7 @@ import { notationDeclarationUpdateState } from '../notationDeclarationUpdateStat
 describe('notationDeclarationUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState();
    });
 

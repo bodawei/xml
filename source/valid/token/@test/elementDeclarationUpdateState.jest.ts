@@ -12,7 +12,7 @@ describe('elementDeclarationUpdateState (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       elementDeclaration = new ElementDeclarationPToken({
          close: toSToken('>'),
          declType: toSToken('ELEMENT'),

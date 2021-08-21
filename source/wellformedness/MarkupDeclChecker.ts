@@ -22,8 +22,8 @@ import {
 import { strOrBlank } from 'sToken';
 import {
    COMMENT_PTOKEN,
-   CONDITIONAL_PTOKEN,
-   CONDITIONAL_CLOSE_PTOKEN,
+   CONDITIONAL_START_PTOKEN,
+   CONDITIONAL_END_PTOKEN,
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    EXTERNAL_SUBSET_END_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
@@ -96,7 +96,7 @@ const transitionsByState: StateTable = {
    },
    [States.PARAM_START_EXTERNAL_SUBSET]: {
       // §2.8.0 [30]
-      [CONDITIONAL_PTOKEN]: States.EXTERNAL_SUBSET,
+      [CONDITIONAL_START_PTOKEN]: States.EXTERNAL_SUBSET,
       [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [ATTLIST_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
@@ -129,8 +129,8 @@ const transitionsByState: StateTable = {
    },
    [States.EXTERNAL_SUBSET]: {
       // §2.8.0 [30], [31]
-      [CONDITIONAL_PTOKEN]: NO_CHANGE,
-      [CONDITIONAL_CLOSE_PTOKEN]: NO_CHANGE,
+      [CONDITIONAL_START_PTOKEN]: NO_CHANGE,
+      [CONDITIONAL_END_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
@@ -145,7 +145,7 @@ const transitionsByState: StateTable = {
    },
    [States.INSIDE_CONDITIONAL]: {
       // §2.8.0 [30], [31]
-      [CONDITIONAL_PTOKEN]: NO_CHANGE,
+      [CONDITIONAL_START_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
@@ -157,7 +157,7 @@ const transitionsByState: StateTable = {
       [COMMENT_PTOKEN]: NO_CHANGE,
       [TEXT_PTOKEN]: NO_CHANGE, // This is where this differs from external subset
       [SPACE_PTOKEN]: NO_CHANGE,
-      // CONDITIONAL_CLOSE_PTOKEN is handled specially
+      // CONDITIONAL_END_PTOKEN is handled specially
       // EXTERNAL_SUBSET_END also needs special handling
    },
    [States.INTERNAL_SUBSET]: {
@@ -463,7 +463,7 @@ class MarkupDeclChecker implements MarkupChecker {
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             this.checkPERef(pToken, errorCollector, false);
             break;
-         case CONDITIONAL_PTOKEN:
+         case CONDITIONAL_START_PTOKEN:
             this.embeddedChecker = new MarkupDeclChecker(
                pToken,
                errorCollector,
@@ -581,8 +581,8 @@ class MarkupDeclChecker implements MarkupChecker {
             this.start.type === INTERNAL_SUBSET_START_TOKEN) ||
          (pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
             (this.start.type === EXTERNAL_SUBSET_START_TOKEN ||
-               this.start.type === CONDITIONAL_PTOKEN)) ||
-         (pToken.type === CONDITIONAL_CLOSE_PTOKEN && this.start.type === CONDITIONAL_PTOKEN)
+               this.start.type === CONDITIONAL_START_PTOKEN)) ||
+         (pToken.type === CONDITIONAL_END_PTOKEN && this.start.type === CONDITIONAL_START_PTOKEN)
       ) {
          newState = States.DONE;
       }
@@ -591,7 +591,10 @@ class MarkupDeclChecker implements MarkupChecker {
          this.peContext.pop();
       }
 
-      if (pToken.type === EXTERNAL_SUBSET_END_TOKEN && this.start.type === CONDITIONAL_PTOKEN) {
+      if (
+         pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
+         this.start.type === CONDITIONAL_START_PTOKEN
+      ) {
          ec.report(WFID.CONDITIONAL_NO_CLOSE, [], getFirstSToken(this.start));
       }
 

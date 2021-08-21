@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'sToken';
-import { ConditionalPToken } from 'token';
+import { ConditionalStartPToken } from 'token';
 
 import { ConditionalStartXToken } from '../conditionalStartXToken';
 
@@ -16,11 +16,11 @@ describe('ConditionalSection', () => {
    });
 
    it('creates an XToken from a pToken', () => {
-      const xToken = new ConditionalStartXToken(new ConditionalPToken({ open: toSToken('<![') }));
+      const xToken = new ConditionalStartXToken(new ConditionalStartPToken({ open: toSToken('<![') }));
 
       expect(xToken).toEqual({
          type: 'CONDITIONAL_SECTION_START_XTOKEN',
-         pToken: new ConditionalPToken({ open: toSToken('<![') }),
+         pToken: new ConditionalStartPToken({ open: toSToken('<![') }),
       });
    });
 });

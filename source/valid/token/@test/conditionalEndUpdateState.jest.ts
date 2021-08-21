@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import {
    makeConditionalClose,
-   makeConditionalSection,
+   makeConditionalStart,
    makeDocTypeStart,
    makeParameterEntityStart,
 } from 'token-test';
@@ -15,13 +15,11 @@ import { conditionalEndUpdateState } from '../conditionalEndUpdateState';
 describe('conditionalEndUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {});
-
    it('removes back to before the start of the conditional section', () => {
       const start = makeDocTypeStart();
       state = new ValidityState({
          dtdContext: {
-            enclosingStack: [makeParameterEntityStart(), makeConditionalSection(), start],
+            enclosingStack: [makeParameterEntityStart(), makeConditionalStart(), start],
             inExternalMarkupContext: false,
             inExternalSubset: false,
          },

@@ -1,12 +1,12 @@
 import { ErrorCollector } from 'basic';
 import { strOrBlank } from 'sToken';
-import { ConditionalPToken } from 'token';
+import { ConditionalStartPToken } from 'token';
 
 import { WellFormedError } from '../error/WellFormedError';
 
 const WFEID = WellFormedError.ID;
 
-function conditionalStartCheck(pToken: ConditionalPToken | undefined, ec: ErrorCollector): void {
+function conditionalStartCheck(pToken: ConditionalStartPToken | undefined, ec: ErrorCollector): void {
    if (!pToken) {
       return;
    }

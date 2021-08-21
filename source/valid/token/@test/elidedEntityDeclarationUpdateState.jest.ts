@@ -17,7 +17,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
    let paramDecl: ParameterEntityDeclarationPToken;
    // new ParameterEntityDeclarationPToken({ open: toSToken('<!') })
 
-   beforeEach(async () => {
+   beforeEach(() => {
       paramDecl = makeParameterEntityDeclaration();
       state = new ValidityState();
    });

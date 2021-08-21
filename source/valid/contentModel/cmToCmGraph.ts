@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ContentModelP, ContentNameP, isContentModelP } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
@@ -7,9 +7,12 @@ import { CmState, CmGraph } from './cmGraphTypes';
 type StateMaker = (graph?: CmGraph) => CmState;
 
 function addAutoTrans(state: CmState, autoTransToState: CmState): void {
-   const index = state.autoTrans!.indexOf(autoTransToState.id); // We always have an autotrans, because we create all the states
+   // We always have an autotrans, because we create all the states in this file, and always give them an autoTrans.
+   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   const index = state.autoTrans!.indexOf(autoTransToState.id);
 
    if (index === -1) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       state.autoTrans!.push(autoTransToState.id);
    }
 }
@@ -271,8 +274,8 @@ function processList(
    makeState: StateMaker,
 ): CmGraph {
    const graph: CmGraph = {
-      startId: start.id,
       endId: end.id,
+      startId: start.id,
       states: {
          [start.id]: start,
          [end.id]: end,
@@ -299,7 +302,7 @@ function processList(
    const delimited = list.delimitedParticles[0];
    let delimiter: string | undefined;
 
-   if (delimited) {
+   if (list.delimitedParticles[0]) {
       delimiter = strOrBlank(delimited.delimiter);
    }
 
@@ -312,16 +315,12 @@ function processList(
    return graph;
 }
 
-/*
- * Takes a ContentModelP and produces a graph that can be used to evaluate
- * whether an input stream matches the expression implicit in the ContentModelP
- */
-function cmToCmGraph(list: ContentModelP): CmGraph {
+function makeStateMaker() {
    let nextStateId = 0;
    function makeState(graph?: CmGraph): CmState {
       const state: CmState = {
-         id: nextStateId,
          autoTrans: [],
+         id: nextStateId,
          trans: {},
       };
 
@@ -333,6 +332,16 @@ function cmToCmGraph(list: ContentModelP): CmGraph {
 
       return state;
    }
+
+   return makeState;
+}
+
+/*
+ * Takes a ContentModelP and produces a graph that can be used to evaluate
+ * whether an input stream matches the expression implicit in the ContentModelP
+ */
+function cmToCmGraph(list: ContentModelP): CmGraph {
+   const makeState = makeStateMaker();
 
    const graph = processList(list, makeState(), makeState(), '/', makeState);
 

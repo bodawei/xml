@@ -11,7 +11,7 @@ import { generalEntityDeclarationUpdateState } from '../generalEntityDeclaration
 describe('generalEntityDeclarationUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(async () => {
+   beforeEach(() => {
       state = new ValidityState();
    });
 
