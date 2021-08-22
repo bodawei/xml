@@ -10,13 +10,8 @@ import { ValidityState } from '../../common/validityState';
 import { docTypeStartUpdateState } from '../docTypeStartUpdateState';
 
 describe('docTypeStartUpdateState (unit)', () => {
-   let state: ValidityState;
-
-   beforeEach(() => {
-      state = new ValidityState({});
-   });
-
    it('adds the docType name to the state', () => {
+      const state = new ValidityState({});
       const start = makeDocTypeStart();
 
       const newState = docTypeStartUpdateState(start, state);
@@ -34,6 +29,7 @@ describe('docTypeStartUpdateState (unit)', () => {
    });
 
    it('adds whether there is an external subset to the state', () => {
+      const state = new ValidityState({});
       const start = new DocTypeStartPToken({
          declType: toSToken('DOCTYPE'),
          externalId: new ExternalIdP({}),

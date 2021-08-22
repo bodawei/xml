@@ -12,17 +12,11 @@ function elementEndValidate(el: ElementEndPToken, state: ValidityState, ec: Erro
    const context = state.elementContext.activeContext;
 
    // if no context, then nothing to validate
-   if (!context || state.elementContext.pastEnd) {
+   if (!context || state.elementContext.pastEnd || context.details.type !== ElDeclType.ELEMENT) {
       return;
    }
 
-   const details = context.details;
-
-   if (details.type !== ElDeclType.ELEMENT) {
-      return;
-   }
-
-   const currentState = details.graph.states[context.stateId];
+   const currentState = context.details.graph.states[context.stateId];
 
    // §3.0.0 Validity Constraint: Element Valid
    //     2. The declaration matches children and the sequence of child elements

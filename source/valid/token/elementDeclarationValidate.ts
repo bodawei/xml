@@ -20,8 +20,8 @@ import {
 } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { validCodes } from '../error/validCodes';
 import { ContentDetails, ElDeclType, ValidityState } from '../common/validityState';
+import { validCodes } from '../error/validCodes';
 
 const EID = error.id;
 const VID = validCodes.id;
@@ -181,8 +181,6 @@ function elementDeclarationValidate(
    const elName = strOrBlank(elDecl.name);
    const version = state.confVer;
 
-   // §3.2.0: Validity constraint: Unique Element Type Declaration
-   //    An element type must not be declared more than once.
    ec.setPos(openSToken);
 
    // §2.8.0: Validity Constraint: Proper Declaration/PE Nesting
@@ -198,6 +196,8 @@ function elementDeclarationValidate(
    }
 
    ec.setPos(elDecl.name);
+   // §3.2.0: Validity constraint: Unique Element Type Declaration
+   //    An element type must not be declared more than once.
    ec.check(state.elements[elName], VID.ELEMENT_XTRA_DECLARATION, [elName]);
 
    if (!elDecl.contentModel) {
@@ -255,8 +255,10 @@ function elementDeclarationValidate(
          const state = declInfo.graph.states[Number(id)];
 
          for (const transName of Object.keys(state.trans)) {
-            if (state.trans[transName].ref.indexOf(',') != -1) {
-               cases.push(`${transName} (${state.trans[transName].ref})`);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            if (state.trans[transName]!.ref.indexOf(',') !== -1) {
+               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+               cases.push(`${transName} (${state.trans[transName]!.ref})`);
             }
          }
       }
@@ -269,9 +271,7 @@ function elementDeclarationValidate(
       }
    }
 
-   if (declInfo.type === ElDeclType.ELEMENT || declInfo.type === ElDeclType.MIXED) {
-      validateEntities(elDecl, elName, state, ec, version);
-   }
+   validateEntities(elDecl, elName, state, ec, version);
 }
 
 export { elementDeclarationValidate };

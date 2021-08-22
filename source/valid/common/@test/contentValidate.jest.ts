@@ -43,6 +43,7 @@ import { contentValidate } from '../contentValidate';
 
 const VID = validCodes.id;
 
+jest.mock('../../common/elementDeclarationPreprocess');
 jest.mock('../../token/attListDeclarationValidate');
 jest.mock('../../token/attListDeclarationUpdateState');
 jest.mock('../../token/conditionalEndUpdateState');
@@ -52,7 +53,6 @@ jest.mock('../../token/conditionalStartValidate');
 jest.mock('../../token/docTypeStartUpdateState');
 jest.mock('../../token/docTypeEndValidate');
 jest.mock('../../token/elementDeclarationUpdateState');
-jest.mock('../../token/elementDeclarationPreprocess');
 jest.mock('../../token/elementDeclarationValidate');
 jest.mock('../../token/elementEndUpdateState');
 jest.mock('../../token/elementEndValidate');

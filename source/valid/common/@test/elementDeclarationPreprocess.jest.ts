@@ -6,7 +6,7 @@ import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { elementDeclarationPreprocess } from '../elementDeclarationPreprocess';
-import { ElDeclType, ValidityState } from '../../common/validityState';
+import { ElDeclType, ValidityState } from '../validityState';
 import * as makeCmGraphModule from '../../contentModel/makeCmGraph';
 
 import { makeCmGraph } from '../../contentModel/makeCmGraph';

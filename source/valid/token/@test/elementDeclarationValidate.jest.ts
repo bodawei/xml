@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 
@@ -12,10 +12,10 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
-
-import { elementDeclarationValidate } from '../elementDeclarationValidate';
-import { ContentDetails, ElDeclType, ValidityState } from '../../common/validityState';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
+
+import { ContentDetails, ElDeclType, ValidityState } from '../../common/validityState';
+import { elementDeclarationValidate } from '../elementDeclarationValidate';
 
 import { validCodes } from '../../error/validCodes';
 
@@ -185,11 +185,15 @@ describe('elementDeclarationValidate (unit)', () => {
    });
 
    it('reports an error if there is more than one ELEMENT declaration for the same element type', () => {
-      state.elements.elementName = {
-         isExternalMarkupDeclaration: false,
-         token: elementDeclaration,
-         type: ElDeclType.ANY,
-      };
+      state = new ValidityState(state, {
+         elements: {
+            elementName: {
+               isExternalMarkupDeclaration: false,
+               token: elementDeclaration,
+               type: ElDeclType.ANY,
+            },
+         },
+      });
       elementDeclarationValidate(
          elementDeclaration,
          {

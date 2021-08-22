@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ElementDeclarationPToken, pTokenArrayToString } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
+import { pTokenArrayToString } from 'pToken';
+import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, ELEMENT_EMPTY_PTOKEN } from 'token';
 
 import {
@@ -17,7 +17,6 @@ function updateFromAttributes(
 ): ValidityStateProps {
    const ids = { ...state.ids };
    const idRefs = { ...state.idRefs };
-
    const elName = strOrBlank(el.name);
    const attDefs = state.attributes[elName];
 
@@ -69,31 +68,33 @@ function updateFromAttributes(
    };
 }
 
-function updateCurrentElContext(elName: string, state: ValidityState): ValidityState {
+function updateCurrentElContext(
+   elName: string,
+   state: ValidityState,
+): ValidityState['elementContext'] {
    const activeContext = state.elementContext.activeContext;
 
-   if (activeContext?.details.type === ElDeclType.ELEMENT) {
-      const currentState = activeContext.details.graph.states[activeContext.stateId];
-      const destState = currentState.trans[elName];
-
-      if (destState) {
-         const newContext: ElementContext = { ...activeContext, stateId: destState.stateId };
-         const temp = [...state.elementContext.contextStack];
-         temp.pop();
-         temp.push(newContext);
-
-         return {
-            ...state,
-            elementContext: {
-               ...state.elementContext,
-               activeContext: newContext,
-               contextStack: temp,
-            },
-         };
-      }
+   if (activeContext?.details.type !== ElDeclType.ELEMENT) {
+      return state.elementContext;
    }
 
-   return state;
+   const currentState = activeContext.details.graph.states[activeContext.stateId];
+   const destState = currentState.trans[elName];
+
+   if (destState) {
+      const newContext: ElementContext = { ...activeContext, stateId: destState.stateId };
+      const temp = [...state.elementContext.contextStack];
+      temp.pop();
+      temp.push(newContext);
+
+      return {
+         ...state.elementContext,
+         activeContext: newContext,
+         contextStack: temp,
+      };
+   }
+
+   return state.elementContext;
 }
 
 function elementStartUpdateState(
@@ -102,21 +103,10 @@ function elementStartUpdateState(
 ): ValidityState {
    const elName = strOrBlank(el.name);
    const details = state.elements[elName];
-   const newState: ValidityState = updateCurrentElContext(elName, state);
+   let newElementContxt = updateCurrentElContext(elName, state);
    let context: ElementContext;
-   let elementContext = newState.elementContext;
 
-   if (el.type === ELEMENT_EMPTY_PTOKEN) {
-      // Why are we only checking empty elements?
-      // And why aren't we checking the end more often?
-      // And might it be better to check all conditions even if past the end?
-      if (newState.elementContext.contextStack.length === 0) {
-         elementContext = {
-            ...state.elementContext,
-            pastEnd: true,
-         };
-      }
-   } else {
+   if (el.type !== ELEMENT_EMPTY_PTOKEN) {
       if (details) {
          context = {
             details,
@@ -125,14 +115,9 @@ function elementStartUpdateState(
             stateId: details.type === ElDeclType.ELEMENT ? details.graph.startId : 0,
          };
       } else {
-         // @@@@ this seems like we should be reporting an error here.  What error is that?
          context = {
             details: {
                isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
-               // Add a dummy declaration to keep the types happy.
-               token: new ElementDeclarationPToken({
-                  open: new SToken('<!', '<!', []),
-               }),
                type: ElDeclType.ANY,
             },
             lastToken: undefined,
@@ -141,8 +126,7 @@ function elementStartUpdateState(
          };
       }
 
-      const newElementContxt = newState.elementContext;
-      elementContext = {
+      newElementContxt = {
          ...newElementContxt,
          activeContext: context,
          contextStack: [...newElementContxt.contextStack, context],
@@ -151,11 +135,20 @@ function elementStartUpdateState(
 
    const attrState = updateFromAttributes(el, state);
 
+   if (newElementContxt.contextStack.length === 0) {
+      newElementContxt = {
+         ...newElementContxt,
+         pastEnd: true,
+      };
+   }
+
    return {
-      ...newState,
-      elementContext,
-      idRefs: attrState.idRefs ?? newState.idRefs,
-      ids: attrState.ids ?? newState.ids,
+      ...state,
+      elementContext: newElementContxt,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- alwaysdefined by updateFromAttributes()
+      idRefs: attrState.idRefs!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- alwaysdefined by updateFromAttributes()
+      ids: attrState.ids!,
    };
 }
 

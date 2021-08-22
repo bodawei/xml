@@ -7,9 +7,9 @@ import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
+import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { validCodes } from '../../error/validCodes';
-import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { elementEndValidate } from '../elementEndValidate';
 
 const VID = validCodes.id;

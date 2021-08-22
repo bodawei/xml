@@ -19,7 +19,8 @@ import { CmGraph } from '../contentModel/cmGraphTypes';
 
 interface AnyDetails {
    readonly isExternalMarkupDeclaration: boolean;
-   readonly token: ElementDeclarationPToken;
+   // If we have no declaration for an element, we assume it is an ANY type, and do not have a declaration token
+   readonly token?: ElementDeclarationPToken;
    readonly type: ElDeclType.ANY;
 }
 

@@ -170,7 +170,7 @@ function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorColle
          details.type === ElDeclType.MIXED
             ? VID.CONTENTMIXED_INVALID_SYNTAX
             : VID.CONTENTANY_INVALID_SYNTAX,
-         [strOrBlank(details.token.name), String(ver), String(ed), token.type],
+         [strOrBlank(details.token?.name), String(ver), String(ed), token.type],
          getFirstSToken(token),
       );
    }

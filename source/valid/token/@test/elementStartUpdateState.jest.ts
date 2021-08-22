@@ -3,10 +3,10 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ElementDeclarationPToken, TextPToken } from 'pToken';
-import { CmGraph } from '../../contentModel/cmGraphTypes';
-import { SToken, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
+import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { elementStartUpdateState } from '../elementStartUpdateState';
 
@@ -98,7 +98,7 @@ describe('elementStartUpdateState (unit)', () => {
       const expectedContext: ElementContext = {
          details: {
             isExternalMarkupDeclaration: false,
-            token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
+            token: undefined,
             type: ElDeclType.ANY,
          },
          lastToken: undefined,
@@ -118,7 +118,7 @@ describe('elementStartUpdateState (unit)', () => {
       });
    });
 
-   it('adds a context to the stack with a fake token with the appropriate isExternalMarkupDeclaration value if no details could be found', () => {
+   it('adds a context to the stack with an absent token with the appropriate isExternalMarkupDeclaration value if no details could be found', () => {
       state = new ValidityState({
          dtdContext: {
             enclosingStack: [],
@@ -134,7 +134,7 @@ describe('elementStartUpdateState (unit)', () => {
       const expectedContext: ElementContext = {
          details: {
             isExternalMarkupDeclaration: true,
-            token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
+            token: undefined,
             type: ElDeclType.ANY,
          },
          lastToken: undefined,
@@ -281,7 +281,7 @@ describe('elementStartUpdateState (unit)', () => {
       const expectedContext: ElementContext = {
          details: {
             isExternalMarkupDeclaration: false,
-            token: new ElementDeclarationPToken({ open: new SToken('<!', '<!', []) }),
+            token: undefined,
             type: ElDeclType.ANY,
          },
          lastToken: undefined,

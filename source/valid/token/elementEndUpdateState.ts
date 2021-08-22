@@ -9,11 +9,7 @@ function elementEndUpdateState(el: ElementEndPToken, state: ValidityState): Vali
    const elName = strOrBlank(el.name);
    const context = state.elementContext.activeContext;
 
-   if (!context) {
-      return state;
-   }
-
-   if (elName !== context.parentName) {
+   if (!context || elName !== context.parentName) {
       return state;
    }
 

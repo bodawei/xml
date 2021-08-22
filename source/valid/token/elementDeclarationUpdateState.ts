@@ -16,9 +16,11 @@ function elementDeclarationUpdateState(
       return state;
    }
 
-   state.elements[elName] = details;
-
-   return state;
+   return new ValidityState(state, {
+      elements: {
+         [elName]: details,
+      },
+   });
 }
 
 export { elementDeclarationUpdateState };

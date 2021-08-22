@@ -80,7 +80,7 @@ import { spaceValidate } from './token/spaceValidate';
 import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
 import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
 import { notationDeclarationValidate } from './token/notationDeclarationValidate';
-import { elementDeclarationPreprocess } from './token/elementDeclarationPreprocess';
+import { elementDeclarationPreprocess } from './common/elementDeclarationPreprocess';
 import { ValidityError } from './error/validityError';
 
 class ValidityChecker {
