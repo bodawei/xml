@@ -36,6 +36,9 @@ describe('parameterEntityEndValidate (unit)', () => {
       state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
+            lastPToken: undefined,
          },
       });
    });
@@ -111,12 +114,13 @@ describe('parameterEntityEndValidate (unit)', () => {
 
    data.forEach((params) => {
       const [token, wholeToken, open, type] = params;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 
-      it(`reports an error when there was an incomplete ${type} declaration at the end of the parameter entity content`, () => {
-         state = new ValidityState({
+      it(`reports an error when there was an incomplete ${type} declaration at the end of the parameter entity content (§2.8.0)`, () => {
+         state = new ValidityState(state, {
             dtdContext: {
                enclosingStack: [makeParameterEntityStart()],
+               inExternalMarkupContext: false,
+               inExternalSubset: false,
                lastPToken: token,
             },
          });
@@ -132,10 +136,12 @@ describe('parameterEntityEndValidate (unit)', () => {
          });
       });
 
-      it(`reports no error when there was a complete ${type} declaration at the end of the parameter entity content`, () => {
+      it(`reports no error when there was a complete ${type} declaration at the end of the parameter entity content (§2.8.0)`, () => {
          state = new ValidityState({
             dtdContext: {
                enclosingStack: [makeParameterEntityStart()],
+               inExternalMarkupContext: false,
+               inExternalSubset: false,
                lastPToken: wholeToken,
             },
          });
@@ -146,10 +152,12 @@ describe('parameterEntityEndValidate (unit)', () => {
       });
    });
 
-   it('reports no error when there was another token at the end of the parameter entity content', () => {
+   it('reports no error when there was another token at the end of the parameter entity content (§2.8.0)', () => {
       state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeParameterEntityStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
             lastPToken: makeCharData(),
          },
       });
@@ -159,10 +167,13 @@ describe('parameterEntityEndValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error when the previous thing in the enclosingStack is a conditional section start', () => {
+   it('reports an error when the previous thing in the enclosingStack is a conditional section start (§3.4.0)', () => {
       state = new ValidityState({
          dtdContext: {
             enclosingStack: [makeConditionalStart()],
+            inExternalMarkupContext: false,
+            inExternalSubset: false,
+            lastPToken: undefined,
          },
       });
 
@@ -177,7 +188,7 @@ describe('parameterEntityEndValidate (unit)', () => {
       });
    });
 
-   it('reports no error when the previous thing in the enclosingStack is a parameter entity start', () => {
+   it('reports no error when the previous thing in the enclosingStack is a parameter entity start (§3.4.0)', () => {
       parameterEntityEndValidate(makeParameterEntityEnd(), state, mockErrorCollector);
 
       expect(mockErrorCollector.errors).toEqual([]);

@@ -15,7 +15,6 @@ import { parameterEntityDeclarationUpdateState } from '../parameterEntityDeclara
 describe('elidedEntityDeclarationUpdateState (unit)', () => {
    let state: ValidityState;
    let paramDecl: ParameterEntityDeclarationPToken;
-   // new ParameterEntityDeclarationPToken({ open: toSToken('<!') })
 
    beforeEach(() => {
       paramDecl = makeParameterEntityDeclaration();
@@ -23,7 +22,7 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
    });
 
    it('adds an elided token to the state', () => {
-      const elided = new ElidedEntityDeclarationPToken(paramDecl, paramDecl.value); // typehack
+      const elided = new ElidedEntityDeclarationPToken(paramDecl, paramDecl.value);
       const nextState = parameterEntityDeclarationUpdateState(paramDecl, state);
 
       const result = elidedEntityDeclarationUpdateState(elided, nextState);
@@ -40,6 +39,14 @@ describe('elidedEntityDeclarationUpdateState (unit)', () => {
             },
          }),
       );
+   });
+
+   it('does not add the elided entity if there was not a previous parameter entity declaration there to update', () => {
+      const elided = new ElidedEntityDeclarationPToken(paramDecl, paramDecl.value);
+
+      const result = elidedEntityDeclarationUpdateState(elided, state);
+
+      expect(result).toEqual(new ValidityState());
    });
 
    it('adds an elided token to the state for an external parameter entity', () => {

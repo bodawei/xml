@@ -3,6 +3,7 @@
 import { error, ErrorCollector, ErrorToken } from 'basic';
 import { AttDefinitionP } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { ValidityState } from './validityState';
 
 const EID = error.id;
 
@@ -10,9 +11,13 @@ function xmlSpaceValidate(
    attDef: AttDefinitionP,
    elName: string,
    attName: string,
+   state: ValidityState,
    ec: ErrorCollector,
 ): void {
-   if (attName.toLowerCase() !== 'xml:space') {
+   if (
+      attName.toLowerCase() !== 'xml:space' ||
+      (state.confVer.version === 1.0 && state.confVer.edition < 3)
+   ) {
       return;
    }
 

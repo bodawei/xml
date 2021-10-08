@@ -61,6 +61,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
          dtdContext: {
             enclosingStack: [],
             inExternalMarkupContext: true,
+            inExternalSubset: false,
          },
       });
 
@@ -71,6 +72,7 @@ describe('parameterEntityDeclarationUpdateState (unit)', () => {
             dtdContext: {
                enclosingStack: [],
                inExternalMarkupContext: true,
+               inExternalSubset: false,
             },
             parameterEntities: {
                entityName: {

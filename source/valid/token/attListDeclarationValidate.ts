@@ -10,7 +10,7 @@ import { attributeValueValidate } from '../common/attributeValueValidate';
 import { PREDEFINED_ENTITIES } from '../common/constants';
 import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
-import { xmlSpaceValidate } from './xmlSpaceValidate';
+import { xmlSpaceValidate } from '../common/xmlSpaceValidate';
 
 const VID = validCodes.id;
 
@@ -216,7 +216,7 @@ function attListDeclarationValidate(
       ec.setPos(attDef.type);
 
       checkEnumeration(attDef, elName, attName, actualType, state, ec);
-      xmlSpaceValidate(attDef, elName, attName, ec);
+      xmlSpaceValidate(attDef, elName, attName, state, ec);
 
       if (isId) {
          const defaultType = strOrBlank(attDef.defaultType).toUpperCase();

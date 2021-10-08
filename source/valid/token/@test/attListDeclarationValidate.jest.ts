@@ -28,13 +28,13 @@ import { attributeValueValidate } from '../../common/attributeValueValidate';
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { validCodes } from '../../error/validCodes';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
-import { xmlSpaceValidate } from '../xmlSpaceValidate';
+import { xmlSpaceValidate } from '../../common/xmlSpaceValidate';
 
 const VID = validCodes.id;
 
 jest.mock('../../common/attributeValueValidate');
 jest.mock('../../common/ancestorPERefsValidate');
-jest.mock('../xmlSpaceValidate');
+jest.mock('../../common/xmlSpaceValidate');
 
 describe('attListDeclarationValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -852,6 +852,7 @@ describe('attListDeclarationValidate (unit)', () => {
          attListDecl.attDefs[0],
          'elName',
          'xml:space',
+         state,
          mockErrorCollector,
       );
    });

@@ -1,13 +1,13 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
-import { parameterEntityReferenceValidate } from '../parameterEntityReferenceValidate';
 import { ValidityState } from '../../common/validityState';
 import { validCodes } from '../../error/validCodes';
+import { parameterEntityReferenceValidate } from '../parameterEntityReferenceValidate';
 
 const VID = validCodes.id;
 

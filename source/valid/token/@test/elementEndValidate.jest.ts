@@ -86,7 +86,7 @@ describe('elementEndValidate (unit)', () => {
       });
    });
 
-   it('reports an error the current context is a ELEMENT context, but we are not at the end', () => {
+   it('reports an error the current context is a ELEMENT context, but we are not at the end (§3.0.0)', () => {
       elementEndValidate(elementEnd, state, mockErrorCollector);
 
       // @ts-expect-error 2329/matchers
@@ -98,7 +98,7 @@ describe('elementEndValidate (unit)', () => {
       });
    });
 
-   it('reports no error the current context is a ELEMENT context, but we are at the end', () => {
+   it('reports no error the current context is a ELEMENT context, but we are at the end (§3.0.0)', () => {
       graph.states[4].done = true;
 
       elementEndValidate(elementEnd, state, mockErrorCollector);
@@ -106,7 +106,7 @@ describe('elementEndValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports no error when there is no active context', () => {
+   it('reports no error when there is no active context (§3.0.0)', () => {
       state = {
          ...state,
          elementContext: {
@@ -120,7 +120,7 @@ describe('elementEndValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports no error when we are past the end of the document', () => {
+   it('reports no error when we are past the end of the document (§3.0.0)', () => {
       state = {
          ...state,
          elementContext: {
@@ -134,7 +134,7 @@ describe('elementEndValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports no error when the active context is not an ELEMENT context', () => {
+   it('reports no error when the active context is not an ELEMENT context (§3.0.0)', () => {
       state = {
          ...state,
          elementContext: {

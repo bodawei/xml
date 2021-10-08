@@ -28,17 +28,17 @@ describe('xmlDeclarationUpdateState (unit)', () => {
 
    it('sets standalone to be true if the xml declaration is standalone', () => {
       const xmlDecl = new XmlDeclarationPToken({
-         open: toSToken('<?'),
+         close: toSToken('?>'),
          fields: [
             {
-               name: toSToken('standalone'),
-               nameSpace: undefined,
                equal: toSToken('='),
                equalSpace: undefined,
+               name: toSToken('standalone'),
+               nameSpace: undefined,
                value: toSToken('yes'),
             },
          ],
-         close: toSToken('?>'),
+         open: toSToken('<?'),
       });
 
       const newState = xmlDeclarationUpdateState(xmlDecl, state);

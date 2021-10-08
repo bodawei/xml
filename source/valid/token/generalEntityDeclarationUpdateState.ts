@@ -11,13 +11,11 @@ function generalEntityDeclarationUpdateState(
    state: ValidityState,
 ): ValidityState {
    const elName = strOrBlank(el.name);
-
    const replacementText = el.value;
    let hasPeRefs = false;
 
    for (const element of replacementText) {
-      hasPeRefs =
-         hasPeRefs ||
+      hasPeRefs ||=
          element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN ||
          element.type === PARAMETER_ENTITY_START_PTOKEN;
    }

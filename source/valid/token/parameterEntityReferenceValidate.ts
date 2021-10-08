@@ -1,11 +1,11 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { validCodes } from '../error/validCodes';
 
 import { ValidityState } from '../common/validityState';
+import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
@@ -26,7 +26,7 @@ function parameterEntityReferenceValidate(
     *    precede any reference to it...
     */
    // Theoretically we should check whether there is an external subset or PE refs...
-   // But, this IS a PERef, so there are some.
+   // But, this IS a PERef, so there are some (true | false) | true is true.
    const applies = !state.isStandalone;
 
    ec.check(!state.parameterEntities[peDeclName] && applies, VID.PARAMETERENTITY_NO_DECLARATION, [

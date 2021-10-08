@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import { warning } from 'basic';
@@ -21,7 +21,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       mockErrorCollector = new MockErrorCollector();
    });
 
-   it('reports no error when the declaration is defined', () => {
+   it('reports no error when the declaration is defined (§4.1.0)', () => {
       state = new ValidityState({
          generalEntities: {
             testRef: {
@@ -37,7 +37,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports no error when the declaration is not defined and standalone is set', () => {
+   it('reports no error when the declaration is not defined and standalone is set (§4.1.0)', () => {
       const ref = makeGeneralEntityReference();
       state = new ValidityState({
          generalEntities: {
@@ -55,7 +55,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports no error when the declaration is not defined and there is no external subset or perefs', () => {
+   it('reports no error when the declaration is not defined and there is no external subset or perefs (§4.1.0)', () => {
       const ref = makeGeneralEntityReference();
       state = new ValidityState({
          generalEntities: {
@@ -75,7 +75,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error when the declaration is not defined and there is an external subset', () => {
+   it('reports an error when the declaration is not defined and there is an external subset (§4.1.0)', () => {
       const ref = makeGeneralEntityReference();
       state = new ValidityState({
          generalEntities: {
@@ -99,7 +99,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       });
    });
 
-   it('reports an error when the declaration is not defined and there is are PE refs', () => {
+   it('reports an error when the declaration is not defined and there is are PE refs (§4.1.0)', () => {
       const ref = makeGeneralEntityReference();
       state = new ValidityState({
          generalEntities: {
@@ -123,7 +123,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       });
    });
 
-   it('reports no warning if a predefined entity has been declared', () => {
+   it('reports no warning if a predefined entity has been declared (§4.1.0)', () => {
       const ref = new GeneralEntityReferencePToken({
          name: toSToken('amp'),
          open: toSToken('&'),
@@ -144,7 +144,7 @@ describe('generalEntityReferenceValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports a warning if a predefined entity has not been declared', () => {
+   it('reports a warning if a predefined entity has not been declared (§4.1.0)', () => {
       const ref = new GeneralEntityReferencePToken({
          name: toSToken('lt'),
          open: toSToken('&'),

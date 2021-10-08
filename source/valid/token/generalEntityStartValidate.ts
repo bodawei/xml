@@ -7,9 +7,9 @@ import { strOrBlank } from 'sToken';
 import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
+import { PREDEFINED_ENTITIES } from '../common/constants';
 
 const VID = validCodes.id;
-const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 function generalEntityStartValidate(
    startPToken: GeneralEntityStartPToken,

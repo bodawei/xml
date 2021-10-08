@@ -208,6 +208,12 @@ This assumes that the first occurence of a notation declaration is correct, whil
 
 Note also that this is not enforced in 1.0/1, since that edition did not have this constraint.
 
+## Commentary on other errors
+Several places in the specification indicate that errors should be reported in several circumstances. These are generally handled and reported by this system.
+
+* `xml:space`: §2.10.0 in 1.0/3 and beyond requires that an error be reported if the values declared for the attribute when it is declared.
+
+
 ## Architecture
 
 This contains a core class, `ValidityChecker`. Once instantiated, its `checkPToken()` function can be called with new tokens and an error collector instance. This routine does not actually do any checks, itself, instead deferring to other routines.  Internally, it keeps a `state` property which maintains tables of declarations it has seen, along with a certain amount of state of the processing in either the DTD or content so it can correctly interpret the situation. This state is passed along into each of the other routines.

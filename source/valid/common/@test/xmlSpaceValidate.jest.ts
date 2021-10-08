@@ -2,20 +2,23 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { error } from 'basic';
-import { toSToken } from 'sToken';
+import { ConformanceVersion, error } from 'basic';
 import { MockErrorCollector } from 'basic-test';
+import { toSToken } from 'sToken';
+import { ENUMERATION_PTOKEN } from 'token';
 
 import { xmlSpaceValidate } from '../xmlSpaceValidate';
-import { ENUMERATION_PTOKEN } from 'token';
+import { ValidityState } from '../validityState';
 
 const EID = error.id;
 
 describe('xmlSpaceValidate (unit)', () => {
+   let state: ValidityState;
    let mockErrorCollector: MockErrorCollector;
 
    beforeEach(() => {
       mockErrorCollector = new MockErrorCollector();
+      state = new ValidityState();
    });
 
    it('reports no error when the attribute is not xml:space (§2.10.0)', () => {
@@ -35,6 +38,7 @@ describe('xmlSpaceValidate (unit)', () => {
          },
          'elOne',
          'frog',
+         state,
          mockErrorCollector,
       );
 
@@ -61,6 +65,7 @@ describe('xmlSpaceValidate (unit)', () => {
          },
          'elOne',
          'xml:space',
+         state,
          mockErrorCollector,
       );
 
@@ -75,6 +80,7 @@ describe('xmlSpaceValidate (unit)', () => {
          },
          'elOne',
          'xml:SPACE',
+         state,
          mockErrorCollector,
       );
 
@@ -85,6 +91,21 @@ describe('xmlSpaceValidate (unit)', () => {
          params: ['elOne'],
          position: toSToken('xml:space'),
       });
+   });
+
+   it('reports no error when the xml:space has no enumeration but the version is less than 1.0/3 (§2.10.0)', () => {
+      xmlSpaceValidate(
+         {
+            name: toSToken('xml:space'),
+            value: [],
+         },
+         'elOne',
+         'xml:SPACE',
+         new ValidityState(state, { confVer: new ConformanceVersion(1.0, 2) }),
+         mockErrorCollector,
+      );
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 
    it('reports an error when the xml:space has something other than preserve and default (§2.10.0)', () => {
@@ -110,6 +131,7 @@ describe('xmlSpaceValidate (unit)', () => {
          },
          'elOne',
          'xml:space',
+         state,
          mockErrorCollector,
       );
 
@@ -120,5 +142,35 @@ describe('xmlSpaceValidate (unit)', () => {
          params: ['elOne', 'outch'],
          position: toSToken('xml:space'),
       });
+   });
+
+   it('reports no error when the xml:space has something other than preserve and default and the version is less than 1.0/3 (§2.10.0)', () => {
+      xmlSpaceValidate(
+         {
+            enumeration: {
+               open: toSToken('('),
+               type: ENUMERATION_PTOKEN,
+               words: [
+                  {
+                     word: toSToken('preserve'),
+                  },
+                  {
+                     word: toSToken('default'),
+                  },
+                  {
+                     word: toSToken('outch'),
+                  },
+               ],
+            },
+            name: toSToken('xml:space'),
+            value: [],
+         },
+         'elOne',
+         'xml:space',
+         new ValidityState(state, { confVer: new ConformanceVersion(1.0, 2) }),
+         mockErrorCollector,
+      );
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

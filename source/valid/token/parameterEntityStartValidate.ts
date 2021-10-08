@@ -4,9 +4,9 @@ import { ErrorCollector } from 'basic';
 import { ParameterEntityStartPToken } from 'token';
 import { strOrBlank } from 'sToken';
 
+import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
-import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 
 const VID = validCodes.id;
 
@@ -19,8 +19,11 @@ function parameterEntityStartValidate(
    ec.setPos(startPToken.referencePToken.open);
 
    // §2.9.0 Validity Constraint: Standalone Document Declaration
+   //    The standalone document declaration must have the value "no" if
+   //    any external markup declarations contain declarations of:
    //    ...entities (other than amp, lt, gt, apos, quot), if references to
    //    those entities appear in the document...
+   // Note: We do not check the predefined entities since those are never PE refs.
    const details = state.parameterEntities[name];
 
    ec.check(

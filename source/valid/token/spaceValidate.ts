@@ -8,16 +8,11 @@ import { validCodes } from '../error/validCodes';
 import { ElDeclType, ValidityState } from '../common/validityState';
 
 const VID = validCodes.id;
-const S_REGEXP = /^[\t\n\r ]*$/;
 
 function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollector): void {
-   if (
-      !state.elementContext.activeContext ||
-      state.elementContext.activeContext.details.type !== ElDeclType.ELEMENT
-   ) {
+   if (state.elementContext.activeContext?.details.type !== ElDeclType.ELEMENT) {
       return;
    }
-   const spaceText = strOrBlank(token.text);
    const details = state.elementContext.activeContext.details;
 
    ec.setPos(token.text);
@@ -27,20 +22,19 @@ function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollec
     *    contain only child elements (no character data), optionally separated by
     *    white space (characters matching the nonterminal S).]
     */
-   if (S_REGEXP.test(spaceText)) {
-      // §2.9.0 Validity constraint: Standalone Document Declaration
-      //    The standalone document declaration must have the value "no" if any external markup
-      //    declarations contain declarations of:
-      //       - element types with element content, if white space occurs directly within any instance of those types
-      // Note: This is because in this circumstance, something parsing this as non-validated will not know
-      // whether those spaces are content or throwaway S.
 
-      ec.check(
-         state.isStandalone && details.isExternalMarkupDeclaration,
-         VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
-         [strOrBlank(details.token.name)],
-      );
-   }
+   // §2.9.0 Validity constraint: Standalone Document Declaration
+   //    The standalone document declaration must have the value "no" if any external markup
+   //    declarations contain declarations of:
+   //       - element types with element content, if white space occurs directly within any instance of those types
+   // Note: This is because in this circumstance, something parsing this as non-validated will not know
+   // whether those spaces are content or throwaway S.
+
+   ec.check(
+      state.isStandalone && details.isExternalMarkupDeclaration,
+      VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
+      [strOrBlank(details.token.name)],
+   );
 }
 
 export { spaceValidate };

@@ -12,21 +12,18 @@ function elidedEntityDeclarationUpdateState(
    const elName = strOrBlank(el.name);
    const existingEntry = state.parameterEntities[elName];
 
-   // This feels iffy to me.
    if (!el.isPE || !existingEntry || existingEntry.token !== el.token) {
       return state;
    }
 
-   return {
-      ...state,
+   return new ValidityState(state, {
       parameterEntities: {
-         ...state.parameterEntities,
          [elName]: {
             ...existingEntry,
             replacementText: el.value,
          },
       },
-   };
+   });
 }
 
 export { elidedEntityDeclarationUpdateState };

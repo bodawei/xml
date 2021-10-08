@@ -13,7 +13,6 @@ import { COMMENT_PTOKEN, CONDITIONAL_START_PTOKEN, ParameterEntityEndPToken } fr
 
 import { ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
-import { SToken } from 'sToken';
 
 const VID = validCodes.id;
 
@@ -25,25 +24,32 @@ function parameterEntityEndValidate(
    const lastPToken = state.dtdContext.lastPToken;
 
    if (lastPToken) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
-      const hasClose = (lastPToken as any).close as SToken | undefined;
-
+      // §2.8.0 Proper Declaration/PE Nesting
+      //    Parameter-entity replacement text must be properly nested with markup declarations.
+      //    That is to say, if either the first character ... of a markup declaration
+      //    (markupdecl above) is contained in the replacement text for a parameter-entity
+      //    reference, both must be contained in the same replacement text.
       if (lastPToken.type === ATTLIST_DECLARATION_PTOKEN) {
-         ec.check(!hasClose, VID.PEREF_INVALID_START_NESTING, ['ATTLIST'], lastPToken.open);
+         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['ATTLIST'], lastPToken.open);
       } else if (lastPToken.type === ELEMENT_DECLARATION_PTOKEN) {
-         ec.check(!hasClose, VID.PEREF_INVALID_START_NESTING, ['ELEMENT'], lastPToken.open);
+         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['ELEMENT'], lastPToken.open);
       } else if (
          lastPToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ||
          lastPToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN
       ) {
-         ec.check(!hasClose, VID.PEREF_INVALID_START_NESTING, ['ENTITY'], lastPToken.open);
+         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['ENTITY'], lastPToken.open);
       } else if (lastPToken.type === NOTATION_DECLARATION_PTOKEN) {
-         ec.check(!hasClose, VID.PEREF_INVALID_START_NESTING, ['NOTATION'], lastPToken.open);
+         ec.check(
+            !lastPToken.close,
+            VID.PEREF_INVALID_START_NESTING,
+            ['NOTATION'],
+            lastPToken.open,
+         );
       } else if (lastPToken.type === COMMENT_PTOKEN) {
-         ec.check(!hasClose, VID.PEREF_INVALID_START_NESTING, ['comment'], lastPToken.open);
+         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['comment'], lastPToken.open);
       } else if (lastPToken.type === PROCESSING_INSTRUCTION_PTOKEN) {
          ec.check(
-            !hasClose,
+            !lastPToken.close,
             VID.PEREF_INVALID_START_NESTING,
             ['processing instruction'],
             lastPToken.open,

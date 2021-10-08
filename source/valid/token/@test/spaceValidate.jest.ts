@@ -110,28 +110,4 @@ describe('spaceValidate (unit)', () => {
 
       expect(mockErrorCollector.errors).toEqual([]);
    });
-
-   it('reports no error when the space token has non-S characters in it but we are not in element content', () => {
-      state = new ValidityState({
-         elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ANY,
-               },
-               lastToken: undefined,
-               parentName: 'foo',
-               stateId: 0,
-            },
-            contextStack: [],
-            pastEnd: false,
-         },
-      });
-      const space = new SpacePToken({ text: toSToken(' \u0085 \u2028') });
-
-      spaceValidate(space, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
 });

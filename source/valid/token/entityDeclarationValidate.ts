@@ -5,8 +5,8 @@ import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from
 import { strOrBlank } from 'sToken';
 
 import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
+import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 

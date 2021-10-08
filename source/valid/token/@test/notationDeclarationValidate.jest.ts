@@ -61,7 +61,7 @@ describe('notationDeclarationValidate (unit)', () => {
       });
    });
 
-   it('reports no error when the declaration name has not been seen before', () => {
+   it('reports no error when the declaration name has not been seen before (§4.7.0)', () => {
       state = new ValidityState({
          notations: {
             foo: true,
@@ -73,7 +73,7 @@ describe('notationDeclarationValidate (unit)', () => {
       expect(mockErrorCollector.errors).toEqual([]);
    });
 
-   it('reports an error when the declaration name has already been encountered defined', () => {
+   it('reports an error when the declaration name has already been encountered defined (§4.7.0)', () => {
       const notationDecl = makeNotationDeclaration();
       state = new ValidityState({
          notations: {
@@ -92,7 +92,7 @@ describe('notationDeclarationValidate (unit)', () => {
       });
    });
 
-   it('reports no error when the declaration has already been defined, but this is a 1.0 document', () => {
+   it('reports no error when the declaration has already been defined, but this is a 1.0/1 document $(§4.7.0)', () => {
       const notationDecl = makeNotationDeclaration();
       state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 1),

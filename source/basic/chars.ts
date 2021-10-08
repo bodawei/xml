@@ -84,7 +84,7 @@ function isSpace(candidate: string): boolean {
 \**********************************************************************/
 
 function isName(candidate: string, version: XMLVersion = 1.0, edition: XMLedition = 5): boolean {
-   const use11Names = version === 1.1 || (version === 1.0 && edition >= 5);
+   const use11Names = version === 1.1 || edition >= 5;
    const regEx = use11Names ? WHOLENAME_REGEX11 : WHOLENAME_REGEX10;
 
    const allowedChars = !!regEx.exec(candidate);
@@ -118,7 +118,7 @@ function isName(candidate: string, version: XMLVersion = 1.0, edition: XMLeditio
 \**********************************************************************/
 
 function isNmToken(candidate: string, version: XMLVersion = 1.0, edition: XMLedition = 5): boolean {
-   const use11Names = version === 1.1 || (version === 1.0 && edition >= 5);
+   const use11Names = version === 1.1 || edition >= 5;
    const regEx = use11Names ? WHOLENMTOKEN_REGEX11 : WHOLENMTOKEN_REGEX10;
 
    const allowedChars = !!regEx.exec(candidate);

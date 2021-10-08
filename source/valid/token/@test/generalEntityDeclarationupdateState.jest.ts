@@ -39,6 +39,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
          dtdContext: {
             enclosingStack: [],
             inExternalMarkupContext: true,
+            inExternalSubset: false,
          },
       });
 
@@ -49,6 +50,7 @@ describe('generalEntityDeclarationUpdateState (unit)', () => {
             dtdContext: {
                enclosingStack: [],
                inExternalMarkupContext: true,
+               inExternalSubset: false,
             },
             generalEntities: {
                geDecl: {

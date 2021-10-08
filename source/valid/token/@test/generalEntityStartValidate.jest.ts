@@ -7,9 +7,9 @@ import { toSToken } from 'sToken';
 import { GeneralEntityStartPToken } from 'token';
 import { makeGeneralEntityDeclaration, makeGeneralEntityStart } from 'token-test';
 
-import { validCodes } from '../../error/validCodes';
 import { ValidityState } from '../../common/validityState';
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
+import { validCodes } from '../../error/validCodes';
 import { generalEntityStartValidate } from '../generalEntityStartValidate';
 
 const VID = validCodes.id;

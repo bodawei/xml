@@ -120,6 +120,8 @@ function attributeCheck(
          // the XML processor may report the error or may recover by ignoring the attribute
          // specification or by reporting the (erroneous) value to the application.
          //
+         // @@@@ Should error if it is not lowercase.
+         // We report error on values in validity
          if (attr.name.str.toLowerCase() === 'xml:space') {
             const valueString = pTokenArrayToString(attr.value);
             const position = attr.openQuote?.ranges[0];
