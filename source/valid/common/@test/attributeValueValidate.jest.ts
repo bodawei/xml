@@ -9,6 +9,7 @@ import {
    makeGeneralEntityDeclaration,
    makeGeneralEntityReference,
    makeGeneralEntityStart,
+   makeTextPToken,
 } from 'token-test';
 
 import { attributeValueValidate } from '../attributeValueValidate';
@@ -153,5 +154,22 @@ describe('attributeValueValidate (unit)', () => {
          params: ['lt'],
          position: ref.open,
       });
+   });
+
+   it('accepts other values in the attribute value that are not eneity references or starts(§4.1.0)', () => {
+      state = new ValidityState({
+         generalEntities: {
+            frog: {
+               isExternalMarkupDeclaration: false,
+               isInternalValue: true,
+               token: makeGeneralEntityDeclaration(),
+            },
+         },
+         hasExternalSubset: true,
+      });
+
+      attributeValueValidate([makeTextPToken('boo')], state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

@@ -8,7 +8,7 @@ import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } f
 import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validCodes } from '../error/validCodes';
-import { ElDeclType, ValidityState } from '../common/validityState';
+import { AttributeDetails, ElDeclType, ValidityState } from '../common/validityState';
 import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 
 const VID = validCodes.id;
@@ -20,6 +20,7 @@ interface AttInfo {
    attName: string;
 }
 
+// working
 function enumeratedValueCheck(
    elName: string,
    attName: string,
@@ -231,17 +232,14 @@ function fixedAttributesCheck(
    elName: string,
    attName: string,
    attValue: string,
-   state: ValidityState,
+   attDetails: AttributeDetails,
    ec: ErrorCollector,
 ): void {
-   const attrs = state.attributes[elName] ?? {};
-   const attDetails = attrs[attName];
-
    // §3.3.2: Validity Constraint: Fixed Attribute Default**
    //    If an attribute has a default value declared with the #FIXED keyword, instances
    //    of that attribute must match the default value.
-   if (strOrBlank(attDetails?.def.defaultType).toUpperCase() === '#FIXED') {
-      const defValue = pTokenArrayToString(attDetails?.def.value);
+   if (strOrBlank(attDetails.def.defaultType).toUpperCase() === '#FIXED') {
+      const defValue = pTokenArrayToString(attDetails.def.value);
 
       ec.check(defValue.trim() !== attValue.trim(), VID.ELEMENTSTART_ATT_INVALID_FIXED, [
          elName,
@@ -342,7 +340,7 @@ function checkAttributes(
 
       ec.setPos(attr.openQuote);
 
-      fixedAttributesCheck(elName, attName, attValue, state, ec);
+      fixedAttributesCheck(elName, attName, attValue, details, ec);
 
       switch (type) {
          case 'ID':

@@ -26,6 +26,7 @@ describe('elementDeclarationPreprocess (unit)', () => {
          dtdContext: {
             enclosingStack: [],
             inExternalMarkupContext: true,
+            inExternalSubset: false,
          },
       });
    });

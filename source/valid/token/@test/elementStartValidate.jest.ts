@@ -79,13 +79,20 @@ describe('elementStartValidate (unit)', () => {
       const currentContext: ElementContext = {
          details: {
             graph,
+            isExternalMarkupDeclaration: false,
             token: elementDeclaration,
             type: ElDeclType.ELEMENT,
          },
+         lastToken: undefined,
          parentName: 'elementName',
          stateId: 4,
       };
       state = new ValidityState({
+         elementContext: {
+            activeContext: currentContext,
+            contextStack: [currentContext],
+            pastEnd: false,
+         },
          elements: {
             elementName: {
                graph,
@@ -98,11 +105,6 @@ describe('elementStartValidate (unit)', () => {
                }),
                type: ElDeclType.ELEMENT,
             },
-         },
-         elementContext: {
-            activeContext: currentContext,
-            contextStack: [currentContext],
-            pastEnd: false,
          },
       });
    });
@@ -191,6 +193,40 @@ describe('elementStartValidate (unit)', () => {
          params: ['other'],
          position: elementStart.name,
       });
+   });
+
+   it('reports no error when the context is EMPTY', () => {
+      state = new ValidityState({
+         elementContext: {
+            ...state.elementContext,
+            activeContext: {
+               details: {
+                  isExternalMarkupDeclaration: false,
+                  token: elementDeclaration,
+                  type: ElDeclType.EMPTY,
+               },
+               lastToken: undefined,
+               parentName: 'parentName',
+               stateId: 0,
+            },
+         },
+         elements: {
+            elementName: {
+               isExternalMarkupDeclaration: false,
+               token: new ElementDeclarationPToken({
+                  close: toSToken('>'),
+                  declType: toSToken('ELEMENT'),
+                  name: toSToken('elementName'),
+                  open: toSToken('<!'),
+               }),
+               type: ElDeclType.ANY,
+            },
+         },
+      });
+
+      elementStartValidate(elementStart, state, mockErrorCollector);
+
+      expect(mockErrorCollector.errors).toEqual([]);
    });
 
    it('reports an error when the context is MIXED, and the name is not a known name', () => {

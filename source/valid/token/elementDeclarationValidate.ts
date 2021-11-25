@@ -25,7 +25,7 @@ import { validCodes } from '../error/validCodes';
 
 const EID = error.id;
 const VID = validCodes.id;
-
+// bar///
 function getElementNames(contentModel: ContentModelP): Array<string> {
    const childNames: Array<string> = [];
 
