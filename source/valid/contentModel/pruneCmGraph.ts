@@ -1,10 +1,10 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { CmStateIdToCmStateMap, CmGraph } from './cmGraphTypes';
+import { MutableCmStateIdToCmStateMap, MutableCmGraph } from './cmGraphTypes';
 
-function pruneCmGraph(graph: CmGraph): CmGraph {
+function pruneCmGraph(graph: MutableCmGraph): MutableCmGraph {
    const oldStates = graph.states;
-   const newStates: CmStateIdToCmStateMap = {
+   const newStates: MutableCmStateIdToCmStateMap = {
       [graph.startId]: oldStates[graph.startId],
       [graph.endId]: oldStates[graph.endId],
    };

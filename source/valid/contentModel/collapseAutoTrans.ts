@@ -1,6 +1,11 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { CmStateId, CmState, CmStateIdToCmStateMap, CmGraph } from './cmGraphTypes';
+import {
+   CmStateId,
+   MutableCmState,
+   MutableCmStateIdToCmStateMap,
+   MutableCmGraph,
+} from './cmGraphTypes';
 
 interface VisitedMap {
    [stateId: string]: true | undefined;
@@ -11,7 +16,7 @@ interface CollapseState {
 }
 
 // Determine what stateId to use for any states we create.
-function findNextId(graph: CmGraph): number {
+function findNextId(graph: MutableCmGraph): number {
    const stateIds = Object.keys(graph.states);
    let max = 0;
 
@@ -22,8 +27,8 @@ function findNextId(graph: CmGraph): number {
    return max + 1;
 }
 
-function addState(map: CmStateIdToCmStateMap, collapseState: CollapseState): CmState {
-   const state: CmState = {
+function addState(map: MutableCmStateIdToCmStateMap, collapseState: CollapseState): MutableCmState {
+   const state: MutableCmState = {
       autoTrans: [],
       id: collapseState.nextStateId,
       trans: {},
@@ -37,9 +42,9 @@ function addState(map: CmStateIdToCmStateMap, collapseState: CollapseState): CmS
 }
 
 function addAllTransitions(
-   base: CmState,
-   originator: CmState,
-   allStates: CmStateIdToCmStateMap,
+   base: MutableCmState,
+   originator: MutableCmState,
+   allStates: MutableCmStateIdToCmStateMap,
    collapseState: CollapseState,
 ) {
    const names = Object.keys(originator.trans);
@@ -94,8 +99,8 @@ function addAllTransitions(
  * In this case, we retain the autoTrans value, which will later be removed.
  */
 function replaceAutoTrans(
-   currState: CmState,
-   allStates: CmStateIdToCmStateMap,
+   currState: MutableCmState,
+   allStates: MutableCmStateIdToCmStateMap,
    traversed: VisitedMap,
    collapseState: CollapseState,
 ): true | undefined {
@@ -156,7 +161,7 @@ function replaceAutoTrans(
  * Note that we change the refs, in the case of one of these conflicts, to be
  * a comma separated list of the refs that were there before.
  */
-function collapseAutoTrans(graph: CmGraph): void {
+function collapseAutoTrans(graph: MutableCmGraph): void {
    const todo: Array<CmStateId> = [];
    const queued: VisitedMap = {};
    const collapseState: CollapseState = {

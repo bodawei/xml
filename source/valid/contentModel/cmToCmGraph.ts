@@ -2,11 +2,11 @@
 
 import { ContentModelP, ContentNameP, isContentModelP } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
-import { CmState, CmGraph } from './cmGraphTypes';
+import { MutableCmState, MutableCmGraph } from './cmGraphTypes';
 
-type StateMaker = (graph?: CmGraph) => CmState;
+type StateMaker = (graph?: MutableCmGraph) => MutableCmState;
 
-function addAutoTrans(state: CmState, autoTransToState: CmState): void {
+function addAutoTrans(state: MutableCmState, autoTransToState: MutableCmState): void {
    // We always have an autotrans, because we create all the states in this file, and always give them an autoTrans.
    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
    const index = state.autoTrans!.indexOf(autoTransToState.id);
@@ -18,8 +18,8 @@ function addAutoTrans(state: CmState, autoTransToState: CmState): void {
 }
 
 function addTrans(
-   sourceState: CmState,
-   destState: CmState,
+   sourceState: MutableCmState,
+   destState: MutableCmState,
    transName: SToken | undefined,
    transRef: string,
 ): void {
@@ -56,10 +56,10 @@ function addTrans(
  *                              <-name
  */
 function processNameInSequence(
-   graph: CmGraph,
+   graph: MutableCmGraph,
    name: ContentNameP,
-   current: CmState,
-   next: CmState,
+   current: MutableCmState,
+   next: MutableCmState,
    transRef: string,
    makeState: StateMaker,
 ): void {
@@ -102,10 +102,10 @@ function processNameInSequence(
  *                              <-name
  */
 function processNameInChoice(
-   graph: CmGraph,
+   graph: MutableCmGraph,
    name: ContentNameP,
-   current: CmState,
-   next: CmState,
+   current: MutableCmState,
+   next: MutableCmState,
    transRef: string,
    makeState: StateMaker,
 ): void {
@@ -150,7 +150,7 @@ function processNameInChoice(
  */
 function processContentModelInChoice(
    list: ContentModelP,
-   graph: CmGraph,
+   graph: MutableCmGraph,
    refBase: string,
    makeState: StateMaker,
 ): void {
@@ -206,12 +206,12 @@ function processContentModelInChoice(
  */
 function processContentModelInSequence(
    list: ContentModelP,
-   graph: CmGraph,
+   graph: MutableCmGraph,
    refBase: string,
    makeState: StateMaker,
 ): void {
    let current = graph.states[graph.startId];
-   let next: CmState;
+   let next: MutableCmState;
 
    for (let index = 0; index < list.delimitedParticles.length; index++) {
       const delimitedParticle = list.delimitedParticles[index];
@@ -268,12 +268,12 @@ function processContentModelInSequence(
  */
 function processList(
    list: ContentModelP,
-   start: CmState,
-   end: CmState,
+   start: MutableCmState,
+   end: MutableCmState,
    baseRef: string,
    makeState: StateMaker,
-): CmGraph {
-   const graph: CmGraph = {
+): MutableCmGraph {
+   const graph: MutableCmGraph = {
       endId: end.id,
       startId: start.id,
       states: {
@@ -317,8 +317,8 @@ function processList(
 
 function makeStateMaker() {
    let nextStateId = 0;
-   function makeState(graph?: CmGraph): CmState {
-      const state: CmState = {
+   function makeState(graph?: MutableCmGraph): MutableCmState {
+      const state: MutableCmState = {
          autoTrans: [],
          id: nextStateId,
          trans: {},
@@ -340,7 +340,7 @@ function makeStateMaker() {
  * Takes a ContentModelP and produces a graph that can be used to evaluate
  * whether an input stream matches the expression implicit in the ContentModelP
  */
-function cmToCmGraph(list: ContentModelP): CmGraph {
+function cmToCmGraph(list: ContentModelP): MutableCmGraph {
    const makeState = makeStateMaker();
 
    const graph = processList(list, makeState(), makeState(), '/', makeState);

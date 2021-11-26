@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ContentModelP } from 'pToken';
 
@@ -9,7 +9,9 @@ import { pruneCmGraph } from './pruneCmGraph';
 
 function makeCmGraph(contentModel: ContentModelP): CmGraph {
    const graph = cmToCmGraph(contentModel);
+
    collapseAutoTrans(graph);
+
    return pruneCmGraph(graph);
 }
 

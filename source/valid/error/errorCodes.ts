@@ -12,7 +12,7 @@ const errorCodes = {
          'Missing either "default" or "preserve" (or both) as enumerated values for the "xml:space" attribute for the element "{0}" (§2.10.0).',
    },
    XMLSPACE_XTRA_ENUMERATED_VALUE: {
-      code: 1201,
+      code: 1202,
       message:
          'Must not have values other than "default" and "preserve" in the enumeration for the "xml:space" attribute for "{0}" (§2.10.0). Found "{1}".',
    },

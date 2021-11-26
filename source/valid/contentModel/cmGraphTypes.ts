@@ -1,4 +1,4 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 type CmStateId = number;
 
@@ -11,37 +11,63 @@ type CmStateId = number;
  * Note that a ref may contain multiple such paths in the case that this
  * Cmtransition has been combined with others.
  */
-interface CmTransition {
+interface MutableCmTransition {
    ref: string;
    stateId: CmStateId;
 }
 
-interface CmState {
+interface MutableCmState {
    autoTrans?: Array<CmStateId>;
    done?: boolean; // true if you can stop when you reach this Cmstate.
    id: CmStateId;
-   trans: CnNameToCmTransitionMap;
+   trans: MutableCnNameToCmTransitionMap;
 }
 
+interface MutableCnNameToCmTransitionMap {
+   [name: string]: MutableCmTransition | undefined;
+}
+
+interface MutableCmStateIdToCmStateMap {
+   [CmstateId: string]: MutableCmState;
+}
+
+interface MutableCmGraph {
+   endId: CmStateId;
+   startId: CmStateId;
+   states: MutableCmStateIdToCmStateMap;
+}
+
+type CmTransition = Readonly<MutableCmTransition>;
+
 interface CnNameToCmTransitionMap {
-   [name: string]: CmTransition | undefined;
+   readonly [name: string]: CmTransition | undefined;
+}
+
+interface CmState {
+   readonly autoTrans?: ReadonlyArray<CmStateId>;
+   readonly done?: boolean; // true if you can stop when you reach this Cmstate.
+   readonly id: CmStateId;
+   readonly trans: CnNameToCmTransitionMap;
 }
 
 interface CmStateIdToCmStateMap {
-   [CmstateId: string]: CmState;
+   readonly [CmstateId: string]: CmState;
 }
 
 interface CmGraph {
-   endId: CmStateId;
-   startId: CmStateId;
-   states: CmStateIdToCmStateMap;
+   readonly endId: CmStateId;
+   readonly startId: CmStateId;
+   readonly states: CmStateIdToCmStateMap;
 }
 
 export {
    CmGraph,
-   CnNameToCmTransitionMap,
    CmState,
    CmStateId,
    CmStateIdToCmStateMap,
    CmTransition,
+   MutableCmGraph,
+   MutableCmStateIdToCmStateMap,
+   MutableCmState,
+   MutableCmTransition,
 };
