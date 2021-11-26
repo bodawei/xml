@@ -89,7 +89,6 @@ describe('elementStartValidate (unit)', () => {
       };
       state = new ValidityState({
          elementContext: {
-            activeContext: currentContext,
             contextStack: [currentContext],
             pastEnd: false,
          },
@@ -167,16 +166,18 @@ describe('elementStartValidate (unit)', () => {
       state = new ValidityState({
          elementContext: {
             ...state.elementContext,
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: elementDeclaration,
-                  type: ElDeclType.ANY,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: false,
+                     token: elementDeclaration,
+                     type: ElDeclType.ANY,
+                  },
+                  lastToken: undefined,
+                  parentName: 'parentName',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'parentName',
-               stateId: 0,
-            },
+            ],
          },
       });
       elementStart = new ElementStartPToken({
@@ -199,16 +200,18 @@ describe('elementStartValidate (unit)', () => {
       state = new ValidityState({
          elementContext: {
             ...state.elementContext,
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: elementDeclaration,
-                  type: ElDeclType.EMPTY,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: false,
+                     token: elementDeclaration,
+                     type: ElDeclType.EMPTY,
+                  },
+                  lastToken: undefined,
+                  parentName: 'parentName',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'parentName',
-               stateId: 0,
-            },
+            ],
          },
          elements: {
             elementName: {
@@ -233,17 +236,19 @@ describe('elementStartValidate (unit)', () => {
       state = new ValidityState({
          elementContext: {
             ...state.elementContext,
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  names: ['foo'],
-                  token: elementDeclaration,
-                  type: ElDeclType.MIXED,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: false,
+                     names: ['foo'],
+                     token: elementDeclaration,
+                     type: ElDeclType.MIXED,
+                  },
+                  lastToken: undefined,
+                  parentName: 'parentName',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'parentName',
-               stateId: 0,
-            },
+            ],
          },
       });
 
@@ -262,17 +267,19 @@ describe('elementStartValidate (unit)', () => {
       state = new ValidityState({
          elementContext: {
             ...state.elementContext,
-            activeContext: {
-               details: {
-                  graph,
-                  isExternalMarkupDeclaration: false,
-                  token: elementDeclaration,
-                  type: ElDeclType.ELEMENT,
+            contextStack: [
+               {
+                  details: {
+                     graph,
+                     isExternalMarkupDeclaration: false,
+                     token: elementDeclaration,
+                     type: ElDeclType.ELEMENT,
+                  },
+                  lastToken: undefined,
+                  parentName: 'parentName',
+                  stateId: 4,
                },
-               lastToken: undefined,
-               parentName: 'parentName',
-               stateId: 4,
-            },
+            ],
          },
       });
 
@@ -292,7 +299,7 @@ describe('elementStartValidate (unit)', () => {
          ...state,
          elementContext: {
             ...state.elementContext,
-            activeContext: undefined,
+            contextStack: [],
          },
       };
 

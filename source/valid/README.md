@@ -410,5 +410,5 @@ The last processing phase does two things:
 
 
 Expander:
-- entityDeclarationValueValidate
+- entityDeclarationValueValidate and ancestorPERefsValidate
    - This anticipates it will get both PE Start andPERefs

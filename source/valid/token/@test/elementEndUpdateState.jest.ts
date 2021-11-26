@@ -60,7 +60,6 @@ describe('elementEndUpdateState (unit)', () => {
       };
       state = new ValidityState({
          elementContext: {
-            activeContext: otherContext,
             contextStack: [expectedContext, otherContext],
             pastEnd: false,
          },
@@ -78,7 +77,6 @@ describe('elementEndUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: expectedContext,
             contextStack: [expectedContext],
             pastEnd: false,
          },
@@ -98,7 +96,6 @@ describe('elementEndUpdateState (unit)', () => {
       };
       state = new ValidityState({
          elementContext: {
-            activeContext: expectedContext,
             contextStack: [expectedContext],
             pastEnd: false,
          },
@@ -116,7 +113,6 @@ describe('elementEndUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: undefined,
             contextStack: [],
             pastEnd: true,
          },
@@ -143,7 +139,6 @@ describe('elementEndUpdateState (unit)', () => {
       };
       state = new ValidityState({
          elementContext: {
-            activeContext: currentContext,
             contextStack: [currentContext],
             pastEnd: false,
          },

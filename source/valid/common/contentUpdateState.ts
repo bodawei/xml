@@ -7,7 +7,9 @@ import { isXmlData } from './isXmlData';
 import { ElDeclType, ElementContext, ValidityState } from './validityState';
 
 function contentUpdateState(token: ParseToken, state: ValidityState): ValidityState {
-   const details = state.elementContext.activeContext?.details;
+   const stack = state.elementContext.contextStack;
+   const curContext = stack[stack.length - 1] as ElementContext | undefined;
+   const details = curContext?.details;
 
    // §3.0.0 Validity Constraint: Element Valid
    /*
@@ -34,7 +36,6 @@ function contentUpdateState(token: ParseToken, state: ValidityState): ValiditySt
             ...state,
             elementContext: {
                ...state.elementContext,
-               activeContext: newContext,
                contextStack: [...partialStack, newContext],
             },
          };

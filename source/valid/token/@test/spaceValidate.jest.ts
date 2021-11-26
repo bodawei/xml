@@ -52,18 +52,19 @@ describe('spaceValidate (unit)', () => {
       } externally declared`, () => {
          state = new ValidityState({
             elementContext: {
-               activeContext: {
-                  details: {
-                     graph: { endId: 0, startId: 0, states: {} },
-                     isExternalMarkupDeclaration,
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ELEMENT,
+               contextStack: [
+                  {
+                     details: {
+                        graph: { endId: 0, startId: 0, states: {} },
+                        isExternalMarkupDeclaration,
+                        token: makeElementDeclaration(),
+                        type: ElDeclType.ELEMENT,
+                     },
+                     lastToken: undefined,
+                     parentName: 'foo',
+                     stateId: 0,
                   },
-                  lastToken: undefined,
-                  parentName: 'foo',
-                  stateId: 0,
-               },
-               contextStack: [],
+               ],
                pastEnd: false,
             },
             isStandalone,
@@ -89,18 +90,19 @@ describe('spaceValidate (unit)', () => {
    it('reports no error when the space token has only S characters in it', () => {
       state = new ValidityState({
          elementContext: {
-            activeContext: {
-               details: {
-                  graph: { endId: 0, startId: 0, states: {} },
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ELEMENT,
+            contextStack: [
+               {
+                  details: {
+                     graph: { endId: 0, startId: 0, states: {} },
+                     isExternalMarkupDeclaration: false,
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ELEMENT,
+                  },
+                  lastToken: undefined,
+                  parentName: 'foo',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'foo',
-               stateId: 0,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });
@@ -114,17 +116,18 @@ describe('spaceValidate (unit)', () => {
    it('reports no error when the space token S characters in it, but we are not in an ELEMENT context', () => {
       state = new ValidityState({
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: true,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ANY,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: true,
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ANY,
+                  },
+                  lastToken: undefined,
+                  parentName: 'foo',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'foo',
-               stateId: 0,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
          isStandalone: true,

@@ -82,21 +82,22 @@ describe('conentValidate (unit)', () => {
    it('reports an error when the context is EMPTY, and any non-element end token is delivered (§3.0.0)', () => {
       const state = new ValidityState({
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: new ElementDeclarationPToken({
-                     declType: toSToken('EMPTY'),
-                     name: toSToken('elementName'),
-                     open: toSToken('<!'),
-                  }),
-                  type: ElDeclType.EMPTY,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: false,
+                     token: new ElementDeclarationPToken({
+                        declType: toSToken('EMPTY'),
+                        name: toSToken('elementName'),
+                        open: toSToken('<!'),
+                     }),
+                     type: ElDeclType.EMPTY,
+                  },
+                  lastToken: undefined,
+                  parentName: 'elementName',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'elementName',
-               stateId: 0,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });
@@ -115,21 +116,22 @@ describe('conentValidate (unit)', () => {
    it('reports no error when the context is EMPTY, and an element end token is delivered (§3.0.0)', () => {
       const state = new ValidityState({
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: new ElementDeclarationPToken({
-                     declType: toSToken('EMPTY'),
-                     name: toSToken('elementName'),
-                     open: toSToken('<!'),
-                  }),
-                  type: ElDeclType.EMPTY,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: false,
+                     token: new ElementDeclarationPToken({
+                        declType: toSToken('EMPTY'),
+                        name: toSToken('elementName'),
+                        open: toSToken('<!'),
+                     }),
+                     type: ElDeclType.EMPTY,
+                  },
+                  lastToken: undefined,
+                  parentName: 'elementName',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'elementName',
-               stateId: 0,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });
@@ -185,22 +187,23 @@ describe('conentValidate (unit)', () => {
             const state = new ValidityState({
                confVer: new ConformanceVersion(version, edition),
                elementContext: {
-                  activeContext: {
-                     details: {
-                        graph: makeCmGraph(new ContentModelP()),
-                        isExternalMarkupDeclaration: false,
-                        token: new ElementDeclarationPToken({
-                           contentModel: new ContentModelP(),
-                           name: toSToken('elementName'),
-                           open: toSToken('<!'),
-                        }),
-                        type: ElDeclType.ELEMENT,
+                  contextStack: [
+                     {
+                        details: {
+                           graph: makeCmGraph(new ContentModelP()),
+                           isExternalMarkupDeclaration: false,
+                           token: new ElementDeclarationPToken({
+                              contentModel: new ContentModelP(),
+                              name: toSToken('elementName'),
+                              open: toSToken('<!'),
+                           }),
+                           type: ElDeclType.ELEMENT,
+                        },
+                        lastToken: undefined,
+                        parentName: 'elementName',
+                        stateId: 0,
                      },
-                     lastToken: undefined,
-                     parentName: 'elementName',
-                     stateId: 0,
-                  },
-                  contextStack: [],
+                  ],
                   pastEnd: false,
                },
             });
@@ -226,22 +229,23 @@ describe('conentValidate (unit)', () => {
       const state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 1),
          elementContext: {
-            activeContext: {
-               details: {
-                  graph: makeCmGraph(new ContentModelP()),
-                  isExternalMarkupDeclaration: false,
-                  token: new ElementDeclarationPToken({
-                     contentModel: new ContentModelP(),
-                     name: toSToken('elementName'),
-                     open: toSToken('<!'),
-                  }),
-                  type: ElDeclType.ELEMENT,
+            contextStack: [
+               {
+                  details: {
+                     graph: makeCmGraph(new ContentModelP()),
+                     isExternalMarkupDeclaration: false,
+                     token: new ElementDeclarationPToken({
+                        contentModel: new ContentModelP(),
+                        name: toSToken('elementName'),
+                        open: toSToken('<!'),
+                     }),
+                     type: ElDeclType.ELEMENT,
+                  },
+                  lastToken: undefined,
+                  parentName: 'elementName',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'elementName',
-               stateId: 0,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });
@@ -261,18 +265,19 @@ describe('conentValidate (unit)', () => {
       const state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 1),
          elementContext: {
-            activeContext: {
-               details: {
-                  graph: makeCmGraph(new ContentModelP()),
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ELEMENT,
+            contextStack: [
+               {
+                  details: {
+                     graph: makeCmGraph(new ContentModelP()),
+                     isExternalMarkupDeclaration: false,
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ELEMENT,
+                  },
+                  lastToken: makeSpace(),
+                  parentName: 'elStart',
+                  stateId: 1,
                },
-               lastToken: makeSpace(),
-               parentName: 'elStart',
-               stateId: 1,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });
@@ -292,18 +297,19 @@ describe('conentValidate (unit)', () => {
       const state = new ValidityState({
          confVer: new ConformanceVersion(1.0, 2),
          elementContext: {
-            activeContext: {
-               details: {
-                  graph: makeCmGraph(new ContentModelP()),
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ELEMENT,
+            contextStack: [
+               {
+                  details: {
+                     graph: makeCmGraph(new ContentModelP()),
+                     isExternalMarkupDeclaration: false,
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ELEMENT,
+                  },
+                  lastToken: makeSpace(),
+                  parentName: 'elStart',
+                  stateId: 1,
                },
-               lastToken: makeSpace(),
-               parentName: 'elStart',
-               stateId: 1,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });
@@ -359,21 +365,22 @@ describe('conentValidate (unit)', () => {
             const state = new ValidityState({
                confVer: new ConformanceVersion(version, edition),
                elementContext: {
-                  activeContext: {
-                     details: {
-                        isExternalMarkupDeclaration: false,
-                        names: [],
-                        token: new ElementDeclarationPToken({
-                           name: toSToken('elementName'),
-                           open: toSToken('<!'),
-                        }),
-                        type: ElDeclType.MIXED,
+                  contextStack: [
+                     {
+                        details: {
+                           isExternalMarkupDeclaration: false,
+                           names: [],
+                           token: new ElementDeclarationPToken({
+                              name: toSToken('elementName'),
+                              open: toSToken('<!'),
+                           }),
+                           type: ElDeclType.MIXED,
+                        },
+                        lastToken: undefined,
+                        parentName: 'elementName',
+                        stateId: 0,
                      },
-                     lastToken: undefined,
-                     parentName: 'elementName',
-                     stateId: 0,
-                  },
-                  contextStack: [],
+                  ],
                   pastEnd: false,
                },
             });
@@ -399,20 +406,21 @@ describe('conentValidate (unit)', () => {
             const state = new ValidityState({
                confVer: new ConformanceVersion(version, edition),
                elementContext: {
-                  activeContext: {
-                     details: {
-                        isExternalMarkupDeclaration: false,
-                        token: new ElementDeclarationPToken({
-                           name: toSToken('elementName'),
-                           open: toSToken('<!'),
-                        }),
-                        type: ElDeclType.ANY,
+                  contextStack: [
+                     {
+                        details: {
+                           isExternalMarkupDeclaration: false,
+                           token: new ElementDeclarationPToken({
+                              name: toSToken('elementName'),
+                              open: toSToken('<!'),
+                           }),
+                           type: ElDeclType.ANY,
+                        },
+                        lastToken: undefined,
+                        parentName: 'elementName',
+                        stateId: 0,
                      },
-                     lastToken: undefined,
-                     parentName: 'elementName',
-                     stateId: 0,
-                  },
-                  contextStack: [],
+                  ],
                   pastEnd: false,
                },
             });

@@ -78,24 +78,24 @@ function updateCurrentElContext(
    elName: string,
    state: ValidityState,
 ): ValidityState['elementContext'] {
-   const activeContext = state.elementContext.activeContext;
+   const stack = state.elementContext.contextStack;
+   const curContext = stack[stack.length - 1] as ElementContext | undefined;
 
-   if (activeContext?.details.type !== ElDeclType.ELEMENT) {
+   if (curContext?.details.type !== ElDeclType.ELEMENT) {
       return state.elementContext;
    }
 
-   const currentState = activeContext.details.graph.states[activeContext.stateId];
+   const currentState = curContext.details.graph.states[curContext.stateId];
    const destState = currentState.trans[elName];
 
    if (destState) {
-      const newContext: ElementContext = { ...activeContext, stateId: destState.stateId };
+      const newContext: ElementContext = { ...curContext, stateId: destState.stateId };
       const temp = [...state.elementContext.contextStack];
       temp.pop();
       temp.push(newContext);
 
       return {
          ...state.elementContext,
-         activeContext: newContext,
          contextStack: temp,
       };
    }
@@ -134,7 +134,6 @@ function elementStartUpdateState(
 
       newElementContxt = {
          ...newElementContxt,
-         activeContext: context,
          contextStack: [...newElementContxt.contextStack, context],
       };
    }

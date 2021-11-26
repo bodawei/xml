@@ -82,7 +82,6 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: expectedContext,
             contextStack: [expectedContext],
             pastEnd: false,
          },
@@ -111,7 +110,6 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: expectedContext,
             contextStack: [expectedContext],
             pastEnd: false,
          },
@@ -152,7 +150,6 @@ describe('elementStartUpdateState (unit)', () => {
             inExternalSubset: false,
          },
          elementContext: {
-            activeContext: expectedContext,
             contextStack: [expectedContext],
             pastEnd: false,
          },
@@ -187,15 +184,14 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: expectedContext,
             contextStack: [expectedContext],
             pastEnd: false,
          },
       });
    });
 
-   it('transitions the activeContext to a new state, when context is ELEMENT', () => {
-      const activeContext: ElementContext = {
+   it('transitions the current context to a new state, when context is ELEMENT', () => {
+      const curContext: ElementContext = {
          details: {
             graph,
             isExternalMarkupDeclaration: false,
@@ -206,11 +202,10 @@ describe('elementStartUpdateState (unit)', () => {
          parentName: 'elementName',
          stateId: 4,
       };
-      const modifiedActive = { ...activeContext, stateId: 5 };
+      const modifiedActive = { ...curContext, stateId: 5 };
       state = new ValidityState({
          elementContext: {
-            activeContext: activeContext,
-            contextStack: [activeContext],
+            contextStack: [curContext],
             pastEnd: false,
          },
          elements: {
@@ -239,7 +234,6 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: expectedContext,
             contextStack: [modifiedActive, expectedContext],
             pastEnd: false,
          },
@@ -247,7 +241,7 @@ describe('elementStartUpdateState (unit)', () => {
    });
 
    it('does not transition to a new state, when context is ELEMENT, but the graph has no transition for this', () => {
-      const activeContext: ElementContext = {
+      const curContext: ElementContext = {
          details: {
             graph,
             isExternalMarkupDeclaration: false,
@@ -260,8 +254,7 @@ describe('elementStartUpdateState (unit)', () => {
       };
       state = new ValidityState({
          elementContext: {
-            activeContext: activeContext,
-            contextStack: [activeContext],
+            contextStack: [curContext],
             pastEnd: false,
          },
          elements: {
@@ -294,8 +287,7 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: expectedContext,
-            contextStack: [activeContext, expectedContext],
+            contextStack: [curContext, expectedContext],
             pastEnd: false,
          },
       });
@@ -307,7 +299,6 @@ describe('elementStartUpdateState (unit)', () => {
       expect(newState).toEqual({
          ...state,
          elementContext: {
-            activeContext: undefined,
             contextStack: [],
             pastEnd: true,
          },
@@ -317,7 +308,6 @@ describe('elementStartUpdateState (unit)', () => {
    it('changes nothing if it encounters an empty element while in the body of the document', () => {
       state = new ValidityState({
          elementContext: {
-            activeContext: undefined,
             contextStack: [
                {
                   details: {

@@ -3,13 +3,14 @@
 import { strOrBlank } from 'sToken';
 import { ElementEndPToken } from 'token';
 
-import { ValidityState } from '../common/validityState';
+import { ElementContext, ValidityState } from '../common/validityState';
 
 function elementEndUpdateState(el: ElementEndPToken, state: ValidityState): ValidityState {
    const elName = strOrBlank(el.name);
-   const context = state.elementContext.activeContext;
+   const stack = state.elementContext.contextStack;
+   const curContext = stack[stack.length - 1] as ElementContext | undefined;
 
-   if (!context || elName !== context.parentName) {
+   if (!curContext || elName !== curContext.parentName) {
       return state;
    }
 
@@ -17,7 +18,6 @@ function elementEndUpdateState(el: ElementEndPToken, state: ValidityState): Vali
    const temp = [...elContext.contextStack];
 
    temp.pop();
-   elContext.activeContext = temp[temp.length - 1];
    elContext.contextStack = temp;
 
    if (elContext.contextStack.length === 0) {

@@ -120,7 +120,6 @@ interface ValidityStateProps {
    };
 
    elementContext?: {
-      activeContext?: ElementContext;
       contextStack: ReadonlyArray<ElementContext>;
       pastEnd: boolean;
    };
@@ -175,9 +174,8 @@ class ValidityState {
    };
 
    readonly elementContext: {
-      readonly activeContext?: ElementContext; // if this is undefined, contextStack is 0 length
       readonly contextStack: ReadonlyArray<ElementContext>;
-      readonly pastEnd: boolean; // when this is true, activeContext will be undefined
+      readonly pastEnd: boolean;
    };
 
    readonly generalEntities: {
@@ -225,7 +223,6 @@ class ValidityState {
          };
       this.elementContext = other.elementContext ??
          baseState.elementContext ?? {
-            activeContext: undefined,
             contextStack: [],
             pastEnd: false,
          };

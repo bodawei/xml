@@ -18,13 +18,15 @@ import {
 
 import { validCodes } from '../error/validCodes';
 import { isXmlData } from './isXmlData';
-import { ElDeclType, ValidityState } from './validityState';
+import { ElDeclType, ElementContext, ValidityState } from './validityState';
 
 const VID = validCodes.id;
 const S_REGEXP = /^[\t\n\r ]*$/;
 
 function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorCollector): void {
-   const details = state.elementContext.activeContext?.details;
+   const stack = state.elementContext.contextStack;
+   const curContext = stack[stack.length - 1] as ElementContext | undefined;
+   const details = curContext?.details;
    const isXml = isXmlData(token);
    const ver = state.confVer.version;
    const ed = state.confVer.edition;
@@ -89,9 +91,7 @@ function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorColle
       }
 
       ec.check(
-         isNoLeadingTrailingSpaceVersion &&
-            isWhitespace &&
-            !state.elementContext.activeContext?.lastToken,
+         isNoLeadingTrailingSpaceVersion && isWhitespace && !curContext?.lastToken,
          VID.CONTENTELEMENT_XTRA_SPACE,
          [strOrBlank(details.token.name)],
          getFirstSToken(token),
@@ -109,7 +109,7 @@ function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorColle
       //    nonterminal S) between each pair of child elements.
       // Translation: in 1.0/1 only, it seemed to imply you should not have S
       // between the last element and the end token.
-      const lastToken = state.elementContext.activeContext?.lastToken;
+      const lastToken = curContext?.lastToken;
 
       if (
          token.type === ELEMENT_END_PTOKEN &&

@@ -34,7 +34,6 @@ describe('ValidityState (unit)', () => {
              "lastPToken": undefined,
            },
            "elementContext": Object {
-             "activeContext": undefined,
              "contextStack": Array [],
              "pastEnd": false,
            },
@@ -73,16 +72,6 @@ describe('ValidityState (unit)', () => {
             lastPToken: makeComment(),
          },
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ANY,
-               },
-               lastToken: makeCdata(),
-               parentName: 'foo',
-               stateId: 3,
-            },
             contextStack: [
                {
                   details: {
@@ -165,16 +154,6 @@ describe('ValidityState (unit)', () => {
             lastPToken: makeComment(),
          },
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ANY,
-               },
-               lastToken: makeCdata(),
-               parentName: 'foo',
-               stateId: 3,
-            },
             contextStack: [
                {
                   details: {
@@ -261,17 +240,6 @@ describe('ValidityState (unit)', () => {
             lastPToken: makeNotationDeclaration(),
          },
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: true,
-                  names: ['other'],
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.MIXED,
-               },
-               lastToken: makeNotationDeclaration(),
-               parentName: 'asdf',
-               stateId: 5,
-            },
             contextStack: [
                {
                   details: {
@@ -378,16 +346,6 @@ describe('ValidityState (unit)', () => {
             lastPToken: makeComment(),
          },
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ANY,
-               },
-               lastToken: makeCdata(),
-               parentName: 'foo',
-               stateId: 3,
-            },
             contextStack: [
                {
                   details: {
@@ -475,16 +433,6 @@ describe('ValidityState (unit)', () => {
             lastPToken: makeComment(),
          },
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ANY,
-               },
-               lastToken: makeCdata(),
-               parentName: 'foo',
-               stateId: 3,
-            },
             contextStack: [
                {
                   details: {

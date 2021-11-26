@@ -66,7 +66,6 @@ describe('elementEndValidate (unit)', () => {
       };
       state = new ValidityState({
          elementContext: {
-            activeContext: currentContext,
             contextStack: [currentContext],
             pastEnd: false,
          },
@@ -111,7 +110,7 @@ describe('elementEndValidate (unit)', () => {
          ...state,
          elementContext: {
             ...state.elementContext,
-            activeContext: undefined,
+            contextStack: [],
          },
       };
 
@@ -139,16 +138,18 @@ describe('elementEndValidate (unit)', () => {
          ...state,
          elementContext: {
             ...state.elementContext,
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: elementDeclaration,
-                  type: ElDeclType.ANY,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: false,
+                     token: elementDeclaration,
+                     type: ElDeclType.ANY,
+                  },
+                  lastToken: undefined,
+                  parentName: 'elementName',
+                  stateId: 4,
                },
-               lastToken: undefined,
-               parentName: 'elementName',
-               stateId: 4,
-            },
+            ],
          },
       };
 

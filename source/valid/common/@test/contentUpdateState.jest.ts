@@ -76,22 +76,23 @@ describe('contentUpdateState (unit)', () => {
       } tokens (§3.0.0)`, () => {
          const state = new ValidityState({
             elementContext: {
-               activeContext: {
-                  details: {
-                     graph: makeCmGraph(new ContentModelP()),
-                     isExternalMarkupDeclaration: false,
-                     token: new ElementDeclarationPToken({
-                        contentModel: new ContentModelP(),
-                        name: toSToken('elementName'),
-                        open: toSToken('<!'),
-                     }),
-                     type: ElDeclType.ELEMENT,
+               contextStack: [
+                  {
+                     details: {
+                        graph: makeCmGraph(new ContentModelP()),
+                        isExternalMarkupDeclaration: false,
+                        token: new ElementDeclarationPToken({
+                           contentModel: new ContentModelP(),
+                           name: toSToken('elementName'),
+                           open: toSToken('<!'),
+                        }),
+                        type: ElDeclType.ELEMENT,
+                     },
+                     lastToken: undefined,
+                     parentName: 'elementName',
+                     stateId: 0,
                   },
-                  lastToken: undefined,
-                  parentName: 'elementName',
-                  stateId: 0,
-               },
-               contextStack: [],
+               ],
                pastEnd: false,
             },
          });
@@ -99,7 +100,6 @@ describe('contentUpdateState (unit)', () => {
          const newState = contentUpdateState(token, state);
          const expected = updates ? token : undefined;
 
-         expect(newState.elementContext.activeContext?.lastToken).toEqual(expected);
          expect(newState.elementContext.contextStack[0]?.lastToken).toEqual(expected);
       });
    });
@@ -107,19 +107,20 @@ describe('contentUpdateState (unit)', () => {
    it('does not update the state if this is not an ELEMENT type (§3.0.0)', () => {
       const state = new ValidityState({
          elementContext: {
-            activeContext: {
-               details: {
-                  isExternalMarkupDeclaration: false,
-                  token: new ElementDeclarationPToken({
-                     open: toSToken('<!'),
-                  }),
-                  type: ElDeclType.ANY,
+            contextStack: [
+               {
+                  details: {
+                     isExternalMarkupDeclaration: false,
+                     token: new ElementDeclarationPToken({
+                        open: toSToken('<!'),
+                     }),
+                     type: ElDeclType.ANY,
+                  },
+                  lastToken: undefined,
+                  parentName: 'elementName',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'elementName',
-               stateId: 0,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });

@@ -22,18 +22,19 @@ describe('conditionalStartValidate (unit)', () => {
 
       state = new ValidityState({
          elementContext: {
-            activeContext: {
-               details: {
-                  graph: { endId: 0, startId: 0, states: {} },
-                  isExternalMarkupDeclaration: false,
-                  token: makeElementDeclaration(),
-                  type: ElDeclType.ELEMENT,
+            contextStack: [
+               {
+                  details: {
+                     graph: { endId: 0, startId: 0, states: {} },
+                     isExternalMarkupDeclaration: false,
+                     token: makeElementDeclaration(),
+                     type: ElDeclType.ELEMENT,
+                  },
+                  lastToken: undefined,
+                  parentName: 'foo',
+                  stateId: 0,
                },
-               lastToken: undefined,
-               parentName: 'foo',
-               stateId: 0,
-            },
-            contextStack: [],
+            ],
             pastEnd: false,
          },
       });

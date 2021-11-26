@@ -5,15 +5,18 @@ import { strOrBlank } from 'sToken';
 import { SpacePToken } from 'token';
 
 import { validCodes } from '../error/validCodes';
-import { ElDeclType, ValidityState } from '../common/validityState';
+import { ElDeclType, ElementContext, ValidityState } from '../common/validityState';
 
 const VID = validCodes.id;
 
 function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollector): void {
-   if (state.elementContext.activeContext?.details.type !== ElDeclType.ELEMENT) {
+   const stack = state.elementContext.contextStack;
+   const curContext = stack[stack.length - 1] as ElementContext | undefined;
+   const details = curContext?.details;
+
+   if (details?.type !== ElDeclType.ELEMENT) {
       return;
    }
-   const details = state.elementContext.activeContext.details;
 
    ec.setPos(token.text);
 

@@ -4,19 +4,19 @@ import { ErrorCollector, isSpace } from 'basic';
 import { strOrBlank } from 'sToken';
 import { CharDataPToken } from 'token';
 
-import { ElDeclType, ValidityState } from '../common/validityState';
+import { ElDeclType, ElementContext, ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
 function charDataValidate(token: CharDataPToken, state: ValidityState, ec: ErrorCollector): void {
-   const activeContext = state.elementContext.activeContext;
+   const stack = state.elementContext.contextStack;
+   const curContext = stack[stack.length - 1] as ElementContext | undefined;
+   const details = curContext?.details;
 
-   if (!activeContext || activeContext.details.type !== ElDeclType.ELEMENT) {
+   if (details?.type !== ElDeclType.ELEMENT) {
       return;
    }
-
-   const details = activeContext.details;
 
    ec.setPos(token.text);
 
