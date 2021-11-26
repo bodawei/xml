@@ -3,6 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
+import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { getFirstSToken } from 'token';
 import {
@@ -35,11 +36,10 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
-import { ElDeclType, ValidityState } from '../validityState';
-import { validCodes } from '../../error/validCodes';
-import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
 import { makeCmGraph } from '../../contentModel/makeCmGraph';
+import { validCodes } from '../../error/validCodes';
 import { contentValidate } from '../contentValidate';
+import { ElDeclType, ValidityState } from '../validityState';
 
 const VID = validCodes.id;
 

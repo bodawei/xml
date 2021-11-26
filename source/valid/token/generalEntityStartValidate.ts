@@ -22,6 +22,8 @@ function generalEntityStartValidate(
 
    const details = state.generalEntities[name];
 
+   // @@ WHY IS THIS NOT VALIDATING THE GENERAL ENTITY REFERENCe?
+
    // §2.9.0 Validity Constraint: Standalone Document Declaration
    //    ...entities (other than amp, lt, gt, apos, quot), if references to
    //    those entities appear in the document...

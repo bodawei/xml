@@ -34,7 +34,9 @@ import {
    GENERAL_ENTITY_START_PTOKEN,
 } from 'token';
 
-// Identifies a token if it in some way represents original XML Data
+/*
+ * Identifies a token if it in some way represents original XML Data
+ */
 function isXmlData(token: ParseToken): boolean {
    switch (token.type) {
       case ATTLIST_DECLARATION_PTOKEN:
@@ -42,8 +44,8 @@ function isXmlData(token: ParseToken): boolean {
       case CHARDATA_PTOKEN:
       case CHARREF_PTOKEN:
       case COMMENT_PTOKEN:
-      case CONDITIONAL_START_PTOKEN:
       case CONDITIONAL_END_PTOKEN:
+      case CONDITIONAL_START_PTOKEN:
       case DOCTYPE_END_PTOKEN:
       case DOCTYPE_START_PTOKEN:
       case ELEMENT_DECLARATION_PTOKEN:

@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ErrorCollector } from 'basic';
 import {
@@ -8,6 +8,7 @@ import {
 } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { ElidedEntityDeclarationPToken, PARAMETER_ENTITY_START_PTOKEN } from 'token';
+
 import { validCodes } from '../error/validCodes';
 
 import { ValidityState } from './validityState';
@@ -28,7 +29,6 @@ function entityDeclarationValueValidate(
       let elementName: string | undefined;
       let open: SToken | undefined;
 
-      // @@@ Will we actually ever get a pe start?
       if (element.type === PARAMETER_ENTITY_START_PTOKEN) {
          elementName = strOrBlank(element.referencePToken.name);
          open = element.referencePToken.open;

@@ -5,21 +5,19 @@ import { describe, expect, it } from '@jest/globals';
 import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
+import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { elementDeclarationPreprocess } from '../elementDeclarationPreprocess';
 import { ElDeclType, ValidityState } from '../validityState';
-import * as makeCmGraphModule from '../../contentModel/makeCmGraph';
-
-import { makeCmGraph } from '../../contentModel/makeCmGraph';
 
 jest.mock('../../contentModel/makeCmGraph');
 
 describe('elementDeclarationPreprocess (unit)', () => {
-   let makeCmGraphMock: jest.MockedFunction<typeof makeCmGraphModule.makeCmGraph>;
+   let makeCmGraphMock: jest.MockedFunction<typeof makeCmGraph>;
    let state: ValidityState;
    let externalState: ValidityState;
 
    beforeEach(() => {
-      makeCmGraphMock = makeCmGraph as jest.MockedFunction<typeof makeCmGraphModule.makeCmGraph>;
+      makeCmGraphMock = makeCmGraph as jest.MockedFunction<typeof makeCmGraph>;
 
       state = new ValidityState();
       externalState = new ValidityState({
@@ -296,7 +294,7 @@ describe('elementDeclarationPreprocess (unit)', () => {
       });
    });
 
-   it('treats an EMPTY top-level content model as an empty entry', () => {
+   it('treats an EMPTY top-level content model as element content', () => {
       const elementDeclaration = new ElementDeclarationPToken({
          close: toSToken('>'),
          contentModel: {
@@ -310,9 +308,10 @@ describe('elementDeclarationPreprocess (unit)', () => {
       const result = elementDeclarationPreprocess(elementDeclaration, state);
 
       expect(result).toEqual({
+         graph: { endId: 0, startId: 0, states: {} },
          isExternalMarkupDeclaration: false,
          token: elementDeclaration,
-         type: ElDeclType.EMPTY,
+         type: ElDeclType.ELEMENT,
       });
    });
 

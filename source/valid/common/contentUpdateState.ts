@@ -10,7 +10,10 @@ function contentUpdateState(token: ParseToken, state: ValidityState): ValiditySt
    const details = state.elementContext.activeContext?.details;
 
    // §3.0.0 Validity Constraint: Element Valid
-   //    Do state setup for a 1.0/1 oddball condition for the CONTENTELEMENT_XTRA_SPACE error
+   /*
+    * Do state setup for a 1.0/1 oddball condition for the CONTENTELEMENT_XTRA_SPACE error
+    * in the contentValidate() routine.
+    */
    if (details?.type === ElDeclType.ELEMENT) {
       const isXml = isXmlData(token);
       const isIgnoredToken =

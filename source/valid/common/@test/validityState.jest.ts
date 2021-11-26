@@ -14,7 +14,7 @@ import {
    makeParameterEntityStart,
 } from 'token-test';
 
-import { ElDeclType, ValidityState, ValidityStateProps } from '../validityState';
+import { ElDeclType, ValidityState } from '../validityState';
 
 describe('ValidityState (unit)', () => {
    it('constructs an empty default state when given no parameters', () => {
@@ -143,7 +143,7 @@ describe('ValidityState (unit)', () => {
       expect(new ValidityState(other)).not.toBe(other);
    });
 
-   it('completely overwrites the base', () => {
+   it('completely overwrites the base when passed a second state', () => {
       const base = new ValidityState({
          attributes: {
             foo: {
@@ -231,7 +231,7 @@ describe('ValidityState (unit)', () => {
          },
       });
 
-      const addition: ValidityStateProps = {
+      const addition: ValidityState = {
          attributes: {
             foo: {
                att1: {
@@ -356,7 +356,7 @@ describe('ValidityState (unit)', () => {
       expect(new ValidityState(base, addition)).toEqual(addition);
    });
 
-   it('completely overwrites the base', () => {
+   it('adds items to the base', () => {
       const base = new ValidityState({
          attributes: {
             foo: {

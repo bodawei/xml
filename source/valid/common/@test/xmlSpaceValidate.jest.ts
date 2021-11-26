@@ -140,7 +140,7 @@ describe('xmlSpaceValidate (unit)', () => {
          id: EID.XMLSPACE_XTRA_ENUMERATED_VALUE,
          lastPosition: undefined,
          params: ['elOne', 'outch'],
-         position: toSToken('xml:space'),
+         position: toSToken('outch'),
       });
    });
 

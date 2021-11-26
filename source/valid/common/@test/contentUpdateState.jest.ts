@@ -1,6 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { ConformanceVersion } from 'basic';
+import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
 import {
    makeAttListDeclaration,
@@ -31,11 +33,9 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
-import { ElDeclType, ValidityState } from '../validityState';
-import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
-import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { contentUpdateState } from '../contentUpdateState';
-import { ConformanceVersion } from 'basic';
+import { ElDeclType, ValidityState } from '../validityState';
+import { makeCmGraph } from '../../contentModel/makeCmGraph';
 
 describe('contentUpdateState (unit)', () => {
    const dataItems: Array<[ParseToken, boolean]> = [

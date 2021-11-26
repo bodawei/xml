@@ -16,6 +16,10 @@ import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
+/*
+ * Recursively walk up the tree of enetities, amd validate that if this document
+ * is marked as standalone, that all the entities are non-external
+ */
 function ancestorPERefsValidate(
    startPToken:
       | GeneralEntityStartPToken
@@ -49,7 +53,6 @@ function ancestorPERefsValidate(
       let elementName: string | undefined;
       let open: SToken | undefined;
 
-      // @@@ Will we actually ever get a pe start?
       if (element.type === PARAMETER_ENTITY_START_PTOKEN) {
          elementName = strOrBlank(element.referencePToken.name);
          open = element.referencePToken.open;
@@ -66,6 +69,10 @@ function ancestorPERefsValidate(
          // §2.9.0 Validity Constraint: Standalone Document Declaration
          //    ...entities (other than amp, lt, gt, apos, quot), if references to
          //    those entities appear in the document...
+         /*
+          * NOTE: Since this is just evaluating the chain of parameter entities,
+          * this does not need to worry about the predefined entities
+          */
          ec.report(VID.ENTITYREF_EXTERNAL, [elementName], open);
       } else {
          ancestorPERefsValidate(element, state, ec);

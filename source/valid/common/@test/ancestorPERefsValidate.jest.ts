@@ -2,13 +2,14 @@
 
 import { describe, expect, it } from '@jest/globals';
 
+import { MockErrorCollector } from 'basic-test';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
 import { toSToken } from 'sToken';
-import { MockErrorCollector } from 'basic-test';
+import { ParameterEntityStartPToken } from 'token';
 import {
    makeGeneralEntityStart,
    makeParameterEntityReference,
@@ -16,10 +17,9 @@ import {
    makeTextPToken,
 } from 'token-test';
 
+import { validCodes } from '../../error/validCodes';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';
 import { ValidityState } from '../validityState';
-import { ParameterEntityStartPToken } from 'token';
-import { validCodes } from '../../error/validCodes';
 
 const VID = validCodes.id;
 

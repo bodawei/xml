@@ -1,3 +1,5 @@
+/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+
 import { ElementDeclarationPToken, isContentModelP } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -15,22 +17,12 @@ function elementDeclarationPreprocess(
    let hasPcData = false;
 
    if (!elDecl.contentModel) {
-      return {
-         isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
-         token: elDecl,
-         type:
-            strOrBlank(elDecl.contentSpec).toUpperCase() === 'EMPTY'
-               ? ElDeclType.EMPTY
-               : ElDeclType.ANY,
-      };
-   }
+      const spec = strOrBlank(elDecl.contentSpec).toUpperCase();
 
-   // @@@@ This seems a bit weird
-   if (elDecl.contentModel.delimitedParticles.length === 0) {
       return {
          isExternalMarkupDeclaration: state.dtdContext.inExternalMarkupContext,
          token: elDecl,
-         type: ElDeclType.EMPTY,
+         type: spec === 'EMPTY' ? ElDeclType.EMPTY : ElDeclType.ANY,
       };
    }
 
@@ -41,7 +33,7 @@ function elementDeclarationPreprocess(
          const name = strOrBlank(delimParticle.particle.name);
          const isPcData = name.toUpperCase() === '#PCDATA';
 
-         hasPcData = hasPcData || isPcData;
+         hasPcData ||= isPcData;
 
          if (!isPcData) {
             names.push(name);

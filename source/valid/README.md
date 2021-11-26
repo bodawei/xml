@@ -54,9 +54,9 @@ The tokens this examines are:
 *  `TextDeclarationPToken` 
 *  `XmlDeclarationPToken` 
 
-This does try to be flexible and cope with grossly malformed documents. However, if your DTD is in the wrong place or if the external comes before the internal subset, it will get confused (this should just result in more error tokens, however, not any kind of outright bugs.  This should never crash or throw any errors (as with other systems, there is no circumstance where this will deliberately throw an error) no matter what is passed to it and in what order.
+This does try to be flexible and cope with grossly malformed documents. However, if your DTD is in the wrong place or if the external comes before the internal subset, this will get confused (this should just result in more error tokens, nothing more serious than that).  This should never crash or throw any errors (as with other systems, there is no circumstance where this will deliberately throw an error) no matter what is passed to it and in what order.
 
-## Commentary on individual constraints
+## Commentary on individual validity constraints
 
 ### §2.8.0 Root element type
 No commentary.
@@ -216,16 +216,15 @@ Several places in the specification indicate that errors should be reported in s
 
 ## Architecture
 
-This contains a core class, `ValidityChecker`. Once instantiated, its `checkPToken()` function can be called with new tokens and an error collector instance. This routine does not actually do any checks, itself, instead deferring to other routines.  Internally, it keeps a `state` property which maintains tables of declarations it has seen, along with a certain amount of state of the processing in either the DTD or content so it can correctly interpret the situation. This state is passed along into each of the other routines.
+This contains a core class, `ValidityChecker`. Once instantiated, its `checkPToken()` function can be called with new tokens and an error collector instance. This routine does not directly do any checks, instead deferring to other routines.  Internally, it keeps a `state` property which maintains tables of declarations it has seen, along with a certain other values to help it handle processing either the DTD or content. This state is passed along into each of the other routines.
 
-The bulk of the processing is done on individual tokens. That is, when receiving a `FooPToken`, this calls a `fooValidate()` routine to validate that token itself, as well as its relationship to the overall `state`. Often, this then calls another routine `fooUpdateState()` which will modify the state given the information from the `FooToken` (most commonly, adding it to one of the tables).
+The bulk of the processing is done on individual tokens. That is, when receiving a `FooPToken`, `ValidityChecker` calls a `fooValidate()` routine to validate that token itself, as well as its relationship to the overall `state`. Often, `ValidityChecker` then calls another routine `fooUpdateState()` which will modify the state given the information from the `FooToken`.
 
-There is some processing that happens in other routines. Judging whether the content of elements matches their declarations is handled in a `contentValidate()` routine.  Theoretically this could be handled in the individual token validation routines, but it would involve a disturbing amount of repetition of code.
+There is some processing that happens in other routines. Judging whether the content of elements matches their declarations is handled in a `contentValidate()` routine.  Theoretically this could be handled in the individual token validation routines, but it would involve a disturbing amount of code repetition.
 
 Note that earlier versions of this system tried to do more validation in a single large file (with the thought (seen in hindsight) that this would involve a simpler collection of state information).  In practice, given the number of constraints, it got too complex to easily understand or maintain.  Fragmenting this into a few dozen validate and update state routines made the individual validation code easier to understand, though at the cost of being in several dozen files (and thus more lines of code) rather than a single one.
 
-One of the more complex aspects of this system is that of the graphs representing an element declaration's content model. This is discussed in more detail below.
-
+One of the more complex aspects of this system is the graphs representing an element declaration's content model. These are discussed in more detail below.
 
 ### ContentModelGraphs
 In order to validate whether the elements in a particular model conform to the content model description in an element declaration, this converts a content model in to a graph representation.  
@@ -388,14 +387,16 @@ The last processing phase does two things:
 * We probably ought to have a different internal structure and external structure, so the `autoTrans` property is never seen outside.
 
 ## Code style
-* Filenames should start with lower case
-* A comment should be placed before each check for a valitity error that lists the section, and the portion of the text from the spec that describes the constraint.  This should be done with line comments.
+* Filenames should start with lower case letters
+* A comment should be placed before each check for a valitity constraint that lists the section, and the portion of the text from the spec that describes the constraint.  This should be done with line comments.
 * Each test for a valitity constraint should list the section of the spec this test is checking.
 * Each group of tests for one validity constraint should be in its own `describe()` section.
 * This strives to treat the validityState as an immutable data structure.  The ValidityState type follows the same pattern of PTokens where you can merge two other objects by passing two arguments to the constructor.
 * 100% code coverage
+* Comments describing a function or section of a function should be block comments
 
-## Architecture notes 
+
+## WORKING/CLEANUP NOTES
 (move to the architecture section, above)
 
 ### Specific token details
@@ -406,3 +407,8 @@ The last processing phase does two things:
 #### Element end
 * If this encounters an unbalanced end, it will ignore the end element.
    * Like wellformedness, this does not try to auto-close parent elements.
+
+
+Expander:
+- entityDeclarationValueValidate
+   - This anticipates it will get both PE Start andPERefs

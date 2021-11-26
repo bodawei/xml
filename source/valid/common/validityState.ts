@@ -15,7 +15,15 @@ import {
    EntityValuePToken,
    ParameterEntityStartPToken,
 } from 'token';
+
 import { CmGraph } from '../contentModel/cmGraphTypes';
+
+enum ElDeclType {
+   ANY,
+   ELEMENT,
+   EMPTY,
+   MIXED,
+}
 
 interface AnyDetails {
    readonly isExternalMarkupDeclaration: boolean;
@@ -40,13 +48,6 @@ interface ElementContext {
    readonly lastToken: ParseToken | undefined;
    readonly parentName: string;
    readonly stateId: number;
-}
-
-enum ElDeclType {
-   ANY,
-   ELEMENT,
-   EMPTY,
-   MIXED,
 }
 
 interface ElementDetails {
@@ -96,6 +97,10 @@ interface ParameterEntityDetails {
    readonly token: ParameterEntityDeclarationPToken;
 }
 
+/*
+ * Mutable and optional-prop version of the main type
+ * See also: https://github.com/microsoft/TypeScript/issues/24509
+ */
 interface ValidityStateProps {
    attributes?: {
       [elementName: string]: AttListDetails | undefined;
@@ -115,9 +120,9 @@ interface ValidityStateProps {
    };
 
    elementContext?: {
+      activeContext?: ElementContext;
       contextStack: ReadonlyArray<ElementContext>;
-      activeContext?: ElementContext; // if this is undefined, contextStack is 0 length
-      pastEnd: boolean; // when this is true, activeContext will be undefined
+      pastEnd: boolean;
    };
 
    elements?: {
@@ -125,7 +130,7 @@ interface ValidityStateProps {
    };
 
    generalEntities?: {
-      [elementName: string]: GeneralEntityDetails;
+      [elementName: string]: GeneralEntityDetails | undefined;
    };
 
    hasExternalSubset?: boolean;
@@ -147,7 +152,7 @@ interface ValidityStateProps {
    };
 
    parameterEntities?: {
-      [name: string]: ParameterEntityDetails;
+      [name: string]: ParameterEntityDetails | undefined;
    };
 }
 
@@ -201,6 +206,12 @@ class ValidityState {
       readonly [elementName: string]: ParameterEntityDetails | undefined;
    };
 
+   /*
+    * Not especially intuitive: this MERGES the "tables" of base and other
+    * e.g. attributes, elements, general and parameter entities, ids, idrefs, and notations
+    * but replaces the contexts and other individual values. This is not exactly
+    * predictable, but in practice is much more convenient.
+    */
    constructor(baseState: ValidityStateProps | ValidityState = {}, other: ValidityStateProps = {}) {
       this.attributes = { ...baseState.attributes, ...other.attributes };
       this.confVer = other.confVer ?? baseState.confVer ?? new ConformanceVersion(1, 5);
@@ -237,6 +248,7 @@ export {
    ElementContext,
    ElDeclType,
    IdRefDetails,
+   IdMap,
+   IdRefMap,
    ValidityState,
-   ValidityStateProps,
 };

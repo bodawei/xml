@@ -7,6 +7,9 @@ import { ValidityState } from './validityState';
 
 const EID = error.id;
 
+/*
+ * Validates whether the xml:space attribute is declared correctly.
+ */
 function xmlSpaceValidate(
    attDef: AttDefinitionP,
    elName: string,
@@ -21,11 +24,7 @@ function xmlSpaceValidate(
       return;
    }
 
-   const names = [];
-
-   for (const word of attDef.enumeration?.words ?? []) {
-      names.push(strOrBlank(word.word));
-   }
+   const words = attDef.enumeration?.words ?? [];
 
    ec.setPos(attDef.name);
 
@@ -35,11 +34,15 @@ function xmlSpaceValidate(
    //    processor may report the error or may recover by ignoring the attribute
    //    specification or by reporting the (erroneous) value to the application.
    //    Applications may ignore or reject erroneous values.
-   if (names.length === 0) {
+   if (words.length === 0) {
       ec.reportError(EID.XMLSPACE_NO_ENUMERATED_VALUES, ErrorToken, [elName]);
    }
 
-   for (const aName of names) {
+   for (const wordPToken of words) {
+      const aName = strOrBlank(wordPToken.word);
+
+      ec.setPos(wordPToken.word);
+
       if (aName !== 'preserve' && aName !== 'default') {
          ec.reportError(EID.XMLSPACE_XTRA_ENUMERATED_VALUE, ErrorToken, [elName, aName]);
       }

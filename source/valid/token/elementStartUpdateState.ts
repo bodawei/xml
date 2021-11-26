@@ -7,14 +7,20 @@ import { ElementStartPToken, ElementEmptyPToken, ELEMENT_EMPTY_PTOKEN } from 'to
 import {
    ElementContext,
    ElDeclType,
+   IdMap,
+   IdRefMap,
    ValidityState,
-   ValidityStateProps,
 } from '../common/validityState';
+
+interface Ids {
+   ids: IdMap;
+   idRefs: IdRefMap;
+}
 
 function updateFromAttributes(
    el: ElementStartPToken | ElementEmptyPToken,
    state: ValidityState,
-): ValidityStateProps {
+): Ids {
    const ids = { ...state.ids };
    const idRefs = { ...state.idRefs };
    const elName = strOrBlank(el.name);
@@ -146,9 +152,9 @@ function elementStartUpdateState(
       ...state,
       elementContext: newElementContxt,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- alwaysdefined by updateFromAttributes()
-      idRefs: attrState.idRefs!,
+      idRefs: attrState.idRefs,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- alwaysdefined by updateFromAttributes()
-      ids: attrState.ids!,
+      ids: attrState.ids,
    };
 }
 
