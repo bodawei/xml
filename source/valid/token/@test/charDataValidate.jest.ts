@@ -3,13 +3,13 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
+import { toSToken } from 'sToken';
+import { CharDataPToken } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
-import { charDataValidate } from '../charDataValidate';
 import { ElDeclType, ValidityState } from '../../common/validityState';
-import { CharDataPToken } from 'token';
-import { toSToken } from 'sToken';
 import { validCodes } from '../../error/validCodes';
+import { charDataValidate } from '../charDataValidate';
 
 const VID = validCodes.id;
 
@@ -21,42 +21,81 @@ describe('charDataValidate (unit)', () => {
       mockErrorCollector = new MockErrorCollector();
    });
 
-   [
-      {
-         error: true,
-         isExternalMarkupDeclaration: true,
-         isStandalone: true,
-      },
-      {
-         error: false,
-         isExternalMarkupDeclaration: true,
-         isStandalone: false,
-      },
-      {
-         error: false,
-         isExternalMarkupDeclaration: false,
-         isStandalone: true,
-      },
-      {
-         error: false,
-         isExternalMarkupDeclaration: false,
-         isStandalone: false,
-      },
-   ].forEach((items) => {
-      const { error, isExternalMarkupDeclaration, isStandalone } = items;
+   describe('Validity constraint: Standalone Document Declaration (§2.9.0)', () => {
+      [
+         {
+            error: true,
+            isExternalMarkupDeclaration: true,
+            isStandalone: true,
+         },
+         {
+            error: false,
+            isExternalMarkupDeclaration: true,
+            isStandalone: false,
+         },
+         {
+            error: false,
+            isExternalMarkupDeclaration: false,
+            isStandalone: true,
+         },
+         {
+            error: false,
+            isExternalMarkupDeclaration: false,
+            isStandalone: false,
+         },
+      ].forEach((items) => {
+         const { error, isExternalMarkupDeclaration, isStandalone } = items;
 
-      it(`reports an error when this is${
-         isStandalone ? '' : ' not'
-      } standalone and the enclosing element was${
-         isExternalMarkupDeclaration ? '' : ' not'
-      } externally declared`, () => {
+         it(`reports an error when this is${
+            isStandalone ? '' : ' not'
+         } standalone and the enclosing element was${
+            isExternalMarkupDeclaration ? '' : ' not'
+         } externally declared (§2.9.0)`, () => {
+            state = new ValidityState({
+               elementContext: {
+                  contextStack: [
+                     {
+                        details: {
+                           graph: { endId: 0, startId: 0, states: {} },
+                           isExternalMarkupDeclaration,
+                           token: makeElementDeclaration(),
+                           type: ElDeclType.ELEMENT,
+                        },
+                        lastToken: undefined,
+                        parentName: 'foo',
+                        stateId: 0,
+                     },
+                  ],
+                  pastEnd: false,
+               },
+               isStandalone,
+            });
+            const charData = new CharDataPToken({ text: toSToken('    ') });
+
+            charDataValidate(charData, state, mockErrorCollector);
+
+            if (error) {
+               // @ts-expect-error 2329/matchers
+               expect(mockErrorCollector).toReportValidityError({
+                  id: VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
+                  lastPosition: undefined,
+                  params: ['elementName'],
+                  position: charData.text,
+               });
+            } else {
+               expect(mockErrorCollector.errors).toEqual([]);
+            }
+         });
+      });
+
+      it('reports no error when the charData token has only S characters in it and the document is not standalone (§2.9.0)', () => {
          state = new ValidityState({
             elementContext: {
                contextStack: [
                   {
                      details: {
                         graph: { endId: 0, startId: 0, states: {} },
-                        isExternalMarkupDeclaration,
+                        isExternalMarkupDeclaration: false,
                         token: makeElementDeclaration(),
                         type: ElDeclType.ELEMENT,
                      },
@@ -67,100 +106,63 @@ describe('charDataValidate (unit)', () => {
                ],
                pastEnd: false,
             },
-            isStandalone,
          });
-         const charData = new CharDataPToken({ text: toSToken('    ') });
+         const charData = new CharDataPToken({ text: toSToken(' \n \t \r') });
 
          charDataValidate(charData, state, mockErrorCollector);
 
-         if (error) {
-            // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
-               id: VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
-               lastPosition: undefined,
-               params: ['elementName'],
-               position: charData.text,
-            });
-         } else {
-            expect(mockErrorCollector.errors).toEqual([]);
-         }
+         expect(mockErrorCollector.errors).toEqual([]);
       });
-   });
 
-   it('reports no error when the charData token has only S characters in it and the document is not standalone', () => {
-      state = new ValidityState({
-         elementContext: {
-            contextStack: [
-               {
-                  details: {
-                     graph: { endId: 0, startId: 0, states: {} },
-                     isExternalMarkupDeclaration: false,
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ELEMENT,
+      it('reports no error when the charData token has non-S characters in it but we are not in element content (§2.9.0)', () => {
+         state = new ValidityState({
+            elementContext: {
+               contextStack: [
+                  {
+                     details: {
+                        isExternalMarkupDeclaration: false,
+                        token: makeElementDeclaration(),
+                        type: ElDeclType.ANY,
+                     },
+                     lastToken: undefined,
+                     parentName: 'foo',
+                     stateId: 0,
                   },
-                  lastToken: undefined,
-                  parentName: 'foo',
-                  stateId: 0,
-               },
-            ],
-            pastEnd: false,
-         },
+               ],
+               pastEnd: false,
+            },
+         });
+         const charData = new CharDataPToken({ text: toSToken(' x y') });
+
+         charDataValidate(charData, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
-      const charData = new CharDataPToken({ text: toSToken(' \n \t \r') });
 
-      charDataValidate(charData, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
-
-   it('reports no error when the charData token has non-S characters in it but we are not in element content', () => {
-      state = new ValidityState({
-         elementContext: {
-            contextStack: [
-               {
-                  details: {
-                     isExternalMarkupDeclaration: false,
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ANY,
+      it('reports no error when the charData token has non-S characters in it and we are in element content (§2.9.0)', () => {
+         state = new ValidityState({
+            elementContext: {
+               contextStack: [
+                  {
+                     details: {
+                        graph: { endId: 0, startId: 0, states: {} },
+                        isExternalMarkupDeclaration: false,
+                        token: makeElementDeclaration(),
+                        type: ElDeclType.ELEMENT,
+                     },
+                     lastToken: undefined,
+                     parentName: 'foo',
+                     stateId: 0,
                   },
-                  lastToken: undefined,
-                  parentName: 'foo',
-                  stateId: 0,
-               },
-            ],
-            pastEnd: false,
-         },
+               ],
+               pastEnd: false,
+            },
+         });
+         const charData = new CharDataPToken({ text: toSToken(' x y') });
+
+         charDataValidate(charData, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
-      const charData = new CharDataPToken({ text: toSToken(' x y') });
-
-      charDataValidate(charData, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
-
-   it('reports no error when the charData token has non-S characters in it and we are in element content', () => {
-      state = new ValidityState({
-         elementContext: {
-            contextStack: [
-               {
-                  details: {
-                     graph: { endId: 0, startId: 0, states: {} },
-                     isExternalMarkupDeclaration: false,
-                     token: makeElementDeclaration(),
-                     type: ElDeclType.ELEMENT,
-                  },
-                  lastToken: undefined,
-                  parentName: 'foo',
-                  stateId: 0,
-               },
-            ],
-            pastEnd: false,
-         },
-      });
-      const charData = new CharDataPToken({ text: toSToken(' x y') });
-
-      charDataValidate(charData, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

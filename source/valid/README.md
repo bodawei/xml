@@ -226,6 +226,9 @@ Note that earlier versions of this system tried to do more validation in a singl
 
 One of the more complex aspects of this system is the graphs representing an element declaration's content model. These are discussed in more detail below.
 
+### Notes
+If this encounters an unbalanced end, it will ignore the end element. Like wellformedness, this does not try to auto-close parent elements.
+
 ### ContentModelGraphs
 In order to validate whether the elements in a particular model conform to the content model description in an element declaration, this converts a content model in to a graph representation.  
 
@@ -388,27 +391,14 @@ The last processing phase does two things:
 
 ## Code style
 * Filenames should start with lower case letters
-* A comment should be placed before each check for a valitity constraint that lists the section, and the portion of the text from the spec that describes the constraint.  This should be done with line comments.
-* Each test for a valitity constraint should list the section of the spec this test is checking.
-* Each group of tests for one validity constraint should be in its own `describe()` section.
-* This strives to treat the validityState as an immutable data structure.  The ValidityState type follows the same pattern of PTokens where you can merge two other objects by passing two arguments to the constructor.
-* 100% code coverage
 * Comments describing a function or section of a function should be block comments
+* A comment should be placed before each check for a valitity constraint that lists the section, and the portion of the text from the spec that describes the constraint.  This should be done with line comments.
+* This strives to treat the validityState as an immutable data structure.  The ValidityState type follows the same pattern of PTokens where you can merge two other objects by passing two arguments to the constructor.
+
+* Each test for a validity constraint should list the section of the spec this test is checking.
+* Each group of tests for one validity constraint should be in its own `describe()` section.
+* 100% code coverage
 
 
-## WORKING/CLEANUP NOTES
-(move to the architecture section, above)
-
-### Specific token details
-
---- ATTLIST
-- If the default value is space padded ("   default"), is this an error?
-
-#### Element end
-* If this encounters an unbalanced end, it will ignore the end element.
-   * Like wellformedness, this does not try to auto-close parent elements.
 
 
-Expander:
-- entityDeclarationValueValidate and ancestorPERefsValidate
-   - This anticipates it will get both PE Start andPERefs

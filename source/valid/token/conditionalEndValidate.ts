@@ -13,15 +13,19 @@ function conditionalEndValidate(
    state: ValidityState,
    ec: ErrorCollector,
 ): void {
+   const stack = state.dtdContext.enclosingStack;
+
    ec.setPos(token.open);
+
    // §3.4.0 Proper Conditional Section/PE Nesting
    //    If any of the "<![", "[", or "]]>" of a conditional section is
    //    contained in the replacement text for a parameter-entity
    //    reference, all of them must be contained in the same
    //    replacement text.
-   const item = state.dtdContext.enclosingStack[state.dtdContext.enclosingStack.length - 1];
+   const item = stack[stack.length - 1];
 
-   if (item.type !== CONDITIONAL_START_PTOKEN) {
+   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- it actually could be undefined if the stack is empty
+   if (item?.type !== CONDITIONAL_START_PTOKEN) {
       ec.report(VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING, []);
    }
 }

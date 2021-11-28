@@ -85,76 +85,128 @@ describe('elementEndValidate (unit)', () => {
       });
    });
 
-   it('reports an error the current context is a ELEMENT context, but we are not at the end (§3.0.0)', () => {
-      elementEndValidate(elementEnd, state, mockErrorCollector);
+   describe('Validity Constraint: Element Valid (§3.0.0)', () => {
+      it('reports an error the current context is a ELEMENT context, but we are not at the end (§3.0.0)', () => {
+         elementEndValidate(elementEnd, state, mockErrorCollector);
 
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
-         id: VID.CONTENT_PREMATURE_END,
-         lastPosition: undefined,
-         params: ['elementName', 'one, two'],
-         position: elementDeclaration.name,
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.CONTENT_PREMATURE_END,
+            lastPosition: undefined,
+            params: ['elementName', 'one, two'],
+            position: elementDeclaration.name,
+         });
       });
-   });
 
-   it('reports no error the current context is a ELEMENT context, but we are at the end (§3.0.0)', () => {
-      graph.states[4].done = true;
-
-      elementEndValidate(elementEnd, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
-
-   it('reports no error when there is no active context (§3.0.0)', () => {
-      state = {
-         ...state,
-         elementContext: {
-            ...state.elementContext,
-            contextStack: [],
-         },
-      };
-
-      elementEndValidate(elementEnd, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
-
-   it('reports no error when we are past the end of the document (§3.0.0)', () => {
-      state = {
-         ...state,
-         elementContext: {
-            ...state.elementContext,
-            pastEnd: true,
-         },
-      };
-
-      elementEndValidate(elementEnd, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
-
-   it('reports no error when the active context is not an ELEMENT context (§3.0.0)', () => {
-      state = {
-         ...state,
-         elementContext: {
-            ...state.elementContext,
-            contextStack: [
-               {
-                  details: {
-                     isExternalMarkupDeclaration: false,
-                     token: elementDeclaration,
-                     type: ElDeclType.ANY,
+      it('reports no error the current context is a ELEMENT context, but we are at the end (§3.0.0)', () => {
+         graph = {
+            endId: 0,
+            startId: 0,
+            states: {
+               '4': {
+                  done: true,
+                  id: 4,
+                  trans: {
+                     one: {
+                        ref: '/1/2',
+                        stateId: 5,
+                     },
+                     two: {
+                        ref: '/3/4',
+                        stateId: 6,
+                     },
                   },
-                  lastToken: undefined,
-                  parentName: 'elementName',
-                  stateId: 4,
                },
-            ],
-         },
-      };
+            },
+         };
+         state = new ValidityState({
+            elementContext: {
+               contextStack: [
+                  {
+                     details: {
+                        graph,
+                        isExternalMarkupDeclaration: false,
+                        token: elementDeclaration,
+                        type: ElDeclType.ELEMENT,
+                     },
+                     lastToken: undefined,
+                     parentName: 'elementName',
+                     stateId: 4,
+                  },
+               ],
+               pastEnd: false,
+            },
+            elements: {
+               elementName: {
+                  graph,
+                  isExternalMarkupDeclaration: false,
+                  token: new ElementDeclarationPToken({
+                     close: toSToken('>'),
+                     declType: toSToken('ELEMENT'),
+                     name: toSToken('elementName'),
+                     open: toSToken('<!'),
+                  }),
+                  type: ElDeclType.ELEMENT,
+               },
+            },
+         });
 
-      elementEndValidate(elementEnd, state, mockErrorCollector);
+         elementEndValidate(elementEnd, state, mockErrorCollector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no error when there is no active context (§3.0.0)', () => {
+         state = {
+            ...state,
+            elementContext: {
+               ...state.elementContext,
+               contextStack: [],
+            },
+         };
+
+         elementEndValidate(elementEnd, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no error when we are past the end of the document (§3.0.0)', () => {
+         state = {
+            ...state,
+            elementContext: {
+               ...state.elementContext,
+               pastEnd: true,
+            },
+         };
+
+         elementEndValidate(elementEnd, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
+
+      it('reports no error when the active context is not an ELEMENT context (§3.0.0)', () => {
+         state = {
+            ...state,
+            elementContext: {
+               ...state.elementContext,
+               contextStack: [
+                  {
+                     details: {
+                        isExternalMarkupDeclaration: false,
+                        token: elementDeclaration,
+                        type: ElDeclType.ANY,
+                     },
+                     lastToken: undefined,
+                     parentName: 'elementName',
+                     stateId: 4,
+                  },
+               ],
+            },
+         };
+
+         elementEndValidate(elementEnd, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
+      });
    });
 });

@@ -12,7 +12,9 @@ function elementEndValidate(el: ElementEndPToken, state: ValidityState, ec: Erro
    const stack = state.elementContext.contextStack;
    const curContext = stack[stack.length - 1] as ElementContext | undefined;
 
-   // if no context, then nothing to validate
+   /*
+    * if no context, then nothing to validate
+    */
    if (
       !curContext ||
       state.elementContext.pastEnd ||

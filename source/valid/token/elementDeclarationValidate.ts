@@ -25,7 +25,7 @@ import { validCodes } from '../error/validCodes';
 
 const EID = error.id;
 const VID = validCodes.id;
-// bar///
+
 function getElementNames(contentModel: ContentModelP): Array<string> {
    const childNames: Array<string> = [];
 
@@ -196,6 +196,7 @@ function elementDeclarationValidate(
    }
 
    ec.setPos(elDecl.name);
+
    // §3.2.0: Validity constraint: Unique Element Type Declaration
    //    An element type must not be declared more than once.
    ec.check(state.elements[elName], VID.ELEMENT_XTRA_DECLARATION, [elName]);

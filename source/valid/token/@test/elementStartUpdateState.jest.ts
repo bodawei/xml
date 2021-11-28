@@ -6,8 +6,8 @@ import { ElementDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
-import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
+import { CmGraph } from '../../contentModel/cmGraphTypes';
 import { elementStartUpdateState } from '../elementStartUpdateState';
 
 describe('elementStartUpdateState (unit)', () => {

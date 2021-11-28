@@ -10,8 +10,6 @@ import { docTypeEndUpdateState } from '../docTypeEndUpdateState';
 describe('docTypeEndUpdateState (unit)', () => {
    let state: ValidityState;
 
-   beforeEach(() => {});
-
    it('removes back to before the start of the enclosingStack', () => {
       const start = makeDocTypeStart();
       const end = makeDocTypeEnd();

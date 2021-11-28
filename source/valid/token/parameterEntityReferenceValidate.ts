@@ -18,15 +18,17 @@ function parameterEntityReferenceValidate(
 
    ec.setPos(token.open);
    ec.setPos(token.name);
+
+   // §4.1.0: Validity Constraint: Entity Declared
+   //    In a document with an external subset or parameter entity references with
+   //    "standalone='no'", the Name given in the entity reference must match that
+   //    in an entity declaration. ... The declaration of a parameter entity must
+   //    precede any reference to it...
+
    /*
-    * §4.1.0: Validity Constraint: Entity Declared
-    *    In a document with an external subset or parameter entity references with
-    *    "standalone='no'", the Name given in the entity reference must match that
-    *    in an entity declaration. ... The declaration of a parameter entity must
-    *    precede any reference to it...
+    * Theoretically we should check whether there is an external subset or PE refs...
+    * But, this IS a PERef, so there are some (true | false) | true is true.
     */
-   // Theoretically we should check whether there is an external subset or PE refs...
-   // But, this IS a PERef, so there are some (true | false) | true is true.
    const applies = !state.isStandalone;
 
    ec.check(!state.parameterEntities[peDeclName] && applies, VID.PARAMETERENTITY_NO_DECLARATION, [

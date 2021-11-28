@@ -11,7 +11,7 @@ function attListDeclarationUpdateState(
 ): ValidityState {
    const elName = strOrBlank(el.elementName);
    const defs = state.attributes[elName] || {};
-   const newDefs: { [attName: string]: AttributeDetails } = {};
+   const newDefs: Record<string, AttributeDetails> = {};
 
    // Add the individual attribute declarations to the ones we already have for this element.
    for (const def of el.attDefs) {

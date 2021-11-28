@@ -14,17 +14,16 @@ function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollec
    const curContext = stack[stack.length - 1] as ElementContext | undefined;
    const details = curContext?.details;
 
-   if (details?.type !== ElDeclType.ELEMENT) {
-      return;
-   }
-
-   ec.setPos(token.text);
-
    /*
     * §3.0.0: An element type has element content when elements of that type must
     *    contain only child elements (no character data), optionally separated by
     *    white space (characters matching the nonterminal S).]
     */
+   if (details?.type !== ElDeclType.ELEMENT) {
+      return;
+   }
+
+   ec.setPos(token.text);
 
    // §2.9.0 Validity constraint: Standalone Document Declaration
    //    The standalone document declaration must have the value "no" if any external markup

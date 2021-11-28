@@ -4,10 +4,11 @@ import { ErrorCollector } from 'basic';
 import { GeneralEntityStartPToken } from 'token';
 import { strOrBlank } from 'sToken';
 
-import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
 import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 import { PREDEFINED_ENTITIES } from '../common/constants';
+import { geRefValidate } from '../common/geRefValidate';
+import { ValidityState } from '../common/validityState';
+import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 
@@ -22,8 +23,6 @@ function generalEntityStartValidate(
 
    const details = state.generalEntities[name];
 
-   // @@ WHY IS THIS NOT VALIDATING THE GENERAL ENTITY REFERENCe?
-
    // §2.9.0 Validity Constraint: Standalone Document Declaration
    //    ...entities (other than amp, lt, gt, apos, quot), if references to
    //    those entities appear in the document...
@@ -33,6 +32,8 @@ function generalEntityStartValidate(
       [name],
       startPToken.referencePToken.open,
    );
+
+   geRefValidate(startPToken.referencePToken, state, ec);
 
    ancestorPERefsValidate(startPToken, state, ec);
 }

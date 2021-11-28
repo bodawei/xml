@@ -40,7 +40,7 @@ function attListValidate(state: ValidityState, ec: ErrorCollector): void {
 
    for (const [elName, allAtts] of attlists) {
       const elementDetails = state.elements[elName];
-      const elType = strOrBlank(elementDetails?.token.contentSpec);
+      const elType = strOrBlank(elementDetails?.token?.contentSpec);
       const elementIsEmpty = elType.toLocaleLowerCase() === 'empty';
       let seenNotationAttr = false;
       let firstIdAtt: string | undefined;
@@ -61,7 +61,7 @@ function attListValidate(state: ValidityState, ec: ErrorCollector): void {
             ec.check(
                seenNotationAttr && !isVer1Ed1,
                VID.ATTLISTDECL_ATT_XTRA_NOTATION,
-               [elName, attName], // @@@ better if we listed the last one we saw
+               [elName, attName],
                attInfo?.def.type,
             );
 

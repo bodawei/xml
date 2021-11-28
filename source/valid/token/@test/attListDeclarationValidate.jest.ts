@@ -26,9 +26,9 @@ import {
 import { ValidityState } from '../../common/validityState';
 import { attributeValueValidate } from '../../common/attributeValueValidate';
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
+import { xmlSpaceValidate } from '../../common/xmlSpaceValidate';
 import { validCodes } from '../../error/validCodes';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
-import { xmlSpaceValidate } from '../../common/xmlSpaceValidate';
 
 const VID = validCodes.id;
 

@@ -61,48 +61,50 @@ describe('notationDeclarationValidate (unit)', () => {
       });
    });
 
-   it('reports no error when the declaration name has not been seen before (§4.7.0)', () => {
-      state = new ValidityState({
-         notations: {
-            foo: true,
-         },
+   describe('Validity constraint: Unique Notation Name (§4.7.0)', () => {
+      it('reports no error when the declaration name has not been seen before (§4.7.0)', () => {
+         state = new ValidityState({
+            notations: {
+               foo: true,
+            },
+         });
+
+         notationDeclarationValidate(makeNotationDeclaration(), state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
 
-      notationDeclarationValidate(makeNotationDeclaration(), state, mockErrorCollector);
+      it('reports an error when the declaration name has already been encountered defined (§4.7.0)', () => {
+         const notationDecl = makeNotationDeclaration();
+         state = new ValidityState({
+            notations: {
+               notationName: true,
+            },
+         });
 
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
+         notationDeclarationValidate(notationDecl, state, mockErrorCollector);
 
-   it('reports an error when the declaration name has already been encountered defined (§4.7.0)', () => {
-      const notationDecl = makeNotationDeclaration();
-      state = new ValidityState({
-         notations: {
-            notationName: true,
-         },
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.NOTATION_XTRA_DECLARATION,
+            lastPosition: undefined,
+            params: ['notationName'],
+            position: notationDecl.name,
+         });
       });
 
-      notationDeclarationValidate(notationDecl, state, mockErrorCollector);
+      it('reports no error when the declaration has already been defined, but this is a 1.0/1 document (§4.7.0)', () => {
+         const notationDecl = makeNotationDeclaration();
+         state = new ValidityState({
+            confVer: new ConformanceVersion(1.0, 1),
+            notations: {
+               notationName: true,
+            },
+         });
 
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
-         id: VID.NOTATION_XTRA_DECLARATION,
-         lastPosition: undefined,
-         params: ['notationName'],
-         position: notationDecl.name,
+         notationDeclarationValidate(notationDecl, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
-   });
-
-   it('reports no error when the declaration has already been defined, but this is a 1.0/1 document $(§4.7.0)', () => {
-      const notationDecl = makeNotationDeclaration();
-      state = new ValidityState({
-         confVer: new ConformanceVersion(1.0, 1),
-         notations: {
-            notationName: true,
-         },
-      });
-
-      notationDeclarationValidate(notationDecl, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

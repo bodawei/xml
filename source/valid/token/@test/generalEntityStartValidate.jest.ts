@@ -7,14 +7,16 @@ import { toSToken } from 'sToken';
 import { GeneralEntityStartPToken } from 'token';
 import { makeGeneralEntityDeclaration, makeGeneralEntityStart } from 'token-test';
 
-import { ValidityState } from '../../common/validityState';
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
+import { geRefValidate } from '../../common/geRefValidate';
+import { ValidityState } from '../../common/validityState';
 import { validCodes } from '../../error/validCodes';
 import { generalEntityStartValidate } from '../generalEntityStartValidate';
 
 const VID = validCodes.id;
 
 jest.mock('../../common/ancestorPERefsValidate');
+jest.mock('../../common/geRefValidate');
 
 describe('generalEntityStartValidate (unit)', () => {
    let mockErrorCollector: MockErrorCollector;
@@ -119,6 +121,31 @@ describe('generalEntityStartValidate (unit)', () => {
          generalEntityStartValidate(geStart, state, mockErrorCollector);
 
          expect(ancestorPERefsValidate).toHaveBeenCalledWith(geStart, state, mockErrorCollector);
+      });
+   });
+
+   describe('Validity Constraint: Entity Declared (§4.1.0)', () => {
+      it('calls geRefValidate() to validate the entity reference (§4.1.0)', () => {
+         const geDecl = makeGeneralEntityDeclaration();
+         state = new ValidityState({
+            generalEntities: {
+               testRef: {
+                  isExternalMarkupDeclaration: true,
+                  isInternalValue: true,
+                  token: geDecl,
+               },
+            },
+            isStandalone: true,
+         });
+         const geStart = makeGeneralEntityStart();
+
+         generalEntityStartValidate(geStart, state, mockErrorCollector);
+
+         expect(geRefValidate).toHaveBeenCalledWith(
+            geStart.referencePToken,
+            state,
+            mockErrorCollector,
+         );
       });
    });
 });

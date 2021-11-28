@@ -9,8 +9,8 @@ import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 import { attributeValueValidate } from '../common/attributeValueValidate';
 import { PREDEFINED_ENTITIES } from '../common/constants';
 import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
 import { xmlSpaceValidate } from '../common/xmlSpaceValidate';
+import { validCodes } from '../error/validCodes';
 
 const VID = validCodes.id;
 

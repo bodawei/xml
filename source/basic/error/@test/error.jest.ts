@@ -15,7 +15,7 @@ describe('error', () => {
              "XMLDECL_VERSION_INVALID": 1303,
              "XMLSPACE_INVALID_VALUE": 1300,
              "XMLSPACE_NO_ENUMERATED_VALUES": 1201,
-             "XMLSPACE_XTRA_ENUMERATED_VALUE": 1201,
+             "XMLSPACE_XTRA_ENUMERATED_VALUE": 1202,
            },
            "id": Object {
              "ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC": "ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC",
@@ -57,7 +57,7 @@ describe('error', () => {
                "message": "Missing either \\"default\\" or \\"preserve\\" (or both) as enumerated values for the \\"xml:space\\" attribute for the element \\"{0}\\" (§2.10.0).",
              },
              "XMLSPACE_XTRA_ENUMERATED_VALUE": Object {
-               "code": 1201,
+               "code": 1202,
                "message": "Must not have values other than \\"default\\" and \\"preserve\\" in the enumeration for the \\"xml:space\\" attribute for \\"{0}\\" (§2.10.0). Found \\"{1}\\".",
              },
            },

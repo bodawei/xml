@@ -3,13 +3,13 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { MockErrorCollector } from 'basic-test';
-
-import { entityDeclarationValidate } from '../entityDeclarationValidate';
-import { ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
 import { GeneralEntityDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
+
+import { ValidityState } from '../../common/validityState';
 import { entityDeclarationValueValidate } from '../../common/entityDeclarationValueValidate';
+import { validCodes } from '../../error/validCodes';
+import { entityDeclarationValidate } from '../entityDeclarationValidate';
 
 const VID = validCodes.id;
 

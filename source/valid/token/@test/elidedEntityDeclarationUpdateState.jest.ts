@@ -4,9 +4,8 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
-import { makeParameterEntityDeclaration } from 'token-test';
-
 import { ElidedEntityDeclarationPToken } from 'token';
+import { makeParameterEntityDeclaration } from 'token-test';
 
 import { ValidityState } from '../../common/validityState';
 import { elidedEntityDeclarationUpdateState } from '../elidedEntityDeclarationUpdateState';

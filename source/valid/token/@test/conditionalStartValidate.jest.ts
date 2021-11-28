@@ -40,51 +40,53 @@ describe('conditionalStartValidate (unit)', () => {
       });
    });
 
-   it('reports an error when in element content', () => {
-      const peRef = makeParameterEntityReference();
-      const conditional = new ConditionalStartPToken({
-         open: toSToken('<!['),
-         unexpanded: {
-            includedBracket: true,
-            peRef,
-            propName: 'test',
-         },
+   describe('Proper conditional section/PE nesting (§3.4.0)', () => {
+      it('reports an error when in element content (§3.4.0)', () => {
+         const peRef = makeParameterEntityReference();
+         const conditional = new ConditionalStartPToken({
+            open: toSToken('<!['),
+            unexpanded: {
+               includedBracket: true,
+               peRef,
+               propName: 'test',
+            },
+         });
+
+         conditionalStartValidate(conditional, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
+            lastPosition: undefined,
+            params: ['entityName'],
+            position: peRef.open,
+         });
       });
 
-      conditionalStartValidate(conditional, state, mockErrorCollector);
+      it('reports no error when there is no unexpanded (§3.4.0)', () => {
+         const conditional = new ConditionalStartPToken({
+            open: toSToken('<!['),
+         });
 
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
-         id: VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
-         lastPosition: undefined,
-         params: ['entityName'],
-         position: peRef.open,
-      });
-   });
+         conditionalStartValidate(conditional, state, mockErrorCollector);
 
-   it('reports no error when there is no unexpanded', () => {
-      const conditional = new ConditionalStartPToken({
-         open: toSToken('<!['),
+         expect(mockErrorCollector.errors).toEqual([]);
       });
 
-      conditionalStartValidate(conditional, state, mockErrorCollector);
+      it('reports no error when we did not include the bracket (§3.4.0)', () => {
+         const peRef = makeParameterEntityReference();
+         const conditional = new ConditionalStartPToken({
+            open: toSToken('<!['),
+            unexpanded: {
+               includedBracket: false,
+               peRef,
+               propName: 'test',
+            },
+         });
 
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
+         conditionalStartValidate(conditional, state, mockErrorCollector);
 
-   it('reports no error when we did not include the bracket', () => {
-      const peRef = makeParameterEntityReference();
-      const conditional = new ConditionalStartPToken({
-         open: toSToken('<!['),
-         unexpanded: {
-            includedBracket: false,
-            peRef,
-            propName: 'test',
-         },
+         expect(mockErrorCollector.errors).toEqual([]);
       });
-
-      conditionalStartValidate(conditional, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

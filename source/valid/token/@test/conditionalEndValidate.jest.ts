@@ -30,37 +30,63 @@ describe('conditionalEndValidate (unit)', () => {
       });
    });
 
-   it('reports an error when the previous thing in the enclosingStack is not a conditional start', () => {
-      const conditional = new ConditionalEndPToken({
-         open: toSToken('<!['),
+   describe('Proper conditional section/PE nesting (§3.4.0)', () => {
+      it('reports an error when the previous thing in the enclosingStack is not a conditional start (§3.4.0)', () => {
+         const conditional = new ConditionalEndPToken({
+            open: toSToken('<!['),
+         });
+
+         conditionalEndValidate(conditional, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING,
+            lastPosition: undefined,
+            params: [],
+            position: conditional.open,
+         });
       });
 
-      conditionalEndValidate(conditional, state, mockErrorCollector);
+      it('reports an error when the enclosingStack is somehow empty (§3.4.0)', () => {
+         state = new ValidityState({
+            dtdContext: {
+               enclosingStack: [],
+               inExternalMarkupContext: false,
+               inExternalSubset: false,
+               lastPToken: undefined,
+            },
+         });
+         const conditional = new ConditionalEndPToken({
+            open: toSToken('<!['),
+         });
 
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
-         id: VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING,
-         lastPosition: undefined,
-         params: [],
-         position: conditional.open,
+         conditionalEndValidate(conditional, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING,
+            lastPosition: undefined,
+            params: [],
+            position: conditional.open,
+         });
       });
-   });
 
-   it('reports no error when the previous thing in the enclosingStack is a conditional start', () => {
-      const conditional = new ConditionalEndPToken({
-         open: toSToken('<!['),
+      it('reports no error when the previous thing in the enclosingStack is a conditional start (§3.4.0)', () => {
+         const conditional = new ConditionalEndPToken({
+            open: toSToken('<!['),
+         });
+         state = new ValidityState({
+            dtdContext: {
+               enclosingStack: [makeConditionalStart()],
+               inExternalMarkupContext: false,
+               inExternalSubset: false,
+               lastPToken: undefined,
+            },
+         });
+
+         conditionalEndValidate(conditional, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
-      state = new ValidityState({
-         dtdContext: {
-            enclosingStack: [makeConditionalStart()],
-            inExternalMarkupContext: false,
-            inExternalSubset: false,
-            lastPToken: undefined,
-         },
-      });
-
-      conditionalEndValidate(conditional, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

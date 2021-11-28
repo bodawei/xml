@@ -19,89 +19,95 @@ describe('parameterEntityReferenceValidate (unit)', () => {
       mockErrorCollector = new MockErrorCollector();
    });
 
-   it('reports no error when the declaration is defined', () => {
-      state = new ValidityState({
-         parameterEntities: {
-            entityName: {
-               isExternalMarkupDeclaration: false,
-               isInternalValue: true,
-               replacementText: undefined,
-               token: makeParameterEntityDeclaration(),
+   describe('Validity Constraint: Entity Declared (§4.1.0)', () => {
+      it('reports no error when the declaration is defined', () => {
+         state = new ValidityState({
+            parameterEntities: {
+               entityName: {
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
+                  replacementText: undefined,
+                  token: makeParameterEntityDeclaration(),
+               },
             },
-         },
+         });
+
+         parameterEntityReferenceValidate(
+            makeParameterEntityReference(),
+            state,
+            mockErrorCollector,
+         );
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
 
-      parameterEntityReferenceValidate(makeParameterEntityReference(), state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
-   });
-
-   it('reports an error when the reference has not been declared (and not standalone and has external subset) (§4.1.0)', () => {
-      const ref = makeParameterEntityReference();
-      state = new ValidityState({
-         hasExternalSubset: true,
-         isStandalone: false,
-         parameterEntities: {
-            frog: {
-               isExternalMarkupDeclaration: false,
-               isInternalValue: true,
-               token: makeParameterEntityDeclaration(),
+      it('reports an error when the reference has not been declared (and not standalone and has external subset) (§4.1.0)', () => {
+         const ref = makeParameterEntityReference();
+         state = new ValidityState({
+            hasExternalSubset: true,
+            isStandalone: false,
+            parameterEntities: {
+               frog: {
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
+                  token: makeParameterEntityDeclaration(),
+               },
             },
-         },
+         });
+
+         parameterEntityReferenceValidate(ref, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.PARAMETERENTITY_NO_DECLARATION,
+            lastPosition: undefined,
+            params: ['entityName'],
+            position: ref.name,
+         });
       });
 
-      parameterEntityReferenceValidate(ref, state, mockErrorCollector);
-
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
-         id: VID.PARAMETERENTITY_NO_DECLARATION,
-         lastPosition: undefined,
-         params: ['entityName'],
-         position: ref.name,
-      });
-   });
-
-   it('reports an error when the reference has not been declared (and not standalone and has external subset) (§4.1.0)', () => {
-      const ref = makeParameterEntityReference();
-      state = new ValidityState({
-         hasExternalSubset: false,
-         isStandalone: false,
-         parameterEntities: {
-            frog: {
-               isExternalMarkupDeclaration: false,
-               isInternalValue: true,
-               token: makeParameterEntityDeclaration(),
+      it('reports an error when the reference has not been declared (and not standalone and has external subset) (§4.1.0)', () => {
+         const ref = makeParameterEntityReference();
+         state = new ValidityState({
+            hasExternalSubset: false,
+            isStandalone: false,
+            parameterEntities: {
+               frog: {
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
+                  token: makeParameterEntityDeclaration(),
+               },
             },
-         },
+         });
+
+         parameterEntityReferenceValidate(ref, state, mockErrorCollector);
+
+         // @ts-expect-error 2329/matchers
+         expect(mockErrorCollector).toReportValidityError({
+            id: VID.PARAMETERENTITY_NO_DECLARATION,
+            lastPosition: undefined,
+            params: ['entityName'],
+            position: ref.name,
+         });
       });
 
-      parameterEntityReferenceValidate(ref, state, mockErrorCollector);
-
-      // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
-         id: VID.PARAMETERENTITY_NO_DECLARATION,
-         lastPosition: undefined,
-         params: ['entityName'],
-         position: ref.name,
-      });
-   });
-
-   it('reports no error when the reference has not been declared but the document is standalone (§4.1.0)', () => {
-      const ref = makeParameterEntityReference();
-      state = new ValidityState({
-         hasExternalSubset: false,
-         isStandalone: true,
-         parameterEntities: {
-            frog: {
-               isExternalMarkupDeclaration: false,
-               isInternalValue: true,
-               token: makeParameterEntityDeclaration(),
+      it('reports no error when the reference has not been declared but the document is standalone (§4.1.0)', () => {
+         const ref = makeParameterEntityReference();
+         state = new ValidityState({
+            hasExternalSubset: false,
+            isStandalone: true,
+            parameterEntities: {
+               frog: {
+                  isExternalMarkupDeclaration: false,
+                  isInternalValue: true,
+                  token: makeParameterEntityDeclaration(),
+               },
             },
-         },
+         });
+
+         parameterEntityReferenceValidate(ref, state, mockErrorCollector);
+
+         expect(mockErrorCollector.errors).toEqual([]);
       });
-
-      parameterEntityReferenceValidate(ref, state, mockErrorCollector);
-
-      expect(mockErrorCollector.errors).toEqual([]);
    });
 });

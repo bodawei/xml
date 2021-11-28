@@ -5,19 +5,19 @@ import { ErrorCollector, isName, isNmToken } from 'basic';
 import { AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } from 'token';
-import { attributeValueValidate } from '../common/attributeValueValidate';
 
 import { validCodes } from '../error/validCodes';
+import { PREDEFINED_ENTITIES } from '../common/constants';
+import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
+import { attributeValueValidate } from '../common/attributeValueValidate';
 import {
    AttributeDetails,
    ElDeclType,
    ElementContext,
    ValidityState,
 } from '../common/validityState';
-import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 
 const VID = validCodes.id;
-const PREDEFINED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 type LocalDetials = Record<string, AttInfo | undefined>;
 interface AttInfo {
@@ -25,7 +25,6 @@ interface AttInfo {
    attName: string;
 }
 
-// working
 function enumeratedValueCheck(
    elName: string,
    attName: string,
@@ -40,8 +39,10 @@ function enumeratedValueCheck(
       : VID.ELEMENTSTART_ATT_ENUMERATION_NO_DECLARATION;
    let foundDeclaration = false;
    const allWords: Array<string> = [];
-   // If this is a notation att OR we have an enumeration, then do the check.
-   // This protects against malformed attrDef's that have no type and no enumeration being evaluated as an enumeration
+   /*
+    * If this is a notation att OR we have an enumeration, then do the check.
+    * This protects against malformed attrDef's that have no type and no enumeration being evaluated as an enumeration
+    */
    const shouldEval = isNotation || attDef.enumeration;
 
    if (attDef.enumeration) {
@@ -318,7 +319,7 @@ function checkAttributes(
             continue;
          }
 
-         // §2.9 Validity constraint: Standalone Document Declaration
+         // §2.9.0 Validity constraint: Standalone Document Declaration
          // The standalone document declaration must have the value "no" if any external markup
          // declarations contain declarations of:
          // - attributes with default values, if elements to which these attributes apply appear
@@ -330,7 +331,7 @@ function checkAttributes(
          // at declaration time, since if it isn't used it is not an error).
          ec.check(attr.defaulted, VID.ELEMENTSTART_ATT_DEFAULT_EXTERNAL, [elName, attName]);
 
-         // §2.9 Validity constraint: Standalone Document Declaration
+         // §2.9.0 Validity constraint: Standalone Document Declaration
          // The standalone document declaration must have the value "no" if any external markup
          // declarations contain declarations of:
          // - attributes with tokenized types, where the attribute appears in the document
