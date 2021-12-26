@@ -1005,7 +1005,7 @@ describe('EntityExpander (unit)', () => {
    //    //       expect(args[0]).toEqual(peRef);
    //    //       expect(args[1].utils).not.toBeUndefined(); // inner awareness
    //    //       expect(args[2]).toBeInstanceOf(EntityContextStack);
-   //    //       expect(args[3]).toEqual(ContextType.PARAMETER_ENTITY);
+   //    //       expect(args[3]).toEqual(ParseType.PARAMETER_ENTITY);
    //    //       expect(args[4]).toBeInstanceOf(Function);
    //    //       expect(args[5]).toBeInstanceOf(Function);
    //    //       done();

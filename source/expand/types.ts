@@ -1,5 +1,5 @@
 import { EntityId, ConformanceVersion } from 'basic';
-import { ContextType, ParseToken } from 'pToken';
+import { ParseType, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken, ErrorToken } from 'token';
 
@@ -20,7 +20,7 @@ interface AttributeValueResults {
 type OpaqueEntityLoc = string | EntityId | any;
 
 interface EntityProcessors {
-   parseBody: (sTokenSource: STokenSource, context: ContextType, expandToken: ExpandToken) => void;
+   parseBody: (sTokenSource: STokenSource, context: ParseType, expandToken: ExpandToken) => void;
    parseEntityValue: (
       sTokenSource: STokenSource,
       done: (results: EntityValuePToken | undefined) => void,

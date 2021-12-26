@@ -3,7 +3,7 @@
 
 import { Token, Range, EntityId, ENTITY_ID } from 'basic';
 import {
-   ContextType,
+   ParseType,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    ParameterEntityDeclarationPToken,
@@ -11,7 +11,7 @@ import {
    TextPToken,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'pToken';
-import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
+import { PTokenStream, PTokenLiteralStream } from 'node';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import {
    AttributeValuePToken,
@@ -35,11 +35,11 @@ describe('EntityExpander (integration)', () => {
 
    function parseBody(
       sTokenSource: STokenSource,
-      context: ContextType,
+      context: ParseType,
       writeToken: ExpandToken,
    ): void {
       const pTokenStream = new PTokenStream(sTokenSource, {
-         context,
+         passeType: context,
       });
       let ended = false;
       let writing = false;
@@ -67,7 +67,7 @@ describe('EntityExpander (integration)', () => {
       sTokenSource: STokenSource,
       done: (results: EntityValuePToken | undefined) => void,
    ): void {
-      const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
+      const pTokenStream = new PTokenLiteralStream(sTokenSource, { peRef: true });
       const results: EntityValuePToken = [];
 
       pTokenStream.on('data', (token: Token) => {
@@ -106,7 +106,7 @@ describe('EntityExpander (integration)', () => {
       sTokenSource: STokenSource,
       done: (results: AttributeValueResults) => void,
    ): void {
-      const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false });
+      const pTokenStream = new PTokenLiteralStream(sTokenSource, { peRef: false });
       const results: AttributeValuePToken = [];
 
       pTokenStream.on('data', (token: Token) => {

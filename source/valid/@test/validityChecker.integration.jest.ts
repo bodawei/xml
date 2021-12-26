@@ -4,9 +4,8 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, XmlErrorToken } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { AttFixerStream, EntityExpanderStream } from 'node';
-import { ContextType, ParseToken } from 'pToken';
-import { PTokenStream } from '../../pTokenStream';
+import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
+import { ParseType, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
 
 import { ValidityChecker } from '../validityChecker';
@@ -27,16 +26,17 @@ describe('ValidityChecker (integration)', () => {
       done: () => void,
       confVer?: ConformanceVersion,
    ): void {
+      const sTokenSource = new STokenSource();
       const finalResults: Array<XmlErrorToken> = [];
-      const pTokenStream = new PTokenStream(new STokenSource(), {
+      const pTokenStream = new PTokenStream(sTokenSource, {
          confVer,
-         context: ContextType.DOCUMENT,
+         parseType: ParseType.DOCUMENT,
       });
       const entityExpander = new EntityExpanderStream(true);
       const attFixer = new AttFixerStream();
 
-      pTokenStream.addText(input);
-      pTokenStream.endText();
+      sTokenSource.addText(input);
+      sTokenSource.endText();
       pTokenStream.pipe(entityExpander).pipe(attFixer);
 
       gatherStreamResults<ParseToken>(attFixer, (results) => {

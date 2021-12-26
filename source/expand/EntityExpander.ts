@@ -25,7 +25,7 @@ import {
    resumeParseNotationDeclaration,
    TextPToken,
    parseText,
-   ContextType,
+   ParseType,
 } from 'pToken';
 import { STokenSource, strOrBlank } from 'sToken';
 import {
@@ -338,7 +338,7 @@ class EntityExpander {
                         ): void => {
                            this.expandParams.utils.parseBody(
                               sTokenSource,
-                              ContextType.EXTERNAL_SUBSET,
+                              ParseType.EXTERNAL_SUBSET,
                               handleNextToken,
                            );
                         },

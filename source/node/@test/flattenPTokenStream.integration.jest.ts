@@ -5,8 +5,8 @@ import { Transform } from 'stream';
 
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { ContextType, ParseToken } from 'pToken';
-import { PTokenStream } from '../../pTokenStream';
+import { ParseType, ParseToken } from 'pToken';
+import { PTokenStream } from '../pTokenStream';
 import { SToken, STokenSource } from 'sToken';
 
 
@@ -44,7 +44,7 @@ describe('flat (integration)', () => {
             const editionToUse = hasEdition ? edition : undefined;
             const sTokenSource = new STokenSource();
             const pTokenStream = new PTokenStream(sTokenSource, {
-               context: ContextType.DOCUMENT,
+               parseType: ParseType.DOCUMENT,
                confVer: verToUse && editionToUse ? new ConformanceVersion(verToUse, editionToUse) : undefined,
             });
             const flat = new FlattenPTokenStream();

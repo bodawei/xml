@@ -37,6 +37,8 @@ export * from './token/text';
 export * from './token/xmlDeclaration';
 export * from './util/externalIdToEntityId';
 export * from './types';
+export * from './pTokenParser';
+export * from './pTokenLiteralParser';
 
 type PToken = PTokenClassic;
 type ParseToken =
@@ -55,11 +57,11 @@ type ParseToken =
    | TextPToken
    | XmlDeclarationPToken;
 
-enum ContextType {
+enum ParseType {
    DOCUMENT,
    EXTERNAL_SUBSET,
    PARAMETER_ENTITY,
    GENERAL_ENTITY,
 }
 
-export { InstructionStart, ContextType, ParseToken, PToken, pTokenArrayToString };
+export { InstructionStart, ParseType, ParseToken, PToken, pTokenArrayToString };

@@ -5,8 +5,8 @@ import { Transform } from 'stream';
 
 import { EntityId, ENTITY_ID } from 'basic';
 import { EntityExpander, OpaqueEntityLoc, RetrieveResults, AttributeValueResults } from 'expand';
-import { ContextType } from 'pToken';
-import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
+import { PTokenStream, PTokenLiteralStream } from 'node';
+import { ParseType } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
    AttributeValueElement,
@@ -27,11 +27,11 @@ interface ResolvedInfo {
 
 function parseBody(
    sTokenSource: STokenSource,
-   context: ContextType,
+   context: ParseType,
    expandToken: (token: PToken | undefined, tokenProcessed: () => void) => void,
 ): void {
    const pTokenStream = new PTokenStream(sTokenSource, {
-      context,
+      parseType: context,
    });
    let seenEnd = false;
    let paused = false;
@@ -67,7 +67,7 @@ function parseEntityValue(
    sTokenSource: STokenSource,
    done: (result: EntityValuePToken) => void,
 ): void {
-   const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
+   const pTokenStream = new PTokenLiteralStream(sTokenSource, { peRef: true });
    const results: EntityValuePToken = [];
 
    pTokenStream.on('data', (token: EntityValueElement) => {
@@ -176,7 +176,7 @@ function parseAttributeValue(
    sTokenSource: STokenSource,
    done: (results: AttributeValueResults) => void,
 ): void {
-   const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: false, geRef: true });
+   const pTokenStream = new PTokenLiteralStream(sTokenSource, { peRef: false, geRef: true });
    const results: AttributeValuePToken = [];
 
    pTokenStream.on('data', (token: AttributeValueElement) => {

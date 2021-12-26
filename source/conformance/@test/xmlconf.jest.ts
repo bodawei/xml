@@ -4,9 +4,8 @@ import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { AttFixerStream, CheckWellFormed } from 'node';
-import { ContextType, ParseToken } from 'pToken';
-import { PTokenStream } from 'pTokenStream';
+import { AttFixerStream, CheckWellFormed, PTokenStream } from 'node';
+import { ParseType, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
 
 import metadata from './data/xmlconf.json';
@@ -25,13 +24,14 @@ function setupWellFormedStream(
    ver?: XmlVersion,
    edition?: XmlEdition,
 ): {
+   sTokenSource: STokenSource;
    pTokenStream: PTokenStream;
    wellFormedStream: CheckWellFormed;
 } {
    const sTokenSource = new STokenSource();
    const pTokenStream = new PTokenStream(sTokenSource, {
       confVer: ver && edition ? new ConformanceVersion(ver, edition) : undefined,
-      context: ContextType.DOCUMENT,
+      parseType: ParseType.DOCUMENT,
    });
    const entityExpander = new TestExpanderStream(test, true);
    const attFix = new AttFixerStream();
@@ -41,18 +41,19 @@ function setupWellFormedStream(
 
    return {
       pTokenStream,
+      sTokenSource,
       wellFormedStream: checkWF,
    };
 }
 
 function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlEdition): Transform {
-   const { pTokenStream, wellFormedStream } = setupWellFormedStream(test, ver, rev);
+   const { sTokenSource, wellFormedStream } = setupWellFormedStream(test, ver, rev);
    const checkValidity = new CheckValidityStream();
 
    wellFormedStream.pipe(checkValidity);
 
-   pTokenStream.addText(test.testData || '');
-   pTokenStream.endText();
+   sTokenSource.addText(test.testData || '');
+   sTokenSource.endText();
 
    return checkValidity;
 }
@@ -137,20 +138,20 @@ describe('XML Conformance tests', () => {
             it(`${testData.ID} (${testData.TYPE}:${ver}/${edition} Running WITHOUT validation) ${testData.description}`, (done) => {
                const verToUse = hasEdition ? ver : undefined;
                const revToUse = hasEdition ? edition : undefined;
-               const { pTokenStream, wellFormedStream } = setupWellFormedStream(
+               const { sTokenSource, wellFormedStream } = setupWellFormedStream(
                   testData,
                   verToUse,
                   revToUse,
                );
 
-               pTokenStream.addText(testData.testData || '');
-               pTokenStream.endText();
+               sTokenSource.addText(testData.testData || '');
+               sTokenSource.endText();
 
                // We also want to test  whether the errors match as expected
                gatherStreamResults<ParseToken>(wellFormedStream, (results) => {
                   // @ts-expect-error 2329/matchers
                   expect(results).not.toHaveXmlConfErrors();
-                  done();
+                  done?.();
                });
             });
          }

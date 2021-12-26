@@ -12,10 +12,9 @@ import {
    TEXT_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
-   ContextType,
+   ParseType,
    ParseToken,
 } from 'pToken';
-import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import {
    DOCTYPE_START_PTOKEN,
@@ -38,15 +37,18 @@ import {
    CONDITIONAL_END_PTOKEN,
 } from 'token';
 import { EntityExpanderStream } from '../EntityExpanderStream';
+import { PTokenStream } from '../pTokenStream';
 import { gatherStream } from './helpers';
 
 describe('EntityExpanderStream (integration)', () => {
+   let sTokenSource: STokenSource;
    let pTokenStream: PTokenStream;
    let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource(), {
-         context: ContextType.DOCUMENT,
+      sTokenSource = new STokenSource();
+      pTokenStream = new PTokenStream(sTokenSource, {
+         parseType: ParseType.DOCUMENT,
          confVer: new ConformanceVersion(1.0),
          entityId: new EntityId(__filename)
       });
@@ -75,10 +77,10 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 1: Expand the external subset', () => {
       it('expands the external subset', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one SYSTEM "./docs/testForCase1.xml">
          <one>&one;</one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -116,14 +118,14 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 2: Expand parameter entity references in the DTD', () => {
       it('replaces references in the default value of an ATTLIST', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY % internalPE "<!ENTITY one 'my content'>">
             %internalPE;
             <!ELEMENT one EMPTY>
          ]>
          <one>&one;</one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,

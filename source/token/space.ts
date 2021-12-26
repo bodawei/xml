@@ -29,7 +29,7 @@ class SpacePToken {
       [3] S ::= (#x20 | #x9 | #xD | #xA)+
 \**********************************************************************/
 
-function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|void) => void) {
+function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|undefined) => void) {
    source.extractNoParams('space', (sToken) => {
       if (!sToken) {
          deliverPToken(undefined);

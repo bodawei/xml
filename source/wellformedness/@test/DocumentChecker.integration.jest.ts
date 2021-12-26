@@ -4,11 +4,10 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, ErrorCollector, ErrorToken, warning, WarningToken } from 'basic';
 import { gatherStreamResults } from 'basic-test';
-import { ContextType, ParseToken } from 'pToken';
-import { PTokenStream } from '../../pTokenStream';
+import { ParseType, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
-import { AttFixerStream, EntityExpanderStream } from 'node';
+import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
 
 import { DocumentChecker } from '../DocumentChecker';
 import { ContentChecker } from '../ContentChecker';
@@ -37,13 +36,14 @@ describe('DocumentChecker (integration)', () => {
       confVer?: ConformanceVersion,
    ): void {
       const finalResults: Array<ErrorToken> = [];
+      const sTokenSource = new STokenSource();
 
-      pTokenStream = new PTokenStream(new STokenSource(), {
+      pTokenStream = new PTokenStream(sTokenSource, {
          confVer,
-         context: ContextType.DOCUMENT,
+         context: ParseType.DOCUMENT,
       });
-      pTokenStream.addText(input);
-      pTokenStream.endText();
+      sTokenSource.addText(input);
+      sTokenSource.endText();
       const entityExpander = new EntityExpanderStream(true);
       const attFixer = new AttFixerStream();
 

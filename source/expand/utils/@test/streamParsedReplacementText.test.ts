@@ -25,7 +25,7 @@ import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { streamParsedReplacementText } from '../streamParsedReplacementText';
-import { ContextType } from 'pToken';
+import { ParseType } from 'pToken';
 import { EntityContextStack } from '../EntityContextStack';
 
 function noopFunction(): void {
@@ -247,7 +247,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toBeInstanceOf(STokenSource);
       expect(args[0]._segments[0].text).toEqual('foo');
-      expect(args[1]).toEqual(ContextType.GENERAL_ENTITY);
+      expect(args[1]).toEqual(ParseType.GENERAL_ENTITY);
       expect(args[2]).toBeInstanceOf(Function);
    });
 
@@ -316,7 +316,7 @@ describe('streamParsedReplacementText() (unit)', () => {
 
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);
-      expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);
+      expect(args[1]).toEqual(ParseType.PARAMETER_ENTITY);
       expect(args[2]).toBeInstanceOf(Function);
    });
 

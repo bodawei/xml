@@ -5,8 +5,7 @@ import { dirname, extname, relative, resolve, join } from 'path';
 import { Transform } from 'stream';
 
 import { EntityId, ConformanceVersion } from 'basic';
-import { PTokenStream } from 'pTokenStream';
-import { EntityExpanderStream, PToXTokenStream } from 'node';
+import { EntityExpanderStream, PTokenStream, PToXTokenStream } from 'node';
 import SimpleObj from '../../../simpleobj/so';
 import { STokenSource } from 'sToken';
 
@@ -381,7 +380,8 @@ class RefineObject extends Transform {
  */
 function convertTestData(pathName: string, ouputDir: string) {
    const docPath = resolve(pathName, 'xmlconf.xml');
-   const pTokenStream = new PTokenStream(new STokenSource(), {
+   const sTokenSource = new STokenSource();
+   const pTokenStream = new PTokenStream(sTokenSource, {
       confVer: new ConformanceVersion(1.0, 5),
       entityId: new EntityId(docPath),
    });
@@ -391,8 +391,8 @@ function convertTestData(pathName: string, ouputDir: string) {
    const writeJson = new RefineObject(pathName, ouputDir);
    const data = readFileSync(docPath, { encoding: 'utf-8' });
 
-   pTokenStream.addText(data);
-   pTokenStream.endText();
+   sTokenSource.addText(data);
+   sTokenSource.endText();
 
    pTokenStream.pipe(entityExpander).pipe(toXToken).pipe(so).pipe(writeJson);
 }

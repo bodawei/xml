@@ -1,4 +1,4 @@
-import { ContextType, ParseToken } from 'pToken';
+import { ParseType, ParseToken } from 'pToken';
 import { STokenSource, strOrBlank } from 'sToken';
 import { ConditionalStartPToken, resumeParseConditional } from 'token';
 
@@ -13,7 +13,7 @@ function setupConditional(
    token: ConditionalStartPToken,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
-   context: ContextType,
+   context: ParseType,
    deliverToken: (aToken: ParseToken, handled: () => void) => void,
    done: Done,
 ): void {

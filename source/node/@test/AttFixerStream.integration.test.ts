@@ -1,26 +1,28 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { gatherStreamResults } from 'basic-test';
-import { PTokenStream } from 'pTokenStream';
 import { toSToken, SToken, STokenSource } from 'sToken';
 import { XmlDeclarationPToken, XMLDECL_PTOKEN, TextPToken, ParseToken } from 'pToken';
 import { ElementStartPToken } from 'token';
 
+import { PTokenStream } from '../pTokenStream';
 import { AttFixerStream } from '../AttFixerStream';
 
 describe('AttFixerStream (integration)', () => {
+   let sTokenSource: STokenSource;
    let pTokenStream: PTokenStream;
    let fixer: AttFixerStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource());
+      sTokenSource = new STokenSource();
+      pTokenStream = new PTokenStream(sTokenSource);
       fixer = new AttFixerStream();
       pTokenStream.pipe(fixer);
    });
 
    it('passes a non-ElementStart value through without changes', (done) => {
-      pTokenStream.addText('<?xml version="1.0"?>');
-      pTokenStream.endText();
+      sTokenSource.addText('<?xml version="1.0"?>');
+      sTokenSource.endText();
 
       gatherStreamResults<ParseToken>(fixer, (results) => {
          const result = results.find(r => r.type === XMLDECL_PTOKEN);
@@ -46,14 +48,14 @@ describe('AttFixerStream (integration)', () => {
    });
 
    it('passes an ElementStart value through with value normalized', (done) => {
-      pTokenStream.addText(`<?xml version="1.0"?>
+      sTokenSource.addText(`<?xml version="1.0"?>
       <!DOCTYPE test [
          <!ELEMENT root ANY>
          <!ATTLIST root
             nmtok NMTOKEN #REQUIRED>
       ]>
       <root nmtok="  3   4  "/>`);
-      pTokenStream.endText();
+      sTokenSource.endText();
 
       gatherStreamResults<ParseToken>(fixer, (results) => {
          expect((results[14] as ElementStartPToken).attributes).toEqualRangeless([{

@@ -2,28 +2,30 @@
 /* eslint-env jasmine */
 
 import { Offset, EntityId, } from 'basic';
-import { PTokenStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
 import { ELEMENT_START_PTOKEN } from 'token';
 import { WellFormedError,  } from 'wellformedness';
 
+import { PTokenStream } from '../pTokenStream';
 import CheckWellFormed from '../CheckWellFormed';
 import { expectError } from './utils';
 
 describe('CheckWellFormed (integration)', () => {
+   let sTokenSource: STokenSource;
    let pTokenStream: PTokenStream;
    let checker: CheckWellFormed;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource());
+      sTokenSource = new STokenSource() ;
+      pTokenStream = new PTokenStream(sTokenSource);
       checker = new CheckWellFormed();
 
       pTokenStream.pipe(checker);
    });
 
    function expectInputToProduce(input: string, error: WellFormedError, done: () => void) {
-      pTokenStream.addText(input);
-      pTokenStream.endText();
+      new STokenSource().addText(input);
+      new STokenSource().endText();
 
       expectError(checker, error, done);
    }

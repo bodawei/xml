@@ -2,6 +2,7 @@
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { gatherStreamResults } from 'basic-test';
+import { PTokenStream } from 'node';
 import { XMLDECL_PTOKEN, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
@@ -12,7 +13,6 @@ import {
    CommentPToken,
 } from 'token';
 
-import { PTokenStream } from '../../pTokenStream';
 import { CommentExpanderStream } from '../CommentExpanderStream';
 
 describe('CommentExpanderStream (integration)', () => {
@@ -20,10 +20,12 @@ describe('CommentExpanderStream (integration)', () => {
 
    function testTransformation(before: string, after: string, done: () => void) {
       const ces = new CommentExpanderStream();
-      pTokenStream = new PTokenStream(new STokenSource());
+      const sTokenSource = new STokenSource();
 
-      pTokenStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
-      pTokenStream.endText();
+      pTokenStream = new PTokenStream(sTokenSource);
+
+      sTokenSource.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
+      sTokenSource.endText();
       pTokenStream.pipe(ces);
 
       gatherStreamResults<ParseToken>(ces, (results) => {
@@ -62,10 +64,11 @@ describe('CommentExpanderStream (integration)', () => {
 
    describe('passthrough', () => {
       it('passes all tokens through', (done) => {
-         pTokenStream = new PTokenStream(new STokenSource());
+         const sTokenSource = new STokenSource();
+         pTokenStream = new PTokenStream(sTokenSource);
 
-         pTokenStream.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
-         pTokenStream.endText();
+         sTokenSource.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
+         sTokenSource.endText();
 
          const cf = new CommentExpanderStream();
          pTokenStream.pipe(cf);

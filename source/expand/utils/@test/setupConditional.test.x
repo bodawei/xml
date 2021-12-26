@@ -3,7 +3,7 @@
 import { ENTITY_ID, ConformanceVersion } from 'basic';
 import {
    CharRefPToken,
-   ContextType,
+   ParseType,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    TextPToken,
@@ -81,7 +81,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          () => {
             const args = addProtoReplacementTextSpy.calls.argsFor(0);
@@ -100,7 +100,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result).toEqual({});
@@ -116,7 +116,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result).toEqual({});
@@ -132,7 +132,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result).toEqual({
@@ -153,7 +153,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result).toEqual({
@@ -173,7 +173,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result.source).toBeInstanceOf(STokenSource);
@@ -189,7 +189,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result.newStart?.sectionType).toEqual(testInclude.text);
@@ -205,7 +205,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             expect(result.source).toBeInstanceOf(STokenSource);
@@ -221,14 +221,14 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             setTimeout(() => {
                const args = (params.utils.parseBody as jasmine.Spy).calls.argsFor(0);
 
                expect(args[0]).toEqual(result.source);
-               expect(args[1]).toEqual(ContextType.PARAMETER_ENTITY);
+               expect(args[1]).toEqual(ParseType.PARAMETER_ENTITY);
                expect(args[2]).toBeInstanceOf(Function);
                done();
             }, 0);
@@ -243,7 +243,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          () => {
             setTimeout(() => {
@@ -268,7 +268,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          () => {
             setTimeout(() => {
@@ -292,7 +292,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             setTimeout(() => {
@@ -315,7 +315,7 @@ describe('setupConditional() (unit)', () => {
          conditionalStart,
          params,
          testStack,
-         ContextType.PARAMETER_ENTITY,
+         ParseType.PARAMETER_ENTITY,
          deliverSpy,
          (result) => {
             result.textIsFinished = jasmine.createSpy();

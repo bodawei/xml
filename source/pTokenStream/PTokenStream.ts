@@ -27,7 +27,7 @@ import {
    InternalSubsetEndToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-import { ContextType } from 'pToken';
+import { ParseType } from 'pToken';
 
 type DeliverPToken = (result: ParseToken | null | undefined | Array<ParseToken>) => void; // icky typeHack
 enum ConditionalState {
@@ -38,7 +38,7 @@ enum ConditionalState {
 }
 
 interface PTokenOptions {
-   context?: ContextType;
+   context?: ParseType;
    confVer?: ConformanceVersion;
    entityId?: EntityId;
 }
@@ -56,19 +56,19 @@ class PTokenStream extends Readable {
    private id: EntityId;
    private confVer: ConformanceVersion;
    private setConfVer: boolean;
-   private context: ContextType = ContextType.DOCUMENT;
+   private context: ParseType = ParseType.DOCUMENT;
    private waitingForInternalClose = false;
    private conditionalStack: Array<ConditionalState> = [];
    private startDocType?: DocTypeStartPToken;
 
-   constructor(sTokenSource: STokenSource, options: PTokenOptions = { context: ContextType.DOCUMENT }) {
+   constructor(sTokenSource: STokenSource, options: PTokenOptions = { context: ParseType.DOCUMENT }) {
       super({
          objectMode: true,
       });
 
       this._elementStack = [];
-      this.context = options.context || ContextType.DOCUMENT;
-      this.inContent = options.context === ContextType.GENERAL_ENTITY;
+      this.context = options.context || ParseType.DOCUMENT;
+      this.inContent = options.context === ParseType.GENERAL_ENTITY;
       this.pushedMetadata = false;
       this.id = options.entityId ?? new EntityId('./document.xml');
       this._sTokenSource = sTokenSource;
@@ -78,7 +78,7 @@ class PTokenStream extends Readable {
       this.setConfVer = !!options.confVer;
 
       // In all other contexts, the EntityExpander will already have set the ConformanceVersion on the sTokenSource
-      if (this.context === ContextType.DOCUMENT) {
+      if (this.context === ParseType.DOCUMENT) {
          this._sTokenSource.setConfVer(this.confVer);
       }
    }
@@ -92,7 +92,7 @@ class PTokenStream extends Readable {
    }
 
    _read() {
-      if (!this.pushedMetadata && this.context === ContextType.DOCUMENT) {
+      if (!this.pushedMetadata && this.context === ParseType.DOCUMENT) {
          this.examineDeclaration();
          return;
       }
@@ -128,7 +128,7 @@ class PTokenStream extends Readable {
                if (name === topName) {
                   this._elementStack.pop();
                   // We are always inContent if we are in a general entity. do not change that.
-                  if (this.context !== ContextType.GENERAL_ENTITY) {
+                  if (this.context !== ParseType.GENERAL_ENTITY) {
                      this.inContent = this._elementStack.length > 0;
                   }
                }
@@ -276,7 +276,7 @@ class PTokenStream extends Readable {
                parseElementEnd(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-               parseInstruction(this._sTokenSource, markupStartSToken, this.context === ContextType.DOCUMENT, deliverParse);
+               parseInstruction(this._sTokenSource, markupStartSToken, this.context === ParseType.DOCUMENT, deliverParse);
                break;
             case '<!--':
                parseComment(this._sTokenSource, markupStartSToken, deliverParse);

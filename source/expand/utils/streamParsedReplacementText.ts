@@ -3,7 +3,7 @@
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
-   ContextType,
+   ParseType,
    ParameterEntityReferencePToken,
    externalIdToEntityId,
    ParseToken,
@@ -67,7 +67,7 @@ function streamParsedReplacementText(
    const { entityDetails, utils } = expandParams;
    let sTokenSource: STokenSource;
    let getErrors: () => Array<ErrorToken>;
-   let context = ContextType.DOCUMENT;
+   let context = ParseType.DOCUMENT;
    let start: ParseToken;
    let end: ParseToken;
    let entityLoc = entityContextStack.getCurrentEntityLoc();
@@ -86,18 +86,18 @@ function streamParsedReplacementText(
          entityId,
       );
       ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(entityLoc));
-      context = ContextType.EXTERNAL_SUBSET;
+      context = ParseType.EXTERNAL_SUBSET;
       start = new ExternalSubsetStartToken();
       end = new ExternalSubsetEndToken();
    } else {
       if (reference.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
          start = new GeneralEntityStartPToken(reference);
          end = new GeneralEntityEndPToken(reference);
-         context = ContextType.GENERAL_ENTITY;
+         context = ParseType.GENERAL_ENTITY;
       } else {
          start = new ParameterEntityStartPToken(reference);
          end = new ParameterEntityEndPToken(reference);
-         context = ContextType.PARAMETER_ENTITY;
+         context = ParseType.PARAMETER_ENTITY;
       }
 
       const details = entityDetails.getReferencedDetails(reference);

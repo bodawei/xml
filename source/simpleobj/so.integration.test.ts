@@ -1,17 +1,19 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { PTokenStream } from '../pTokenStream';
+import { PTokenStream } from 'node';
 import { PToXTokenStream } from '../node';
 import SimpleObjStream from './so';
 import { STokenSource } from 'sToken';
 
 describe('SimpleObjStream (integration)', () => {
+   let sTokenSource: STokenSource;
    let pTokenStream: PTokenStream;
    let tokenStream: PToXTokenStream;
    let objStream: SimpleObjStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource());
+      sTokenSource = new STokenSource();
+      pTokenStream = new PTokenStream(sTokenSource);
       tokenStream = new PToXTokenStream();
       objStream = new SimpleObjStream();
 
@@ -19,8 +21,8 @@ describe('SimpleObjStream (integration)', () => {
    });
 
    it('builds a simple result', (done) => {
-      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<two>2</two>1</one>');
-      pTokenStream.endText();
+      sTokenSource.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<two>2</two>1</one>');
+      sTokenSource.endText();
 
       objStream.on('data', (final: Record<string, any>) => {
          const result = JSON.parse(JSON.stringify(final));
@@ -43,8 +45,8 @@ describe('SimpleObjStream (integration)', () => {
    });
 
    it('includes CDATA', (done) => {
-      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>');
-      pTokenStream.endText();
+      sTokenSource.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>');
+      sTokenSource.endText();
 
       objStream.on('data', (final: Record<string, any>) => {
          const result = JSON.parse(JSON.stringify(final));
