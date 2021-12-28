@@ -164,7 +164,7 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 3: Expand parameter entity references in the value of internal paramter and general entities', () => {
       it('expands', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY % grandparent "Grandma ">
             <!ENTITY % parent "Parent to %grandparent;">
@@ -172,7 +172,7 @@ describe('EntityExpanderStream (integration)', () => {
             <!ELEMENT one EMPTY>
          ]>
          <one>&child;</one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -188,12 +188,12 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 4: Expansion of parameter entity references in the values of external parameter entities', () => {
       it('expands', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one SYSTEM "./docs/testForCase4.xml" [
             <!ELEMENT one EMPTY>
          ]>
          <one>&child;</one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -211,12 +211,12 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 5: Expansion of parameter entity references in markup declarations but not in literals', () => {
       it('expands', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one SYSTEM "./docs/testForCase5.xml" [
             <!ELEMENT one EMPTY>
          ]>
          <one>&epandedEntity;</one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -232,7 +232,7 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 6: Expand general entities in an ATTLIST default value', () => {
       it('replaces references in the default value of an ATTLIST', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY % internalPE "foo">
             <!ENTITY internalGE "(%internalPE;)">
@@ -242,7 +242,7 @@ describe('EntityExpanderStream (integration)', () => {
             >
          ]>
          <one/>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -268,7 +268,7 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 7: Expand general entities in attributes', () => {
       it('replaces references in element attributes', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY % internalPE "foo">
             <!ENTITY internalGE "(%internalPE;)">
@@ -278,7 +278,7 @@ describe('EntityExpanderStream (integration)', () => {
             >
          ]>
          <one second="first &#45; &internalGE;"/>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -304,7 +304,7 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 8: Expand general entities in the content', () => {
       it('replaces an general entity reference with an entity start and end token', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY anEntity "the value">
             <!ELEMENT one ANY>
@@ -312,7 +312,7 @@ describe('EntityExpanderStream (integration)', () => {
          <one>
             &anEntity;
          </one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -350,7 +350,7 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Case 9: Expand the parameter to a conditional section', () => {
       it('includes the parsed content within the conditional section', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY % doit " INCLUDE">
             <![%doit;[
@@ -361,7 +361,7 @@ describe('EntityExpanderStream (integration)', () => {
          <one>
             &anEntity;
          </one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -403,7 +403,7 @@ describe('EntityExpanderStream (integration)', () => {
       });
 
       it('ignores content within an ignored conditional section', (done) => {
-         pTokenStream.addText(`<?xml version="1.0"?>
+         sTokenSource.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY % doit " IGNORE ">
             <![%doit;[
@@ -414,7 +414,7 @@ describe('EntityExpanderStream (integration)', () => {
          <one>
             &anEntity;
          </one>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -452,14 +452,14 @@ describe('EntityExpanderStream (integration)', () => {
 
    describe('Other cases', () => {
       it('expands predefined entities in external general entities', (done) => {
-         pTokenStream.addText(`<?xml version="1.0" encoding="UTF-8"?>
+         sTokenSource.addText(`<?xml version="1.0" encoding="UTF-8"?>
          <!DOCTYPE TESTSUITE [
              <!ENTITY jclark-xmltest	SYSTEM "./docs/xmltest.xml">
          ] >
          <TESTSUITE>
             &jclark-xmltest;
          </TESTSUITE>`);
-         pTokenStream.endText();
+         sTokenSource.endText();
 
          gatherStream(
             entityExpander,
@@ -509,14 +509,14 @@ describe('EntityExpanderStream (integration)', () => {
    });
 
    // it('replaces a parameter entity reference with an entity start and end token', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY % anEntity "the value">
    //          <!ELEMENT one ANY>
    //          %anEntity;
    //       ]>
    //       <one></one>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    gatherStream(
    //       entityExpander,
@@ -531,7 +531,7 @@ describe('EntityExpanderStream (integration)', () => {
    // });
 
    // it('replaces a multiply nested entity', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY seven "≤done≥">
    //          <!ENTITY six "{&seven;}">
@@ -545,7 +545,7 @@ describe('EntityExpanderStream (integration)', () => {
    //       <one>
    //          &base;
    //       </one>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    gatherStream(
    //       entityExpander,
@@ -560,7 +560,7 @@ describe('EntityExpanderStream (integration)', () => {
    // });
 
    // it('pre-parses internal entity values for character references, and treats them as content', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY elementWithCharRef "&#x3c;two></two>">
    //          <!ELEMENT one ANY>
@@ -569,7 +569,7 @@ describe('EntityExpanderStream (integration)', () => {
    //       <one>
    //          &elementWithCharRef;
    //       </one>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    gatherStream(
    //       entityExpander,
@@ -584,7 +584,7 @@ describe('EntityExpanderStream (integration)', () => {
    // });
 
    // it('replaces references to internal parameter entities with actual values', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY % internalPE1 "foo">
    //          <!ENTITY % internalPE2 "(%internalPE1;)">
@@ -594,7 +594,7 @@ describe('EntityExpanderStream (integration)', () => {
    //       <one>
    //          &internalGE;
    //       </one>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    gatherStream(
    //       entityExpander,
@@ -632,7 +632,7 @@ describe('EntityExpanderStream (integration)', () => {
    // });
 
    // it('replaces references to external parameter entities in entity values', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY % externalPE SYSTEM "foo.xml">
    //          <!ENTITY internalGE "%externalPE;">
@@ -641,7 +641,7 @@ describe('EntityExpanderStream (integration)', () => {
    //       <one>
    //          &internalGE;
    //       </one>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    gatherStream(
    //       entityExpander,
@@ -666,7 +666,7 @@ describe('EntityExpanderStream (integration)', () => {
    // });
 
    // it('replaces references in ATTLIST defaults', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY % internalPE "foo">
    //          <!ENTITY internalGE "(%internalPE;)">
@@ -675,7 +675,7 @@ describe('EntityExpanderStream (integration)', () => {
    //       ]>
    //       <one>
    //       </one>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    gatherStream(
    //       entityExpander,
@@ -751,7 +751,7 @@ describe('EntityExpanderStream (integration)', () => {
    // });
 
    // it('replaces references in element attributes', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY % internalPE "foo">
    //          <!ENTITY internalGE "(%internalPE;)">
@@ -762,7 +762,7 @@ describe('EntityExpanderStream (integration)', () => {
    //          >
    //       ]>
    //       <one second="first &#45; &internalGE;" first="second &#45; &internalGE;"/>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    gatherStream(
    //       entityExpander,
@@ -859,7 +859,7 @@ describe('EntityExpanderStream (integration)', () => {
    // });
 
    // it('aborts on a recursive entity reference', (done) => {
-   //    pTokenStream.addText(`<?xml version="1.0"?>
+   //    sTokenSource.addText(`<?xml version="1.0"?>
    //       <!DOCTYPE one [
    //          <!ENTITY second "[&first;]">
    //          <!ENTITY first "(&second;)">
@@ -868,7 +868,7 @@ describe('EntityExpanderStream (integration)', () => {
    //       <one>
    //          &first;
    //       </one>`);
-   //    pTokenStream.endText();
+   //    sTokenSource.endText();
 
    //    const expected = new WellFormedError(
    //       WellFormedError.ID.REFERENCE_INVALID_RECURSION,

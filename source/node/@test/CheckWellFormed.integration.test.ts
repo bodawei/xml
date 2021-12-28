@@ -24,8 +24,8 @@ describe('CheckWellFormed (integration)', () => {
    });
 
    function expectInputToProduce(input: string, error: WellFormedError, done: () => void) {
-      new STokenSource().addText(input);
-      new STokenSource().endText();
+      sTokenSource.addText(input);
+      sTokenSource.endText();
 
       expectError(checker, error, done);
    }

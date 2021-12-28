@@ -1,11 +1,12 @@
-/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import {   GENERAL_ENTITY_DECLARATION_PTOKEN, GENERAL_ENTITY_REFERENCE_PTOKEN,  PROCESSING_INSTRUCTION_PTOKEN,    NOTATION_DECLARATION_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, } from 'pToken';
 import { STokenSource } from 'sToken';
+import { ELEMENT_DECLARATION_PTOKEN } from 'pToken';
 
-import PTokenStream from '../PTokenStream';
+import {PTokenStream} from '../pTokenStream';
 
 import {
    CDATA_PTOKEN,
@@ -17,16 +18,17 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    SPACE_PTOKEN,
 } from 'token';
-import { ELEMENT_DECLARATION_PTOKEN } from 'source/pToken/token/ElementDeclaration';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
 
-describe('PTokenStream (integration)', () => {
+describe('pTokenStream (integration)', () => {
    let pTokenStream: PTokenStream;
+   let sTokenSource: STokenSource;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new STokenSource());
+      sTokenSource= new STokenSource();
+      pTokenStream = new PTokenStream(sTokenSource);
    });
 
    function gatherTokens(stream: PTokenStream, input: string | void, done: (tokens: TokenArray) => void) {
@@ -40,12 +42,12 @@ describe('PTokenStream (integration)', () => {
       });
 
       if (input) {
-         stream.addText(input);
-         stream.endText();
+         sTokenSource.addText(input);
+         sTokenSource.endText();
       }
    }
 
-   function expectInputToProduceTypes(input: string | void, types: Array<string> | string, done: () => void) {
+   function expectInputToProduceTypes(input: string | void, types: Array<string> | string, done?: () => void) {
       gatherTokens(pTokenStream, input, (results) => {
          let expecteds: Array<string>;
          if (!Array.isArray(types)) {
@@ -57,11 +59,11 @@ describe('PTokenStream (integration)', () => {
          expecteds.forEach((expected) => {
             const actuals = results.filter((actual) => actual.type === expected);
 
-            expect(actuals[0]).toContainPTokenProps({
+            expect(actuals[0]).toMatchObject({
                type: expected,
             });
          });
-         done();
+         done?.();
       });
    }
 
@@ -145,7 +147,7 @@ describe('PTokenStream (integration)', () => {
          const types = results.map(r => r.type);
          expect(types).toEqual([
             CONFORMANCE_VERSION, ENTITY_ID, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
-         done();
+         done?.();
       });
    });
 

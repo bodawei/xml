@@ -39,7 +39,7 @@ describe('EntityExpander (integration)', () => {
       writeToken: ExpandToken,
    ): void {
       const pTokenStream = new PTokenStream(sTokenSource, {
-         passeType: context,
+         parseType: context,
       });
       let ended = false;
       let writing = false;

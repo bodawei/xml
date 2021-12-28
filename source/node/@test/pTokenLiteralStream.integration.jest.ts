@@ -1,26 +1,27 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXTDECL_PTOKEN, TEXT_PTOKEN } from 'pToken';
 import { STokenSource } from 'sToken';
 
-import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
+import {PTokenLiteralStream} from '../pTokenLiteralStream';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
 
-describe('PTokenFromLiteralStream (integration)', () => {
+describe('PTokenLiteralStream (integration)', () => {
 
-   function expectInputToProduceTypes(input: string | void, options: Object, types: Array<string>, done: () => void) {
+   function expectInputToProduceTypes(input: string | void, options: Object, types: Array<string>, done?: () => void) {
       const results: TokenArray = [];
       const sTokenStream = new STokenSource();
-      const pTokenStream = new PTokenFromLiteralStream(sTokenStream, options);
+      const pTokenStream = new PTokenLiteralStream(sTokenStream, options);
 
       pTokenStream.on('data', (data: Token) => results.push(data));
       pTokenStream.on('end', () => {
          const resultTypes = results.map((result) => result.type);
 
          expect(resultTypes).toEqual(types);
-         done();
+         done?.();
       });
 
       if (input) {
