@@ -137,3 +137,12 @@ Hi.\r\nBye\r\n
 ```
 
 Entity replacement is actually a much more complex process that is beyond the scope of this writeup.  The only point here is to note that at this point in this abstract model of processing, the post-character-reference-replacement document contains all the final characters of the logical document.
+
+
+
+
+
+# QUESTIONS
+- When can we get a text declaration in a literal?
+   -- Because we do not discard the text declaration, we can get:
+      <!ENTITY "%SomeExternalEntity;">

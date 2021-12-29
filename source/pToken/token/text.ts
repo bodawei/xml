@@ -36,7 +36,7 @@ class TextPToken {
 
 function parseText(
    source: STokenSource,
-   terminators: Array<string>,
+   terminators: ReadonlyArray<string>,
    deliverPToken: (token: TextPToken | undefined) => void,
 ): void {
    source.extract('all', terminators, (sToken) => {

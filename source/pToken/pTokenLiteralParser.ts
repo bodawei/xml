@@ -1,20 +1,20 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import {
-   ParseToken,
-   parseInstruction,
-   parseParameterEntityReference,
-   parseGeneralEntityReference,
-   TextPToken,
-   parseCharRef,
-   parseText,
-} from 'pToken';
 import { STokenSource } from 'sToken';
 
-interface Options {
+import { parseInstruction } from './bridge/instruction';
+import { parseCharRef } from './token/charRef';
+import { parseGeneralEntityReference } from './token/generalEntityReference';
+import { parseParameterEntityReference } from './token/parameterEntityReference';
+import { parseText, TextPToken } from './token/text';
+import { ParseToken } from './types';
+
+interface PTokenLiteralParserOptions {
    peRef?: boolean;
    geRef?: boolean;
 }
+
+type DeliverToken = (token: ParseToken | undefined) => void;
 
 /*
  * This is used to parse EntityValue and AttributeValue literals. As such, it only
@@ -27,41 +27,33 @@ class PTokenLiteralParser {
 
    private geRef: boolean;
 
-   private terminators: Array<string>;
+   private terminators: ReadonlyArray<string>;
 
-   private seenOneToken: boolean;
+   private seenFirstToken: boolean;
 
-   constructor(sTokenSource: STokenSource, options: Options = {}) {
+   constructor(sTokenSource: STokenSource, options: PTokenLiteralParserOptions = {}) {
       this.sTokenSource = sTokenSource;
       this.peRef = !!options.peRef;
       this.geRef = !!options.geRef;
       this.terminators = this.peRef ? ['&', '%'] : ['&'];
-      this.seenOneToken = false;
+      this.seenFirstToken = false;
    }
 
-   parse(deliver: (token: ParseToken | undefined) => void): void {
+   public parse(deliver: DeliverToken): void {
       this.sTokenSource.extractNoParams('peekChar', (sToken) => {
+         const isFirstToken = this.seenFirstToken;
+
          if (!sToken) {
             deliver(undefined);
             return;
          }
 
-         if (!this.seenOneToken) {
-            this.seenOneToken = true;
+         this.seenFirstToken = true;
 
-            if (sToken.str === '<') {
-               this.sTokenSource.extractNoParams('peekDecl', (sToken) => {
-                  if (sToken) {
-                     this.sTokenSource.extract('match', '<?', (open) => {
-                        parseInstruction(this.sTokenSource, open!, false, deliver);
-                     });
-                     return;
-                  }
-
-                  parseText(this.sTokenSource, this.terminators, deliver);
-               });
-               return;
-            }
+         // Check for processing instructions (esp TextDeclarations)
+         if (!isFirstToken && sToken.str === '<') {
+            this.parsePossibleProcessingInstruction(deliver);
+            return;
          }
 
          if (this.peRef && sToken.str === '%') {
@@ -81,15 +73,38 @@ class PTokenLiteralParser {
             }
 
             this.sTokenSource.extractNoParams('char', (sToken) => {
+               if (!sToken) {
+                  // This can only happen if something has gone drastically wrong.
+                  deliver(undefined);
+                  return;
+               }
+
                if (this.geRef) {
-                  parseGeneralEntityReference(this.sTokenSource, sToken!, deliver);
+                  parseGeneralEntityReference(this.sTokenSource, sToken, deliver);
                } else {
-                  deliver(new TextPToken({ text: sToken! }));
+                  // Just deliver the single & character.
+                  deliver(new TextPToken(sToken));
                }
             });
          });
       });
    }
+
+   private parsePossibleProcessingInstruction(deliver: DeliverToken) {
+      this.sTokenSource.extractNoParams('peekDecl', (sToken) => {
+         if (sToken) {
+            this.sTokenSource.extract('match', '<?', (open) => {
+               if (!open) {
+                  deliver(undefined);
+               } else {
+                  parseInstruction(this.sTokenSource, open, false, deliver);
+               }
+            });
+         } else {
+            parseText(this.sTokenSource, this.terminators, deliver);
+         }
+      });
+   }
 }
 
-export { PTokenLiteralParser };
+export { PTokenLiteralParserOptions, PTokenLiteralParser };
