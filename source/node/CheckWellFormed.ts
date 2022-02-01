@@ -33,8 +33,7 @@ import { ContentChecker, DocumentChecker, MarkupDeclChecker, } from 'wellformedn
  * as well as the presence or absence of a DTD to help it make
  * accurate assessments.
  *
- * This does depend on the artificial InternalSubsetStartToken as well
- * as the corresponding End, and ExternalSubset tokens to be present
+ * This does depend on the artificial ExternalSubset tokens to be present
  * in the incoming stream to accurately identify the internal and
  * external subsets (which should be between the start and end DocType
  * tokens). This also will handle the start and end markers for any

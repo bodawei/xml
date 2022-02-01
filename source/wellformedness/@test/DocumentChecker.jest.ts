@@ -18,7 +18,6 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    ELEMENT_START_PTOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
    CdataPToken,
    CommentPToken,
    DocTypeEndPToken,
@@ -28,11 +27,10 @@ import {
    ElementEmptyPToken,
    ExternalSubsetEndToken,
    ExternalSubsetStartToken,
-   InternalSubsetEndToken,
-   InternalSubsetStartToken,
    SpacePToken,
    PToken,
    ConditionalStartPToken,
+   DOCTYPE_START_PTOKEN,
 } from 'token';
 import {
    makeTextDecl,
@@ -46,8 +44,6 @@ import {
    makeCdata,
    makeExternalSubsetEnd,
    makeExternalSubsetStart,
-   makeInternalSubsetEnd,
-   makeInternalSubsetStart,
    makeElementStart,
    makeElementEnd,
    makeElementEmpty,
@@ -82,8 +78,6 @@ describe('DocumentChecker (unit)', () => {
    let elementEnd: ElementEndPToken;
    let elementStart: ElementStartPToken;
    let elementEmpty: ElementEmptyPToken;
-   let internalSubsetEnd: InternalSubsetEndToken;
-   let internalSubsetStart: InternalSubsetStartToken;
    let externalSubsetEnd: ExternalSubsetEndToken;
    let externalSubsetStart: ExternalSubsetStartToken;
 
@@ -94,6 +88,7 @@ describe('DocumentChecker (unit)', () => {
          subParams = [start, ec];
          subState = checkState;
          this.lastSeen = start;
+         this.inSecondPassContxt = false;
       }
 
       inSecondPassContxt: boolean;
@@ -108,7 +103,7 @@ describe('DocumentChecker (unit)', () => {
 
          if (
             this.lastSeen &&
-            (this.lastSeen.type === INTERNAL_SUBSET_START_TOKEN ||
+            (this.lastSeen.type === DOCTYPE_START_PTOKEN ||
                this.lastSeen.type === EXTERNAL_SUBSET_START_TOKEN)
          ) {
             return CHECKER_DONE;
@@ -128,6 +123,7 @@ describe('DocumentChecker (unit)', () => {
          subState = checkState;
          this.lastSeen = start;
          this.allDone = start.type === ELEMENT_EMPTY_PTOKEN;
+         this.inSecondPassContxt = false;
       }
 
       inSecondPassContxt: boolean;
@@ -172,8 +168,6 @@ describe('DocumentChecker (unit)', () => {
       docTypeStart = makeDocTypeStart();
       externalSubsetEnd = makeExternalSubsetEnd();
       externalSubsetStart = makeExternalSubsetStart();
-      internalSubsetEnd = makeInternalSubsetEnd();
-      internalSubsetStart = makeInternalSubsetStart();
       processingInstruction = makeProcessingInstruction();
       space = makeSpace();
       textDecl = makeTextDecl();
@@ -193,8 +187,8 @@ describe('DocumentChecker (unit)', () => {
       });
       docTypeStartExtSubset = new DocTypeStartPToken({
          ...docTypeStart,
-         openSubset: undefined,
          externalId: {},
+         openSubset: undefined,
       });
    });
 
@@ -229,8 +223,8 @@ describe('DocumentChecker (unit)', () => {
 
       it('handles an ConditionalSection start with no problems', () => {
          const conditional = new ConditionalStartPToken({
-            open: toSToken('<!['),
             bracket: toSToken('['),
+            open: toSToken('<!['),
          });
 
          checker.check(conditional, ec);
@@ -243,9 +237,9 @@ describe('DocumentChecker (unit)', () => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
             checker.check(docTypeStart, ec);
-            checker.check(internalSubsetStart, ec);
+            checker.check(docTypeStart, ec);
 
-            expect(subParams[0]).toEqual(internalSubsetStart);
+            expect(subParams[0]).toEqual(docTypeStart);
             expect(subParams[1]).toEqual(ec);
          });
 
@@ -256,7 +250,7 @@ describe('DocumentChecker (unit)', () => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
             checker.check(docTypeStart, ec);
-            checker.check(internalSubsetStart, ec);
+            checker.check(docTypeStart, ec);
 
             expect(subState).toEqual(expected);
          });
@@ -272,7 +266,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
             checker.check(docTypeStart, ec);
-            checker.check(internalSubsetStart, ec);
 
             expect(subState).toEqual(expected);
          });
@@ -285,7 +278,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(xmlDecl, ec);
             checker.check(space, ec);
             checker.check(docTypeStartExtSubset, ec);
-            checker.check(internalSubsetStart, ec);
 
             expect(subState).toEqual(expected);
          });
@@ -297,7 +289,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(xmlDeclStandalone, ec);
             checker.check(space, ec);
             checker.check(docTypeStart, ec);
-            checker.check(internalSubsetStart, ec);
 
             expect(subState).toEqual(expected);
          });
@@ -311,7 +302,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(space, ec);
             checker.check(docTypeStartExtSubset, ec);
             checker.check(makeDocTypeStart(), ec);
-            checker.check(internalSubsetStart, ec);
 
             expect(subState).toEqual(expected);
          });
@@ -324,7 +314,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(space, ec);
             checker.check(makeXmlDecl(), ec);
             checker.check(docTypeStart, ec);
-            checker.check(internalSubsetStart, ec);
 
             expect(subState).toEqual(expected);
          });
@@ -539,17 +528,6 @@ describe('DocumentChecker (unit)', () => {
             checker.check(docTypeStart, ec);
          });
 
-         it('reports an error if something incorrect is found', () => {
-            checker.check(cdata, ec);
-
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [CDATA_PTOKEN],
-               position: cdata.open,
-            });
-         });
-
          it('allows the end of the DOCTYPE', () => {
             checker.check(docTypeEnd, ec);
 
@@ -562,29 +540,10 @@ describe('DocumentChecker (unit)', () => {
             expect(dtdEndCheck).toHaveBeenCalledWith(expect.any(Object), ec);
          });
 
-         it('allows an internal subset start marker', () => {
-            checker.check(internalSubsetStart, ec);
-
-            expect(ec.errors).toEqual([]);
-         });
-
          it('allows an external subset start marker', () => {
             checker.check(externalSubsetStart, ec);
 
             expect(ec.errors).toEqual([]);
-         });
-
-         it('rejects multiple internal subset starts', () => {
-            checker.check(internalSubsetStart, ec);
-            checker.check(internalSubsetEnd, ec);
-            checker.check(internalSubsetStart, ec);
-
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [INTERNAL_SUBSET_START_TOKEN],
-               position: docTypeStart.openSubset,
-            });
          });
 
          it('rejects multiple external subset starts', () => {
@@ -597,44 +556,6 @@ describe('DocumentChecker (unit)', () => {
                id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
                params: [EXTERNAL_SUBSET_START_TOKEN],
                position: docTypeStart.openSubset,
-            });
-         });
-
-         it('rejects an internal subset after an external subset', () => {
-            checker.check(externalSubsetStart, ec);
-            checker.check(externalSubsetEnd, ec);
-            checker.check(internalSubsetStart, ec);
-
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [INTERNAL_SUBSET_START_TOKEN],
-               position: docTypeStart.openSubset,
-            });
-         });
-
-         it('accepts an internal then external then docTypeEnd', () => {
-            checker.check(internalSubsetStart, ec);
-            checker.check(internalSubsetEnd, ec);
-            checker.check(externalSubsetStart, ec);
-            checker.check(externalSubsetEnd, ec);
-            checker.check(docTypeEnd, ec);
-
-            expect(ec.errors).toEqual([]);
-         });
-
-         it('rejects an element start and then accepts a docTypeEnd', () => {
-            checker.check(elementStart, ec);
-            checker.check(internalSubsetStart, ec);
-            checker.check(internalSubsetEnd, ec);
-            checker.check(docTypeEnd, ec);
-
-            expect(ec.errors.length).toEqual(1);
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [ELEMENT_START_PTOKEN],
-               position: elementStart.open,
             });
          });
       });

@@ -30,10 +30,8 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    
-   InternalSubsetStartToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
-   InternalSubsetEndToken,
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
    SpacePToken,
@@ -327,13 +325,6 @@ function makeGeneralEntityEnd(): GeneralEntityEndPToken {
    return new GeneralEntityEndPToken(makeGeneralEntityReference());
 }
 
-function makeInternalSubsetEnd(): InternalSubsetEndToken {
-   return new InternalSubsetEndToken();
-}
-function makeInternalSubsetStart(): InternalSubsetStartToken {
-   return new InternalSubsetStartToken();
-}
-
 function makeParameterEntityDeclaration(): ParameterEntityDeclarationPToken {
    return new ParameterEntityDeclarationPToken({
       open: toSToken('<!'),
@@ -499,8 +490,6 @@ export {
    makeGeneralEntityEnd,
    makeGeneralEntityReference,
    makeGeneralEntityStart,
-   makeInternalSubsetEnd,
-   makeInternalSubsetStart,
    makeNotationDeclaration,
    makeParameterEntityDeclaration,
    makeParameterExternalEntityDeclaration,

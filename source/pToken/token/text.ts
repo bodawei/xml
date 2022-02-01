@@ -39,7 +39,7 @@ function parseText(
    terminators: ReadonlyArray<string>,
    deliverPToken: (token: TextPToken | undefined) => void,
 ): void {
-   source.extract('all', terminators, (sToken) => {
+   source.extract('all', [...terminators], (sToken) => {
       deliverPToken(sToken ? new TextPToken({ text: sToken }) : undefined);
    });
 }

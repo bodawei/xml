@@ -70,9 +70,6 @@ describe('PToXTokenStream (integration)', () => {
                    "name": "test",
                    "type": "DOCTYPE_START_XTOKEN",
                  },
-                 InternalSubsetStartToken {
-                   "type": "INTERNAL_SUBSET_START_TOKEN",
-                 },
                  SpaceXToken {
                    "text": "
                         ",
@@ -88,9 +85,6 @@ describe('PToXTokenStream (integration)', () => {
                    "text": "
                      ",
                    "type": "SPACE_XTOKEN",
-                 },
-                 InternalSubsetEndToken {
-                   "type": "INTERNAL_SUBSET_END_TOKEN",
                  },
                  DocTypeEndXToken {
                    "type": "DOCTYPE_END_XTOKEN",

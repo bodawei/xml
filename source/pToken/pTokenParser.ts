@@ -28,8 +28,6 @@ import {
    ConditionalStartPToken,
    DocTypeStartPToken,
    ElementStartPToken,
-   InternalSubsetStartToken,
-   InternalSubsetEndToken,
    SpacePToken,
 } from 'token';
 
@@ -250,16 +248,13 @@ class PTokenParser {
                         const conditionalClose = new ConditionalEndPToken({ open: sToken });
                         deliverParse(conditionalClose);
                      } else if (this.docTypeStart) {
-                        parseDocTypeEnd(this.sTokenSource, this.docTypeStart, (result) => {
-                           deliverParse([new InternalSubsetEndToken(), result]); // NUKE internal
-                        });
+                        parseDocTypeEnd(this.sTokenSource, this.docTypeStart, deliverParse);
                         this.docTypeStart = undefined;
                      } else {
                         parseCharData(this.sTokenSource, [], deliverParse);
                      }
                   });
                } else if (this.docTypeStart) {
-                  deliverParse(new InternalSubsetEndToken()); // NUKE
                   parseDocTypeEnd(this.sTokenSource, this.docTypeStart, deliverParse);
                   this.docTypeStart = undefined;
                } else {
@@ -323,10 +318,8 @@ class PTokenParser {
                      pToken.openSubset
                   ) {
                      this.docTypeStart = pToken;
-                     deliverParse([pToken, new InternalSubsetStartToken()]); // Nuke INTERNAL
-                  } else {
-                     deliverParse(pToken);
                   }
+                  deliverParse(pToken);
                });
                break;
             case '<![':

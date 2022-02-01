@@ -27,13 +27,13 @@ import {
    ELIDED_ENTITY_DECLARATION_PTOKEN,
    EXTERNAL_SUBSET_END_TOKEN,
    EXTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    SPACE_PTOKEN,
    ElidedEntityDeclarationPToken,
    getFirstSToken,
+   DOCTYPE_START_PTOKEN,
+   DOCTYPE_END_PTOKEN,
 } from 'token';
 
 import { WellFormedError } from './error/WellFormedError';
@@ -73,104 +73,104 @@ interface StateTable {
 
 const transitionsByState: StateTable = {
    [States.PRE]: {
-      [INTERNAL_SUBSET_START_TOKEN]: States.INTERNAL_SUBSET,
+      [DOCTYPE_START_PTOKEN]: States.INTERNAL_SUBSET,
       [EXTERNAL_SUBSET_START_TOKEN]: States.EXTERNAL_SUBSET_START,
       // [PARAMETER_ENTITY_START_PTOKEN]: This will depend on the context
    },
    [States.EXTERNAL_SUBSET_START]: {
       // §2.8.0 [30]
-      [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
-      [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [ATTLIST_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
+      [COMMENT_PTOKEN]: States.EXTERNAL_SUBSET,
+      [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
+      [NOTATION_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: States.EXTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
       [PARAMETER_ENTITY_START_PTOKEN]: States.EXTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
-      [NOTATION_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PROCESSING_INSTRUCTION_PTOKEN]: States.EXTERNAL_SUBSET,
-      [COMMENT_PTOKEN]: States.EXTERNAL_SUBSET,
       [SPACE_PTOKEN]: States.EXTERNAL_SUBSET,
+      [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       // EXTERNAL_SUBSET_END also needs special handling
       // conditional section will be here
    },
    [States.PARAM_START_EXTERNAL_SUBSET]: {
       // §2.8.0 [30]
-      [CONDITIONAL_START_PTOKEN]: States.EXTERNAL_SUBSET,
-      [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
-      [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [ATTLIST_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
+      [COMMENT_PTOKEN]: States.EXTERNAL_SUBSET,
+      [CONDITIONAL_START_PTOKEN]: States.EXTERNAL_SUBSET,
+      [ELEMENT_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
+      [NOTATION_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: States.EXTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
       [PARAMETER_ENTITY_START_PTOKEN]: States.EXTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
-      [NOTATION_DECLARATION_PTOKEN]: States.EXTERNAL_SUBSET,
       [PROCESSING_INSTRUCTION_PTOKEN]: States.EXTERNAL_SUBSET,
-      [COMMENT_PTOKEN]: States.EXTERNAL_SUBSET,
       [SPACE_PTOKEN]: States.EXTERNAL_SUBSET,
+      [TEXTDECL_PTOKEN]: States.EXTERNAL_SUBSET,
       // PARAMETER_ENTITY_END_PTOKEN will need special handling
    },
    [States.PARAM_START_INTERNAL_SUBSET]: {
       // §2.8.0 [30]
-      [TEXTDECL_PTOKEN]: States.INTERNAL_SUBSET,
-      [ELEMENT_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [ATTLIST_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
+      [COMMENT_PTOKEN]: States.INTERNAL_SUBSET,
+      [ELEMENT_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
+      [NOTATION_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: States.INTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
       [PARAMETER_ENTITY_START_PTOKEN]: States.INTERNAL_SUBSET, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
-      [NOTATION_DECLARATION_PTOKEN]: States.INTERNAL_SUBSET,
       [PROCESSING_INSTRUCTION_PTOKEN]: States.INTERNAL_SUBSET,
-      [COMMENT_PTOKEN]: States.INTERNAL_SUBSET,
       [SPACE_PTOKEN]: States.INTERNAL_SUBSET,
+      [TEXTDECL_PTOKEN]: States.INTERNAL_SUBSET,
       // PARAMETER_ENTITY_END_PTOKEN will need special handling
    },
    [States.EXTERNAL_SUBSET]: {
       // §2.8.0 [30], [31]
-      [CONDITIONAL_START_PTOKEN]: NO_CHANGE,
-      [CONDITIONAL_END_PTOKEN]: NO_CHANGE,
-      [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
+      [COMMENT_PTOKEN]: NO_CHANGE,
+      [CONDITIONAL_END_PTOKEN]: NO_CHANGE,
+      [CONDITIONAL_START_PTOKEN]: NO_CHANGE,
+      [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
+      [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: NO_CHANGE, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
-      [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
-      [COMMENT_PTOKEN]: NO_CHANGE,
       [SPACE_PTOKEN]: NO_CHANGE,
       // EXTERNAL_SUBSET_END also needs special handling
    },
    [States.INSIDE_CONDITIONAL]: {
       // §2.8.0 [30], [31]
+      [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
+      [COMMENT_PTOKEN]: NO_CHANGE,
       [CONDITIONAL_START_PTOKEN]: NO_CHANGE,
       [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
-      [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
+      [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: NO_CHANGE, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
-      [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
-      [COMMENT_PTOKEN]: NO_CHANGE,
-      [TEXT_PTOKEN]: NO_CHANGE, // This is where this differs from external subset
       [SPACE_PTOKEN]: NO_CHANGE,
+      [TEXT_PTOKEN]: NO_CHANGE, // This is where this differs from external subset
       // CONDITIONAL_END_PTOKEN is handled specially
       // EXTERNAL_SUBSET_END also needs special handling
    },
    [States.INTERNAL_SUBSET]: {
       // §2.8.0 [28a], [28b], [29]
-      [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [ATTLIST_DECLARATION_PTOKEN]: NO_CHANGE,
+      [COMMENT_PTOKEN]: NO_CHANGE,
+      [ELEMENT_DECLARATION_PTOKEN]: NO_CHANGE,
       [ELIDED_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [GENERAL_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
+      [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_DECLARATION_PTOKEN]: NO_CHANGE,
       [PARAMETER_ENTITY_REFERENCE_PTOKEN]: NO_CHANGE, // §4.1.0: Well-Formedness Constraint: In DTD Parameter-entity references may only appear in the DTD.
-      [NOTATION_DECLARATION_PTOKEN]: NO_CHANGE,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
-      [COMMENT_PTOKEN]: NO_CHANGE,
       [SPACE_PTOKEN]: NO_CHANGE,
       // INTERNAL_SUBSET_END also needs special handling
    },
@@ -396,7 +396,7 @@ class MarkupDeclChecker implements MarkupChecker {
       this.declsSeen = {};
       this.start = start;
 
-      if (start.type === INTERNAL_SUBSET_START_TOKEN) {
+      if (start.type === DOCTYPE_START_PTOKEN) {
          this.inExternalContext = false;
          this.state = States.INTERNAL_SUBSET;
       } else if (start.type === EXTERNAL_SUBSET_START_TOKEN) {
@@ -463,6 +463,15 @@ class MarkupDeclChecker implements MarkupChecker {
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             this.checkPERef(pToken, errorCollector, false);
             break;
+         case EXTERNAL_SUBSET_START_TOKEN:
+            this.embeddedChecker = new MarkupDeclChecker(
+               pToken,
+               errorCollector,
+               this.checkState,
+               this.peContext,
+               this.inExternalContext,
+            );
+            return;
          case CONDITIONAL_START_PTOKEN:
             this.embeddedChecker = new MarkupDeclChecker(
                pToken,
@@ -577,8 +586,7 @@ class MarkupDeclChecker implements MarkupChecker {
       if (
          (pToken.type === PARAMETER_ENTITY_END_PTOKEN &&
             this.start.type === PARAMETER_ENTITY_START_PTOKEN) ||
-         (pToken.type === INTERNAL_SUBSET_END_TOKEN &&
-            this.start.type === INTERNAL_SUBSET_START_TOKEN) ||
+         (pToken.type === DOCTYPE_END_PTOKEN && this.start.type === DOCTYPE_START_PTOKEN) ||
          (pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
             (this.start.type === EXTERNAL_SUBSET_START_TOKEN ||
                this.start.type === CONDITIONAL_START_PTOKEN)) ||

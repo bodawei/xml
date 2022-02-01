@@ -26,10 +26,6 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
    ErrorToken,
-   InternalSubsetStartToken,
-   InternalSubsetEndToken,
-   INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
 import * as attListDecl from '../../pToken/token/attListDeclaration';
@@ -436,22 +432,14 @@ describe('EntityExpander (unit)', () => {
             });
 
             entityExpander.expandPToken(docTypeStart, () => {});
-            entityExpander.expandPToken(new InternalSubsetStartToken(), () => {});
             entityExpander.expandPToken(docTypeStart, () => {});
-            entityExpander.expandPToken(new InternalSubsetStartToken(), () => {});
-            entityExpander.expandPToken(new InternalSubsetEndToken(), () => {});
             entityExpander.expandPToken(docTypeEnd, () => {});
-            entityExpander.expandPToken(new InternalSubsetEndToken(), () => {});
             entityExpander.expandPToken(docTypeEnd, () => {});
 
             expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
-               INTERNAL_SUBSET_START_TOKEN,
                DOCTYPE_START_PTOKEN,
-               INTERNAL_SUBSET_START_TOKEN,
-               INTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
-               INTERNAL_SUBSET_END_TOKEN,
                DOCTYPE_END_PTOKEN,
             ]);
             done();

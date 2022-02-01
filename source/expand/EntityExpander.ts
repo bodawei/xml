@@ -37,14 +37,11 @@ import {
    DocTypeStartPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   InternalSubsetEndToken,
    ErrorToken,
    ElidedEntityDeclarationPToken,
    CONDITIONAL_START_PTOKEN,
    ConditionalStartPToken,
    CONDITIONAL_END_PTOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
 } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';
@@ -156,18 +153,6 @@ class EntityExpander {
             this.docTypeDepth++;
             this.handleDocTypeStart(pToken, expanded);
             break;
-         case INTERNAL_SUBSET_START_TOKEN:
-            this.deliverToken(pToken);
-            expanded();
-            break;
-         case INTERNAL_SUBSET_END_TOKEN:
-            if (!this.expandedExternalSubset && this.docTypeDepth === 1) {
-               this.handleAndExpandExternalSubset(pToken, expanded);
-            } else {
-               this.deliverToken(pToken);
-               expanded();
-            }
-            break;
          case DOCTYPE_END_PTOKEN:
             if (this.docTypeDepth !== 1) {
                this.docTypeDepth--;
@@ -247,13 +232,10 @@ class EntityExpander {
     *
     * Declaration: §2.8.0 [28]
     */
-   private handleAndExpandExternalSubset(
-      pToken: InternalSubsetEndToken | DocTypeEndPToken,
-      handled: PTokenExpanded,
-   ): void {
-      if (pToken.type === INTERNAL_SUBSET_END_TOKEN) {
-         this.deliverToken(pToken);
-      }
+   private handleAndExpandExternalSubset(pToken: DocTypeEndPToken, handled: PTokenExpanded): void {
+      // if (pToken.type === EXTERNAL_SUBSET_START_TOKEN) {
+      //    this.deliverToken(pToken);
+      // }
 
       const externalSubsetToken = this.expandParams.entityDetails.getExternalSubsetReference();
       this.expandedExternalSubset = true;

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector, ErrorToken, warning, WarningToken } from 'basic';
+import { ConformanceVersion, ErrorCollector, ErrorToken, warning } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ParseType, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';

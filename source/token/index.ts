@@ -6,8 +6,6 @@ import { AttributePToken, AttributesPToken, AttributeValuePToken, AttributeValue
 import { LiteralPToken, parseLiteral } from './common/literal';
 import literalValue, { LiteralValuePToken, parseLiteralValue } from './common/literalValue';
 import { WordListPToken, WordListType, WordListEntryPToken, parseWordList, NOTATION_PTOKEN, ENUMERATION_PTOKEN } from './common/wordList';
-import { InternalSubsetStartToken } from './marker/internalSubsetStart';
-import { InternalSubsetEndToken } from './marker/internalSubsetEnd';
 import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
 import { ExternalSubsetEndToken } from './marker/externalSubsetEnd';
 import { DocTypeEndPToken } from './docTypeEnd';
@@ -34,8 +32,6 @@ export * from './marker/externalSubsetEnd';
 export * from './marker/externalSubsetStart';
 export * from './marker/generalEntityEnd';
 export * from './marker/generalEntityStart';
-export * from './marker/internalSubsetEnd';
-export * from './marker/internalSubsetStart';
 export * from './marker/parameterEntityEnd';
 export * from './marker/parameterEntityStart';
 export * from './ElidedEntityDeclarationPToken';
@@ -78,8 +74,6 @@ type PToken =
    | ExternalSubsetEndToken
    | GeneralEntityEndPToken
    | GeneralEntityStartPToken
-   | InternalSubsetStartToken
-   | InternalSubsetEndToken
    | ParameterEntityEndPToken
    | ParameterEntityStartPToken
    | SpacePToken

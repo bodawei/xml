@@ -19,10 +19,10 @@ import {
    ElementEmptyPToken,
    ElementStartPToken,
    GeneralEntityStartPToken,
-   InternalSubsetStartToken,
    ExternalSubsetStartToken,
    ParameterEntityStartPToken,
    ConditionalStartPToken,
+   DocTypeStartPToken,
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
 import { LiteralValuePToken } from '../token/common/literal';
@@ -31,7 +31,7 @@ import { WellFormedError } from './error/WellFormedError';
 type ContentStart = ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
 
 type MarkupStart =
-   | InternalSubsetStartToken
+   | DocTypeStartPToken
    | ExternalSubsetStartToken
    | ParameterEntityStartPToken
    | ConditionalStartPToken;

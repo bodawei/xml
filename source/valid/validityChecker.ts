@@ -36,8 +36,6 @@ import {
    UNKNOWNDECL_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_END_TOKEN,
    getFirstSToken,
 } from 'token';
 
@@ -208,8 +206,6 @@ class ValidityChecker {
          case ENTITY_ID:
          case GENERAL_ENTITY_END_PTOKEN:
          case GENERAL_ENTITY_START_PTOKEN:
-         case INTERNAL_SUBSET_START_TOKEN:
-         case INTERNAL_SUBSET_END_TOKEN:
          default:
             break;
       }

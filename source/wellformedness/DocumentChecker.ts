@@ -14,8 +14,6 @@ import {
    DOCTYPE_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
    ELEMENT_START_PTOKEN,
-   EXTERNAL_SUBSET_START_TOKEN,
-   INTERNAL_SUBSET_START_TOKEN,
    SPACE_PTOKEN,
    getFirstSToken,
 } from 'token';
@@ -61,37 +59,36 @@ enum State {
 
 const transitionsByState: StateTable = {
    [State.START]: {
-      [XMLDECL_PTOKEN]: State.PROLOG_LEADING_MISC,
       [COMMENT_PTOKEN]: State.PROLOG_LEADING_MISC,
+      [DOCTYPE_START_PTOKEN]: State.PROLOG_IN_DOCTYPE,
+      [ELEMENT_EMPTY_PTOKEN]: State.ELEMENT,
+      [ELEMENT_START_PTOKEN]: State.ELEMENT,
       [PROCESSING_INSTRUCTION_PTOKEN]: State.PROLOG_LEADING_MISC,
       [SPACE_PTOKEN]: State.PROLOG_LEADING_MISC,
-      [DOCTYPE_START_PTOKEN]: State.PROLOG_IN_DOCTYPE,
-      [ELEMENT_START_PTOKEN]: State.ELEMENT,
-      [ELEMENT_EMPTY_PTOKEN]: State.ELEMENT,
+      [XMLDECL_PTOKEN]: State.PROLOG_LEADING_MISC,
    },
    [State.PROLOG_LEADING_MISC]: {
       [COMMENT_PTOKEN]: NO_CHANGE,
+      [DOCTYPE_START_PTOKEN]: State.PROLOG_IN_DOCTYPE,
+      [ELEMENT_EMPTY_PTOKEN]: State.ELEMENT,
+      [ELEMENT_START_PTOKEN]: State.ELEMENT,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
       [SPACE_PTOKEN]: NO_CHANGE,
-      [DOCTYPE_START_PTOKEN]: State.PROLOG_IN_DOCTYPE,
-      [ELEMENT_START_PTOKEN]: State.ELEMENT,
-      [ELEMENT_EMPTY_PTOKEN]: State.ELEMENT,
    },
    [State.PROLOG_IN_DOCTYPE]: {
-      [SPACE_PTOKEN]: NO_CHANGE, // @@@ TEST
-      [INTERNAL_SUBSET_START_TOKEN]: State.PROLOG_DTD,
-      [EXTERNAL_SUBSET_START_TOKEN]: State.PROLOG_DTD,
       [DOCTYPE_END_PTOKEN]: State.PROLOG_TRAILING_MISC,
+      [SPACE_PTOKEN]: NO_CHANGE, // @@@ TEST
+      // [EXTERNAL_SUBSET_START_TOKEN]: State.PROLOG_DTD,
    },
    [State.PROLOG_DTD]: {
       // exit this through below. Will transition to PROLOG_IN_DOCTYPE
    },
    [State.PROLOG_TRAILING_MISC]: {
       [COMMENT_PTOKEN]: NO_CHANGE,
+      [ELEMENT_EMPTY_PTOKEN]: State.ELEMENT,
+      [ELEMENT_START_PTOKEN]: State.ELEMENT,
       [PROCESSING_INSTRUCTION_PTOKEN]: NO_CHANGE,
       [SPACE_PTOKEN]: NO_CHANGE,
-      [ELEMENT_START_PTOKEN]: State.ELEMENT,
-      [ELEMENT_EMPTY_PTOKEN]: State.ELEMENT,
    },
    [State.ELEMENT]: {
       // exit this through below. Will transition to TRAILING_MISC
@@ -166,6 +163,8 @@ class DocumentChecker {
          if (result === CHECKER_DONE) {
             if (this.state === State.ELEMENT) {
                this.state = State.TRAILING_MISC;
+            } else if (this.state === State.PROLOG_IN_DOCTYPE) {
+               this.state = State.PROLOG_TRAILING_MISC;
             } else {
                this.state = State.PROLOG_IN_DOCTYPE;
             }
@@ -184,26 +183,32 @@ class DocumentChecker {
             }
             break;
          case DOCTYPE_START_PTOKEN:
-            if (this.state === State.PROLOG_LEADING_MISC) {
+            if (this.state === State.PROLOG_LEADING_MISC || this.state === State.START) {
                // §4.1.0: WFC Entiy Declared requires us to know what our DTD situation is
                this.checkState.hasNoDTD = !pToken.openSubset && !pToken.externalId;
                this.checkState.hasExternalDTD = !!pToken.externalId;
+
+               this.transition(pToken, errorCollector);
+               if (pToken.openSubset) {
+                  this.internalSubsetSeen = true;
+               }
+
+               if (pToken.externalId) {
+                  this.externalSubsetSeen = true;
+               }
+
+               this.subChecker = new this.checkers.dtd(pToken, errorCollector, this.checkState, []);
+               return;
             }
             break;
-         case INTERNAL_SUBSET_START_TOKEN:
-         case EXTERNAL_SUBSET_START_TOKEN:
-            this.transition(pToken, errorCollector);
+         // case EXTERNAL_SUBSET_START_TOKEN:
+         //    this.transition(pToken, errorCollector);
+         //    this.externalSubsetSeen = true;
 
-            if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
-               this.internalSubsetSeen = true;
-            } else {
-               this.externalSubsetSeen = true;
-            }
-
-            if (this.state === State.PROLOG_DTD) {
-               this.subChecker = new this.checkers.dtd(pToken, errorCollector, this.checkState, []);
-            }
-            return;
+         //    if (this.state === State.PROLOG_DTD) {
+         //       this.subChecker = new this.checkers.dtd(pToken, errorCollector, this.checkState, []);
+         //    }
+         //    return;
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
             this.transition(pToken, errorCollector);
@@ -241,10 +246,10 @@ class DocumentChecker {
       const newState = transitions?.[pToken.type];
       let badSubset = false;
 
-      if (pToken.type === INTERNAL_SUBSET_START_TOKEN) {
+      if (pToken.type === DOCTYPE_START_PTOKEN) {
          badSubset = this.internalSubsetSeen || this.externalSubsetSeen;
-      } else if (pToken.type === EXTERNAL_SUBSET_START_TOKEN) {
-         badSubset = this.externalSubsetSeen;
+         // } else if (pToken.type === EXTERNAL_SUBSET_START_TOKEN) {
+         //    badSubset = this.externalSubsetSeen;
       }
 
       if (newState && !badSubset) {
