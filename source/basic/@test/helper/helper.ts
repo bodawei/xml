@@ -4,7 +4,8 @@
 import ErrorCollector from '../../ErrorCollector';
 import { SToken } from 'sToken';
 
-import { Position, BaseError } from '../../BaseError';
+import { XmlErrorPosition } from '../../error/XmlErrorToken';
+import { ErrorToken } from '../../error/errorToken';
 import { XmlErrorToken } from 'source/basic/error/XmlErrorToken';
 
 /**********************************************************************\
@@ -12,16 +13,21 @@ import { XmlErrorToken } from 'source/basic/error/XmlErrorToken';
 \**********************************************************************/
 
 interface ErrorInfo {
-   position: Position;
+   position?: XmlErrorPosition;
    id: string;
    params?: Array<string>;
-   lastPosition?: Position;
+   lastPosition?: XmlErrorPosition;
 }
 
-declare class ErrorToken {
-   public readonly id: string;
-   constructor(id: string, params: Array<string>, position: Position, context: Position);
-}
+// declare class ErrorTokenx {
+//    public readonly id: string;
+//    constructor(
+//       id: string,
+//       params: Array<string>,
+//       position: XmlErrorPosition,
+//       context: XmlErrorPosition,
+//    );
+// }
 
 type ErrConstFunc = typeof ErrorToken;
 
@@ -42,7 +48,7 @@ class MockErrorCollector extends ErrorCollector {
    public errors: Array<XmlErrorToken> = [];
 
    constructor() {
-      super(SToken.fromString('test'), BaseError as any);
+      super(SToken.fromString('test'), ErrorToken);
       this.errors = [];
       this.setPos = this.setPos.bind(this);
       this.report = this.report.bind(this);
@@ -60,7 +66,7 @@ class MockErrorCollector extends ErrorCollector {
       this._lastPos = sToken;
    }
 
-   report(id: string, params?: Array<string>, position?: Position): void {
+   report(id: string, params?: Array<string>, position?: XmlErrorPosition): void {
       const info: ErrorInfo = {
          position: position || this._lastPos,
          id,
@@ -73,7 +79,7 @@ class MockErrorCollector extends ErrorCollector {
       this.errors.push(info as any);
    }
 
-   check(condition: any, id: string, params?: Array<string>, position?: Position): void {
+   check(condition: any, id: string, params?: Array<string>, position?: XmlErrorPosition): void {
       if (condition) {
          if (params) {
             this.report(id, params, position);
@@ -87,7 +93,7 @@ class MockErrorCollector extends ErrorCollector {
       id: string,
       constructor: ErrConstFunc,
       params: Array<string>,
-      position?: Position,
+      position?: XmlErrorPosition,
    ): void {
       this.report(id, params, position);
    }

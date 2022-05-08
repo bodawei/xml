@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { StringBundle } from 'basic';
+import { StringBundle } from './StringBundle';
 
 import messagesAndStrings from './derive/WellFormedError.json';
-import { BaseError, MessageCache, Position } from 'basic';
+import { BaseError, MessageCache, Position } from './BaseError';
 
 const WELL_FORMED_ERROR_SUBTYPE = 'WELL_FORMED_ERROR';
 const messages: MessageCache = {

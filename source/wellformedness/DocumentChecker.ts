@@ -1,6 +1,6 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { ERROR_TYPE, ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
+import { XML_ERROR_TOKEN, ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    XMLDECL_PTOKEN,
@@ -131,7 +131,7 @@ class DocumentChecker {
          return;
       } else if (pToken.type === ENTITY_ID) {
          return;
-      } else if (pToken.type === ERROR_TYPE) {
+      } else if (pToken.type === XML_ERROR_TOKEN) {
          return;
       }
 

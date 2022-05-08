@@ -1,10 +1,11 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityId, Offset, Range, StringBundle } from 'basic';
+import { EntityId, Offset, Range } from 'basic';
 import { SToken } from 'sToken';
 
 import { BaseError, MessageCache } from '../BaseError';
+import { StringBundle } from '../StringBundle';
 
 describe('BaseError()', () => {
    let cache: MessageCache;

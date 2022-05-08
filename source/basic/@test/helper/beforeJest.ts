@@ -1,11 +1,10 @@
 /* Copyright ® 2017-202 by 柏大衛. All rights reserved. */
 
 import { expect } from '@jest/globals';
-import { error } from '../..//error/error';
-import { BaseError } from '../../BaseError';
+import { error } from '../../error/error';
+import { ErrorToken } from '../../error/errorToken';
 import { warning } from '../../error/warning';
 import { MockErrorCollector } from './helper';
-import { makeErrorMatcher } from './makeErrorMatcher';
 import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
 import { fatalError } from '../../error/fatalError';
 
@@ -36,7 +35,7 @@ function toHaveError(actual: any, expected: any) {
 }
 
 function toBeErrorFree(actual: any) {
-   let error: BaseError | undefined;
+   let error: ErrorToken | undefined;
    let message: string;
 
    actual.forEach((token: any) => {
@@ -60,7 +59,7 @@ function toBeErrorFree(actual: any) {
 }
 
 function toBeErrorAndWarningFree(actual: any) {
-   let error: BaseError | undefined;
+   let error: ErrorToken | undefined;
    let message: string;
 
    actual.forEach((token: any) => {
@@ -108,11 +107,11 @@ function toNotReportError(mockErrorCollector: MockErrorCollector, expectedId: st
 }
 
 expect.extend({
-   toHaveError,
-   toBeErrorFree,
    toBeErrorAndWarningFree,
+   toBeErrorFree,
+   toHaveError,
    toNotReportError,
-   toReportWarning: makeNewErrorMatcher(warning),
    toReportError: makeNewErrorMatcher(error),
    toReportFatalError: makeNewErrorMatcher(fatalError),
+   toReportWarning: makeNewErrorMatcher(warning),
 });

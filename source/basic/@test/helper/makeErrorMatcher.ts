@@ -1,11 +1,11 @@
 import { MockErrorCollector } from './helper';
 
-import { Position } from '../../BaseError';
+import { XmlErrorPosition } from '../../error/XmlErrorToken';
 interface ErrorInfo {
-   position: Position;
+   position: XmlErrorPosition;
    id: string;
    params?: Array<string>;
-   lastPosition?: Position;
+   lastPosition?: XmlErrorPosition;
 }
 
 interface JestThis {

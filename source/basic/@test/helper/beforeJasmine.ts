@@ -2,9 +2,8 @@
 
 /* eslint-env jasmine */
 
-import { BaseError } from '../../BaseError';
+import { ErrorToken } from '../../error/errorToken';
 import { warning } from '../../error/warning';
-import { error } from '../../error/error';
 import { MockErrorCollector } from './helper';
 import { makeNewJasmineErrorMatcher } from './makeJasmineErrorMatcher';
 
@@ -90,7 +89,7 @@ function toHaveError(util: any) {
 function toBeErrorFree() {
    return {
       compare: (actual: any) => {
-         let error: BaseError | undefined;
+         let error: ErrorToken | undefined;
          let message: string;
 
          actual.forEach((token: any) => {
@@ -102,9 +101,7 @@ function toBeErrorFree() {
          if (!error!) {
             message = 'Expected to find one or more ErrorToken.';
          } else {
-            message = `Expected to find no ErrorToken, but found ${(error as any).message}. (${
-               (error as any).id
-            })`; // typeHack
+            message = `Expected to find no ErrorToken, but found ${error.message}. (${error.id})`; // typeHack
          }
 
          return {
@@ -118,7 +115,7 @@ function toBeErrorFree() {
 function toBeErrorAndWarningFree() {
    return {
       compare: (actual: any) => {
-         let error: BaseError | undefined;
+         let error: ErrorToken | undefined;
          let message: string;
 
          actual.forEach((token: any) => {
@@ -130,9 +127,7 @@ function toBeErrorAndWarningFree() {
          if (!error!) {
             message = 'Expected to find one or more ErrorToken.';
          } else {
-            message = `Expected to find no ErrorToken, but found ${(error as any).message}. (${
-               (error as any).id
-            })`; // typeHack
+            message = `Expected to find no ErrorToken, but found ${error.message}. (${error.id})`; // typeHack
          }
 
          return {

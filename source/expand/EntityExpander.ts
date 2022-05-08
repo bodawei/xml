@@ -1,6 +1,12 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion, ERROR_TYPE } from 'basic';
+import {
+   CONFORMANCE_VERSION,
+   ENTITY_ID,
+   EntityId,
+   ConformanceVersion,
+   XML_ERROR_TOKEN,
+} from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
@@ -100,9 +106,9 @@ class EntityExpander {
    constructor(validating: boolean, deliverPToken: DeliverPToken, processors: EntityProcessors) {
       this.deliverToken = deliverPToken;
       this.expandParams = {
-         entityId: new EntityId(''),
          confVer: new ConformanceVersion(),
          entityDetails: new EntityDetails(),
+         entityId: new EntityId(''),
          loadExternalEntities: validating,
          utils: processors,
       };
@@ -113,7 +119,7 @@ class EntityExpander {
          if (pToken.type === TEXT_PTOKEN) {
             this.conditionalStartExpander.expandPToken(pToken, expanded);
             return;
-         } else if (pToken.type !== ERROR_TYPE) {
+         } else if (pToken.type !== XML_ERROR_TOKEN) {
             this.conditionalStartExpander.finish();
          }
       }
