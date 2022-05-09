@@ -1,13 +1,12 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
+import { ENTITY_ID, CONFORMANCE_VERSION, XmlErrorToken } from 'basic';
 import { GeneralEntityDeclarationPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
 import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   ErrorToken,
    ElidedEntityDeclarationPToken,
 } from 'token';
 
@@ -64,7 +63,7 @@ describe('expandAttributes() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<ErrorToken> => [],
+                  getErrors: (): Array<XmlErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -319,10 +318,10 @@ describe('expandAttributes() (unit)', () => {
             b: any,
             chain: any,
             callback: (result: {
-               byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+               byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
             }) => void,
          ) => {
-            callback({ byproducts: [attrError] });
+            callback({ byproducts: [attrError] } as any);
          },
       );
 
@@ -331,7 +330,7 @@ describe('expandAttributes() (unit)', () => {
          params,
          new EntityContextStack(),
          (result) => {
-            expect(result).toEqual([
+            expect(result as any).toEqual([
                {
                   newValue: [textPToken, unloadable],
                   byproducts: [attrError],
@@ -391,7 +390,7 @@ describe('expandAttributes() (unit)', () => {
             sTokenSource: STokenSource,
             done: (results: AttributeValueResults) => void,
          ): void => {
-            done({ newValue: [textPToken], errors: [attrError] });
+            done({ newValue: [textPToken], errors: [attrError] } as any);
          };
 
          expandAttributes(
@@ -399,7 +398,7 @@ describe('expandAttributes() (unit)', () => {
             params,
             new EntityContextStack(),
             (result) => {
-               expect(result[0].byproducts).toEqual([attrError]);
+               expect(result[0].byproducts as any).toEqual([attrError]);
                done();
             },
          );
@@ -430,10 +429,10 @@ describe('expandAttributes() (unit)', () => {
                b: any,
                chain: any,
                callback: (result: {
-                  byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+                  byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
                }) => void,
             ) => {
-               callback({ byproducts: [loadingError] });
+               callback({ byproducts: [loadingError] } as any);
             },
          );
          params.utils.parseAttributeValue = (
@@ -448,7 +447,7 @@ describe('expandAttributes() (unit)', () => {
             params,
             new EntityContextStack(),
             (results) => {
-               expect(results[0].byproducts).toEqual([loadingError]);
+               expect(results[0].byproducts as any).toEqual([loadingError]);
                done();
             },
          );
@@ -477,11 +476,11 @@ describe('expandAttributes() (unit)', () => {
             b: any,
             chain: any,
             callback: (result: {
-               byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+               byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
             }) => void,
          ) => {
             entityDetails.updateDeclaredValue(get2Decl, [ge2Value], []);
-            callback({ byproducts: [loadingError] });
+            callback({ byproducts: [loadingError] } as any);
          },
       );
       params.utils.parseAttributeValue = (
@@ -490,10 +489,10 @@ describe('expandAttributes() (unit)', () => {
       ): void => {
          if (ctr === 0) {
             ctr++;
-            done({ newValue: [ge2Ref], errors: [attrError1] });
+            done({ newValue: [ge2Ref], errors: [attrError1] } as any);
             return;
          }
-         done({ newValue: [textPToken], errors: [attrError2] });
+         done({ newValue: [textPToken], errors: [attrError2] } as any);
       };
 
       expandAttributes(
@@ -501,7 +500,7 @@ describe('expandAttributes() (unit)', () => {
          params,
          new EntityContextStack(),
          (results) => {
-            expect(results[0].byproducts).toEqual([attrError1, loadingError, attrError2]);
+            expect(results[0].byproducts as any).toEqual([attrError1, loadingError, attrError2]);
             done();
          },
       );

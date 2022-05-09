@@ -1,11 +1,13 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { error, ErrorCollector, ErrorToken } from 'basic';
+import { ErrorCollector } from 'basic';
 import { AttDefinitionP } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { ValidityState } from './validityState';
+import { ErrorToken } from '../error/errorToken';
+import { errorCodes } from '../error/errorCodes';
 
-const EID = error.id;
+const EID = errorCodes.id;
 
 /*
  * Validates whether the xml:space attribute is declared correctly.

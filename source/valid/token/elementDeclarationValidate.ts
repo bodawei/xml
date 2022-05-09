@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion, isSpace, error, ErrorToken, warning } from 'basic';
+import { ErrorCollector, ConformanceVersion, isSpace } from 'basic';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
@@ -16,8 +16,10 @@ import { ContentDetails, ElDeclType, ValidityState } from '../common/validitySta
 import { validCodes } from '../error/validCodes';
 import { ValidityWarning } from '../error/validityWarning';
 import { warningCodes } from '../error/warningCodes';
+import { errorCodes } from '../error/errorCodes';
+import { ErrorToken } from '../error/errorToken';
 
-const EID = error.id;
+const EID = errorCodes.id;
 const VID = validCodes.id;
 
 function getElementNames(contentModel: ContentModelP): Array<string> {

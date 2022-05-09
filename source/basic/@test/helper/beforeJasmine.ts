@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { ErrorToken } from '../../error/errorToken';
+import { XmlErrorToken } from '../../error/XmlErrorToken';
 import { MockErrorCollector } from './helper';
 import { makeNewJasmineErrorMatcher } from './makeJasmineErrorMatcher';
 
@@ -88,7 +88,7 @@ function toHaveError(util: any) {
 function toBeErrorFree() {
    return {
       compare: (actual: any) => {
-         let error: ErrorToken | undefined;
+         let error: XmlErrorToken | undefined;
          let message: string;
 
          actual.forEach((token: any) => {
@@ -98,9 +98,9 @@ function toBeErrorFree() {
          });
 
          if (!error!) {
-            message = 'Expected to find one or more ErrorToken.';
+            message = 'Expected to find one or more XmlErrorToken.';
          } else {
-            message = `Expected to find no ErrorToken, but found ${error.message}. (${error.id})`; // typeHack
+            message = `Expected to find no XmlErrorToken, but found ${error.message}. (${error.id})`; // typeHack
          }
 
          return {
@@ -114,7 +114,7 @@ function toBeErrorFree() {
 function toBeErrorAndWarningFree() {
    return {
       compare: (actual: any) => {
-         let error: ErrorToken | undefined;
+         let error: XmlErrorToken | undefined;
          let message: string;
 
          actual.forEach((token: any) => {
@@ -124,9 +124,9 @@ function toBeErrorAndWarningFree() {
          });
 
          if (!error!) {
-            message = 'Expected to find one or more ErrorToken.';
+            message = 'Expected to find one or more XmlErrorToken.';
          } else {
-            message = `Expected to find no ErrorToken, but found ${error.message}. (${error.id})`; // typeHack
+            message = `Expected to find no XmlErrorToken, but found ${error.message}. (${error.id})`; // typeHack
          }
 
          return {
@@ -193,7 +193,7 @@ declare global {
    namespace jasmine {
       interface Matchers<T> {
          toBeInstanceOf(anObject: Object): void;
-         toHaveError(expectedErrorTokenInstance: any): void; // given tokens: Array<any>,
+         toHaveError(expectedXmlErrorTokenInstance: any): void; // given tokens: Array<any>,
          toBeErrorFree(): void; // given tokens: Array<any>
          toBeErrorAndWarningFree(): void; // given tokens: Array<any>
          toNotReportError(id: string): void;

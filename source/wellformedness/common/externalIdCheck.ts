@@ -1,10 +1,12 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { ExternalIdP, pTokenArrayToString, TextPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
+import { errorCodes } from '../error/errorCodes';
+import { WellFormedError as NewWellFormedError } from '../error/errorToken';
 
 import { literalCheck } from './literalCheck';
 
@@ -78,7 +80,9 @@ function externalIdCheck(
          const literalString = pTokenArrayToString(externalId.system?.value);
 
          if (literalString.indexOf('#') !== -1) {
-            ec.reportError(error.id.SYSTEMLITERAL_NO_FRAGMENT, ErrorToken, [literalString]);
+            ec.reportError(errorCodes.id.SYSTEMLITERAL_NO_FRAGMENT, NewWellFormedError, [
+               literalString,
+            ]);
          }
       });
    }

@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { XmlErrorToken } from 'basic';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
@@ -10,7 +11,6 @@ import {
 } from 'pToken';
 import { STokenSource } from 'sToken';
 import {
-   ErrorToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    GeneralEntityStartPToken,
@@ -66,7 +66,7 @@ function streamParsedReplacementText(
 ): void {
    const { entityDetails, utils } = expandParams;
    let sTokenSource: STokenSource;
-   let getErrors: () => Array<ErrorToken>;
+   let getErrors: () => Array<XmlErrorToken>;
    let context = ParseType.DOCUMENT;
    let start: ParseToken;
    let end: ParseToken;
@@ -114,7 +114,7 @@ function streamParsedReplacementText(
             details.protoReplacementText,
             expandParams.entityId,
          );
-         getErrors = (): Array<ErrorToken> => [];
+         getErrors = (): Array<XmlErrorToken> => [];
       } else {
          ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(entityLoc));
       }

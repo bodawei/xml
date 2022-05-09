@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, error } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -12,11 +12,12 @@ import { WellFormedError } from '../../error/WellFormedError';
 
 import { textDeclarationCheck } from '../textDeclarationCheck';
 import { fatalError } from '../../error/fatalError';
+import { errorCodes } from '../../error/errorCodes';
 
 jest.mock('../../common/charCheck');
 
 const WFEID = WellFormedError.ID;
-const XEID = error.id;
+const XEID = errorCodes.id;
 
 describe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;

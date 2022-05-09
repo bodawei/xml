@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, error } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -19,8 +19,9 @@ import { elementDeclarationValidate } from '../elementDeclarationValidate';
 
 import { validCodes } from '../../error/validCodes';
 import { warningCodes } from '../../error/warningCodes';
+import { errorCodes } from '../../error/errorCodes';
 
-const EID = error.id;
+const EID = errorCodes.id;
 const VID = validCodes.id;
 
 describe('elementDeclarationValidate (unit)', () => {

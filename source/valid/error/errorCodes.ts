@@ -1,6 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-const errorCodes = {
+import { ErrorCodes } from 'basic';
+
+const errorCodes = new ErrorCodes({
    ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC: {
       code: 1200,
       message:
@@ -16,6 +18,6 @@ const errorCodes = {
       message:
          'Must not have values other than "default" and "preserve" in the enumeration for the "xml:space" attribute for "{0}" (§2.10.0). Found "{1}".',
    },
-};
+});
 
 export { errorCodes };

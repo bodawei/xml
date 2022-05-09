@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, CONFORMANCE_VERSION } from 'basic';
+import { ENTITY_ID, CONFORMANCE_VERSION, XmlErrorToken } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -10,7 +10,7 @@ import {
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
-import { ElidedEntityDeclarationPToken, EntityValuePToken, ErrorToken } from 'token';
+import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
@@ -74,7 +74,7 @@ describe('addProtoReplacementText() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<ErrorToken> => [],
+                  getErrors: (): Array<XmlErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -225,20 +225,20 @@ describe('addProtoReplacementText() (unit)', () => {
          done1 = localDone;
       };
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
-         const errors: Array<ErrorToken> = [];
+         const errors: Array<any> = [];
          for (let index = 0; index < callCount; index++) {
             errors.push(new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS));
          }
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<ErrorToken> => errors,
+            getErrors: (): Array<XmlErrorToken> => errors,
          };
       };
 
       callCount++;
       // Make a first call.  This will start to "retrieve" the sToken and the errors at this time
       addProtoReplacementText(peRefPToken, params, new EntityContextStack(), (results) => {
-         expect(results).toEqual({
+         expect(results as any).toEqual({
             byproducts: [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
                new ElidedEntityDeclarationPToken(peDecl, [
@@ -265,7 +265,8 @@ describe('addProtoReplacementText() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<ErrorToken> => [
+            getErrors: (): Array<any> => [
+               // any should be XmlErrorToken
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],
          };
@@ -275,7 +276,7 @@ describe('addProtoReplacementText() (unit)', () => {
       };
 
       addProtoReplacementText(peRefPToken, params, new EntityContextStack(), (results) => {
-         expect(results).toEqual({
+         expect(results as any).toEqual({
             byproducts: [new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)],
          });
          done();

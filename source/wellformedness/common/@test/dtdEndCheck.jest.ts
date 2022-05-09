@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, error } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -17,6 +17,7 @@ import { fatalError } from '../../error/fatalError';
 import { dtdEndCheck } from '../dtdEndCheck';
 
 import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { errorCodes } from '../../error/errorCodes';
 
 const WARNID = wellFormedWarningCodes.id;
 
@@ -175,7 +176,7 @@ describe('dtdEndCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: error.id.REFERENCE_INVALID_UNPARSED,
+         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -217,7 +218,7 @@ describe('dtdEndCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: error.id.REFERENCE_INVALID_UNPARSED,
+         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -300,19 +301,19 @@ describe('dtdEndCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: error.id.REFERENCE_INVALID_UNPARSED,
+         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar1'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: error.id.REFERENCE_INVALID_UNPARSED,
+         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar2'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportError({
-         id: error.id.REFERENCE_INVALID_UNPARSED,
+         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
          params: ['bar3'],
          position: text2.text,
       });

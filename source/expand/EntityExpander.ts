@@ -6,6 +6,7 @@ import {
    EntityId,
    ConformanceVersion,
    XML_ERROR_TOKEN,
+   XmlErrorToken,
 } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
@@ -43,7 +44,6 @@ import {
    DocTypeStartPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   ErrorToken,
    ElidedEntityDeclarationPToken,
    CONDITIONAL_START_PTOKEN,
    ConditionalStartPToken,
@@ -616,7 +616,9 @@ class EntityExpander {
       );
    }
 
-   private deliverByproducts(byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>): void {
+   private deliverByproducts(
+      byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>,
+   ): void {
       for (const err of byproducts) {
          this.deliverToken(err);
       }

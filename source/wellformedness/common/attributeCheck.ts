@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import { AttributePToken, LiteralValuePToken } from 'token';
@@ -11,6 +11,8 @@ import { nameCheck } from './nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { WellFormedError } from '../error/WellFormedError';
 import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { errorCodes } from '../error/errorCodes';
+import { WellFormedError as NewWellFormedError } from '../error/errorToken';
 
 type CheckAttValue = (
    name: SToken,
@@ -129,8 +131,8 @@ function attributeCheck(
 
             if (valueString !== 'preserve' && valueString !== 'default') {
                ec.reportError(
-                  error.id.XMLSPACE_INVALID_VALUE,
-                  ErrorToken,
+                  errorCodes.id.XMLSPACE_INVALID_VALUE,
+                  NewWellFormedError,
                   [valueString],
                   position?.getStartOffset(),
                );

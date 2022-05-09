@@ -2,15 +2,16 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, error } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ENUMERATION_PTOKEN } from 'token';
 
 import { xmlSpaceValidate } from '../xmlSpaceValidate';
 import { ValidityState } from '../validityState';
+import { errorCodes } from '../../error/errorCodes';
 
-const EID = error.id;
+const EID = errorCodes.id;
 
 describe('xmlSpaceValidate (unit)', () => {
    let state: ValidityState;

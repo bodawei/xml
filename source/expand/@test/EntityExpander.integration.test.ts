@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, Range, EntityId, ENTITY_ID } from 'basic';
+import { Token, Range, EntityId, ENTITY_ID, XmlErrorToken } from 'basic';
 import {
    ParseType,
    GeneralEntityDeclarationPToken,
@@ -20,7 +20,6 @@ import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    PToken,
-   ErrorToken,
    PARAMETER_ENTITY_START_PTOKEN,
    COMMENT_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
@@ -96,7 +95,7 @@ describe('EntityExpander (integration)', () => {
 
       return {
          sTokenSource,
-         getErrors(): Array<ErrorToken> {
+         getErrors(): Array<XmlErrorToken> {
             return [];
          },
       };

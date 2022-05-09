@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion } from 'basic';
+import { ENTITY_ID, ConformanceVersion, XmlErrorToken } from 'basic';
 import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
@@ -9,7 +9,7 @@ import {
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
-import { ErrorToken, ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
+import { ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';
@@ -68,7 +68,7 @@ describe('expandMarkupUnexpanded() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<ErrorToken> => [],
+                  getErrors: (): Array<XmlErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -169,12 +169,12 @@ describe('expandMarkupUnexpanded() (unit)', () => {
             chain: any,
             cb: (result: AddProtoReplacementTextResult) => void,
          ) => {
-            cb({ byproducts: [attrError] });
+            cb({ byproducts: [attrError] } as any);
          },
       );
 
       expandMarkupUnexpanded(unexpandedTokens, params, new EntityContextStack(), (result) => {
-         expect(result.byproducts).toEqual([attrError]);
+         expect(result.byproducts as any).toEqual([attrError]);
          done();
       });
    });
@@ -198,12 +198,12 @@ describe('expandMarkupUnexpanded() (unit)', () => {
             chain: any,
             cb: (result: AddProtoReplacementTextResult) => void,
          ) => {
-            cb({ byproducts: [attrError] });
+            cb({ byproducts: [attrError] } as any);
          },
       );
 
       expandMarkupUnexpanded(unexpandedTokens, params, new EntityContextStack(), (result) => {
-         expect(result).toEqual({
+         expect(result as any).toEqual({
             expandedTokens: [peRef2],
             byproducts: [attrError],
          });

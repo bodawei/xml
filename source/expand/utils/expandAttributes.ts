@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { XmlErrorToken } from 'basic';
 import { doAsyncLoop } from 'basic';
 import { GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank, STokenSource } from 'sToken';
@@ -8,7 +9,6 @@ import {
    ElidedEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
-   ErrorToken,
 } from 'token';
 
 import { entityValueToSTokenSource } from './entityValueToSTokenSource';
@@ -22,14 +22,14 @@ interface AttrValueObj {
 }
 
 interface ExpandAttrResult {
-   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
    newValue: AttributeValuePToken;
 }
 type AttrExpanded = (result: ExpandAttrResult) => void;
 
 interface ParseResults {
    expandedFragment: AttributeValuePToken | void;
-   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
 }
 
 /*
@@ -41,7 +41,7 @@ function parseEntityValueAsAttributeValue(
    geDetails: GEDetails,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
-   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>,
+   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>,
    callback: (result: ParseResults) => void,
 ): void {
    const entityValue = geDetails.protoReplacementText;
@@ -171,7 +171,7 @@ function expandOneAttribute(
       geRefs,
       expandGeRef.bind(undefined, expandParams, entityContextStack),
       (expandedDetails) => {
-         const allByproducts: Array<ErrorToken | ElidedEntityDeclarationPToken> = [];
+         const allByproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken> = [];
          const newValue: AttributeValuePToken = [];
          let geRefIndex = 0;
 

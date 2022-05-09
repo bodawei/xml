@@ -1,3 +1,4 @@
+import { XmlErrorToken } from 'basic';
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
@@ -5,7 +6,6 @@ import {
    EntityValuePToken,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
-   ErrorToken,
 } from 'token';
 
 import { ExpandParams } from '../types';
@@ -16,7 +16,7 @@ import { EntityContextStack } from './EntityContextStack';
 
 interface ExpandedResult {
    newValue: EntityValuePToken;
-   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
 }
 
 /*
@@ -55,7 +55,7 @@ function expandValue(
    value: EntityValuePToken,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
-   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>,
+   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>,
    expanded: (result: ExpandedResult) => void,
 ): void {
    const newValue: EntityValuePToken = [];
@@ -104,7 +104,7 @@ function expandEntityValue(
    entityContextStack: EntityContextStack,
    expanded: (result: ExpandedResult) => void,
 ): void {
-   const byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken> = [];
+   const byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken> = [];
    const entitiesWithoutRT = entitiesWithoutReplacementText(value, expandParams.entityDetails);
    let remainingEntities = entitiesWithoutRT.length;
 

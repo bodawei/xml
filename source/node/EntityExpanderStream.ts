@@ -3,12 +3,12 @@
 import fs from 'fs';
 import { resolve } from 'path';
 import { Transform } from 'stream';
-import { EntityId } from 'basic';
+import { EntityId, XmlErrorToken } from 'basic';
 import { PTokenLiteralStream } from './pTokenLiteralStream';
 import { PTokenStream } from './pTokenStream';
 import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
 import { STokenSource } from 'sToken';
-import { AttributeValuePToken, EntityValuePToken, PToken, ErrorToken } from 'token';
+import { AttributeValuePToken, EntityValuePToken, PToken } from 'token';
 
 import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../expand/types';
 import { ParseType } from 'pToken';
@@ -64,7 +64,7 @@ function retrieveExternalEntity(
 
    return {
       sTokenSource,
-      getErrors: (): Array<ErrorToken> => [],
+      getErrors: (): Array<XmlErrorToken> => [],
    };
 }
 

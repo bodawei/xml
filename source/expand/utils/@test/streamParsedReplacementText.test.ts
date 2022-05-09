@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion, EntityId } from 'basic';
+import { ENTITY_ID, ConformanceVersion, EntityId, XmlErrorToken } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -12,7 +12,6 @@ import {
 import { toSToken, STokenSource } from 'sToken';
 import { WellFormedError } from 'wellformedness';
 import {
-   ErrorToken,
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    GeneralEntityStartPToken,
@@ -67,7 +66,7 @@ describe('streamParsedReplacementText() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<ErrorToken> => [],
+                  getErrors: (): Array<XmlErrorToken> => [],
                };
             },
             parseAttributeValue: noopFunction,
@@ -162,14 +161,14 @@ describe('streamParsedReplacementText() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<ErrorToken> => [error1, error2],
+            getErrors: (): Array<any> => [error1, error2],
          };
       };
 
       gatherResults(
          entityDetails.getExternalSubsetReference() as any,
          (results: Array<ParseToken>) => {
-            expect(results).toEqual([
+            expect(results as any).toEqual([
                new ExternalSubsetStartToken(),
                textPToken,
                error1,
@@ -307,7 +306,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       const retrieveSpy = spyOn(params.utils, 'retrieveExternalEntity');
       retrieveSpy.and.returnValue({
          sTokenSource,
-         getErrors: (): Array<ErrorToken> => [],
+         getErrors: (): Array<XmlErrorToken> => [],
       });
 
       streamParsedReplacementText(peRef, params, stack, (value, cb) => {

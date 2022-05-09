@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion } from 'basic';
+import { ENTITY_ID, ConformanceVersion, XmlErrorToken } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
@@ -13,7 +13,6 @@ import {
    ElidedEntityDeclarationPToken,
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
-   ErrorToken,
 } from 'token';
 
 import { expandEntityValue } from '../expandEntityValue';
@@ -67,7 +66,7 @@ describe('expandEntityValue() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<ErrorToken> => [],
+                  getErrors: (): Array<XmlErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -137,7 +136,7 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<ErrorToken> => [],
+            getErrors: (): Array<XmlErrorToken> => [],
          };
       };
 
@@ -161,14 +160,14 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<ErrorToken> => [
+            getErrors: (): Array<any> => [
                new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             ],
          };
       };
 
       expandEntityValue([textPToken, peRefPToken], params, new EntityContextStack(), (result) => {
-         expect(result.byproducts).toEqual([
+         expect(result.byproducts as any).toEqual([
             new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
             new ElidedEntityDeclarationPToken(peDecl, []),
          ]);
@@ -248,7 +247,7 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<ErrorToken> => [],
+            getErrors: (): Array<XmlErrorToken> => [],
          };
       };
 

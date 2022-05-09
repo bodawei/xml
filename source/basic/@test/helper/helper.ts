@@ -4,8 +4,8 @@
 import ErrorCollector from '../../ErrorCollector';
 import { SToken } from 'sToken';
 
+import { ErrorToken } from './errorToken';
 import { XmlErrorPosition } from '../../error/XmlErrorToken';
-import { ErrorToken } from '../../error/errorToken';
 import { XmlErrorToken } from 'source/basic/error/XmlErrorToken';
 
 /**********************************************************************\
@@ -18,16 +18,6 @@ interface ErrorInfo {
    params?: Array<string>;
    lastPosition?: XmlErrorPosition;
 }
-
-// declare class ErrorTokenx {
-//    public readonly id: string;
-//    constructor(
-//       id: string,
-//       params: Array<string>,
-//       position: XmlErrorPosition,
-//       context: XmlErrorPosition,
-//    );
-// }
 
 type ErrConstFunc = typeof ErrorToken;
 

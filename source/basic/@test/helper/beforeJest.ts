@@ -1,8 +1,7 @@
 /* Copyright ® 2017-202 by 柏大衛. All rights reserved. */
 
 import { expect } from '@jest/globals';
-import { error } from '../../error/error';
-import { ErrorToken } from '../../error/errorToken';
+import { XmlErrorToken } from '../../error/XmlErrorToken';
 import { MockErrorCollector } from './helper';
 import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
 
@@ -33,7 +32,7 @@ function toHaveError(actual: any, expected: any) {
 }
 
 function toBeErrorFree(actual: any) {
-   let error: ErrorToken | undefined;
+   let error: XmlErrorToken | undefined;
    let message: string;
 
    actual.forEach((token: any) => {
@@ -43,9 +42,9 @@ function toBeErrorFree(actual: any) {
    });
 
    if (!error!) {
-      message = 'Expected to find one or more ErrorTokens.';
+      message = 'Expected to find one or more XmlErrorTokens.';
    } else {
-      message = `Expected to find no ErrorTokens, but found ${(error as any).message}. (${
+      message = `Expected to find no XmlErrorTokens, but found ${(error as any).message}. (${
          (error as any).id
       })`; // typeHack
    }
@@ -57,7 +56,7 @@ function toBeErrorFree(actual: any) {
 }
 
 function toBeErrorAndWarningFree(actual: any) {
-   let error: ErrorToken | undefined;
+   let error: XmlErrorToken | undefined;
    let message: string;
 
    actual.forEach((token: any) => {
@@ -67,9 +66,9 @@ function toBeErrorAndWarningFree(actual: any) {
    });
 
    if (!error!) {
-      message = 'Expected to find one or more ErrorTokens.';
+      message = 'Expected to find one or more XmlErrorTokens.';
    } else {
-      message = `Expected to find no ErrorTokens, but found ${(error as any).message}. (${
+      message = `Expected to find no XmlErrorTokens, but found ${(error as any).message}. (${
          (error as any).id
       })`; // typeHack
    }
@@ -109,7 +108,7 @@ expect.extend({
    toBeErrorFree,
    toHaveError,
    toNotReportError,
-   toReportError: makeNewErrorMatcher(error),
+   toReportError: makeNewErrorMatcher(), // should be an error
    toReportFatalError: makeNewErrorMatcher(), // should be a fatalError
    toReportWarning: makeNewErrorMatcher(), // should be warning
 });

@@ -1,8 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { XmlErrorToken } from 'basic';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'pToken';
 
-import { ElidedEntityDeclarationPToken, EntityValuePToken, ErrorToken } from 'token';
+import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
 
 import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
@@ -10,7 +11,7 @@ import { EntityContextStack } from './EntityContextStack';
 import { PARAMETER_ENTITY_DECLARATION_PTOKEN, externalIdToEntityId } from 'pToken';
 
 interface AddProtoReplacementTextResult {
-   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
 }
 
 type Done = (result: AddProtoReplacementTextResult) => void;

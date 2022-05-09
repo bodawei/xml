@@ -1,5 +1,5 @@
 import { ErrorCodes } from '../../../error/errorCodes';
-import { ErrorInfo } from '../../../error/errorInfo';
+import { ErrorInfo } from '../errorInfo';
 import { MockErrorCollector } from '../../helper';
 
 interface SyncExpectationResult {

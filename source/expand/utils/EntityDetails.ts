@@ -1,5 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
+import { XmlErrorToken } from 'basic';
 import { strOrBlank, toSToken } from 'sToken';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
@@ -9,7 +10,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { EntityValuePToken, ErrorToken, ElidedEntityDeclarationPToken } from 'token';
+import { EntityValuePToken, ElidedEntityDeclarationPToken } from 'token';
 
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
@@ -17,7 +18,7 @@ import { OpaqueEntityLoc } from '../types';
 
 interface LoadingResult {
    details: PrivateGEDetails | PrivatePEDetails | undefined;
-   byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
 }
 type LoadingCallback = (result: LoadingResult) => void;
 
@@ -189,7 +190,7 @@ class EntityDetails {
    public updateDeclaredValue(
       declaration: ParameterEntityDeclarationPToken | GeneralEntityDeclarationPToken,
       newValue: EntityValuePToken | undefined,
-      byproducts: Array<ErrorToken | ElidedEntityDeclarationPToken>,
+      byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>,
    ): void {
       const details = this.getContentDetails(declaration);
 

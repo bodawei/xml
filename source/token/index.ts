@@ -1,5 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
+import { XmlErrorToken } from 'basic';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 
 import { AttributePToken, AttributesPToken, AttributeValuePToken, AttributeValueElement, parseAttribute } from './common/attribute';
@@ -49,15 +50,15 @@ export * from './space';
 
 const ERROR_TYPE = 'ERROR_TYPE';
 
-type ErrorToken = {
-   type: 'ERROR_TYPE';
-   subtype?: string;
-   id: string;
-   message: string;
-}
+// type ErrorToken = {
+//    type: 'ERROR_TYPE';
+//    subtype?: string;
+//    id: string;
+//    message: string;
+// }
 
 type PToken =
-   | ErrorToken
+   | XmlErrorToken
    | CdataPToken
    | CharDataPToken
    | CommentPToken
@@ -105,5 +106,4 @@ export {
    literalValue,
    AttributeValuePToken,
    PToken,
-   ErrorToken,
 };

@@ -1,11 +1,13 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import Offset from '../Offset';
-import { error } from './error';
-import { makeOffset } from './makeOffset';
-import { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken } from './XmlErrorToken';
-
-const ERROR_SUBTYPE = 'ERROR_SUBTYPE';
+import Offset from '../../Offset';
+import { makeOffset } from '../../error/makeOffset';
+import {
+   XML_ERROR_TOKEN,
+   XmlErrorPosition,
+   XmlErrorToken,
+   ERROR_SUBTYPE,
+} from '../../error/XmlErrorToken';
 
 class ErrorToken implements XmlErrorToken {
    public readonly code: number;
@@ -29,11 +31,11 @@ class ErrorToken implements XmlErrorToken {
       context?: XmlErrorPosition,
    ) {
       this.id = id;
-      this.code = error.codeFor(id);
+      this.code = 123;
       this.context = makeOffset(context);
-      this.message = error.messageFor(id, params);
+      this.message = 'this is a test';
       this.place = makeOffset(place);
    }
 }
 
-export { ERROR_SUBTYPE, ErrorToken };
+export { ErrorToken };

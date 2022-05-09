@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector, ErrorToken } from 'basic';
+import { ConformanceVersion, ErrorCollector, XmlErrorToken } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ParseType, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -36,7 +36,7 @@ fdescribe('DocumentChecker (integration)', () => {
       done: () => void,
       confVer?: ConformanceVersion,
    ): void {
-      const finalResults: Array<ErrorToken> = [];
+      const finalResults: Array<XmlErrorToken> = [];
       const sTokenSource = new STokenSource();
 
       pTokenStream = new PTokenStream(sTokenSource, {
@@ -60,7 +60,7 @@ fdescribe('DocumentChecker (integration)', () => {
 
             checker.check(result, ec);
 
-            finalResults.push(...(ec.errors as Array<ErrorToken>));
+            finalResults.push(...ec.errors);
          }
 
          const targetError = finalResults.find((err) => err.id === errorCode);

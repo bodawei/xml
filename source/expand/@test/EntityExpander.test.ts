@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { XmlErrorToken } from 'basic';
 import {
    ParseToken,
    NOTATION_DECLARATION_PTOKEN,
@@ -25,7 +26,6 @@ import {
    DocTypeStartPToken,
    ElementStartPToken,
    ElementEmptyPToken,
-   ErrorToken,
 } from 'token';
 
 import * as attListDecl from '../../pToken/token/attListDeclaration';
@@ -61,7 +61,7 @@ describe('EntityExpander (unit)', () => {
 
       return {
          sTokenSource,
-         getErrors(): Array<ErrorToken> {
+         getErrors(): Array<XmlErrorToken> {
             return [];
          },
       };
@@ -625,7 +625,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          doExpand([attList], true, (results) => {
-            expect(results).toEqual([error1, error2, expanded]);
+            expect(results as any).toEqual([error1, error2, expanded]); // any because of WellFormed error
             done();
          });
       });
@@ -779,7 +779,7 @@ describe('EntityExpander (unit)', () => {
          const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['0']);
 
          doExpand([geDecl], true, (results) => {
-            expect(results).toEqual([error1, geDecl]);
+            expect(results as any).toEqual([error1, geDecl]); // any because of WellFormedError
             done();
          });
       });
@@ -1266,7 +1266,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          doExpand([startElement], true, (results) => {
-            expect(results).toEqual([error1, error2, expandedStart]);
+            expect(results as any).toEqual([error1, error2, expandedStart]); // @@ hack, because of WellFormedError
             done();
          });
       });

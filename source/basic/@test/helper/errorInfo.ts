@@ -1,4 +1,4 @@
-import { XmlErrorPosition } from './XmlErrorToken';
+import { XmlErrorPosition } from '../../error/XmlErrorToken';
 
 interface ErrorInfo {
    position: XmlErrorPosition;

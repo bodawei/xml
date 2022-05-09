@@ -1,4 +1,8 @@
-const wellFormedErrors = {
+/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+
+import { ErrorCodes } from 'basic';
+
+const errorCodes = new ErrorCodes({
    XMLSPACE_INVALID_VALUE: {
       code: 1300,
       message:
@@ -20,6 +24,6 @@ const wellFormedErrors = {
       code: 1304,
       message: 'Must not reference an unparsed entity (§4.9.0). Found "{0}".',
    },
-};
+});
 
-export { wellFormedErrors };
+export { errorCodes };

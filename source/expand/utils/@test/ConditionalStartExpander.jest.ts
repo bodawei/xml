@@ -2,11 +2,11 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, EntityId } from 'basic';
+import { ConformanceVersion, EntityId, XmlErrorToken } from 'basic';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { ExpandParams, RetrieveResults } from 'source/expand/types';
 import { STokenSource, toSToken } from 'sToken';
-import { ConditionalStartPToken, ErrorToken, resumeParseConditional } from 'token';
+import { ConditionalStartPToken, resumeParseConditional } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
 import { addProtoReplacementText } from '../addProtoReplacementText';
 import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
@@ -49,7 +49,7 @@ describe('ConditionalStartExpander (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<ErrorToken> => [],
+                  getErrors: (): Array<XmlErrorToken> => [],
                };
             },
             parseAttributeValue: (): void => {},

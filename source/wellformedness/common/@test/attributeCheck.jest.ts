@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, error } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -14,6 +14,7 @@ import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { attributeCheck } from '../attributeCheck';
 import { WellFormedError } from '../../error/WellFormedError';
 import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { errorCodes } from '../../error/errorCodes';
 
 jest.mock('../attributeLangCheck');
 jest.mock('../literalCheck');
@@ -102,7 +103,7 @@ describe('attributeCheck (unit)', () => {
       );
 
       expect(mockErrorCollector).toReportError({
-         id: error.id.XMLSPACE_INVALID_VALUE,
+         id: errorCodes.id.XMLSPACE_INVALID_VALUE,
          params: ['bogus'],
          position: undefined,
          lastPosition: toSToken('='),

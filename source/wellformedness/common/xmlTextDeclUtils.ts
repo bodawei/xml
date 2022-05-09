@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { InstructionField } from 'pToken';
 import { SToken } from 'sToken';
 
@@ -8,6 +8,8 @@ import { WellFormedError } from '../error/WellFormedError';
 import { FatalErrorToken } from '../error/fatalErrorToken';
 import { WellFormedWarning } from '../error/wellFormedWarning';
 import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { errorCodes } from '../error/errorCodes';
+import { WellFormedError as NewWellFormedError } from '../error/errorToken';
 
 const WFEID = WellFormedError.ID;
 const S_REGEXP = /^[\t\r\n ]*$/;
@@ -58,8 +60,10 @@ function checkVersionString(
          ec.report(code, ["([a-zA-Z0-9_.:] | '-')+", versionText]);
       } else if (isNot10) {
          ec.reportError(
-            isXmlDecl ? error.id.XMLDECL_VERSION_INVALID : error.id.TEXTDECL_VERSION_INVALID,
-            ErrorToken,
+            isXmlDecl
+               ? errorCodes.id.XMLDECL_VERSION_INVALID
+               : errorCodes.id.TEXTDECL_VERSION_INVALID,
+            NewWellFormedError,
             ['1.0', versionText],
          );
       }

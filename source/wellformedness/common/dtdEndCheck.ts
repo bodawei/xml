@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { LiteralValuePToken } from 'token';
@@ -9,6 +9,8 @@ import { FatalErrorToken } from '../error/fatalErrorToken';
 import { fatalError } from '../error/fatalError';
 import { WellFormedWarning } from '../error/wellFormedWarning';
 import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { errorCodes } from '../error/errorCodes';
+import { WellFormedError as NewWellFormedError } from '../error/errorToken';
 
 const GE_REF_REGEXP = /&([^;]*);/g;
 const WARNID = wellFormedWarningCodes.id;
@@ -42,9 +44,9 @@ function checkEntity(
             if (isUnparsed) {
                const code = isForbidden
                   ? fatalError.id.REFERENCE_INVALID_UNPARSED
-                  : error.id.REFERENCE_INVALID_UNPARSED;
+                  : errorCodes.id.REFERENCE_INVALID_UNPARSED;
                ec.setPos(element.text);
-               ec.reportError(code, isForbidden ? FatalErrorToken : ErrorToken, [name]);
+               ec.reportError(code, isForbidden ? FatalErrorToken : NewWellFormedError, [name]);
             }
          }
 
