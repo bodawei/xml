@@ -6,7 +6,6 @@ import { ErrorToken } from '../../error/errorToken';
 import { warning } from '../../error/warning';
 import { MockErrorCollector } from './helper';
 import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
-import { fatalError } from '../../error/fatalError';
 
 function toHaveError(actual: any, expected: any) {
    let pass = false;
@@ -112,6 +111,6 @@ expect.extend({
    toHaveError,
    toNotReportError,
    toReportError: makeNewErrorMatcher(error),
-   toReportFatalError: makeNewErrorMatcher(fatalError),
+   toReportFatalError: makeNewErrorMatcher(), // should be a fatalError
    toReportWarning: makeNewErrorMatcher(warning),
 });

@@ -4,6 +4,7 @@ import { SToken } from 'sToken';
 import Offset from '../Offset';
 
 const XML_ERROR_TOKEN = 'ERROR_TYPE';
+const FATAL_ERROR_SUBTYPE = 'FATAL_ERROR_SUBTYPE';
 
 type XmlErrorPosition = Offset | SToken;
 
@@ -17,4 +18,4 @@ interface XmlErrorToken {
    readonly type: typeof XML_ERROR_TOKEN;
 }
 
-export { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken };
+export { XML_ERROR_TOKEN, FATAL_ERROR_SUBTYPE, XmlErrorPosition, XmlErrorToken };

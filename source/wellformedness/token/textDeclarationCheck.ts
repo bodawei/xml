@@ -1,12 +1,13 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, fatalError } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { InstructionField, TextDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { charCheck } from '../common/charCheck';
 import { checkSpaceProblems, checkSpaces, checkVersionString } from '../common/xmlTextDeclUtils';
 import { WellFormedError } from '../error/WellFormedError';
+import { fatalError } from '../error/fatalError';
 
 const WFEID = WellFormedError.ID;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;

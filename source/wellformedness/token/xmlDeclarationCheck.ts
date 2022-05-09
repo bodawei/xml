@@ -1,8 +1,9 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, fatalError } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { InstructionField, XmlDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
+import { fatalError } from '../error/fatalError';
 
 import { charCheck } from '../common/charCheck';
 import { checkSpaceProblems, checkSpaces, checkVersionString } from '../common/xmlTextDeclUtils';

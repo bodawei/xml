@@ -5,7 +5,6 @@ import {
    ErrorCollector,
    error,
    ErrorToken,
-   FatalErrorToken,
    warning,
    WarningToken,
 } from 'basic';
@@ -13,6 +12,7 @@ import { InstructionField } from 'pToken';
 import { SToken } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
+import { FatalErrorToken } from '../error/fatalErrorToken';
 
 const WFEID = WellFormedError.ID;
 const S_REGEXP = /^[\t\r\n ]*$/;

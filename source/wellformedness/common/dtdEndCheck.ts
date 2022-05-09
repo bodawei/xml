@@ -5,8 +5,6 @@ import {
    ErrorCollector,
    error,
    ErrorToken,
-   FatalErrorToken,
-   fatalError,
    warning,
    WarningToken,
 } from 'basic';
@@ -14,6 +12,8 @@ import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { LiteralValuePToken } from 'token';
 import { CheckState, GeneralEntitiesInfo } from '../checkUtils';
+import { FatalErrorToken } from '../error/fatalErrorToken';
+import { fatalError } from '../error/fatalError';
 
 const GE_REF_REGEXP = /&([^;]*);/g;
 const WARNID = warning.id;

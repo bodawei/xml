@@ -1,11 +1,14 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import Offset from '../Offset';
 import { fatalError } from './fatalError';
-import { makeOffset } from './makeOffset';
-import { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken } from './XmlErrorToken';
-
-const FATAL_ERROR_SUBTYPE = 'FATAL_ERROR_SUBTYPE';
+import {
+   FATAL_ERROR_SUBTYPE,
+   Offset,
+   makeOffset,
+   XML_ERROR_TOKEN,
+   XmlErrorPosition,
+   XmlErrorToken,
+} from 'basic';
 
 class FatalErrorToken implements XmlErrorToken {
    public readonly code: number;

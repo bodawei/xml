@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, error, fatalError, warning } from 'basic';
+import { ConformanceVersion, error, warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { XmlDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -10,6 +10,7 @@ import { charCheck } from '../../common/charCheck';
 import { WellFormedError } from '../../error/WellFormedError';
 
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
+import { fatalError } from '../../error/fatalError';
 
 jest.mock('../../common/charCheck');
 

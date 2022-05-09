@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, error, fatalError } from 'basic';
+import { ConformanceVersion, error } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -11,6 +11,7 @@ import { charCheck } from '../../common/charCheck';
 import { WellFormedError } from '../../error/WellFormedError';
 
 import { textDeclarationCheck } from '../textDeclarationCheck';
+import { fatalError } from '../../error/fatalError';
 
 jest.mock('../../common/charCheck');
 

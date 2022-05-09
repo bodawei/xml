@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, error, fatalError } from 'basic';
+import { ConformanceVersion, error } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -13,6 +13,7 @@ import {
 import { toSToken } from 'sToken';
 
 import { CheckState } from '../../checkUtils';
+import { fatalError } from '../../error/fatalError';
 import { dtdEndCheck } from '../dtdEndCheck';
 
 import { warning } from 'basic';
