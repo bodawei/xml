@@ -127,7 +127,7 @@ describe('pTokenStream (integration)', () => {
    });
 
    it('parse parameter entity reference', (done) => {
-      expectInputToProduceTypes('%foo;', PARAMETER_ENTITY_REFERENCE_PTOKEN, done);
+      expectInputToProduceTypes('<!DOCTYPE foo [%foo;]>', PARAMETER_ENTITY_REFERENCE_PTOKEN, done);
    });
 
    it('parse NOTATION declaration', (done) => {

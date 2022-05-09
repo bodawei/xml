@@ -5,7 +5,7 @@ export * from './bridge/entityDeclaration';
 export * from './common/contentModel';
 export * from './common/externalId';
 export * from './common/fieldedInstruction';
-export * from './pTokenParser';
+export * from './pTokenParser3';
 export * from './pTokenLiteralParser';
 export * from './token/attListDeclaration';
 export * from './token/charRef';

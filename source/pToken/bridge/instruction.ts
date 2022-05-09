@@ -71,4 +71,20 @@ function parseInstruction(
    });
 }
 
-export { InstructionStart, parseInstruction };
+function parseXmlDecl(
+   source: STokenSource,
+   openSToken: SToken,
+   deliverPToken: DeliverInstruction,
+): void {
+   parseInstruction(source, openSToken, true, deliverPToken);
+}
+
+function parsePlainInstruction(
+   source: STokenSource,
+   openSToken: SToken,
+   deliverPToken: DeliverInstruction,
+): void {
+   parseInstruction(source, openSToken, false, deliverPToken);
+}
+
+export { InstructionStart, parseInstruction, parseXmlDecl, parsePlainInstruction };

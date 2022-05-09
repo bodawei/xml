@@ -85,9 +85,7 @@ class PTokenParser {
       this.parseType = options.parseType || ParseType.DOCUMENT;
       this.sTokenSource = sTokenSource;
       // We should always get a confVer if we are not the document type.
-      this.confVer = options.confVer
-         ? new ConformanceVersion(options.confVer)
-         : new ConformanceVersion();
+      this.confVer = new ConformanceVersion(options.confVer);
 
       // In all other contexts, the EntityExpander will already have set the ConformanceVersion on the sTokenSource
       if (this.parseType === ParseType.DOCUMENT) {
@@ -95,55 +93,116 @@ class PTokenParser {
       }
    }
 
-   parse(done: DeliverPToken): void {
+   public parse(done: DeliverPToken): void {
       if (!this.isEntityIdDelivered && this.parseType === ParseType.DOCUMENT) {
          this.examineDeclaration(done);
          return;
       }
 
       if (this.isParsing) {
-         done(undefined);
+         done(undefined); // this is a real big problem.  undefined means "nothing else to parse"
          return;
       }
 
       this.isParsing = true;
 
-      this.parseGeneral((result) => {
-         let tokens: Array<ParseToken> | ParseToken | undefined = result;
+      if (this.inContent) {
+         this.parseContent((result) => {
+            this.handleGeneralDone(result, done);
+         });
+         return;
+      }
 
-         if (Array.isArray(result)) {
-            // docstart and end may deliver an array(!)
-            tokens = result;
-            result = result[result.length - 1];
-         }
+      const conditionalState =
+         this.conditionalStack.length === 0
+            ? ConditionalState.NONE
+            : this.conditionalStack[this.conditionalStack.length - 1];
 
-         switch (result?.type) {
-            case ELEMENT_START_PTOKEN:
-               this.inContent = true;
-               this.elementStack.push(result);
-               break;
-            case ELEMENT_END_PTOKEN:
-               const resultName = strOrBlank(result.name);
-               const topToken = this.elementStack[this.elementStack.length - 1];
-               const topName = strOrBlank(topToken ? topToken.name : undefined);
-
-               if (resultName === topName) {
-                  this.elementStack.pop();
-                  // We are always inContent if we are in a general entity. do not change that.
-                  if (this.parseType !== ParseType.GENERAL_ENTITY) {
-                     this.inContent = this.elementStack.length > 0;
+      if (
+         conditionalState === ConditionalState.IGNORE ||
+         conditionalState === ConditionalState.INSIDE_IGNORE
+      ) {
+         this.sTokenSource.extract('multi', ['<![', ']]>'], (sToken) => {
+            if (!sToken) {
+               this.sTokenSource.extract('all', ['<![', ']]>'], (sToken) => {
+                  if (!sToken) {
+                     this.handleGeneralDone(undefined, done);
+                  } else {
+                     this.handleGeneralDone(new TextPToken({ text: sToken }), done);
                   }
+               });
+               return;
+            }
+
+            switch (strOrBlank(sToken)) {
+               case '<![':
+                  this.handleGeneralDone(new TextPToken({ text: sToken }), done);
+                  this.conditionalStack.push(ConditionalState.INSIDE_IGNORE);
+                  break;
+               case ']]>':
+                  this.conditionalStack.pop();
+
+                  if (conditionalState === ConditionalState.INSIDE_IGNORE) {
+                     this.handleGeneralDone(new TextPToken({ text: sToken }), done);
+                  } else {
+                     const conditionalClose = new ConditionalEndPToken({ open: sToken });
+                     this.handleGeneralDone(conditionalClose, done);
+                  }
+                  break;
+            }
+         });
+      } else {
+         parseSpace(this.sTokenSource, (pToken: SpacePToken | undefined) => {
+            if (pToken) {
+               this.handleGeneralDone(pToken, done);
+               return;
+            }
+
+            this.parseContent((result) => {
+               this.handleGeneralDone(result, done);
+            });
+         });
+      }
+   }
+
+   private handleGeneralDone(
+      result: ParseToken | Array<ParseToken> | undefined,
+      done: DeliverPToken,
+   ): void {
+      let tokens: Array<ParseToken> | ParseToken | undefined = result;
+
+      if (Array.isArray(result)) {
+         // docstart and end may deliver an array(!)
+         tokens = result;
+         result = result[result.length - 1];
+      }
+
+      switch (result?.type) {
+         case ELEMENT_START_PTOKEN:
+            this.inContent = true;
+            this.elementStack.push(result);
+            break;
+         case ELEMENT_END_PTOKEN:
+            const resultName = strOrBlank(result.name);
+            const topToken = this.elementStack[this.elementStack.length - 1];
+            const topName = strOrBlank(topToken ? topToken.name : undefined);
+
+            if (resultName === topName) {
+               this.elementStack.pop();
+               // We are always inContent if we are in a general entity. do not change that.
+               if (this.parseType !== ParseType.GENERAL_ENTITY) {
+                  this.inContent = this.elementStack.length > 0;
                }
-               break;
-            default:
-               // do nothing
-               break;
-         }
+            }
+            break;
+         default:
+            // do nothing
+            break;
+      }
 
-         this.isParsing = false;
+      this.isParsing = false;
 
-         done(tokens);
-      });
+      done(tokens);
    }
 
    /*
@@ -170,62 +229,6 @@ class PTokenParser {
          this.isEntityIdDelivered = true;
          done([this.confVer, this.entityId]);
       });
-   }
-
-   private parseGeneral(deliverParse: DeliverPToken): void {
-      if (this.inContent) {
-         this.parseContent(deliverParse);
-         return;
-      }
-
-      const conditionalState =
-         this.conditionalStack.length === 0
-            ? ConditionalState.NONE
-            : this.conditionalStack[this.conditionalStack.length - 1];
-
-      if (
-         conditionalState === ConditionalState.IGNORE ||
-         conditionalState === ConditionalState.INSIDE_IGNORE
-      ) {
-         this.sTokenSource.extract('multi', ['<![', ']]>'], (sToken) => {
-            if (!sToken) {
-               this.sTokenSource.extract('all', ['<![', ']]>'], (sToken) => {
-                  if (!sToken) {
-                     deliverParse(undefined);
-                  } else {
-                     deliverParse(new TextPToken({ text: sToken }));
-                  }
-               });
-               return;
-            }
-
-            switch (strOrBlank(sToken)) {
-               case '<![':
-                  deliverParse(new TextPToken({ text: sToken }));
-                  this.conditionalStack.push(ConditionalState.INSIDE_IGNORE);
-                  break;
-               case ']]>':
-                  this.conditionalStack.pop();
-
-                  if (conditionalState === ConditionalState.INSIDE_IGNORE) {
-                     deliverParse(new TextPToken({ text: sToken }));
-                  } else {
-                     const conditionalClose = new ConditionalEndPToken({ open: sToken });
-                     deliverParse(conditionalClose);
-                  }
-                  break;
-            }
-         });
-      } else {
-         parseSpace(this.sTokenSource, (pToken: SpacePToken | undefined) => {
-            if (pToken) {
-               deliverParse(pToken);
-               return;
-            }
-
-            this.parseContent(deliverParse);
-         });
-      }
    }
 
    private parseContent(deliverParse: DeliverPToken): void {

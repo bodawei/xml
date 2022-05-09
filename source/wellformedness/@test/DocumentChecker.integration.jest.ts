@@ -17,7 +17,7 @@ import { WellFormedError } from '../error/WellFormedError';
 const WFID = WellFormedError.ID;
 const WARNID = warning.id;
 
-describe('DocumentChecker (integration)', () => {
+fdescribe('DocumentChecker (integration)', () => {
    let ec: ErrorCollector;
    let checker: DocumentChecker;
    let pTokenStream: PTokenStream;
@@ -69,7 +69,7 @@ describe('DocumentChecker (integration)', () => {
       });
    }
 
-   it('reports an interoperability warning when an empty element tag is used for an element that was not declared as EMPTY (§3.1.0)', (done) => {
+   fit('reports an interoperability warning when an empty element tag is used for an element that was not declared as EMPTY (§3.1.0)', (done) => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE root [
@@ -77,7 +77,7 @@ describe('DocumentChecker (integration)', () => {
          ]>
          <bar/>`,
          WARNID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
-         done!,
+         done,
       );
    });
 

@@ -545,12 +545,12 @@ const expectedNotWfCodes: IdToErrorMap = {
    'not-wf-sa-163': {
       // OK - Invalid placement of Parameter entity reference.
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'PARAMETER_ENTITY_START_PTOKEN',
+      message: 'CHARDATA_PTOKEN', // 'PARAMETER_ENTITY_START_PTOKEN',
    },
    'not-wf-sa-164': {
       // OK - Invalid placement of Parameter entity reference.
       id: 'TOKEN_INVALID_CONTEXT',
-      message: 'PARAMETER_ENTITY_START_PTOKEN',
+      message: 'CHARDATA_PTOKEN', // 'PARAMETER_ENTITY_START_PTOKEN',
    },
    'not-wf-sa-165': 'ENTITYDECL_DECLTYPE_NO_SPACE_AFTER', // OK - Parameter entity declarations must have a space before the '%'.
    'not-wf-sa-166': 'CHARDATA_INVALID_CHAR', // good - Character FFFF is not legal anywhere in an XML document.

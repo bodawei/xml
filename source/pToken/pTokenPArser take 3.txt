@@ -1,0 +1,63 @@
+TODO
+- Switch to using the fake source
+- also convert pTokenParser.tes.ts to pTokenParser3.integration.test.
+
+
+
+
+parse(done):
+   if pending data
+      flush pending data <-- short cut out
+
+   push done
+   findAToken
+
+
+findAToken (MUST result in pushing a token) <-- this is the only async
+   if no waiting dones
+      return
+   if at start
+      find the declaration
+
+   if in an ignore conditional
+      find conditionalToken
+
+   find space
+      if none, find content
+
+
+pushData(can take an array)
+   adds to queue
+
+   if Dones waiting
+      examine data and decide what to do
+           - if in conditional and this is a start, then one thing
+           - if this is a doctype and we are in that mode, then do that
+           - if element start
+           - if element end
+      push nxt in queue to done
+
+   findAToken
+
+
+findConentToken
+      look at next char
+      markup
+      one of thee ] <-- involves a mode
+      peref or data <-- involves a mode
+
+      Note: We could simplify parseInstruction perhaps.
+
+flags
+- unstarted
+- inDocType -- recognize ]
+- seenDocType -- avoid %s
+- in conditional (stack)
+- inContent
+(note: we disallow parame entities in content, and doctype after the first, and xmldecl in non-doc entities)
+
+
+
+
+QUESTIONS
+- What does entity expander

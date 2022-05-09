@@ -88,7 +88,7 @@ function streamParsedReplacementText(
       ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(entityLoc));
       context = ParseType.EXTERNAL_SUBSET;
       start = new ExternalSubsetStartToken();
-      end = new ExternalSubsetEndToken();
+      end = new ExternalSubsetEndToken(); // REMOVE ME
    } else {
       if (reference.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
          start = new GeneralEntityStartPToken(reference);
