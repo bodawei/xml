@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, error, warning } from 'basic';
+import { ConformanceVersion, error } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { XmlDeclarationPToken, InstructionStart } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -11,12 +11,13 @@ import { WellFormedError } from '../../error/WellFormedError';
 
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 import { fatalError } from '../../error/fatalError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 jest.mock('../../common/charCheck');
 
 const WFEID = WellFormedError.ID;
 const XEID = error.id;
-const XWID = warning.id;
+const XWID = wellFormedWarningCodes.id;
 
 describe('xmlDeclarationCheck() (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;

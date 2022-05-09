@@ -1,11 +1,12 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { parseElementDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
@@ -45,7 +46,9 @@ describe('elementDeclarationCheck()', () => {
 
          elementDeclarationCheck(parsing, ec, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(warning.id.ELEMENTDECL_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(
+            wellFormedWarningCodes.id.ELEMENTDECL_NAME_XML_RESERVED,
+         );
          done();
       });
    });

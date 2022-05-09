@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -8,6 +8,7 @@ import { charCheck } from '../common/charCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { nameCheck } from '../common/nameCheck';
 import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
 const WFEID = WellFormedError.ID;
 
@@ -35,8 +36,8 @@ function processingInstructionCheck(
       ec,
       confVer,
       'PI',
-      warning.id.PI_TARGET_XMLDASH_RESERVED,
-      warning.id.PI_TARGET_XML_RESERVED,
+      wellFormedWarningCodes.id.PI_TARGET_XMLDASH_RESERVED,
+      wellFormedWarningCodes.id.PI_TARGET_XML_RESERVED,
    );
 
    ec.setPos(pToken.targetSpace);

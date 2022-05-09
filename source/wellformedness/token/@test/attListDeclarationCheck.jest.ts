@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, Range, EntityId, warning } from 'basic';
+import { ConformanceVersion, Range, EntityId } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { AttListDeclarationPToken } from 'pToken';
 import { SToken, toSToken } from 'sToken';
@@ -13,6 +13,7 @@ import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { wordListCheck } from '../../common/wordListCheck';
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
@@ -152,8 +153,8 @@ describe('attListDeclarationCheck()', () => {
          mockErrorCollector,
          confVer,
          'ATTRIBUTE',
-         warning.id.ATTLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
-         warning.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
+         wellFormedWarningCodes.id.ATTLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
+         wellFormedWarningCodes.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
       );
    });
 
@@ -184,7 +185,7 @@ describe('attListDeclarationCheck()', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.ATTLISTDECL_ATTR_NAME_DUPLICATE,
+         id: wellFormedWarningCodes.id.ATTLISTDECL_ATTR_NAME_DUPLICATE,
          params: ['att1'],
          position: testToken.attDefs[2].name,
       });

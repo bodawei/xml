@@ -7,7 +7,9 @@
 // THING_NO_(whatever) = "Missing WHATEVER in a THING"
 // THING_XTRA_... = " ..."
 
-const warningCodes = {
+import { ErrorCodes } from 'basic';
+
+const warningCodes = new ErrorCodes({
    ELEMENT_CHILD_UNDECLARED: {
       code: 201,
       message:
@@ -32,6 +34,6 @@ const warningCodes = {
       message:
          'For interoperability, the parmeter entity "{1}" shoud not have replacement text in the element declaration "{0}" that ends with "|" or "," (§3.2.1).',
    },
-};
+});
 
 export { warningCodes };

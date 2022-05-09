@@ -1,13 +1,16 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import Offset from '../Offset';
-import { makeOffset } from './makeOffset';
-import { XML_ERROR_TOKEN, XmlErrorPosition, XmlErrorToken } from './XmlErrorToken';
-import { warning } from './warning';
+import {
+   WARNING_SUBTYPE,
+   makeOffset,
+   Offset,
+   XML_ERROR_TOKEN,
+   XmlErrorPosition,
+   XmlErrorToken,
+} from 'basic';
+import { wellFormedWarningCodes } from './wellFormedWarningCodes';
 
-const WARNING_SUBTYPE = 'WARNING_SUBTYPE';
-
-class WarningToken implements XmlErrorToken {
+class WellFormedWarning implements XmlErrorToken {
    public readonly code: number;
 
    public readonly context?: Offset;
@@ -29,11 +32,11 @@ class WarningToken implements XmlErrorToken {
       context?: XmlErrorPosition,
    ) {
       this.id = id;
-      this.code = warning.codeFor(id);
+      this.code = wellFormedWarningCodes.codeFor(id);
       this.context = makeOffset(context);
-      this.message = warning.messageFor(id, params);
+      this.message = wellFormedWarningCodes.messageFor(id, params);
       this.place = makeOffset(place);
    }
 }
 
-export { WARNING_SUBTYPE, WarningToken };
+export { WellFormedWarning };

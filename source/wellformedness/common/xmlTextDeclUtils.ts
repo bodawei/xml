@@ -1,18 +1,13 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import {
-   ConformanceVersion,
-   ErrorCollector,
-   error,
-   ErrorToken,
-   warning,
-   WarningToken,
-} from 'basic';
+import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
 import { InstructionField } from 'pToken';
 import { SToken } from 'sToken';
 
 import { WellFormedError } from '../error/WellFormedError';
 import { FatalErrorToken } from '../error/fatalErrorToken';
+import { WellFormedWarning } from '../error/wellFormedWarning';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
 const WFEID = WellFormedError.ID;
 const S_REGEXP = /^[\t\r\n ]*$/;
@@ -79,7 +74,10 @@ function checkVersionString(
       } else if (isNot10) {
          if (isXmlDecl) {
             // We interpret "should not" to mean warning, since the "should not"s in the spec do not represent errors
-            ec.reportError(warning.id.XMLDECL_VERSION_INVALID, WarningToken, ['1.0', versionText]);
+            ec.reportError(wellFormedWarningCodes.id.XMLDECL_VERSION_INVALID, WellFormedWarning, [
+               '1.0',
+               versionText,
+            ]);
          } else {
             // We'd ike to consider this a warning too, but there are xmlconf tests which want an error in thise case
             ec.reportError(code, WellFormedError as any, ['1.0', versionText]);

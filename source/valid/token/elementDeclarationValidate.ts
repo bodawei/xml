@@ -1,14 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import {
-   ErrorCollector,
-   ConformanceVersion,
-   isSpace,
-   error,
-   ErrorToken,
-   warning,
-   WarningToken,
-} from 'basic';
+import { ErrorCollector, ConformanceVersion, isSpace, error, ErrorToken, warning } from 'basic';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
@@ -22,6 +14,8 @@ import { strOrBlank } from 'sToken';
 
 import { ContentDetails, ElDeclType, ValidityState } from '../common/validityState';
 import { validCodes } from '../error/validCodes';
+import { ValidityWarning } from '../error/validityWarning';
+import { warningCodes } from '../error/warningCodes';
 
 const EID = error.id;
 const VID = validCodes.id;
@@ -157,13 +151,19 @@ function validateEntities(
             nonSpace === 0);
 
       if (cmEndFound && hasEmptyContent) {
-         ec.reportError(warning.id.PEREF_NO_EMPTY_IN_MODEL, WarningToken, [elName, entityName]);
+         ec.reportError(warningCodes.id.PEREF_NO_EMPTY_IN_MODEL, ValidityWarning, [
+            elName,
+            entityName,
+         ]);
       }
 
       // §3.2.1 For interoperability, ... neither the first nor last non-blank character
       //    of the replacement text should be a connector (| or ,).
       if (cmEndFound && trailingDelimiter) {
-         ec.reportError(warning.id.PEREF_NO_TRAILING_CONNECTOR, WarningToken, [elName, entityName]);
+         ec.reportError(warningCodes.id.PEREF_NO_TRAILING_CONNECTOR, ValidityWarning, [
+            elName,
+            entityName,
+         ]);
       }
 
       cmDepth += depth;
@@ -219,7 +219,7 @@ function elementDeclarationValidate(
    // §3.2.0: At user option, an XML processor may issue a warning when a declaration mentions an
    //    element type for which no declaration is provided, but this is not an error.
    if (undeclaredNames.length > 0) {
-      ec.reportError(warning.id.ELEMENT_CHILD_UNDECLARED, WarningToken, [
+      ec.reportError(warningCodes.id.ELEMENT_CHILD_UNDECLARED, ValidityWarning, [
          elName,
          undeclaredNames.join(','),
       ]);

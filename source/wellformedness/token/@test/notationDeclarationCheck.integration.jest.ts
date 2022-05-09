@@ -2,12 +2,13 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { parseNotationDeclaration } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
 
@@ -62,7 +63,9 @@ describe('notationDeclarationCheck() (integration)', () => {
 
          notationDeclarationCheck(parsing, ec, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(warning.id.NOTATIONDECL_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(
+            wellFormedWarningCodes.id.NOTATIONDECL_NAME_XML_RESERVED,
+         );
          done?.();
       });
    });

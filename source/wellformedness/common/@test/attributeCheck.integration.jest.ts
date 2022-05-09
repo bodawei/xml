@@ -1,10 +1,11 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { parseAttribute } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { attributeCheck } from '../attributeCheck';
 
@@ -57,7 +58,9 @@ describe('attributeCheck (integration)', () => {
       parseAttribute(source, { terminators: ['>'] }, (parsing) => {
          attributeCheck(parsing!, ec, confVer, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         expect(ec.getErrors()[0].id).toEqual(warning.id.ATTRIBUTE_NAME_XMLCOLON_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(
+            wellFormedWarningCodes.id.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
+         );
          done();
       });
    });

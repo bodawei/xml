@@ -1,15 +1,16 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { ElementEmptyPToken, ElementStartPToken } from 'token';
 
 import { attributeCheck } from '../common/attributeCheck';
 import { nameCheck } from '../common/nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
 const WFEID = WellFormedError.ID;
-const WARN = warning.id;
+const WARN = wellFormedWarningCodes.id;
 
 function elementStartCheck(
    pToken: ElementStartPToken | ElementEmptyPToken,

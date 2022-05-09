@@ -1,12 +1,13 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { parseAttListDeclaration } from 'pToken';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
@@ -70,7 +71,9 @@ describe('checkWellFormed()', () => {
       parseAttListDeclaration(source, declarationStart, (result) => {
          attListDeclarationCheck(result, ec, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(warning.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(
+            wellFormedWarningCodes.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
+         );
          done?.();
       });
    });

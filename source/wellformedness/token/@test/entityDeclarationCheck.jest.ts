@@ -1,6 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, warning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    TextPToken,
@@ -16,6 +16,7 @@ import { literalCheck } from '../../common/literalCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
@@ -117,8 +118,8 @@ describe('entityDeclarationCheck (unit)', () => {
          mockErrorCollector,
          confVer,
          'ENTITY',
-         warning.id.ENTITYDECL_NAME_XMLDASH_RESERVED,
-         warning.id.ENTITYDECL_NAME_XML_RESERVED,
+         wellFormedWarningCodes.id.ENTITYDECL_NAME_XMLDASH_RESERVED,
+         wellFormedWarningCodes.id.ENTITYDECL_NAME_XML_RESERVED,
       );
    });
 

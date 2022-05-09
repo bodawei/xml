@@ -1,15 +1,17 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, warning, WarningToken } from 'basic';
+import { ErrorCollector } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { validCodes } from '../error/validCodes';
+import { ValidityWarning } from '../error/validityWarning';
 
 import { PREDEFINED_ENTITIES } from '../common/constants';
 import { ValidityState } from '../common/validityState';
+import { warningCodes } from '../error/warningCodes';
 
 const VID = validCodes.id;
-const WARNID = warning.id;
+const WARNID = warningCodes.id;
 
 function geRefValidate(
    token: GeneralEntityReferencePToken,
@@ -40,7 +42,7 @@ function geRefValidate(
        *    For interoperability, valid documents should declare the entities
        *    amp, lt, gt, apos, quot, in the form specified in 4.6 Predefined Entities.
        */
-      ec.reportError(WARNID.ENTITY_PREDEFINED_NO_DECLARATION, WarningToken, [geDeclName]);
+      ec.reportError(WARNID.ENTITY_PREDEFINED_NO_DECLARATION, ValidityWarning, [geDeclName]);
    }
 }
 

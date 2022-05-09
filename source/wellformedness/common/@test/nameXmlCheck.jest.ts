@@ -1,10 +1,11 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, warning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
 import { nameXmlCheck } from '../nameXmlCheck';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 describe('nameXmlCheck()', () => {
    let WARN1: string;
@@ -15,8 +16,8 @@ describe('nameXmlCheck()', () => {
    beforeEach(() => {
       ec = new MockErrorCollector();
       confVer = new ConformanceVersion();
-      WARN1 = warning.id.ENTITYDECL_XRA_DECLARATION;
-      WARN2 = warning.id.ELEMENT_START_USED_FOR_EMPTY_DECL;
+      WARN1 = wellFormedWarningCodes.id.ENTITYDECL_XRA_DECLARATION;
+      WARN2 = wellFormedWarningCodes.id.ELEMENT_START_USED_FOR_EMPTY_DECL;
    });
 
    it('adds no errors if a name is not passed in', () => {

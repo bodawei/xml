@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, error, warning } from 'basic';
+import { ConformanceVersion, error } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker } from 'sToken-test';
@@ -13,6 +13,7 @@ import { nameCheck } from '../nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { attributeCheck } from '../attributeCheck';
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 jest.mock('../attributeLangCheck');
 jest.mock('../literalCheck');
@@ -218,8 +219,8 @@ describe('attributeCheck (unit)', () => {
          mockErrorCollector,
          confVer,
          'ATTRIBUTE',
-         warning.id.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
-         warning.id.ATTRIBUTE_NAME_XML_RESERVED,
+         wellFormedWarningCodes.id.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
+         wellFormedWarningCodes.id.ATTRIBUTE_NAME_XML_RESERVED,
       );
    });
 

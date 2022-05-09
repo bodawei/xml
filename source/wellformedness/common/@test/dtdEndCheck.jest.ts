@@ -16,9 +16,9 @@ import { CheckState } from '../../checkUtils';
 import { fatalError } from '../../error/fatalError';
 import { dtdEndCheck } from '../dtdEndCheck';
 
-import { warning } from 'basic';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
-const WARNID = warning.id;
+const WARNID = wellFormedWarningCodes.id;
 
 describe('dtdEndCheck()', () => {
    let mockErrorCollector: MockErrorCollector;

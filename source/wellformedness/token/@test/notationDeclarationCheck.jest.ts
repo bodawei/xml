@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, warning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -11,6 +11,7 @@ import { externalIdCheck } from '../../common/externalIdCheck';
 import { WellFormedError } from '../../error/WellFormedError';
 
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/nameXmlCheck');
@@ -68,8 +69,8 @@ describe('notationdeDeclaration (unit)', () => {
          mockErrorCollector,
          confVer,
          'NOTATION',
-         warning.id.NOTATIONDECL_NAME_XMLDASH_RESERVED,
-         warning.id.NOTATIONDECL_NAME_XML_RESERVED,
+         wellFormedWarningCodes.id.NOTATIONDECL_NAME_XMLDASH_RESERVED,
+         wellFormedWarningCodes.id.NOTATIONDECL_NAME_XML_RESERVED,
       );
    });
 

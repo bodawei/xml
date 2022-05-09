@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, WarningToken, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -9,8 +9,10 @@ import { nameCheck } from '../common/nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { wordListCheck } from '../common/wordListCheck';
 import { WellFormedError } from '../error/WellFormedError';
+import { WellFormedWarning } from '../error/wellFormedWarning';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
-const WARN = warning.id;
+const WARN = wellFormedWarningCodes.id;
 const WFEID = WellFormedError.ID;
 const ATTR_TYPES = [
    'CDATA',
@@ -70,7 +72,7 @@ function attListDeclarationCheck(
       );
 
       if (namesSeen[attName]) {
-         ec.reportError(WARN.ATTLISTDECL_ATTR_NAME_DUPLICATE, WarningToken, [attName]);
+         ec.reportError(WARN.ATTLISTDECL_ATTR_NAME_DUPLICATE, WellFormedWarning, [attName]);
       }
 
       namesSeen[attName] = true;

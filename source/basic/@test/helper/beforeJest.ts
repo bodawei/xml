@@ -3,7 +3,6 @@
 import { expect } from '@jest/globals';
 import { error } from '../../error/error';
 import { ErrorToken } from '../../error/errorToken';
-import { warning } from '../../error/warning';
 import { MockErrorCollector } from './helper';
 import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
 
@@ -112,5 +111,5 @@ expect.extend({
    toNotReportError,
    toReportError: makeNewErrorMatcher(error),
    toReportFatalError: makeNewErrorMatcher(), // should be a fatalError
-   toReportWarning: makeNewErrorMatcher(warning),
+   toReportWarning: makeNewErrorMatcher(), // should be warning
 });

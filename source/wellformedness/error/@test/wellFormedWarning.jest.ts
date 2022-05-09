@@ -1,15 +1,13 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { EntityId } from '../../EntityId';
-import Offset from '../../Offset';
+import { WARNING_SUBTYPE, XML_ERROR_TOKEN, EntityId, Offset } from 'basic';
 import { toSToken } from 'sToken';
 
-import { WARNING_SUBTYPE, WarningToken } from '../warningToken';
-import { XML_ERROR_TOKEN } from '../XmlErrorToken';
+import { WellFormedWarning } from '../wellFormedWarning';
 
-describe('warningToken()', () => {
+describe('wellFormedWarning()', () => {
    it('constructs an instance with just an id', () => {
-      const result = new WarningToken('ATTLISTDECL_ATTR_NAME_DUPLICATE');
+      const result = new WellFormedWarning('ATTLISTDECL_ATTR_NAME_DUPLICATE');
 
       expect(result).toEqual({
          code: 415,
@@ -24,7 +22,7 @@ describe('warningToken()', () => {
    });
 
    it('constructs an instance with all parameters', () => {
-      const result = new WarningToken(
+      const result = new WellFormedWarning(
          'ATTLISTDECL_ATTR_NAME_DUPLICATE',
          ['a'],
          toSToken('foo'),

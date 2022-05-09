@@ -7,6 +7,7 @@ import { DeclarationStart } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 describe('entityDeclarationCheck() (integration)', () => {
    let declarationStart: DeclarationStart;
@@ -55,7 +56,9 @@ describe('entityDeclarationCheck() (integration)', () => {
 
          entityDeclarationCheck(result, ec, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(warning.id.ENTITYDECL_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(
+            wellFormedWarningCodes.id.ENTITYDECL_NAME_XML_RESERVED,
+         );
          done();
       });
    });

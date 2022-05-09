@@ -13,6 +13,7 @@ describe('wellformedness', () => {
            "DocumentChecker": [Function],
            "MarkupDeclChecker": [Function],
            "WellFormedError": [Function],
+           "WellFormedWarning": [Function],
          }
       `);
    });

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -8,8 +8,9 @@ import { nameCheck } from '../common/nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
 import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
-const WARN = warning.id;
+const WARN = wellFormedWarningCodes.id;
 const WFEID = WellFormedError.ID;
 
 function notationDeclarationCheck(

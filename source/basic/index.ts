@@ -42,10 +42,9 @@ export { makeOffset } from './error/makeOffset';
 export {
    FATAL_ERROR_SUBTYPE,
    XML_ERROR_TOKEN,
+   WARNING_SUBTYPE,
    XmlErrorPosition,
    XmlErrorToken,
 } from './error/XmlErrorToken';
 export { ERROR_SUBTYPE, ErrorToken } from './error/ErrorToken';
-export { WARNING_SUBTYPE, WarningToken } from './error/WarningToken';
 export { error } from './error/error';
-export { warning } from './error/warning';

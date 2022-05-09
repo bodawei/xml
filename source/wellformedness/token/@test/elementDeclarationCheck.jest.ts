@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, warning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -9,6 +9,7 @@ import { contentModelCheck } from '../../common/contentModelCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
@@ -115,8 +116,8 @@ describe('elementDeclarationCheck()', () => {
          mockErrorCollector,
          confVer,
          'ELEMENT',
-         warning.id.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
-         warning.id.ELEMENTDECL_NAME_XML_RESERVED,
+         wellFormedWarningCodes.id.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
+         wellFormedWarningCodes.id.ELEMENTDECL_NAME_XML_RESERVED,
       );
    });
 

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, warning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -9,6 +9,7 @@ import { charCheck } from '../../common/charCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
@@ -67,8 +68,8 @@ describe('processingInstructionCheck() (unit)', () => {
          mockErrorCollector,
          confVer,
          'PI',
-         warning.id.PI_TARGET_XMLDASH_RESERVED,
-         warning.id.PI_TARGET_XML_RESERVED,
+         wellFormedWarningCodes.id.PI_TARGET_XMLDASH_RESERVED,
+         wellFormedWarningCodes.id.PI_TARGET_XML_RESERVED,
       );
    });
 

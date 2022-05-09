@@ -1,10 +1,11 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, warning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { charCheck } from '../charCheck';
 
@@ -86,7 +87,7 @@ describe('charCheck()', () => {
       charCheck(sToken, mockErrorCollector, new ConformanceVersion(), false);
 
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.CHARDATA_DISCOURAGED_CHAR,
+         id: wellFormedWarningCodes.id.CHARDATA_DISCOURAGED_CHAR,
          params: ['5, 7'],
          position: undefined,
       });
@@ -122,7 +123,7 @@ describe('charCheck()', () => {
       charCheck(sToken, mockErrorCollector, new ConformanceVersion(1.0, 5), false);
 
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.CHARDATA_DISCOURAGED_CHAR,
+         id: wellFormedWarningCodes.id.CHARDATA_DISCOURAGED_CHAR,
          params: ['3'],
          position: undefined,
       });
@@ -134,7 +135,7 @@ describe('charCheck()', () => {
       charCheck(sToken, mockErrorCollector, new ConformanceVersion(1.0, 5), false);
 
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.CHARDATA_DISCOURAGED_CHAR,
+         id: wellFormedWarningCodes.id.CHARDATA_DISCOURAGED_CHAR,
          params: ['3'],
          position: undefined,
       });

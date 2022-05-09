@@ -1,6 +1,6 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, warning, WarningToken } from 'basic';
+import { ErrorCollector } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -37,6 +37,8 @@ import {
 } from 'token';
 
 import { WellFormedError } from './error/WellFormedError';
+import { WellFormedWarning } from './error/wellFormedWarning';
+import { wellFormedWarningCodes } from './error/wellFormedWarningCodes';
 
 import {
    CHECKER_DONE,
@@ -60,7 +62,7 @@ enum States {
 }
 
 const WFID = WellFormedError.ID;
-const WARNID = warning.id;
+const WARNID = wellFormedWarningCodes.id;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
 interface StateTable {
@@ -327,7 +329,7 @@ function checkAttlistContext(
       //   attribute-list declaration is provided for a given element type,
       ec.reportError(
          WARNID.ATTLISTDECL_ELEMENT_XTRA_DECLARATION,
-         WarningToken,
+         WellFormedWarning,
          [elName],
          pToken.elementName,
       );
@@ -342,7 +344,7 @@ function checkAttlistContext(
          //   attribute, but this is not an error.
          ec.reportError(
             WARNID.ATTLISTDECL_ATTR_XTRA_DECLARATION,
-            WarningToken,
+            WellFormedWarning,
             [elName, attName],
             def.name,
          );
@@ -506,7 +508,7 @@ class MarkupDeclChecker implements MarkupChecker {
                // an XML processor may issue a warning if entities are declared multiple times.
                errorCollector.reportError(
                   WARNID.ENTITYDECL_XRA_DECLARATION,
-                  WarningToken,
+                  WellFormedWarning,
                   [geDeclName],
                   pToken.open,
                );
@@ -523,7 +525,7 @@ class MarkupDeclChecker implements MarkupChecker {
                // an XML processor may issue a warning if entities are declared multiple times.
                errorCollector.reportError(
                   WARNID.ENTITYDECL_XRA_DECLARATION,
-                  WarningToken,
+                  WellFormedWarning,
                   [peDeclName],
                   pToken.open,
                );

@@ -1,7 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    NOTATION_DECLARATION_PTOKEN,
@@ -27,8 +26,9 @@ import {
 import { WellFormedError } from '../error/WellFormedError';
 import { ContentChecker } from '../ContentChecker';
 import { CheckState, CHECKER_DONE } from '../checkUtils';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
-const WARNID = warning.id;
+const WARNID = wellFormedWarningCodes.id;
 
 describe('ContentChecker (unit)', () => {
    let ec: MockErrorCollector;

@@ -1,11 +1,12 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { STokenSource, toSToken } from 'sToken';
 import { parseElementEnd } from 'token';
 
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { elementEndCheck } from '../elementEndCheck';
 
@@ -26,7 +27,7 @@ describe('elementEndCheck() (integration)', () => {
 
          elementEndCheck(pToken, ec, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(warning.id.ELEMENT_NAME_XML_RESERVED);
+         expect(ec.getErrors()[0].id).toEqual(wellFormedWarningCodes.id.ELEMENT_NAME_XML_RESERVED);
          done?.();
       });
    });

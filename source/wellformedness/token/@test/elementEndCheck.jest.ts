@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, warning } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
@@ -9,6 +9,7 @@ import { ElementEndPToken } from 'token';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 import { elementEndCheck } from '../elementEndCheck';
 
@@ -52,8 +53,8 @@ describe('elementEndCheck()', () => {
          mockErrorCollector,
          confVer,
          'ELEMENT',
-         warning.id.ELEMENT_NAME_XMLCOLON_RESERVED,
-         warning.id.ELEMENT_NAME_XML_RESERVED,
+         wellFormedWarningCodes.id.ELEMENT_NAME_XMLCOLON_RESERVED,
+         wellFormedWarningCodes.id.ELEMENT_NAME_XML_RESERVED,
       );
    });
 

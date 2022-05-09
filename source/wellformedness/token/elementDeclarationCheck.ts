@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector } from 'basic';
 import { ElementDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
@@ -8,9 +8,10 @@ import { contentModelCheck } from '../common/contentModelCheck';
 import { nameCheck } from '../common/nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
 const WFEID = WellFormedError.ID;
-const WARN = warning.id;
+const WARN = wellFormedWarningCodes.id;
 const ALLOWED_CONTENT_SPEC = ['EMPTY', 'ANY'];
 
 function elementDeclarationCheck(

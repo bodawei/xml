@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, error, warning } from 'basic';
+import { ConformanceVersion, error } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -18,6 +18,7 @@ import { ContentDetails, ElDeclType, ValidityState } from '../../common/validity
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
 
 import { validCodes } from '../../error/validCodes';
+import { warningCodes } from '../../error/warningCodes';
 
 const EID = error.id;
 const VID = validCodes.id;
@@ -259,7 +260,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWarning({
-            id: warning.id.ELEMENT_CHILD_UNDECLARED,
+            id: warningCodes.id.ELEMENT_CHILD_UNDECLARED,
             lastPosition: undefined,
             params: ['elementName', 'bogus'],
             position: elementDeclaration.contentModel?.open,
@@ -303,7 +304,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).not.toReportWarning({
-            id: warning.id.ELEMENT_CHILD_UNDECLARED,
+            id: warningCodes.id.ELEMENT_CHILD_UNDECLARED,
             lastPosition: undefined,
             params: ['elementName', '#PCDATA'],
             position: elementDeclaration.contentModel?.open,
@@ -349,7 +350,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWarning({
-            id: warning.id.ELEMENT_CHILD_UNDECLARED,
+            id: warningCodes.id.ELEMENT_CHILD_UNDECLARED,
             lastPosition: undefined,
             params: ['elementName', 'bogus1,bogus2'],
             position: elementDeclaration.contentModel?.open,
@@ -679,7 +680,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWarning({
-            id: warning.id.PEREF_NO_TRAILING_CONNECTOR,
+            id: warningCodes.id.PEREF_NO_TRAILING_CONNECTOR,
             lastPosition: undefined,
             params: ['elementName', 'x'],
             position: elementDeclaration.contentModel?.open,
@@ -712,7 +713,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWarning({
-            id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
+            id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'x'],
             position: elementDeclaration.contentModel?.open,
@@ -746,7 +747,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).not.toReportWarning({
-            id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
+            id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'x'],
             position: elementDeclaration.contentModel?.open,
@@ -777,7 +778,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWarning({
-            id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
+            id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'empty'],
             position: elementDeclaration.contentModel?.open,
@@ -1029,7 +1030,7 @@ describe('elementDeclarationValidate (unit)', () => {
 
          // @ts-expect-error 2329/matchers
          expect(mockErrorCollector).toReportWarning({
-            id: warning.id.PEREF_NO_EMPTY_IN_MODEL,
+            id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'x'],
             position: elementDeclaration.contentModel?.open,

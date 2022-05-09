@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector, ErrorToken, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector, ErrorToken } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ParseType, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -13,9 +13,10 @@ import { DocumentChecker } from '../DocumentChecker';
 import { ContentChecker } from '../ContentChecker';
 import { MarkupDeclChecker } from '../MarkupDeclChecker';
 import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
 const WFID = WellFormedError.ID;
-const WARNID = warning.id;
+const WARNID = wellFormedWarningCodes.id;
 
 fdescribe('DocumentChecker (integration)', () => {
    let ec: ErrorCollector;

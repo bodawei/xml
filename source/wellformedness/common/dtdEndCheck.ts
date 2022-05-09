@@ -1,22 +1,17 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import {
-   ConformanceVersion,
-   ErrorCollector,
-   error,
-   ErrorToken,
-   warning,
-   WarningToken,
-} from 'basic';
+import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
 import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { LiteralValuePToken } from 'token';
 import { CheckState, GeneralEntitiesInfo } from '../checkUtils';
 import { FatalErrorToken } from '../error/fatalErrorToken';
 import { fatalError } from '../error/fatalError';
+import { WellFormedWarning } from '../error/wellFormedWarning';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
 const GE_REF_REGEXP = /&([^;]*);/g;
-const WARNID = warning.id;
+const WARNID = wellFormedWarningCodes.id;
 
 function checkEntity(
    value: LiteralValuePToken,
@@ -78,7 +73,7 @@ function dtdEndCheck(state: CheckState, ec: ErrorCollector): void {
          // an XML processor may issue a warning if entities are declared multiple times.
          ec.reportError(
             WARNID.ATTLISTDECL_NO_ELEMENTDECL,
-            WarningToken,
+            WellFormedWarning,
             [elName],
             undefined, // seems like a prolem
          );

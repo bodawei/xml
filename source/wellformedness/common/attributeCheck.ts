@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, error, ErrorToken, warning } from 'basic';
+import { ConformanceVersion, ErrorCollector, error, ErrorToken } from 'basic';
 import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import { AttributePToken, LiteralValuePToken } from 'token';
@@ -10,6 +10,7 @@ import { literalCheck } from './literalCheck';
 import { nameCheck } from './nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
 type CheckAttValue = (
    name: SToken,
@@ -25,7 +26,7 @@ type CheckAttName = (
 ) => void;
 
 const WFEID = WellFormedError.ID;
-const WARN = warning.id;
+const WARN = wellFormedWarningCodes.id;
 
 function attributeCheck(
    attributes: ReadonlyArray<AttributePToken>,

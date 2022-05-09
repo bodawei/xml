@@ -53,9 +53,9 @@ import {
    makeDocTypeEnd,
 } from 'token-test';
 
-import { warning } from 'basic';
+import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
 
-const WARNID = warning.id;
+const WARNID = wellFormedWarningCodes.id;
 
 describe('MarkupDeclChecker (unit)', () => {
    let ec: MockErrorCollector;

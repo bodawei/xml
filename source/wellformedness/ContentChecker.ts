@@ -1,6 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, warning, WarningToken } from 'basic';
+import { ErrorCollector } from 'basic';
 import {
    CHARREF_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -31,6 +31,8 @@ import {
    checkGeneralEntity,
 } from './checkUtils';
 import { WellFormedError } from './error/WellFormedError';
+import { WellFormedWarning } from './error/wellFormedWarning';
+import { wellFormedWarningCodes } from './error/wellFormedWarningCodes';
 
 enum State {
    PRE = 'PRE',
@@ -50,7 +52,7 @@ interface StateTable {
 }
 
 const WFID = WellFormedError.ID;
-const WARNID = warning.id;
+const WARNID = wellFormedWarningCodes.id;
 
 const transitionsByState: StateTable = {
    [State.PRE]: {
@@ -191,7 +193,7 @@ class ContentChecker implements IContentChecker {
             if (this.checkState.elementDecl[emptyName] !== 'EMPTY') {
                errorCollector.reportError(
                   WARNID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
-                  WarningToken,
+                  WellFormedWarning,
                   [emptyName],
                   pToken.open,
                );

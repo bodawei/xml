@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { warning } from 'basic';
 import { MockErrorCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
@@ -10,6 +9,7 @@ import { makeGeneralEntityDeclaration, makeGeneralEntityReference } from 'token-
 import { geRefValidate } from '../geRefValidate';
 import { ValidityState } from '../validityState';
 import { validCodes } from '../../error/validCodes';
+import { warningCodes } from '../../error/warningCodes';
 
 const VID = validCodes.id;
 
@@ -165,7 +165,7 @@ describe('geRefValidate (unit)', () => {
 
       // @ts-expect-error 2329/matchers
       expect(mockErrorCollector).toReportWarning({
-         id: warning.id.ENTITY_PREDEFINED_NO_DECLARATION,
+         id: warningCodes.id.ENTITY_PREDEFINED_NO_DECLARATION,
          lastPosition: undefined,
          params: ['lt'],
          position: ref.name,

@@ -3,7 +3,6 @@
 /* eslint-env jasmine */
 
 import { ErrorToken } from '../../error/errorToken';
-import { warning } from '../../error/warning';
 import { MockErrorCollector } from './helper';
 import { makeNewJasmineErrorMatcher } from './makeJasmineErrorMatcher';
 
@@ -167,7 +166,7 @@ function toNotReportError(util: any) {
 }
 
 function toReportWarning(util: any) {
-   return makeNewJasmineErrorMatcher(util, warning);
+   return makeNewJasmineErrorMatcher(util); // warning'
 }
 
 if (typeof jest === 'undefined') {

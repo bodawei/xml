@@ -1,7 +1,6 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { warning, WarningToken } from 'basic';
 import {
    makeAttListDeclaration,
    makeCdata,
@@ -30,6 +29,7 @@ import {
 } from 'token-test';
 
 import { convertPTokenToSTokens } from '../convertPTokenToSTokens';
+import { WellFormedWarning } from 'wellformedness'; // ick
 
 describe('convertPTokenToSTokens (integration)', () => {
    it('returns an AttListDeclaration', () => {
@@ -2049,8 +2049,8 @@ describe('convertPTokenToSTokens (integration)', () => {
    });
 
    it('returns an empty array when encountering an error', () => {
-      expect(
-         convertPTokenToSTokens(new WarningToken(warning.id.ELEMENT_NAME_XML_RESERVED)),
-      ).toMatchInlineSnapshot('Array []');
+      expect(convertPTokenToSTokens(new WellFormedWarning('foobar'))).toMatchInlineSnapshot(
+         'Array []',
+      );
    });
 });

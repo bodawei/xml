@@ -76,7 +76,7 @@ function makeJasmineErrorMatcher(util: any, ErrorClass: any) {
    };
 }
 
-function makeNewJasmineErrorMatcher(util: any, codes: any) {
+function makeNewJasmineErrorMatcher(util: any, codes?: any) {
    return {
       compare: (mockErrorCollector: MockErrorCollector, expectedError: ErrorInfo) => {
          if (!mockErrorCollector) {
@@ -93,28 +93,28 @@ function makeNewJasmineErrorMatcher(util: any, codes: any) {
             if (expectedError.id === actual.id) {
                let errMsg;
 
-               errMsg = codes.messageFor(actual.id);
+               // errMsg = codes.messageFor(actual.id);
 
-               if (!errMsg) {
-                  pass = false;
-                  message = `The error ${expectedError.id} is not a legal error ID.`;
-                  break;
-               } else {
-                  let count = 0;
-                  let offset = errMsg.indexOf('{');
+               // if (!errMsg) {
+               //    pass = false;
+               //    message = `The error ${expectedError.id} is not a legal error ID.`;
+               //    break;
+               // } else {
+               //    let count = 0;
+               //    let offset = errMsg.indexOf('{');
 
-                  while (offset !== -1) {
-                     count++;
-                     offset = errMsg.indexOf('{', offset + 1);
-                  }
+               //    while (offset !== -1) {
+               //       count++;
+               //       offset = errMsg.indexOf('{', offset + 1);
+               //    }
 
-                  const params = actual.params || [];
-                  if (count !== params.length) {
-                     pass = false;
-                     message = `${expectedError.id} expects ${count} parameters, but ${params.length} found.`;
-                     break;
-                  }
-               }
+               //    const params = actual.params || [];
+               //    if (count !== params.length) {
+               //       pass = false;
+               //       message = `${expectedError.id} expects ${count} parameters, but ${params.length} found.`;
+               //       break;
+               //    }
+               // }
 
                if (!util.equals(expectedError.params, actual.params)) {
                   message =
