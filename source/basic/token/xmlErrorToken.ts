@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { SToken } from 'sToken';
-import Offset from '../Offset';
+import { Offset } from '../klass/offset';
 
 const ERROR_SUBTYPE = 'ERROR_SUBTYPE';
 const FATAL_ERROR_SUBTYPE = 'FATAL_ERROR_SUBTYPE';

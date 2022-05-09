@@ -1,12 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import ErrorCollector from '../../ErrorCollector';
+import { ErrorCollector } from '../../klass/errorCollector';
 import { SToken } from 'sToken';
 
 import { ErrorToken } from './errorToken';
-import { XmlErrorPosition } from '../../error/XmlErrorToken';
-import { XmlErrorToken } from 'source/basic/error/XmlErrorToken';
+import { XmlErrorPosition, XmlErrorToken } from '../../token/XmlErrorToken';
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace

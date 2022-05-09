@@ -3,7 +3,7 @@
 import { Offset, EntityId } from 'basic';
 
 import { SToken } from 'sToken';
-import { XmlErrorPosition, XmlErrorToken } from './error/XmlErrorToken';
+import { XmlErrorPosition, XmlErrorToken } from '../token/xmlErrorToken';
 
 type Position = SToken | Offset | undefined;
 
@@ -114,4 +114,4 @@ class ErrorCollector {
    }
 }
 
-export default ErrorCollector;
+export { ErrorCollector };

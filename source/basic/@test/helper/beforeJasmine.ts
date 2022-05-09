@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { XmlErrorToken } from '../../error/XmlErrorToken';
+import { XmlErrorToken } from '../../token/xmlErrorToken';
 import { MockErrorCollector } from './helper';
 import { makeNewJasmineErrorMatcher } from './makeJasmineErrorMatcher';
 

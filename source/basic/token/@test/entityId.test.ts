@@ -9,18 +9,18 @@ describe('EntityId', () => {
 
    it('exports a EntityId type', () => {
       const token: EntityId = {
-         type: ENTITY_ID,
-         systemId: './index.xml',
          publicId: '- foo -',
+         systemId: './index.xml',
+         type: ENTITY_ID,
       };
 
       // This is a lame test.  The core of it really is that
       // we can use the type declaration above without is causing problems.
       expect(token).toEqual(
          jasmine.objectContaining({
-            type: 'ENTITY_ID',
-            systemId: './index.xml',
             publicId: '- foo -',
+            systemId: './index.xml',
+            type: 'ENTITY_ID',
          }),
       );
    });
@@ -30,9 +30,9 @@ describe('EntityId', () => {
 
       expect(token).toEqual(
          jasmine.objectContaining({
-            type: 'ENTITY_ID',
-            systemId: 'foo',
             publicId: 'bar',
+            systemId: 'foo',
+            type: 'ENTITY_ID',
          }),
       );
    });

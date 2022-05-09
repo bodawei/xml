@@ -1,5 +1,5 @@
 import { SToken, getStartOffset, isSToken } from 'sToken';
-import Offset from '../Offset';
+import { Offset } from '../klass/offset';
 
 function makeOffset(place?: Offset | SToken): Offset | undefined {
    if (isSToken(place)) {

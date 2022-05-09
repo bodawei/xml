@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityId } from '../EntityId';
-import Offset from '../Offset';
-import Range from '../Range';
+import { EntityId } from '../../token/entityId';
+import { Offset } from '../offset';
+import { Range } from '../range';
 
 describe('Range', () => {
    describe('construction', () => {

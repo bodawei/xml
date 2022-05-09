@@ -1,4 +1,4 @@
-import { BaseToken } from 'basic';
+import { XmlErrorToken, EntityId, ConformanceVersion } from 'basic';
 
 import { PToken as PTokenClassic } from 'token';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
@@ -30,7 +30,9 @@ interface UnexpandedMarkupDetails {
 
 type PToken = PTokenClassic;
 type ParseToken =
-   | BaseToken
+   | XmlErrorToken
+   | EntityId
+   | ConformanceVersion
    | PToken
    | CharRefPToken
    | AttListDeclarationPToken

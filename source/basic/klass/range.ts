@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityId } from './entityId';
-import Offset from './Offset';
+import { EntityId } from '../token/entityId';
+import { Offset } from './offset';
 
 /**********************************************************************\
  A range is used to record the start and end of a range of characters
@@ -100,4 +100,4 @@ class Range {
    }
 }
 
-export default Range;
+export { Range };

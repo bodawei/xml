@@ -1,49 +1,16 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2022 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from './conformanceVersion';
-import { EntityId } from './entityId';
-import { XmlErrorToken } from './error/XmlErrorToken';
-
-type XmlVersion = 1.0 | 1.1;
-type XmlEdition = 1 | 2 | 3 | 4 | 5 | 6;
-
-type BaseToken = XmlErrorToken | EntityId | ConformanceVersion;
-
-interface ErrorLocale {
-   code: {
-      [name: string]: number;
-   };
-   id: {
-      [name: string]: string;
-   };
-   message: {
-      [locale: string]: {
-         [name: string]: string;
-      };
-   };
-}
-
-export { BaseToken, ErrorLocale };
-
-export { default as Offset } from './Offset';
-export { default as Range } from './Range';
-export { default as ErrorCollector } from './ErrorCollector';
-export * from './token';
-export * from './conformanceVersion';
-export * from './entityId';
-export * from './chars';
-export * from './doAsyncLoop';
-export * from './doAsyncWhileLoop';
-export * from './extractSurrogatePair';
-export { XmlVersion, XmlEdition };
-
-export { ErrorCodes } from './error/errorCodes';
-export { makeOffset } from './error/makeOffset';
-export {
-   ERROR_SUBTYPE,
-   FATAL_ERROR_SUBTYPE,
-   XML_ERROR_TOKEN,
-   WARNING_SUBTYPE,
-   XmlErrorPosition,
-   XmlErrorToken,
-} from './error/XmlErrorToken';
+export * from './versionTypes';
+export * from './klass/errorCodes';
+export * from './klass/errorCollector';
+export * from './klass/offset';
+export * from './klass/range';
+export * from './token/conformanceVersion';
+export * from './token/entityId';
+export * from './token/token';
+export * from './token/xmlErrorToken';
+export * from './util/chars';
+export * from './util/doAsyncLoop';
+export * from './util/doAsyncWhileLoop';
+export * from './util/extractSurrogatePair';
+export * from './util/makeOffset';

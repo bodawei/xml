@@ -3,8 +3,8 @@
 import { Offset, Range, EntityId } from 'basic';
 import { SToken } from 'sToken';
 
-import ErrorCollector from '../ErrorCollector';
-import { TestErrorType } from './TestErrorType';
+import { ErrorCollector } from '../errorCollector';
+import { TestErrorType } from './testErrorType';
 
 describe('ErrorCollector', () => {
    describe('construction', () => {

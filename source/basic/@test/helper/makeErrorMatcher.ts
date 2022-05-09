@@ -1,6 +1,6 @@
 import { MockErrorCollector } from './helper';
 
-import { XmlErrorPosition } from '../../error/XmlErrorToken';
+import { XmlErrorPosition } from '../../token/XmlErrorToken';
 interface ErrorInfo {
    position: XmlErrorPosition;
    id: string;

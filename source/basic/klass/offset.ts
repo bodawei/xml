@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityId } from './entityId';
+import { EntityId } from '../token/entityId';
 
 /**********************************************************************\
  An Offset is used to track a particular index, and row/column
@@ -38,4 +38,4 @@ class Offset {
    }
 }
 
-export default Offset;
+export { Offset };

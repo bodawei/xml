@@ -3,10 +3,10 @@
 import { describe, expect, it } from '@jest/globals';
 import { SToken } from 'sToken';
 
-import { EntityId } from '../../EntityId';
+import { Offset } from '../../klass/offset';
+import { Range } from '../../klass/range';
+import { EntityId } from '../../token/entityId';
 import { makeOffset } from '../makeOffset';
-import Range from '../../Range';
-import Offset from '../../Offset';
 
 describe('makeOffset', () => {
    it('returns undefined when passed nothing', () => {

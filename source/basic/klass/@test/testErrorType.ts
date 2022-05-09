@@ -1,13 +1,13 @@
 /* Copyright ® 2022 by 柏大衛. All rights reserved. */
 
-import { makeOffset } from '../error/makeOffset';
-import Offset from '../Offset';
+import { makeOffset } from '../../util/makeOffset';
+import { Offset } from '../offset';
 import {
    WARNING_SUBTYPE,
    XML_ERROR_TOKEN,
    XmlErrorPosition,
    XmlErrorToken,
-} from '../error/XmlErrorToken';
+} from '../../token/xmlErrorToken';
 
 class TestErrorType implements XmlErrorToken {
    public readonly code: number;

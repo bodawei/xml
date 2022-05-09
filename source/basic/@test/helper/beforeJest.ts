@@ -1,7 +1,7 @@
 /* Copyright ® 2017-202 by 柏大衛. All rights reserved. */
 
 import { expect } from '@jest/globals';
-import { XmlErrorToken } from '../../error/XmlErrorToken';
+import { XmlErrorToken } from '../../token/xmlErrorToken';
 import { MockErrorCollector } from './helper';
 import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
 

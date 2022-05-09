@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityId } from '../../basic/entityId';
+import { EntityId } from '../../basic/token/entityId';
 import { Range } from 'basic';
 
 import SToken from '../SToken';

@@ -1,4 +1,4 @@
-import { ErrorCodes } from '../../../error/errorCodes';
+import { ErrorCodes } from '../../../klass/errorCodes';
 import { ErrorInfo } from '../errorInfo';
 import { MockErrorCollector } from '../../helper';
 
