@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import {
@@ -10,18 +10,18 @@ import {
    makeParameterEntityStart,
 } from 'token-test';
 
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { entityDeclarationValueValidate } from '../entityDeclarationValueValidate';
 import { ValidityState } from '../validityState';
-import { validCodes } from '../../error/validCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('entityDeclarationValueValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('reports no error when the declaration is defined (§4.1.0)', () => {
@@ -41,9 +41,10 @@ describe('entityDeclarationValueValidate (unit)', () => {
          value: [makeParameterEntityReference()],
       });
 
-      entityDeclarationValueValidate(peDecl, state, mockErrorCollector);
+      entityDeclarationValueValidate(peDecl, state, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports no error when the declaration is for a reference is not declared, but the document is standalone (§4.1.0)', () => {
@@ -58,9 +59,10 @@ describe('entityDeclarationValueValidate (unit)', () => {
          value: [makeParameterEntityReference()],
       });
 
-      entityDeclarationValueValidate(peDecl, state, mockErrorCollector);
+      entityDeclarationValueValidate(peDecl, state, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error when the declaration is for a reference is not declared and there is an external subset (§4.1.0)', () => {
@@ -74,10 +76,10 @@ describe('entityDeclarationValueValidate (unit)', () => {
          value: [makeParameterEntityReference()],
       });
 
-      entityDeclarationValueValidate(peDecl, state, mockErrorCollector);
+      entityDeclarationValueValidate(peDecl, state, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
+      expect(collector).toHaveValidityError({
          id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],
@@ -96,10 +98,10 @@ describe('entityDeclarationValueValidate (unit)', () => {
          value: [makeParameterEntityReference()],
       });
 
-      entityDeclarationValueValidate(peDecl, state, mockErrorCollector);
+      entityDeclarationValueValidate(peDecl, state, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
+      expect(collector).toHaveValidityError({
          id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],
@@ -118,10 +120,10 @@ describe('entityDeclarationValueValidate (unit)', () => {
          value: [makeParameterEntityStart()],
       });
 
-      entityDeclarationValueValidate(geDecl, state, mockErrorCollector);
+      entityDeclarationValueValidate(geDecl, state, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportValidityError({
+      expect(collector).toHaveValidityError({
          id: VID.PARAMETERENTITY_NO_DECLARATION,
          lastPosition: undefined,
          params: ['entityName'],

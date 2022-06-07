@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -19,7 +19,7 @@ import {
 } from 'token';
 import { makeParameterExternalEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 import {
    scanAttributeValues,
    checkGeneralEntity,
@@ -28,9 +28,11 @@ import {
    CheckState,
 } from '../checkUtils';
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('checkUtils (unit)', () => {
    let state: CheckState;
-   let ec: MockErrorCollector;
+   let collector: ParamCollector;
    let generalEntityStart: GeneralEntityStartPToken;
    let generalEntityEnd: GeneralEntityEndPToken;
    let generalEntityReference: GeneralEntityReferencePToken;
@@ -38,36 +40,36 @@ describe('checkUtils (unit)', () => {
    beforeEach(() => {
       state = new CheckState();
       generalEntityReference = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
          name: toSToken('testRef'),
+         open: toSToken('&'),
       });
       generalEntityStart = new GeneralEntityStartPToken(generalEntityReference);
       generalEntityEnd = new GeneralEntityEndPToken(generalEntityReference);
-      ec = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('scanAttributeValues()', () => {
       it('reports an error in the case of unbalanced entity starts and ends', () => {
          const refTwo = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
             name: toSToken('second'),
+            open: toSToken('&'),
          });
          const generalEntityStartTwo = new GeneralEntityStartPToken(refTwo);
          const unbalancedElement = new ElementStartPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityStart, generalEntityStartTwo, generalEntityEnd],
                },
             ],
+            open: toSToken('<'),
          });
 
-         scanAttributeValues(unbalancedElement.attributes, {}, state, [], ec);
+         scanAttributeValues(unbalancedElement.attributes, {}, state, [], collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.ATTRIBUTE_REFERENCE_UNBALANCED,
             params: ['testRef', 'second'],
             position: generalEntityEnd.referencePToken.open,
          });
@@ -75,7 +77,6 @@ describe('checkUtils (unit)', () => {
 
       it('reports no errors when entity start and ends are properly blanced', () => {
          const unbalancedElement = new ElementStartPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
@@ -87,30 +88,31 @@ describe('checkUtils (unit)', () => {
                   ],
                },
             ],
+            open: toSToken('<'),
          });
 
-         scanAttributeValues(unbalancedElement.attributes, {}, state, [], ec);
+         scanAttributeValues(unbalancedElement.attributes, {}, state, [], collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toNotReportError(WellFormedError.ID.ATTRIBUTE_REFERENCE_UNBALANCED);
+         expect(collector).not.toHaveProblem(WFEID.ATTRIBUTE_REFERENCE_UNBALANCED);
       });
 
       it('reports an error if an undeclared reference is found', () => {
          const undeclaredRef = new ElementStartPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityReference],
                },
             ],
+            open: toSToken('<'),
          });
 
-         scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
+         scanAttributeValues(undeclaredRef.attributes, {}, state, [], collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
             position: generalEntityReference.open,
          });
@@ -118,73 +120,73 @@ describe('checkUtils (unit)', () => {
 
       it('reports no error if an undeclared reference is found, but not all declarations are known', () => {
          const undeclaredRef = new ElementStartPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityReference],
                },
             ],
+            open: toSToken('<'),
          });
          state.peRefCount = 1;
 
-         scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
+         scanAttributeValues(undeclaredRef.attributes, {}, state, [], collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+         expect(collector).not.toHaveProblem(WFEID.REFERENCE_NO_DECLARATION);
       });
 
       it('reports no error if an undeclared reference is found, but it is a predefined one', () => {
          generalEntityReference = new GeneralEntityReferencePToken(generalEntityReference, {
-            open: generalEntityReference.open,
             name: toSToken('lt'),
+            open: generalEntityReference.open,
          });
          const undeclaredRef = new ElementStartPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityReference],
                },
             ],
+            open: toSToken('<'),
          });
 
-         scanAttributeValues(undeclaredRef.attributes, {}, state, [], ec);
+         scanAttributeValues(undeclaredRef.attributes, {}, state, [], collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+         expect(collector).not.toHaveProblem(WFEID.REFERENCE_NO_DECLARATION);
       });
 
       it('reports an error if an entity references an external entiy (§3.1.0)', () => {
          const withExternalRef = new ElementEmptyPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityStart],
                },
             ],
+            open: toSToken('<'),
          });
 
          scanAttributeValues(
             withExternalRef.attributes,
             {
                testRef: {
-                  token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     externalId: {},
-                  }),
                   declaredInInternalSubset: true,
+                  token: new GeneralEntityDeclarationPToken({
+                     externalId: {},
+                     open: toSToken('<!'),
+                  }),
                },
             },
             state,
             [],
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
          });
@@ -192,34 +194,34 @@ describe('checkUtils (unit)', () => {
 
       it('reports an error if an entity references an unparsed entity (§4.1.0)', () => {
          const withUnparsedRef = new ElementEmptyPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityStart],
                },
             ],
+            open: toSToken('<'),
          });
 
          scanAttributeValues(
             withUnparsedRef.attributes,
             {
                testRef: {
-                  token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     nDataName: toSToken('foo'),
-                  }),
                   declaredInInternalSubset: true,
+                  token: new GeneralEntityDeclarationPToken({
+                     nDataName: toSToken('foo'),
+                     open: toSToken('<!'),
+                  }),
                },
             },
             state,
             [],
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
             position: generalEntityStart.referencePToken.open,
          });
@@ -227,55 +229,55 @@ describe('checkUtils (unit)', () => {
 
       it('reports an error there is a recursive general entity start in an attribute value (§4.1.0)', () => {
          const ge1 = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
             name: toSToken('one'),
+            open: toSToken('&'),
          });
          const ge1Start = new GeneralEntityStartPToken(ge1);
          const ge2 = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
             name: toSToken('two'),
+            open: toSToken('&'),
          });
          const ge2Start = new GeneralEntityStartPToken(ge2);
          const ge1B = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
             name: toSToken('one'),
+            open: toSToken('&'),
          });
          const ge1BStart = new GeneralEntityStartPToken(ge1B);
 
          const emptyElement = new ElementEmptyPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [ge1Start, ge2Start, ge1BStart],
                },
             ],
+            open: toSToken('<'),
          });
 
          scanAttributeValues(
             emptyElement.attributes,
             {
                one: {
+                  declaredInInternalSubset: true,
                   token: new GeneralEntityDeclarationPToken({
                      open: toSToken('<!'),
                   }),
-                  declaredInInternalSubset: true,
                },
                two: {
+                  declaredInInternalSubset: true,
                   token: new GeneralEntityDeclarationPToken({
                      open: toSToken('<!'),
                   }),
-                  declaredInInternalSubset: true,
                },
             },
             state,
             [],
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_RECURSION,
             params: ['one'],
             position: ge1B.open,
          });
@@ -283,54 +285,54 @@ describe('checkUtils (unit)', () => {
 
       it('reports an error there is a recursive general entity reference in an attribute value (§4.1.0)', () => {
          const ge1 = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
             name: toSToken('one'),
+            open: toSToken('&'),
          });
          const ge1Start = new GeneralEntityStartPToken(ge1);
          const ge2 = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
             name: toSToken('two'),
+            open: toSToken('&'),
          });
          const ge2Start = new GeneralEntityStartPToken(ge2);
          const ge1B = new GeneralEntityReferencePToken({
-            open: toSToken('&'),
             name: toSToken('one'),
+            open: toSToken('&'),
          });
 
          const emptyElement = new ElementEmptyPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [ge1Start, ge2Start, ge1B],
                },
             ],
+            open: toSToken('<'),
          });
 
          scanAttributeValues(
             emptyElement.attributes,
             {
                one: {
+                  declaredInInternalSubset: true,
                   token: new GeneralEntityDeclarationPToken({
                      open: toSToken('<!'),
                   }),
-                  declaredInInternalSubset: true,
                },
                two: {
+                  declaredInInternalSubset: true,
                   token: new GeneralEntityDeclarationPToken({
                      open: toSToken('<!'),
                   }),
-                  declaredInInternalSubset: true,
                },
             },
             state,
             [],
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_RECURSION,
             params: ['one'],
             position: ge1B.open,
          });
@@ -338,33 +340,33 @@ describe('checkUtils (unit)', () => {
 
       it('reports an error when an attribute value has a general entity start that the attribute, itself, is within (§4.1.0)', () => {
          const emptyElement = new ElementEmptyPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityStart],
                },
             ],
+            open: toSToken('<'),
          });
 
          scanAttributeValues(
             emptyElement.attributes,
             {
                one: {
+                  declaredInInternalSubset: true,
                   token: new GeneralEntityDeclarationPToken({
                      open: toSToken('<!'),
                   }),
-                  declaredInInternalSubset: true,
                },
             },
             state,
             ['testRef'],
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
             position: generalEntityReference.open,
          });
@@ -373,33 +375,33 @@ describe('checkUtils (unit)', () => {
       // This seems impossible, but lets check anyway
       it('reports an error when an attribute value has a general entity reference that the attribute, itself, is within (§4.1.0)', () => {
          const emptyElement = new ElementEmptyPToken({
-            open: toSToken('<'),
             attributes: [
                {
                   name: toSToken('first'),
                   value: [generalEntityReference],
                },
             ],
+            open: toSToken('<'),
          });
 
          scanAttributeValues(
             emptyElement.attributes,
             {
                one: {
+                  declaredInInternalSubset: true,
                   token: new GeneralEntityDeclarationPToken({
                      open: toSToken('<!'),
                   }),
-                  declaredInInternalSubset: true,
                },
             },
             state,
             ['testRef'],
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_RECURSION,
             params: ['testRef'],
             position: generalEntityReference.open,
          });
@@ -408,11 +410,11 @@ describe('checkUtils (unit)', () => {
 
    describe('checkGeneralEntity()', () => {
       it('reports an error if an undeclared reference is found (§4.1.0)', () => {
-         checkGeneralEntity(generalEntityReference, false, {}, state, ec);
+         checkGeneralEntity(generalEntityReference, false, {}, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
             position: generalEntityReference.open,
          });
@@ -420,22 +422,22 @@ describe('checkUtils (unit)', () => {
 
       it('reports no error if an undeclared reference is found, but not all declarations are known (§4.1.0)', () => {
          state.peRefCount = 1;
-         checkGeneralEntity(generalEntityReference, false, {}, state, ec);
+         checkGeneralEntity(generalEntityReference, false, {}, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+         expect(collector).not.toHaveProblem(WFEID.REFERENCE_NO_DECLARATION);
       });
 
       it('reports no error if an undeclared reference is found, but it is a predefined one (§4.1.0)', () => {
          generalEntityReference = new GeneralEntityReferencePToken(generalEntityReference, {
-            open: generalEntityReference.open,
             name: toSToken('lt'),
+            open: generalEntityReference.open,
          });
 
-         checkGeneralEntity(generalEntityReference, false, {}, state, ec);
+         checkGeneralEntity(generalEntityReference, false, {}, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+         expect(collector).not.toHaveProblem(WFEID.REFERENCE_NO_DECLARATION);
       });
 
       it('reports an error if an entity references an unparsed entity (§4.1.0)', () => {
@@ -444,20 +446,20 @@ describe('checkUtils (unit)', () => {
             false,
             {
                testRef: {
-                  token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     nDataName: toSToken('foo'),
-                  }),
                   declaredInInternalSubset: false,
+                  token: new GeneralEntityDeclarationPToken({
+                     nDataName: toSToken('foo'),
+                     open: toSToken('<!'),
+                  }),
                },
             },
             state,
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_UNPARSED_NO_USE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_UNPARSED_NO_USE,
             params: ['testRef'],
             position: generalEntityReference.open,
          });
@@ -469,20 +471,20 @@ describe('checkUtils (unit)', () => {
             true, // in an attribute
             {
                testRef: {
-                  token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     externalId: {},
-                  }),
                   declaredInInternalSubset: true,
+                  token: new GeneralEntityDeclarationPToken({
+                     externalId: {},
+                     open: toSToken('<!'),
+                  }),
                },
             },
             state,
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['testRef'],
             position: generalEntityReference.open,
          });
@@ -497,12 +499,12 @@ describe('checkUtils (unit)', () => {
             true, // in an attribute
             {
                testRef: {
+                  declaredInInternalSubset: false,
                   token: new GeneralEntityDeclarationPToken({
+                     externalId: {},
                      open: toSToken('<!'),
                      value: [new ParameterEntityStartPToken(peRef)],
-                     externalId: {},
                   }),
-                  declaredInInternalSubset: false,
                },
             },
             {
@@ -511,12 +513,12 @@ describe('checkUtils (unit)', () => {
                   entityName: peRefDecl,
                },
             },
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['entityName'],
             position: generalEntityReference.open,
          });
@@ -531,35 +533,35 @@ describe('checkUtils (unit)', () => {
             true, // in an attribute
             {
                testRef: {
+                  declaredInInternalSubset: false,
                   token: new GeneralEntityDeclarationPToken({
+                     externalId: {},
                      open: toSToken('<!'),
                      value: [
                         new ParameterEntityReferencePToken({
-                           open: toSToken('%'),
                            name: toSToken('intermediate'),
+                           open: toSToken('%'),
                         }),
                      ],
-                     externalId: {},
                   }),
-                  declaredInInternalSubset: false,
                },
             },
             {
                ...state,
                paramDecls: {
+                  entityName: externalRefDecl,
                   intermediate: new ParameterEntityDeclarationPToken({
                      open: toSToken('<!'),
                      value: [peRef],
                   }),
-                  entityName: externalRefDecl,
                },
             },
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['entityName'],
             position: generalEntityReference.open,
          });
@@ -574,12 +576,12 @@ describe('checkUtils (unit)', () => {
             true, // in an attribute
             {
                testRef: {
+                  declaredInInternalSubset: false,
                   token: new GeneralEntityDeclarationPToken({
+                     externalId: {},
                      open: toSToken('<!'),
                      value: [peRef],
-                     externalId: {},
                   }),
-                  declaredInInternalSubset: false,
                },
             },
             {
@@ -588,12 +590,12 @@ describe('checkUtils (unit)', () => {
                   entityName: peRefDecl,
                },
             },
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.ATTRIBUTE_INVALID_REFERENCE,
             params: ['entityName'],
             position: generalEntityReference.open,
          });
@@ -607,23 +609,23 @@ describe('checkUtils (unit)', () => {
             true, // in an attribute
             {
                testRef: {
+                  declaredInInternalSubset: false,
                   token: new GeneralEntityDeclarationPToken({
+                     externalId: {},
                      open: toSToken('<!'),
                      value: [new ParameterEntityStartPToken(peRef)],
-                     externalId: {},
                   }),
-                  declaredInInternalSubset: false,
                },
             },
             {
                ...state,
                paramDecls: {},
             },
-            ec,
+            collector,
          );
 
-         expect(ec.errors.length).toEqual(1);
-         expect(ec.errors[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE);
+         expect(collector.getParams().length).toEqual(1);
+         expect(collector.getParams()[0].id).toEqual(WFEID.ATTRIBUTE_INVALID_REFERENCE);
       });
 
       it('reports an error if the general entity is external but document is standalone (§4.1.0)', () => {
@@ -633,20 +635,20 @@ describe('checkUtils (unit)', () => {
             true,
             {
                testRef: {
-                  token: new GeneralEntityDeclarationPToken({
-                     open: toSToken('<!'),
-                     externalId: {},
-                  }),
                   declaredInInternalSubset: false,
+                  token: new GeneralEntityDeclarationPToken({
+                     externalId: {},
+                     open: toSToken('<!'),
+                  }),
                },
             },
             state,
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_STANDALONE,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_STANDALONE,
             params: ['testRef'],
             position: generalEntityReference.open,
          });
@@ -656,15 +658,15 @@ describe('checkUtils (unit)', () => {
    describe('isParamEntityExternal()', () => {
       it('reports true if the param entity reference is to an external declaration', () => {
          const refTwo = new ParameterEntityReferencePToken({
-            open: toSToken('%'),
             name: toSToken('second'),
+            open: toSToken('%'),
          });
 
          const result = isParamEntityExternal(refTwo, {
             second: new ParameterEntityDeclarationPToken({
-               open: toSToken('<!'),
-               name: toSToken('second'),
                externalId: {},
+               name: toSToken('second'),
+               open: toSToken('<!'),
             }),
          });
 
@@ -673,14 +675,14 @@ describe('checkUtils (unit)', () => {
 
       it('reports false if the param entity reference is to an external declaration', () => {
          const refTwo = new ParameterEntityReferencePToken({
-            open: toSToken('%'),
             name: toSToken('second'),
+            open: toSToken('%'),
          });
 
          const result = isParamEntityExternal(refTwo, {
             second: new ParameterEntityDeclarationPToken({
-               open: toSToken('<!'),
                name: toSToken('second'),
+               open: toSToken('<!'),
             }),
          });
 
@@ -691,15 +693,15 @@ describe('checkUtils (unit)', () => {
    describe('checkParameterEntity()', () => {
       it('reports an error if the specified parameter entity has no declaration', () => {
          const peRef = new ParameterEntityReferencePToken({
-            open: toSToken('%'),
             name: toSToken('testRef'),
+            open: toSToken('%'),
          });
 
-         checkParameterEntity(peRef, {}, state, ec);
+         checkParameterEntity(peRef, {}, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_NO_DECLARATION,
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_NO_DECLARATION,
             params: ['testRef'],
             position: peRef.open,
          });
@@ -707,37 +709,37 @@ describe('checkUtils (unit)', () => {
 
       it('reports no error if the parameter entity is declared', () => {
          const peRef = new ParameterEntityReferencePToken({
-            open: toSToken('%'),
             name: toSToken('testRef'),
+            open: toSToken('%'),
          });
 
          checkParameterEntity(
             peRef,
             {
                testRef: new ParameterEntityDeclarationPToken({
-                  open: toSToken('<!'),
                   name: toSToken('testRef'),
+                  open: toSToken('<!'),
                }),
             },
             state,
-            ec,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+         expect(collector).not.toHaveProblem(WFEID.REFERENCE_NO_DECLARATION);
       });
 
       it('reports no error if the parameter entity is not declared but we do not have all decls', () => {
          state.peRefCount = 1;
          const peRef = new ParameterEntityReferencePToken({
-            open: toSToken('%'),
             name: toSToken('testRef'),
+            open: toSToken('%'),
          });
 
-         checkParameterEntity(peRef, {}, state, ec);
+         checkParameterEntity(peRef, {}, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(ec).toNotReportError(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+         expect(collector).not.toHaveProblem(WFEID.REFERENCE_NO_DECLARATION);
       });
    });
 });

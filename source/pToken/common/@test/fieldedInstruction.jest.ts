@@ -144,7 +144,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback).toEqualRangeless(expected);
+         expect(callback).toEqualRangeless(expected);
       });
 
       it('calls literal.parse()', () => {
@@ -164,7 +164,7 @@ describe('FieldedInstruction (unit)', () => {
          const args = litParse.mock.calls[0];
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toBeUndefined();
-         expect(args[2]).toBeInstanceOf(Function);
+         expect(args[2]).toEqual(expect.any(Function));
       });
 
       it('parses multiple attributes', () => {
@@ -215,7 +215,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback).toEqualRangeless(expected);
+         expect(callback).toEqualRangeless(expected);
       });
 
       it('parses zero fields', () => {
@@ -234,7 +234,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback).toEqualRangeless(expected);
+         expect(callback).toEqualRangeless(expected);
       });
 
       it('stops parsing if an unexpected field name is found', () => {
@@ -272,7 +272,7 @@ describe('FieldedInstruction (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(callback).toEqualRangeless(expected);
+         expect(callback).toEqualRangeless(expected);
       });
    });
 });

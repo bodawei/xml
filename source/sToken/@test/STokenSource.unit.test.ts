@@ -497,7 +497,9 @@ describe('STokenSource (unit)', () => {
 
       it('returns a STokens as soon as the finish criteria for the specified extractor has not been met', (done) => {
          source.addText('these are letters with an x');
-         source.extractNoParams('tox', done); // EXPECTATION
+         source.extractNoParams('tox', () => {
+            done();
+         }); // EXPECTATION (simply that it calls back)
       });
 
       describe('ranges', () => {

@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    makeGeneralEntityDeclaration,
    makeGeneralEntityReference,
@@ -16,11 +16,11 @@ import { ValidityState } from '../validityState';
 jest.mock('../geRefValidate');
 
 describe('attributeValueValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('reports no error when the declaration is defined (§4.1.0)', () => {
@@ -34,9 +34,10 @@ describe('attributeValueValidate (unit)', () => {
          },
       });
 
-      attributeValueValidate([makeGeneralEntityReference()], state, mockErrorCollector);
+      attributeValueValidate([makeGeneralEntityReference()], state, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('passes validation of a ref in a general entity start to geRefValidate() (§4.1.0)', () => {
@@ -44,12 +45,12 @@ describe('attributeValueValidate (unit)', () => {
          hasExternalSubset: true,
       });
 
-      attributeValueValidate([makeGeneralEntityStart()], state, mockErrorCollector);
+      attributeValueValidate([makeGeneralEntityStart()], state, collector);
 
       expect(geRefValidate).toHaveBeenCalledWith(
          makeGeneralEntityStart().referencePToken,
          state,
-         mockErrorCollector,
+         collector,
       );
    });
 
@@ -59,9 +60,9 @@ describe('attributeValueValidate (unit)', () => {
          hasExternalSubset: true,
       });
 
-      attributeValueValidate([ref], state, mockErrorCollector);
+      attributeValueValidate([ref], state, collector);
 
-      expect(geRefValidate).toHaveBeenCalledWith(ref, state, mockErrorCollector);
+      expect(geRefValidate).toHaveBeenCalledWith(ref, state, collector);
    });
 
    it('accepts other values in the attribute value that are not eneity references or starts(§4.1.0)', () => {
@@ -69,8 +70,9 @@ describe('attributeValueValidate (unit)', () => {
          hasExternalSubset: true,
       });
 
-      attributeValueValidate([makeTextPToken('boo')], state, mockErrorCollector);
+      attributeValueValidate([makeTextPToken('boo')], state, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 });

@@ -3,7 +3,6 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { CmGraph } from '../cmGraphTypes';
-
 import { pruneCmGraph } from '../pruneCmGraph';
 
 describe('pruneCmGraph()', () => {

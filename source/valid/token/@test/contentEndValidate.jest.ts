@@ -1,22 +1,21 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
-import { contentEndValidate } from '../contentEndValidate';
-import { validCodes } from '../../error/validCodes';
 import { ValidityState } from '../../common/validityState';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
+import { contentEndValidate } from '../contentEndValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('contentEndValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('IDREF (§3.3.1)', () => {
@@ -32,10 +31,10 @@ describe('contentEndValidate (unit)', () => {
             ids: {},
          });
 
-         contentEndValidate(state, mockErrorCollector);
+         contentEndValidate(state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ELEMENTSTART_ATT_IDREF_NO_ID,
             lastPosition: undefined,
             params: ['otherElement', 'otherAtt', 'value1'],
@@ -60,9 +59,10 @@ describe('contentEndValidate (unit)', () => {
             },
          });
 
-         contentEndValidate(state, mockErrorCollector);
+         contentEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

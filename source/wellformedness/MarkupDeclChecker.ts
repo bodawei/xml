@@ -1,6 +1,6 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -36,9 +36,9 @@ import {
    DOCTYPE_END_PTOKEN,
 } from 'token';
 
-import { WellFormedError } from './error/WellFormedError';
-import { WellFormedWarning } from './error/wellFormedWarning';
-import { wellFormedWarningCodes } from './error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from './error/wellFormedError';
+import { Warning } from './error/Warning';
+import { warningCodes } from './error/warningCodes';
 
 import {
    CHECKER_DONE,
@@ -61,8 +61,8 @@ enum States {
    DONE = 'DONE',
 }
 
-const WFID = WellFormedError.ID;
-const WARNID = wellFormedWarningCodes.id;
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
 interface StateTable {
@@ -226,7 +226,7 @@ function checkForRecursionInValue(
       | ElidedEntityDeclarationPToken,
    declContext: Array<string>,
    declsSeen: DeclarationInfo,
-   errorCollector: ErrorCollector,
+   collector: Collector,
 ): void {
    const declName = strOrBlank(pToken.name);
 
@@ -253,16 +253,16 @@ function checkForRecursionInValue(
    for (const refToken of descendentRefs) {
       const refName = strOrBlank(refToken.name);
 
-      errorCollector.check(
+      collector.check(
          pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN && refName === declName,
-         WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         WFEID.REFERENCE_INVALID_RECURSION,
          [declName],
          refToken.open,
       );
 
-      errorCollector.check(
+      collector.check(
          declContext.includes(refName),
-         WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         WFEID.REFERENCE_INVALID_RECURSION,
          [refName],
          refToken.open,
       );
@@ -277,7 +277,7 @@ function checkDeclaration(
       | GeneralEntityDeclarationPToken
       | ParameterEntityDeclarationPToken,
    state: States,
-   ec: ErrorCollector,
+   collector: Collector,
 ): void {
    // §2.8.0: Well-formedness constraint: PEs in Internal Subset
    //     In the internal DTD subset, parameter-entity references must not
@@ -285,12 +285,7 @@ function checkDeclaration(
    //     declarations can occur. (This does not apply to references that
    //     occur in external parameter entities or to the external subset.)
    if (state === States.INTERNAL_SUBSET) {
-      ec.check(
-         pToken.unexpanded,
-         WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
-         [],
-         pToken.open,
-      );
+      collector.check(pToken.unexpanded, WFEID.REFERENCE_INVALID_SUBSET_CONTEXT, [], pToken.open);
 
       if (
          pToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN ||
@@ -308,7 +303,7 @@ function checkDeclaration(
             }
          }
 
-         ec.check(hasPERef, WellFormedError.ID.REFERENCE_INVALID_SUBSET_CONTEXT, [], pToken.open);
+         collector.check(hasPERef, WFEID.REFERENCE_INVALID_SUBSET_CONTEXT, [], pToken.open);
       }
    }
 }
@@ -316,7 +311,7 @@ function checkDeclaration(
 function checkAttlistContext(
    pToken: AttListDeclarationPToken,
    state: CheckState,
-   ec: ErrorCollector,
+   collector: Collector,
 ): void {
    const elName = strOrBlank(pToken.elementName);
 
@@ -327,9 +322,9 @@ function checkAttlistContext(
       //   attribute-list declaration for a given element type ... For interoperability,
       //   an XML processor may at user option issue a warning when more than one
       //   attribute-list declaration is provided for a given element type,
-      ec.reportError(
-         WARNID.ATTLISTDECL_ELEMENT_XTRA_DECLARATION,
-         WellFormedWarning,
+      collector.reportProblem(
+         Warning,
+         WID.ATTLISTDECL_ELEMENT_XTRA_DECLARATION,
          [elName],
          pToken.elementName,
       );
@@ -342,9 +337,9 @@ function checkAttlistContext(
          // §3.3.0: ... For interoperability, an XML processor may at user option
          //   issue a warning when ... more than one attribute definition is provided for a given
          //   attribute, but this is not an error.
-         ec.reportError(
-            WARNID.ATTLISTDECL_ATTR_XTRA_DECLARATION,
-            WellFormedWarning,
+         collector.reportProblem(
+            Warning,
+            WID.ATTLISTDECL_ATTR_XTRA_DECLARATION,
             [elName, attName],
             def.name,
          );
@@ -387,7 +382,7 @@ class MarkupDeclChecker implements MarkupChecker {
 
    public constructor(
       start: MarkupStart,
-      ec: ErrorCollector,
+      collector: Collector,
       checkState: CheckState,
       peContext: Array<string>,
       inExternalContext = false,
@@ -405,7 +400,7 @@ class MarkupDeclChecker implements MarkupChecker {
          this.inExternalContext = true;
          this.state = States.EXTERNAL_SUBSET_START;
       } else if (start.type === PARAMETER_ENTITY_START_PTOKEN) {
-         this.checkPERef(start.referencePToken, ec, true);
+         this.checkPERef(start.referencePToken, collector, true);
 
          if (isParamEntityExternal(start.referencePToken, this.checkState.paramDecls)) {
             this.state = States.PARAM_START_EXTERNAL_SUBSET;
@@ -417,15 +412,12 @@ class MarkupDeclChecker implements MarkupChecker {
          if (this.inExternalContext) {
             this.state = States.INSIDE_CONDITIONAL;
          } else {
-            ec.report(WFID.MARKUPDECL_INVALID_TOKEN, [start.type], getFirstSToken(start));
+            collector.report(WFEID.MARKUPDECL_INVALID_TOKEN, [start.type], getFirstSToken(start));
          }
       }
    }
 
-   public check(
-      pToken: ParseToken,
-      errorCollector: ErrorCollector,
-   ): undefined | typeof CHECKER_DONE {
+   public check(pToken: ParseToken, collector: Collector): undefined | typeof CHECKER_DONE {
       if (this.state === States.DONE) {
          throw new Error(
             'Internal error: Passed a token to MarkupDeclChecker when it was already done.',
@@ -433,7 +425,7 @@ class MarkupDeclChecker implements MarkupChecker {
       }
 
       if (this.embeddedChecker) {
-         const result = this.embeddedChecker.check(pToken, errorCollector);
+         const result = this.embeddedChecker.check(pToken, collector);
 
          if (result === CHECKER_DONE) {
             delete this.embeddedChecker;
@@ -448,27 +440,27 @@ class MarkupDeclChecker implements MarkupChecker {
                this.checkState.generalDecls,
                this.checkState,
                [], // not possible to have general entity context here
-               errorCollector,
+               collector,
             );
-            checkAttlistContext(pToken, this.checkState, errorCollector);
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkAttlistContext(pToken, this.checkState, collector);
+            checkDeclaration(pToken, this.state, collector);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             const type = strOrBlank(pToken.contentSpec).toUpperCase();
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, collector);
             this.checkState.elementDecl[strOrBlank(pToken.name)] =
                type === 'EMPTY' ? 'EMPTY' : 'OTHER';
             break;
          case NOTATION_DECLARATION_PTOKEN:
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, collector);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            this.checkPERef(pToken, errorCollector, false);
+            this.checkPERef(pToken, collector, false);
             break;
          case EXTERNAL_SUBSET_START_TOKEN:
             this.embeddedChecker = new MarkupDeclChecker(
                pToken,
-               errorCollector,
+               collector,
                this.checkState,
                this.peContext,
                this.inExternalContext,
@@ -477,7 +469,7 @@ class MarkupDeclChecker implements MarkupChecker {
          case CONDITIONAL_START_PTOKEN:
             this.embeddedChecker = new MarkupDeclChecker(
                pToken,
-               errorCollector,
+               collector,
                this.checkState,
                this.peContext,
                this.inExternalContext,
@@ -486,7 +478,7 @@ class MarkupDeclChecker implements MarkupChecker {
          case PARAMETER_ENTITY_START_PTOKEN:
             this.embeddedChecker = new MarkupDeclChecker(
                pToken,
-               errorCollector,
+               collector,
                this.checkState,
                this.peContext,
                this.inExternalContext,
@@ -506,41 +498,41 @@ class MarkupDeclChecker implements MarkupChecker {
             } else {
                // §4.2 If the same entity is declared more than once, ... at user option,
                // an XML processor may issue a warning if entities are declared multiple times.
-               errorCollector.reportError(
-                  WARNID.ENTITYDECL_XRA_DECLARATION,
-                  WellFormedWarning,
+               collector.reportProblem(
+                  Warning,
+                  WID.ENTITYDECL_XRA_DECLARATION,
                   [geDeclName],
                   pToken.open,
                );
             }
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, collector);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             const peDeclName = strOrBlank(pToken.name);
-            checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
+            checkForRecursionInValue(pToken, this.peContext, this.declsSeen, collector);
             if (!this.checkState.paramDecls[peDeclName]) {
                this.checkState.paramDecls[peDeclName] = pToken;
             } else {
                // §4.2 If the same entity is declared more than once, ... at user option,
                // an XML processor may issue a warning if entities are declared multiple times.
-               errorCollector.reportError(
-                  WARNID.ENTITYDECL_XRA_DECLARATION,
-                  WellFormedWarning,
+               collector.reportProblem(
+                  Warning,
+                  WID.ENTITYDECL_XRA_DECLARATION,
                   [peDeclName],
                   pToken.open,
                );
             }
-            checkDeclaration(pToken, this.state, errorCollector);
+            checkDeclaration(pToken, this.state, collector);
             break;
          case ELIDED_ENTITY_DECLARATION_PTOKEN:
-            checkForRecursionInValue(pToken, this.peContext, this.declsSeen, errorCollector);
+            checkForRecursionInValue(pToken, this.peContext, this.declsSeen, collector);
             break;
          default:
             // do nothing
             break;
       }
 
-      this.transition(pToken, errorCollector);
+      this.transition(pToken, collector);
 
       // @ts-expect-error ts2367 the transition may change the state.
       if (this.state === States.DONE) {
@@ -552,7 +544,7 @@ class MarkupDeclChecker implements MarkupChecker {
 
    private checkPERef(
       pToken: ParameterEntityReferencePToken,
-      ec: ErrorCollector,
+      collector: Collector,
       addToContext: boolean,
    ): void {
       const entityName = strOrBlank(pToken.name);
@@ -560,9 +552,9 @@ class MarkupDeclChecker implements MarkupChecker {
       // §4.1.0: Well-formedness constraint: No Recursion
       //    A parsed entity must not contain a recursive reference to itself,
       //    either directly or indirectly.
-      ec.check(
+      collector.check(
          this.peContext.includes(entityName),
-         WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+         WFEID.REFERENCE_INVALID_RECURSION,
          [entityName],
          pToken.open,
       );
@@ -572,7 +564,7 @@ class MarkupDeclChecker implements MarkupChecker {
       }
 
       // §4.1.0: Do whatever existence check we need to. Do this BEFORE we change the has all decls
-      checkParameterEntity(pToken, this.checkState.paramDecls, this.checkState, ec);
+      checkParameterEntity(pToken, this.checkState.paramDecls, this.checkState, collector);
 
       this.checkState.peRefCount++; // Related to §4.1.0 Entity declared
       // this.checkState.hasAllDecls = false; // That is, a non-validating processor would have seen all declarations
@@ -582,7 +574,7 @@ class MarkupDeclChecker implements MarkupChecker {
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: ParseToken, ec: ErrorCollector): boolean {
+   private transition(pToken: ParseToken, collector: Collector): boolean {
       let newState: States | typeof NO_CHANGE | undefined;
 
       if (
@@ -605,7 +597,7 @@ class MarkupDeclChecker implements MarkupChecker {
          pToken.type === EXTERNAL_SUBSET_END_TOKEN &&
          this.start.type === CONDITIONAL_START_PTOKEN
       ) {
-         ec.report(WFID.CONDITIONAL_NO_CLOSE, [], getFirstSToken(this.start));
+         collector.report(WFEID.CONDITIONAL_NO_CLOSE, [], getFirstSToken(this.start));
       }
 
       if (!newState) {
@@ -616,7 +608,7 @@ class MarkupDeclChecker implements MarkupChecker {
       if (newState) {
          this.state = newState === NO_CHANGE ? this.state : newState;
       } else {
-         ec.report(WFID.MARKUPDECL_INVALID_TOKEN, [pToken.type], getFirstSToken(pToken));
+         collector.report(WFEID.MARKUPDECL_INVALID_TOKEN, [pToken.type], getFirstSToken(pToken));
       }
 
       return !!newState;

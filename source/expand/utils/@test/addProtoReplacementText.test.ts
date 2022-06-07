@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, CONFORMANCE_VERSION, XmlErrorToken } from 'basic';
+import { ENTITY_ID, CONFORMANCE_VERSION, Problem } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -9,7 +9,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { WellFormedError } from 'wellformedness';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';
@@ -17,6 +17,8 @@ import { EntityDetails } from '../EntityDetails';
 import * as expandEntityValue from '../expandEntityValue';
 import { addProtoReplacementText } from '../addProtoReplacementText';
 import { EntityContextStack } from '../EntityContextStack';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('addProtoReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -74,7 +76,7 @@ describe('addProtoReplacementText() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<XmlErrorToken> => [],
+                  getErrors: (): Array<Problem> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -227,11 +229,11 @@ describe('addProtoReplacementText() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          const errors: Array<any> = [];
          for (let index = 0; index < callCount; index++) {
-            errors.push(new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS));
+            errors.push(new WellFormedError(WFEID.XMLDECL_NO_PARAMS));
          }
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<XmlErrorToken> => errors,
+            getErrors: (): Array<Problem> => errors,
          };
       };
 
@@ -240,7 +242,7 @@ describe('addProtoReplacementText() (unit)', () => {
       addProtoReplacementText(peRefPToken, params, new EntityContextStack(), (results) => {
          expect(results as any).toEqual({
             byproducts: [
-               new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
+               new WellFormedError(WFEID.XMLDECL_NO_PARAMS),
                new ElidedEntityDeclarationPToken(peDecl, [
                   new TextPToken({ text: toSToken('foo') }),
                ]),
@@ -266,8 +268,8 @@ describe('addProtoReplacementText() (unit)', () => {
          return {
             sTokenSource: new STokenSource(),
             getErrors: (): Array<any> => [
-               // any should be XmlErrorToken
-               new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
+               // any should be Problem
+               new WellFormedError(WFEID.XMLDECL_NO_PARAMS),
             ],
          };
       };
@@ -277,7 +279,7 @@ describe('addProtoReplacementText() (unit)', () => {
 
       addProtoReplacementText(peRefPToken, params, new EntityContextStack(), (results) => {
          expect(results as any).toEqual({
-            byproducts: [new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS)],
+            byproducts: [new WellFormedError(WFEID.XMLDECL_NO_PARAMS)],
          });
          done();
       });

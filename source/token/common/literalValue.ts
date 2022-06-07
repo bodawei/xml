@@ -1,6 +1,5 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
 import { CharRefPToken, parseCharRef, GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { SToken, STokenSource } from 'sToken';
 
@@ -20,8 +19,6 @@ import { ParameterEntityStartPToken, } from '../marker/parameterEntityStart';
 type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
 type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
-
-let checkMap: { [typeName: string]: (item: any, ec: ErrorCollector, confVer: ConformanceVersion) => void };
 
 /**********************************************************************\
  This the value part of an literal value (that is, the text between

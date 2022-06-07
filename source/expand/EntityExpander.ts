@@ -5,8 +5,8 @@ import {
    ENTITY_ID,
    EntityId,
    ConformanceVersion,
-   XML_ERROR_TOKEN,
-   XmlErrorToken,
+   PROBLEM,
+   Problem,
 } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
@@ -119,7 +119,7 @@ class EntityExpander {
          if (pToken.type === TEXT_PTOKEN) {
             this.conditionalStartExpander.expandPToken(pToken, expanded);
             return;
-         } else if (pToken.type !== XML_ERROR_TOKEN) {
+         } else if (pToken.type !== PROBLEM) {
             this.conditionalStartExpander.finish();
          }
       }
@@ -616,9 +616,7 @@ class EntityExpander {
       );
    }
 
-   private deliverByproducts(
-      byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>,
-   ): void {
+   private deliverByproducts(byproducts: Array<Problem | ElidedEntityDeclarationPToken>): void {
       for (const err of byproducts) {
          this.deliverToken(err);
       }

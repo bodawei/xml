@@ -71,7 +71,7 @@ describe('elementStart (unit)', () => {
             terminators: [ '/', '>', '/>' ],
             geRef: true,
          });
-         expect(args[2]).toBeInstanceOf(Function);
+         expect(typeof args[2]).toEqual('function');
       });
 
       it('returns an empty element if appropriate', () => {

@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
@@ -26,23 +26,23 @@ import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { attributeValueValidate } from '../../common/attributeValueValidate';
 import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { CmGraph } from '../../contentModel/cmGraphTypes';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { elementStartValidate } from '../elementStartValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 jest.mock('../../common/ancestorPERefsValidate');
 jest.mock('../../common/attributeValueValidate');
 
 describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
    let elementStart: ElementStartPToken;
    let graph: CmGraph;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       elementDeclaration = new ElementDeclarationPToken({
          close: toSToken('>'),
          declType: toSToken('ELEMENT'),
@@ -114,10 +114,10 @@ describe('elementStartValidate (unit)', () => {
             docType: 'rootType',
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ELEMENT_DOCTYPE_MISMATCH,
             lastPosition: undefined,
             params: ['rootType', 'elementName'],
@@ -137,9 +137,10 @@ describe('elementStartValidate (unit)', () => {
             },
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when element is the first/root element, does not match the docType, but we are past the end (§2.8.0)', () => {
@@ -158,9 +159,10 @@ describe('elementStartValidate (unit)', () => {
             },
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -188,10 +190,10 @@ describe('elementStartValidate (unit)', () => {
             open: toSToken('</'),
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ELEMENT_NO_DECLARATION,
             lastPosition: undefined,
             params: ['other'],
@@ -230,9 +232,10 @@ describe('elementStartValidate (unit)', () => {
             },
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports an error when the context is MIXED, and the name is not a known name (§3.0.0)', () => {
@@ -255,10 +258,10 @@ describe('elementStartValidate (unit)', () => {
             },
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.CONTENTMIXED_CHILD_UNEXPECTED,
             lastPosition: undefined,
             params: ['parentName', 'elementName'],
@@ -286,10 +289,10 @@ describe('elementStartValidate (unit)', () => {
             },
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.CONTENTELEMENT_CHILD_UNEXPECTED,
             lastPosition: undefined,
             params: ['parentName', 'elementName'],
@@ -306,9 +309,10 @@ describe('elementStartValidate (unit)', () => {
             },
          };
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when we are past the end of the document (§3.0.0)', () => {
@@ -320,9 +324,10 @@ describe('elementStartValidate (unit)', () => {
             },
          };
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -347,10 +352,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_ATT_UNDECLARED,
                lastPosition: undefined,
                params: ['elementName', 'att1'],
@@ -388,10 +393,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_INVALID_ID_NAME,
                   lastPosition: undefined,
                   params: ['elementName', 'att1', '$BOGUS'],
@@ -433,9 +438,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             });
 
             it('reports an error when an ID value has been used before (§3.3.1)', () => {
@@ -471,10 +477,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_XTRA_ID,
                   lastPosition: undefined,
                   params: ['elementName', 'att1', 'otherElement', 'otherAttribute', 'reused'],
@@ -523,10 +529,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_XTRA_ID,
                   lastPosition: undefined,
                   params: ['elementName', 'att2', 'elementName', 'att1', 'reused'],
@@ -563,10 +569,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_INVALID_IDREF_NAME,
                   lastPosition: undefined,
                   params: ['elementName', 'att1', '$BOGUS'],
@@ -601,10 +607,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_INVALID_IDREFS_NAME,
                   lastPosition: undefined,
                   params: ['elementName', 'att1', '$BOGUS, $BAD'],
@@ -646,9 +652,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             });
          });
 
@@ -679,10 +686,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_ATT_INVALID_NMTOKEN,
                lastPosition: undefined,
                params: ['', 'elementName', 'att1'],
@@ -718,10 +725,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_ATT_INVALID_NMTOKENS,
                lastPosition: undefined,
                params: ['', 'elementName', 'att1'],
@@ -762,10 +769,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_ATT_INVALID_NMTOKENS,
                lastPosition: undefined,
                params: ['fooo$$bar, foo\nbar', 'elementName', 'att1'],
@@ -801,10 +808,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_ATT_INVALID_NMTOKENS,
                lastPosition: undefined,
                params: ['fooo$$bar', 'elementName', 'att1'],
@@ -886,10 +893,10 @@ describe('elementStartValidate (unit)', () => {
                      open: toSToken('</'),
                   });
 
-                  elementStartValidate(elementStart, state, mockErrorCollector);
+                  elementStartValidate(elementStart, state, collector);
 
                   // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportValidityError({
+                  expect(collector).toHaveValidityError({
                      id: isPlural
                         ? VID.ELEMENTSTART_ATT_INVALID_ENTITIES_NAME
                         : VID.ELEMENTSTART_ATT_INVALID_ENTITY_NAME,
@@ -911,10 +918,10 @@ describe('elementStartValidate (unit)', () => {
                      open: toSToken('</'),
                   });
 
-                  elementStartValidate(elementStart, state, mockErrorCollector);
+                  elementStartValidate(elementStart, state, collector);
 
                   // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportValidityError({
+                  expect(collector).toHaveValidityError({
                      id: isPlural
                         ? VID.ELEMENTSTART_ATT_ENTITIES_NO_DECLARATION
                         : VID.ELEMENTSTART_ATT_ENTITY_NO_DECLARATION,
@@ -936,10 +943,10 @@ describe('elementStartValidate (unit)', () => {
                      open: toSToken('</'),
                   });
 
-                  elementStartValidate(elementStart, state, mockErrorCollector);
+                  elementStartValidate(elementStart, state, collector);
 
                   // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportValidityError({
+                  expect(collector).toHaveValidityError({
                      id: isPlural
                         ? VID.ELEMENTSTART_ATT_PARSED_ENTITIES
                         : VID.ELEMENTSTART_ATT_PARSED_ENTITY,
@@ -981,9 +988,10 @@ describe('elementStartValidate (unit)', () => {
                      open: toSToken('</'),
                   });
 
-                  elementStartValidate(elementStart, state, mockErrorCollector);
+                  elementStartValidate(elementStart, state, collector);
 
-                  expect(mockErrorCollector.errors).toEqual([]);
+                  // @ts-expect-error 2329/matchers
+                  expect(collector).not.toHaveAnyProblems();
                });
             });
          });
@@ -1027,10 +1035,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_NOTATION_NO_DECLARATION,
                   lastPosition: undefined,
                   params: ['elementName', 'att1', 'first|second', 'bad'],
@@ -1065,10 +1073,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_NOTATION_NO_DECLARATION,
                   lastPosition: undefined,
                   params: ['elementName', 'att1', '', 'bad'],
@@ -1118,9 +1126,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             });
          });
 
@@ -1162,10 +1171,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ELEMENTSTART_ATT_ENUMERATION_NO_DECLARATION,
                   lastPosition: undefined,
                   params: ['elementName', 'att1', 'first|second', 'bad'],
@@ -1207,9 +1216,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             });
 
             it('reports no error when the value of a enumeration in the element start is found in the ATTLIST declaration (§3.3.1)', () => {
@@ -1253,9 +1263,10 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('</'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             });
          });
       });
@@ -1298,10 +1309,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_NO_REQUIRED,
                lastPosition: undefined,
                params: ['elementName', 'req1'],
@@ -1346,10 +1357,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_NO_REQUIRED,
                lastPosition: undefined,
                params: ['elementName', 'req1'],
@@ -1395,10 +1406,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_ATT_INVALID_FIXED,
                lastPosition: undefined,
                params: ['elementName', 'fixed1', 'myDefault', 'other'],
@@ -1435,10 +1446,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.ELEMENTSTART_ATT_DEFAULT_EXTERNAL,
                lastPosition: undefined,
                params: ['elementName', 'att1'],
@@ -1474,9 +1485,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
-            expect(mockErrorCollector.errors).toEqual([]);
+            // @ts-expect-error 2329/matchers
+            expect(collector).not.toHaveAnyProblems();
          });
 
          it('reports no error when an attribute is defaulted from an external ATTLIST declaration, and the document is not standalone (§2.9.0)', () => {
@@ -1507,9 +1519,10 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('</'),
             });
 
-            elementStartValidate(elementStart, state, mockErrorCollector);
+            elementStartValidate(elementStart, state, collector);
 
-            expect(mockErrorCollector.errors).toEqual([]);
+            // @ts-expect-error 2329/matchers
+            expect(collector).not.toHaveAnyProblems();
          });
       });
    });
@@ -1544,10 +1557,10 @@ describe('elementStartValidate (unit)', () => {
             open: toSToken('</'),
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_EXTERNAL,
             lastPosition: undefined,
             params: ['elementName', 'att1'],
@@ -1584,9 +1597,10 @@ describe('elementStartValidate (unit)', () => {
             open: toSToken('</'),
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error if an attribute was not changed through normalization, but the declaration was external and the document is standalone (§2.9.0)', () => {
@@ -1616,9 +1630,10 @@ describe('elementStartValidate (unit)', () => {
             open: toSToken('</'),
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       describe('Standalone Document Declaration (§2.9.0)', () => {
@@ -1726,13 +1741,14 @@ describe('elementStartValidate (unit)', () => {
                   open: toSToken('<!'),
                });
 
-               elementStartValidate(elementStart, state, mockErrorCollector);
+               elementStartValidate(elementStart, state, collector);
 
                if (pass) {
-                  expect(mockErrorCollector.errors).toEqual([]);
+                  // @ts-expect-error 2329/matchers
+                  expect(collector).not.toHaveAnyProblems();
                } else {
                   // @ts-expect-error 2329/matchers
-                  expect(mockErrorCollector).toReportValidityError({
+                  expect(collector).toHaveValidityError({
                      id: VID.ENTITYREF_EXTERNAL,
                      lastPosition: undefined,
                      params: [start.referencePToken.name?.str],
@@ -1768,9 +1784,9 @@ describe('elementStartValidate (unit)', () => {
                open: toSToken('<!'),
             });
 
-            elementStartValidate(elmentStart, state, mockErrorCollector);
+            elementStartValidate(elmentStart, state, collector);
 
-            expect(ancestorPERefsValidate).toHaveBeenCalledWith(start, state, mockErrorCollector);
+            expect(ancestorPERefsValidate).toHaveBeenCalledWith(start, state, collector);
          });
       });
    });
@@ -1790,12 +1806,12 @@ describe('elementStartValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         elementStartValidate(elementStart, state, mockErrorCollector);
+         elementStartValidate(elementStart, state, collector);
 
          expect(attributeValueValidate).toHaveBeenCalledWith(
             elementStart.attributes[0].value,
             state,
-            mockErrorCollector,
+            collector,
          );
       });
    });

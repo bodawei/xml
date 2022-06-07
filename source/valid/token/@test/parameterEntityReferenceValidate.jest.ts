@@ -1,22 +1,21 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { parameterEntityReferenceValidate } from '../parameterEntityReferenceValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('parameterEntityReferenceValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('Validity Constraint: Entity Declared (§4.1.0)', () => {
@@ -32,13 +31,10 @@ describe('parameterEntityReferenceValidate (unit)', () => {
             },
          });
 
-         parameterEntityReferenceValidate(
-            makeParameterEntityReference(),
-            state,
-            mockErrorCollector,
-         );
+         parameterEntityReferenceValidate(makeParameterEntityReference(), state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports an error when the reference has not been declared (and not standalone and has external subset) (§4.1.0)', () => {
@@ -55,10 +51,10 @@ describe('parameterEntityReferenceValidate (unit)', () => {
             },
          });
 
-         parameterEntityReferenceValidate(ref, state, mockErrorCollector);
+         parameterEntityReferenceValidate(ref, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PARAMETERENTITY_NO_DECLARATION,
             lastPosition: undefined,
             params: ['entityName'],
@@ -80,10 +76,10 @@ describe('parameterEntityReferenceValidate (unit)', () => {
             },
          });
 
-         parameterEntityReferenceValidate(ref, state, mockErrorCollector);
+         parameterEntityReferenceValidate(ref, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PARAMETERENTITY_NO_DECLARATION,
             lastPosition: undefined,
             params: ['entityName'],
@@ -105,9 +101,10 @@ describe('parameterEntityReferenceValidate (unit)', () => {
             },
          });
 
-         parameterEntityReferenceValidate(ref, state, mockErrorCollector);
+         parameterEntityReferenceValidate(ref, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

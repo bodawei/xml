@@ -1,6 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { Range } from 'basic';
+import { Range, rangeEndOffset, rangeStartOffset } from 'basic';
+import { offsetsAreEqual } from 'basic';
 import SToken from './SToken';
 
 function canFuseRanges(range1: Range, range2: Range) {
@@ -10,7 +11,7 @@ function canFuseRanges(range1: Range, range2: Range) {
       range1.entityId.publicId === range2.entityId.publicId;
 
    if (locationsSame || locationsEqual) {
-      return range1.getEndOffset().equals(range2.getStartOffset());
+      return offsetsAreEqual(rangeEndOffset(range1), rangeStartOffset(range2));
    }
 
    return false;

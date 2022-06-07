@@ -1,51 +1,54 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import * as util from '../../common/nameCheck';
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { generalEntityReferenceCheck } from '../generalEntityReferenceCheck';
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('generalEntityReferenceCheck()', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let gePToken: GeneralEntityReferencePToken;
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
 
       gePToken = new GeneralEntityReferencePToken({
-         open: toSToken('%'),
-         openSpace: toSToken(' '),
+         close: toSToken(';'),
          name: toSToken('entityName'),
          nameSpace: toSToken(' '),
-         close: toSToken(';'),
+         open: toSToken('%'),
+         openSpace: toSToken(' '),
       });
 
       jest.spyOn(util, 'nameCheck').mockImplementation();
    });
 
    it('checks that the name is a valid name', () => {
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
+      generalEntityReferenceCheck(gePToken, collector, confVer);
 
       expect(util.nameCheck).toHaveBeenCalledWith(
          gePToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.REFERENCE_NAME_INVALID,
+         WFEID.REFERENCE_NAME_INVALID,
       );
    });
 
    it('reports an error if there is a space after the opening %', () => {
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
+      generalEntityReferenceCheck(gePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.REFERENCE_XTRA_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.REFERENCE_XTRA_SPACE,
          params: ['entityName'],
          position: gePToken.openSpace,
       });
@@ -53,27 +56,29 @@ describe('generalEntityReferenceCheck()', () => {
 
    it('reports an error if there is no name', () => {
       gePToken = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
-         openSpace: undefined,
+         close: toSToken(';'),
          name: undefined,
          nameSpace: undefined,
-         close: toSToken(';'),
+         open: toSToken('&'),
+         openSpace: undefined,
       });
 
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
+      generalEntityReferenceCheck(gePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.REFERENCE_NO_NAME,
-         params: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.REFERENCE_NO_NAME,
          lastPosition: gePToken.open,
+         params: [],
       });
    });
 
    it('reports an error if there is a space after the entity name', () => {
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
+      generalEntityReferenceCheck(gePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.REFERENCE_XTRA_TRAILING_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.REFERENCE_XTRA_TRAILING_SPACE,
          params: ['entityName'],
          position: gePToken.nameSpace,
       });
@@ -81,19 +86,20 @@ describe('generalEntityReferenceCheck()', () => {
 
    it('reports an error if there was no closing', () => {
       gePToken = new GeneralEntityReferencePToken({
-         open: toSToken('&'),
-         openSpace: undefined,
+         close: undefined,
          name: toSToken('refName'),
          nameSpace: undefined,
-         close: undefined,
+         open: toSToken('&'),
+         openSpace: undefined,
       });
 
-      generalEntityReferenceCheck(gePToken, mockErrorCollector, confVer);
+      generalEntityReferenceCheck(gePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.REFERENCE_NO_SEMICOLON,
-         params: ['refName'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.REFERENCE_NO_SEMICOLON,
          lastPosition: gePToken.name,
+         params: ['refName'],
       });
    });
 });

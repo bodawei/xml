@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { SToken } from 'sToken';
-import { WellFormedWarning } from '../error/wellFormedWarning';
+import { Warning } from '../error/Warning';
 
 /**********************************************************************\
  nameXmlCheck() does a check whether a name starts
@@ -12,7 +12,7 @@ import { WellFormedWarning } from '../error/wellFormedWarning';
 
 function nameXmlCheck(
    nameSToken: SToken | undefined,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
    nameType: string,
    v1R6Warning: string,
@@ -91,10 +91,10 @@ function nameXmlCheck(
       }
 
       if (isProblematic) {
-         ec.reportError(v1R6Warning, WellFormedWarning, [name]);
+         collector.reportProblem(Warning, v1R6Warning, [name]);
       }
    } else if (name.substring(0, 3).toLowerCase() === 'xml') {
-      ec.reportError(otherWarning, WellFormedWarning, [name]);
+      collector.reportProblem(Warning, otherWarning, [name]);
    }
 }
 

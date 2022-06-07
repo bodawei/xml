@@ -1,6 +1,6 @@
 /* Copyright ® 2019 by 柏大衛. All rights reserved. */
 
-import { XML_ERROR_TOKEN, ErrorCollector, CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
+import { PROBLEM, CONFORMANCE_VERSION, ENTITY_ID, Problem, ProblemCollector } from 'basic';
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    XMLDECL_PTOKEN,
@@ -27,7 +27,7 @@ import {
    CHECKER_DONE,
 } from './checkUtils';
 import { checkMap } from './checkMap';
-import { WellFormedError } from './error/WellFormedError';
+import { WellFormedError, wellFormedErrorCodes } from './error/wellFormedError';
 import { conditionalStartCheck } from './token/conditionalStartCheck';
 import { docTypeEndCheck } from './token/docTypeEndCheck';
 import { dtdEndCheck } from './common/dtdEndCheck';
@@ -46,6 +46,8 @@ interface CheckerMap {
    content: ContentCheckerConstructor;
    dtd: MarkupCheckerConstructor;
 }
+
+const WFEID = wellFormedErrorCodes.id;
 
 enum State {
    START = 'START', // §2.1.0: Production [1]
@@ -125,40 +127,37 @@ class DocumentChecker {
       this.checkers = checkerMap;
    }
 
-   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE {
+   check(pToken: ParseToken): ReadonlyArray<Problem> {
+      const collector = new ProblemCollector(getFirstSToken(pToken), WellFormedError);
+
       if (pToken.type === CONFORMANCE_VERSION) {
          this.checkState.confVer = pToken;
-         return;
+         return [];
       } else if (pToken.type === ENTITY_ID) {
-         return;
-      } else if (pToken.type === XML_ERROR_TOKEN) {
-         return;
+         return [];
+      } else if (pToken.type === PROBLEM) {
+         return [];
       }
 
       const mapped = checkMap[pToken.type];
 
       if (pToken.type === DOCTYPE_END_PTOKEN) {
          // Report errors with the starting context of the DOCTYPE start
-         const specialErrorCollector = new ErrorCollector(
+         const specialErrorCollector = new ProblemCollector(
             pToken.docTypeStartPToken.open,
-            WellFormedError as any,
+            WellFormedError,
          );
          docTypeEndCheck(pToken, specialErrorCollector);
-         errorCollector.appendFrom(specialErrorCollector);
-         dtdEndCheck(this.checkState, errorCollector);
+         collector.appendFrom(specialErrorCollector);
+         dtdEndCheck(this.checkState, collector);
       } else if (pToken.type === CONDITIONAL_START_PTOKEN) {
-         conditionalStartCheck(pToken, errorCollector);
+         conditionalStartCheck(pToken, collector);
       } else if (mapped) {
-         mapped(
-            pToken,
-            errorCollector,
-            this.checkState.confVer,
-            this.subChecker?.inSecondPassContxt,
-         );
+         mapped(pToken, collector, this.checkState.confVer, this.subChecker?.inSecondPassContxt);
       }
 
       if (this.subChecker) {
-         const result = this.subChecker.check(pToken, errorCollector);
+         const result = this.subChecker.check(pToken, collector);
 
          if (result === CHECKER_DONE) {
             if (this.state === State.ELEMENT) {
@@ -172,7 +171,7 @@ class DocumentChecker {
             delete this.subChecker;
          }
 
-         return;
+         return collector.getProblems();
       }
 
       switch (pToken.type) {
@@ -188,7 +187,7 @@ class DocumentChecker {
                this.checkState.hasNoDTD = !pToken.openSubset && !pToken.externalId;
                this.checkState.hasExternalDTD = !!pToken.externalId;
 
-               this.transition(pToken, errorCollector);
+               this.transition(pToken, collector);
                if (pToken.openSubset) {
                   this.internalSubsetSeen = true;
                }
@@ -197,29 +196,24 @@ class DocumentChecker {
                   this.externalSubsetSeen = true;
                }
 
-               this.subChecker = new this.checkers.dtd(pToken, errorCollector, this.checkState, []);
-               return;
+               this.subChecker = new this.checkers.dtd(pToken, collector, this.checkState, []);
+               return collector.getProblems();
             }
             break;
          // case EXTERNAL_SUBSET_START_TOKEN:
-         //    this.transition(pToken, errorCollector);
+         //    this.transition(pToken, collector);
          //    this.externalSubsetSeen = true;
 
          //    if (this.state === State.PROLOG_DTD) {
-         //       this.subChecker = new this.checkers.dtd(pToken, errorCollector, this.checkState, []);
+         //       this.subChecker = new this.checkers.dtd(pToken, collector, this.checkState, []);
          //    }
          //    return;
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
-            this.transition(pToken, errorCollector);
+            this.transition(pToken, collector);
 
             if (this.state === State.ELEMENT) {
-               const checker = new this.checkers.content(
-                  pToken,
-                  errorCollector,
-                  this.checkState,
-                  [],
-               );
+               const checker = new this.checkers.content(pToken, collector, this.checkState, []);
 
                if (checker.isDone) {
                   this.state = State.TRAILING_MISC;
@@ -227,21 +221,26 @@ class DocumentChecker {
                   this.subChecker = checker;
                }
             }
-            return;
+            return collector.getProblems();
          default:
             break;
       }
 
-      this.transition(pToken, errorCollector);
+      this.transition(pToken, collector);
+
+      return collector.getProblems();
    }
 
-   public finish(ec: ErrorCollector): void {
+   public finish(): ReadonlyArray<Problem> {
       if (this.state !== State.TRAILING_MISC) {
-         ec.report(WellFormedError.ID.DOC_END_EARLY);
+         // might be nice to store the overall context and position so we can re-use it here.
+         return [new WellFormedError(WFEID.DOC_END_EARLY, [], undefined, undefined)];
       }
+
+      return [];
    }
 
-   private transition(pToken: ParseToken, ec: ErrorCollector): void {
+   private transition(pToken: ParseToken, collector: ProblemCollector): void {
       const transitions = transitionsByState[this.state];
       const newState = transitions?.[pToken.type];
       let badSubset = false;
@@ -255,7 +254,7 @@ class DocumentChecker {
       if (newState && !badSubset) {
          this.state = newState === NO_CHANGE ? this.state : newState;
       } else {
-         ec.report(WellFormedError.ID.TOKEN_INVALID_CONTEXT, [pToken.type], getFirstSToken(pToken));
+         collector.report(WFEID.TOKEN_INVALID_CONTEXT, [pToken.type], getFirstSToken(pToken));
       }
    }
 }

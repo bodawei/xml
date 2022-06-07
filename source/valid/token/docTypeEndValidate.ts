@@ -1,20 +1,20 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { WordListPToken } from 'token';
 
 import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function notationValidate(
    enumeration: WordListPToken | undefined,
    elName: string,
    attName: string,
    state: ValidityState,
-   ec: ErrorCollector,
+   ec: Collector,
 ): void {
    if (!enumeration) {
       return;
@@ -34,7 +34,7 @@ function notationValidate(
    }
 }
 
-function attListValidate(state: ValidityState, ec: ErrorCollector): void {
+function attListValidate(state: ValidityState, ec: Collector): void {
    const attlists = Object.entries(state.attributes);
    const isVer1Ed1 = state.confVer.version !== 1.1 && state.confVer.edition === 1;
 
@@ -93,8 +93,8 @@ function attListValidate(state: ValidityState, ec: ErrorCollector): void {
    }
 }
 
-function docTypeEndValidate(state: ValidityState, ec: ErrorCollector): void {
-   attListValidate(state, ec);
+function docTypeEndValidate(state: ValidityState, coll: Collector): void {
+   attListValidate(state, coll);
 
    const generalEntityDetails = Object.entries(state.generalEntities);
 
@@ -104,14 +104,14 @@ function docTypeEndValidate(state: ValidityState, ec: ErrorCollector): void {
       if (nDataName !== '') {
          const notationDeclared = state.notations[nDataName];
 
-         ec.setPos(info?.token.name);
-         ec.setPos(info?.token.nDataName);
+         coll.setPos(info?.token.name);
+         coll.setPos(info?.token.nDataName);
 
          /*
           * §4.2.2: Validity constraint: Notation Declared
           *    The Name must match the declared name of a notation.
           */
-         ec.check(!notationDeclared, VID.ENTITYDECL_NO_NOTATION_DECLARATION, [
+         coll.check(!notationDeclared, VID.ENTITYDECL_NO_NOTATION_DECLARATION, [
             geDeclName,
             nDataName,
          ]);

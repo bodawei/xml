@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { XmlErrorToken } from 'basic';
+import { Problem, PROBLEM } from 'basic';
 import {
    ParseToken,
    NOTATION_DECLARATION_PTOKEN,
@@ -15,12 +15,11 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { WellFormedError } from 'wellformedness';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import {
    CONDITIONAL_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
-   ERROR_TYPE,
    ConditionalStartPToken,
    DocTypeEndPToken,
    DocTypeStartPToken,
@@ -42,6 +41,8 @@ import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
 import { EntityContextStack } from '../utils/EntityContextStack';
 import { EntityId } from 'basic';
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('EntityExpander (unit)', () => {
    let setupConditionalSpy: jasmine.Spy;
    let expandMarkupUnexpandedSpy: jasmine.Spy;
@@ -61,7 +62,7 @@ describe('EntityExpander (unit)', () => {
 
       return {
          sTokenSource,
-         getErrors(): Array<XmlErrorToken> {
+         getErrors(): Array<Problem> {
             return [];
          },
       };
@@ -209,7 +210,7 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0].type).toEqual(EXTERNAL_DTD_PSEUDO_TOKEN);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(EntityContextStack);
+            expect(args[2] instanceof EntityContextStack).toEqual(true);
             done();
          });
       });
@@ -261,7 +262,7 @@ describe('EntityExpander (unit)', () => {
             streamParsedReplacementText,
             'streamParsedReplacementText',
          );
-         const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
+         const error = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, ['x']);
          streamParsedReplacementTextSpy.and.callFake(
             (
                token,
@@ -279,7 +280,7 @@ describe('EntityExpander (unit)', () => {
             expect(harvestTypes(results)).toEqual([
                DOCTYPE_START_PTOKEN,
                NOTATION_DECLARATION_PTOKEN,
-               ERROR_TYPE,
+               PROBLEM,
                DOCTYPE_END_PTOKEN,
             ]);
             done();
@@ -578,7 +579,7 @@ describe('EntityExpander (unit)', () => {
                cb: (arg: any) => void,
             ) => {
                const result = value.map(() => {
-                  const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
+                  const code = WFEID.XMLDECL_PARAM_UNKNOWN;
                   index++;
 
                   return {
@@ -607,8 +608,8 @@ describe('EntityExpander (unit)', () => {
                },
             ],
          });
-         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['1']);
-         const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['2']);
+         const error1 = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, ['1']);
+         const error2 = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, ['2']);
          const expanded = new AttListDeclarationPToken({
             open: toSToken('<!'),
             elementName: toSToken('student'),
@@ -647,8 +648,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(callArgs[0]).toEqual(attList.attDefs);
             expect(callArgs[1]).not.toBeUndefined();
-            expect(callArgs[2]).toBeInstanceOf(EntityContextStack);
-            expect(callArgs[3]).toBeInstanceOf(Function);
+            expect(callArgs[2] instanceof EntityContextStack).toEqual(true);
+            expect(typeof callArgs[3]).toEqual('function');
             done();
          });
       });
@@ -723,9 +724,7 @@ describe('EntityExpander (unit)', () => {
             cb(pToken);
          });
          expandEntityValueSpy.and.callFake((pToken, params, chain, cb: (arg: any) => void) => {
-            const error = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, [
-               `${index}`,
-            ]);
+            const error = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, [`${index}`]);
             index++;
             cb({
                newValue: [new TextPToken({ text: toSToken(`testValue #${index}`) })],
@@ -746,8 +745,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(EntityContextStack);
-            expect(args[3]).toBeInstanceOf(Function);
+            expect(args[2] instanceof EntityContextStack).toEqual(true);
+            expect(typeof args[3]).toEqual('function');
             done();
          });
       });
@@ -764,8 +763,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual([new CharRefPToken({ open: toSToken('&#') })]);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(EntityContextStack);
-            expect(args[3]).toBeInstanceOf(Function);
+            expect(args[2] instanceof EntityContextStack).toEqual(true);
+            expect(typeof args[3]).toEqual('function');
             done();
          });
       });
@@ -776,7 +775,7 @@ describe('EntityExpander (unit)', () => {
             name: toSToken('student'),
             value: [new CharRefPToken({ open: toSToken('&#') })],
          });
-         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['0']);
+         const error1 = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, ['0']);
 
          doExpand([geDecl], true, (results) => {
             expect(results as any).toEqual([error1, geDecl]); // any because of WellFormedError
@@ -992,10 +991,10 @@ describe('EntityExpander (unit)', () => {
    //    //       const args = setupConditionalSpy.calls.argsFor(0);
    //    //       expect(args[0]).toEqual(peRef);
    //    //       expect(args[1].utils).not.toBeUndefined(); // inner awareness
-   //    //       expect(args[2]).toBeInstanceOf(EntityContextStack);
+   //    //       expect(args[2] instanceof EntityContextStack).toEqual(true);
    //    //       expect(args[3]).toEqual(ParseType.PARAMETER_ENTITY);
-   //    //       expect(args[4]).toBeInstanceOf(Function);
-   //    //       expect(args[5]).toBeInstanceOf(Function);
+   //    //       expect(typeof args[4]).toEqual('function');
+   //    //       expect(typeof args[5]).toEqual('function');
    //    //       done();
    //    //    });
    //    // });
@@ -1204,7 +1203,7 @@ describe('EntityExpander (unit)', () => {
                cb: (arg: any) => void,
             ) => {
                const result = value.map(() => {
-                  const code = WellFormedError.ID.XMLDECL_PARAM_UNKNOWN;
+                  const code = WFEID.XMLDECL_PARAM_UNKNOWN;
                   index++;
 
                   return {
@@ -1226,8 +1225,8 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('returns the expanded general entity references when there is one in the attribute', (done) => {
-         const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['1']);
-         const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['2']);
+         const error1 = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, ['1']);
+         const error2 = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, ['2']);
          const reference1 = new GeneralEntityReferencePToken({
             open: toSToken('&'),
             name: toSToken('foo'),
@@ -1288,8 +1287,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(callArgs[0]).toEqual(startElement.attributes);
             expect(callArgs[1].entityDetails).not.toBeUndefined();
-            expect(callArgs[2]).toBeInstanceOf(EntityContextStack);
-            expect(callArgs[3]).toBeInstanceOf(Function);
+            expect(callArgs[2] instanceof EntityContextStack).toEqual(true);
+            expect(typeof callArgs[3]).toEqual('function');
             done();
          });
       });
@@ -1341,8 +1340,8 @@ describe('EntityExpander (unit)', () => {
 
             expect(args[0]).toEqual(geRef);
             expect(args[1].entityDetails).not.toBeUndefined();
-            expect(args[2]).toBeInstanceOf(EntityContextStack);
-            expect(args[3]).toBeInstanceOf(Function);
+            expect(args[2] instanceof EntityContextStack).toEqual(true);
+            expect(typeof args[3]).toEqual('function');
             done();
          });
       });

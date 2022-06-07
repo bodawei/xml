@@ -1,58 +1,58 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { WordListPToken } from 'token';
 
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 import { nmTokenCheck } from './nmTokenCheck';
 import { nameCheck } from './nameCheck';
 
 const ENUMERATION_PTOKEN = 'ENUMERATION_PTOKEN';
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 
 function wordListCheck(
    pToken: WordListPToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   ec.setPos(pToken.open);
-   ec.setPos(pToken.openSpace);
+   collector.setPos(pToken.open);
+   collector.setPos(pToken.openSpace);
 
    if (pToken.words.length <= 0) {
-      ec.setPos(undefined);
-      ec.report(WFEID.WORDLIST_NO_WORDS);
+      collector.setPos(undefined);
+      collector.report(WFEID.WORDLIST_NO_WORDS);
    }
 
    let index = 0;
    for (const entry of pToken.words) {
       const isLast = index === pToken.words.length - 1;
 
-      ec.setPos(entry.word);
-      ec.check(!entry.word, WFEID.WORDLIST_NO_WORD, [index.toString()]);
+      collector.setPos(entry.word);
+      collector.check(!entry.word, WFEID.WORDLIST_NO_WORD, [index.toString()]);
 
       if (pToken.type === ENUMERATION_PTOKEN) {
-         nmTokenCheck(entry.word, ec, confVer, WFEID.WORDLIST_INVALID_NMTOKEN);
+         nmTokenCheck(entry.word, collector, confVer, WFEID.WORDLIST_INVALID_NMTOKEN);
       } else {
-         nameCheck(entry.word, ec, confVer, WFEID.WORDLIST_INVALID_NAME);
+         nameCheck(entry.word, collector, confVer, WFEID.WORDLIST_INVALID_NAME);
       }
 
-      ec.setPos(entry.wordSpace);
-      ec.setPos(entry.connector);
+      collector.setPos(entry.wordSpace);
+      collector.setPos(entry.connector);
 
       if (isLast) {
-         ec.check(entry.connector, WFEID.WORDLIST_NO_WORD, [(index + 1).toString()]);
+         collector.check(entry.connector, WFEID.WORDLIST_NO_WORD, [(index + 1).toString()]);
       } else {
-         ec.check(!entry.connector, WFEID.WORDLIST_NO_CONNECTOR, [index.toString()]);
+         collector.check(!entry.connector, WFEID.WORDLIST_NO_CONNECTOR, [index.toString()]);
       }
 
-      ec.setPos(entry.connectorSpace);
+      collector.setPos(entry.connectorSpace);
 
       index++;
    }
 
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.WORDLIST_NO_CLOSE);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.WORDLIST_NO_CLOSE);
 }
 
 export { wordListCheck };

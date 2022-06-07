@@ -1,13 +1,15 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { STokenSource } from 'sToken';
 import { parseCharData } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { charDataCheck } from '../charDataCheck';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('charDataCheck()', () => {
    let confVer: ConformanceVersion;
@@ -23,12 +25,12 @@ describe('charDataCheck()', () => {
       source.endText();
 
       parseCharData(source, [], (result) => {
-         const ec = new ErrorCollector(result!.text, WellFormedError);
+         const ec = new ProblemCollector(result!.text, WellFormedError);
 
          charDataCheck(result!, ec, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-         done?.();
+         expect(ec.getProblems()[0].id).toEqual(WFEID.CHARDATA_INVALID_CHAR);
+         done();
       });
    });
 });

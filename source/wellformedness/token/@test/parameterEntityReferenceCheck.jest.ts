@@ -1,51 +1,54 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import * as util from '../../common/nameCheck';
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { parameterEntityReferenceCheck } from '../parameterEntityReferenceCheck';
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('parameterEntityReferenceCheck()', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let pePToken: ParameterEntityReferencePToken;
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
 
       pePToken = new ParameterEntityReferencePToken({
-         open: toSToken('%'),
-         openSpace: toSToken(' '),
+         close: toSToken(';'),
          name: toSToken('entityName'),
          nameSpace: toSToken(' '),
-         close: toSToken(';'),
+         open: toSToken('%'),
+         openSpace: toSToken(' '),
       });
 
       jest.spyOn(util, 'nameCheck').mockImplementation();
    });
 
    it('checks that the name is a valid name ', () => {
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
+      parameterEntityReferenceCheck(pePToken, collector, confVer);
 
       expect(util.nameCheck).toHaveBeenCalledWith(
          pePToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.PEREF_NAME_INVALID,
+         WFEID.PEREF_NAME_INVALID,
       );
    });
 
    it('reports an error if there is a space after the opening % (syntax)', () => {
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
+      parameterEntityReferenceCheck(pePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PEREF_XTRA_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PEREF_XTRA_SPACE,
          params: ['entityName'],
          position: pePToken.openSpace,
       });
@@ -53,27 +56,29 @@ describe('parameterEntityReferenceCheck()', () => {
 
    it('reports an error if there is no name (syntax)', () => {
       pePToken = new ParameterEntityReferencePToken({
-         open: toSToken('%'),
-         openSpace: undefined,
+         close: toSToken(';'),
          name: undefined,
          nameSpace: undefined,
-         close: toSToken(';'),
+         open: toSToken('%'),
+         openSpace: undefined,
       });
 
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
+      parameterEntityReferenceCheck(pePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PEREF_NO_NAME,
-         params: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PEREF_NO_NAME,
          lastPosition: pePToken.open,
+         params: [],
       });
    });
 
    it('reports an error if there is a space after the entity name (syntax)', () => {
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
+      parameterEntityReferenceCheck(pePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PEREF_XTRA_TRAILING_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PEREF_XTRA_TRAILING_SPACE,
          params: ['entityName'],
          position: pePToken.nameSpace,
       });
@@ -81,19 +86,20 @@ describe('parameterEntityReferenceCheck()', () => {
 
    it('reports an error if there was no closing (syntax)', () => {
       pePToken = new ParameterEntityReferencePToken({
-         open: toSToken('%'),
-         openSpace: undefined,
+         close: undefined,
          name: toSToken('refName'),
          nameSpace: undefined,
-         close: undefined,
+         open: toSToken('%'),
+         openSpace: undefined,
       });
 
-      parameterEntityReferenceCheck(pePToken, mockErrorCollector, confVer);
+      parameterEntityReferenceCheck(pePToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PEREF_NO_SEMICOLON,
-         params: ['refName'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PEREF_NO_SEMICOLON,
          lastPosition: pePToken.name,
+         params: ['refName'],
       });
    });
 });

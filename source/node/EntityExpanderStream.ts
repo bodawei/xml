@@ -3,7 +3,7 @@
 import fs from 'fs';
 import { resolve } from 'path';
 import { Transform } from 'stream';
-import { EntityId, XmlErrorToken } from 'basic';
+import { EntityId, Problem } from 'basic';
 import { PTokenLiteralStream } from './pTokenLiteralStream';
 import { PTokenStream } from './pTokenStream';
 import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
@@ -64,7 +64,7 @@ function retrieveExternalEntity(
 
    return {
       sTokenSource,
-      getErrors: (): Array<XmlErrorToken> => [],
+      getErrors: (): Array<Problem> => [],
    };
 }
 

@@ -1,0 +1,16 @@
+/* Copyright ® 2022 by 柏大衛. All rights reserved. */
+
+import { expect } from '@jest/globals';
+
+import { EntityId } from '../../token/entityId';
+import { Offset } from '../offset';
+import { Range } from '../range';
+import { rangeStartOffset } from '../rangeStartOffset';
+
+describe('rangeStartOffset()', () => {
+   it('returns an Offset that is the start of the Range', () => {
+      const range = new Range(new EntityId('s', 'p'), 1, 2, 3, 4, 5, 6);
+
+      expect(rangeStartOffset(range)).toEqual(new Offset(new EntityId('s', 'p'), 1, 2, 3));
+   });
+});

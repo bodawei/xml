@@ -1,25 +1,28 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { externalIdCheck } from '../../common/externalIdCheck';
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/nameXmlCheck');
 jest.mock('../../common/externalIdCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
+
 describe('notationdeDeclaration (unit)', () => {
    let notationPToken: NotationDeclarationPToken;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
 
    beforeEach(() => {
@@ -36,77 +39,79 @@ describe('notationdeDeclaration (unit)', () => {
       });
 
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('asks the externalId module to look for well formed problems', () => {
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
       expect(externalIdCheck).toHaveBeenCalledWith(
          notationPToken.externalId,
          true,
-         mockErrorCollector,
+         collector,
          confVer,
       );
    });
 
    it('calls nameCheck() to report on bad names', () => {
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(
          notationPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.NOTATIONDECL_NAME_INVALID,
+         WFEID.NOTATIONDECL_NAME_INVALID,
       );
    });
 
    it('calls nameXmlCheck() to report on bad names', () => {
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
       expect(nameXmlCheck).toHaveBeenCalledWith(
          notationPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
          'NOTATION',
-         wellFormedWarningCodes.id.NOTATIONDECL_NAME_XMLDASH_RESERVED,
-         wellFormedWarningCodes.id.NOTATIONDECL_NAME_XML_RESERVED,
+         WID.NOTATIONDECL_NAME_XMLDASH_RESERVED,
+         WID.NOTATIONDECL_NAME_XML_RESERVED,
       );
    });
 
    it('reports an error if there is an extra opening space', () => {
       notationPToken = new NotationDeclarationPToken({
-         open: toSToken('<!'),
-         openSpace: toSToken(' '),
+         close: toSToken('>'),
          declType: toSToken('NOTATION'),
          declTypeSpace: toSToken(' '),
-         name: toSToken('notationName'),
-         nameSpace: toSToken(' '),
          externalId: {},
          externalIdSpace: toSToken(' '),
-         close: toSToken('>'),
+         name: toSToken('notationName'),
+         nameSpace: toSToken(' '),
+         open: toSToken('<!'),
+         openSpace: toSToken(' '),
       });
 
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.NOTATIONDECL_OPEN_XTRA_SPACE_AFTER,
-         params: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.NOTATIONDECL_OPEN_XTRA_SPACE_AFTER,
+         params: [],
          position: notationPToken.openSpace,
       });
    });
 
    it('reports an error if notation is not capitalized', () => {
       notationPToken = new NotationDeclarationPToken({
+         declType: toSToken('notation'),
          open: toSToken('<!'),
          openSpace: toSToken(' '),
-         declType: toSToken('notation'),
       });
 
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.NOTATIONDECL_DECLTYPE_INVALID,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.NOTATIONDECL_DECLTYPE_INVALID,
          params: ['notation'],
          position: notationPToken.declType,
       });
@@ -114,18 +119,19 @@ describe('notationdeDeclaration (unit)', () => {
 
    it('reports an error if there is no name', () => {
       notationPToken = new NotationDeclarationPToken({
-         open: toSToken('<!'),
-         openSpace: toSToken(' '),
          declType: toSToken('NOTATION'),
          declTypeSpace: toSToken(' '),
          name: undefined,
+         open: toSToken('<!'),
+         openSpace: toSToken(' '),
       });
 
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.NOTATIONDECL_NO_NAME,
-         params: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.NOTATIONDECL_NO_NAME,
+         params: [],
          position: undefined,
          lastPosition: notationPToken.declType,
       });
@@ -133,23 +139,24 @@ describe('notationdeDeclaration (unit)', () => {
 
    it('reports an error if there is no space after the name', () => {
       notationPToken = new NotationDeclarationPToken({
-         open: toSToken('<!'),
-         openSpace: toSToken(' '),
+         close: toSToken('>'),
          declType: toSToken('NOTATION'),
          declTypeSpace: toSToken(' '),
+         externalIdSpace: toSToken(' '),
          name: toSToken('notationName'),
          nameSpace: undefined,
-         externalIdSpace: toSToken(' '),
-         close: toSToken('>'),
+         open: toSToken('<!'),
+         openSpace: toSToken(' '),
       });
 
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.NOTATIONDECL_NAME_NO_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.NOTATIONDECL_NAME_NO_SPACE,
+         lastPosition: notationPToken.name,
          params: ['notationName'],
          position: undefined,
-         lastPosition: notationPToken.name,
       });
    });
 
@@ -166,11 +173,12 @@ describe('notationdeDeclaration (unit)', () => {
          close: toSToken('>'),
       });
 
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.NOTATIONDECL_NO_EXTERNALID,
-         params: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.NOTATIONDECL_NO_EXTERNALID,
+         params: [],
          position: notationPToken.nameSpace,
       });
    });
@@ -188,13 +196,14 @@ describe('notationdeDeclaration (unit)', () => {
          close: undefined,
       });
 
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.NOTATIONDECL_NO_CLOSE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.NOTATIONDECL_NO_CLOSE,
+         lastPosition: notationPToken.externalIdSpace,
          params: [notationPToken.name!.str],
          position: undefined,
-         lastPosition: notationPToken.externalIdSpace,
       });
    });
 
@@ -212,10 +221,11 @@ describe('notationdeDeclaration (unit)', () => {
          extra: toSToken('foo'),
       });
 
-      notationDeclarationCheck(notationPToken, mockErrorCollector, confVer);
+      notationDeclarationCheck(notationPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.NOTATIONDECL_EXTRA_TEXT,
          params: ['foo'],
          position: notationPToken.extra,
       });

@@ -1,6 +1,6 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
-import { XmlVersion, XmlEdition } from 'basic';
+import { XmlVersion, XmlEdition } from '../versionTypes';
 
 const CONFORMANCE_VERSION = 'CONFORMANCE_VERSION';
 
@@ -18,7 +18,9 @@ class ConformanceVersion {
    readonly edition: XmlEdition;
 
    constructor(confVer?: ConformanceVersion);
+
    constructor(version?: XmlVersion, edition?: XmlEdition);
+
    constructor(verOrConfVer?: XmlVersion | ConformanceVersion, edition?: XmlEdition) {
       if (typeof verOrConfVer === 'number' || typeof verOrConfVer === 'undefined') {
          this.version = verOrConfVer || 1.0;

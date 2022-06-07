@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ElementStartPToken } from 'token';
 
@@ -10,70 +10,73 @@ import { attributeCheck } from '../../common/attributeCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { elementStartCheck } from '../elementStartCheck';
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 jest.mock('../../common/attributeCheck');
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/nameXmlCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
+
 describe('elementStartCheck()', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let elementStartPToken: ElementStartPToken;
    let elementStartPTokenWithLeading: ElementStartPToken;
 
    beforeEach(() => {
       elementStartPTokenWithLeading = new ElementStartPToken({
+         close: toSToken('>'),
+         name: toSToken('elemName'),
+         nameSpace: toSToken(' '),
          open: toSToken('<'),
          openSpace: toSToken(' '),
-         name: toSToken('elemName'),
-         nameSpace: toSToken(' '),
-         close: toSToken('>'),
       });
       elementStartPToken = new ElementStartPToken({
-         open: toSToken('<'),
-         openSpace: undefined,
+         close: toSToken('>'),
          name: toSToken('elemName'),
          nameSpace: toSToken(' '),
-         close: toSToken('>'),
+         open: toSToken('<'),
+         openSpace: undefined,
       });
 
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('asks the misc module to look for errors in the name', () => {
-      elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
+      elementStartCheck(elementStartPToken, collector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(
          elementStartPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.ELEMENT_NAME_INVALID,
+         WFEID.ELEMENT_NAME_INVALID,
       );
    });
 
    it('asks the misc module to look for warning problems in the name', () => {
-      elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
+      elementStartCheck(elementStartPToken, collector, confVer);
 
       expect(nameXmlCheck).toHaveBeenCalledWith(
          elementStartPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
          'ELEMENT',
-         wellFormedWarningCodes.id.ELEMENT_NAME_XMLCOLON_RESERVED,
-         wellFormedWarningCodes.id.ELEMENT_NAME_XML_RESERVED,
+         WID.ELEMENT_NAME_XMLCOLON_RESERVED,
+         WID.ELEMENT_NAME_XML_RESERVED,
       );
    });
 
    it('calls attributeCheck', () => {
       const confVer = new ConformanceVersion();
-      elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
+      elementStartCheck(elementStartPToken, collector, confVer);
 
       expect(attributeCheck).toHaveBeenCalledWith(
          elementStartPToken.attributes,
-         mockErrorCollector,
+         collector,
          confVer,
          elementStartPToken.nameSpace,
          'NOUN_ATTRIBUTE',
@@ -81,18 +84,19 @@ describe('elementStartCheck()', () => {
    });
 
    it('reports no errors if everything is in order', () => {
-      elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
+      elementStartCheck(elementStartPToken, collector, confVer);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error if there is a space after the opening "<"', () => {
-      elementStartCheck(elementStartPTokenWithLeading, mockErrorCollector, confVer);
+      elementStartCheck(elementStartPTokenWithLeading, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENT_XTRA_LEADING_SPACE,
+         params: [],
          position: elementStartPTokenWithLeading.openSpace,
       });
    });
@@ -101,13 +105,13 @@ describe('elementStartCheck()', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       (elementStartPToken as any).name = undefined;
 
-      elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
+      elementStartCheck(elementStartPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENT_NO_NAME,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENT_NO_NAME,
          lastPosition: undefined,
+         params: [],
       });
    });
 
@@ -115,13 +119,13 @@ describe('elementStartCheck()', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       (elementStartPToken as any).close = undefined;
 
-      elementStartCheck(elementStartPToken, mockErrorCollector, confVer);
+      elementStartCheck(elementStartPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENT_NO_CLOSE,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENT_NO_CLOSE,
          lastPosition: elementStartPToken.nameSpace,
+         params: [],
       });
    });
 });

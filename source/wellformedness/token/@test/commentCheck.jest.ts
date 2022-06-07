@@ -2,31 +2,33 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, EntityId, Offset, Range } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken, SToken } from 'sToken';
 import { CommentPToken } from 'token';
 
 import { charCheck } from '../../common/charCheck';
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { commentCheck } from '../commentCheck';
 
 jest.mock('../../common/charCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('commentCheck()', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let commentPToken: CommentPToken;
 
    beforeEach(() => {
       commentPToken = new CommentPToken({
+         close: toSToken('-->'),
          open: toSToken('<!--'),
          text: [toSToken('commentText')],
-         close: toSToken('-->'),
       });
 
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('asks the charCheck() to validate the text', () => {
@@ -35,20 +37,10 @@ describe('commentCheck()', () => {
          text: [toSToken('blah'), toSToken('commentText')],
       });
 
-      commentCheck(commentPToken, mockErrorCollector, confVer);
+      commentCheck(commentPToken, collector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(
-         commentPToken.text[0],
-         mockErrorCollector,
-         confVer,
-         false,
-      );
-      expect(charCheck).toHaveBeenCalledWith(
-         commentPToken.text[1],
-         mockErrorCollector,
-         confVer,
-         false,
-      );
+      expect(charCheck).toHaveBeenCalledWith(commentPToken.text[0], collector, confVer, false);
+      expect(charCheck).toHaveBeenCalledWith(commentPToken.text[1], collector, confVer, false);
    });
 
    it('reports an error when the content ends with a hyphen', () => {
@@ -57,12 +49,12 @@ describe('commentCheck()', () => {
          text: [new SToken('-', '-', new Range(new EntityId(), 1, 0, 1, 2, 0, 2))],
       });
 
-      commentCheck(commentPToken, mockErrorCollector, confVer);
+      commentCheck(commentPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.COMMENT_ENDS_WITH_HYPHEN,
+         params: [],
          position: new Offset(new EntityId(), 1, 0, 1),
       });
    });
@@ -72,12 +64,12 @@ describe('commentCheck()', () => {
       commentPToken.text[0].originalStr += '-';
       commentPToken.text[0].ranges = [];
 
-      commentCheck(commentPToken, mockErrorCollector, confVer);
+      commentCheck(commentPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.COMMENT_ENDS_WITH_HYPHEN,
+         params: [],
          position: commentPToken.text[0],
       });
    });
@@ -88,12 +80,12 @@ describe('commentCheck()', () => {
          text: [toSToken('commentText'), toSToken('--'), toSToken(' illegal')],
       });
 
-      commentCheck(commentPToken, mockErrorCollector, confVer);
+      commentCheck(commentPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.COMMENT_DOUBLE_HYPHEN,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.COMMENT_DOUBLE_HYPHEN,
+         params: [],
          position: commentPToken.text[1],
       });
    });
@@ -104,32 +96,32 @@ describe('commentCheck()', () => {
          close: undefined,
       });
 
-      commentCheck(commentPToken, mockErrorCollector, confVer);
+      commentCheck(commentPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.COMMENT_NO_CLOSE,
-         params: undefined,
-         position: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.COMMENT_NO_CLOSE,
          lastPosition: commentPToken.text[0],
+         params: [],
+         position: undefined,
       });
    });
 
    it('reports an error when there was an empty text and no closing', () => {
       commentPToken = new CommentPToken({
          ...commentPToken,
-         text: [],
          close: undefined,
+         text: [],
       });
 
-      commentCheck(commentPToken, mockErrorCollector, confVer);
+      commentCheck(commentPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.COMMENT_NO_CLOSE,
-         params: undefined,
-         position: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.COMMENT_NO_CLOSE,
          lastPosition: commentPToken.open,
+         params: [],
+         position: undefined,
       });
    });
 });

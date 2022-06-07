@@ -1,22 +1,22 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
-import { ParameterEntityStartPToken } from 'token';
+import { Collector } from 'basic';
 import { strOrBlank } from 'sToken';
+import { ParameterEntityStartPToken } from 'token';
 
 import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';
 import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function parameterEntityStartValidate(
    startPToken: ParameterEntityStartPToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    const name = strOrBlank(startPToken.referencePToken.name);
-   ec.setPos(startPToken.referencePToken.open);
+   coll.setPos(startPToken.referencePToken.open);
 
    // §2.9.0 Validity Constraint: Standalone Document Declaration
    //    The standalone document declaration must have the value "no" if
@@ -26,14 +26,14 @@ function parameterEntityStartValidate(
    // Note: We do not check the predefined entities since those are never PE refs.
    const details = state.parameterEntities[name];
 
-   ec.check(
+   coll.check(
       details?.isExternalMarkupDeclaration && state.isStandalone,
       VID.ENTITYREF_EXTERNAL,
       [name],
       startPToken.referencePToken.open,
    );
 
-   ancestorPERefsValidate(startPToken, state, ec);
+   ancestorPERefsValidate(startPToken, state, coll);
 }
 
 export { parameterEntityStartValidate };

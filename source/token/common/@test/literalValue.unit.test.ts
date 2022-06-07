@@ -94,7 +94,7 @@ describe('literalValue (unit)', () => {
             mockSource.respondInAsyncTime();
 
             expect(paramParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-            expect(paramParseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+            expect(typeof paramParseSpy.calls.argsFor(0)[1]).toEqual('function');
          });
 
          it('calls out to parseGeneralEntityReference() when encountering a & and asked to parse geRefs', () => {
@@ -109,7 +109,7 @@ describe('literalValue (unit)', () => {
 
             expect(generalParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
             expect(generalParseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)));
-            expect(generalParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+            expect(typeof generalParseSpy.calls.argsFor(0)[2]).toEqual('function');
          });
 
          it('calls out to charRef.parse() when encountering a &# and asked to parse charRefs', () => {
@@ -124,7 +124,7 @@ describe('literalValue (unit)', () => {
 
             expect(charRefSpy.calls.argsFor(0)[0]).toEqual(mockSource);
             expect(charRefSpy.calls.argsFor(0)[1]).toEqual(new SToken('&#', '&#', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)));
-            expect(charRefSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+            expect(typeof charRefSpy.calls.argsFor(0)[2]).toEqual('function');
          });
 
          it('handles a combination of text, pe and ge refs', () => {

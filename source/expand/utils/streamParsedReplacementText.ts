@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { XmlErrorToken } from 'basic';
+import { Problem } from 'basic';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
@@ -66,7 +66,7 @@ function streamParsedReplacementText(
 ): void {
    const { entityDetails, utils } = expandParams;
    let sTokenSource: STokenSource;
-   let getErrors: () => Array<XmlErrorToken>;
+   let getErrors: () => Array<Problem>;
    let context = ParseType.DOCUMENT;
    let start: ParseToken;
    let end: ParseToken;
@@ -114,7 +114,7 @@ function streamParsedReplacementText(
             details.protoReplacementText,
             expandParams.entityId,
          );
-         getErrors = (): Array<XmlErrorToken> => [];
+         getErrors = (): Array<Problem> => [];
       } else {
          ({ sTokenSource, getErrors } = utils.retrieveExternalEntity(entityLoc));
       }

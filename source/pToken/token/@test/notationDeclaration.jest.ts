@@ -90,7 +90,7 @@ describe('notationdeDeclaration (unit)', () => {
 
          expect(externalIDParseSpy.mock.calls[0][0]).toEqual(mockSource);
          expect(externalIDParseSpy.mock.calls[0][1]).toEqual(['>']);
-         expect(externalIDParseSpy.mock.calls[0][2]).toBeInstanceOf(Function);
+         expect(externalIDParseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
       });
 
       it('does a simple parse', () => {
@@ -353,7 +353,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done?.();
+            done();
          });
 
          mockSource.respondInAsyncTime();
@@ -398,7 +398,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done?.();
+            done();
          });
 
          mockSource.respondInAsyncTime();
@@ -440,7 +440,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done?.();
+            done();
          });
 
          mockSource.respondInAsyncTime();
@@ -478,7 +478,7 @@ describe('notationdeDeclaration (unit)', () => {
                }),
             );
 
-            done?.();
+            done();
          });
 
          mockSource.respondInAsyncTime();

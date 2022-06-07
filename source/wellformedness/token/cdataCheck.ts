@@ -1,45 +1,45 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { CdataPToken } from 'token';
 
 import { charCheck } from '../common/charCheck';
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 
-function cdataCheck(pToken: CdataPToken, ec: ErrorCollector, confVer: ConformanceVersion): void {
+function cdataCheck(pToken: CdataPToken, collector: Collector, confVer: ConformanceVersion): void {
    const typeText = strOrBlank(pToken.sectionType);
 
-   ec.setPos(pToken.open);
+   collector.setPos(pToken.open);
 
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.CDATA_XTRA_SPACE_AFTER_OPEN, [typeText]);
+   collector.setPos(pToken.openSpace);
+   collector.check(pToken.openSpace, WFEID.CDATA_XTRA_SPACE_AFTER_OPEN, [typeText]);
 
-   ec.setPos(pToken.sectionType);
+   collector.setPos(pToken.sectionType);
 
    if (pToken.sectionType) {
       const upperType = typeText.toLocaleUpperCase();
 
-      ec.check(upperType !== 'CDATA', WFEID.CDATA_UNKNOWN, [typeText]);
-      ec.check(typeText !== upperType, WFEID.CDATA_INVALID_CASE, [upperType, typeText]);
+      collector.check(upperType !== 'CDATA', WFEID.CDATA_UNKNOWN, [typeText]);
+      collector.check(typeText !== upperType, WFEID.CDATA_INVALID_CASE, [upperType, typeText]);
    } else {
-      ec.report(WFEID.CDATA_NO_TYPE);
+      collector.report(WFEID.CDATA_NO_TYPE);
    }
 
-   ec.setPos(pToken.sectionTypeSpace);
+   collector.setPos(pToken.sectionTypeSpace);
 
-   ec.check(pToken.sectionTypeSpace, WFEID.CDATA_XTRA_SPACE_AFTER_TYPE, [typeText]);
+   collector.check(pToken.sectionTypeSpace, WFEID.CDATA_XTRA_SPACE_AFTER_TYPE, [typeText]);
 
-   ec.setPos(pToken.bracket);
-   ec.check(!pToken.bracket, WFEID.CDATA_NO_SECOND_BRACKET, [typeText]);
+   collector.setPos(pToken.bracket);
+   collector.check(!pToken.bracket, WFEID.CDATA_NO_SECOND_BRACKET, [typeText]);
 
-   ec.setPos(pToken.text);
-   charCheck(pToken.text, ec, confVer, false);
+   collector.setPos(pToken.text);
+   charCheck(pToken.text, collector, confVer, false);
 
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.CDATA_NO_CLOSE);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.CDATA_NO_CLOSE);
 }
 
 export { cdataCheck };

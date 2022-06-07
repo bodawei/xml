@@ -1,17 +1,16 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { ConformanceVersion, XmlErrorToken } from 'basic';
+import { ConformanceVersion, Problem } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
 import { ParseType, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
 
+import { validityErrorCodes } from '../error/validityErrorCodes';
 import { ValidityChecker } from '../validityChecker';
-import { validCodes } from '../error/validCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('ValidityChecker (integration)', () => {
    let checker: ValidityChecker;
@@ -27,7 +26,7 @@ describe('ValidityChecker (integration)', () => {
       confVer?: ConformanceVersion,
    ): void {
       const sTokenSource = new STokenSource();
-      const finalResults: Array<XmlErrorToken> = [];
+      const finalResults: Array<Problem> = [];
       const pTokenStream = new PTokenStream(sTokenSource, {
          confVer,
          parseType: ParseType.DOCUMENT,
@@ -61,7 +60,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <bar/>`,
          VID.ELEMENT_DOCTYPE_MISMATCH,
-         done!,
+         done,
       );
    });
 
@@ -75,7 +74,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_END_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -88,7 +87,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_END_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -102,7 +101,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_END_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -116,7 +115,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_END_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -130,7 +129,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -144,7 +143,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -158,7 +157,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -172,7 +171,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -185,7 +184,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -198,7 +197,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -212,7 +211,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><other></other> </root>`,
          VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
-         done!,
+         done,
       );
    });
 
@@ -224,7 +223,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><other></other> </root>`,
          VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
-         done!,
+         done,
       );
    });
 
@@ -237,7 +236,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
          </root>`,
          VID.ELEMENTSTART_ATT_DEFAULT_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -252,7 +251,7 @@ describe('ValidityChecker (integration)', () => {
          <root attr1="  one   two three  ">
          </root>`,
          VID.ATTLISTDECL_ATT_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -268,7 +267,7 @@ describe('ValidityChecker (integration)', () => {
          &external;
          </root>`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -284,7 +283,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
          </root>`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -300,7 +299,7 @@ describe('ValidityChecker (integration)', () => {
          <root att1="foo &external; foo">
          </root>`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -320,7 +319,7 @@ describe('ValidityChecker (integration)', () => {
          <root>
          </root>`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -340,7 +339,7 @@ describe('ValidityChecker (integration)', () => {
          &level1;
          </root>`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -361,7 +360,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root att1="&level1;" />`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -381,7 +380,7 @@ describe('ValidityChecker (integration)', () => {
          &level1;
          </root>`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -402,7 +401,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root att1="&level1;" />`,
          VID.ENTITYREF_EXTERNAL,
-         done!,
+         done,
       );
    });
 
@@ -414,7 +413,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><a/></root>`,
          VID.ELEMENT_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -426,7 +425,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><!-- not even this! --></root>`,
          VID.CONTENTEMPTY_INVALID_SYNTAX,
-         done!,
+         done,
       );
    });
 
@@ -440,7 +439,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><a/><b/></root>`,
          VID.CONTENTELEMENT_CHILD_UNEXPECTED,
-         done!,
+         done,
       );
    });
 
@@ -454,7 +453,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><a/>&#20;<a/><b/></root>`,
          VID.CONTENTELEMENT_INVALID_SYNTAX,
-         done!,
+         done,
       );
    });
 
@@ -468,7 +467,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><a/><a/><b/> </root>`,
          VID.CONTENTELEMENT_XTRA_SPACE,
-         done!,
+         done,
          new ConformanceVersion(1.0, 1),
       );
    });
@@ -483,7 +482,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root> <a/><a/><b/></root>`,
          VID.CONTENTELEMENT_XTRA_SPACE,
-         done!,
+         done,
          new ConformanceVersion(1.0, 1),
       );
    });
@@ -499,7 +498,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><a/><b/><c/></root>`,
          VID.CONTENTMIXED_CHILD_UNEXPECTED,
-         done!,
+         done,
       );
    });
 
@@ -513,7 +512,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root> <a/><a/><![CDATA[wow]]><b/></root>`,
          VID.CONTENTMIXED_INVALID_SYNTAX,
-         done!,
+         done,
          new ConformanceVersion(1.0, 1),
       );
    });
@@ -528,7 +527,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root> <a/><a/><![CDATA[wow]]><b/></root>`,
          VID.CONTENTANY_INVALID_SYNTAX,
-         done!,
+         done,
          new ConformanceVersion(1.0, 1),
       );
    });
@@ -543,7 +542,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root><a/><a/></root>`,
          VID.CONTENT_PREMATURE_END,
-         done!,
+         done,
       );
    });
 
@@ -555,7 +554,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root foo="bar"/>`,
          VID.ELEMENTSTART_ATT_UNDECLARED,
-         done!,
+         done,
       );
    });
 
@@ -568,7 +567,7 @@ describe('ValidityChecker (integration)', () => {
             ]>
             <root />`,
          VID.ELEMENT_XTRA_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -583,7 +582,7 @@ describe('ValidityChecker (integration)', () => {
       ]>
       <root/>`,
          VID.PEREF_PARENS_UNBALANCED,
-         done!,
+         done,
       );
    });
 
@@ -595,7 +594,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root />`,
          VID.ELEMENTDECL_XTRA_MIXED_NAME,
-         done!,
+         done,
       );
    });
 
@@ -610,7 +609,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root id="$BAD"  />`,
          VID.ELEMENTSTART_ATT_INVALID_ID_NAME,
-         done!,
+         done,
       );
    });
 
@@ -631,7 +630,7 @@ describe('ValidityChecker (integration)', () => {
             <body id="one">
          </root>`,
          VID.ELEMENTSTART_ATT_XTRA_ID,
-         done!,
+         done,
       );
    });
 
@@ -652,7 +651,7 @@ describe('ValidityChecker (integration)', () => {
             <body id="one">
          </root>`,
          VID.ELEMENTSTART_ATT_XTRA_ID,
-         done!,
+         done,
       );
    });
 
@@ -670,7 +669,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root />`,
          VID.ATTLISTDECL_ATT_XTRA_ID,
-         done!,
+         done,
       );
    });
 
@@ -685,7 +684,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root />`,
          VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -700,7 +699,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root ref="$BAD"/>`,
          VID.ELEMENTSTART_ATT_INVALID_IDREF_NAME,
-         done!,
+         done,
       );
    });
 
@@ -715,7 +714,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root ref="OTHER"/>`,
          VID.ELEMENTSTART_ATT_IDREF_NO_ID,
-         done!,
+         done,
       );
    });
 
@@ -731,7 +730,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root unparsed="  foo bar   "  />`,
          VID.ELEMENTSTART_ATT_PARSED_ENTITIES,
-         done!,
+         done,
       );
    });
 
@@ -747,7 +746,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <emptyElement/>`,
          VID.ATTLISTDECL_ATT_INVALID_NOTATION_ON_EMPTY,
-         done!,
+         done,
       );
    });
 
@@ -762,7 +761,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.ATTLISTDECL_ATT_NOTATION_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -777,7 +776,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root notationAttr="bad"/>`,
          VID.ELEMENTSTART_ATT_NOTATION_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -794,7 +793,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.ATTLISTDECL_ATT_XTRA_NOTATION_VALUE,
-         done!,
+         done,
       );
    });
 
@@ -811,7 +810,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE,
-         done!,
+         done,
       );
    });
 
@@ -832,7 +831,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.ATTLISTDECL_ATT_XTRA_NOTATION,
-         done!,
+         done,
       );
    });
 
@@ -847,7 +846,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root enumerationAtt= 'bad' />`,
          VID.ELEMENTSTART_ATT_ENUMERATION_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -862,7 +861,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root />`,
          VID.ELEMENTSTART_NO_REQUIRED,
-         done!,
+         done,
       );
    });
 
@@ -876,7 +875,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_IDREF_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -890,7 +889,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -904,7 +903,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_IDREFS_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -918,7 +917,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -932,7 +931,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -946,7 +945,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_NMTOKENS_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -960,7 +959,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_NOTATION_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -974,7 +973,7 @@ describe('ValidityChecker (integration)', () => {
             >
          ]>`,
          VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
-         done!,
+         done,
       );
    });
 
@@ -989,7 +988,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root attr1="bad" />`,
          VID.ELEMENTSTART_ATT_INVALID_FIXED,
-         done!,
+         done,
       );
    });
 
@@ -1002,7 +1001,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -1015,7 +1014,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING,
-         done!,
+         done,
       );
    });
 
@@ -1028,7 +1027,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
-         done!,
+         done,
       );
    });
 
@@ -1041,7 +1040,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
-         done!,
+         done,
       );
    });
 
@@ -1054,7 +1053,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
-         done!,
+         done,
       );
    });
 
@@ -1070,7 +1069,7 @@ describe('ValidityChecker (integration)', () => {
            &I-Am-Not-Defined;
          </root>`,
          VID.GENERALENTITY_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1086,7 +1085,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root att1="&I-Am-Not-Defined;" />`,
          VID.GENERALENTITY_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1102,7 +1101,7 @@ describe('ValidityChecker (integration)', () => {
             ]>
          <root/>`,
          VID.GENERALENTITY_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1115,7 +1114,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PARAMETERENTITY_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1129,7 +1128,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.PARAMETERENTITY_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1142,7 +1141,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root>&I-Am-Declared;</root>`,
          VID.PARAMETERENTITY_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1156,7 +1155,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root>&I-Am-Declared;</root>`,
          VID.PARAMETERENTITY_NO_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1169,7 +1168,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.ENTITYDECL_NO_NOTATION_DECLARATION,
-         done!,
+         done,
       );
    });
 
@@ -1182,7 +1181,7 @@ describe('ValidityChecker (integration)', () => {
          ]>
          <root/>`,
          VID.NOTATION_XTRA_DECLARATION,
-         done!,
+         done,
       );
    });
 });

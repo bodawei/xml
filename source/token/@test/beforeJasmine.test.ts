@@ -19,7 +19,7 @@ describe('token custom matchers', () => {
          it('throws an exception if the callback spy is undefined', () => {
             try {
                toContainPTokenProps().compare(undefined, {});
-            } catch (e) {
+            } catch (e: any) {
                expect(e.message).toEqual('Did not get a spy as expected.');
             }
          });
@@ -31,7 +31,7 @@ describe('token custom matchers', () => {
 
             try {
                toContainPTokenProps().compare(spy, {});
-            } catch (e) {
+            } catch (e: any) {
                expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 2 calls with 1 arguments.');
             }
          });
@@ -42,7 +42,7 @@ describe('token custom matchers', () => {
 
             try {
                toContainPTokenProps().compare(spy, {});
-            } catch (e) {
+            } catch (e: any) {
                expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 1 calls with 2 arguments.');
             }
          });
@@ -52,7 +52,7 @@ describe('token custom matchers', () => {
 
             try {
                toContainPTokenProps().compare(spy, {});
-            } catch (e) {
+            } catch (e: any) {
                expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 0 calls with 0 arguments.');
             }
          });
@@ -152,7 +152,7 @@ describe('token custom matchers', () => {
          it('throws an exception if the callback spy is undefined', () => {
             try {
                toEqualRangeless({}, {}).compare(undefined as any, {});
-            } catch (e) {
+            } catch (e: any) {
                expect(e.message).toEqual('Did not get a spy as expected.');
             }
          });
@@ -168,7 +168,7 @@ describe('token custom matchers', () => {
 
             try {
                toEqualRangeless({}, {}).compare(spy, {});
-            } catch (e) {
+            } catch (e: any) {
                expect(e.message).toEqual('toEqualRangeless() wanted one call with one argument. ' +
                   'Got 2 calls with 1 arguments.');
             }
@@ -179,7 +179,7 @@ describe('token custom matchers', () => {
 
             try {
                toEqualRangeless({}, {}).compare(spy, {});
-            } catch (e) {
+            } catch (e: any) {
                expect(e.message).toEqual('toEqualRangeless() wanted one call with one argument. ' +
                   'Got 0 calls with 0 arguments.');
             }

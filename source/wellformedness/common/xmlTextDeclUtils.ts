@@ -1,17 +1,19 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { InstructionField } from 'pToken';
 import { SToken } from 'sToken';
 
-import { WellFormedError } from '../error/WellFormedError';
-import { FatalErrorToken } from '../error/fatalErrorToken';
-import { WellFormedWarning } from '../error/wellFormedWarning';
-import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { Error } from '../error/error';
+import { FatalError } from '../error/fatalError';
+import { Warning } from '../error/Warning';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { warningCodes } from '../error/warningCodes';
 import { errorCodes } from '../error/errorCodes';
-import { WellFormedError as NewWellFormedError } from '../error/errorToken';
 
-const WFEID = WellFormedError.ID;
+const EID = errorCodes.id;
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 const S_REGEXP = /^[\t\r\n ]*$/;
 const VERSION_10_1_REGEXP = /^[-a-zA-Z0-9_.:]+$/;
 const VERSION_10_5_REGEXP = /^1.[0-9]+$/;
@@ -47,7 +49,7 @@ const VERSION_10_5_REGEXP = /^1.[0-9]+$/;
 function checkVersionString(
    versionText: string,
    isXmlDecl: boolean,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
    const code = isXmlDecl ? WFEID.XMLDECL_VERSION_INVALD : WFEID.TEXTDECL_VERSION_INVALD;
@@ -57,34 +59,29 @@ function checkVersionString(
       const isNot10 = versionText !== '1.0';
 
       if (doesNotMatchSyntax) {
-         ec.report(code, ["([a-zA-Z0-9_.:] | '-')+", versionText]);
+         collector.report(code, ["([a-zA-Z0-9_.:] | '-')+", versionText]);
       } else if (isNot10) {
-         ec.reportError(
-            isXmlDecl
-               ? errorCodes.id.XMLDECL_VERSION_INVALID
-               : errorCodes.id.TEXTDECL_VERSION_INVALID,
-            NewWellFormedError,
+         collector.reportProblem(
+            Error,
+            isXmlDecl ? EID.XMLDECL_VERSION_INVALID : EID.TEXTDECL_VERSION_INVALID,
             ['1.0', versionText],
          );
       }
    } else if (confVer.version === 1 && confVer.edition < 5) {
-      ec.check(versionText !== '1.0', code, ['1.0', versionText]);
+      collector.check(versionText !== '1.0', code, ['1.0', versionText]);
    } else if (confVer.version === 1 && confVer.edition >= 5) {
       const doesNotMatchSyntax = !VERSION_10_5_REGEXP.test(versionText);
       const isNot10 = versionText !== '1.0';
 
       if (doesNotMatchSyntax) {
-         ec.report(code, ['1.[0-9]+', versionText]);
+         collector.report(code, ['1.[0-9]+', versionText]);
       } else if (isNot10) {
          if (isXmlDecl) {
+            collector.reportProblem(Warning, WID.XMLDECL_VERSION_INVALID, ['1.0', versionText]);
             // We interpret "should not" to mean warning, since the "should not"s in the spec do not represent errors
-            ec.reportError(wellFormedWarningCodes.id.XMLDECL_VERSION_INVALID, WellFormedWarning, [
-               '1.0',
-               versionText,
-            ]);
          } else {
             // We'd ike to consider this a warning too, but there are xmlconf tests which want an error in thise case
-            ec.reportError(code, WellFormedError as any, ['1.0', versionText]);
+            collector.report(code, ['1.0', versionText]);
          }
       }
    } else {
@@ -94,14 +91,14 @@ function checkVersionString(
          : versionText !== '1.1' && versionText !== '1.0';
       const allowed = isXmlDecl ? '1.1' : '1.0/1.1';
 
-      ec.check(condition, code, [allowed, versionText]);
+      collector.check(condition, code, [allowed, versionText]);
    }
 }
 
 function checkSpaceProblems(
    sToken: SToken | undefined,
    code: string,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
    const text = sToken?.originalStr || '';
@@ -116,28 +113,27 @@ function checkSpaceProblems(
       if (!S_REGEXP.test(char)) {
          // §2.11.0 Therefore, it is a fatal error to use them
          //    within the XML declaration or text declaration.
-         ec.reportError(code, FatalErrorToken, [char.charCodeAt(0).toString(16)]);
+         collector.reportProblem(FatalError, code, [char.charCodeAt(0).toString(16)]);
       }
    }
 }
-
 function checkSpaces(
    param: InstructionField,
    spaceCode: string,
    equalCode: string | undefined,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   ec.setPos(param.nameSpace);
-   checkSpaceProblems(param.nameSpace, spaceCode, ec, confVer);
-   ec.setPos(param.equal);
+   collector.setPos(param.nameSpace);
+   checkSpaceProblems(param.nameSpace, spaceCode, collector, confVer);
+   collector.setPos(param.equal);
 
    if (equalCode) {
-      ec.check(!param.equal, equalCode);
+      collector.check(!param.equal, equalCode);
    }
 
-   ec.setPos(param.equalSpace);
-   checkSpaceProblems(param.equalSpace, spaceCode, ec, confVer);
-   ec.setPos(param.openQuote);
+   collector.setPos(param.equalSpace);
+   checkSpaceProblems(param.equalSpace, spaceCode, collector, confVer);
+   collector.setPos(param.openQuote);
 }
 export { checkSpaceProblems, checkSpaces, checkVersionString };

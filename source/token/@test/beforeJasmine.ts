@@ -178,7 +178,7 @@ function toEqualRangeless(util: any, customEqualityTesters: any) {
 beforeEach(() => {
    jasmine.addMatchers({
       toContainPTokenProps,
-      toEqualRangeless,
+      toEqualRangeless: toEqualRangeless as any,
    });
 });
 

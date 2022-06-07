@@ -1,66 +1,66 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { LiteralPToken } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { literalCheck } from '../literalCheck';
 import { literalValueCheck } from '../literalValueCheck';
 
 jest.mock('../literalValueCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('literalCheck() (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
    let literalPToken: LiteralPToken;
 
    beforeEach(() => {
       literalPToken = {
-         type: 'foo',
-         openQuote: toSToken('"'),
-         value: [new TextPToken({ text: toSToken('xxx') })],
          closeQuote: toSToken('"'),
+         openQuote: toSToken('"'),
+         type: 'foo',
+         value: [new TextPToken({ text: toSToken('xxx') })],
       };
 
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       confVer = new ConformanceVersion();
    });
 
    it('calls literalValue.checkWellFormed() to check the value', () => {
-      literalCheck(literalPToken, mockErrorCollector, confVer, 'foo');
+      literalCheck(literalPToken, collector, confVer, 'foo');
 
-      expect(literalValueCheck).toHaveBeenCalledWith(
-         literalPToken.value,
-         mockErrorCollector,
-         confVer,
-      );
+      expect(literalValueCheck).toHaveBeenCalledWith(literalPToken.value, collector, confVer);
    });
 
    it('reports an error if there is no opening quote', () => {
       delete literalPToken.openQuote;
 
-      literalCheck(literalPToken, mockErrorCollector, confVer, 'aType');
+      literalCheck(literalPToken, collector, confVer, 'aType');
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.LITERAL_NO_OPEN_QUOTE,
-         params: ['aType'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.LITERAL_NO_OPEN_QUOTE,
          lastPosition: undefined,
+         params: ['aType'],
       });
    });
 
    it('reports an error if there is no close quote', () => {
       delete literalPToken.closeQuote;
 
-      literalCheck(literalPToken, mockErrorCollector, confVer, 'aType');
+      literalCheck(literalPToken, collector, confVer, 'aType');
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE,
-         params: ['aType'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.LITERAL_NO_CLOSE_QUOTE,
          lastPosition: literalPToken.openQuote,
+         params: ['aType'],
       });
    });
 });

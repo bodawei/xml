@@ -2,66 +2,70 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { elementEndCheck } from '../elementEndCheck';
 
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/nameXmlCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
+
 describe('elementEndCheck()', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let elementEndPToken: ElementEndPToken;
 
    beforeEach(() => {
       elementEndPToken = new ElementEndPToken({
-         open: toSToken('</'),
-         openSpace: undefined,
+         close: toSToken('>'),
          name: toSToken('elemName'),
          nameSpace: toSToken(' '),
-         close: toSToken('>'),
+         open: toSToken('</'),
+         openSpace: undefined,
       });
 
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('asks the misc module to look for errors in the name', () => {
-      elementEndCheck(elementEndPToken, mockErrorCollector, confVer);
+      elementEndCheck(elementEndPToken, collector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(
          elementEndPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.ELEMENT_NAME_INVALID,
+         WFEID.ELEMENT_NAME_INVALID,
       );
    });
 
    it('asks the misc module to look for warnings in the name', () => {
-      elementEndCheck(elementEndPToken, mockErrorCollector, confVer);
+      elementEndCheck(elementEndPToken, collector, confVer);
 
       expect(nameXmlCheck).toHaveBeenCalledWith(
          elementEndPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
          'ELEMENT',
-         wellFormedWarningCodes.id.ELEMENT_NAME_XMLCOLON_RESERVED,
-         wellFormedWarningCodes.id.ELEMENT_NAME_XML_RESERVED,
+         WID.ELEMENT_NAME_XMLCOLON_RESERVED,
+         WID.ELEMENT_NAME_XML_RESERVED,
       );
    });
 
    it('reports no errors if everything is in order', () => {
-      elementEndCheck(elementEndPToken, mockErrorCollector, confVer);
+      elementEndCheck(elementEndPToken, collector, confVer);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error if there is a space after the opening "<"', () => {
@@ -70,12 +74,12 @@ describe('elementEndCheck()', () => {
          openSpace: toSToken(' '),
       });
 
-      elementEndCheck(elementEndPToken, mockErrorCollector, confVer);
+      elementEndCheck(elementEndPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENT_XTRA_LEADING_SPACE,
+         params: [],
          position: elementEndPToken.openSpace,
       });
    });
@@ -86,13 +90,13 @@ describe('elementEndCheck()', () => {
          name: undefined,
       });
 
-      elementEndCheck(elementEndPToken, mockErrorCollector, confVer);
+      elementEndCheck(elementEndPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENT_NO_NAME,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENT_NO_NAME,
          lastPosition: undefined,
+         params: [],
       });
    });
 
@@ -102,13 +106,13 @@ describe('elementEndCheck()', () => {
          close: undefined,
       });
 
-      elementEndCheck(elementEndPToken, mockErrorCollector, confVer);
+      elementEndCheck(elementEndPToken, collector, confVer);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENT_NO_CLOSE,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENT_NO_CLOSE,
          lastPosition: elementEndPToken.nameSpace,
+         params: [],
       });
    });
 });

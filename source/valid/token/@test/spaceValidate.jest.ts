@@ -1,24 +1,23 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { SpacePToken } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
 import { ElDeclType, ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { spaceValidate } from '../spaceValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('spaceValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('Validity constraint: Standalone Document Declaration', () => {
@@ -72,18 +71,19 @@ describe('spaceValidate (unit)', () => {
             });
             const space = new SpacePToken({ text: toSToken('   ') });
 
-            spaceValidate(space, state, mockErrorCollector);
+            spaceValidate(space, state, collector);
 
             if (error) {
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
                   lastPosition: undefined,
                   params: ['elementName'],
                   position: space.text,
                });
             } else {
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             }
          });
       });
@@ -109,9 +109,10 @@ describe('spaceValidate (unit)', () => {
          });
          const space = new SpacePToken({ text: toSToken(' \n \t \r') });
 
-         spaceValidate(space, state, mockErrorCollector);
+         spaceValidate(space, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when the space token S characters in it, but we are not in an ELEMENT context (§2.9.0)', () => {
@@ -135,9 +136,10 @@ describe('spaceValidate (unit)', () => {
          });
          const space = new SpacePToken({ text: toSToken('   ') });
 
-         spaceValidate(space, state, mockErrorCollector);
+         spaceValidate(space, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

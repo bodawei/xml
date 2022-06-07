@@ -1,11 +1,13 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { AttDefinitionP } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { ValidityState } from './validityState';
-import { ErrorToken } from '../error/errorToken';
+
+import { Error } from '../error/error';
 import { errorCodes } from '../error/errorCodes';
+
+import { ValidityState } from './validityState';
 
 const EID = errorCodes.id;
 
@@ -17,7 +19,7 @@ function xmlSpaceValidate(
    elName: string,
    attName: string,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    if (
       attName.toLowerCase() !== 'xml:space' ||
@@ -28,7 +30,7 @@ function xmlSpaceValidate(
 
    const words = attDef.enumeration?.words ?? [];
 
-   ec.setPos(attDef.name);
+   coll.setPos(attDef.name);
 
    // §2.10: concerning xml:space:
    //    it must be given as an enumerated type whose values are one or both of "default"
@@ -37,16 +39,16 @@ function xmlSpaceValidate(
    //    specification or by reporting the (erroneous) value to the application.
    //    Applications may ignore or reject erroneous values.
    if (words.length === 0) {
-      ec.reportError(EID.XMLSPACE_NO_ENUMERATED_VALUES, ErrorToken, [elName]);
+      coll.reportProblem(Error, EID.XMLSPACE_NO_ENUMERATED_VALUES, [elName]);
    }
 
    for (const wordPToken of words) {
       const aName = strOrBlank(wordPToken.word);
 
-      ec.setPos(wordPToken.word);
+      coll.setPos(wordPToken.word);
 
       if (aName !== 'preserve' && aName !== 'default') {
-         ec.reportError(EID.XMLSPACE_XTRA_ENUMERATED_VALUE, ErrorToken, [elName, aName]);
+         coll.reportProblem(Error, EID.XMLSPACE_XTRA_ENUMERATED_VALUE, [elName, aName]);
       }
    }
 }

@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
@@ -12,14 +12,14 @@ import {
 import { COMMENT_PTOKEN, CONDITIONAL_START_PTOKEN, ParameterEntityEndPToken } from 'token';
 
 import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function parameterEntityEndValidate(
    endPToken: ParameterEntityEndPToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    const lastPToken = state.dtdContext.lastPToken;
 
@@ -30,25 +30,45 @@ function parameterEntityEndValidate(
       //    (markupdecl above) is contained in the replacement text for a parameter-entity
       //    reference, both must be contained in the same replacement text.
       if (lastPToken.type === ATTLIST_DECLARATION_PTOKEN) {
-         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['ATTLIST'], lastPToken.open);
+         coll.check(
+            !lastPToken.close,
+            VID.PEREF_INVALID_START_NESTING,
+            ['ATTLIST'],
+            lastPToken.open,
+         );
       } else if (lastPToken.type === ELEMENT_DECLARATION_PTOKEN) {
-         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['ELEMENT'], lastPToken.open);
+         coll.check(
+            !lastPToken.close,
+            VID.PEREF_INVALID_START_NESTING,
+            ['ELEMENT'],
+            lastPToken.open,
+         );
       } else if (
          lastPToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ||
          lastPToken.type === PARAMETER_ENTITY_DECLARATION_PTOKEN
       ) {
-         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['ENTITY'], lastPToken.open);
+         coll.check(
+            !lastPToken.close,
+            VID.PEREF_INVALID_START_NESTING,
+            ['ENTITY'],
+            lastPToken.open,
+         );
       } else if (lastPToken.type === NOTATION_DECLARATION_PTOKEN) {
-         ec.check(
+         coll.check(
             !lastPToken.close,
             VID.PEREF_INVALID_START_NESTING,
             ['NOTATION'],
             lastPToken.open,
          );
       } else if (lastPToken.type === COMMENT_PTOKEN) {
-         ec.check(!lastPToken.close, VID.PEREF_INVALID_START_NESTING, ['comment'], lastPToken.open);
+         coll.check(
+            !lastPToken.close,
+            VID.PEREF_INVALID_START_NESTING,
+            ['comment'],
+            lastPToken.open,
+         );
       } else if (lastPToken.type === PROCESSING_INSTRUCTION_PTOKEN) {
-         ec.check(
+         coll.check(
             !lastPToken.close,
             VID.PEREF_INVALID_START_NESTING,
             ['processing instruction'],
@@ -57,7 +77,7 @@ function parameterEntityEndValidate(
       }
    }
 
-   ec.setPos(endPToken.referencePToken.open);
+   coll.setPos(endPToken.referencePToken.open);
 
    // §3.4.0 Proper Conditional Section/PE Nesting
    //    If any of the "<![", "[", or "]]>" of a conditional section is
@@ -67,7 +87,7 @@ function parameterEntityEndValidate(
    const item = state.dtdContext.enclosingStack[state.dtdContext.enclosingStack.length - 1];
 
    if (item.type === CONDITIONAL_START_PTOKEN) {
-      ec.report(VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING, [], item.open);
+      coll.report(VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING, [], item.open);
    }
 }
 

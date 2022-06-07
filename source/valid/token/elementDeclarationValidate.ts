@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion, isSpace } from 'basic';
+import { Collector, ConformanceVersion, isSpace } from 'basic';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
@@ -13,14 +13,14 @@ import {
 import { strOrBlank } from 'sToken';
 
 import { ContentDetails, ElDeclType, ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
-import { ValidityWarning } from '../error/validityWarning';
-import { warningCodes } from '../error/warningCodes';
+import { Error } from '../error/error';
 import { errorCodes } from '../error/errorCodes';
-import { ErrorToken } from '../error/errorToken';
+import { validityErrorCodes } from '../error/validityErrorCodes';
+import { Warning } from '../error/warning';
+import { warningCodes } from '../error/warningCodes';
 
 const EID = errorCodes.id;
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function getElementNames(contentModel: ContentModelP): Array<string> {
    const childNames: Array<string> = [];
@@ -50,7 +50,7 @@ function validateEntities(
    elDecl: ElementDeclarationPToken,
    elName: string,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
    version: ConformanceVersion,
 ): void {
    if (!elDecl.unexpanded) {
@@ -140,7 +140,7 @@ function validateEntities(
       //    contained in the replacement text for a parameter entity, both
       //    must be contained in the same replacement text.
       if (depth !== 0) {
-         ec.report(VID.PEREF_PARENS_UNBALANCED, [elName, entityName]);
+         coll.report(VID.PEREF_PARENS_UNBALANCED, [elName, entityName]);
       }
 
       // §3.2.1 For interoperability, if a parameter-entity reference appears
@@ -153,16 +153,13 @@ function validateEntities(
             nonSpace === 0);
 
       if (cmEndFound && hasEmptyContent) {
-         ec.reportError(warningCodes.id.PEREF_NO_EMPTY_IN_MODEL, ValidityWarning, [
-            elName,
-            entityName,
-         ]);
+         coll.reportProblem(Warning, warningCodes.id.PEREF_NO_EMPTY_IN_MODEL, [elName, entityName]);
       }
 
       // §3.2.1 For interoperability, ... neither the first nor last non-blank character
       //    of the replacement text should be a connector (| or ,).
       if (cmEndFound && trailingDelimiter) {
-         ec.reportError(warningCodes.id.PEREF_NO_TRAILING_CONNECTOR, ValidityWarning, [
+         coll.reportProblem(Warning, warningCodes.id.PEREF_NO_TRAILING_CONNECTOR, [
             elName,
             entityName,
          ]);
@@ -177,13 +174,13 @@ function elementDeclarationValidate(
    elDecl: ElementDeclarationPToken,
    declInfo: ContentDetails,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    const openSToken = elDecl.open;
    const elName = strOrBlank(elDecl.name);
    const version = state.confVer;
 
-   ec.setPos(openSToken);
+   coll.setPos(openSToken);
 
    // §2.8.0: Validity Constraint: Proper Declaration/PE Nesting
    //    Parameter-entity replacement text must be properly nested with markup declarations.
@@ -194,14 +191,14 @@ function elementDeclarationValidate(
    if (elDecl.unexpanded && elDecl.extra) {
       const extraText = strOrBlank(elDecl.extra);
 
-      ec.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ELEMENT']);
+      coll.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ELEMENT']);
    }
 
-   ec.setPos(elDecl.name);
+   coll.setPos(elDecl.name);
 
    // §3.2.0: Validity constraint: Unique Element Type Declaration
    //    An element type must not be declared more than once.
-   ec.check(state.elements[elName], VID.ELEMENT_XTRA_DECLARATION, [elName]);
+   coll.check(state.elements[elName], VID.ELEMENT_XTRA_DECLARATION, [elName]);
 
    if (!elDecl.contentModel) {
       return;
@@ -210,7 +207,7 @@ function elementDeclarationValidate(
    const contentNames = getElementNames(elDecl.contentModel);
    const undeclaredNames: Array<string> = [];
 
-   ec.setPos(elDecl.contentModel.open);
+   coll.setPos(elDecl.contentModel.open);
 
    for (const name of contentNames) {
       if (!state.elements[name] && name !== elName) {
@@ -221,7 +218,7 @@ function elementDeclarationValidate(
    // §3.2.0: At user option, an XML processor may issue a warning when a declaration mentions an
    //    element type for which no declaration is provided, but this is not an error.
    if (undeclaredNames.length > 0) {
-      ec.reportError(warningCodes.id.ELEMENT_CHILD_UNDECLARED, ValidityWarning, [
+      coll.reportProblem(Warning, warningCodes.id.ELEMENT_CHILD_UNDECLARED, [
          elName,
          undeclaredNames.join(','),
       ]);
@@ -241,7 +238,7 @@ function elementDeclarationValidate(
          }
       }
 
-      ec.check(duplicateNames.length > 0, VID.ELEMENTDECL_XTRA_MIXED_NAME, [
+      coll.check(duplicateNames.length > 0, VID.ELEMENTDECL_XTRA_MIXED_NAME, [
          elName,
          duplicateNames.join(','),
       ]);
@@ -255,26 +252,26 @@ function elementDeclarationValidate(
       const cases: Array<string> = [];
 
       for (const id of Object.keys(declInfo.graph.states)) {
-         const state = declInfo.graph.states[Number(id)];
+         const thisState = declInfo.graph.states[Number(id)];
 
-         for (const transName of Object.keys(state.trans)) {
+         for (const transName of Object.keys(thisState.trans)) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            if (state.trans[transName]!.ref.indexOf(',') !== -1) {
+            if (thisState.trans[transName]!.ref.indexOf(',') !== -1) {
                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-               cases.push(`${transName} (${state.trans[transName]!.ref})`);
+               cases.push(`${transName} (${thisState.trans[transName]!.ref})`);
             }
          }
       }
 
       if (cases.length > 0) {
-         ec.reportError(EID.ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC, ErrorToken, [
+         coll.reportProblem(Error, EID.ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC, [
             elName,
             cases.join(','),
          ]);
       }
    }
 
-   validateEntities(elDecl, elName, state, ec, version);
+   validateEntities(elDecl, elName, state, coll, version);
 }
 
 export { elementDeclarationValidate };

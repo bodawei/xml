@@ -1,14 +1,17 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { parseTextDeclaration } from 'pToken';
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { WellFormedError } from '../../error/wellFormedError';
 import { InstructionStart } from '../../../pToken/bridge/instruction';
 
 import { textDeclarationCheck } from '../textDeclarationCheck';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('textDeclaration (integration)', () => {
    let start: InstructionStart;
@@ -17,10 +20,10 @@ describe('textDeclaration (integration)', () => {
 
    beforeEach(() => {
       start = {
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
       };
       confVer = new ConformanceVersion();
       source = new STokenSource();
@@ -28,15 +31,16 @@ describe('textDeclaration (integration)', () => {
 
    it('reports an error when the target text is malformed (check charCheck())', (done) => {
       source.addText('version "1.0" encoding="usascii"?>');
-      start.target = SToken.fromString('\u0001xml');
+      start.target = toSToken('\u0001xml');
 
       parseTextDeclaration(source, start, (result) => {
-         const ec = new ErrorCollector(start.open, WellFormedError);
+         const collector = new ProblemCollector(start.open, WellFormedError);
 
-         textDeclarationCheck(result, ec, confVer);
+         textDeclarationCheck(result, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-         done?.();
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
+         done();
       });
    });
 
@@ -44,12 +48,13 @@ describe('textDeclaration (integration)', () => {
       source.addText('version="\u00011.0" encoding="usascii"?>');
 
       parseTextDeclaration(source, start, (result) => {
-         const ec = new ErrorCollector(start.open, WellFormedError);
+         const collector = new ProblemCollector(start.open, WellFormedError);
 
-         textDeclarationCheck(result, ec, confVer);
+         textDeclarationCheck(result, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-         done?.();
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
+         done();
       });
    });
 });

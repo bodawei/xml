@@ -345,7 +345,7 @@ describe('EntityDetails (unit)', () => {
          entityDetails.addExternalSubset(new ExternalIdP({}));
 
          const result = entityDetails.getExternalSubsetReference();
-         expect(result).toBeInstanceOf(ExternalDtdSubsetPseudoToken);
+         expect(result instanceof ExternalDtdSubsetPseudoToken).toEqual(true);
       });
    });
 
@@ -355,7 +355,7 @@ describe('EntityDetails (unit)', () => {
 
          const result = entityDetails.getExternalSubsetReference();
 
-         expect(result).toBeInstanceOf(ExternalDtdSubsetPseudoToken);
+         expect(result instanceof ExternalDtdSubsetPseudoToken).toEqual(true);
       });
    });
 

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { XmlErrorToken } from 'basic';
+import { Problem } from 'basic';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 
 import { AttributePToken, AttributesPToken, AttributeValuePToken, AttributeValueElement, parseAttribute } from './common/attribute';
@@ -48,8 +48,6 @@ export * from './elementEnd';
 export * from './elementStart';
 export * from './space';
 
-const ERROR_TYPE = 'ERROR_TYPE';
-
 // type ErrorToken = {
 //    type: 'ERROR_TYPE';
 //    subtype?: string;
@@ -58,7 +56,7 @@ const ERROR_TYPE = 'ERROR_TYPE';
 // }
 
 type PToken =
-   | XmlErrorToken
+   | Problem
    | CdataPToken
    | CharDataPToken
    | CommentPToken
@@ -83,7 +81,6 @@ type PToken =
    export * from './getFirstSToken';
 
 export {
-   ERROR_TYPE,
    NOTATION_PTOKEN,
    ENUMERATION_PTOKEN,
 

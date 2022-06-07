@@ -1,26 +1,25 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { GeneralEntityDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { ValidityState } from '../../common/validityState';
 import { entityDeclarationValueValidate } from '../../common/entityDeclarationValueValidate';
-import { validCodes } from '../../error/validCodes';
+import { ValidityState } from '../../common/validityState';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { entityDeclarationValidate } from '../entityDeclarationValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 jest.mock('../../common/entityDeclarationValueValidate');
 
 describe('entityDeclarationValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       state = new ValidityState();
    });
 
@@ -35,10 +34,10 @@ describe('entityDeclarationValidate (unit)', () => {
             },
          });
 
-         entityDeclarationValidate(geDecl, state, mockErrorCollector);
+         entityDeclarationValidate(geDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_INVALID_END_NESTING,
             lastPosition: undefined,
             params: ['ENTITY'],
@@ -56,9 +55,10 @@ describe('entityDeclarationValidate (unit)', () => {
             },
          });
 
-         entityDeclarationValidate(geDecl, state, mockErrorCollector);
+         entityDeclarationValidate(geDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports calls entityDeclarationValueValidate() (§4.1.0)', () => {
@@ -71,13 +71,9 @@ describe('entityDeclarationValidate (unit)', () => {
             },
          });
 
-         entityDeclarationValidate(geDecl, state, mockErrorCollector);
+         entityDeclarationValidate(geDecl, state, collector);
 
-         expect(entityDeclarationValueValidate).toHaveBeenCalledWith(
-            geDecl,
-            state,
-            mockErrorCollector,
-         );
+         expect(entityDeclarationValueValidate).toHaveBeenCalledWith(geDecl, state, collector);
       });
    });
 });

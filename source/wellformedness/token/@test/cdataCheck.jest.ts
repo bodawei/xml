@@ -1,38 +1,41 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { CdataPToken } from 'token';
 
 import { charCheck } from '../../common/charCheck';
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { cdataCheck } from '../cdataCheck';
 
 jest.mock('../../common/charCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('cdataCheck()', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
    let cdataPToken: CdataPToken;
 
    beforeEach(() => {
       cdataPToken = new CdataPToken({
+         bracket: toSToken('['),
+         close: toSToken(']]>'),
          open: toSToken('<!['),
          sectionType: toSToken('CDATA'),
-         bracket: toSToken('['),
          text: toSToken('test text'),
-         close: toSToken(']]>'),
       });
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       confVer = new ConformanceVersion();
    });
 
    it('checks the text is well formed', () => {
-      cdataCheck(cdataPToken, mockErrorCollector, confVer);
+      cdataCheck(cdataPToken, collector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(cdataPToken.text, mockErrorCollector, confVer, false);
+      expect(charCheck).toHaveBeenCalledWith(cdataPToken.text, collector, confVer, false);
    });
 
    it('reports an error if there is no section type provided', () => {
@@ -43,13 +46,14 @@ describe('cdataCheck()', () => {
          close: toSToken(']]>'),
       });
 
-      cdataCheck(cdataPToken, mockErrorCollector, confVer);
+      cdataCheck(cdataPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CDATA_NO_TYPE,
-         params: undefined,
-         position: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CDATA_NO_TYPE,
          lastPosition: cdataPToken.open,
+         params: [],
+         position: undefined,
       });
    });
 
@@ -62,10 +66,11 @@ describe('cdataCheck()', () => {
          close: toSToken(']]>'),
       });
 
-      cdataCheck(cdataPToken, mockErrorCollector, confVer);
+      cdataCheck(cdataPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CDATA_INVALID_CASE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CDATA_INVALID_CASE,
          params: ['CDATA', 'cdata'],
          position: cdataPToken.sectionType,
       });
@@ -79,12 +84,13 @@ describe('cdataCheck()', () => {
          close: toSToken(']]>'),
       });
 
-      cdataCheck(cdataPToken, mockErrorCollector, confVer);
+      cdataCheck(cdataPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CDATA_NO_SECOND_BRACKET,
-         params: ['CDATA'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CDATA_NO_SECOND_BRACKET,
          lastPosition: cdataPToken.sectionType,
+         params: ['CDATA'],
       });
    });
 
@@ -98,10 +104,11 @@ describe('cdataCheck()', () => {
          close: toSToken(']]>'),
       });
 
-      cdataCheck(cdataPToken, mockErrorCollector, confVer);
+      cdataCheck(cdataPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_OPEN,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CDATA_XTRA_SPACE_AFTER_OPEN,
          params: ['CDATA'],
          position: cdataPToken.openSpace,
       });
@@ -117,10 +124,11 @@ describe('cdataCheck()', () => {
          close: toSToken(']]>'),
       });
 
-      cdataCheck(cdataPToken, mockErrorCollector, confVer);
+      cdataCheck(cdataPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CDATA_XTRA_SPACE_AFTER_TYPE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CDATA_XTRA_SPACE_AFTER_TYPE,
          params: ['CDATA'],
          position: cdataPToken.sectionTypeSpace,
       });
@@ -134,12 +142,13 @@ describe('cdataCheck()', () => {
          text: toSToken('test text'),
       });
 
-      cdataCheck(cdataPToken, mockErrorCollector, confVer);
+      cdataCheck(cdataPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CDATA_NO_CLOSE,
-         params: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CDATA_NO_CLOSE,
          lastPosition: cdataPToken.text,
+         params: [],
       });
    });
 });

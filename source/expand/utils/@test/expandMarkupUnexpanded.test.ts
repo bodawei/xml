@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion, XmlErrorToken } from 'basic';
+import { ENTITY_ID, ConformanceVersion, Problem } from 'basic';
 import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
@@ -8,7 +8,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { WellFormedError } from 'wellformedness';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import { ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
 
 import { ExpandParams, RetrieveResults } from '../../types';
@@ -17,6 +17,8 @@ import { AddProtoReplacementTextResult } from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
 import { EntityContextStack } from '../EntityContextStack';
 import { expandMarkupUnexpanded } from '../expandMarkupUnexpanded';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('expandMarkupUnexpanded() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -68,7 +70,7 @@ describe('expandMarkupUnexpanded() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<XmlErrorToken> => [],
+                  getErrors: (): Array<Problem> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -159,7 +161,7 @@ describe('expandMarkupUnexpanded() (unit)', () => {
    });
 
    it('returns errors from the process of setting up references', (done) => {
-      const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
+      const attrError = new WellFormedError(WFEID.XMLDECL_NO_PARAMS, []);
       const unexpandedTokens: Array<UnexpandedMarkupToken> = [peRef];
       entityDetails.addEntity(peDecl, [textPToken], '');
       addSpy.and.callFake(
@@ -180,7 +182,7 @@ describe('expandMarkupUnexpanded() (unit)', () => {
    });
 
    it('returns the original reference if the replacement text could not be constructed', (done) => {
-      const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
+      const attrError = new WellFormedError(WFEID.XMLDECL_NO_PARAMS, []);
       const peDecl2 = new ParameterEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('pe2'),

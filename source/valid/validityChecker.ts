@@ -1,6 +1,6 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, CONFORMANCE_VERSION, ERROR_TYPE, ENTITY_ID, XmlErrorToken } from 'basic';
+import { ProblemCollector, CONFORMANCE_VERSION, PROBLEM, ENTITY_ID, Problem } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -41,9 +41,11 @@ import {
 
 import { contentUpdateState } from './common/contentUpdateState';
 import { contentValidate } from './common/contentValidate';
+import { elementDeclarationPreprocess } from './common/elementDeclarationPreprocess';
 import { entityDeclarationValueValidate } from './common/entityDeclarationValueValidate';
 import { isXmlData } from './common/isXmlData';
 import { ValidityState } from './common/validityState';
+import { ValidityError } from './error/validityError';
 import { attListDeclarationUpdateState } from './token/attListDeclarationUpdateState';
 import { attListDeclarationValidate } from './token/attListDeclarationValidate';
 import { charDataValidate } from './token/charDataValidate';
@@ -57,17 +59,19 @@ import { docTypeEndValidate } from './token/docTypeEndValidate';
 import { docTypeStartUpdateState } from './token/docTypeStartUpdateState';
 import { elementDeclarationUpdateState } from './token/elementDeclarationUpdateState';
 import { elementDeclarationValidate } from './token/elementDeclarationValidate';
+import { elementEndUpdateState } from './token/elementEndUpdateState';
+import { elementEndValidate } from './token/elementEndValidate';
 import { elementStartUpdateState } from './token/elementStartUpdateState';
 import { elementStartValidate } from './token/elementStartValidate';
 import { elidedEntityDeclarationUpdateState } from './token/elidedEntityDeclarationUpdateState';
 import { entityDeclarationValidate } from './token/entityDeclarationValidate';
 import { externalSubsetEndUpdateState } from './token/externalSubsetEndUpdateState';
 import { externalSubsetStartUpdateState } from './token/externalSubsetStartUpdateState';
-import { elementEndUpdateState } from './token/elementEndUpdateState';
-import { elementEndValidate } from './token/elementEndValidate';
 import { generalEntityDeclarationUpdateState } from './token/generalEntityDeclarationUpdateState';
 import { generalEntityReferenceValidate } from './token/generalEntityReferenceValidate';
 import { generalEntityStartValidate } from './token/generalEntityStartValidate';
+import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
+import { notationDeclarationValidate } from './token/notationDeclarationValidate';
 import { parameterEntityDeclarationUpdateState } from './token/parameterEntityDeclarationUpdateState';
 import { parameterEntityEndUpdateState } from './token/parameterEntityEndUpdateState';
 import { parameterEntityEndValidate } from './token/parameterEntityEndValidate';
@@ -76,10 +80,6 @@ import { parameterEntityStartUpdateState } from './token/parameterEntityStartUpd
 import { parameterEntityStartValidate } from './token/parameterEntityStartValidate';
 import { spaceValidate } from './token/spaceValidate';
 import { xmlDeclarationUpdateState } from './token/xmlDeclarationUpdateState';
-import { notationDeclarationUpdateState } from './token/notationDeclarationUpdateState';
-import { notationDeclarationValidate } from './token/notationDeclarationValidate';
-import { elementDeclarationPreprocess } from './common/elementDeclarationPreprocess';
-import { ValidityError } from './error/validityError';
 
 class ValidityChecker {
    private state: ValidityState;
@@ -94,11 +94,11 @@ class ValidityChecker {
       this.seenVersion = false;
    }
 
-   check(token: ParseToken): Array<XmlErrorToken> {
-      const ec = new ErrorCollector(getFirstSToken(token), ValidityError);
+   check(token: ParseToken): ReadonlyArray<Problem> {
+      const coll = new ProblemCollector(getFirstSToken(token), ValidityError);
       const wasAtEndBefore = this.state.elementContext.pastEnd;
 
-      contentValidate(token, this.state, ec);
+      contentValidate(token, this.state, coll);
       this.state = contentUpdateState(token, this.state);
 
       switch (token.type) {
@@ -111,43 +111,43 @@ class ValidityChecker {
             }
             break;
          case ATTLIST_DECLARATION_PTOKEN:
-            attListDeclarationValidate(token, this.state, ec);
+            attListDeclarationValidate(token, this.state, coll);
             this.state = attListDeclarationUpdateState(token, this.state);
             break;
          case CHARDATA_PTOKEN:
-            charDataValidate(token, this.state, ec);
+            charDataValidate(token, this.state, coll);
             break;
          case CONDITIONAL_START_PTOKEN:
-            conditionalStartValidate(token, this.state, ec);
+            conditionalStartValidate(token, this.state, coll);
             this.state = conditionalStartUpdateState(token, this.state);
             break;
          case CONDITIONAL_END_PTOKEN:
-            conditionalEndValidate(token, this.state, ec);
+            conditionalEndValidate(token, this.state, coll);
             this.state = conditionalEndUpdateState(token, this.state);
             break;
          case DOCTYPE_START_PTOKEN:
             this.state = docTypeStartUpdateState(token, this.state);
             break;
          case DOCTYPE_END_PTOKEN:
-            docTypeEndValidate(this.state, ec);
+            docTypeEndValidate(this.state, coll);
             this.state = docTypeEndUpdateState(token, this.state);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
             const details = elementDeclarationPreprocess(token, this.state);
-            elementDeclarationValidate(token, details, this.state, ec);
+            elementDeclarationValidate(token, details, this.state, coll);
             this.state = elementDeclarationUpdateState(token, details, this.state);
             break;
          case ELEMENT_END_PTOKEN:
-            elementEndValidate(token, this.state, ec);
+            elementEndValidate(token, this.state, coll);
             this.state = elementEndUpdateState(token, this.state);
             break;
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
-            elementStartValidate(token, this.state, ec);
+            elementStartValidate(token, this.state, coll);
             this.state = elementStartUpdateState(token, this.state);
             break;
          case ELIDED_ENTITY_DECLARATION_PTOKEN:
-            entityDeclarationValueValidate(token, this.state, ec);
+            entityDeclarationValueValidate(token, this.state, coll);
             this.state = elidedEntityDeclarationUpdateState(token, this.state);
             break;
          case EXTERNAL_SUBSET_END_TOKEN:
@@ -157,36 +157,36 @@ class ValidityChecker {
             this.state = externalSubsetStartUpdateState(token, this.state);
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
-            entityDeclarationValidate(token, this.state, ec);
+            entityDeclarationValidate(token, this.state, coll);
             this.state = generalEntityDeclarationUpdateState(token, this.state);
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
-            generalEntityReferenceValidate(token, this.state, ec);
+            generalEntityReferenceValidate(token, this.state, coll);
             break;
          case GENERAL_ENTITY_START_PTOKEN:
-            generalEntityStartValidate(token, this.state, ec);
+            generalEntityStartValidate(token, this.state, coll);
             break;
          case NOTATION_DECLARATION_PTOKEN:
-            notationDeclarationValidate(token, this.state, ec);
+            notationDeclarationValidate(token, this.state, coll);
             this.state = notationDeclarationUpdateState(token, this.state);
             break;
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-            entityDeclarationValidate(token, this.state, ec);
+            entityDeclarationValidate(token, this.state, coll);
             this.state = parameterEntityDeclarationUpdateState(token, this.state);
             break;
          case PARAMETER_ENTITY_END_PTOKEN:
-            parameterEntityEndValidate(token, this.state, ec);
+            parameterEntityEndValidate(token, this.state, coll);
             this.state = parameterEntityEndUpdateState(token, this.state);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            parameterEntityReferenceValidate(token, this.state, ec);
+            parameterEntityReferenceValidate(token, this.state, coll);
             break;
          case PARAMETER_ENTITY_START_PTOKEN:
-            parameterEntityStartValidate(token, this.state, ec);
+            parameterEntityStartValidate(token, this.state, coll);
             this.state = parameterEntityStartUpdateState(token, this.state);
             break;
          case SPACE_PTOKEN:
-            spaceValidate(token, this.state, ec);
+            spaceValidate(token, this.state, coll);
             break;
          case XMLDECL_PTOKEN:
             if (!this.seenXmlDecl) {
@@ -202,7 +202,7 @@ class ValidityChecker {
          case PROCESSING_INSTRUCTION_PTOKEN:
          case TEXTDECL_PTOKEN:
          case TEXT_PTOKEN:
-         case ERROR_TYPE:
+         case PROBLEM:
          case ENTITY_ID:
          case GENERAL_ENTITY_END_PTOKEN:
          case GENERAL_ENTITY_START_PTOKEN:
@@ -211,7 +211,7 @@ class ValidityChecker {
       }
 
       if (!wasAtEndBefore && this.state.elementContext.pastEnd) {
-         contentEndValidate(this.state, ec);
+         contentEndValidate(this.state, coll);
       }
 
       if (isXmlData(token)) {
@@ -223,7 +223,7 @@ class ValidityChecker {
          });
       }
 
-      return ec.getErrors();
+      return coll.getProblems();
    }
 }
 

@@ -31,12 +31,62 @@ module.exports = {
    overrides: [
       {
          files: [
-            './source/flat/**/*.ts',
+            './source/basic/**/*.ts',
             './source/valid/**/*.ts',
+         ],
+         parser: '@typescript-eslint/parser',
+         parserOptions: {
+            project: './tsconfig.json',
+            tsconfigRootDir: './',
+            warnOnUnsupportedTypeScriptVersion: true,
+         },
+         extends: [
+            // Right now can't use airbnb base because it is conflicting with @typescript-eslint
+            // 'airbnb-base', // https://www.npmjs.com/package/eslint-config-airbnb-base
+            'plugin:prettier/recommended', // https://github.com/prettier/eslint-plugin-prettier
+            'plugin:import/recommended', // https://www.npmjs.com/package/eslint-plugin-import
+            "plugin:@typescript-eslint/recommended",
+            "plugin:@typescript-eslint/recommended-requiring-type-checking",
+            'airbnb-typescript/base', // https://github.com/iamturns/eslint-config-airbnb-typescript -- Also note this seems to provide settings.import/resolver.typescript: {}
+           ],
+         rules: {
+            indent: 'off',
+            '@typescript-eslint/indent': 'off',
+            "import/order": ['error', {
+               groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+               'newlines-between': 'always',
+               alphabetize: {
+                  order: 'asc',
+                  caseInsensitive: true,
+               },
+               warnOnUnassignedImports: true
+            }],
+         },
+         overrides: [ {
+            files: [
+               './source/**/*.jest.ts',
+               './source/**/beforeJest.ts',
+            ],
+            rules: {
+               '@typescript-eslint/no-non-null-assertion': [ 'off' ],
+               '@typescript-eslint/no-empty-function': [ 'off' ],
+               '@typescript-eslint/no-explit-any': [ 'off' ],
+               '@typescript-eslint/no-unsafe-argument': [ 'off' ],
+               '@typescript-eslint/no-unsafe-call': [ 'off' ],
+               "import/no-extraneous-dependencies": [
+                  //  Don't let the @jest/globals import mess up the reporting
+                  'error' , { devDependencies: true }
+               ],
+            },
+         },]
+      },
+
+      {
+         files: [
+            './source/flat/**/*.ts',
             './source/xToken/**/*.ts',
 
             './source/attFixer/**/*.ts',
-            './source/basic/**/*.ts',
             './source/conformance/**/*.ts',
             './source/demo/**/*.ts',
             './source/expand/**/*.ts',

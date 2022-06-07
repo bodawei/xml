@@ -3,11 +3,11 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { CharRefPToken, ExternalIdP, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { errorCodes } from '../../error/errorCodes';
 
 import { literalCheck } from '../literalCheck';
@@ -15,27 +15,30 @@ import { externalIdCheck } from '../externalIdCheck';
 
 jest.mock('../literalCheck');
 
+const EID = errorCodes.id;
+const WFEID = wellFormedErrorCodes.id;
+
 describe('externalIdCheck()', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let externalId: ExternalIdP;
    let mockLiteralCheck: jest.MockedFunction<typeof literalCheck>;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
 
       externalId = {
          externalType: toSToken('PUBLIC'),
          externalTypeSpace: toSToken(' '),
          public: {
+            closeQuote: toSToken('"'),
             openQuote: toSToken('"'),
             value: [new TextPToken({ text: toSToken('pub.xml') })],
-            closeQuote: toSToken('"'),
          },
          publicSpace: toSToken(' '),
          system: {
+            closeQuote: toSToken('"'),
             openQuote: toSToken('"'),
             value: [new TextPToken({ text: toSToken('sys.xml') })],
-            closeQuote: toSToken('"'),
          },
       };
       mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
@@ -43,26 +46,26 @@ describe('externalIdCheck()', () => {
 
    it('calls literalCheck() to check the PUBLIC value', () => {
       const confVer = new ConformanceVersion();
-      externalIdCheck(externalId, false, mockErrorCollector, confVer);
+      externalIdCheck(externalId, false, collector, confVer);
 
       expect(literalCheck).toHaveBeenCalledWith(
          externalId.public,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.NOUN_EXTERNALID_PUBLIC,
+         WFEID.NOUN_EXTERNALID_PUBLIC,
          (expect as any).any(Function), // eslint-disable-line
       );
    });
 
    it('calls literalCheck() to check the SYSTEM value', () => {
       const confVer = new ConformanceVersion();
-      externalIdCheck(externalId, false, mockErrorCollector, confVer);
+      externalIdCheck(externalId, false, collector, confVer);
 
       expect(literalCheck).toHaveBeenCalledWith(
          externalId.system,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.NOUN_EXTERNALID_SYSTEM,
+         WFEID.NOUN_EXTERNALID_SYSTEM,
          expect.any(Function),
       );
    });
@@ -73,14 +76,14 @@ describe('externalIdCheck()', () => {
             value: [
                new TextPToken({ text: toSToken('stuff') }),
                new CharRefPToken({
-                  open: toSToken('&'),
                   digits: toSToken('35'),
+                  open: toSToken('&'),
                }),
             ],
          },
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // invoke the callback function
       const mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
@@ -88,8 +91,8 @@ describe('externalIdCheck()', () => {
       cb?.();
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
-         id: errorCodes.id.SYSTEMLITERAL_NO_FRAGMENT,
+      expect(collector).toHaveWFError({
+         id: EID.SYSTEMLITERAL_NO_FRAGMENT,
          params: ['stuff#'],
          position: externalId.publicSpace, // This is only because we call the callback after
       });
@@ -101,7 +104,7 @@ describe('externalIdCheck()', () => {
             value: [new TextPToken({ text: toSToken('bad&chars') })],
          },
       });
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // invoke the callback function
       const mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
@@ -109,17 +112,18 @@ describe('externalIdCheck()', () => {
       cb?.();
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['&'],
          position: externalId.publicSpace, // This is only because we call the callback after
       });
    });
 
    it('reports no errors when no PToken part is passed in', () => {
-      externalIdCheck(undefined, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(undefined, false, collector, new ConformanceVersion());
 
-      expect(mockErrorCollector.errors.length).toEqual(0);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error if the public value contains invalid characters', () => {
@@ -134,11 +138,11 @@ describe('externalIdCheck()', () => {
          },
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['{'],
          position: externalId.externalTypeSpace, // wrong due to mocking
       });
@@ -156,11 +160,11 @@ describe('externalIdCheck()', () => {
          },
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).not.toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+      expect(collector).not.toHaveWellFormedError({
+         id: WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
          params: ['{'],
          position: externalId.externalTypeSpace, // wrong due to mocking
       });
@@ -171,11 +175,11 @@ describe('externalIdCheck()', () => {
          externalType: toSToken('Bogus'),
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_UNKNOWN,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_UNKNOWN,
          params: ['Bogus'],
          position: externalId.externalType,
       });
@@ -186,11 +190,11 @@ describe('externalIdCheck()', () => {
          externalType: toSToken('public'),
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_INVALID_CASE,
          params: ['PUBLIC', 'public'],
          position: externalId.externalType,
       });
@@ -201,13 +205,13 @@ describe('externalIdCheck()', () => {
          externalTypeSpace: undefined,
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_EXTERNALTYPE_NO_SPACE,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_EXTERNALTYPE_NO_SPACE,
          lastPosition: externalId.externalType,
+         params: [],
       });
    });
 
@@ -216,13 +220,13 @@ describe('externalIdCheck()', () => {
          publicSpace: undefined,
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
          lastPosition: externalId.externalTypeSpace, // beccause we are mocking out the quotes call
+         params: [],
       });
    });
 
@@ -236,11 +240,11 @@ describe('externalIdCheck()', () => {
          public: undefined,
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_MISSING_PUBLIC_VALUE,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_MISSING_PUBLIC_VALUE,
          params: [],
          position: toSToken(' '),
       });
@@ -256,11 +260,11 @@ describe('externalIdCheck()', () => {
          system: undefined,
       });
 
-      externalIdCheck(externalId, false, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.EXTERNALID_MISSING_SYSTEM_VALUE,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_MISSING_SYSTEM_VALUE,
          params: [],
          position: toSToken(' '),
       });
@@ -276,8 +280,9 @@ describe('externalIdCheck()', () => {
          system: undefined,
       });
 
-      externalIdCheck(externalId, true, mockErrorCollector, new ConformanceVersion());
+      externalIdCheck(externalId, true, collector, new ConformanceVersion());
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 });

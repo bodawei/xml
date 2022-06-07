@@ -1,12 +1,12 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, extractSurrogatePair, isChar } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { CharRefPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { makeCharRef } from 'token-test';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { charRefCheck } from '../charRefCheck';
 
@@ -15,18 +15,20 @@ jest.mock('basic', () => {
 
    return {
       ...basicOriginal,
-      isChar: jest.fn(),
       extractSurrogatePair: jest.fn(),
+      isChar: jest.fn(),
    };
 });
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('charRefCheck()', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
    let charRefPToken: CharRefPToken;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       confVer = new ConformanceVersion(1, 2);
 
       (extractSurrogatePair as jest.Mock).mockReturnValue([123, 456]);
@@ -36,12 +38,12 @@ describe('charRefCheck()', () => {
 
    it('calls the isChar() routine with the version and code it was given (WFC §4.1.0)', () => {
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
-         digits: toSToken('66'),
          charCode: 66,
+         digits: toSToken('66'),
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
       expect(isChar).toHaveBeenCalledWith('\u0042', 1.0);
    });
@@ -49,37 +51,39 @@ describe('charRefCheck()', () => {
    it('reports an error if the character is not a valid Char (WFC §4.1.0)', () => {
       (isChar as jest.Mock).mockReturnValue(false);
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
-         digits: toSToken('65535'),
          charCode: 0xffff,
+         digits: toSToken('65535'),
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_INVALID_CHAR,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_INVALID_CHAR,
+         lastPosition: undefined,
          params: ['65535'],
          position: charRefPToken.digits,
-         lastPosition: undefined,
       });
    });
 
    it('reports an error if the character is not a valid Char (WFC §4.1.0)', () => {
       (isChar as jest.Mock).mockReturnValue(false);
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
-         hexMarker: toSToken('x'),
-         digits: toSToken('1F026'),
          charCode: 0x1f026,
+         digits: toSToken('1F026'),
+         hexMarker: toSToken('x'),
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_INVALID_CHAR,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_INVALID_CHAR,
+         lastPosition: undefined,
          params: ['x1F026'],
          position: charRefPToken.digits,
-         lastPosition: undefined,
       });
    });
 
@@ -89,94 +93,100 @@ describe('charRefCheck()', () => {
          openSpace: toSToken(' '),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_XTRA_POST_OPEN_SPACE,
-         params: undefined,
-         position: charRefPToken.openSpace,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_XTRA_POST_OPEN_SPACE,
          lastPosition: undefined,
+         params: [],
+         position: charRefPToken.openSpace,
       });
    });
 
    it('reports an error if the "x" is capitalized (syntax)', () => {
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
          hexMarker: toSToken('X'),
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_INVALID_HEX_CASE,
-         params: undefined,
-         position: charRefPToken.hexMarker,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_INVALID_HEX_CASE,
          lastPosition: undefined,
+         params: [],
+         position: charRefPToken.hexMarker,
       });
    });
 
    it('reports an error when there is a space after the "x" (syntax)', () => {
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
          hexMarkerSpace: toSToken(' '),
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_XTRA_POST_HEX_SPACE,
-         params: undefined,
-         position: charRefPToken.hexMarkerSpace,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_XTRA_POST_HEX_SPACE,
          lastPosition: undefined,
+         params: [],
+         position: charRefPToken.hexMarkerSpace,
       });
    });
 
    it('reports an error if there are no digits (syntax)', () => {
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
          digits: undefined,
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_NO_DIGITS,
-         params: undefined,
-         position: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_NO_DIGITS,
          lastPosition: charRefPToken.open,
+         params: [],
+         position: undefined,
       });
    });
 
    it('reports an error when there is a space after the digits (syntax)', () => {
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
          digitsSpace: toSToken(' '),
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_XTRA_POST_DIGITS_SPACE,
-         params: undefined,
-         position: charRefPToken.digitsSpace,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_XTRA_POST_DIGITS_SPACE,
          lastPosition: undefined,
+         params: [],
+         position: charRefPToken.digitsSpace,
       });
    });
 
    it('reports an error when there is no close (syntax)', () => {
       charRefPToken = new CharRefPToken({
-         open: toSToken('&#'),
-         digits: toSToken('34'),
          close: undefined,
+         digits: toSToken('34'),
+         open: toSToken('&#'),
       });
 
-      charRefCheck(charRefPToken, mockErrorCollector, confVer);
+      charRefCheck(charRefPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CHARREF_NO_CLOSE,
-         params: undefined,
-         position: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CHARREF_NO_CLOSE,
          lastPosition: charRefPToken.digits,
+         params: [],
+         position: undefined,
       });
    });
 });

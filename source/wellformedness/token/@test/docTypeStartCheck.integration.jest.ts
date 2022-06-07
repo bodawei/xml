@@ -1,21 +1,23 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationPToken, parseDocTypeStart } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { docTypeStartCheck } from '../docTypeStartCheck';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('docTypeStartCheck()', () => {
    let declaration: DeclarationPToken;
 
    beforeEach(() => {
       declaration = new DeclarationPToken('FOO', {
-         open: toSToken('<!'),
          declType: toSToken('DOCTYPE'),
+         open: toSToken('<!'),
       });
    });
 
@@ -26,12 +28,12 @@ describe('docTypeStartCheck()', () => {
       delete declaration.declType;
 
       parseDocTypeStart(source, declaration, (parsing) => {
-         const ec = new ErrorCollector(toSToken('x'), WellFormedError);
+         const collector = new ProblemCollector(toSToken('x'), WellFormedError);
 
-         docTypeStartCheck(parsing, ec, new ConformanceVersion());
+         docTypeStartCheck(parsing, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_NO_DECLTYPE);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.DECL_NO_DECLTYPE);
+         done();
       });
    });
 
@@ -41,12 +43,12 @@ describe('docTypeStartCheck()', () => {
       source.endText();
 
       parseDocTypeStart(source, declaration, (parsing) => {
-         const ec = new ErrorCollector(toSToken('x'), WellFormedError);
+         const collector = new ProblemCollector(toSToken('x'), WellFormedError);
 
-         docTypeStartCheck(parsing, ec, new ConformanceVersion());
+         docTypeStartCheck(parsing, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.EXTERNALID_INVALID_CASE);
+         done();
       });
    });
 });

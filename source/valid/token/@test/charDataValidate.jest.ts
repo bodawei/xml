@@ -1,24 +1,23 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { CharDataPToken } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
 import { ElDeclType, ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { charDataValidate } from '../charDataValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('charDataValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('Validity constraint: Standalone Document Declaration (§2.9.0)', () => {
@@ -72,18 +71,19 @@ describe('charDataValidate (unit)', () => {
             });
             const charData = new CharDataPToken({ text: toSToken('    ') });
 
-            charDataValidate(charData, state, mockErrorCollector);
+            charDataValidate(charData, state, collector);
 
             if (error) {
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
                   lastPosition: undefined,
                   params: ['elementName'],
                   position: charData.text,
                });
             } else {
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             }
          });
       });
@@ -109,9 +109,10 @@ describe('charDataValidate (unit)', () => {
          });
          const charData = new CharDataPToken({ text: toSToken(' \n \t \r') });
 
-         charDataValidate(charData, state, mockErrorCollector);
+         charDataValidate(charData, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when the charData token has non-S characters in it but we are not in element content (§2.9.0)', () => {
@@ -134,9 +135,10 @@ describe('charDataValidate (unit)', () => {
          });
          const charData = new CharDataPToken({ text: toSToken(' x y') });
 
-         charDataValidate(charData, state, mockErrorCollector);
+         charDataValidate(charData, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when the charData token has non-S characters in it and we are in element content (§2.9.0)', () => {
@@ -160,9 +162,10 @@ describe('charDataValidate (unit)', () => {
          });
          const charData = new CharDataPToken({ text: toSToken(' x y') });
 
-         charDataValidate(charData, state, mockErrorCollector);
+         charDataValidate(charData, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

@@ -1,6 +1,6 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import {
    CHARREF_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -30,9 +30,9 @@ import {
    scanAttributeValues,
    checkGeneralEntity,
 } from './checkUtils';
-import { WellFormedError } from './error/WellFormedError';
-import { WellFormedWarning } from './error/wellFormedWarning';
-import { wellFormedWarningCodes } from './error/wellFormedWarningCodes';
+import { Warning } from './error/Warning';
+import { warningCodes } from './error/warningCodes';
+import { wellFormedErrorCodes } from './error/wellFormedError';
 
 enum State {
    PRE = 'PRE',
@@ -41,6 +41,7 @@ enum State {
    DONE = 'DONE',
 }
 
+const WFEID = wellFormedErrorCodes.id;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
 interface StateTable {
@@ -51,8 +52,8 @@ interface StateTable {
       | undefined;
 }
 
-const WFID = WellFormedError.ID;
-const WARNID = wellFormedWarningCodes.id;
+const WFID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 const transitionsByState: StateTable = {
    [State.PRE]: {
@@ -122,7 +123,7 @@ class ContentChecker implements IContentChecker {
 
    constructor(
       start: ContentStart,
-      ec: ErrorCollector,
+      collector: Collector,
       checkState: CheckState,
       geContext: Array<string>,
    ) {
@@ -133,11 +134,11 @@ class ContentChecker implements IContentChecker {
       this.inIngernalGeRef = false;
 
       if (start.type !== GENERAL_ENTITY_START_PTOKEN) {
-         this.check(start, ec);
+         this.check(start, collector);
       } else {
          const entityName = strOrBlank(start.referencePToken.name);
 
-         this.checkGERef(start.referencePToken, ec, true);
+         this.checkGERef(start.referencePToken, collector, true);
 
          const genEntityDecl = this.checkState.generalDecls[entityName];
 
@@ -158,7 +159,7 @@ class ContentChecker implements IContentChecker {
       return this.inIngernalGeRef || this.embeddedChecker?.inSecondPassContxt || false;
    }
 
-   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE {
+   check(pToken: ParseToken, collector: Collector): undefined | typeof CHECKER_DONE {
       if (this.state === State.DONE) {
          throw new Error(
             'Internal error: Passed a token to ContentChecker when it was already done.',
@@ -166,7 +167,7 @@ class ContentChecker implements IContentChecker {
       }
 
       if (this.embeddedChecker) {
-         const result = this.embeddedChecker.check(pToken, errorCollector);
+         const result = this.embeddedChecker.check(pToken, collector);
 
          if (result === CHECKER_DONE) {
             delete this.embeddedChecker;
@@ -183,7 +184,7 @@ class ContentChecker implements IContentChecker {
                this.checkState.generalDecls,
                this.checkState,
                this.geContext,
-               errorCollector,
+               collector,
             );
             break;
          case ELEMENT_EMPTY_PTOKEN:
@@ -191,9 +192,9 @@ class ContentChecker implements IContentChecker {
             //    used, and should only be used, for elements which are declared EMPTY.
             const emptyName = strOrBlank(pToken.name);
             if (this.checkState.elementDecl[emptyName] !== 'EMPTY') {
-               errorCollector.reportError(
-                  WARNID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
-                  WellFormedWarning,
+               collector.reportProblem(
+                  Warning,
+                  WID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
                   [emptyName],
                   pToken.open,
                );
@@ -204,7 +205,7 @@ class ContentChecker implements IContentChecker {
                this.checkState.generalDecls,
                this.checkState,
                this.geContext,
-               errorCollector,
+               collector,
             );
             break;
          case CHARDATA_PTOKEN:
@@ -212,7 +213,7 @@ class ContentChecker implements IContentChecker {
             //    In the content of elements, character data is any string of characters which
             //    does not contain the start-delimiter of any markup and does not include the
             //    CDATA-section-close delimiter, "]]>".
-            errorCollector.check(
+            collector.check(
                strOrBlank(pToken.text) === ']]>',
                WFID.CHARDATA_INVALID_SECTION_END,
                [],
@@ -227,7 +228,7 @@ class ContentChecker implements IContentChecker {
             //    The Name in an element's end-tag must match the element type in the start-tag.
             // Also production [39] says that start and end must match within the same entity.
             if (lastElement !== endNameText) {
-               errorCollector.report(
+               collector.report(
                   WFID.ELEMENT_UNBALANCED,
                   [lastElement || '', endNameText],
                   pToken.open,
@@ -244,7 +245,7 @@ class ContentChecker implements IContentChecker {
          case GENERAL_ENTITY_START_PTOKEN:
             this.embeddedChecker = new ContentChecker(
                pToken,
-               errorCollector,
+               collector,
                this.checkState,
                this.geContext,
             );
@@ -259,7 +260,7 @@ class ContentChecker implements IContentChecker {
                      const lastElement = this.elementNameStack[this.elementNameStack.length - 1];
 
                      // §4.3.2: (implicitly) the elements in an entity must be properly nested.
-                     errorCollector.report(
+                     collector.report(
                         WFID.ELEMENT_UNBALANCED,
                         [lastElement, pToken.type],
                         pToken.referencePToken.open,
@@ -272,13 +273,13 @@ class ContentChecker implements IContentChecker {
             }
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
-            this.checkGERef(pToken, errorCollector, false);
+            this.checkGERef(pToken, collector, false);
             break;
          default:
             break;
       }
 
-      this.transition(pToken, errorCollector);
+      this.transition(pToken, collector);
 
       // @ts-expect-error ts2367 this.transition may change the state
       if (this.state === State.DONE) {
@@ -288,15 +289,15 @@ class ContentChecker implements IContentChecker {
 
    checkGERef(
       pToken: GeneralEntityReferencePToken,
-      ec: ErrorCollector,
+      collector: Collector,
       addToContext: boolean,
    ): void {
       const refName = strOrBlank(pToken.name);
 
       if (refName !== '') {
-         ec.check(
+         collector.check(
             this.geContext.includes(refName),
-            WellFormedError.ID.REFERENCE_INVALID_RECURSION,
+            WFEID.REFERENCE_INVALID_RECURSION,
             [refName],
             pToken.open,
          );
@@ -306,14 +307,14 @@ class ContentChecker implements IContentChecker {
          }
       }
 
-      checkGeneralEntity(pToken, false, this.checkState.generalDecls, this.checkState, ec);
+      checkGeneralEntity(pToken, false, this.checkState.generalDecls, this.checkState, collector);
    }
 
    /*
     * Given the specific PToken, transition in the state graph. Do any special casing as well
     * as just relying on the graph enumerated above.
     */
-   private transition(pToken: ParseToken, ec: ErrorCollector): boolean {
+   private transition(pToken: ParseToken, collector: Collector): boolean {
       let newState: undefined | State | typeof NO_CHANGE = NO_CHANGE;
 
       const transitions = transitionsByState[this.state];
@@ -323,7 +324,7 @@ class ContentChecker implements IContentChecker {
       if (newState) {
          this.state = newState === NO_CHANGE ? this.state : newState;
       } else {
-         ec.report(WFID.CONTENT_INVALID_TOKEN, [pToken.type], getFirstSToken(pToken));
+         collector.report(WFID.CONTENT_INVALID_TOKEN, [pToken.type], getFirstSToken(pToken));
       }
 
       return !!newState;

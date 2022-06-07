@@ -1,25 +1,24 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
-import { makeNotationDeclaration } from 'token-test';
-
-import { notationDeclarationValidate } from '../notationDeclarationValidate';
-import { ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { ParamCollector } from 'basic-test';
 import { NotationDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
+import { makeNotationDeclaration } from 'token-test';
 
-const VID = validCodes.id;
+import { ValidityState } from '../../common/validityState';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
+import { notationDeclarationValidate } from '../notationDeclarationValidate';
+
+const VID = validityErrorCodes.id;
 
 describe('notationDeclarationValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       state = new ValidityState();
    });
 
@@ -34,10 +33,10 @@ describe('notationDeclarationValidate (unit)', () => {
             },
          });
 
-         notationDeclarationValidate(notationDecl, state, mockErrorCollector);
+         notationDeclarationValidate(notationDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_INVALID_END_NESTING,
             lastPosition: undefined,
             params: ['NOTATION'],
@@ -55,9 +54,10 @@ describe('notationDeclarationValidate (unit)', () => {
             },
          });
 
-         notationDeclarationValidate(notationDecl, state, mockErrorCollector);
+         notationDeclarationValidate(notationDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -69,9 +69,10 @@ describe('notationDeclarationValidate (unit)', () => {
             },
          });
 
-         notationDeclarationValidate(makeNotationDeclaration(), state, mockErrorCollector);
+         notationDeclarationValidate(makeNotationDeclaration(), state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports an error when the declaration name has already been encountered defined (§4.7.0)', () => {
@@ -82,10 +83,10 @@ describe('notationDeclarationValidate (unit)', () => {
             },
          });
 
-         notationDeclarationValidate(notationDecl, state, mockErrorCollector);
+         notationDeclarationValidate(notationDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.NOTATION_XTRA_DECLARATION,
             lastPosition: undefined,
             params: ['notationName'],
@@ -102,9 +103,10 @@ describe('notationDeclarationValidate (unit)', () => {
             },
          });
 
-         notationDeclarationValidate(notationDecl, state, mockErrorCollector);
+         notationDeclarationValidate(notationDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

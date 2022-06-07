@@ -1,12 +1,12 @@
 import { pattern as BCP47_REGEX } from 'bcp47-validate';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { GENERAL_ENTITY_REFERENCE_PTOKEN, isTextPToken } from 'pToken';
 import { SToken } from 'sToken';
 import { AttributeValuePToken } from 'token';
 
-import { WellFormedError } from '..//error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
-const WFID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 const ONE_DOT_ZERO_REV1_REGEX = /^[a-z][a-z](?:-[a-z]+)*$|^[xi](?:-[a-z]+)+$/i;
 
 const LAX_BCP47 = /^[ix]-[A-Za-z]+(-[A-Za-z]+)*$/;
@@ -56,10 +56,10 @@ function firstSToken(value: AttributeValue): SToken | undefined {
  *          [37] UserCode   ::= ('x' | 'X') '-' ([a-z] | [A-Z])+
  *          [38] Subcode    ::= ([a-z] | [A-Z])+
  */
-function check1dot0rev1(value: AttributeValue, attrValue: string, ec: ErrorCollector) {
+function check1dot0rev1(value: AttributeValue, attrValue: string, collector: Collector) {
    const isValid = ONE_DOT_ZERO_REV1_REGEX.test(attrValue);
 
-   ec.check(!isValid, WFID.ATTRIBUTE_LANG_BAD_CODE, [attrValue], firstSToken(value));
+   collector.check(!isValid, WFEID.ATTRIBUTE_LANG_BAD_CODE, [attrValue], firstSToken(value));
 }
 
 /*
@@ -124,7 +124,7 @@ function check1dot0rev1(value: AttributeValue, attrValue: string, ec: ErrorColle
  *               / "zh-xiang"
  * alphanum      = (ALPHA / DIGIT)     ; letters and numbers
  */
-function check1dot0rev2AndBeyond(value: AttributeValue, attrValue: string, ec: ErrorCollector) {
+function check1dot0rev2AndBeyond(value: AttributeValue, attrValue: string, collector: Collector) {
    if (BCP47_REGEX.test(attrValue)) {
       return;
    }
@@ -186,7 +186,7 @@ function check1dot0rev2AndBeyond(value: AttributeValue, attrValue: string, ec: E
       return;
    }
 
-   ec.report(WFID.ATTRIBUTE_LANG_BAD_CODE, [attrValue], firstSToken(value));
+   collector.report(WFEID.ATTRIBUTE_LANG_BAD_CODE, [attrValue], firstSToken(value));
 }
 
 function hasReference(value: AttributeValue): boolean {
@@ -201,7 +201,7 @@ function hasReference(value: AttributeValue): boolean {
 
 function attributeLangCheck(
    value: AttributeValue,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
    if (hasReference(value)) {
@@ -211,7 +211,7 @@ function attributeLangCheck(
    const attrValue = getAttributeValueText(value);
 
    if (confVer.version === 1.0 && confVer.edition === 1) {
-      check1dot0rev1(value, attrValue, ec);
+      check1dot0rev1(value, attrValue, collector);
       return;
    }
 
@@ -222,7 +222,7 @@ function attributeLangCheck(
       return;
    }
 
-   check1dot0rev2AndBeyond(value, attrValue, ec);
+   check1dot0rev2AndBeyond(value, attrValue, collector);
 }
 
 export { attributeLangCheck };

@@ -1,4 +1,4 @@
-import { EntityId, ConformanceVersion, XmlErrorToken } from 'basic';
+import { EntityId, ConformanceVersion, Problem } from 'basic';
 import { ParseType, ParseToken } from 'pToken';
 import { STokenSource } from 'sToken';
 import { AttributeValuePToken, EntityValuePToken } from 'token';
@@ -10,11 +10,11 @@ type TokenHandled = () => void;
 
 interface RetrieveResults {
    sTokenSource: STokenSource;
-   getErrors: () => Array<XmlErrorToken>;
+   getErrors: () => Array<Problem>;
 }
 interface AttributeValueResults {
    newValue: AttributeValuePToken | undefined;
-   errors: Array<XmlErrorToken>;
+   errors: Array<Problem>;
 }
 
 type OpaqueEntityLoc = string | EntityId | any;

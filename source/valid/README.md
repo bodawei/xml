@@ -2,11 +2,11 @@
 
 ## Purpose
 
-The "valid" system scans a series of PTokens, and identifies a set of "validity" problems.  When such a problem is encountered, it introduces an ErrorToken into the series, generally immediately before the token that allowed it to identify the problem.
+The "valid" system scans a series of PTokens, and identifies a set of "validity" problems.  When such a problem is encountered, it introduces a Problem into the series, generally immediately before the token that allowed it to identify the problem.
 
 The problems this identifies are primarily the 26 validity constraints from the XML standard. Beyond these, it also reports a few errors and warnings. The errors are all the `errors` mentioned in the standard (not `fatal errors`) and warnings that seem to depend on the same level of understanding of the document as the validity constraints.
 
-The other errors are:
+The other problems are:
 
 * When an element declaration's content model is non-deterministic
 * If an `xml:space` attribute is the wrong case
@@ -54,7 +54,7 @@ The tokens this examines are:
 *  `TextDeclarationPToken` 
 *  `XmlDeclarationPToken` 
 
-This does try to be flexible and cope with grossly malformed documents. However, if your DTD is in the wrong place or if the external comes before the internal subset, this will get confused (this should just result in more error tokens, nothing more serious than that).  This should never crash or throw any errors (as with other systems, there is no circumstance where this will deliberately throw an error) no matter what is passed to it and in what order.
+This does try to be flexible and cope with grossly malformed documents. However, if your DTD is in the wrong place or if the external comes before the internal subset, this will get confused (this should just result in more problem tokens, nothing more serious than that).  This should never crash or throw any Errors (as with other systems, there is no circumstance where this will deliberately throw an Error) no matter what is passed to it and in what order.
 
 ## Commentary on individual validity constraints
 
@@ -84,9 +84,9 @@ From the standpoint of referencing a parameter entity within `intSubset` and `ex
 ANY>
 ```
 
-This will be reported as a problem by our parser and the expansion system. The parser will interpret the above as three tokens: `ENTITY_DECLARATION_PTOKEN`, `PARAMENTER_ENTITY_REFERENCE_PTOKEN` `CHARDATA_PTOKEN`, and the last will be reported as a token in the wrong place by the syntax checks in the wellformedness system. When it comes to expansion, the processing there will conclude that the ELEMENT declaration is simply incomplete, and again the syntax checks in the wellformedness system will also report that as an error.  Thus, in this processor, if the "first character ... of a markup declaration" appears in the replacement text of a parameter entity, it will always result in some kind of syntax error. This validity system (redundantly) checks for markup declaration tokens that were missing their closing value, and are are the end of a parameter entity expansion.
+This will be reported as a Problem by our parser and the expansion system. The parser will interpret the above as three tokens: `ENTITY_DECLARATION_PTOKEN`, `PARAMENTER_ENTITY_REFERENCE_PTOKEN` `CHARDATA_PTOKEN`, and the last will be reported as a token in the wrong place by the syntax checks in the wellformedness system. When it comes to expansion, the processing there will conclude that the ELEMENT declaration is simply incomplete, and again the syntax checks in the wellformedness system will also report that as a Problem.  Thus, in this processor, if the "first character ... of a markup declaration" appears in the replacement text of a parameter entity, it will always result in some kind of syntax error. This validity system (redundantly) checks for markup declaration tokens that were missing their closing value, and are are the end of a parameter entity expansion.
 
-Another aspect of this is having the "last character of a markup declaration" in the replacement text.  This covers things like: `<!NOTATION %myPERef;`. Here, again, the parser and expansion will report errors long before the data gets to the validator.  In particular, the parser will parse `<!NOTATION %myPERef; ...` as a `NOTATION_DECLARATION_PTOKEN` with a potentially long `unexpanded` property (it will read `...` until it finds a closing `>`.  Once it has gone through the expander, it will end up with text in the `extra` property (at least the `>` from the `myPERef` replacement text), which will be flagged as a syntax error. This validity system will still report a "Proper Declaration/PE Nesting" validity constraint if it finds an attlist, element, entity or notation declaration PToken with an unexpanded property and a `>` in the extra property. 
+Another aspect of this is having the "last character of a markup declaration" in the replacement text.  This covers things like: `<!NOTATION %myPERef;`. Here, again, the parser and expansion will report Problems long before the data gets to the validator.  In particular, the parser will parse `<!NOTATION %myPERef; ...` as a `NOTATION_DECLARATION_PTOKEN` with a potentially long `unexpanded` property (it will read `...` until it finds a closing `>`.  Once it has gone through the expander, it will end up with text in the `extra` property (at least the `>` from the `myPERef` replacement text), which will be flagged as a syntax error. This validity system will still report a "Proper Declaration/PE Nesting" validity constraint if it finds an attlist, element, entity or notation declaration PToken with an unexpanded property and a `>` in the extra property. 
 
 Note that the definitions of PI and Comment both say that PE references are not recognized within them. So even seemingly legitimate things like `<!-- %foo; -->` will not cause the PE reference to be recognized, much less `<!-- %foo;`.
 
@@ -98,7 +98,7 @@ The spec doesn't mention this, but it seems like this could apply to conditional
 ### §2.9.0 Standalone Document Declaration
 In the standard, these cases can be a little hard to follow why they are important.
 
-- If an element contains whitespace between child elements, then without validation (that is, attending to the content model), we do not know whether that whitespace is significant or not (in the case of an element with element content, there should be no char data between the child elements, and so the white space is not significant).  If we are validating, then we know to ignore the whitespace. However, if the document was marked as "standalone=yes", and the declaration for that element type was an "external markupp declaration", then the standalone declaration was in error... this isn't a standalone document (it requires processing the so-called external markup declarations in order to correctly interpret the docuent -- that is, identify that the white space is not significant)
+- If an element contains whitespace between child elements, then without validation (that is, attending to the content model), we do not know whether that whitespace is significant or not (in the case of an element with element content, there should be no char data between the child elements, and so the white space is not significant).  If we are validating, then we know to ignore the whitespace. However, if the document was marked as "standalone=yes", and the declaration for that element type was an "external markup declaration", then the standalone declaration was in error... this isn't a standalone document (it requires processing the so-called external markup declarations in order to correctly interpret the docuent -- that is, identify that the white space is not significant)
 
 - If an element has an attribute added to it through the defaulting process, and the
 declaration for that attribute is in an external markup declaration, and the document
@@ -112,11 +112,11 @@ as standalone, then this is an error, since the normalization could not have bee
 identified without that external declaration.  Note that if the attribute would not
 have changed due to normalization processes, it is not an error.
 
-- If a parameter entity reference in the DTD, or a general entity reference in the content references an entity that was an external markup declaration, and the document is standalone (and, if a general entity reference, is not one of the five predefined entities) then this is also a valitity error, since a non-validating processor would not have been able to expand the entity and the resulting document would have been different. (crucially, if an entity is never referenced, we do not care. Similarly, we do not care if an entity is named in an attribute value (e.g. an attribute of type ENTITY or ENTITIES) since whether that is or is not declared in an external markup declaration, since that will not affect the interpretation of the document).
+- If a parameter entity reference in the DTD, or a general entity reference in the content references an entity that was an external markup declaration, and the document is standalone (and, if a general entity reference, is not one of the five predefined entities) then this is also a validity error, since a non-validating processor would not have been able to expand the entity and the resulting document would have been different. (crucially, if an entity is never referenced, we do not care. Similarly, we do not care if an entity is named in an attribute value (e.g. an attribute of type ENTITY or ENTITIES) since whether that is or is not declared in an external markup declaration, since that will not affect the interpretation of the document).
    - Relatedly, if any of the referenced entities themselves contain entity references that were declared in external markup declarations, those are errors.
 
 ### §3.0.0: Element Valid
-- EMPTY case: The wording of this changed in 1.0/3 and beyond, but I think it would have reasonably been interpreted the same way in either case.  Note that this implementation will report any PToken that appears between a start and end tag that corresponds directly to some original bit of XML text. However, it ignores Errors, and the various metadata tokens that flow through.
+- EMPTY case: The wording of this changed in 1.0/3 and beyond, but I think it would have reasonably been interpreted the same way in either case.  Note that this implementation will report any PToken that appears between a start and end tag that corresponds directly to some original bit of XML text. However, it ignores Problems, and the various metadata tokens that flow through.
 - ELEMENT: This has three wording variations (1.0/1, 1.0/2 and 1.0/3 and beyond). THey all agree that the child elements must match the grammar in the element content model. As for the non-child-element content within the element, they say:
    - The first says that whitespace is allowed only between between child elements (but not before the first and after the second).
    - The second says that whitespace is allowed before the first and after the second (and repeats that CDATA section are not allowed)
@@ -209,14 +209,14 @@ This assumes that the first occurence of a notation declaration is correct, whil
 Note also that this is not enforced in 1.0/1, since that edition did not have this constraint.
 
 ## Commentary on other errors
-Several places in the specification indicate that errors should be reported in several circumstances. These are generally handled and reported by this system.
+Several places in the specification indicate that errors should be reported in various circumstances. These are generally handled and reported by this system.
 
 * `xml:space`: §2.10.0 in 1.0/3 and beyond requires that an error be reported if the values declared for the attribute when it is declared.
 
 
 ## Architecture
 
-This contains a core class, `ValidityChecker`. Once instantiated, its `checkPToken()` function can be called with new tokens and an error collector instance. This routine does not directly do any checks, instead deferring to other routines.  Internally, it keeps a `state` property which maintains tables of declarations it has seen, along with a certain other values to help it handle processing either the DTD or content. This state is passed along into each of the other routines.
+This contains a core class, `ValidityChecker`. Once instantiated, its `checkPToken()` function can be called with new tokens and an problem collector instance. This routine does not directly do any checks, instead deferring to other routines.  Internally, it keeps a `state` property which maintains tables of declarations it has seen, along with a certain other values to help it handle processing either the DTD or content. This state is passed along into each of the other routines.
 
 The bulk of the processing is done on individual tokens. That is, when receiving a `FooPToken`, `ValidityChecker` calls a `fooValidate()` routine to validate that token itself, as well as its relationship to the overall `state`. Often, `ValidityChecker` then calls another routine `fooUpdateState()` which will modify the state given the information from the `FooToken`.
 
@@ -270,7 +270,7 @@ Each state can be thought of as a position "between" a sequenced content particl
 
 We trandition (`trans`) through the graph by encountering an element name, looking that element up in the `trans` map and following to the state with the specified id.  If there is no transition, then we are in error.  If we finish reading elements and our current state is not marked `done`, then we are also in error.
 
-The `ref` property is used to keep track of where this transition was in the content model, for reporting to any errors to the user.  Thus, in the `(head, (p | list | note)*, div2*)`, the transition when encountering `head` is `/1`, the transition with `(p | list | note)` is `/2` etc.  The `ref`s are hierarchical, representing the hierarchy in a content model. Thus, the transition for `p` is `/2/1` Note that if a choice `cp` has multiple of the same name, we represent this in the `ref` property as `/1,/3` (in the case of `(foo|bar|foo)`).
+The `ref` property is used to keep track of where this transition was in the content model, for reporting to any problems to the user.  Thus, in the `(head, (p | list | note)*, div2*)`, the transition when encountering `head` is `/1`, the transition with `(p | list | note)` is `/2` etc.  The `ref`s are hierarchical, representing the hierarchy in a content model. Thus, the transition for `p` is `/2/1` Note that if a choice `cp` has multiple of the same name, we represent this in the `ref` property as `/1,/3` (in the case of `(foo|bar|foo)`).
 
 #### Autotrans
 

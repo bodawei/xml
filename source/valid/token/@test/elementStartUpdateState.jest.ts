@@ -1,7 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ElementDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';

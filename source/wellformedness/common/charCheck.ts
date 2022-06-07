@@ -1,14 +1,14 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { SToken } from 'sToken';
 
-import { WellFormedError } from '../error/WellFormedError';
-import { WellFormedWarning } from '../error/wellFormedWarning';
-import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { Warning } from '../error/Warning';
+import { warningCodes } from '../error/warningCodes';
 
-const WFEID = WellFormedError.ID;
-const XWID = wellFormedWarningCodes.id;
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 const BAD_CHARS_11 =
    /[\u0000\u0001-\u0008\u000B\u000C\u000E-\u001F\u007F-\u0084\u0086-\u009F\uFFFE\uFFFF]/g;
@@ -40,7 +40,7 @@ const LONE_SURROGATE =
 
 function charCheck(
    sToken: SToken | undefined,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
    isSecondPass: boolean,
 ): void {
@@ -67,12 +67,12 @@ function charCheck(
          found = badRegEx.test(sToken.str);
       }
 
-      ec.report(WFEID.CHARDATA_INVALID_CHAR, [badIndices.join(', ')]);
+      collector.report(WFEID.CHARDATA_INVALID_CHAR, [badIndices.join(', ')]);
    }
 
    LONE_SURROGATE.lastIndex = 0;
    if (LONE_SURROGATE.test(sToken.str)) {
-      ec.report(WFEID.CHARDATA_INVALID_CHAR, [
+      collector.report(WFEID.CHARDATA_INVALID_CHAR, [
          String(sToken.ranges[0].startIndex - 1 + LONE_SURROGATE.lastIndex),
       ]);
    }
@@ -106,7 +106,7 @@ function charCheck(
          foundDiscouraged = discouragedRegEx.test(sToken.str);
       }
 
-      ec.reportError(XWID.CHARDATA_DISCOURAGED_CHAR, WellFormedWarning, [
+      collector.reportProblem(Warning, WID.CHARDATA_DISCOURAGED_CHAR, [
          discouragedIndices.join(', '),
       ]);
    }

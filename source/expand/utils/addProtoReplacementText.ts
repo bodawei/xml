@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { XmlErrorToken } from 'basic';
+import { Problem } from 'basic';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'pToken';
 
 import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
@@ -11,7 +11,7 @@ import { EntityContextStack } from './EntityContextStack';
 import { PARAMETER_ENTITY_DECLARATION_PTOKEN, externalIdToEntityId } from 'pToken';
 
 interface AddProtoReplacementTextResult {
-   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<Problem | ElidedEntityDeclarationPToken>;
 }
 
 type Done = (result: AddProtoReplacementTextResult) => void;

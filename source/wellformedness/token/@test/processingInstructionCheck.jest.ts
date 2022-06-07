@@ -1,15 +1,15 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { ProcessingInstructionPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { charCheck } from '../../common/charCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { nameCheck } from '../../common/nameCheck';
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
@@ -17,59 +17,57 @@ jest.mock('../../common/charCheck');
 jest.mock('../../common/nameXmlCheck');
 jest.mock('../../common/nameCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
+
 describe('processingInstructionCheck() (unit)', () => {
    let piPToken: ProcessingInstructionPToken;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
 
    beforeEach(() => {
       const protoPToken = {
+         close: toSToken('?>'),
+         instruction: toSToken('blah'),
          open: toSToken('<?'),
          openSpace: undefined,
          target: toSToken('target'),
          targetSpace: toSToken(' '),
-         instruction: toSToken('blah'),
-         close: toSToken('?>'),
       };
       piPToken = new ProcessingInstructionPToken(protoPToken);
 
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       confVer = new ConformanceVersion();
       piPToken = new ProcessingInstructionPToken(protoPToken);
    });
 
    it('calls nameCheck() on the target', () => {
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(
          piPToken.target,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.PI_TARGET_NAME_INVALID,
+         WFEID.PI_TARGET_NAME_INVALID,
       );
    });
 
    it('calls charCheck() on the instruction data', () => {
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(
-         piPToken.instruction,
-         mockErrorCollector,
-         confVer,
-         false,
-      );
+      expect(charCheck).toHaveBeenCalledWith(piPToken.instruction, collector, confVer, false);
    });
 
    it('calls nameXmlCheck()', () => {
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
       expect(nameXmlCheck).toHaveBeenCalledWith(
          piPToken.target,
-         mockErrorCollector,
+         collector,
          confVer,
          'PI',
-         wellFormedWarningCodes.id.PI_TARGET_XMLDASH_RESERVED,
-         wellFormedWarningCodes.id.PI_TARGET_XML_RESERVED,
+         WID.PI_TARGET_XMLDASH_RESERVED,
+         WID.PI_TARGET_XML_RESERVED,
       );
    });
 
@@ -78,10 +76,11 @@ describe('processingInstructionCheck() (unit)', () => {
          openSpace: toSToken(' '),
       });
 
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PI_SPACE_AFTER_OPEN,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PI_SPACE_AFTER_OPEN,
          params: ['target'],
          position: piPToken.openSpace,
       });
@@ -92,12 +91,13 @@ describe('processingInstructionCheck() (unit)', () => {
          target: undefined,
       });
 
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PI_NO_TARGET,
-         params: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PI_NO_TARGET,
          lastPosition: piPToken.open,
+         params: [],
       });
    });
 
@@ -106,10 +106,11 @@ describe('processingInstructionCheck() (unit)', () => {
          target: toSToken('fofoXmLTarget'),
       });
 
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PI_TARGET_HAS_XML,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PI_TARGET_HAS_XML,
          params: ['fofoXmLTarget'],
          position: piPToken.target,
       });
@@ -120,27 +121,29 @@ describe('processingInstructionCheck() (unit)', () => {
          targetSpace: undefined,
       });
 
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PI_NO_SPACE_AFTER_TARGET,
-         params: ['target'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PI_NO_SPACE_AFTER_TARGET,
          lastPosition: piPToken.target,
+         params: ['target'],
       });
    });
 
    it('reports no error if there is no space after the target but there is no instruction', () => {
       piPToken = new ProcessingInstructionPToken(piPToken, {
-         targetSpace: undefined,
          instruction: undefined,
+         targetSpace: undefined,
       });
 
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
-      expect(mockErrorCollector).not.toReportWFError({
-         id: WellFormedError.ID.PI_NO_SPACE_AFTER_TARGET,
-         params: ['target'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveWellFormedError({
+         id: WFEID.PI_NO_SPACE_AFTER_TARGET,
          lastPosition: piPToken.target,
+         params: ['target'],
       });
    });
 
@@ -149,12 +152,13 @@ describe('processingInstructionCheck() (unit)', () => {
          close: undefined,
       });
 
-      processingInstructionCheck(piPToken, mockErrorCollector, confVer);
+      processingInstructionCheck(piPToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.PI_NO_CLOSE,
-         params: ['target'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.PI_NO_CLOSE,
          lastPosition: piPToken.instruction,
+         params: ['target'],
       });
    });
 });

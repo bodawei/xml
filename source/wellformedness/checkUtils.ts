@@ -1,4 +1,4 @@
-import { ErrorCollector, ConformanceVersion } from 'basic';
+import { Collector, ConformanceVersion } from 'basic';
 import {
    CHARREF_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -26,7 +26,7 @@ import {
 } from 'token';
 import { AttributePToken } from '../token/common/attribute';
 import { LiteralValuePToken } from '../token/common/literal';
-import { WellFormedError } from './error/WellFormedError';
+import { wellFormedErrorCodes } from './error/wellFormedError';
 
 type ContentStart = ElementStartPToken | ElementEmptyPToken | GeneralEntityStartPToken;
 
@@ -54,12 +54,12 @@ interface ParameterEntitiesInfo {
 }
 
 interface MarkupChecker {
-   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
+   check(pToken: ParseToken, collector: Collector): undefined | typeof CHECKER_DONE;
    inSecondPassContxt: boolean;
 }
 
 interface ContentChecker {
-   check(pToken: ParseToken, errorCollector: ErrorCollector): undefined | typeof CHECKER_DONE;
+   check(pToken: ParseToken, collector: Collector): undefined | typeof CHECKER_DONE;
    isDone: boolean;
    inSecondPassContxt: boolean;
 }
@@ -67,7 +67,7 @@ interface ContentChecker {
 interface ContentCheckerConstructor {
    new (
       start: ContentStart,
-      ec: ErrorCollector,
+      collector: Collector,
       checkState: CheckState,
       geContext: Array<string>,
    ): ContentChecker;
@@ -76,7 +76,7 @@ interface ContentCheckerConstructor {
 interface MarkupCheckerConstructor {
    new (
       start: MarkupStart,
-      ec: ErrorCollector,
+      collector: Collector,
       checkState: CheckState,
       geContext: Array<string>,
    ): MarkupChecker;
@@ -84,7 +84,8 @@ interface MarkupCheckerConstructor {
 
 const CHECKER_DONE = '**Checker Done**';
 
-const WFID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
+
 const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 
 class CheckState {
@@ -114,7 +115,7 @@ class CheckState {
 function checkForExternalEntity(
    value: LiteralValuePToken,
    paramDecls: ParameterEntitiesInfo,
-   ec: ErrorCollector,
+   collector: Collector,
    open: SToken,
 ): void {
    for (const item of value) {
@@ -137,9 +138,9 @@ function checkForExternalEntity(
          continue;
       }
 
-      ec.check(decl.externalId, WFID.ATTRIBUTE_INVALID_REFERENCE, [name], open);
+      collector.check(decl.externalId, WFEID.ATTRIBUTE_INVALID_REFERENCE, [name], open);
 
-      checkForExternalEntity(decl.value, paramDecls, ec, open);
+      checkForExternalEntity(decl.value, paramDecls, collector, open);
    }
 }
 
@@ -198,7 +199,7 @@ function checkGeneralEntity(
    inAtt: boolean,
    entityDecls: GeneralEntitiesInfo,
    state: CheckState,
-   ec: ErrorCollector,
+   collector: Collector,
 ): void {
    const name = strOrBlank(pToken.name);
    const genEntityDecl = entityDecls[name];
@@ -212,21 +213,31 @@ function checkGeneralEntity(
          // §3.1.0: Well-Formedness Constraint: No External Entity References
          //    Attribute values must not contain direct or indirect entity
          //    references to external entities.
-         ec.check(
+         collector.check(
             genEntityDecl.token.externalId,
-            WFID.ATTRIBUTE_INVALID_REFERENCE,
+            WFEID.ATTRIBUTE_INVALID_REFERENCE,
             [name],
             pToken.open,
          );
 
-         checkForExternalEntity(genEntityDecl.token.value, state.paramDecls, ec, pToken.open);
+         checkForExternalEntity(
+            genEntityDecl.token.value,
+            state.paramDecls,
+            collector,
+            pToken.open,
+         );
       }
 
       // §4.1.0: Well-Formedness Constraint: Parsed Entity
       //     An entity reference must not contain the name of an unparsed entity.
       //     Unparsed entities may be referred to only in attribute values
       //     declared to be of type ENTITY or ENTITIES.
-      ec.check(genEntityDecl.token.nDataName, WFID.REFERENCE_UNPARSED_NO_USE, [name], pToken.open);
+      collector.check(
+         genEntityDecl.token.nDataName,
+         WFEID.REFERENCE_UNPARSED_NO_USE,
+         [name],
+         pToken.open,
+      );
 
       // §4.1.0 Well-formedness constraint: Entity Declared
       //     In a ... document with "standalone='yes'", for an entity reference that
@@ -237,9 +248,9 @@ function checkGeneralEntity(
       // the content or an attribute list default in the internal subset
       // but not in a parameter entity), there must be a declaration, and it
       // must not be in the external subset
-      ec.check(
+      collector.check(
          state.isStandalone && !genEntityDecl.declaredInInternalSubset,
-         WFID.REFERENCE_INVALID_STANDALONE,
+         WFEID.REFERENCE_INVALID_STANDALONE,
          [name],
          pToken.open,
       );
@@ -247,7 +258,7 @@ function checkGeneralEntity(
 
    // §4.1.0 See long comment above.
    if (!declarationExists && !isPredefinedEntity && mustHaveDeclaration) {
-      ec.report(WFID.REFERENCE_NO_DECLARATION, [name], pToken.open);
+      collector.report(WFEID.REFERENCE_NO_DECLARATION, [name], pToken.open);
    }
 }
 
@@ -259,7 +270,7 @@ function scanAttributeValues(
    entityDecls: GeneralEntitiesInfo,
    state: CheckState,
    geContext: Array<string>,
-   ec: ErrorCollector,
+   collector: Collector,
 ): void {
    const refNameStack: Array<string> = [];
 
@@ -272,13 +283,13 @@ function scanAttributeValues(
                // §4.1.0: Well-formedness constraint: No Recursion
                //    A parsed entity must not contain a recursive reference to itself,
                //    either directly or indirectly.
-               ec.check(
+               collector.check(
                   refNameStack.includes(entityName) || geContext.includes(entityName),
-                  WFID.REFERENCE_INVALID_RECURSION,
+                  WFEID.REFERENCE_INVALID_RECURSION,
                   [entityName],
                   val.open,
                );
-               checkGeneralEntity(val, true, entityDecls, state, ec);
+               checkGeneralEntity(val, true, entityDecls, state, collector);
                break;
             case GENERAL_ENTITY_START_PTOKEN:
                const geEntityName = strOrBlank(val.referencePToken.name);
@@ -286,14 +297,14 @@ function scanAttributeValues(
                // §4.1.0: Well-formedness constraint: No Recursion
                //    A parsed entity must not contain a recursive reference to itself,
                //    either directly or indirectly.
-               ec.check(
+               collector.check(
                   refNameStack.includes(geEntityName) || geContext.includes(geEntityName),
-                  WFID.REFERENCE_INVALID_RECURSION,
+                  WFEID.REFERENCE_INVALID_RECURSION,
                   [geEntityName],
                   val.referencePToken.open,
                );
                refNameStack.push(geEntityName);
-               checkGeneralEntity(val.referencePToken, true, entityDecls, state, ec);
+               checkGeneralEntity(val.referencePToken, true, entityDecls, state, collector);
                break;
             case GENERAL_ENTITY_END_PTOKEN:
                const name = strOrBlank(val.referencePToken.name);
@@ -302,8 +313,8 @@ function scanAttributeValues(
                if (name === topName) {
                   refNameStack.pop();
                } else {
-                  ec.report(
-                     WFID.ATTRIBUTE_REFERENCE_UNBALANCED,
+                  collector.report(
+                     WFEID.ATTRIBUTE_REFERENCE_UNBALANCED,
                      [name, topName],
                      val.referencePToken.open,
                   );
@@ -333,7 +344,7 @@ function checkParameterEntity(
    pToken: ParameterEntityReferencePToken,
    entityDecls: ParameterEntitiesInfo,
    state: CheckState,
-   ec: ErrorCollector,
+   collector: Collector,
 ): void {
    const name = strOrBlank(pToken.name);
    const paramEntityDecl = entityDecls[name];
@@ -343,7 +354,7 @@ function checkParameterEntity(
 
    // §4.1.0 See long comment above.
    if (!declarationExists && mustHaveDeclaration) {
-      ec.report(WFID.REFERENCE_NO_DECLARATION, [name], pToken.open);
+      collector.report(WFEID.REFERENCE_NO_DECLARATION, [name], pToken.open);
    }
 }
 
@@ -359,7 +370,7 @@ function isParamEntityExternal(
    const paramEntityDecl = entityDecls[name];
    const declarationExists = paramEntityDecl !== undefined;
 
-   return declarationExists && paramEntityDecl?.externalId !== undefined;
+   return declarationExists && paramEntityDecl.externalId !== undefined;
 }
 
 export {

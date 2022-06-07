@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, EntityId, XmlErrorToken } from 'basic';
+import { ConformanceVersion, EntityId, Problem } from 'basic';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { ExpandParams, RetrieveResults } from 'source/expand/types';
 import { STokenSource, toSToken } from 'sToken';
@@ -49,7 +49,7 @@ describe('ConditionalStartExpander (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<XmlErrorToken> => [],
+                  getErrors: (): Array<Problem> => [],
                };
             },
             parseAttributeValue: (): void => {},

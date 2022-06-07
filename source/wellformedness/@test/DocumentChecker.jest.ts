@@ -2,18 +2,15 @@
 
 import { describe, expect, it, jest } from '@jest/globals';
 
-import { ErrorCollector, ConformanceVersion, EntityId } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ProblemCollector, ConformanceVersion, EntityId } from 'basic';
 import {
    ParseToken,
    ProcessingInstructionPToken,
    TextDeclarationPToken,
    XmlDeclarationPToken,
-   XMLDECL_PTOKEN,
 } from 'pToken';
 import { toSToken } from 'sToken';
 import {
-   CDATA_PTOKEN,
    COMMENT_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
    ELEMENT_START_PTOKEN,
@@ -50,7 +47,7 @@ import {
 } from 'token-test';
 
 import { dtdEndCheck } from '../common/dtdEndCheck';
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes, WellFormedError } from '../error/wellFormedError';
 import { DocumentChecker } from '../DocumentChecker';
 import { CHECKER_DONE, CheckState, MarkupChecker, ContentChecker } from '../checkUtils';
 import { checkMap } from '../checkMap';
@@ -58,6 +55,8 @@ import { conditionalStartCheck } from '../token/conditionalStartCheck';
 
 jest.mock('../common/dtdEndCheck');
 jest.mock('../token/conditionalStartCheck');
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('DocumentChecker (unit)', () => {
    let checker: DocumentChecker;
@@ -67,7 +66,6 @@ describe('DocumentChecker (unit)', () => {
    let comment: CommentPToken;
    let space: SpacePToken;
    let processingInstruction: ProcessingInstructionPToken;
-   let ec: MockErrorCollector;
    let confVer: ConformanceVersion;
    let textDecl: TextDeclarationPToken;
    let xmlDecl: XmlDeclarationPToken;
@@ -84,8 +82,8 @@ describe('DocumentChecker (unit)', () => {
    class MockMarkupChecker implements MarkupChecker {
       lastSeen?: ParseToken;
 
-      constructor(start: ParseToken, ec: ErrorCollector, checkState: CheckState) {
-         subParams = [start, ec];
+      constructor(start: ParseToken, collector: ProblemCollector, checkState: CheckState) {
+         subParams = [start, collector];
          subState = checkState;
          this.lastSeen = start;
          this.inSecondPassContxt = false;
@@ -118,8 +116,8 @@ describe('DocumentChecker (unit)', () => {
 
       allDone: boolean;
 
-      constructor(start: ParseToken, ec: ErrorCollector, checkState: CheckState) {
-         subParams = [start, ec];
+      constructor(start: ParseToken, collector: ProblemCollector, checkState: CheckState) {
+         subParams = [start, collector];
          subState = checkState;
          this.lastSeen = start;
          this.allDone = start.type === ELEMENT_EMPTY_PTOKEN;
@@ -154,7 +152,6 @@ describe('DocumentChecker (unit)', () => {
       jest.resetAllMocks();
       subState = new CheckState();
       subParams = [];
-      ec = new MockErrorCollector();
       checker = new DocumentChecker({
          content: MockContentChecker,
          dtd: MockMarkupChecker,
@@ -195,30 +192,25 @@ describe('DocumentChecker (unit)', () => {
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
          const cwfSpy = jest.spyOn(checkMap, 'XMLDECL_PTOKEN').mockImplementation(() => {});
-         checker.check(confVer, ec);
+         checker.check(confVer);
 
-         checker.check(xmlDecl, ec);
+         checker.check(xmlDecl);
 
-         expect(cwfSpy).toHaveBeenCalledWith(
-            xmlDecl,
-            expect.any(ErrorCollector),
-            confVer,
-            undefined,
-         );
+         expect(cwfSpy).toHaveBeenCalledWith(xmlDecl, expect.any(Object), confVer, undefined);
       });
 
       it('handles an error token with no problems', () => {
-         const error = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS);
+         const error = new WellFormedError(WFEID.XMLDECL_NO_PARAMS);
 
-         checker.check(error, ec);
+         const problems = checker.check(error);
 
-         expect(ec.errors).toEqual([]);
+         expect(problems.length).toEqual(0);
       });
 
       it('handles an EntityId with no problems', () => {
-         checker.check(new EntityId(), ec);
+         const problems = checker.check(new EntityId());
 
-         expect(ec.errors).toEqual([]);
+         expect(problems.length).toEqual(0);
       });
 
       it('handles an ConditionalSection start with no problems', () => {
@@ -227,30 +219,30 @@ describe('DocumentChecker (unit)', () => {
             open: toSToken('<!['),
          });
 
-         checker.check(conditional, ec);
+         checker.check(conditional);
 
-         expect(conditionalStartCheck).toHaveBeenCalledWith(conditional, ec);
+         expect(conditionalStartCheck).toHaveBeenCalledWith(conditional, expect.any(Object));
       });
 
       describe('dtd subchecker', () => {
          it('calls with the token and error collector', () => {
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStart);
+            checker.check(docTypeStart);
 
             expect(subParams[0]).toEqual(docTypeStart);
-            expect(subParams[1]).toEqual(ec);
+            expect(subParams[1]).toEqual(expect.any(Object));
          });
 
          it('passes internal subset flags', () => {
             const expected = new CheckState();
             expected.hasNoDTD = false;
 
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStart);
+            checker.check(docTypeStart);
 
             expect(subState).toEqual(expected);
          });
@@ -263,9 +255,9 @@ describe('DocumentChecker (unit)', () => {
             const expected = new CheckState();
             expected.hasNoDTD = true;
 
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStart);
 
             expect(subState).toEqual(expected);
          });
@@ -275,9 +267,9 @@ describe('DocumentChecker (unit)', () => {
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
 
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStartExtSubset, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStartExtSubset);
 
             expect(subState).toEqual(expected);
          });
@@ -286,9 +278,9 @@ describe('DocumentChecker (unit)', () => {
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDeclStandalone, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(xmlDeclStandalone);
+            checker.check(space);
+            checker.check(docTypeStart);
 
             expect(subState).toEqual(expected);
          });
@@ -298,10 +290,10 @@ describe('DocumentChecker (unit)', () => {
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
 
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStartExtSubset, ec);
-            checker.check(makeDocTypeStart(), ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStartExtSubset);
+            checker.check(makeDocTypeStart());
 
             expect(subState).toEqual(expected);
          });
@@ -310,10 +302,10 @@ describe('DocumentChecker (unit)', () => {
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDeclStandalone, ec);
-            checker.check(space, ec);
-            checker.check(makeXmlDecl(), ec);
-            checker.check(docTypeStart, ec);
+            checker.check(xmlDeclStandalone);
+            checker.check(space);
+            checker.check(makeXmlDecl());
+            checker.check(docTypeStart);
 
             expect(subState).toEqual(expected);
          });
@@ -321,22 +313,22 @@ describe('DocumentChecker (unit)', () => {
 
       describe('content subchecker', () => {
          it('calls content sub-checker with the token and error collector', () => {
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
+            checker.check(elementStart);
 
             expect(subParams[0]).toEqual(elementStart);
-            expect(subParams[1]).toEqual(ec);
+            expect(subParams[1]).toEqual(expect.any(Object));
          });
 
          it('passes internal subset flags', () => {
             const expected = new CheckState();
             expected.hasNoDTD = false;
 
-            checker.check(xmlDecl, ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDecl);
+            checker.check(elementStart);
 
             expect(subState).toEqual(expected);
          });
@@ -349,11 +341,11 @@ describe('DocumentChecker (unit)', () => {
             const expected = new CheckState();
             expected.hasNoDTD = true;
 
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
+            checker.check(elementStart);
 
             expect(subState).toEqual(expected);
          });
@@ -363,10 +355,10 @@ describe('DocumentChecker (unit)', () => {
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
 
-            checker.check(xmlDecl, ec);
-            checker.check(docTypeStartExtSubset, ec);
-            checker.check(docTypeEnd, ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDecl);
+            checker.check(docTypeStartExtSubset);
+            checker.check(docTypeEnd);
+            checker.check(elementStart);
 
             expect(subState).toEqual(expected);
          });
@@ -375,10 +367,10 @@ describe('DocumentChecker (unit)', () => {
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDeclStandalone, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDeclStandalone);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
+            checker.check(elementStart);
 
             expect(subState).toEqual(expected);
          });
@@ -387,13 +379,12 @@ describe('DocumentChecker (unit)', () => {
             const expected = new CheckState();
             expected.hasNoDTD = false;
             expected.hasExternalDTD = true;
-
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStartExtSubset, ec);
-            checker.check(docTypeEnd, ec);
-            checker.check(makeDocTypeStart(), ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStartExtSubset);
+            checker.check(docTypeEnd);
+            checker.check(makeDocTypeStart());
+            checker.check(elementStart);
 
             expect(subState).toEqual(expected);
          });
@@ -402,11 +393,11 @@ describe('DocumentChecker (unit)', () => {
             const expected = new CheckState();
             expected.isStandalone = true;
 
-            checker.check(xmlDeclStandalone, ec);
-            checker.check(makeXmlDecl(), ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDeclStandalone);
+            checker.check(makeXmlDecl());
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
+            checker.check(elementStart);
 
             expect(subState).toEqual(expected);
          });
@@ -414,291 +405,329 @@ describe('DocumentChecker (unit)', () => {
 
       describe('initial state', () => {
          it('reports no error when an XML Declaration is found at the start', () => {
-            checker.check(xmlDecl, ec);
+            const problems = checker.check(xmlDecl);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('does not report an error if document starts with an element start', () => {
-            checker.check(elementStart, ec);
+            const problems = checker.check(elementStart);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
+            expect(problems.length).toEqual(0);
          });
 
          it('reports an error when a textDecl is found at the start', () => {
-            checker.check(textDecl, ec);
+            const problems = checker.check(textDecl);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [textDecl.type],
-               position: textDecl.open,
-            });
+            expect(problems[2].id).toEqual(WFEID.TOKEN_INVALID_CONTEXT);
          });
 
          it('reports no error when a space is found at the start', () => {
-            checker.check(space, ec);
+            const problems = checker.check(space);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toNotReportError(WellFormedError.ID.TOKEN_INVALID_CONTEXT);
+            expect(problems.length).toEqual(0);
          });
 
          it('reports an error if an xml declaration is found other than at the start of the document', () => {
-            checker.check(xmlDecl, ec);
-            checker.check(xmlDecl, ec);
+            const prob1 = checker.check(xmlDecl);
+            const prob2 = checker.check(xmlDecl);
+            const problems = prob1.concat(prob2);
 
-            expect(ec.errors.length).toEqual(1);
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [XMLDECL_PTOKEN],
-               position: xmlDecl.open,
-            });
+            expect(problems.length).toEqual(1);
+            expect(problems[0].id).toEqual(WFEID.TOKEN_INVALID_CONTEXT);
          });
       });
 
       describe('post XML Declaration', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
+            checker.check(xmlDecl);
          });
 
          it('reports an error if something incorrect is found', () => {
-            checker.check(cdata, ec);
+            const problems = checker.check(cdata);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [CDATA_PTOKEN],
-               position: cdata.open,
-            });
+            expect(problems[0].id).toEqual(WFEID.TOKEN_INVALID_CONTEXT);
          });
 
          it('allows a comment', () => {
-            checker.check(comment, ec);
+            const problems = checker.check(comment);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows a space', () => {
-            checker.check(space, ec);
+            const problems = checker.check(space);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows a processing instruction', () => {
-            checker.check(processingInstruction, ec);
+            const problems = checker.check(processingInstruction);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows an element start', () => {
-            checker.check(elementStart, ec);
+            const problems = checker.check(elementStart);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows an empty element', () => {
-            checker.check(elementEmpty, ec);
+            const problems = checker.check(elementEmpty);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows an doctype start', () => {
-            checker.check(docTypeStart, ec);
+            const problems = checker.check(docTypeStart);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows several no-state-changes in a row', () => {
-            checker.check(comment, ec);
-            checker.check(comment, ec);
-            checker.check(processingInstruction, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            const p1 = checker.check(comment);
+            const p2 = checker.check(comment);
+            const p3 = checker.check(processingInstruction);
+            const p4 = checker.check(space);
+            const p5 = checker.check(docTypeStart);
 
-            expect(ec.errors).toEqual([]);
+            const problems = p1.concat(p2, p3, p4, p5);
+            expect(problems.length).toEqual(0);
          });
       });
 
       describe('in DOCTYPE', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStart);
          });
 
          it('allows the end of the DOCTYPE', () => {
-            checker.check(docTypeEnd, ec);
+            const problems = checker.check(docTypeEnd);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('calls docTypeEndCheck() when encountering a doctype end', () => {
-            checker.check(docTypeEnd, ec);
+            checker.check(docTypeEnd);
 
-            expect(dtdEndCheck).toHaveBeenCalledWith(expect.any(Object), ec);
+            expect(dtdEndCheck).toHaveBeenCalledWith(
+               expect.any(Object),
+               expect.any(ProblemCollector),
+            );
          });
 
          it('allows an external subset start marker', () => {
-            checker.check(externalSubsetStart, ec);
+            const problems = checker.check(externalSubsetStart);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('rejects multiple external subset starts', () => {
-            checker.check(externalSubsetStart, ec);
-            checker.check(externalSubsetEnd, ec);
-            checker.check(externalSubsetStart, ec);
+            checker.check(externalSubsetStart);
+            checker.check(externalSubsetEnd);
+            const problems = checker.check(externalSubsetStart);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [EXTERNAL_SUBSET_START_TOKEN],
-               position: docTypeStart.openSubset,
-            });
+            const problem = problems[0];
+            expect(problem.id).toEqual(WFEID.TOKEN_INVALID_CONTEXT);
          });
       });
 
       describe('post DOCTYPE', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
+            checker.check(xmlDecl);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
          });
 
          it('reports an error if something incorrect is found', () => {
-            checker.check(cdata, ec);
+            const problems = checker.check(cdata);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [CDATA_PTOKEN],
-               position: cdata.open,
-            });
+            const problem = problems[0];
+            expect(problem.id).toEqual(WFEID.TOKEN_INVALID_CONTEXT);
          });
 
          it('allows a comment', () => {
-            checker.check(comment, ec);
+            const problems = checker.check(comment);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows a space', () => {
-            checker.check(space, ec);
+            const problems = checker.check(space);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows a processing instruction', () => {
-            checker.check(processingInstruction, ec);
+            const problems = checker.check(processingInstruction);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows an element start', () => {
-            checker.check(elementStart, ec);
+            const problems = checker.check(elementStart);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows an empty element', () => {
-            checker.check(elementEmpty, ec);
+            const problems = checker.check(elementEmpty);
 
-            expect(ec.errors).toEqual([]);
+            expect(problems.length).toEqual(0);
          });
 
          it('allows several no-state-changes in a row', () => {
-            checker.check(comment, ec);
-            checker.check(comment, ec);
-            checker.check(processingInstruction, ec);
-            checker.check(space, ec);
-            checker.check(elementStart, ec);
+            const p1 = checker.check(comment);
+            const p2 = checker.check(comment);
+            const p3 = checker.check(processingInstruction);
+            const p4 = checker.check(space);
+            const p5 = checker.check(elementStart);
 
-            expect(ec.errors).toEqual([]);
+            const lengths = p1.length + p2.length + p3.length + p4.length + p5.length;
+            expect(lengths).toEqual(0);
          });
       });
 
       describe('in ELEMENT', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
-            checker.check(elementStart, ec);
+            checker.check(xmlDecl);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
+            checker.check(elementStart);
          });
 
          // This exercises not deleting the sub-checker after a call
          it('can respond to things within the element', () => {
-            checker.check(comment, ec);
-            checker.check(elementEnd, ec);
+            const p1 = checker.check(comment);
+            const p2 = checker.check(elementEnd);
 
-            expect(ec.errors).toEqual([]);
+            const lengths = p1.length + p2.length;
+            expect(lengths).toEqual(0);
          });
       });
 
       describe('in TRAILING MISC', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
+            checker.check(xmlDecl);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
          });
 
          it('rejects content after an element start and end', () => {
-            checker.check(elementStart, ec);
-            checker.check(elementEnd, ec);
-            checker.check(cdata, ec);
+            const p1 = checker.check(elementStart);
+            const p2 = checker.check(elementEnd);
+            const p3 = checker.check(cdata);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [CDATA_PTOKEN],
-               position: cdata.open,
-            });
+            expect([...p1, ...p2, ...p3]).toMatchInlineSnapshot(`
+               Array [
+                 WellFormedError {
+                   "code": 1003,
+                   "context": Offset {
+                     "column": 0,
+                     "entityId": EntityId {
+                       "publicId": undefined,
+                       "systemId": "",
+                       "type": "ENTITY_ID",
+                     },
+                     "index": 0,
+                     "row": 0,
+                   },
+                   "id": "TOKEN_INVALID_CONTEXT",
+                   "message": "The token (CDATA_PTOKEN) must not be used in this location.",
+                   "place": Offset {
+                     "column": 0,
+                     "entityId": EntityId {
+                       "publicId": undefined,
+                       "systemId": "",
+                       "type": "ENTITY_ID",
+                     },
+                     "index": 0,
+                     "row": 0,
+                   },
+                   "severity": "FATAL_ERROR_SSEVERITY",
+                   "source": "wellformed",
+                   "type": "PROBLEM",
+                 },
+               ]
+            `);
          });
 
          it('rejects content after an empty element', () => {
-            checker.check(elementEmpty, ec);
-            checker.check(cdata, ec);
+            const p1 = checker.check(elementEmpty);
+            const p2 = checker.check(cdata);
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.TOKEN_INVALID_CONTEXT,
-               params: [CDATA_PTOKEN],
-               position: cdata.open,
-            });
+            expect([...p1, ...p2]).toMatchInlineSnapshot(`
+               Array [
+                 WellFormedError {
+                   "code": 1003,
+                   "context": Offset {
+                     "column": 0,
+                     "entityId": EntityId {
+                       "publicId": undefined,
+                       "systemId": "",
+                       "type": "ENTITY_ID",
+                     },
+                     "index": 0,
+                     "row": 0,
+                   },
+                   "id": "TOKEN_INVALID_CONTEXT",
+                   "message": "The token (CDATA_PTOKEN) must not be used in this location.",
+                   "place": Offset {
+                     "column": 0,
+                     "entityId": EntityId {
+                       "publicId": undefined,
+                       "systemId": "",
+                       "type": "ENTITY_ID",
+                     },
+                     "index": 0,
+                     "row": 0,
+                   },
+                   "severity": "FATAL_ERROR_SSEVERITY",
+                   "source": "wellformed",
+                   "type": "PROBLEM",
+                 },
+               ]
+            `);
          });
 
          it('allows a comment', () => {
-            checker.check(elementStart, ec);
-            checker.check(elementEnd, ec);
-            checker.check(comment, ec);
+            const p1 = checker.check(elementStart);
+            const p2 = checker.check(elementEnd);
+            const p3 = checker.check(comment);
 
-            expect(ec.errors).toEqual([]);
+            const lengths = p1.length + p2.length + p3.length;
+            expect(lengths).toEqual(0);
          });
 
          it('allows a space', () => {
-            checker.check(elementEmpty, ec);
-            checker.check(space, ec);
+            const p1 = checker.check(elementEmpty);
+            const p2 = checker.check(space);
 
-            expect(ec.errors).toEqual([]);
+            const lengths = p1.length + p2.length;
+            expect(lengths).toEqual(0);
          });
 
          it('allows a processing instruction', () => {
-            checker.check(elementStart, ec);
-            checker.check(elementEnd, ec);
-            checker.check(processingInstruction, ec);
+            const p1 = checker.check(elementStart);
+            const p2 = checker.check(elementEnd);
+            const p3 = checker.check(processingInstruction);
 
-            expect(ec.errors).toEqual([]);
+            const lengths = p1.length + p2.length + p3.length;
+            expect(lengths).toEqual(0);
          });
 
          it('allows several no-state-changes in a row', () => {
-            checker.check(elementEmpty, ec);
-            checker.check(comment, ec);
-            checker.check(comment, ec);
-            checker.check(processingInstruction, ec);
-            checker.check(space, ec);
+            const p1 = checker.check(elementEmpty);
+            const p2 = checker.check(comment);
+            const p3 = checker.check(comment);
+            const p4 = checker.check(processingInstruction);
+            const p5 = checker.check(space);
 
-            expect(ec.errors).toEqual([]);
+            const lengths = p1.length + p2.length + p3.length + p4.length + p5.length;
+            expect(lengths).toEqual(0);
          });
       });
    });
@@ -706,107 +735,87 @@ describe('DocumentChecker (unit)', () => {
    describe('finish()', () => {
       describe('initial state', () => {
          it('reports an error if called before anything has been processed', () => {
-            checker.finish(ec);
+            const problems = checker.finish();
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.DOC_END_EARLY,
-               params: undefined,
-               position: undefined,
-            });
+            const problem = problems[0];
+            expect(problem.id).toEqual(WFEID.DOC_END_EARLY);
          });
       });
 
       describe('post XML Declaration', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
+            checker.check(xmlDecl);
          });
 
          it('reports an error if called after the XML Declaration', () => {
-            checker.finish(ec);
+            const problems = checker.finish();
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.DOC_END_EARLY,
-               params: undefined,
-               position: xmlDecl.close,
-            });
+            const problem = problems[0];
+            expect(problem.id).toEqual(WFEID.DOC_END_EARLY);
          });
       });
 
       describe('in DOCTYPE', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
-            checker.check(space, ec);
-            checker.check(docTypeStart, ec);
+            checker.check(xmlDecl);
+            checker.check(space);
+            checker.check(docTypeStart);
          });
 
          it('reports an error when called after a DOCTYPE has started', () => {
-            checker.finish(ec);
+            const problems = checker.finish();
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.DOC_END_EARLY,
-               params: undefined,
-               position: docTypeStart.openSubset,
-            });
+            const problem = problems[0];
+            expect(problem.id).toEqual(WFEID.DOC_END_EARLY);
          });
       });
 
       describe('post DOCTYPE', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
+            checker.check(xmlDecl);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
          });
 
          it('reports an error if called after the DOCTYPE', () => {
-            checker.finish(ec);
+            const problems = checker.finish();
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.DOC_END_EARLY,
-               params: undefined,
-               position: docTypeStart.openSubset,
-            });
+            const problem = problems[0];
+            expect(problem.id).toEqual(WFEID.DOC_END_EARLY);
          });
 
          it('reports an error if called after the start of an element', () => {
-            checker.check(elementStart, ec);
+            const prob1 = checker.check(elementStart);
 
-            checker.finish(ec);
+            const prob2 = checker.finish();
 
-            // @ts-expect-error 2329/matchers
-            expect(ec).toReportWFError({
-               id: WellFormedError.ID.DOC_END_EARLY,
-               params: undefined,
-               position: elementStart.close,
-            });
+            const problem = [...prob1, ...prob2][0];
+            expect(problem.id).toEqual(WFEID.DOC_END_EARLY);
          });
       });
 
       describe('in TRAILING MISC', () => {
          beforeEach(() => {
-            checker.check(xmlDecl, ec);
-            checker.check(docTypeStart, ec);
-            checker.check(docTypeEnd, ec);
+            checker.check(xmlDecl);
+            checker.check(docTypeStart);
+            checker.check(docTypeEnd);
          });
 
          it('reports no errors after an element start and end', () => {
-            checker.check(elementStart, ec);
-            checker.check(elementEnd, ec);
+            const prob1 = checker.check(elementStart);
+            const prob2 = checker.check(elementEnd);
 
-            checker.finish(ec);
+            const prob3 = checker.finish();
 
-            expect(ec.errors).toEqual([]);
+            expect(prob1.length + prob2.length + prob3.length).toEqual(0);
          });
 
          it('reports no errors after an empty element', () => {
-            checker.check(elementEmpty, ec);
+            const prob1 = checker.check(elementEmpty);
 
-            checker.finish(ec);
+            const prob2 = checker.finish();
 
-            expect(ec.errors).toEqual([]);
+            expect(prob1.length + prob2.length).toEqual(0);
          });
       });
    });

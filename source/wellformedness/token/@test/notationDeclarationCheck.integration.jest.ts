@@ -2,25 +2,28 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { parseNotationDeclaration } from 'pToken';
-import { SToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'sToken';
 import { DeclarationStart } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
+
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 describe('notationDeclarationCheck() (integration)', () => {
    let declarationStart: DeclarationStart;
 
    beforeEach(() => {
       declarationStart = {
-         open: SToken.fromString('<!'),
+         declType: toSToken('NOTATION'),
+         declTypeSpace: toSToken(' '),
+         open: toSToken('<!'),
          openSpace: undefined,
-         declType: SToken.fromString('NOTATION'),
-         declTypeSpace: SToken.fromString(' '),
       };
    });
 
@@ -30,12 +33,13 @@ describe('notationDeclarationCheck() (integration)', () => {
       source.endText();
 
       parseNotationDeclaration(source, declarationStart, (parsing) => {
-         const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
+         const collector = new ProblemCollector(toSToken('dummy'), WellFormedError);
 
-         notationDeclarationCheck(parsing, ec, new ConformanceVersion());
+         notationDeclarationCheck(parsing, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
-         done?.();
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.EXTERNALID_INVALID_CASE);
+         done();
       });
    });
 
@@ -44,12 +48,13 @@ describe('notationDeclarationCheck() (integration)', () => {
       source.addText('$foo system "sys.dtd">');
       source.endText();
       parseNotationDeclaration(source, declarationStart, (result) => {
-         const ec = new ErrorCollector(result.open, WellFormedError);
+         const collector = new ProblemCollector(result.open, WellFormedError);
 
-         notationDeclarationCheck(result, ec, new ConformanceVersion());
+         notationDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
-         done?.();
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.NOTATIONDECL_NAME_INVALID);
+         done();
       });
    });
 
@@ -59,14 +64,13 @@ describe('notationDeclarationCheck() (integration)', () => {
       source.endText();
 
       parseNotationDeclaration(source, declarationStart, (parsing) => {
-         const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
+         const collector = new ProblemCollector(toSToken('dummy'), WellFormedError);
 
-         notationDeclarationCheck(parsing, ec, new ConformanceVersion());
+         notationDeclarationCheck(parsing, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(
-            wellFormedWarningCodes.id.NOTATIONDECL_NAME_XML_RESERVED,
-         );
-         done?.();
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WID.NOTATIONDECL_NAME_XML_RESERVED);
+         done();
       });
    });
 });

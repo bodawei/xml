@@ -1,23 +1,25 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { parseElementDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('elementDeclarationCheck()', () => {
    let declarationStart: DeclarationStart;
 
    beforeEach(() => {
       declarationStart = {
-         open: toSToken('<!'),
          declType: toSToken('ELEMENT'),
          declTypeSpace: toSToken(' '),
+         open: toSToken('<!'),
       };
    });
 
@@ -27,11 +29,11 @@ describe('elementDeclarationCheck()', () => {
       source.endText();
 
       parseElementDeclaration(source, declarationStart, (result) => {
-         const ec = new ErrorCollector(result.open, WellFormedError);
+         const collector = new ProblemCollector(result.open, WellFormedError);
 
-         elementDeclarationCheck(result, ec, new ConformanceVersion());
+         elementDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENTDECL_NAME_INVALID);
+         expect(collector.getProblems()[0].id).toEqual(WFEID.ELEMENTDECL_NAME_INVALID);
          done();
       });
    });
@@ -42,12 +44,12 @@ describe('elementDeclarationCheck()', () => {
       source.endText();
 
       parseElementDeclaration(source, declarationStart, (parsing) => {
-         const ec = new ErrorCollector(toSToken('x'), WellFormedError);
+         const collector = new ProblemCollector(toSToken('x'), WellFormedError);
 
-         elementDeclarationCheck(parsing, ec, new ConformanceVersion());
+         elementDeclarationCheck(parsing, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(
-            wellFormedWarningCodes.id.ELEMENTDECL_NAME_XML_RESERVED,
+         expect(collector.getProblems()[0].id).toEqual(
+            warningCodes.id.ELEMENTDECL_NAME_XML_RESERVED,
          );
          done();
       });

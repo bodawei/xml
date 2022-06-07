@@ -2,10 +2,8 @@
 
 import { Readable } from 'stream';
 
-import { MockErrorCollector, ErrorInfo } from './helper';
-import { makeErrorMatcher } from './makeErrorMatcher';
-import { makeJasmineErrorMatcher } from './makeJasmineErrorMatcher';
-import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
+export { ParamCollector, ProblemParams } from './paramCollector';
+export { makeProblemMatcher } from './makeProblemMatcher';
 
 function gatherStreamResults<ElemenType>(
    stream: Readable,
@@ -22,19 +20,4 @@ function gatherStreamResults<ElemenType>(
    });
 }
 
-// declare global {
-//    namespace jasmine {
-//       interface Matchers<T> {
-//          toReportValidityError(errorProps: ErrorProps): void;
-//       }
-//    }
-// }
-
-export {
-   gatherStreamResults,
-   makeErrorMatcher,
-   makeNewErrorMatcher,
-   makeJasmineErrorMatcher,
-   MockErrorCollector,
-   ErrorInfo,
-};
+export { gatherStreamResults };

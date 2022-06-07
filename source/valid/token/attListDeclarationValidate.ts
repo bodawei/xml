@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { SPACE_REGEX, ErrorCollector, isName, isNmToken } from 'basic';
+import { SPACE_REGEX, Collector, isName, isNmToken } from 'basic';
 import { AttListDeclarationPToken, AttDefinitionP, pTokenArrayToString } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken, WordListEntryPToken } from 'token';
@@ -10,9 +10,9 @@ import { attributeValueValidate } from '../common/attributeValueValidate';
 import { PREDEFINED_ENTITIES } from '../common/constants';
 import { ValidityState } from '../common/validityState';
 import { xmlSpaceValidate } from '../common/xmlSpaceValidate';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 const CODEMAP: Record<string, string> = {
    ENTITIES: VID.ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT,
@@ -31,7 +31,7 @@ function checkEnumeration(
    attName: string,
    attType: string,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    if (!attDef.enumeration) {
       return;
@@ -44,17 +44,17 @@ function checkEnumeration(
          ? VID.ATTLISTDECL_ATT_XTRA_NOTATION_VALUE
          : VID.ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE;
 
-   ec.setPos(attDef.enumeration.open);
+   coll.setPos(attDef.enumeration.open);
 
    for (const wordInfo of attDef.enumeration.words) {
-      ec.setPos(wordInfo.word);
+      coll.setPos(wordInfo.word);
       const word = strOrBlank(wordInfo.word);
 
       // §3.3.1: (1.0/3+) Validity constraint: No Duplicate Tokens
       //    The notation names in a single NotationType attribute declaration,
       //    as well as the NmTokens in a single Enumeration attribute declaration,
       //    must all be distinct.
-      ec.check(!isVer1Ed1Or2 && seenWords[word], code, [elName, attName, word]);
+      coll.check(!isVer1Ed1Or2 && seenWords[word], code, [elName, attName, word]);
 
       seenWords[word] = true;
    }
@@ -112,7 +112,7 @@ function checkDefaultValue(
    attName: string,
    attType: string,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    for (const element of attDef.value) {
       if (element.type === GENERAL_ENTITY_START_PTOKEN) {
@@ -120,22 +120,22 @@ function checkDefaultValue(
          const isPredefined = PREDEFINED_ENTITIES.includes(name);
          const details = state.generalEntities[name];
 
-         ec.setPos(element.referencePToken.open);
+         coll.setPos(element.referencePToken.open);
 
          // §2.9.0 Validity Constraint: Standalone Document Declaration
          //    ...entities (other than amp, lt, gt, apos, quot), if references to
          //    those entities appear in the document...
-         ec.check(
+         coll.check(
             details?.isExternalMarkupDeclaration && state.isStandalone && !isPredefined,
             VID.ENTITYREF_EXTERNAL,
             [name],
          );
 
-         ancestorPERefsValidate(element, state, ec);
+         ancestorPERefsValidate(element, state, coll);
       }
    }
 
-   attributeValueValidate(attDef.value, state, ec);
+   attributeValueValidate(attDef.value, state, coll);
 
    if (attDef.value.length === 0 || !CODEMAP[attType]) {
       return;
@@ -144,7 +144,7 @@ function checkDefaultValue(
    const value = pTokenArrayToString(attDef.value);
    const code = CODEMAP[attType];
 
-   ec.setPos(getFirstSToken(attDef.value[0]));
+   coll.setPos(getFirstSToken(attDef.value[0]));
 
    // §3.3.2: (1.0/1-2) Validity constraint: Attribute Default Legal
    //    The declared default value must meet the lexical constraints
@@ -175,22 +175,22 @@ function checkDefaultValue(
       const wordList = attDef.enumeration?.words ?? [];
       const [isValid, words, badItem] = checkEnumOrNotation(value, wordList);
 
-      ec.check(!isValid, code, [elName, attName, words.join(','), badItem]);
+      coll.check(!isValid, code, [elName, attName, words.join(','), badItem]);
    } else {
       const [isValid, badItems] = checkValue(value, attType, state);
 
-      ec.check(!isValid, code, [elName, attName, badItems.join(',')]);
+      coll.check(!isValid, code, [elName, attName, badItems.join(',')]);
    }
 }
 
 function attListDeclarationValidate(
    token: AttListDeclarationPToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    const elName = strOrBlank(token.elementName);
 
-   ec.setPos(token.open);
+   coll.setPos(token.open);
 
    // §2.8.0: Validity Constraint: Proper Declaration/PE Nesting
    //    Parameter-entity replacement text must be properly nested with markup declarations.
@@ -201,10 +201,10 @@ function attListDeclarationValidate(
    if (token.unexpanded && token.extra) {
       const extraText = strOrBlank(token.extra);
 
-      ec.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ATTLIST']);
+      coll.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ATTLIST']);
    }
 
-   ec.setPos(token.elementName);
+   coll.setPos(token.elementName);
 
    for (const attDef of token.attDefs) {
       const attType = strOrBlank(attDef.type).toUpperCase();
@@ -212,27 +212,27 @@ function attListDeclarationValidate(
       const attName = strOrBlank(attDef.name);
       const isId = actualType === 'ID';
 
-      ec.setPos(attDef.name);
-      ec.setPos(attDef.type);
+      coll.setPos(attDef.name);
+      coll.setPos(attDef.type);
 
-      checkEnumeration(attDef, elName, attName, actualType, state, ec);
-      xmlSpaceValidate(attDef, elName, attName, state, ec);
+      checkEnumeration(attDef, elName, attName, actualType, state, coll);
+      xmlSpaceValidate(attDef, elName, attName, state, coll);
 
       if (isId) {
          const defaultType = strOrBlank(attDef.defaultType).toUpperCase();
 
-         ec.setPos(attDef.defaultType);
+         coll.setPos(attDef.defaultType);
 
          // §3.3.1: Validity Constraint: ID Attribute Default
          //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
-         ec.check(
+         coll.check(
             defaultType !== '#REQUIRED' && defaultType !== '#IMPLIED',
             VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
             [elName, attName, defaultType],
          );
       }
 
-      checkDefaultValue(attDef, elName, attName, actualType, state, ec);
+      checkDefaultValue(attDef, elName, attName, actualType, state, coll);
    }
 }
 

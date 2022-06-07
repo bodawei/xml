@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { XML_ERROR_TOKEN } from 'basic';
+import { PROBLEM } from 'basic';
 
 import { ParseToken, TEXT_PTOKEN } from 'pToken';
 import { STokenSource, strOrBlank } from 'sToken';
@@ -76,7 +76,7 @@ class ConditionalBodyProcessor {
       }
 
       switch (pToken.type) {
-         case XML_ERROR_TOKEN:
+         case PROBLEM:
             this.expandToken(pToken, expanded);
             break;
          case TEXT_PTOKEN:

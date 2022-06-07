@@ -33,9 +33,9 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
+import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { contentUpdateState } from '../contentUpdateState';
 import { ElDeclType, ValidityState } from '../validityState';
-import { makeCmGraph } from '../../contentModel/makeCmGraph';
 
 describe('contentUpdateState (unit)', () => {
    const dataItems: Array<[ParseToken, boolean]> = [

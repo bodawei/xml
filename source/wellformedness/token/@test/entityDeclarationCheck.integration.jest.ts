@@ -1,13 +1,15 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, warning } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { parseEntityDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { warningCodes } from '../../error/warningCodes';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('entityDeclarationCheck() (integration)', () => {
    let declarationStart: DeclarationStart;
@@ -16,9 +18,9 @@ describe('entityDeclarationCheck() (integration)', () => {
 
    beforeEach(() => {
       declarationStart = {
-         open: toSToken('<!'),
          declType: toSToken('ENTITY'),
          declTypeSpace: toSToken('\t'),
+         open: toSToken('<!'),
       };
       confVer = new ConformanceVersion();
       source = new STokenSource();
@@ -28,11 +30,11 @@ describe('entityDeclarationCheck() (integration)', () => {
       source.addText('entityName "entityValue'); // missing closing quote
       source.endText();
       parseEntityDeclaration(source, declarationStart, (result) => {
-         const ec = new ErrorCollector(declarationStart.open, WellFormedError);
+         const collector = new ProblemCollector(declarationStart.open, WellFormedError);
 
-         entityDeclarationCheck(result, ec, confVer);
+         entityDeclarationCheck(result, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
+         expect(collector.getProblems()[0].id).toEqual(WFEID.LITERAL_NO_CLOSE_QUOTE);
          done();
       });
    });
@@ -40,11 +42,11 @@ describe('entityDeclarationCheck() (integration)', () => {
    it('reports an error when name used an invalid char(check nameCheck())', (done) => {
       source.addText('$foo "frog">');
       parseEntityDeclaration(source, declarationStart, (result) => {
-         const ec = new ErrorCollector(declarationStart.open, WellFormedError);
+         const collector = new ProblemCollector(declarationStart.open, WellFormedError);
 
-         entityDeclarationCheck(result, ec, confVer);
+         entityDeclarationCheck(result, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ENTITYDECL_NAME_INVALID);
+         expect(collector.getProblems()[0].id).toEqual(WFEID.ENTITYDECL_NAME_INVALID);
          done();
       });
    });
@@ -52,12 +54,12 @@ describe('entityDeclarationCheck() (integration)', () => {
    it('reports an error when name starts with "xml" (check nameXmlCheck())', (done) => {
       source.addText('xmlFoo "frog">');
       parseEntityDeclaration(source, declarationStart, (result) => {
-         const ec = new ErrorCollector(declarationStart.open, WellFormedError);
+         const collector = new ProblemCollector(declarationStart.open, WellFormedError);
 
-         entityDeclarationCheck(result, ec, confVer);
+         entityDeclarationCheck(result, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(
-            wellFormedWarningCodes.id.ENTITYDECL_NAME_XML_RESERVED,
+         expect(collector.getProblems()[0].id).toEqual(
+            warningCodes.id.ENTITYDECL_NAME_XML_RESERVED,
          );
          done();
       });
@@ -66,11 +68,11 @@ describe('entityDeclarationCheck() (integration)', () => {
    it('reports an error when external ID has no value (externalId.checkWellFormed())', (done) => {
       source.addText('entityName SYSTEM >');
       parseEntityDeclaration(source, declarationStart, (result) => {
-         const ec = new ErrorCollector(declarationStart.open, WellFormedError);
+         const collector = new ProblemCollector(declarationStart.open, WellFormedError);
 
-         entityDeclarationCheck(result, ec, confVer);
+         entityDeclarationCheck(result, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_MISSING_SYSTEM_VALUE);
+         expect(collector.getProblems()[0].id).toEqual(WFEID.EXTERNALID_MISSING_SYSTEM_VALUE);
          done();
       });
    });
@@ -78,11 +80,11 @@ describe('entityDeclarationCheck() (integration)', () => {
    it('reports an error when NDATA value has a bad char (check charCheck())', (done) => {
       source.addText('entityName SYSTEM "sys.xml" NDATA bad\u0000>');
       parseEntityDeclaration(source, declarationStart, (result) => {
-         const ec = new ErrorCollector(declarationStart.open, WellFormedError);
+         const collector = new ProblemCollector(declarationStart.open, WellFormedError);
 
-         entityDeclarationCheck(result, ec, confVer);
+         entityDeclarationCheck(result, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         expect(collector.getProblems()[0].id).toEqual(WFEID.CHARDATA_INVALID_CHAR);
          done();
       });
    });

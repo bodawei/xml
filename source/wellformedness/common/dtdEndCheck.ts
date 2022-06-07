@@ -1,24 +1,24 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
 import { LiteralValuePToken } from 'token';
 import { CheckState, GeneralEntitiesInfo } from '../checkUtils';
-import { FatalErrorToken } from '../error/fatalErrorToken';
-import { fatalError } from '../error/fatalError';
-import { WellFormedWarning } from '../error/wellFormedWarning';
-import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { FatalError } from '../error/fatalError';
+import { fatalErrorCodes } from '../error/fatalErrorCodes';
+import { Warning } from '../error/Warning';
+import { warningCodes } from '../error/warningCodes';
 import { errorCodes } from '../error/errorCodes';
-import { WellFormedError as NewWellFormedError } from '../error/errorToken';
+import { Error } from '../error/error';
 
 const GE_REF_REGEXP = /&([^;]*);/g;
-const WARNID = wellFormedWarningCodes.id;
+const WID = warningCodes.id;
 
 function checkEntity(
    value: LiteralValuePToken,
    geDetails: GeneralEntitiesInfo,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ) {
    // E55 in https://www.w3.org/XML/xml-V10-2e-errata changed how this should be reported
@@ -43,10 +43,10 @@ function checkEntity(
 
             if (isUnparsed) {
                const code = isForbidden
-                  ? fatalError.id.REFERENCE_INVALID_UNPARSED
+                  ? fatalErrorCodes.id.REFERENCE_INVALID_UNPARSED
                   : errorCodes.id.REFERENCE_INVALID_UNPARSED;
-               ec.setPos(element.text);
-               ec.reportError(code, isForbidden ? FatalErrorToken : NewWellFormedError, [name]);
+               collector.setPos(element.text);
+               collector.reportProblem(isForbidden ? FatalError : Error, code, [name]);
             }
          }
 
@@ -55,27 +55,27 @@ function checkEntity(
    }
 }
 
-function dtdEndCheck(state: CheckState, ec: ErrorCollector): void {
+function dtdEndCheck(state: CheckState, collector: Collector): void {
    const geValues = Object.values(state.generalDecls);
    const peValues = Object.values(state.paramDecls);
 
    for (const entry of geValues) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      checkEntity(entry!.token.value, state.generalDecls, ec, state.confVer);
+      checkEntity(entry!.token.value, state.generalDecls, collector, state.confVer);
    }
 
    for (const entry of peValues) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      checkEntity(entry!.value, state.generalDecls, ec, state.confVer);
+      checkEntity(entry!.value, state.generalDecls, collector, state.confVer);
    }
 
    for (const elName of Object.keys(state.atts ?? {})) {
       if (!state.elementDecl[elName]) {
          // §4.2 If the same entity is declared more than once, ... at user option,
          // an XML processor may issue a warning if entities are declared multiple times.
-         ec.reportError(
-            WARNID.ATTLISTDECL_NO_ELEMENTDECL,
-            WellFormedWarning,
+         collector.reportProblem(
+            Warning,
+            WID.ATTLISTDECL_NO_ELEMENTDECL,
             [elName],
             undefined, // seems like a prolem
          );

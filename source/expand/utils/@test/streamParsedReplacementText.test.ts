@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion, EntityId, XmlErrorToken } from 'basic';
+import { ENTITY_ID, ConformanceVersion, EntityId, Problem } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -10,7 +10,7 @@ import {
    ParseToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { WellFormedError } from 'wellformedness';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import {
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
@@ -30,6 +30,8 @@ import { EntityContextStack } from '../EntityContextStack';
 function noopFunction(): void {
    // do nothing
 }
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('streamParsedReplacementText() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -66,7 +68,7 @@ describe('streamParsedReplacementText() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<XmlErrorToken> => [],
+                  getErrors: (): Array<Problem> => [],
                };
             },
             parseAttributeValue: noopFunction,
@@ -151,8 +153,8 @@ describe('streamParsedReplacementText() (unit)', () => {
    });
 
    it('delivers any errors before the end token', (done) => {
-      const error1 = new WellFormedError(WellFormedError.ID.XMLDECL_PARAM_UNKNOWN, ['x']);
-      const error2 = new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE, ['x']);
+      const error1 = new WellFormedError(WFEID.XMLDECL_PARAM_UNKNOWN, ['x']);
+      const error2 = new WellFormedError(WFEID.XMLDECL_NO_CLOSE, ['x']);
       params.utils.parseBody = (source, context, cb) => {
          cb(textPToken, () => {
             cb(undefined, noopFunction);
@@ -244,10 +246,10 @@ describe('streamParsedReplacementText() (unit)', () => {
       });
 
       const args = parseBodySpy.calls.argsFor(0);
-      expect(args[0]).toBeInstanceOf(STokenSource);
+      expect(args[0] instanceof STokenSource).toEqual(true);
       expect(args[0]._segments[0].text).toEqual('foo');
       expect(args[1]).toEqual(ParseType.GENERAL_ENTITY);
-      expect(args[2]).toBeInstanceOf(Function);
+      expect(typeof args[2]).toEqual('function');
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end general entity', (done) => {
@@ -306,7 +308,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       const retrieveSpy = spyOn(params.utils, 'retrieveExternalEntity');
       retrieveSpy.and.returnValue({
          sTokenSource,
-         getErrors: (): Array<XmlErrorToken> => [],
+         getErrors: (): Array<Problem> => [],
       });
 
       streamParsedReplacementText(peRef, params, stack, (value, cb) => {
@@ -316,7 +318,7 @@ describe('streamParsedReplacementText() (unit)', () => {
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0]).toEqual(sTokenSource);
       expect(args[1]).toEqual(ParseType.PARAMETER_ENTITY);
-      expect(args[2]).toBeInstanceOf(Function);
+      expect(typeof args[2]).toEqual('function');
    });
 
    it('delivers the parsed content of an already prepared entity wrapped in a start and end parameter entity', (done) => {

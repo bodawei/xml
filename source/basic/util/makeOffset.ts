@@ -1,11 +1,12 @@
 import { SToken, getStartOffset, isSToken } from 'sToken';
-import { Offset } from '../klass/offset';
+
+import { Offset } from '../util/offset';
 
 function makeOffset(place?: Offset | SToken): Offset | undefined {
    if (isSToken(place)) {
       return getStartOffset(place);
    } else if (place) {
-      return place.clone();
+      return new Offset(place);
    }
 }
 export { makeOffset };

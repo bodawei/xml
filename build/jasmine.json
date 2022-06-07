@@ -6,7 +6,6 @@
    ],
  
    "helpers": [
-      "source/basic/helper/beforeJasmine.ts",
       "source/token/@test/beforeJasmine.ts",
       "source/wellformedness/@test/beforeJasmine.ts"
    ],

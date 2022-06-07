@@ -1,15 +1,15 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { SpacePToken } from 'token';
 
-import { validCodes } from '../error/validCodes';
 import { ElDeclType, ElementContext, ValidityState } from '../common/validityState';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
-function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollector): void {
+function spaceValidate(token: SpacePToken, state: ValidityState, coll: Collector): void {
    const stack = state.elementContext.contextStack;
    const curContext = stack[stack.length - 1] as ElementContext | undefined;
    const details = curContext?.details;
@@ -23,7 +23,7 @@ function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollec
       return;
    }
 
-   ec.setPos(token.text);
+   coll.setPos(token.text);
 
    // §2.9.0 Validity constraint: Standalone Document Declaration
    //    The standalone document declaration must have the value "no" if any external markup
@@ -32,7 +32,7 @@ function spaceValidate(token: SpacePToken, state: ValidityState, ec: ErrorCollec
    // Note: This is because in this circumstance, something parsing this as non-validated will not know
    // whether those spaces are content or throwaway S.
 
-   ec.check(
+   coll.check(
       state.isStandalone && details.isExternalMarkupDeclaration,
       VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
       [strOrBlank(details.token.name)],

@@ -1,15 +1,15 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 
 import { contentModelCheck } from '../../common/contentModelCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
@@ -18,14 +18,17 @@ jest.mock('../../common/nameCheck');
 jest.mock('../../common/nameXmlCheck');
 jest.mock('../../common/nameXmlCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
+
 describe('elementDeclarationCheck()', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
    let elementDeclaration: ElementDeclarationPToken;
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       elementDeclaration = new ElementDeclarationPToken({
          open: toSToken('<!'),
          openSpace: undefined,
@@ -42,13 +45,14 @@ describe('elementDeclarationCheck()', () => {
          openSpace: toSToken(' '),
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_OPEN_XTRA_SPACE_AFTER,
-         params: undefined,
-         position: elementDeclaration.openSpace,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_OPEN_XTRA_SPACE_AFTER,
          lastPosition: undefined,
+         params: [],
+         position: elementDeclaration.openSpace,
       });
    });
 
@@ -57,13 +61,14 @@ describe('elementDeclarationCheck()', () => {
          declType: toSToken('Element'),
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_DECLTYPE_INVALID,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_DECLTYPE_INVALID,
+         lastPosition: undefined,
          params: ['Element'],
          position: elementDeclaration.declType,
-         lastPosition: undefined,
       });
    });
 
@@ -72,13 +77,14 @@ describe('elementDeclarationCheck()', () => {
          declTypeSpace: undefined,
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_DECLTYPE_NO_SPACE,
-         params: undefined,
-         position: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_DECLTYPE_NO_SPACE,
          lastPosition: elementDeclaration.declType,
+         params: [],
+         position: undefined,
       });
    });
 
@@ -87,37 +93,38 @@ describe('elementDeclarationCheck()', () => {
          name: undefined,
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_NO_NAME,
-         params: undefined,
-         position: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_NO_NAME,
          lastPosition: elementDeclaration.declTypeSpace,
+         params: [],
+         position: undefined,
       });
    });
 
    it('calls nameCheck() to report on bad names', () => {
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(
          elementDeclaration.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.ELEMENTDECL_NAME_INVALID,
+         WFEID.ELEMENTDECL_NAME_INVALID,
       );
    });
 
    it('calls nameXmlCheck() to report on bad names', () => {
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
       expect(nameXmlCheck).toHaveBeenCalledWith(
          elementDeclaration.name,
-         mockErrorCollector,
+         collector,
          confVer,
          'ELEMENT',
-         wellFormedWarningCodes.id.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
-         wellFormedWarningCodes.id.ELEMENTDECL_NAME_XML_RESERVED,
+         WID.ELEMENTDECL_NAME_XMLCOLON_RESERVED,
+         WID.ELEMENTDECL_NAME_XML_RESERVED,
       );
    });
 
@@ -126,29 +133,31 @@ describe('elementDeclarationCheck()', () => {
          nameSpace: undefined,
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_NAME_NO_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_NAME_NO_SPACE,
+         lastPosition: elementDeclaration.name,
          params: ['elementName'],
          position: undefined,
-         lastPosition: elementDeclaration.name,
       });
    });
 
    it('reports an error if there was no content spec at all', () => {
       elementDeclaration = new ElementDeclarationPToken(elementDeclaration, {
-         contentSpec: undefined,
          contentModel: undefined,
+         contentSpec: undefined,
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_NO_SPEC,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_NO_SPEC,
+         lastPosition: elementDeclaration.nameSpace,
          params: ['elementName'],
          position: undefined,
-         lastPosition: elementDeclaration.nameSpace,
       });
    });
 
@@ -157,10 +166,11 @@ describe('elementDeclarationCheck()', () => {
          contentSpec: toSToken('XYZ'),
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_SPEC_UNKNOWN,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_SPEC_UNKNOWN,
          params: ['elementName', 'XYZ'],
          position: elementDeclaration.contentSpec,
       });
@@ -171,10 +181,11 @@ describe('elementDeclarationCheck()', () => {
          contentSpec: toSToken('any'),
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_SPEC_INVALID_CASE,
          params: ['elementName', 'ANY', 'any'],
          position: elementDeclaration.contentSpec,
       });
@@ -185,13 +196,14 @@ describe('elementDeclarationCheck()', () => {
          close: undefined,
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_NO_CLOSE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_NO_CLOSE,
+         lastPosition: elementDeclaration.nameSpace,
          params: ['elementName'],
          position: undefined,
-         lastPosition: elementDeclaration.nameSpace,
       });
    });
 
@@ -200,11 +212,11 @@ describe('elementDeclarationCheck()', () => {
          contentModel: new ContentModelP({}),
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
       expect(contentModelCheck).toHaveBeenCalledWith(
          new ContentModelP({}),
-         mockErrorCollector,
+         collector,
          confVer,
          true,
       );
@@ -215,13 +227,14 @@ describe('elementDeclarationCheck()', () => {
          extra: toSToken('foo'),
       });
 
-      elementDeclarationCheck(elementDeclaration, mockErrorCollector, confVer);
+      elementDeclarationCheck(elementDeclaration, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ELEMENTDECL_EXTRA_TEXT,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ELEMENTDECL_EXTRA_TEXT,
+         lastPosition: undefined,
          params: ['foo'],
          position: elementDeclaration.extra,
-         lastPosition: undefined,
       });
    });
 });

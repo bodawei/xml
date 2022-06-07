@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { GeneralEntityStartPToken } from 'token';
@@ -10,20 +10,20 @@ import { makeGeneralEntityDeclaration, makeGeneralEntityStart } from 'token-test
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { geRefValidate } from '../../common/geRefValidate';
 import { ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { generalEntityStartValidate } from '../generalEntityStartValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 jest.mock('../../common/ancestorPERefsValidate');
 jest.mock('../../common/geRefValidate');
 
 describe('generalEntityStartValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('Standalone Document Declaration (§2.9.0)', () => {
@@ -88,13 +88,14 @@ describe('generalEntityStartValidate (unit)', () => {
                );
             }
 
-            generalEntityStartValidate(geStart, state, mockErrorCollector);
+            generalEntityStartValidate(geStart, state, collector);
 
             if (pass) {
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             } else {
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ENTITYREF_EXTERNAL,
                   lastPosition: undefined,
                   params: [geStart.referencePToken.name?.str],
@@ -118,9 +119,9 @@ describe('generalEntityStartValidate (unit)', () => {
          });
          const geStart = makeGeneralEntityStart();
 
-         generalEntityStartValidate(geStart, state, mockErrorCollector);
+         generalEntityStartValidate(geStart, state, collector);
 
-         expect(ancestorPERefsValidate).toHaveBeenCalledWith(geStart, state, mockErrorCollector);
+         expect(ancestorPERefsValidate).toHaveBeenCalledWith(geStart, state, collector);
       });
    });
 
@@ -139,13 +140,9 @@ describe('generalEntityStartValidate (unit)', () => {
          });
          const geStart = makeGeneralEntityStart();
 
-         generalEntityStartValidate(geStart, state, mockErrorCollector);
+         generalEntityStartValidate(geStart, state, collector);
 
-         expect(geRefValidate).toHaveBeenCalledWith(
-            geStart.referencePToken,
-            state,
-            mockErrorCollector,
-         );
+         expect(geRefValidate).toHaveBeenCalledWith(geStart.referencePToken, state, collector);
       });
    });
 });

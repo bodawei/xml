@@ -3,7 +3,6 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken } from 'sToken';
 
@@ -11,11 +10,9 @@ import { ParameterEntityStartPToken } from '../parameterEntityStart';
 
 describe('ParameterEntityStartPToken (unit)', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
 
    beforeEach(() => {
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
    });
 
    it('is constructed with the specified name', () => {

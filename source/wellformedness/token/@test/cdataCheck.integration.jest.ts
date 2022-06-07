@@ -1,12 +1,14 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { toSToken, STokenSource } from 'sToken';
 import { parseCdata, SectionStart } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { cdataCheck } from '../cdataCheck';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('cdataCheck() (integration)', () => {
    let sectionStart: SectionStart;
@@ -24,11 +26,11 @@ describe('cdataCheck() (integration)', () => {
       source.endText();
 
       parseCdata(source, sectionStart, (pToken) => {
-         const ec = new ErrorCollector(toSToken('<!['), WellFormedError);
+         const collector = new ProblemCollector(toSToken('<!['), WellFormedError);
 
-         cdataCheck(pToken, ec, new ConformanceVersion());
+         cdataCheck(pToken, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         expect(collector.getProblems()[0].id).toEqual(WFEID.CHARDATA_INVALID_CHAR);
          done();
       });
    });
@@ -39,11 +41,11 @@ describe('cdataCheck() (integration)', () => {
       source.endText();
 
       parseCdata(source, sectionStart, (pToken) => {
-         const ec = new ErrorCollector(pToken.open, WellFormedError);
+         const collector = new ProblemCollector(pToken.open, WellFormedError);
 
-         cdataCheck(pToken, ec, new ConformanceVersion());
+         cdataCheck(pToken, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         expect(collector.getProblems()[0].id).toEqual(WFEID.CHARDATA_INVALID_CHAR);
          done();
       });
    });

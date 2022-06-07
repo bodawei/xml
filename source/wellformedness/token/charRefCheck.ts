@@ -1,35 +1,35 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, isChar } from 'basic';
+import { ConformanceVersion, Collector, isChar } from 'basic';
 import { CharRefPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 
 function charRefCheck(
    pToken: CharRefPToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   ec.setPos(pToken.open);
+   collector.setPos(pToken.open);
 
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.CHARREF_XTRA_POST_OPEN_SPACE);
+   collector.setPos(pToken.openSpace);
+   collector.check(pToken.openSpace, WFEID.CHARREF_XTRA_POST_OPEN_SPACE);
 
-   ec.setPos(pToken.hexMarker);
+   collector.setPos(pToken.hexMarker);
    const xMarker = strOrBlank(pToken.hexMarker);
-   ec.check(
+   collector.check(
       pToken.hexMarker && (xMarker.toLowerCase() !== xMarker || xMarker.toLowerCase() !== 'x'),
       WFEID.CHARREF_INVALID_HEX_CASE,
    );
 
-   ec.setPos(pToken.hexMarkerSpace);
-   ec.check(pToken.hexMarkerSpace, WFEID.CHARREF_XTRA_POST_HEX_SPACE);
+   collector.setPos(pToken.hexMarkerSpace);
+   collector.check(pToken.hexMarkerSpace, WFEID.CHARREF_XTRA_POST_HEX_SPACE);
 
-   ec.setPos(pToken.digits);
-   ec.check(!pToken.digits, WFEID.CHARREF_NO_DIGITS);
+   collector.setPos(pToken.digits);
+   collector.check(!pToken.digits, WFEID.CHARREF_NO_DIGITS);
 
    /*
     * §4.1.0: Well-Formedness Constraint: Legal Character
@@ -43,20 +43,20 @@ function charRefCheck(
          charInfo = `x${charInfo}`;
       }
 
-      ec.check(!isChar(char, confVer.version), WFEID.CHARREF_INVALID_CHAR, [charInfo]);
+      collector.check(!isChar(char, confVer.version), WFEID.CHARREF_INVALID_CHAR, [charInfo]);
 
-      ec.check(
+      collector.check(
          pToken.charCode >= 0xd800 && pToken.charCode <= 0xdfff,
          WFEID.CHARDATA_INVALID_CHAR,
          [String(pToken.digits.ranges[0]?.startIndex - 1)],
       );
    }
 
-   ec.setPos(pToken.digitsSpace);
-   ec.check(pToken.digitsSpace, WFEID.CHARREF_XTRA_POST_DIGITS_SPACE);
+   collector.setPos(pToken.digitsSpace);
+   collector.check(pToken.digitsSpace, WFEID.CHARREF_XTRA_POST_DIGITS_SPACE);
 
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.CHARREF_NO_CLOSE);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.CHARREF_NO_CLOSE);
 }
 
 export { charRefCheck };

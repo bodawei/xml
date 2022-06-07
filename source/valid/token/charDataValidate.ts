@@ -1,15 +1,15 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, isSpace } from 'basic';
+import { Collector, isSpace } from 'basic';
 import { strOrBlank } from 'sToken';
 import { CharDataPToken } from 'token';
 
 import { ElDeclType, ElementContext, ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
-function charDataValidate(token: CharDataPToken, state: ValidityState, ec: ErrorCollector): void {
+function charDataValidate(token: CharDataPToken, state: ValidityState, coll: Collector): void {
    const stack = state.elementContext.contextStack;
    const curContext = stack[stack.length - 1] as ElementContext | undefined;
    const details = curContext?.details;
@@ -21,7 +21,7 @@ function charDataValidate(token: CharDataPToken, state: ValidityState, ec: Error
       return;
    }
 
-   ec.setPos(token.text);
+   coll.setPos(token.text);
 
    if (isSpace(strOrBlank(token.text))) {
       // §2.9.0 Validity constraint: Standalone Document Declaration
@@ -31,7 +31,7 @@ function charDataValidate(token: CharDataPToken, state: ValidityState, ec: Error
       // Note: This is because in this circumstance, something parsing this as non-validated will not know
       // whether those spaces are content or throwaway S.
 
-      ec.check(
+      coll.check(
          state.isStandalone && details.isExternalMarkupDeclaration,
          VID.CONTENTELEMENT_AMBIGUOUS_SPACE,
          [strOrBlank(details.token.name)],

@@ -1,114 +1,47 @@
-/* Copyright ® 2017-202 by 柏大衛. All rights reserved. */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { expect } from '@jest/globals';
-import { XmlErrorToken } from '../../token/xmlErrorToken';
-import { MockErrorCollector } from './helper';
-import { makeErrorMatcher as makeNewErrorMatcher } from './matcher/makeErrorMatcher';
 
-function toHaveError(actual: any, expected: any) {
+import { ProblemCollector } from '../../util/problemCollector';
+
+import { ParamCollector } from './paramCollector';
+
+function toHaveProblem(collector: ProblemCollector, expectedId: string) {
    let pass = false;
-   let message: string;
+   let message = `The problem "${expectedId}" was not reported.`;
+   let problems: Array<{ id: string }>;
 
-   actual.forEach((token: any) => {
-      if (token.type === 'ERROR_TYPE') {
-         pass = pass || this.equals(token, expected);
-      }
-   });
-
-   if (pass) {
-      message = `Expected not to find "${JSON.stringify(expected, undefined, 2)}".`;
+   if ((collector as any).getProblems) {
+      problems = (collector as any).getProblems() as Array<{ id: string }>;
    } else {
-      message = `Expected to find "${JSON.stringify(
-         expected,
-         undefined,
-         2,
-      )}". Instead found ${JSON.stringify(actual, undefined, 2)}.`;
+      problems = (collector as any).getParams() as Array<{ id: string }>;
    }
 
-   return {
-      pass: pass,
-      message: () => message,
-   };
-}
-
-function toBeErrorFree(actual: any) {
-   let error: XmlErrorToken | undefined;
-   let message: string;
-
-   actual.forEach((token: any) => {
-      if (token.type === 'ERROR_TYPE' && token.subtype !== 'WARNING') {
-         error = token;
-      }
-   });
-
-   if (!error!) {
-      message = 'Expected to find one or more XmlErrorTokens.';
-   } else {
-      message = `Expected to find no XmlErrorTokens, but found ${(error as any).message}. (${
-         (error as any).id
-      })`; // typeHack
-   }
-
-   return {
-      pass: !error!,
-      message: () => message,
-   };
-}
-
-function toBeErrorAndWarningFree(actual: any) {
-   let error: XmlErrorToken | undefined;
-   let message: string;
-
-   actual.forEach((token: any) => {
-      if (token.type === 'ERROR_TYPE') {
-         error = token;
-      }
-   });
-
-   if (!error!) {
-      message = 'Expected to find one or more XmlErrorTokens.';
-   } else {
-      message = `Expected to find no XmlErrorTokens, but found ${(error as any).message}. (${
-         (error as any).id
-      })`; // typeHack
-   }
-
-   return {
-      pass: !error!,
-      message: () => message,
-   };
-}
-
-function toNotReportError(mockErrorCollector: MockErrorCollector, expectedId: string) {
-   if (!mockErrorCollector) {
-      throw new Error('Did not get a mock error collector as expected.');
-   }
-
-   const errors = mockErrorCollector.errors;
-   let pass = true;
-   let message = `No error with the id ${expectedId} reported.`;
-
-   for (let index = 0; index < errors.length; index++) {
-      const actual = errors[index];
-
+   for (const actual of problems) {
       if (expectedId === actual.id) {
-         pass = false;
-         message = `The error ${expectedId} was found.`;
+         pass = true;
+         message = `The problem "${expectedId}" was reported.`;
       }
    }
 
    return {
-      pass,
       message: () => message,
+      pass,
+   };
+}
+
+function toHaveAnyProblems(collector: ParamCollector) {
+   const problems = collector.getParams();
+
+   return {
+      message: () =>
+         problems.length > 0 ? `Found ${problems.length} problems.` : 'Found no problems.',
+      pass: problems.length > 0,
    };
 }
 
 expect.extend({
-   toBeErrorAndWarningFree,
-   toBeErrorFree,
-   toHaveError,
-   toNotReportError,
-   toReportError: makeNewErrorMatcher(), // should be an error
-   toReportFatalError: makeNewErrorMatcher(), // should be a fatalError
-   toReportWarning: makeNewErrorMatcher(), // should be warning
+   toHaveProblem,
+   toHaveAnyProblems,
 });

@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { doAsyncLoop, XmlErrorToken } from 'basic';
+import { doAsyncLoop, Problem } from 'basic';
 
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
@@ -20,7 +20,7 @@ import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
 
 interface ExpandResults {
-   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<Problem | ElidedEntityDeclarationPToken>;
    expandedTokens: Array<EntityValueElement> | undefined;
 }
 
@@ -87,7 +87,7 @@ function expandMarkupUnexpanded(
 
    // Process expand all the peRefs potentially very asynchronously.
    doAsyncLoop(peRefs, expandRef, (results) => {
-      const allByproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken> = [];
+      const allByproducts: Array<Problem | ElidedEntityDeclarationPToken> = [];
       const newValue: Array<EntityValueElement> = [];
       let peRefIndex = 0;
 

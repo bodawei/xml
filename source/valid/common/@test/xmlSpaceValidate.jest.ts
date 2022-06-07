@@ -1,24 +1,23 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ENUMERATION_PTOKEN } from 'token';
 
-import { xmlSpaceValidate } from '../xmlSpaceValidate';
-import { ValidityState } from '../validityState';
 import { errorCodes } from '../../error/errorCodes';
+import { ValidityState } from '../validityState';
+import { xmlSpaceValidate } from '../xmlSpaceValidate';
 
 const EID = errorCodes.id;
 
 describe('xmlSpaceValidate (unit)', () => {
    let state: ValidityState;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       state = new ValidityState();
    });
 
@@ -40,10 +39,11 @@ describe('xmlSpaceValidate (unit)', () => {
          'elOne',
          'frog',
          state,
-         mockErrorCollector,
+         collector,
       );
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports no error the attribute is a healthy xml:space (§2.10.0)', () => {
@@ -67,10 +67,11 @@ describe('xmlSpaceValidate (unit)', () => {
          'elOne',
          'xml:space',
          state,
-         mockErrorCollector,
+         collector,
       );
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error when the xml:space has no enumeration (§2.10.0)', () => {
@@ -82,11 +83,11 @@ describe('xmlSpaceValidate (unit)', () => {
          'elOne',
          'xml:SPACE',
          state,
-         mockErrorCollector,
+         collector,
       );
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(collector).toHaveValidError({
          id: EID.XMLSPACE_NO_ENUMERATED_VALUES,
          lastPosition: undefined,
          params: ['elOne'],
@@ -103,10 +104,11 @@ describe('xmlSpaceValidate (unit)', () => {
          'elOne',
          'xml:SPACE',
          new ValidityState(state, { confVer: new ConformanceVersion(1.0, 2) }),
-         mockErrorCollector,
+         collector,
       );
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error when the xml:space has something other than preserve and default (§2.10.0)', () => {
@@ -133,11 +135,11 @@ describe('xmlSpaceValidate (unit)', () => {
          'elOne',
          'xml:space',
          state,
-         mockErrorCollector,
+         collector,
       );
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
+      expect(collector).toHaveValidError({
          id: EID.XMLSPACE_XTRA_ENUMERATED_VALUE,
          lastPosition: undefined,
          params: ['elOne', 'outch'],
@@ -169,9 +171,10 @@ describe('xmlSpaceValidate (unit)', () => {
          'elOne',
          'xml:space',
          new ValidityState(state, { confVer: new ConformanceVersion(1.0, 2) }),
-         mockErrorCollector,
+         collector,
       );
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 });

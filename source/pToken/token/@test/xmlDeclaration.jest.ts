@@ -153,7 +153,7 @@ describe('xmlDeclaration (unit)', () => {
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual(start);
          expect(args[2]).toEqual(['version', 'encoding', 'standalone']);
-         expect(args[3]).toBeInstanceOf(Function);
+         expect(args[3]).toEqual(expect.any(Function));
       });
 
       it('returns an XmlDeclaration', () => {

@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { EntityId } from '../basic/token/entityId';
-import { Range } from '../basic/klass/range';
+import { Range } from '../basic/util/range';
+import { offsetsAreEqual, rangeEndOffset, rangeStartOffset } from 'basic';
 
 function canFuseRanges(range1: Range, range2: Range): boolean {
    const locationsSame = range1.entityId === range2.entityId;
@@ -10,7 +11,7 @@ function canFuseRanges(range1: Range, range2: Range): boolean {
       range1.entityId.publicId === range2.entityId.publicId;
 
    if (locationsSame || locationsEqual) {
-      return range1.getEndOffset().equals(range2.getStartOffset());
+      return offsetsAreEqual(rangeEndOffset(range1), rangeStartOffset(range2));
    }
 
    return false;
@@ -62,7 +63,7 @@ class SToken {
    clone(): SToken {
       const clonedRanges = [];
       for (let index = 0; index < this.ranges.length; index++) {
-         clonedRanges.push(this.ranges[index].clone());
+         clonedRanges.push(new Range(this.ranges[index]));
       }
       return new SToken(this.str, this.originalStr, clonedRanges);
    }

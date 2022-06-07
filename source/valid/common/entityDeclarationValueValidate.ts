@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
@@ -9,11 +9,11 @@ import {
 import { SToken, strOrBlank } from 'sToken';
 import { ElidedEntityDeclarationPToken, PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
 import { ValidityState } from './validityState';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function entityDeclarationValueValidate(
    el:
@@ -21,7 +21,7 @@ function entityDeclarationValueValidate(
       | GeneralEntityDeclarationPToken
       | ElidedEntityDeclarationPToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    const replacementText = el.value;
 
@@ -51,7 +51,7 @@ function entityDeclarationValueValidate(
       // or there is no standalone declaration), then the Name given in the
       // entity reference must match that in an entity declaration. ...
       // The declaration of a parameter entity must precede any reference to it. ...
-      ec.check(!elementDetails, VID.PARAMETERENTITY_NO_DECLARATION, [elementName], open);
+      coll.check(!elementDetails, VID.PARAMETERENTITY_NO_DECLARATION, [elementName], open);
    }
 }
 

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { CharDataPToken } from 'token';
 
@@ -14,7 +14,7 @@ jest.mock('../../common/charCheck');
 
 describe('commentCheck()', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let charDataPToken: CharDataPToken;
 
    beforeEach(() => {
@@ -23,17 +23,12 @@ describe('commentCheck()', () => {
       });
 
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('asks the charCheck to verify the text is well formed', () => {
-      charDataCheck(charDataPToken, mockErrorCollector, confVer);
+      charDataCheck(charDataPToken, collector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(
-         charDataPToken.text,
-         mockErrorCollector,
-         confVer,
-         false,
-      );
+      expect(charCheck).toHaveBeenCalledWith(charDataPToken.text, collector, confVer, false);
    });
 });

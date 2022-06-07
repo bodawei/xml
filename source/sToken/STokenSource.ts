@@ -1,6 +1,13 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, EntityId, Offset, Range } from 'basic';
+import {
+   ConformanceVersion,
+   EntityId,
+   Offset,
+   Range,
+   rangeEndOffset,
+   rangeStartOffset,
+} from 'basic';
 import {
    Extractor,
    PSEUDO_SPACE,
@@ -188,7 +195,7 @@ class STokenSource {
       // with this first segment, or a default offset that starts at 0
       if (this._segments.length === 0) {
          if (rangeToUse) {
-            this._lastOffset = rangeToUse.getStartOffset();
+            this._lastOffset = rangeStartOffset(rangeToUse);
          } else {
             this._lastOffset = new Offset(this.entityId, 0, 0, 0);
          }
@@ -360,7 +367,7 @@ class STokenSource {
             (results.segments[0].segment as Segment).index !== extContext.startIndex
          ) {
             // typeHack
-            this._lastOffset = ranges[ranges.length - 1].getEndOffset();
+            this._lastOffset = rangeEndOffset(ranges[ranges.length - 1]);
          }
 
          // A

@@ -1,5 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
+import { offsetsAreEqual } from 'basic';
 import { Readable } from 'stream';
 import { PToken } from 'token';
 
@@ -26,7 +27,23 @@ function expectError(validator: Readable, expected: any, done: () => void) {
       }
 
       for (const expectedVal of arrayExpected) {
-         (expect(tokens) as any).toHaveError(expectedVal); // typeHack
+         let pass = false;
+
+         tokens.forEach((token: any) => {
+            if (token.type === 'PROBLEM') {
+               const somePass =
+                  token.id === expectedVal.id &&
+                  token.type === expectedVal.type &&
+                  token.message === expectedVal.message;
+               pass =
+                  pass ||
+                  (somePass &&
+                     offsetsAreEqual(token.place, expectedVal.place) &&
+                     offsetsAreEqual(token.context, expectedVal.context));
+            }
+         });
+
+         expect(pass).toEqual(true);
       }
    }, done);
 }

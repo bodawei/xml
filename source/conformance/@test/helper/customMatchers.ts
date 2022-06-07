@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { expect } from '@jest/globals';
-import { XML_ERROR_TOKEN, WARNING_SUBTYPE, XmlErrorToken } from 'basic';
+import { PROBLEM, Problem, WARNING_SEVERITY } from 'basic';
 import { PToken } from 'token';
 
 import { ErrorDetails } from './types';
@@ -47,9 +47,9 @@ function toHaveXmlConfErrors(
    let message;
 
    const errorsExpected = expected.length > 0;
-   const actualErrors: Array<XmlErrorToken> = actual.filter(
-      (token) => token.type === XML_ERROR_TOKEN && token.subtype !== WARNING_SUBTYPE,
-   ) as Array<XmlErrorToken>;
+   const actualErrors: Array<Problem> = actual.filter(
+      (token) => token.type === PROBLEM && token.severity !== WARNING_SEVERITY,
+   ) as Array<Problem>;
 
    const hasAllExpectedErrors = expected.reduce((foundAll, expectedId) => {
       if (!expectedId) {

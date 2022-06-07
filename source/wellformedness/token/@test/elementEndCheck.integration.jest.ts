@@ -1,14 +1,17 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { STokenSource, toSToken } from 'sToken';
 import { parseElementEnd } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { elementEndCheck } from '../elementEndCheck';
+
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 describe('elementEndCheck() (integration)', () => {
    let confVer: ConformanceVersion;
@@ -23,12 +26,12 @@ describe('elementEndCheck() (integration)', () => {
       source.addText('xmlElementName>');
       source.endText();
       parseElementEnd(source, toSToken('</'), (pToken) => {
-         const ec = new ErrorCollector(pToken.open, WellFormedError);
+         const collector = new ProblemCollector(pToken.open, WellFormedError);
 
-         elementEndCheck(pToken, ec, confVer);
+         elementEndCheck(pToken, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(wellFormedWarningCodes.id.ELEMENT_NAME_XML_RESERVED);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WID.ELEMENT_NAME_XML_RESERVED);
+         done();
       });
    });
 
@@ -36,12 +39,12 @@ describe('elementEndCheck() (integration)', () => {
       source.addText('$elementName>');
       source.endText();
       parseElementEnd(source, toSToken('</'), (pToken) => {
-         const ec = new ErrorCollector(pToken.open, WellFormedError);
+         const collector = new ProblemCollector(pToken.open, WellFormedError);
 
-         elementEndCheck(pToken, ec, confVer);
+         elementEndCheck(pToken, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.ELEMENT_NAME_INVALID);
+         done();
       });
    });
 });

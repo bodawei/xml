@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { XmlErrorToken } from 'basic';
+import { Problem } from 'basic';
 import { strOrBlank, toSToken } from 'sToken';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
@@ -18,7 +18,7 @@ import { OpaqueEntityLoc } from '../types';
 
 interface LoadingResult {
    details: PrivateGEDetails | PrivatePEDetails | undefined;
-   byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
+   byproducts: Array<Problem | ElidedEntityDeclarationPToken>;
 }
 type LoadingCallback = (result: LoadingResult) => void;
 
@@ -190,7 +190,7 @@ class EntityDetails {
    public updateDeclaredValue(
       declaration: ParameterEntityDeclarationPToken | GeneralEntityDeclarationPToken,
       newValue: EntityValuePToken | undefined,
-      byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>,
+      byproducts: Array<Problem | ElidedEntityDeclarationPToken>,
    ): void {
       const details = this.getContentDetails(declaration);
 

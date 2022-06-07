@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, ConformanceVersion, XmlErrorToken } from 'basic';
+import { ENTITY_ID, ConformanceVersion, Problem } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
@@ -8,7 +8,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { WellFormedError } from 'wellformedness';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import {
    ElidedEntityDeclarationPToken,
    ParameterEntityEndPToken,
@@ -19,6 +19,8 @@ import { expandEntityValue } from '../expandEntityValue';
 import { ExpandParams, RetrieveResults } from '../../types';
 import { EntityDetails } from '../EntityDetails';
 import { EntityContextStack } from '../EntityContextStack';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('expandEntityValue() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -66,7 +68,7 @@ describe('expandEntityValue() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<XmlErrorToken> => [],
+                  getErrors: (): Array<Problem> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -136,7 +138,7 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<XmlErrorToken> => [],
+            getErrors: (): Array<Problem> => [],
          };
       };
 
@@ -160,15 +162,13 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<any> => [
-               new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
-            ],
+            getErrors: (): Array<any> => [new WellFormedError(WFEID.XMLDECL_NO_PARAMS)],
          };
       };
 
       expandEntityValue([textPToken, peRefPToken], params, new EntityContextStack(), (result) => {
          expect(result.byproducts as any).toEqual([
-            new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS),
+            new WellFormedError(WFEID.XMLDECL_NO_PARAMS),
             new ElidedEntityDeclarationPToken(peDecl, []),
          ]);
          done();
@@ -247,7 +247,7 @@ describe('expandEntityValue() (unit)', () => {
       params.utils.retrieveExternalEntity = (): RetrieveResults => {
          return {
             sTokenSource: new STokenSource(),
-            getErrors: (): Array<XmlErrorToken> => [],
+            getErrors: (): Array<Problem> => [],
          };
       };
 

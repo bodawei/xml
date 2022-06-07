@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { getFirstSToken } from 'token';
@@ -37,11 +37,11 @@ import {
 } from 'token-test';
 
 import { makeCmGraph } from '../../contentModel/makeCmGraph';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { contentValidate } from '../contentValidate';
 import { ElDeclType, ValidityState } from '../validityState';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 jest.mock('../../common/elementDeclarationPreprocess');
 jest.mock('../../token/attListDeclarationValidate');
@@ -73,10 +73,10 @@ jest.mock('../../token/parameterEntityStartValidate');
 jest.mock('../../token/xmlDeclarationUpdateState');
 
 describe('conentValidate (unit)', () => {
-   let ec: MockErrorCollector;
+   let collector: ParamCollector;
 
    beforeEach(() => {
-      ec = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('reports an error when the context is EMPTY, and any non-element end token is delivered (§3.0.0)', () => {
@@ -102,10 +102,10 @@ describe('conentValidate (unit)', () => {
          },
       });
 
-      contentValidate(makeProcessingInstruction(), state, ec);
+      contentValidate(makeProcessingInstruction(), state, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(ec).toReportValidityError({
+      expect(collector).toHaveValidityError({
          id: VID.CONTENTEMPTY_INVALID_SYNTAX,
          lastPosition: undefined,
          params: ['elementName'],
@@ -136,9 +136,10 @@ describe('conentValidate (unit)', () => {
          },
       });
 
-      contentValidate(makeElementEnd(), state, ec);
+      contentValidate(makeElementEnd(), state, collector);
 
-      expect(ec.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    const dataItems: Array<[ParseToken, Array<boolean>]> = [
@@ -175,12 +176,12 @@ describe('conentValidate (unit)', () => {
       const [token, versions] = items;
       const [v10e1, v10e5, v11e1] = versions;
 
-      const edition: Array<[XmlVersion, XmlEdition, boolean]> = [
+      const editions: Array<[XmlVersion, XmlEdition, boolean]> = [
          [1.0, 2, v10e1],
          [1.0, 5, v10e5],
          [1.1, 1, v11e1],
       ];
-      edition.forEach(([version, edition, pass]) => {
+      editions.forEach(([version, edition, pass]) => {
          it(`${pass ? 'does not report' : 'reports'} an error when a ${
             token.type
          } token is found in an element with element content in ${version}/${edition} (§3.0.0)`, () => {
@@ -208,18 +209,19 @@ describe('conentValidate (unit)', () => {
                },
             });
 
-            contentValidate(token, state, ec);
+            contentValidate(token, state, collector);
 
             if (!pass) {
                // @ts-expect-error 2329/matchers
-               expect(ec).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.CONTENTELEMENT_INVALID_SYNTAX,
                   lastPosition: undefined,
                   params: ['elementName', String(version), String(edition), token.type],
                   position: getFirstSToken(token),
                });
             } else {
-               expect(ec.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             }
          });
       });
@@ -250,10 +252,10 @@ describe('conentValidate (unit)', () => {
          },
       });
 
-      contentValidate(makeSpace(), state, ec);
+      contentValidate(makeSpace(), state, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(ec).toReportValidityError({
+      expect(collector).toHaveValidityError({
          id: VID.CONTENTELEMENT_XTRA_SPACE,
          lastPosition: undefined,
          params: ['elementName'],
@@ -282,10 +284,10 @@ describe('conentValidate (unit)', () => {
          },
       });
 
-      contentValidate(makeElementEnd(), state, ec);
+      contentValidate(makeElementEnd(), state, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(ec).toReportValidityError({
+      expect(collector).toHaveValidityError({
          id: VID.CONTENTELEMENT_XTRA_SPACE,
          lastPosition: undefined,
          params: ['elStart'],
@@ -314,9 +316,10 @@ describe('conentValidate (unit)', () => {
          },
       });
 
-      contentValidate(makeElementEnd(), state, ec);
+      contentValidate(makeElementEnd(), state, collector);
 
-      expect(ec.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    const mixedDataItems: Array<[ParseToken, Array<boolean>]> = [
@@ -353,12 +356,12 @@ describe('conentValidate (unit)', () => {
       const [token, versions] = items;
       const [v10e1, v10e3, v11e2] = versions;
 
-      const edition: Array<[XmlVersion, XmlEdition, boolean]> = [
+      const editions: Array<[XmlVersion, XmlEdition, boolean]> = [
          [1.0, 1, v10e1],
          [1.0, 3, v10e3],
          [1.1, 2, v11e2],
       ];
-      edition.forEach(([version, edition, pass]) => {
+      editions.forEach(([version, edition, pass]) => {
          it(`${pass ? 'does not report' : 'reports'} an error when a ${
             token.type
          } token is found in an element with MIXED content in ${version}/${edition} (§3.0.0)`, () => {
@@ -385,18 +388,19 @@ describe('conentValidate (unit)', () => {
                },
             });
 
-            contentValidate(token, state, ec);
+            contentValidate(token, state, collector);
 
             if (!pass) {
                // @ts-expect-error 2329/matchers
-               expect(ec).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.CONTENTMIXED_INVALID_SYNTAX,
                   lastPosition: undefined,
                   params: ['elementName', String(version), String(edition), token.type],
                   position: getFirstSToken(token),
                });
             } else {
-               expect(ec.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             }
          });
 
@@ -425,18 +429,19 @@ describe('conentValidate (unit)', () => {
                },
             });
 
-            contentValidate(token, state, ec);
+            contentValidate(token, state, collector);
 
             if (!pass) {
                // @ts-expect-error 2329/matchers
-               expect(ec).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.CONTENTANY_INVALID_SYNTAX,
                   lastPosition: undefined,
                   params: ['elementName', String(version), String(edition), token.type],
                   position: getFirstSToken(token),
                });
             } else {
-               expect(ec.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             }
          });
       });

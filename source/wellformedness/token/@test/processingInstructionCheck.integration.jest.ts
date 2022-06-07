@@ -1,21 +1,24 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { ProcessingInstructionPToken, parseProcessingInstruction } from 'pToken';
-import { SToken, STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { WellFormedError } from '../../error/wellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { processingInstructionCheck } from '../processingInstructionCheck';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('processingInstructionCheck() (integration)', () => {
    let piPToken: ProcessingInstructionPToken;
 
    beforeEach(() => {
       const proto = {
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('targetName'),
+         target: toSToken('targetName'),
       };
       piPToken = new ProcessingInstructionPToken(proto);
    });
@@ -29,11 +32,12 @@ describe('processingInstructionCheck() (integration)', () => {
       source.endText();
 
       parseProcessingInstruction(source, piPToken, (pToken) => {
-         const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
+         const collector = new ProblemCollector(toSToken(''), WellFormedError);
 
-         processingInstructionCheck(pToken, ec, new ConformanceVersion());
+         processingInstructionCheck(pToken, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_AFTER_OPEN);
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.PI_SPACE_AFTER_OPEN);
          done();
       });
    });

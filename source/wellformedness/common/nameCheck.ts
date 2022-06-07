@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, isName } from 'basic';
+import { ConformanceVersion, Collector, isName } from 'basic';
 import { SToken } from 'sToken';
 
 /**********************************************************************\
@@ -10,7 +10,7 @@ import { SToken } from 'sToken';
 
 function nameCheck(
    nameSToken: SToken | undefined,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
    errorCode: string,
 ): void {
@@ -18,7 +18,7 @@ function nameCheck(
       return;
    }
 
-   ec.report(errorCode, [nameSToken.str], nameSToken);
+   collector.report(errorCode, [nameSToken.str], nameSToken);
 }
 
 export { nameCheck };

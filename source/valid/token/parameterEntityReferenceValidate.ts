@@ -1,23 +1,23 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function parameterEntityReferenceValidate(
    token: ParameterEntityReferencePToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    const peDeclName = strOrBlank(token.name);
 
-   ec.setPos(token.open);
-   ec.setPos(token.name);
+   coll.setPos(token.open);
+   coll.setPos(token.name);
 
    // §4.1.0: Validity Constraint: Entity Declared
    //    In a document with an external subset or parameter entity references with
@@ -31,7 +31,7 @@ function parameterEntityReferenceValidate(
     */
    const applies = !state.isStandalone;
 
-   ec.check(!state.parameterEntities[peDeclName] && applies, VID.PARAMETERENTITY_NO_DECLARATION, [
+   coll.check(!state.parameterEntities[peDeclName] && applies, VID.PARAMETERENTITY_NO_DECLARATION, [
       peDeclName,
    ]);
 }

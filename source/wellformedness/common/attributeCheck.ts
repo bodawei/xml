@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector, rangeStartOffset } from 'basic';
 import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'sToken';
 import { AttributePToken, LiteralValuePToken } from 'token';
@@ -9,30 +9,30 @@ import { attributeLangCheck } from './attributeLangCheck';
 import { literalCheck } from './literalCheck';
 import { nameCheck } from './nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
-import { WellFormedError } from '../error/WellFormedError';
-import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { warningCodes } from '../error/warningCodes';
 import { errorCodes } from '../error/errorCodes';
-import { WellFormedError as NewWellFormedError } from '../error/errorToken';
+import { Error } from '../error/error';
 
 type CheckAttValue = (
    name: SToken,
    value: LiteralValuePToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ) => void;
 type CheckAttName = (
    name: SToken,
    index: number,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ) => void;
 
-const WFEID = WellFormedError.ID;
-const WARN = wellFormedWarningCodes.id;
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 function attributeCheck(
    attributes: ReadonlyArray<AttributePToken>,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
    preceedingSpace: SToken | undefined,
    type: string,
@@ -46,28 +46,30 @@ function attributeCheck(
       const nameText = strOrBlank(attr.name);
 
       if (index === 0) {
-         ec.setPos(preceedingSpace);
-         ec.check(!preceedingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [nameText]);
+         collector.setPos(preceedingSpace);
+         collector.check(!preceedingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [nameText]);
       } else {
-         ec.setPos(attributes[index - 1].trailingSpace);
-         ec.check(!attributes[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [
-            nameText,
-         ]);
+         collector.setPos(attributes[index - 1].trailingSpace);
+         collector.check(
+            !attributes[index - 1].trailingSpace,
+            WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
+            [nameText],
+         );
       }
 
-      ec.setPos(attr.name);
+      collector.setPos(attr.name);
 
       if (type === WFEID.NOUN_ATTRIBUTE) {
          // Well-formedness constraint: §3.1: Unique Att Spec
          //    An attribute name must not appear more than once in the same start-tag or empty-element tag.
-         ec.check(seenAttrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [nameText]);
+         collector.check(seenAttrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [nameText]);
          nameXmlCheck(
             attr.name,
-            ec,
+            collector,
             confVer,
             'ATTRIBUTE',
-            WARN.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
-            WARN.ATTRIBUTE_NAME_XML_RESERVED,
+            WID.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
+            WID.ATTRIBUTE_NAME_XML_RESERVED,
          );
 
          //
@@ -77,24 +79,24 @@ function attributeCheck(
          // has entity references, this won't do any checking.
          //
          if (attr.name.str.toLowerCase() === 'xml:lang') {
-            attributeLangCheck(attr.value, ec, confVer); // TypeHack
+            attributeLangCheck(attr.value, collector, confVer); // TypeHack
          }
 
          seenAttrNames[nameText] = true;
       }
 
-      nameCheck(attr.name, ec, confVer, WFEID.ATTRIBUTE_INVALID_NAME);
+      nameCheck(attr.name, collector, confVer, WFEID.ATTRIBUTE_INVALID_NAME);
 
       if (checkName) {
-         checkName(attr.name, index, ec, confVer);
+         checkName(attr.name, index, collector, confVer);
       }
 
-      ec.setPos(attr.postNameSpace);
-      ec.setPos(attr.equal);
-      ec.check(!attr.equal, WFEID.ATTRIBUTE_NO_EQUAL, [nameText]);
-      ec.setPos(attr.postEqualSpace);
+      collector.setPos(attr.postNameSpace);
+      collector.setPos(attr.equal);
+      collector.check(!attr.equal, WFEID.ATTRIBUTE_NO_EQUAL, [nameText]);
+      collector.setPos(attr.postEqualSpace);
 
-      literalCheck(attr, ec, confVer, type, () => {
+      literalCheck(attr, collector, confVer, type, () => {
          // Well-formedness constraint: §3.1: No < in Attribute Values
          //   The replacement text of any entity referred to directly or indirectly
          //   in an attribute value must not contain a <.
@@ -106,14 +108,14 @@ function attributeCheck(
 
                if (isTextPToken(valuePart)) {
                   if (valuePart.text.str.indexOf('<') !== -1) {
-                     ec.report(WFEID.ATTRIBUTE_INVALID_VALUE, [nameText]);
+                     collector.report(WFEID.ATTRIBUTE_INVALID_VALUE, [nameText]);
                   }
                }
             }
          }
 
          if (checkValue) {
-            checkValue(attr.name, attr.value, ec, confVer);
+            checkValue(attr.name, attr.value, collector, confVer);
          }
 
          //
@@ -130,11 +132,11 @@ function attributeCheck(
             const position = attr.openQuote?.ranges[0];
 
             if (valueString !== 'preserve' && valueString !== 'default') {
-               ec.reportError(
+               collector.reportProblem(
+                  Error,
                   errorCodes.id.XMLSPACE_INVALID_VALUE,
-                  NewWellFormedError,
                   [valueString],
-                  position?.getStartOffset(),
+                  position ? rangeStartOffset(position) : undefined,
                );
             }
          }

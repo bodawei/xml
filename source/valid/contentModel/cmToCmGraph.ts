@@ -2,6 +2,7 @@
 
 import { ContentModelP, ContentNameP, isContentModelP } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
+
 import { MutableCmState, MutableCmGraph } from './cmGraphTypes';
 
 type StateMaker = (graph?: MutableCmGraph) => MutableCmState;

@@ -1,14 +1,17 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { STokenSource, toSToken } from 'sToken';
 import { ElementStartPToken, parseElementStart } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { elementStartCheck } from '../elementStartCheck';
+
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 describe('elementStartCheck() (integration)', () => {
    let source: STokenSource;
@@ -18,11 +21,11 @@ describe('elementStartCheck() (integration)', () => {
    beforeEach(() => {
       source = new STokenSource();
       elementStartPToken = new ElementStartPToken({
-         open: toSToken('<'),
-         openSpace: undefined,
+         close: toSToken('>'),
          name: toSToken('elemName'),
          nameSpace: toSToken(' '),
-         close: toSToken('>'),
+         open: toSToken('<'),
+         openSpace: undefined,
       });
 
       confVer = new ConformanceVersion();
@@ -33,12 +36,12 @@ describe('elementStartCheck() (integration)', () => {
       source.endText();
 
       parseElementStart(source, elementStartPToken.open, (pToken) => {
-         const ec = new ErrorCollector(pToken!.open, WellFormedError);
+         const collector = new ProblemCollector(pToken!.open, WellFormedError);
 
-         elementStartCheck(pToken!, ec, confVer);
+         elementStartCheck(pToken!, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(wellFormedWarningCodes.id.ELEMENT_NAME_XML_RESERVED);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WID.ELEMENT_NAME_XML_RESERVED);
+         done();
       });
    });
 
@@ -47,12 +50,12 @@ describe('elementStartCheck() (integration)', () => {
       source.endText();
 
       parseElementStart(source, elementStartPToken.open, (pToken) => {
-         const ec = new ErrorCollector(pToken!.open, WellFormedError);
+         const collector = new ProblemCollector(pToken!.open, WellFormedError);
 
-         elementStartCheck(pToken!, ec, confVer);
+         elementStartCheck(pToken!, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.ELEMENT_NAME_INVALID);
+         done();
       });
    });
 
@@ -60,12 +63,12 @@ describe('elementStartCheck() (integration)', () => {
       source.addText('foo blah "value">');
 
       parseElementStart(source, elementStartPToken.open, (pToken) => {
-         const ec = new ErrorCollector(pToken!.open, WellFormedError);
+         const collector = new ProblemCollector(pToken!.open, WellFormedError);
 
-         elementStartCheck(pToken!, ec, confVer);
+         elementStartCheck(pToken!, collector, confVer);
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.ATTRIBUTE_NO_EQUAL);
+         done();
       });
    });
 });

@@ -1,11 +1,14 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
-import { WellFormedError } from 'wellformedness';
-import { SToken, STokenSource } from 'sToken';
+import { ConformanceVersion, ProblemCollector } from 'basic';
+import { toSToken, STokenSource } from 'sToken';
 import { parseLiteralValue } from 'token';
 
 import { literalValueCheck } from '../literalValueCheck';
+
+import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('literalValueCheck()', () => {
    let source: STokenSource;
@@ -18,11 +21,12 @@ describe('literalValueCheck()', () => {
       source.addText('b\u0000d"');
       source.endText();
       parseLiteralValue(source, ['"'], (pToken) => {
-         const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
+         const collector = new ProblemCollector(toSToken(''), WellFormedError);
 
-         literalValueCheck(pToken, ec, new ConformanceVersion());
+         literalValueCheck(pToken, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
          done();
       });
    });
@@ -31,11 +35,12 @@ describe('literalValueCheck()', () => {
       source.addText('good& bad;"');
       source.endText();
       parseLiteralValue(source, ['"', '&'], (pToken) => {
-         const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
+         const collector = new ProblemCollector(toSToken(''), WellFormedError);
 
-         literalValueCheck(pToken, ec, new ConformanceVersion());
+         literalValueCheck(pToken, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.REFERENCE_XTRA_SPACE);
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.REFERENCE_XTRA_SPACE);
          done();
       });
    });

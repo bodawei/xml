@@ -1,27 +1,27 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ParameterEntityStartPToken } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityStart } from 'token-test';
 
-import { validCodes } from '../../error/validCodes';
-import { ValidityState } from '../../common/validityState';
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
+import { ValidityState } from '../../common/validityState';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { parameterEntityStartValidate } from '../parameterEntityStartValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 jest.mock('../../common/ancestorPERefsValidate');
 
 describe('parameterEntityStartValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('Standalone Document Declaration (§2.9.0)', () => {
@@ -89,13 +89,14 @@ describe('parameterEntityStartValidate (unit)', () => {
                );
             }
 
-            parameterEntityStartValidate(peStart, state, mockErrorCollector);
+            parameterEntityStartValidate(peStart, state, collector);
 
             if (pass) {
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             } else {
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ENTITYREF_EXTERNAL,
                   lastPosition: undefined,
                   params: [peStart.referencePToken.name?.str],
@@ -119,9 +120,9 @@ describe('parameterEntityStartValidate (unit)', () => {
          });
          const peStart = makeParameterEntityStart();
 
-         parameterEntityStartValidate(peStart, state, mockErrorCollector);
+         parameterEntityStartValidate(peStart, state, collector);
 
-         expect(ancestorPERefsValidate).toHaveBeenCalledWith(peStart, state, mockErrorCollector);
+         expect(ancestorPERefsValidate).toHaveBeenCalledWith(peStart, state, collector);
       });
    });
 });

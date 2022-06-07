@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    CharRefPToken,
    ElementDeclarationPToken,
@@ -15,18 +14,17 @@ import { toSToken } from 'sToken';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 import { ContentDetails, ElDeclType, ValidityState } from '../../common/validityState';
+import { errorCodes } from '../../error/errorCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
+import { warningCodes } from '../../error/warningCodes';
 import { elementDeclarationValidate } from '../elementDeclarationValidate';
 
-import { validCodes } from '../../error/validCodes';
-import { warningCodes } from '../../error/warningCodes';
-import { errorCodes } from '../../error/errorCodes';
-
 const EID = errorCodes.id;
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('elementDeclarationValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
    let peDecl: ParameterEntityDeclarationPToken;
    let peRefEmpty: ParameterEntityReferencePToken;
@@ -50,7 +48,7 @@ describe('elementDeclarationValidate (unit)', () => {
          open: toSToken('&'),
       });
       textClose = new TextPToken({ text: toSToken(')') });
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       elementDeclaration = new ElementDeclarationPToken({
          close: toSToken('>'),
          declType: toSToken('ELEMENT'),
@@ -118,11 +116,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ANY,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_INVALID_END_NESTING,
             lastPosition: undefined,
             params: ['ELEMENT'],
@@ -152,10 +150,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ANY,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error if a markup-internal PERef has been expanded and included no extra text (§2.8.0)', () => {
@@ -181,10 +180,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ANY,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -212,11 +212,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ANY,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ELEMENT_XTRA_DECLARATION,
             lastPosition: undefined,
             params: ['elementName'],
@@ -256,11 +256,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportWarning({
+         expect(collector).toHaveValidWarning({
             id: warningCodes.id.ELEMENT_CHILD_UNDECLARED,
             lastPosition: undefined,
             params: ['elementName', 'bogus'],
@@ -300,11 +300,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.MIXED,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).not.toReportWarning({
+         expect(collector).not.toHaveValidWarning({
             id: warningCodes.id.ELEMENT_CHILD_UNDECLARED,
             lastPosition: undefined,
             params: ['elementName', '#PCDATA'],
@@ -347,10 +347,10 @@ describe('elementDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
+         elementDeclarationValidate(elementDeclaration, childrenDetails, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportWarning({
+         expect(collector).toHaveValidWarning({
             id: warningCodes.id.ELEMENT_CHILD_UNDECLARED,
             lastPosition: undefined,
             params: ['elementName', 'bogus1,bogus2'],
@@ -377,10 +377,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.MIXED,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no errors there is a particle without a name', () => {
@@ -404,10 +405,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.MIXED,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports an error if this is a mixed declaration and there are duplicate names (§3.2.2)', () => {
@@ -427,11 +429,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.MIXED,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ELEMENTDECL_XTRA_MIXED_NAME,
             lastPosition: undefined,
             params: ['elementName', 'foo,bar'],
@@ -514,10 +516,10 @@ describe('elementDeclarationValidate (unit)', () => {
             type: ElDeclType.ELEMENT,
          };
 
-         elementDeclarationValidate(elementDeclaration, details, state, mockErrorCollector);
+         elementDeclarationValidate(elementDeclaration, details, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportError({
+         expect(collector).toHaveValidError({
             id: EID.ELEMENTDECL_CONTENTMODEL_NONDETERMINISTC,
             lastPosition: undefined,
             params: ['elementName', 'last (/4,/99),first (/2/1,/3)'],
@@ -549,10 +551,10 @@ describe('elementDeclarationValidate (unit)', () => {
             },
          });
 
-         elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
+         elementDeclarationValidate(elementDeclaration, childrenDetails, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_PARENS_UNBALANCED,
             lastPosition: undefined,
             params: ['elementName', 'x'],
@@ -593,10 +595,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('report an error if in a mixed, the parentheses in the replacement text of an entity are not balanced (§3.2.1)', () => {
@@ -630,11 +633,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.MIXED,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_PARENS_UNBALANCED,
             lastPosition: undefined,
             params: ['elementName', 'x'],
@@ -676,11 +679,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportWarning({
+         expect(collector).toHaveValidWarning({
             id: warningCodes.id.PEREF_NO_TRAILING_CONNECTOR,
             lastPosition: undefined,
             params: ['elementName', 'x'],
@@ -710,10 +713,10 @@ describe('elementDeclarationValidate (unit)', () => {
             },
          });
 
-         elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
+         elementDeclarationValidate(elementDeclaration, childrenDetails, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportWarning({
+         expect(collector).toHaveValidWarning({
             id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'x'],
@@ -744,10 +747,10 @@ describe('elementDeclarationValidate (unit)', () => {
             },
          });
 
-         elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
+         elementDeclarationValidate(elementDeclaration, childrenDetails, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).not.toReportWarning({
+         expect(collector).not.toHaveValidWarning({
             id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'x'],
@@ -774,11 +777,11 @@ describe('elementDeclarationValidate (unit)', () => {
                ...state,
                confVer: new ConformanceVersion(1, 1),
             },
-            mockErrorCollector,
+            collector,
          );
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportWarning({
+         expect(collector).toHaveValidWarning({
             id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'empty'],
@@ -824,10 +827,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('ignores non-perefs in the unexpanded value (§3.2.1)', () => {
@@ -861,10 +865,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('ignores perefs that have no details (§3.2.1)', () => {
@@ -888,10 +893,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('ignores empty entities before the start of the content model (§3.2.1)', () => {
@@ -925,10 +931,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('ignores even closing parenthesis if we have not yet seen an open (§3.2.1)', () => {
@@ -962,10 +969,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('ignores an open paren in the text in the middle of a content model (§3.2.1)', () => {
@@ -999,10 +1007,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('considers a parenthesis within the unexpanded text tokens to count as the start of the content model (§3.2.1)', () => {
@@ -1027,10 +1036,10 @@ describe('elementDeclarationValidate (unit)', () => {
             },
          });
 
-         elementDeclarationValidate(elementDeclaration, childrenDetails, state, mockErrorCollector);
+         elementDeclarationValidate(elementDeclaration, childrenDetails, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportWarning({
+         expect(collector).toHaveValidWarning({
             id: warningCodes.id.PEREF_NO_EMPTY_IN_MODEL,
             lastPosition: undefined,
             params: ['elementName', 'x'],
@@ -1069,10 +1078,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('does not report errors about empty PE or trailing delimiters if they come before the content model (§3.2.1)', () => {
@@ -1096,10 +1106,11 @@ describe('elementDeclarationValidate (unit)', () => {
                type: ElDeclType.ELEMENT,
             },
             state,
-            mockErrorCollector,
+            collector,
          );
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

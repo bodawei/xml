@@ -95,7 +95,7 @@ describe('pTokenParser (unit)', () => {
                type: CONFORMANCE_VERSION,
                version: 1,
             });
-            done?.();
+            done();
          });
       });
 
@@ -114,7 +114,7 @@ describe('pTokenParser (unit)', () => {
                type: CONFORMANCE_VERSION,
                version: 1,
             });
-            done?.();
+            done();
          });
       });
 
@@ -131,7 +131,7 @@ describe('pTokenParser (unit)', () => {
                type: CONFORMANCE_VERSION,
                version: 1.1,
             });
-            done?.();
+            done();
          });
       });
 
@@ -154,7 +154,7 @@ describe('pTokenParser (unit)', () => {
                type: CONFORMANCE_VERSION,
                version: 1.0,
             });
-            done?.();
+            done();
          });
       });
 
@@ -171,7 +171,7 @@ describe('pTokenParser (unit)', () => {
                type: CONFORMANCE_VERSION,
                version: 1.0,
             });
-            done?.();
+            done();
          });
       });
 
@@ -186,7 +186,7 @@ describe('pTokenParser (unit)', () => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
             expect(result).toBeUndefined();
-            done?.();
+            done();
          });
       });
    });
@@ -203,7 +203,7 @@ describe('pTokenParser (unit)', () => {
                systemId: './document.xml',
                type: ENTITY_ID,
             });
-            done?.();
+            done();
          });
       });
 
@@ -223,7 +223,7 @@ describe('pTokenParser (unit)', () => {
                systemId: 'http://foo.com/bar.xml',
                type: ENTITY_ID,
             });
-            done?.();
+            done();
          });
       });
 
@@ -239,244 +239,244 @@ describe('pTokenParser (unit)', () => {
             const result = findToken(results, ENTITY_ID);
 
             expect(result).toBeUndefined();
-            done?.();
+            done();
          });
       });
    });
 
    it('calls parseDeclaration() when encountering an ATTLIST', (done) => {
-      const parseSpy = spyOn(declaration, 'parseDeclaration').and.callThrough();
+      const parseSpy = jest.spyOn(declaration, 'parseDeclaration');
       sTokenSource.addText('<!ATTLIST something bar CDATA #REQUIRED>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<!' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<!' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls charRef.parse()', (done) => {
-      const parseSpy = spyOn(charRef, 'parseCharRef').and.callThrough();
+      const parseSpy = jest.spyOn(charRef, 'parseCharRef');
       sTokenSource.addText('&#foo;');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toBeInstanceOf(SToken);
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toEqual(expect.any(SToken));
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls charData.parse()', (done) => {
-      const parseSpy = spyOn(charData, 'parseCharData').and.callThrough();
+      const parseSpy = jest.spyOn(charData, 'parseCharData');
       sTokenSource.addText('asdf</foo>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toEqual([]);
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toEqual([]);
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls charData.parse() in the internal subset', (done) => {
-      const parseSpy = spyOn(charData, 'parseCharData').and.callThrough();
+      const parseSpy = jest.spyOn(charData, 'parseCharData');
       sTokenSource.addText('<!DOCTYPE foo [ asdf</foo>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toEqual(['%', ']']);
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toEqual(['%', ']']);
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls comment.parse()', (done) => {
-      spyOn(comment, 'parseComment').and.callThrough();
+      jest.spyOn(comment, 'parseComment');
       sTokenSource.addText('<!--asdf-->');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
          expect(tokenStuff.parseComment).toHaveBeenCalled();
-         done?.();
+         done();
       });
    });
 
    it('calls parseElementStart()', (done) => {
-      spyOn(elementStart, 'parseElementStart').and.callThrough();
+      jest.spyOn(elementStart, 'parseElementStart');
       sTokenSource.addText('<foo>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
          expect(tokenStuff.parseElementStart).toHaveBeenCalled();
-         done?.();
+         done();
       });
    });
 
    it('calls parseDeclaration() when encountering a DOCTYPE', (done) => {
-      const parseSpy = spyOn(declaration, 'parseDeclaration').and.callThrough();
+      const parseSpy = jest.spyOn(declaration, 'parseDeclaration');
       sTokenSource.addText('<!DOCTYPE theType>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<!' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<!' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls parseDeclaration() when encountering a DOCTYPE', (done) => {
-      const parseSpy = spyOn(declaration, 'parseDeclaration').and.callThrough();
+      const parseSpy = jest.spyOn(declaration, 'parseDeclaration');
       sTokenSource.addText('<!docType theType>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<!' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<!' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls parseElementEnd()', (done) => {
-      spyOn(elementEnd, 'parseElementEnd').and.callThrough();
+      jest.spyOn(elementEnd, 'parseElementEnd');
       sTokenSource.addText('</foo>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
          expect(tokenStuff.parseElementEnd).toHaveBeenCalled();
-         done?.();
+         done();
       });
    });
 
    it('calls parseDeclaration() when encountering an ELEMENT', (done) => {
-      const parseSpy = spyOn(declaration, 'parseDeclaration').and.callThrough();
+      const parseSpy = jest.spyOn(declaration, 'parseDeclaration');
       sTokenSource.addText('<!ELEMENT something "foo">');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<!' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<!' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls parseDeclaration() when encountering an ENTITY', (done) => {
-      const parseSpy = spyOn(declaration, 'parseDeclaration').and.callThrough();
+      const parseSpy = jest.spyOn(declaration, 'parseDeclaration');
       sTokenSource.addText('<!ENTITY something "foo">');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<!' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<!' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls parseGeneralEntityReference()', (done) => {
-      const parseSpy = spyOn(geRef, 'parseGeneralEntityReference').and.callThrough();
+      const parseSpy = jest.spyOn(geRef, 'parseGeneralEntityReference');
       sTokenSource.addText('&foo;');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toEqual(
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toEqual(
             new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
          );
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls parseParameterEntityReference()', (done) => {
-      const parseSpy = spyOn(peRef, 'parseParameterEntityReference').and.callThrough();
+      const parseSpy = jest.spyOn(peRef, 'parseParameterEntityReference');
       sTokenSource.addText('%foo;');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('does not call parseParameterEntityReference() if already in content', (done) => {
-      const parseSpy = spyOn(peRef, 'parseParameterEntityReference').and.callThrough();
+      const parseSpy = jest.spyOn(peRef, 'parseParameterEntityReference');
       sTokenSource.addText('<one>');
       sTokenSource.addText('%foo;');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
          expect(parseSpy).not.toHaveBeenCalled();
-         done?.();
+         done();
       });
    });
 
    it('calls parseDeclaration() when encountering a notation', (done) => {
-      const parseSpy = spyOn(declaration, 'parseDeclaration').and.callThrough();
+      const parseSpy = jest.spyOn(declaration, 'parseDeclaration');
       sTokenSource.addText('<!NOTATION something>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<!' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<!' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls parseInstruction()', (done) => {
-      const parseSpy = spyOn(instruction, 'parseInstruction').and.callThrough();
+      const parseSpy = jest.spyOn(instruction, 'parseInstruction');
       sTokenSource.addText('<?something foo?>');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<?' });
-         expect(parseSpy.calls.argsFor(0)[2]).toEqual(true);
-         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<?' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(true);
+         expect(parseSpy.mock.calls[0][3]).toEqual(expect.any(Function));
+         done();
       });
    });
 
    it('calls space.parse()', (done) => {
-      spyOn(space, 'parseSpace').and.callThrough();
+      jest.spyOn(space, 'parseSpace');
       sTokenSource.addText('   x');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
          expect(tokenStuff.parseSpace).toHaveBeenCalled();
-         done?.();
+         done();
       });
    });
 
    it('does not call space.parse() if an element start has been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parseSpace').and.callThrough();
+      const parseSpy = jest.spyOn(space, 'parseSpace');
       sTokenSource.addText('<foo>   ');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.count()).toEqual(1);
-         done?.();
+         expect(parseSpy.mock.calls.length).toEqual(1);
+         done();
       });
    });
 
    it('call space.parse() after the topmost element start and end have been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parseSpace').and.callThrough();
+      const parseSpy = jest.spyOn(space, 'parseSpace');
       sTokenSource.addText('<foo></foo>   ');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.count()).toEqual(3);
-         done?.();
+         expect(parseSpy.mock.calls.length).toEqual(3);
+         done();
       });
    });
 
@@ -484,48 +484,48 @@ describe('pTokenParser (unit)', () => {
       pTokenParser = new PTokenParser(sTokenSource, {
          parseType: ParseType.GENERAL_ENTITY,
       });
-      const parseSpy = spyOn(space, 'parseSpace').and.callThrough();
+      const parseSpy = jest.spyOn(space, 'parseSpace');
       sTokenSource.addText('<foo></foo>   ');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.count()).toEqual(0);
-         done?.();
+         expect(parseSpy.mock.calls.length).toEqual(0);
+         done();
       });
    });
 
    it('call space.parse() after nameless start and end have been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parseSpace').and.callThrough();
+      const parseSpy = jest.spyOn(space, 'parseSpace');
       sTokenSource.addText('<></>   ');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.count()).toEqual(3);
-         done?.();
+         expect(parseSpy.mock.calls.length).toEqual(3);
+         done();
       });
    });
 
    it('call space.parse() after a misbalaned end has been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parseSpace').and.callThrough();
+      const parseSpy = jest.spyOn(space, 'parseSpace');
       sTokenSource.addText('<foo></bar></foo>   ');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.count()).toEqual(3);
-         done?.();
+         expect(parseSpy.mock.calls.length).toEqual(3);
+         done();
       });
    });
 
    it('calls parseDeclaration() when encountering an unknown declaration', (done) => {
-      const parseSpy = spyOn(declaration, 'parseDeclaration').and.callThrough();
+      const parseSpy = jest.spyOn(declaration, 'parseDeclaration');
       sTokenSource.addText('<!FOO >');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<!' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<!' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
@@ -536,20 +536,20 @@ describe('pTokenParser (unit)', () => {
       gatherParseResults(pTokenParser, (pTokens) => {
          const result = findToken(pTokens, 'UNKNOWNDECL');
          expect(result).not.toBeUndefined();
-         done?.();
+         done();
       });
    });
 
    it('calls parseSection()', (done) => {
-      const parseSpy = spyOn(section, 'parseSection').and.callThrough();
+      const parseSpy = jest.spyOn(section, 'parseSection');
       sTokenSource.addText('<![FOO [');
       sTokenSource.endText();
 
       gatherParseResults(pTokenParser, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toMatchObject({ str: '<![' });
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done?.();
+         expect(parseSpy.mock.calls[0][0]).toEqual(expect.any(STokenSource));
+         expect(parseSpy.mock.calls[0][1]).toMatchObject({ str: '<![' });
+         expect(parseSpy.mock.calls[0][2]).toEqual(expect.any(Function));
+         done();
       });
    });
 
@@ -564,7 +564,7 @@ describe('pTokenParser (unit)', () => {
                str: ']',
             }),
          });
-         done?.();
+         done();
       });
    });
 
@@ -582,7 +582,7 @@ describe('pTokenParser (unit)', () => {
                TEXT_PTOKEN,
                CONDITIONAL_END_PTOKEN,
             ]);
-            done?.();
+            done();
          });
       });
 
@@ -599,7 +599,7 @@ describe('pTokenParser (unit)', () => {
             }, []);
 
             expect(strings).toEqual(['foo ', '<![', 'INCLUDE[bar', ']]>']);
-            done?.();
+            done();
          });
       });
 
@@ -620,7 +620,7 @@ describe('pTokenParser (unit)', () => {
                CONDITIONAL_END_PTOKEN,
                CONDITIONAL_END_PTOKEN,
             ]);
-            done?.();
+            done();
          });
       });
 
@@ -646,7 +646,7 @@ describe('pTokenParser (unit)', () => {
                ELEMENT_START_PTOKEN,
                ELEMENT_END_PTOKEN,
             ]);
-            done?.();
+            done();
          });
       });
    });

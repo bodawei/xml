@@ -225,8 +225,13 @@ class MockSTokenSource extends STokenSource {
       }
       this.queuedCalls = [];
 
-      this.extractToObject = spyOn(this as any, 'extractToObject').and.callThrough(); // typeHack
-      this.extract = spyOn(this as any, 'extract').and.callThrough(); // typeHack
+      if (typeof spyOn === 'function') {
+         this.extractToObject = spyOn(this as any, 'extractToObject').and.callThrough(); // typeHack
+         this.extract = spyOn(this as any, 'extract').and.callThrough(); // typeHack
+      } else {
+         this.extractToObject = jest.spyOn(this as any, 'extractToObject') as any; // typeHack
+         this.extract = jest.spyOn(this as any, 'extract') as any; // typeHack
+      }
    }
 
    extractToObjectNoParams(type: string, obj: Object, name: string): void {

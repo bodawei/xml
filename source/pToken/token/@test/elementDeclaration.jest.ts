@@ -232,7 +232,7 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(parseContentModelMock.mock.calls[0][0]).toEqual(mockSource);
-         expect(parseContentModelMock.mock.calls[0][1]).toBeInstanceOf(Function);
+         expect(parseContentModelMock.mock.calls[0][1]).toEqual(expect.any(Function));
       });
 
       it('delivers contentModel and end of list', () => {

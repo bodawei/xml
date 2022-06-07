@@ -1,35 +1,35 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion } from 'basic';
+import { Collector, ConformanceVersion } from 'basic';
 import { ContentModelP, isContentModelP } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 import { nameCheck } from './nameCheck';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 const PCDATA = '#PCDATA';
 
 type DelimiterType = 'ANY' | 'CHOICE' | 'SEQUENCE';
 
 function contentModelCheck(
    cmToken: ContentModelP,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
    isTopLevel: boolean,
 ): void {
    let delimType: DelimiterType | undefined;
    let isMixedType = false;
 
-   ec.setPos(cmToken.open);
-   ec.check(!cmToken.open, WFEID.CONTENTMODEL_NO_OPEN);
+   collector.setPos(cmToken.open);
+   collector.check(!cmToken.open, WFEID.CONTENTMODEL_NO_OPEN);
 
-   ec.setPos(cmToken.openSpace);
+   collector.setPos(cmToken.openSpace);
 
    if (cmToken.delimitedParticles.length <= 0) {
-      ec.setPos(undefined);
-      ec.report(WFEID.CONTENTMODEL_NO_NAMES);
+      collector.setPos(undefined);
+      collector.report(WFEID.CONTENTMODEL_NO_NAMES);
    }
 
    for (let index = 0; index < cmToken.delimitedParticles.length; index++) {
@@ -41,47 +41,51 @@ function contentModelCheck(
          const theParticle = particle.particle;
 
          if (isContentModelP(theParticle)) {
-            ec.setPos(theParticle.open);
+            collector.setPos(theParticle.open);
 
             if (isMixedType) {
-               ec.report(WFEID.CONTENTMODEL_MIXED_INVALID_SUBPARTICLE, [indexStr]);
+               collector.report(WFEID.CONTENTMODEL_MIXED_INVALID_SUBPARTICLE, [indexStr]);
             }
 
-            contentModelCheck(theParticle, ec, confVer, false);
+            contentModelCheck(theParticle, collector, confVer, false);
          } else {
-            ec.setPos(theParticle.name);
-            ec.check(!theParticle.name, WFEID.CONTENTMODEL_NO_NAME, [indexStr]);
+            collector.setPos(theParticle.name);
+            collector.check(!theParticle.name, WFEID.CONTENTMODEL_NO_NAME, [indexStr]);
 
             const nameStr = strOrBlank(theParticle.name);
             const ucName = nameStr.toUpperCase();
 
             if (index === 0 && !isMixedType && ucName === PCDATA && isTopLevel) {
-               ec.check(ucName !== nameStr, WFEID.CONTENTMODEL_PCDATA_INVALID_CASE, [nameStr]);
+               collector.check(ucName !== nameStr, WFEID.CONTENTMODEL_PCDATA_INVALID_CASE, [
+                  nameStr,
+               ]);
                isMixedType = true;
                delimType = 'CHOICE';
             } else {
-               nameCheck(theParticle.name, ec, confVer, WFEID.CONTENTMODEL_NAME_INVALID);
+               nameCheck(theParticle.name, collector, confVer, WFEID.CONTENTMODEL_NAME_INVALID);
             }
 
-            ec.setPos(theParticle.nameSpace);
+            collector.setPos(theParticle.nameSpace);
 
             if (theParticle.repeat) {
-               ec.check(theParticle.nameSpace, WFEID.CONTENTMODEL_NAME_EXTRA_SPACE, [indexStr]);
+               collector.check(theParticle.nameSpace, WFEID.CONTENTMODEL_NAME_EXTRA_SPACE, [
+                  indexStr,
+               ]);
 
-               ec.setPos(theParticle.repeat);
+               collector.setPos(theParticle.repeat);
 
                if (isMixedType) {
-                  ec.report(WFEID.CONTENTMODEL_MIXED_NAME_EXTRA_REPEAT, [
+                  collector.report(WFEID.CONTENTMODEL_MIXED_NAME_EXTRA_REPEAT, [
                      indexStr,
                      strOrBlank(theParticle.repeat),
                   ]);
                }
-               ec.setPos(theParticle.repeatSpace);
+               collector.setPos(theParticle.repeatSpace);
             }
          }
       }
 
-      ec.setPos(particle.delimiter);
+      collector.setPos(particle.delimiter);
 
       if (particle.delimiter) {
          const delimiterStr = strOrBlank(particle.delimiter);
@@ -92,44 +96,46 @@ function contentModelCheck(
 
          if (delimType === 'SEQUENCE') {
             if (delimiterStr !== ',') {
-               ec.report(WFEID.CONTENTMODEL_BAD_SEQUENCE, [indexStr, delimiterStr]);
+               collector.report(WFEID.CONTENTMODEL_BAD_SEQUENCE, [indexStr, delimiterStr]);
             }
          } else if (delimiterStr !== '|') {
-            ec.report(WFEID.CONTENTMODEL_BAD_CHOICE, [indexStr, delimiterStr]);
+            collector.report(WFEID.CONTENTMODEL_BAD_CHOICE, [indexStr, delimiterStr]);
          }
       }
 
       if (!isLast) {
-         ec.check(!particle.delimiter, WFEID.CONTENTMODEL_NO_DELIM, [indexStr]);
+         collector.check(!particle.delimiter, WFEID.CONTENTMODEL_NO_DELIM, [indexStr]);
       } else {
-         ec.check(particle.delimiter, WFEID.CONTENTMODEL_EXTRA_DELIM, [indexStr]);
+         collector.check(particle.delimiter, WFEID.CONTENTMODEL_EXTRA_DELIM, [indexStr]);
       }
 
-      ec.setPos(particle.delimiterSpace);
+      collector.setPos(particle.delimiterSpace);
    }
 
-   ec.setPos(cmToken.close);
-   ec.check(!cmToken.close, WFEID.CONTENTMODEL_NO_CLOSE);
-   ec.setPos(cmToken.closeSpace);
+   collector.setPos(cmToken.close);
+   collector.check(!cmToken.close, WFEID.CONTENTMODEL_NO_CLOSE);
+   collector.setPos(cmToken.closeSpace);
 
    if (cmToken.repeat) {
-      ec.check(cmToken.closeSpace, WFEID.CONTENTMODEL_CLOSE_EXTRA_SPACE);
+      collector.check(cmToken.closeSpace, WFEID.CONTENTMODEL_CLOSE_EXTRA_SPACE);
    }
 
-   ec.setPos(cmToken.repeat);
+   collector.setPos(cmToken.repeat);
    const repeatStr = strOrBlank(cmToken.repeat);
 
    if (isMixedType) {
       if (cmToken.delimitedParticles.length > 1) {
-         ec.check(repeatStr !== '*', WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT, [repeatStr]);
+         collector.check(repeatStr !== '*', WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT, [repeatStr]);
       } else {
-         ec.check(repeatStr !== '' && repeatStr !== '*', WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT, [
-            repeatStr,
-         ]);
+         collector.check(
+            repeatStr !== '' && repeatStr !== '*',
+            WFEID.CONTENTMODEL_MIXED_INVALID_REPEAT,
+            [repeatStr],
+         );
       }
    }
 
-   ec.setPos(cmToken.repeatSpace);
+   collector.setPos(cmToken.repeatSpace);
 }
 
 export { contentModelCheck };

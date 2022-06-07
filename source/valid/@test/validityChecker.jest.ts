@@ -1,7 +1,7 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { toSToken } from 'sToken';
 import { ConditionalEndPToken, ConditionalStartPToken, ElidedEntityDeclarationPToken } from 'token';
 import {
@@ -24,6 +24,9 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
+import { contentUpdateState } from '../common/contentUpdateState';
+import { contentValidate } from '../common/contentValidate';
+import { elementDeclarationPreprocess } from '../common/elementDeclarationPreprocess';
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
 import { ValidityState } from '../common/validityState';
 import { attListDeclarationUpdateState } from '../token/attListDeclarationUpdateState';
@@ -32,10 +35,9 @@ import { conditionalEndUpdateState } from '../token/conditionalEndUpdateState';
 import { conditionalEndValidate } from '../token/conditionalEndValidate';
 import { conditionalStartUpdateState } from '../token/conditionalStartUpdateState';
 import { conditionalStartValidate } from '../token/conditionalStartValidate';
-import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
 import { docTypeEndValidate } from '../token/docTypeEndValidate';
+import { docTypeStartUpdateState } from '../token/docTypeStartUpdateState';
 import { elementDeclarationUpdateState } from '../token/elementDeclarationUpdateState';
-import { elementDeclarationPreprocess } from '../common/elementDeclarationPreprocess';
 import { elementDeclarationValidate } from '../token/elementDeclarationValidate';
 import { elementEndUpdateState } from '../token/elementEndUpdateState';
 import { elementEndValidate } from '../token/elementEndValidate';
@@ -43,8 +45,8 @@ import { elementStartUpdateState } from '../token/elementStartUpdateState';
 import { elementStartValidate } from '../token/elementStartValidate';
 import { elidedEntityDeclarationUpdateState } from '../token/elidedEntityDeclarationUpdateState';
 import { entityDeclarationValidate } from '../token/entityDeclarationValidate';
-import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpdateState';
 import { externalSubsetEndUpdateState } from '../token/externalSubsetEndUpdateState';
+import { externalSubsetStartUpdateState } from '../token/externalSubsetStartUpdateState';
 import { generalEntityDeclarationUpdateState } from '../token/generalEntityDeclarationUpdateState';
 import { generalEntityReferenceValidate } from '../token/generalEntityReferenceValidate';
 import { generalEntityStartValidate } from '../token/generalEntityStartValidate';
@@ -54,8 +56,6 @@ import { parameterEntityDeclarationUpdateState } from '../token/parameterEntityD
 import { parameterEntityReferenceValidate } from '../token/parameterEntityReferenceValidate';
 import { parameterEntityStartValidate } from '../token/parameterEntityStartValidate';
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
-import { contentValidate } from '../common/contentValidate';
-import { contentUpdateState } from '../common/contentUpdateState';
 import { ValidityChecker } from '../validityChecker';
 
 jest.mock('../common/contentValidate');
@@ -131,7 +131,7 @@ describe('ValidityChecker (unit)', () => {
          elDecl,
          {},
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -148,7 +148,7 @@ describe('ValidityChecker (unit)', () => {
          elDecl,
          {},
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -160,7 +160,7 @@ describe('ValidityChecker (unit)', () => {
       expect(contentValidate).toHaveBeenCalledWith(
          conditional,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -181,7 +181,7 @@ describe('ValidityChecker (unit)', () => {
       expect(attListDeclarationValidate).toHaveBeenCalledWith(
          attListDecl,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -210,7 +210,7 @@ describe('ValidityChecker (unit)', () => {
       expect(conditionalEndValidate).toHaveBeenCalledWith(
          conditional,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -223,7 +223,7 @@ describe('ValidityChecker (unit)', () => {
       expect(conditionalStartValidate).toHaveBeenCalledWith(
          conditional,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -262,7 +262,7 @@ describe('ValidityChecker (unit)', () => {
       expect(elementStartValidate).toHaveBeenCalledWith(
          elStart,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -288,7 +288,7 @@ describe('ValidityChecker (unit)', () => {
          elDecl,
          {},
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -310,7 +310,7 @@ describe('ValidityChecker (unit)', () => {
       expect(elementEndValidate).toHaveBeenCalledWith(
          elementEnd,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -333,7 +333,7 @@ describe('ValidityChecker (unit)', () => {
       expect(entityDeclarationValueValidate).toHaveBeenCalledWith(
          elided,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -364,7 +364,7 @@ describe('ValidityChecker (unit)', () => {
       expect(entityDeclarationValidate).toHaveBeenCalledWith(
          geDecl,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -382,7 +382,7 @@ describe('ValidityChecker (unit)', () => {
 
       expect(docTypeEndValidate).toHaveBeenCalledWith(
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -394,7 +394,7 @@ describe('ValidityChecker (unit)', () => {
       expect(generalEntityReferenceValidate).toHaveBeenCalledWith(
          geRef,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -416,7 +416,7 @@ describe('ValidityChecker (unit)', () => {
       expect(notationDeclarationValidate).toHaveBeenCalledWith(
          notationDecl,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -429,7 +429,7 @@ describe('ValidityChecker (unit)', () => {
       expect(entityDeclarationValidate).toHaveBeenCalledWith(
          peDecl,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -441,7 +441,7 @@ describe('ValidityChecker (unit)', () => {
       expect(generalEntityStartValidate).toHaveBeenCalledWith(
          geStart,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -453,7 +453,7 @@ describe('ValidityChecker (unit)', () => {
       expect(parameterEntityReferenceValidate).toHaveBeenCalledWith(
          peRef,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 
@@ -477,7 +477,7 @@ describe('ValidityChecker (unit)', () => {
       expect(parameterEntityStartValidate).toHaveBeenCalledWith(
          peStart,
          expect.any(Object),
-         expect.any(ErrorCollector),
+         expect.any(ProblemCollector),
       );
    });
 

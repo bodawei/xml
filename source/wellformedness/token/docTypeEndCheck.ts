@@ -1,22 +1,22 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { DocTypeEndPToken } from 'token';
 
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 
-function docTypeEndCheck(pToken: DocTypeEndPToken, ec: ErrorCollector): void {
-   ec.setPos(pToken.closeSubset);
+function docTypeEndCheck(pToken: DocTypeEndPToken, collector: Collector): void {
+   collector.setPos(pToken.closeSubset);
 
    if (!pToken.docTypeStartPToken.openSubset) {
-      ec.check(pToken.closeSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
+      collector.check(pToken.closeSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
    }
 
-   // If there is no close, and no closeInternalSubset, this won't get a very good position.
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.DOCTYPE_NO_CLOSE);
+   // If there is no close, and no closeSubset, this won't get a very good position.
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.DOCTYPE_NO_CLOSE);
 }
 
 export { docTypeEndCheck };

@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    AttListDeclarationPToken,
    ElementDeclarationPToken,
@@ -21,17 +20,17 @@ import {
 } from 'token-test';
 
 import { ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { parameterEntityEndValidate } from '../parameterEntityEndValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('parameterEntityEndValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
 
       state = new ValidityState({
          dtdContext: {
@@ -126,10 +125,10 @@ describe('parameterEntityEndValidate (unit)', () => {
                },
             });
 
-            parameterEntityEndValidate(makeParameterEntityEnd(), state, mockErrorCollector);
+            parameterEntityEndValidate(makeParameterEntityEnd(), state, collector);
 
             // @ts-expect-error 2329/matchers
-            expect(mockErrorCollector).toReportValidityError({
+            expect(collector).toHaveValidityError({
                id: VID.PEREF_INVALID_START_NESTING,
                lastPosition: undefined,
                params: [type],
@@ -147,9 +146,10 @@ describe('parameterEntityEndValidate (unit)', () => {
                },
             });
 
-            parameterEntityEndValidate(makeParameterEntityEnd(), state, mockErrorCollector);
+            parameterEntityEndValidate(makeParameterEntityEnd(), state, collector);
 
-            expect(mockErrorCollector.errors).toEqual([]);
+            // @ts-expect-error 2329/matchers
+            expect(collector).not.toHaveAnyProblems();
          });
       });
    });
@@ -165,9 +165,10 @@ describe('parameterEntityEndValidate (unit)', () => {
             },
          });
 
-         parameterEntityEndValidate(makeParameterEntityEnd(), state, mockErrorCollector);
+         parameterEntityEndValidate(makeParameterEntityEnd(), state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -182,10 +183,10 @@ describe('parameterEntityEndValidate (unit)', () => {
             },
          });
 
-         parameterEntityEndValidate(makeParameterEntityEnd(), state, mockErrorCollector);
+         parameterEntityEndValidate(makeParameterEntityEnd(), state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_INVALID_CONDITIONALSECTION_START_NESTING,
             lastPosition: undefined,
             params: [],
@@ -194,9 +195,10 @@ describe('parameterEntityEndValidate (unit)', () => {
       });
 
       it('reports no error when the previous thing in the enclosingStack is a parameter entity start (§3.4.0)', () => {
-         parameterEntityEndValidate(makeParameterEntityEnd(), state, mockErrorCollector);
+         parameterEntityEndValidate(makeParameterEntityEnd(), state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

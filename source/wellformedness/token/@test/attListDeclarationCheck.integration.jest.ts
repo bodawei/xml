@@ -1,28 +1,30 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { parseAttListDeclaration } from 'pToken';
-import { SToken, STokenSource, toSToken } from 'sToken';
+import { toSToken, STokenSource } from 'sToken';
 import { DeclarationStart } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
-describe('checkWellFormed()', () => {
-   let ec: ErrorCollector;
+const WFEID = wellFormedErrorCodes.id;
+
+describe('attListDeclarationCheck()', () => {
+   let collector: ProblemCollector;
    let declarationStart: DeclarationStart;
 
    beforeEach(() => {
-      ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
+      collector = new ProblemCollector(toSToken('x'), WellFormedError);
 
       declarationStart = {
-         open: toSToken('<!'),
-         openSpace: undefined,
          declType: toSToken('ATTLIST'),
          declTypeSpace: toSToken(' '),
+         open: toSToken('<!'),
+         openSpace: undefined,
       };
    });
 
@@ -35,7 +37,7 @@ describe('checkWellFormed()', () => {
    //    parseAttListDeclaration(source, declarationStart, (parsing) => {
    //       attListDeclarationCheck(parsing, ec, new ConformanceVersion());
 
-   //       expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
+   //       expect(collector.getProblems()[0].id).toEqual(WFEID.DECL_OPEN_XTRA_SPACE_AFTER);
    //       done?.();
    //    });
    // });
@@ -45,10 +47,10 @@ describe('checkWellFormed()', () => {
       source.addText('$foo>');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, ec, new ConformanceVersion());
+         attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+         done();
       });
    });
 
@@ -57,10 +59,10 @@ describe('checkWellFormed()', () => {
       source.addText('elName $foo>');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, ec, new ConformanceVersion());
+         attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
+         done();
       });
    });
 
@@ -69,12 +71,12 @@ describe('checkWellFormed()', () => {
       source.addText('elName xml:foo>');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, ec, new ConformanceVersion());
+         attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(
-            wellFormedWarningCodes.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
+         expect(collector.getProblems()[0].id).toEqual(
+            warningCodes.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
          );
-         done?.();
+         done();
       });
    });
 
@@ -83,10 +85,10 @@ describe('checkWellFormed()', () => {
       source.addText('elName attr ( $badName ) >');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, ec, new ConformanceVersion());
+         attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NMTOKEN);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.WORDLIST_INVALID_NMTOKEN);
+         done();
       });
    });
 
@@ -95,10 +97,10 @@ describe('checkWellFormed()', () => {
       source.addText('elName attr2 NOTATION ( goodName | $badName ) >');
       source.endText();
       parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, ec, new ConformanceVersion());
+         attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NAME);
-         done?.();
+         expect(collector.getProblems()[0].id).toEqual(WFEID.WORDLIST_INVALID_NAME);
+         done();
       });
    });
 });

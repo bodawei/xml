@@ -2,86 +2,88 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken, SToken } from 'sToken';
 import { DocTypeStartPToken } from 'token';
 
 import { externalIdCheck } from '../../common/externalIdCheck';
 import { nameCheck } from '../../common/nameCheck';
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { docTypeStartCheck } from '../docTypeStartCheck';
 
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/externalIdCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('docTypeStartCheck()', () => {
    let confVer: ConformanceVersion;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let docTypeStartPToken: DocTypeStartPToken;
 
    beforeEach(() => {
       docTypeStartPToken = new DocTypeStartPToken({
-         open: SToken.fromString('<!'),
-         name: toSToken('rootElement'),
-         nameSpace: toSToken(' '),
          externalId: {},
          externalIdSpace: toSToken(' '),
+         name: toSToken('rootElement'),
+         nameSpace: toSToken(' '),
+         open: SToken.fromString('<!'),
          openSubset: toSToken('['),
       });
 
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('asks the nameCheck() to validate the name', () => {
-      docTypeStartCheck(docTypeStartPToken, mockErrorCollector, confVer);
+      docTypeStartCheck(docTypeStartPToken, collector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(
          docTypeStartPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.DOCTYPE_NAME_INVALID,
+         WFEID.DOCTYPE_NAME_INVALID,
       );
    });
 
    it('checks whether externalId is valid', () => {
-      docTypeStartCheck(docTypeStartPToken, mockErrorCollector, confVer);
+      docTypeStartCheck(docTypeStartPToken, collector, confVer);
 
       expect(externalIdCheck).toHaveBeenCalledWith(
          docTypeStartPToken.externalId,
          false,
-         mockErrorCollector,
+         collector,
          confVer,
       );
    });
 
    it('reports an error if there is no elment name', () => {
       docTypeStartPToken = new DocTypeStartPToken({
-         open: SToken.fromString('<!'),
-         nameSpace: toSToken(' '),
          externalId: {},
          externalIdSpace: toSToken(' '),
+         nameSpace: toSToken(' '),
+         open: SToken.fromString('<!'),
          openSubset: toSToken('['),
       });
 
-      docTypeStartCheck(docTypeStartPToken, mockErrorCollector, new ConformanceVersion());
+      docTypeStartCheck(docTypeStartPToken, collector, new ConformanceVersion());
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.DOCTYPE_NO_NAME,
-         params: undefined,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DOCTYPE_NO_NAME,
          lastPosition: docTypeStartPToken.open,
+         params: [],
       });
    });
 
    it('reports no error if there is an elment name', () => {
-      docTypeStartCheck(docTypeStartPToken, mockErrorCollector, new ConformanceVersion());
+      docTypeStartCheck(docTypeStartPToken, collector, new ConformanceVersion());
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).not.toReportWFError({
-         id: WellFormedError.ID.DOCTYPE_NO_NAME,
-         params: undefined,
+      expect(collector).not.toHaveWellFormedError({
+         id: WFEID.DOCTYPE_NO_NAME,
+         params: [],
          position: undefined,
       });
    });

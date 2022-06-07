@@ -1,10 +1,11 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ErrorCollector } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ConformanceVersion } from 'basic';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { nameCheck } from '../nameCheck';
 
 jest.mock('basic', () => {
@@ -17,50 +18,57 @@ jest.mock('basic', () => {
    };
 });
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('nameCheck()', () => {
-   let ec: ErrorCollector;
+   let collector: ParamCollector;
    let version: ConformanceVersion;
 
    beforeEach(() => {
-      ec = new MockErrorCollector();
+      collector = new ParamCollector();
       version = new ConformanceVersion();
    });
 
    it('reports no errors if no token is provided', () => {
-      nameCheck(undefined, ec, version, 'foo');
+      nameCheck(undefined, collector, version, WFEID.EXTERNALID_EXTRA_TEXT);
 
-      expect(ec.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports the provided error with one parameter ', () => {
-      nameCheck(toSToken('$$$'), ec, version, 'foo');
+      nameCheck(toSToken('$$$'), collector, version, WFEID.EXTERNALID_EXTRA_TEXT);
 
-      expect(ec.errors).toEqual([
-         {
-            id: 'foo',
-            lastPosition: undefined,
-            params: ['$$$'],
-            position: toSToken('$$$'),
-         },
-      ]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_EXTRA_TEXT,
+         lastPosition: undefined,
+         params: ['$$$'],
+         position: toSToken('$$$'),
+      });
    });
 
    it('reports the error when the version does not match', () => {
-      nameCheck(toSToken('good'), ec, version, 'foo');
+      nameCheck(toSToken('good'), collector, version, WFEID.EXTERNALID_EXTRA_TEXT);
 
-      expect(ec.errors).toEqual([
-         {
-            id: 'foo',
-            lastPosition: undefined,
-            params: ['good'],
-            position: toSToken('good'),
-         },
-      ]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.EXTERNALID_EXTRA_TEXT,
+         lastPosition: undefined,
+         params: ['good'],
+         position: toSToken('good'),
+      });
    });
 
    it('reports no error when the string is good for this version', () => {
-      nameCheck(toSToken('good'), ec, new ConformanceVersion(1, 3), 'foo');
+      nameCheck(
+         toSToken('good'),
+         collector,
+         new ConformanceVersion(1, 3),
+         WFEID.EXTERNALID_EXTRA_TEXT,
+      );
 
-      expect(ec.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 });

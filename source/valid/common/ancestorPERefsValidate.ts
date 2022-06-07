@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { SToken, strOrBlank } from 'sToken';
 import {
@@ -11,10 +11,11 @@ import {
    PARAMETER_ENTITY_START_PTOKEN,
 } from 'token';
 
-import { ValidityState } from './validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+import { ValidityState } from './validityState';
+
+const VID = validityErrorCodes.id;
 
 /*
  * Recursively walk up the tree of enetities, amd validate that if this document
@@ -26,7 +27,7 @@ function ancestorPERefsValidate(
       | ParameterEntityStartPToken
       | ParameterEntityReferencePToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    if (!state.isStandalone) {
       return;
@@ -73,9 +74,9 @@ function ancestorPERefsValidate(
           * NOTE: Since this is just evaluating the chain of parameter entities,
           * this does not need to worry about the predefined entities
           */
-         ec.report(VID.ENTITYREF_EXTERNAL, [elementName], open);
+         coll.report(VID.ENTITYREF_EXTERNAL, [elementName], open);
       } else {
-         ancestorPERefsValidate(element, state, ec);
+         ancestorPERefsValidate(element, state, coll);
       }
    }
 }

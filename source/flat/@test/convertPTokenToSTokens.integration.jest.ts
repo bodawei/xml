@@ -29,7 +29,7 @@ import {
 } from 'token-test';
 
 import { convertPTokenToSTokens } from '../convertPTokenToSTokens';
-import { WellFormedWarning } from 'wellformedness'; // ick
+import { Warning } from 'wellformedness'; // ick
 
 describe('convertPTokenToSTokens (integration)', () => {
    it('returns an AttListDeclaration', () => {
@@ -2049,8 +2049,6 @@ describe('convertPTokenToSTokens (integration)', () => {
    });
 
    it('returns an empty array when encountering an error', () => {
-      expect(convertPTokenToSTokens(new WellFormedWarning('foobar'))).toMatchInlineSnapshot(
-         'Array []',
-      );
+      expect(convertPTokenToSTokens(new Warning('foobar'))).toMatchInlineSnapshot('Array []');
    });
 });

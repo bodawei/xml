@@ -1,7 +1,7 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    TextPToken,
    GeneralEntityDeclarationPToken,
@@ -15,8 +15,8 @@ import { externalIdCheck } from '../../common/externalIdCheck';
 import { literalCheck } from '../../common/literalCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
@@ -26,19 +26,22 @@ jest.mock('../../common/literalCheck');
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/nameXmlCheck');
 
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
+
 describe('entityDeclarationCheck (unit)', () => {
    let genEntityDeclarationPToken: GeneralEntityDeclarationPToken;
    let paramEntityDeclarationPToken: ParameterEntityDeclarationPToken;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
 
    beforeEach(() => {
       genEntityDeclarationPToken = new GeneralEntityDeclarationPToken({
-         open: toSToken('<!'),
+         close: toSToken('>'),
+         externalIdSpace: toSToken(' '),
          name: toSToken('anEntity'),
          nameSpace: toSToken(' '),
-         externalIdSpace: toSToken(' '),
-         close: toSToken('>'),
+         open: toSToken('<!'),
       });
 
       paramEntityDeclarationPToken = new ParameterEntityDeclarationPToken({
@@ -51,7 +54,7 @@ describe('entityDeclarationCheck (unit)', () => {
       });
 
       confVer = new ConformanceVersion();
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    it('asks the literal module to look for problems in the declaration part', () => {
@@ -59,14 +62,9 @@ describe('entityDeclarationCheck (unit)', () => {
          value: [new TextPToken({ text: toSToken('yipes') })],
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+      entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-      expect(literalCheck).toHaveBeenCalledWith(
-         pToken,
-         mockErrorCollector,
-         confVer,
-         WellFormedError.ID.NOUN_ENTITYVALUE,
-      );
+      expect(literalCheck).toHaveBeenCalledWith(pToken, collector, confVer, WFEID.NOUN_ENTITYVALUE);
    });
 
    it('reports an error if % is not followed by a space', () => {
@@ -74,13 +72,14 @@ describe('entityDeclarationCheck (unit)', () => {
          parameterSpace: undefined,
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+      entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE,
+         lastPosition: pToken.parameter,
          params: ['anEntity'],
          position: undefined,
-         lastPosition: pToken.parameter,
       });
    });
 
@@ -89,37 +88,38 @@ describe('entityDeclarationCheck (unit)', () => {
          name: undefined,
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+      entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ENTITYDECL_NO_NAME,
-         params: undefined,
-         position: undefined,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ENTITYDECL_NO_NAME,
          lastPosition: pToken.parameterSpace,
+         params: [],
+         position: undefined,
       });
    });
 
    it('calls nameCheck() to report on name validity', () => {
-      entityDeclarationCheck(paramEntityDeclarationPToken, mockErrorCollector, confVer);
+      entityDeclarationCheck(paramEntityDeclarationPToken, collector, confVer);
 
       expect(nameCheck).toHaveBeenCalledWith(
          paramEntityDeclarationPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
-         WellFormedError.ID.ENTITYDECL_NAME_INVALID,
+         WFEID.ENTITYDECL_NAME_INVALID,
       );
    });
 
    it('calls nameXmlCheck() to report on bad names', () => {
-      entityDeclarationCheck(paramEntityDeclarationPToken, mockErrorCollector, confVer);
+      entityDeclarationCheck(paramEntityDeclarationPToken, collector, confVer);
 
       expect(nameXmlCheck).toHaveBeenCalledWith(
          paramEntityDeclarationPToken.name,
-         mockErrorCollector,
+         collector,
          confVer,
          'ENTITY',
-         wellFormedWarningCodes.id.ENTITYDECL_NAME_XMLDASH_RESERVED,
-         wellFormedWarningCodes.id.ENTITYDECL_NAME_XML_RESERVED,
+         WID.ENTITYDECL_NAME_XMLDASH_RESERVED,
+         WID.ENTITYDECL_NAME_XML_RESERVED,
       );
    });
 
@@ -128,13 +128,14 @@ describe('entityDeclarationCheck (unit)', () => {
          nameSpace: undefined,
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, confVer);
+      entityDeclarationCheck(pToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE,
+         lastPosition: pToken.name,
          params: ['anEntity'],
          position: undefined,
-         lastPosition: pToken.name,
       });
    });
 
@@ -143,14 +144,9 @@ describe('entityDeclarationCheck (unit)', () => {
          externalId: {},
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, confVer);
+      entityDeclarationCheck(pToken, collector, confVer);
 
-      expect(externalIdCheck).toHaveBeenCalledWith(
-         pToken.externalId,
-         false,
-         mockErrorCollector,
-         confVer,
-      );
+      expect(externalIdCheck).toHaveBeenCalledWith(pToken.externalId, false, collector, confVer);
    });
 
    it('reports an error if NDATA is the wrong case', () => {
@@ -160,10 +156,11 @@ describe('entityDeclarationCheck (unit)', () => {
          nDataName: toSToken('foo'),
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, confVer);
+      entityDeclarationCheck(pToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ENTITYDECL_NDATA_INVALID_CASE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ENTITYDECL_NDATA_INVALID_CASE,
          params: ['anEntity', 'nData'],
          position: pToken.nData,
       });
@@ -175,12 +172,13 @@ describe('entityDeclarationCheck (unit)', () => {
          nData: toSToken('nData'),
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, confVer);
+      entityDeclarationCheck(pToken, collector, confVer);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ENTITYDECL_NDATA_NO_NAME,
-         params: ['anEntity'],
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
          lastPosition: pToken.nData,
+         id: WFEID.ENTITYDECL_NDATA_NO_NAME,
+         params: ['anEntity'],
       });
    });
 
@@ -191,9 +189,9 @@ describe('entityDeclarationCheck (unit)', () => {
          nDataName: toSToken('nDataName'),
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, confVer);
+      entityDeclarationCheck(pToken, collector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(pToken.nDataName, mockErrorCollector, confVer, false);
+      expect(charCheck).toHaveBeenCalledWith(pToken.nDataName, collector, confVer, false);
    });
 
    it('reports an error if there was no closing', () => {
@@ -201,13 +199,14 @@ describe('entityDeclarationCheck (unit)', () => {
          close: undefined,
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+      entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ENTITYDECL_NO_CLOSE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ENTITYDECL_NO_CLOSE,
+         lastPosition: pToken.nameSpace,
          params: ['anEntity'],
          position: undefined,
-         lastPosition: pToken.nameSpace,
       });
    });
 
@@ -216,13 +215,14 @@ describe('entityDeclarationCheck (unit)', () => {
          extra: toSToken('fooo'),
       });
 
-      entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+      entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.ENTITYDECL_EXTRA_TEXT,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.ENTITYDECL_EXTRA_TEXT,
+         lastPosition: undefined,
          params: ['fooo'],
          position: pToken.extra,
-         lastPosition: undefined,
       });
    });
 
@@ -239,9 +239,10 @@ describe('entityDeclarationCheck (unit)', () => {
             close: toSToken('>'),
          });
 
-         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+         entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no errors if the value has no ampersands in it', () => {
@@ -264,9 +265,10 @@ describe('entityDeclarationCheck (unit)', () => {
             close: toSToken('>'),
          });
 
-         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+         entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports a syntax error if there is a lone ampersand in the value', () => {
@@ -290,13 +292,14 @@ describe('entityDeclarationCheck (unit)', () => {
             close: toSToken('>'),
          });
 
-         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+         entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_CHARS,
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_CHARS,
+            lastPosition: undefined,
             params: ['& bar'],
             position: text.text,
-            lastPosition: undefined,
          });
       });
 
@@ -321,19 +324,21 @@ describe('entityDeclarationCheck (unit)', () => {
             close: toSToken('>'),
          });
 
-         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+         entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_CHARS,
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_CHARS,
+            lastPosition: undefined,
             params: ['& bar & gi'],
             position: text.text,
-            lastPosition: undefined,
          });
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_CHARS,
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_CHARS,
+            lastPosition: undefined,
             params: ['& ginger'],
             position: text.text,
-            lastPosition: undefined,
          });
       });
 
@@ -358,13 +363,14 @@ describe('entityDeclarationCheck (unit)', () => {
             close: toSToken('>'),
          });
 
-         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+         entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_SYNTAX,
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_SYNTAX,
+            lastPosition: undefined,
             params: ['&123;'],
             position: text.text,
-            lastPosition: undefined,
          });
       });
 
@@ -389,13 +395,14 @@ describe('entityDeclarationCheck (unit)', () => {
             close: toSToken('>'),
          });
 
-         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+         entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-         expect(mockErrorCollector).toReportWFError({
-            id: WellFormedError.ID.REFERENCE_INVALID_SYNTAX,
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveWellFormedError({
+            id: WFEID.REFERENCE_INVALID_SYNTAX,
+            lastPosition: undefined,
             params: ['& name ;'],
             position: text.text,
-            lastPosition: undefined,
          });
       });
 
@@ -420,9 +427,10 @@ describe('entityDeclarationCheck (unit)', () => {
             close: toSToken('>'),
          });
 
-         entityDeclarationCheck(pToken, mockErrorCollector, new ConformanceVersion());
+         entityDeclarationCheck(pToken, collector, new ConformanceVersion());
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

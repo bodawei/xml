@@ -1,20 +1,22 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { DeclarationStart } from 'token';
 import { makeCharRef } from 'token-test';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { checkDeclarationStart } from '../checkDeclarationStart';
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('checkDeclarationStart()', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let startPToken: DeclarationStart;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       startPToken = makeCharRef();
    });
 
@@ -24,30 +26,32 @@ describe('checkDeclarationStart()', () => {
          openSpace: toSToken(' '),
       };
 
-      checkDeclarationStart(startPToken, mockErrorCollector);
+      checkDeclarationStart(startPToken, collector);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
-         params: undefined,
-         position: startPToken.openSpace,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DECL_OPEN_XTRA_SPACE_AFTER,
          lastPosition: undefined,
+         params: [],
+         position: startPToken.openSpace,
       });
    });
 
    it('reports an error if the declaration type is not a known one (productions [28], [45], [52], [71], [72], [82])', () => {
       startPToken = {
+         declType: toSToken('frog'),
          open: toSToken('<!'),
          openSpace: toSToken(' '),
-         declType: toSToken('frog'),
       };
 
-      checkDeclarationStart(startPToken, mockErrorCollector);
+      checkDeclarationStart(startPToken, collector);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.DECL_UNKNOWN,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DECL_UNKNOWN,
+         lastPosition: undefined,
          params: ['frog'],
          position: startPToken.declType,
-         lastPosition: undefined,
       });
    });
 
@@ -60,31 +64,33 @@ describe('checkDeclarationStart()', () => {
    ].forEach(([type, production]) => {
       it(`does not report an error if the declaration type is ${type} (production [${production}])`, () => {
          startPToken = {
-            open: toSToken('<!'),
             declType: toSToken('type'),
             declTypeSpace: toSToken(' '),
+            open: toSToken('<!'),
          };
 
-         checkDeclarationStart(startPToken, mockErrorCollector);
+         checkDeclarationStart(startPToken, collector);
 
-         expect(mockErrorCollector).toNotReportError(WellFormedError.ID.DECL_UNKNOWN);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveProblem(WFEID.DECL_UNKNOWN);
       });
    });
 
    it('reports an error if the declaration type is not upper case (productions [28], [45], [52], [71], [72], [82])', () => {
       startPToken = {
+         declType: toSToken('notation'),
          open: toSToken('<!'),
          openSpace: toSToken(' '),
-         declType: toSToken('notation'),
       };
 
-      checkDeclarationStart(startPToken, mockErrorCollector);
+      checkDeclarationStart(startPToken, collector);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DECL_DECLTYPE_INVALID_CASE,
+         lastPosition: undefined,
          params: ['NOTATION', 'notation'],
          position: startPToken.declType,
-         lastPosition: undefined,
       });
    });
 
@@ -94,30 +100,32 @@ describe('checkDeclarationStart()', () => {
          openSpace: toSToken(' '),
       };
 
-      checkDeclarationStart(startPToken, mockErrorCollector);
+      checkDeclarationStart(startPToken, collector);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.DECL_NO_DECLTYPE,
-         params: undefined,
-         position: startPToken.declType,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DECL_NO_DECLTYPE,
          lastPosition: startPToken.openSpace,
+         params: [],
+         position: startPToken.declType,
       });
    });
 
    it('reports an error if there is no space after the declaration type (productions [28], [45], [52], [71], [72], [82])', () => {
       startPToken = {
+         declType: toSToken('notation'),
          open: toSToken('<!'),
          openSpace: toSToken(' '),
-         declType: toSToken('notation'),
       };
 
-      checkDeclarationStart(startPToken, mockErrorCollector);
+      checkDeclarationStart(startPToken, collector);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.DECL_TYPE_NO_SPACE_AFTER,
+      // @ts-expect-error 2329/matchers
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DECL_TYPE_NO_SPACE_AFTER,
+         lastPosition: undefined,
          params: ['notation'],
          position: startPToken.declType,
-         lastPosition: undefined,
       });
    });
 });

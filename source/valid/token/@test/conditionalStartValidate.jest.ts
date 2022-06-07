@@ -1,24 +1,23 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ConditionalStartPToken } from 'token';
 import { makeElementDeclaration, makeParameterEntityReference } from 'token-test';
 
 import { ElDeclType, ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { conditionalStartValidate } from '../conditionalStartValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('conditionalStartValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
 
       state = new ValidityState({
          elementContext: {
@@ -52,10 +51,10 @@ describe('conditionalStartValidate (unit)', () => {
             },
          });
 
-         conditionalStartValidate(conditional, state, mockErrorCollector);
+         conditionalStartValidate(conditional, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET,
             lastPosition: undefined,
             params: ['entityName'],
@@ -68,9 +67,10 @@ describe('conditionalStartValidate (unit)', () => {
             open: toSToken('<!['),
          });
 
-         conditionalStartValidate(conditional, state, mockErrorCollector);
+         conditionalStartValidate(conditional, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when we did not include the bracket (§3.4.0)', () => {
@@ -84,9 +84,10 @@ describe('conditionalStartValidate (unit)', () => {
             },
          });
 
-         conditionalStartValidate(conditional, state, mockErrorCollector);
+         conditionalStartValidate(conditional, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

@@ -1,37 +1,43 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
-import { fatalError } from '../fatalError';
+import { PROBLEM, EntityId, Offset, FATAL_ERROR_SEVERITY } from 'basic';
+import { toSToken } from 'sToken';
 
-describe('fatalError', () => {
-   it('contains no codes by default', () => {
-      expect(fatalError).toMatchInlineSnapshot(`
-         ErrorCodes {
-           "code": Object {
-             "REFERENCE_INVALID_UNPARSED": 2003,
-             "TEXTDECL_INVALID_SPACE": 2002,
-             "XMLDECL_INVALID_SPACE": 2001,
-           },
-           "id": Object {
-             "REFERENCE_INVALID_UNPARSED": "REFERENCE_INVALID_UNPARSED",
-             "TEXTDECL_INVALID_SPACE": "TEXTDECL_INVALID_SPACE",
-             "XMLDECL_INVALID_SPACE": "XMLDECL_INVALID_SPACE",
-           },
-           "mapping": Object {
-             "REFERENCE_INVALID_UNPARSED": Object {
-               "code": 2003,
-               "message": "Must not reference an unparsed entity (§4.9.0). Found \\"{0}\\"",
-             },
-             "TEXTDECL_INVALID_SPACE": Object {
-               "code": 2002,
-               "message": "Text Declarations must not have either the characters 0x85 or 0x2028 in them (§2.11.0 - XML 1.1). Found 0x{0}",
-             },
-             "XMLDECL_INVALID_SPACE": Object {
-               "code": 2001,
-               "message": "XML Declarations must not have either the characters 0x85 or 0x2028 in them (§2.11.0 - XML 1.1). Found 0x{0}",
-             },
-           },
-         }
-      `);
+import { FatalError } from '../fatalError';
+
+describe('FatalError()', () => {
+   it('constructs an instance with just an id', () => {
+      const result = new FatalError('REFERENCE_INVALID_UNPARSED');
+
+      expect(result).toEqual({
+         code: 2003,
+         context: undefined,
+         id: 'REFERENCE_INVALID_UNPARSED',
+         message: 'Must not reference an unparsed entity (§4.9.0). Found "{0}"',
+         place: undefined,
+         severity: FATAL_ERROR_SEVERITY,
+         source: 'wellformed',
+         type: PROBLEM,
+      });
+   });
+
+   it('constructs an instance with all parameters', () => {
+      const result = new FatalError(
+         'REFERENCE_INVALID_UNPARSED',
+         ['a'],
+         toSToken('foo'),
+         new Offset(new EntityId(), 12, 3, 4),
+      );
+
+      expect(result).toEqual({
+         code: 2003,
+         context: new Offset(new EntityId(), 12, 3, 4),
+         id: 'REFERENCE_INVALID_UNPARSED',
+         message: 'Must not reference an unparsed entity (§4.9.0). Found "a"',
+         place: new Offset(new EntityId(), 0, 0, 0),
+         severity: FATAL_ERROR_SEVERITY,
+         source: 'wellformed',
+         type: PROBLEM,
+      });
    });
 });

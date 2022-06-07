@@ -1,21 +1,21 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
-import { ValidityState } from '../common/validityState';
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
-import { validCodes } from '../error/validCodes';
+import { ValidityState } from '../common/validityState';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function entityDeclarationValidate(
    token: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
-   ec.setPos(token.open);
+   coll.setPos(token.open);
 
    // §2.8.0: Validity Constraint: Proper Declaration/PE Nesting
    //    Parameter-entity replacement text must be properly nested with markup declarations.
@@ -26,10 +26,10 @@ function entityDeclarationValidate(
    if (token.unexpanded && token.extra) {
       const extraText = strOrBlank(token.extra);
 
-      ec.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ENTITY']);
+      coll.check(extraText.indexOf('>') !== -1, VID.PEREF_INVALID_END_NESTING, ['ENTITY']);
    }
 
-   entityDeclarationValueValidate(token, state, ec);
+   entityDeclarationValueValidate(token, state, coll);
 }
 
 export { entityDeclarationValidate };

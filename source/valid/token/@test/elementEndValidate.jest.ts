@@ -1,28 +1,27 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
 import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { CmGraph } from '../../contentModel/cmGraphTypes';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { elementEndValidate } from '../elementEndValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('elementEndValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
    let elementEnd: ElementEndPToken;
    let graph: CmGraph;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       elementDeclaration = new ElementDeclarationPToken({
          close: toSToken('>'),
          declType: toSToken('ELEMENT'),
@@ -87,10 +86,10 @@ describe('elementEndValidate (unit)', () => {
 
    describe('Validity Constraint: Element Valid (§3.0.0)', () => {
       it('reports an error the current context is a ELEMENT context, but we are not at the end (§3.0.0)', () => {
-         elementEndValidate(elementEnd, state, mockErrorCollector);
+         elementEndValidate(elementEnd, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.CONTENT_PREMATURE_END,
             lastPosition: undefined,
             params: ['elementName', 'one, two'],
@@ -151,9 +150,10 @@ describe('elementEndValidate (unit)', () => {
             },
          });
 
-         elementEndValidate(elementEnd, state, mockErrorCollector);
+         elementEndValidate(elementEnd, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when there is no active context (§3.0.0)', () => {
@@ -165,9 +165,10 @@ describe('elementEndValidate (unit)', () => {
             },
          };
 
-         elementEndValidate(elementEnd, state, mockErrorCollector);
+         elementEndValidate(elementEnd, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when we are past the end of the document (§3.0.0)', () => {
@@ -179,9 +180,10 @@ describe('elementEndValidate (unit)', () => {
             },
          };
 
-         elementEndValidate(elementEnd, state, mockErrorCollector);
+         elementEndValidate(elementEnd, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when the active context is not an ELEMENT context (§3.0.0)', () => {
@@ -204,9 +206,10 @@ describe('elementEndValidate (unit)', () => {
             },
          };
 
-         elementEndValidate(elementEnd, state, mockErrorCollector);
+         elementEndValidate(elementEnd, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

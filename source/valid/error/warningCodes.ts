@@ -7,9 +7,9 @@
 // THING_NO_(whatever) = "Missing WHATEVER in a THING"
 // THING_XTRA_... = " ..."
 
-import { ErrorCodes } from 'basic';
+import { ProblemCodes } from 'basic';
 
-const warningCodes = new ErrorCodes({
+const warningCodes = new ProblemCodes({
    ELEMENT_CHILD_UNDECLARED: {
       code: 201,
       message:

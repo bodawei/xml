@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { LiteralValuePToken } from 'token';
@@ -13,29 +13,29 @@ import { literalValueCheck } from '../literalValueCheck';
 jest.mock('../../common/charCheck');
 
 describe('literalValueCheck() (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
    let valuePToken: LiteralValuePToken;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       confVer = new ConformanceVersion();
 
       valuePToken = [new TextPToken({ text: toSToken('xxx') })];
    });
 
    it('calls charCheck() to check the value', () => {
-      literalValueCheck(valuePToken, mockErrorCollector, confVer);
+      literalValueCheck(valuePToken, collector, confVer);
 
-      expect(charCheck).toHaveBeenCalledWith(toSToken('xxx'), mockErrorCollector, confVer, false);
+      expect(charCheck).toHaveBeenCalledWith(toSToken('xxx'), collector, confVer, false);
    });
 
    it('sets the position before calling misc.checkWellFormed', () => {
-      const mock: jest.MockedFunction<typeof mockErrorCollector.setPos> = jest.fn();
+      const mock: jest.MockedFunction<typeof collector.setPos> = jest.fn();
 
-      mockErrorCollector.setPos = mock;
+      collector.setPos = mock;
 
-      literalValueCheck(valuePToken, mockErrorCollector, confVer);
+      literalValueCheck(valuePToken, collector, confVer);
 
       expect(mock.mock.calls[0][0]).toEqual(toSToken('xxx'));
    });
@@ -45,9 +45,9 @@ describe('literalValueCheck() (unit)', () => {
    //    refCheckWellFormedSpy = spyOn(geRef, 'checkWellFormed');
    //    valuePToken.push(geRef);
 
-   //    literalValueCheck(valuePToken, mockErrorCollector, confVer);
+   //    literalValueCheck(valuePToken, collector, confVer);
 
-   //    expect(refCheckWellFormedSpy.mock.calls[0][0]).toEqual(mockErrorCollector);
+   //    expect(refCheckWellFormedSpy.mock.calls[0][0]).toEqual(collector);
    // });
 
    // it('calls charRef.checkWellFormed when there is a charRef in the value', () => {
@@ -55,8 +55,8 @@ describe('literalValueCheck() (unit)', () => {
    //    const spy = spyOn(ref, 'checkWellFormed');
    //    valuePToken.push(ref);
 
-   //    literalValueCheck(valuePToken, mockErrorCollector, confVer);
+   //    literalValueCheck(valuePToken, collector, confVer);
 
-   //    expect(spy).toHaveBeenCalledWith(mockErrorCollector, confVer);
+   //    expect(spy).toHaveBeenCalledWith(collector, confVer);
    // });
 });

@@ -1,26 +1,25 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { GeneralEntityDeclarationPToken } from 'pToken';
 import { toSToken } from 'sToken';
 import { NOTATION_PTOKEN } from 'token';
 import { makeElementDeclaration } from 'token-test';
 
-import { docTypeEndValidate } from '../docTypeEndValidate';
-import { validCodes } from '../../error/validCodes';
 import { ElDeclType, ValidityState } from '../../common/validityState';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
+import { docTypeEndValidate } from '../docTypeEndValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('docTypeEndValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
    });
 
    describe('One ID per Element Type constraint (§3.3.1)', () => {
@@ -48,10 +47,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_XTRA_ID,
             lastPosition: undefined,
             params: ['anElement', 'other', 'id'],
@@ -75,9 +74,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -105,10 +105,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_NOTATION_ON_EMPTY,
             lastPosition: undefined,
             params: ['emptyEl', 'notationAttr'],
@@ -140,9 +140,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when a CDATA attribute type is on an EMPTY element (§3.3.1)', () => {
@@ -168,9 +169,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when a NOTATION attribute type is on an ANY element (§3.3.1)', () => {
@@ -196,9 +198,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when the element or attribute details are undefined (§3.3.1)', () => {
@@ -214,9 +217,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -246,10 +250,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_NOTATION_NO_DECLARATION,
             lastPosition: undefined,
             params: ['someElement', 'notationAttr', 'undeclared'],
@@ -285,9 +289,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error for enumeration types (§3.3.1)', () => {
@@ -316,9 +321,10 @@ describe('docTypeEndValidate (unit)', () => {
             notations: {},
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -349,10 +355,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_XTRA_NOTATION,
             lastPosition: undefined,
             params: ['someElement', 'notationAttr2'],
@@ -380,9 +386,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when there are multiple NOTATION attribute per element, but the conformance version is 1.0/1 (§3.3.1)', () => {
@@ -412,9 +419,10 @@ describe('docTypeEndValidate (unit)', () => {
             confVer: new ConformanceVersion(1.0, 1),
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -437,10 +445,10 @@ describe('docTypeEndValidate (unit)', () => {
             notations: {},
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ENTITYDECL_NO_NOTATION_DECLARATION,
             lastPosition: undefined,
             params: ['withNData', 'someNotation'],
@@ -468,9 +476,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when there is no NDATA name  (§4.2.2)', () => {
@@ -492,9 +501,10 @@ describe('docTypeEndValidate (unit)', () => {
             },
          });
 
-         docTypeEndValidate(state, mockErrorCollector);
+         docTypeEndValidate(state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

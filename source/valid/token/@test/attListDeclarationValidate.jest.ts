@@ -2,8 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    AttListDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -23,25 +22,25 @@ import {
    makeGeneralEntityStart,
 } from 'token-test';
 
-import { ValidityState } from '../../common/validityState';
-import { attributeValueValidate } from '../../common/attributeValueValidate';
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
+import { attributeValueValidate } from '../../common/attributeValueValidate';
+import { ValidityState } from '../../common/validityState';
 import { xmlSpaceValidate } from '../../common/xmlSpaceValidate';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { attListDeclarationValidate } from '../attListDeclarationValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 jest.mock('../../common/attributeValueValidate');
 jest.mock('../../common/ancestorPERefsValidate');
 jest.mock('../../common/xmlSpaceValidate');
 
 describe('attListDeclarationValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       state = new ValidityState({});
    });
 
@@ -64,10 +63,10 @@ describe('attListDeclarationValidate (unit)', () => {
             },
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_INVALID_END_NESTING,
             lastPosition: undefined,
             params: ['ATTLIST'],
@@ -93,8 +92,9 @@ describe('attListDeclarationValidate (unit)', () => {
             },
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
-         expect(mockErrorCollector.errors).toEqual([]);
+         attListDeclarationValidate(attListDecl, state, collector);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -190,13 +190,14 @@ describe('attListDeclarationValidate (unit)', () => {
                open: toSToken('<!'),
             });
 
-            attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+            attListDeclarationValidate(attListDecl, state, collector);
 
             if (pass) {
-               expect(mockErrorCollector.errors).toEqual([]);
+               // @ts-expect-error 2329/matchers
+               expect(collector).not.toHaveAnyProblems();
             } else {
                // @ts-expect-error 2329/matchers
-               expect(mockErrorCollector).toReportValidityError({
+               expect(collector).toHaveValidityError({
                   id: VID.ENTITYREF_EXTERNAL,
                   lastPosition: undefined,
                   params: [start.referencePToken.name?.str],
@@ -233,9 +234,9 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(ancestorPERefsValidate).toHaveBeenCalledWith(start, state, mockErrorCollector);
+         expect(ancestorPERefsValidate).toHaveBeenCalledWith(start, state, collector);
       });
    });
 
@@ -257,12 +258,12 @@ describe('attListDeclarationValidate (unit)', () => {
       });
       // jest.spyOn(validator, 'attributeValueValidate');
 
-      attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+      attListDeclarationValidate(attListDecl, state, collector);
 
       expect(attributeValueValidate).toHaveBeenCalledWith(
          attListDecl.attDefs[0].value,
          state,
-         mockErrorCollector,
+         collector,
       );
    });
 
@@ -280,10 +281,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
             lastPosition: toSToken('ID'),
             params: ['elName', 'att1', ''],
@@ -305,10 +306,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_ID_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '#FIXED'],
@@ -330,9 +331,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when the default for an ID attribute is #IMPLIED (§3.3.1)', () => {
@@ -349,9 +351,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -381,10 +384,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_XTRA_NOTATION_VALUE,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one'],
@@ -416,10 +419,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_XTRA_ENUMERATION_VALUE,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one'],
@@ -455,9 +458,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when no values are repeated in a NOTATION attribute declaration (§3.3.1)', () => {
@@ -485,9 +489,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when there is no enumeration (§3.3.1)', () => {
@@ -504,9 +509,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 
@@ -524,9 +530,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports no error when an ID declaration has a default value that does not match either Name or NmToken (§3.3.2)', () => {
@@ -543,9 +550,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
 
       it('reports an error when an IDREF declaration has a syntactically invalid default value (§3.3.2)', () => {
@@ -561,10 +569,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_IDREF_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
@@ -585,10 +593,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_IDREFS_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
@@ -609,10 +617,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_ENTITY_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
@@ -633,10 +641,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_ENTITIES_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
@@ -657,10 +665,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_NMTOKEN_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
@@ -681,10 +689,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_NMTOKENS_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '$bad'],
@@ -720,10 +728,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_NOTATION_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one,two,three', 'foo'],
@@ -758,10 +766,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', 'one,two,three', 'foo'],
@@ -796,10 +804,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', 'two,three', 'foo'],
@@ -819,10 +827,10 @@ describe('attListDeclarationValidate (unit)', () => {
             open: toSToken('<!'),
          });
 
-         attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+         attListDeclarationValidate(attListDecl, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.ATTLISTDECL_ATT_INVALID_ENUMERATION_DEFAULT,
             lastPosition: undefined,
             params: ['elName', 'att1', '', 'foo'],
@@ -846,14 +854,14 @@ describe('attListDeclarationValidate (unit)', () => {
          open: toSToken('<!'),
       });
 
-      attListDeclarationValidate(attListDecl, state, mockErrorCollector);
+      attListDeclarationValidate(attListDecl, state, collector);
 
       expect(xmlSpaceValidate).toHaveBeenCalledWith(
          attListDecl.attDefs[0],
          'elName',
          'xml:space',
          state,
-         mockErrorCollector,
+         collector,
       );
    });
 });

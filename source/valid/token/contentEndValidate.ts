@@ -1,13 +1,13 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 
 import { IdRefDetails, ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
-function contentEndValidate(state: ValidityState, ec: ErrorCollector): void {
+function contentEndValidate(state: ValidityState, coll: Collector): void {
    const refValues = Object.keys(state.idRefs);
    const idvalues = Object.keys(state.ids);
    const idMap: Record<string, boolean> = {};
@@ -23,7 +23,7 @@ function contentEndValidate(state: ValidityState, ec: ErrorCollector): void {
       //    each Name must match the value of an ID attribute on some element
       //    in the XML document; i.e. IDREF values must match the value of
       //    some ID attribute.
-      ec.check(
+      coll.check(
          !idMap[refValue],
          VID.ELEMENTSTART_ATT_IDREF_NO_ID,
          [details.elName, details.attName, refValue],

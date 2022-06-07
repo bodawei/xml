@@ -2,24 +2,20 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { ConformanceVersion, ErrorCollector, XmlErrorToken } from 'basic';
+import { ConformanceVersion, Problem } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ParseType, ParseToken } from 'pToken';
-import { toSToken } from 'sToken';
 import { STokenSource } from 'sToken';
 import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
 
 import { DocumentChecker } from '../DocumentChecker';
 import { ContentChecker } from '../ContentChecker';
 import { MarkupDeclChecker } from '../MarkupDeclChecker';
-import { WellFormedError } from '../error/WellFormedError';
-import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { warningCodes } from '../error/warningCodes';
 
-const WFID = WellFormedError.ID;
-const WARNID = wellFormedWarningCodes.id;
+const WID = warningCodes.id;
 
-fdescribe('DocumentChecker (integration)', () => {
-   let ec: ErrorCollector;
+describe('DocumentChecker (integration)', () => {
    let checker: DocumentChecker;
    let pTokenStream: PTokenStream;
 
@@ -36,7 +32,7 @@ fdescribe('DocumentChecker (integration)', () => {
       done: () => void,
       confVer?: ConformanceVersion,
    ): void {
-      const finalResults: Array<XmlErrorToken> = [];
+      const finalResults: Array<Problem> = [];
       const sTokenSource = new STokenSource();
 
       pTokenStream = new PTokenStream(sTokenSource, {
@@ -53,14 +49,9 @@ fdescribe('DocumentChecker (integration)', () => {
       gatherStreamResults<ParseToken>(attFixer, (results) => {
          // console.json(results);
          for (const result of results) {
-            ec = new ErrorCollector(
-               'open' in result ? result.open : toSToken('foo'),
-               WellFormedError,
-            );
+            const problems = checker.check(result);
 
-            checker.check(result, ec);
-
-            finalResults.push(...ec.errors);
+            finalResults.push(...problems);
          }
 
          const targetError = finalResults.find((err) => err.id === errorCode);
@@ -70,14 +61,14 @@ fdescribe('DocumentChecker (integration)', () => {
       });
    }
 
-   fit('reports an interoperability warning when an empty element tag is used for an element that was not declared as EMPTY (§3.1.0)', (done) => {
+   it('reports an interoperability warning when an empty element tag is used for an element that was not declared as EMPTY (§3.1.0)', (done) => {
       expectError(
          `<?xml version="1.0"?>
          <!DOCTYPE root [
             <!ELEMENT bar ANY>
          ]>
          <bar/>`,
-         WARNID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
+         WID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
          done,
       );
    });
@@ -90,8 +81,8 @@ fdescribe('DocumentChecker (integration)', () => {
             <!ENTITY bar "boo">
          ]>
          <bar/>`,
-         WARNID.ENTITYDECL_XRA_DECLARATION,
-         done!,
+         WID.ENTITYDECL_XRA_DECLARATION,
+         done,
       );
    });
 
@@ -103,8 +94,8 @@ fdescribe('DocumentChecker (integration)', () => {
             <!ENTITY % bar "boo">
          ]>
          <bar/>`,
-         WARNID.ENTITYDECL_XRA_DECLARATION,
-         done!,
+         WID.ENTITYDECL_XRA_DECLARATION,
+         done,
       );
    });
 });

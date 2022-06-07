@@ -1,24 +1,23 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ConditionalEndPToken } from 'token';
 import { makeConditionalStart, makeParameterEntityStart } from 'token-test';
 
 import { ValidityState } from '../../common/validityState';
-import { validCodes } from '../../error/validCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { conditionalEndValidate } from '../conditionalEndValidate';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 describe('conditionalEndValidate (unit)', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let state: ValidityState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
 
       state = new ValidityState({
          dtdContext: {
@@ -36,10 +35,10 @@ describe('conditionalEndValidate (unit)', () => {
             open: toSToken('<!['),
          });
 
-         conditionalEndValidate(conditional, state, mockErrorCollector);
+         conditionalEndValidate(conditional, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING,
             lastPosition: undefined,
             params: [],
@@ -60,10 +59,10 @@ describe('conditionalEndValidate (unit)', () => {
             open: toSToken('<!['),
          });
 
-         conditionalEndValidate(conditional, state, mockErrorCollector);
+         conditionalEndValidate(conditional, state, collector);
 
          // @ts-expect-error 2329/matchers
-         expect(mockErrorCollector).toReportValidityError({
+         expect(collector).toHaveValidityError({
             id: VID.PEREF_INVALID_CONDITIONALSECTION_END_NESTING,
             lastPosition: undefined,
             params: [],
@@ -84,9 +83,10 @@ describe('conditionalEndValidate (unit)', () => {
             },
          });
 
-         conditionalEndValidate(conditional, state, mockErrorCollector);
+         conditionalEndValidate(conditional, state, collector);
 
-         expect(mockErrorCollector.errors).toEqual([]);
+         // @ts-expect-error 2329/matchers
+         expect(collector).not.toHaveAnyProblems();
       });
    });
 });

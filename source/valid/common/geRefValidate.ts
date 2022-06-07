@@ -1,22 +1,22 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
-import { validCodes } from '../error/validCodes';
-import { ValidityWarning } from '../error/validityWarning';
 
 import { PREDEFINED_ENTITIES } from '../common/constants';
 import { ValidityState } from '../common/validityState';
+import { validityErrorCodes } from '../error/validityErrorCodes';
+import { Warning } from '../error/warning';
 import { warningCodes } from '../error/warningCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 const WARNID = warningCodes.id;
 
 function geRefValidate(
    token: GeneralEntityReferencePToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    const geDeclName = strOrBlank(token.name);
    const isDeclared = !!state.generalEntities[geDeclName];
@@ -26,8 +26,8 @@ function geRefValidate(
       return;
    }
 
-   ec.setPos(token.open);
-   ec.setPos(token.name);
+   coll.setPos(token.open);
+   coll.setPos(token.name);
    /*
     * §4.1.0: Validity Constraint: Entity Declared
     *    In a document with an external subset or parameter entity references with
@@ -35,14 +35,14 @@ function geRefValidate(
     *    in an entity declaration. ...
     */
    if (!PREDEFINED_ENTITIES.includes(geDeclName)) {
-      ec.report(VID.GENERALENTITY_NO_DECLARATION, [geDeclName]);
+      coll.report(VID.GENERALENTITY_NO_DECLARATION, [geDeclName]);
    } else {
       /*
        * §4.1.0: Validity Constraint: Entity Declared
        *    For interoperability, valid documents should declare the entities
        *    amp, lt, gt, apos, quot, in the form specified in 4.6 Predefined Entities.
        */
-      ec.reportError(WARNID.ENTITY_PREDEFINED_NO_DECLARATION, ValidityWarning, [geDeclName]);
+      coll.reportProblem(Warning, WARNID.ENTITY_PREDEFINED_NO_DECLARATION, [geDeclName]);
    }
 }
 

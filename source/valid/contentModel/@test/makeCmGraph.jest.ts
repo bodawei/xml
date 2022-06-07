@@ -1,12 +1,11 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ContentModelP } from 'pToken';
 
-import { makeCmGraph } from '../makeCmGraph';
 import { cmToCmGraph } from '../cmToCmGraph';
 import { collapseAutoTrans } from '../collapseAutoTrans';
+import { makeCmGraph } from '../makeCmGraph';
 import { pruneCmGraph } from '../pruneCmGraph';
 
 jest.mock('../cmToCmGraph');

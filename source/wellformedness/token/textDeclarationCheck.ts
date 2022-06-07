@@ -1,20 +1,21 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { InstructionField, TextDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { charCheck } from '../common/charCheck';
 import { checkSpaceProblems, checkSpaces, checkVersionString } from '../common/xmlTextDeclUtils';
-import { WellFormedError } from '../error/WellFormedError';
-import { fatalError } from '../error/fatalError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { fatalErrorCodes } from '../error/fatalErrorCodes';
 
-const WFEID = WellFormedError.ID;
+const FEID = fatalErrorCodes.id;
+const WFEID = wellFormedErrorCodes.id;
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 
 function checkFields(
    params: ReadonlyArray<InstructionField>,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
    let foundEncoding = false;
@@ -26,70 +27,70 @@ function checkFields(
       const value = param.value;
       const valueText = strOrBlank(value);
 
-      ec.setPos(param.name);
-      ec.check(nameText !== lcName, WFEID.TEXTDECL_PARAM_INVALID_CASE, [lcName, nameText]);
+      collector.setPos(param.name);
+      collector.check(nameText !== lcName, WFEID.TEXTDECL_PARAM_INVALID_CASE, [lcName, nameText]);
 
       switch (lcName) {
          case 'version':
-            ec.check(foundVersion, WFEID.TEXTDECL_DUPLICATE_VERSION);
+            collector.check(foundVersion, WFEID.TEXTDECL_DUPLICATE_VERSION);
             foundVersion = true;
-            ec.check(foundEncoding, WFEID.TEXTDECL_VERSION_INVALID_ORDER);
+            collector.check(foundEncoding, WFEID.TEXTDECL_VERSION_INVALID_ORDER);
 
-            checkSpaces(param, fatalError.id.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
-            ec.setPos(value);
-            charCheck(value, ec, confVer, false);
+            checkSpaces(param, FEID.TEXTDECL_INVALID_SPACE, undefined, collector, confVer);
+            collector.setPos(value);
+            charCheck(value, collector, confVer, false);
 
-            checkVersionString(valueText, false, ec, confVer);
+            checkVersionString(valueText, false, collector, confVer);
             break;
          case 'encoding':
-            ec.check(foundEncoding, WFEID.TEXTDECL_DUPLICATE_ENCODING);
+            collector.check(foundEncoding, WFEID.TEXTDECL_DUPLICATE_ENCODING);
             foundEncoding = true;
 
-            checkSpaces(param, fatalError.id.TEXTDECL_INVALID_SPACE, undefined, ec, confVer);
-            ec.setPos(value);
-            charCheck(value, ec, confVer, false);
-            ec.check(!ENCODING_REGEXP.test(valueText), WFEID.TEXTDECL_ENCODING_INVALID, [
+            checkSpaces(param, FEID.TEXTDECL_INVALID_SPACE, undefined, collector, confVer);
+            collector.setPos(value);
+            charCheck(value, collector, confVer, false);
+            collector.check(!ENCODING_REGEXP.test(valueText), WFEID.TEXTDECL_ENCODING_INVALID, [
                valueText,
             ]);
             break;
       }
 
-      ec.setPos(param.valueSpace);
-      checkSpaceProblems(param.valueSpace, fatalError.id.TEXTDECL_INVALID_SPACE, ec, confVer);
+      collector.setPos(param.valueSpace);
+      checkSpaceProblems(param.valueSpace, FEID.TEXTDECL_INVALID_SPACE, collector, confVer);
    }
 
-   ec.check(!foundEncoding, WFEID.TEXTDECL_ENCODING_MISSING);
+   collector.check(!foundEncoding, WFEID.TEXTDECL_ENCODING_MISSING);
 }
 
 function textDeclarationCheck(
    pToken: TextDeclarationPToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   ec.setPos(pToken.open);
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.TEXTDECL_SPACE_AFTER_OPEN);
-   checkSpaceProblems(pToken.openSpace, fatalError.id.TEXTDECL_INVALID_SPACE, ec, confVer);
+   collector.setPos(pToken.open);
+   collector.setPos(pToken.openSpace);
+   collector.check(pToken.openSpace, WFEID.TEXTDECL_SPACE_AFTER_OPEN);
+   checkSpaceProblems(pToken.openSpace, FEID.TEXTDECL_INVALID_SPACE, collector, confVer);
 
-   ec.setPos(pToken.target);
-   charCheck(pToken.target, ec, confVer, false);
+   collector.setPos(pToken.target);
+   charCheck(pToken.target, collector, confVer, false);
 
    if (pToken.target) {
       const target = strOrBlank(pToken.target);
       const lcTarget = target.toLowerCase();
-      ec.check(target !== lcTarget, WFEID.TEXTDECL_TARGET_INVALID_CASE, [pToken.target.str]);
+      collector.check(target !== lcTarget, WFEID.TEXTDECL_TARGET_INVALID_CASE, [pToken.target.str]);
    } else {
-      ec.report(WFEID.TEXTDECL_NO_TARGET);
+      collector.report(WFEID.TEXTDECL_NO_TARGET);
    }
 
-   ec.setPos(pToken.targetSpace);
-   ec.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);
-   checkSpaceProblems(pToken.targetSpace, fatalError.id.TEXTDECL_INVALID_SPACE, ec, confVer);
+   collector.setPos(pToken.targetSpace);
+   collector.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);
+   checkSpaceProblems(pToken.targetSpace, FEID.TEXTDECL_INVALID_SPACE, collector, confVer);
 
-   checkFields(pToken.fields, ec, confVer);
+   checkFields(pToken.fields, collector, confVer);
 
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.TEXTDECL_NO_CLOSE);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.TEXTDECL_NO_CLOSE);
 }
 
 export { textDeclarationCheck };

@@ -1,40 +1,40 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { ElementEndPToken } from 'token';
 
 import { nameCheck } from '../common/nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
-import { WellFormedError } from '../error/WellFormedError';
-import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { warningCodes } from '../error/warningCodes';
 
-const WFEID = WellFormedError.ID;
-const WARN = wellFormedWarningCodes.id;
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 function elementEndCheck(
    pToken: ElementEndPToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
+   collector.setPos(pToken.openSpace);
+   collector.check(pToken.openSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
 
-   ec.setPos(pToken.name);
-   ec.check(!pToken.name, WFEID.ELEMENT_NO_NAME);
-   nameCheck(pToken.name, ec, confVer, WFEID.ELEMENT_NAME_INVALID);
+   collector.setPos(pToken.name);
+   collector.check(!pToken.name, WFEID.ELEMENT_NO_NAME);
+   nameCheck(pToken.name, collector, confVer, WFEID.ELEMENT_NAME_INVALID);
    nameXmlCheck(
       pToken.name,
-      ec,
+      collector,
       confVer,
       'ELEMENT',
-      WARN.ELEMENT_NAME_XMLCOLON_RESERVED,
-      WARN.ELEMENT_NAME_XML_RESERVED,
+      WID.ELEMENT_NAME_XMLCOLON_RESERVED,
+      WID.ELEMENT_NAME_XML_RESERVED,
    );
 
-   ec.setPos(pToken.nameSpace);
+   collector.setPos(pToken.nameSpace);
 
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.ELEMENT_NO_CLOSE);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.ELEMENT_NO_CLOSE);
 }
 
 export { elementEndCheck };

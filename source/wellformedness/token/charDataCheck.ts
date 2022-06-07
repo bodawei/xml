@@ -1,19 +1,19 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { CharDataPToken } from 'token';
 
 import { charCheck } from '../common/charCheck';
 
 function charDataCheck(
    pToken: CharDataPToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
    inSecondPassText = false,
 ): void {
-   ec.setPos(pToken.text);
+   collector.setPos(pToken.text);
 
-   charCheck(pToken.text, ec, confVer, inSecondPassText);
+   charCheck(pToken.text, collector, confVer, inSecondPassText);
 }
 
 export { charDataCheck };

@@ -1,35 +1,35 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { LiteralPToken } from 'token';
 
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 import { literalValueCheck } from './literalValueCheck';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 
 function literalCheck(
    pTokenPart: LiteralPToken | undefined,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
    type: string,
    checkValue?: () => void,
 ): void {
    const pToken: LiteralPToken = pTokenPart || { value: [] };
 
-   ec.setPos(pToken.openQuote);
-   ec.check(!pToken.openQuote, WFEID.LITERAL_NO_OPEN_QUOTE, [type]);
+   collector.setPos(pToken.openQuote);
+   collector.check(!pToken.openQuote, WFEID.LITERAL_NO_OPEN_QUOTE, [type]);
 
    const pieces = pToken.value;
-   literalValueCheck(pieces, ec, confVer);
+   literalValueCheck(pieces, collector, confVer);
 
    if (checkValue) {
       checkValue();
    }
 
-   ec.setPos(pToken.closeQuote);
+   collector.setPos(pToken.closeQuote);
 
-   ec.check(!pToken.closeQuote, WFEID.LITERAL_NO_CLOSE_QUOTE, [type]);
+   collector.check(!pToken.closeQuote, WFEID.LITERAL_NO_CLOSE_QUOTE, [type]);
 }
 
 export { literalCheck };

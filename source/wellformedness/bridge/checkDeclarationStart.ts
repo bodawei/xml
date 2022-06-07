@@ -1,39 +1,41 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { DeclarationStart } from 'token';
 import { strOrBlank } from 'sToken';
 
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 const DECLARATION_TYPES = ['ATTLIST', 'DOCTYPE', 'ELEMENT', 'ENTITY', 'NOTATION'];
 
-function checkDeclarationStart(pToken: DeclarationStart, ec: ErrorCollector): void {
+function checkDeclarationStart(pToken: DeclarationStart, collector: Collector): void {
    const declTypeString = strOrBlank(pToken.declType);
-   ec.setPos(pToken.open);
+   collector.setPos(pToken.open);
 
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.DECL_OPEN_XTRA_SPACE_AFTER);
+   collector.setPos(pToken.openSpace);
+   collector.check(pToken.openSpace, WFEID.DECL_OPEN_XTRA_SPACE_AFTER);
 
-   ec.setPos(pToken.declType);
+   collector.setPos(pToken.declType);
 
    if (pToken.declType) {
       const upperCase = pToken.declType.str.toLocaleUpperCase();
 
       if (!DECLARATION_TYPES.includes(upperCase)) {
-         ec.check(!pToken.declTypeSpace, WFEID.DECL_UNKNOWN, [strOrBlank(pToken.declType)]);
+         collector.check(!pToken.declTypeSpace, WFEID.DECL_UNKNOWN, [strOrBlank(pToken.declType)]);
       } else {
-         ec.check(pToken.declType.str !== upperCase, WFEID.DECL_DECLTYPE_INVALID_CASE, [
+         collector.check(pToken.declType.str !== upperCase, WFEID.DECL_DECLTYPE_INVALID_CASE, [
             upperCase,
             declTypeString,
          ]);
       }
    } else {
-      ec.report(WFEID.DECL_NO_DECLTYPE);
+      collector.report(WFEID.DECL_NO_DECLTYPE);
    }
 
-   ec.check(!pToken.declTypeSpace, WFEID.DECL_TYPE_NO_SPACE_AFTER, [strOrBlank(pToken.declType)]);
+   collector.check(!pToken.declTypeSpace, WFEID.DECL_TYPE_NO_SPACE_AFTER, [
+      strOrBlank(pToken.declType),
+   ]);
 }
 
 export { checkDeclarationStart };

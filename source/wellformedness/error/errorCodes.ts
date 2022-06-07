@@ -1,8 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCodes } from 'basic';
+import { ProblemCodes } from 'basic';
 
-const errorCodes = new ErrorCodes({
+const errorCodes = new ProblemCodes({
    XMLSPACE_INVALID_VALUE: {
       code: 1300,
       message:

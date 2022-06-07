@@ -1,38 +1,18 @@
-/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2022 by 柏大衛. All rights reserved. */
 
-import { makeOffset, XmlErrorToken } from 'basic';
-import { XML_ERROR_TOKEN, Offset, XmlErrorPosition } from 'basic';
-import { validCodes } from './validCodes';
+import { ProblemPosition, Problem, ERROR_SEVERITY } from 'basic';
 
-const VALIDITY_ERROR_SUBTYPE = 'VALIDITY_ERROR';
+import { validityErrorCodes } from './validityErrorCodes';
 
-class ValidityError implements XmlErrorToken {
-   public readonly code: number;
-
-   public readonly context?: Offset;
-
-   public readonly id: string;
-
-   public readonly message: string;
-
-   public readonly place?: Offset;
-
-   public readonly subtype: typeof VALIDITY_ERROR_SUBTYPE = VALIDITY_ERROR_SUBTYPE;
-
-   public readonly type: typeof XML_ERROR_TOKEN = XML_ERROR_TOKEN;
-
+class ValidityError extends Problem {
    constructor(
       id: string,
       params?: ReadonlyArray<string | number | boolean>,
-      place?: XmlErrorPosition,
-      context?: XmlErrorPosition,
+      place?: ProblemPosition,
+      context?: ProblemPosition,
    ) {
-      this.id = id;
-      this.code = validCodes.codeFor(id);
-      this.context = makeOffset(context);
-      this.message = validCodes.messageFor(id, params);
-      this.place = makeOffset(place);
+      super(validityErrorCodes, ERROR_SEVERITY, 'VALIDITY_CONSTRAINT', id, params, place, context);
    }
 }
 
-export { VALIDITY_ERROR_SUBTYPE, ValidityError };
+export { ValidityError };

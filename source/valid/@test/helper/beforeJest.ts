@@ -1,11 +1,14 @@
 import { expect } from '@jest/globals';
+import { makeProblemMatcher } from 'basic-test';
 
-import { makeNewErrorMatcher } from 'basic-test';
-
-import { validCodes } from '../../error/validCodes';
+import { errorCodes } from '../../error/errorCodes';
+import { validityErrorCodes } from '../../error/validityErrorCodes';
+import { warningCodes } from '../../error/warningCodes';
 
 expect.extend({
-   toReportValidityError: makeNewErrorMatcher(validCodes),
+   toHaveValidityError: makeProblemMatcher(validityErrorCodes),
+   toHaveValidWarning: makeProblemMatcher(warningCodes),
+   toHaveValidError: makeProblemMatcher(errorCodes),
 });
 
-export { validCodes };
+export { validityErrorCodes };

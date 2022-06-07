@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, isNmToken } from 'basic';
+import { ConformanceVersion, Collector, isNmToken } from 'basic';
 import { SToken } from 'sToken';
 
 /**********************************************************************\
@@ -10,7 +10,7 @@ import { SToken } from 'sToken';
 
 function nmTokenCheck(
    nameTokenSToken: SToken | undefined,
-   ec: ErrorCollector,
+   collector: Collector,
    confVers: ConformanceVersion,
    errorCode: string,
 ): void {
@@ -18,7 +18,7 @@ function nmTokenCheck(
       return;
    }
 
-   ec.report(errorCode, [nameTokenSToken.str], nameTokenSToken);
+   collector.report(errorCode, [nameTokenSToken.str], nameTokenSToken);
 }
 
 export { nmTokenCheck };

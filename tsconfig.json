@@ -67,7 +67,6 @@
    },
    "include": [
       "build/beforeJest.ts",
-      "build/beforeJasmine.ts",
       "source/**/*.ts",
       "build/buildTestData.ts",
       "bcp47-validate.d.ts", // We don't really need this declared here. 

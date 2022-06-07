@@ -45,7 +45,7 @@ const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
 const RANGE = new Range(new EntityId(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
 
 function makeInsertedRange() {
-   return RANGE.clone();
+   return new Range(RANGE);
 };
 
 function makeAttListDeclaration(type = 'CDATA'): AttListDeclarationPToken {

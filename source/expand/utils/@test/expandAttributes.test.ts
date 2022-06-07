@@ -1,9 +1,9 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ENTITY_ID, CONFORMANCE_VERSION, XmlErrorToken } from 'basic';
+import { ENTITY_ID, CONFORMANCE_VERSION, Problem } from 'basic';
 import { GeneralEntityDeclarationPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken, STokenSource } from 'sToken';
-import { WellFormedError } from 'wellformedness';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
@@ -15,6 +15,8 @@ import { ExpandParams, RetrieveResults, AttributeValueResults } from '../../type
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { EntityDetails } from '../EntityDetails';
 import { EntityContextStack } from '../EntityContextStack';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('expandAttributes() (unit)', () => {
    let entityDetails: EntityDetails;
@@ -63,7 +65,7 @@ describe('expandAttributes() (unit)', () => {
             retrieveExternalEntity: (): RetrieveResults => {
                return {
                   sTokenSource: new STokenSource(),
-                  getErrors: (): Array<XmlErrorToken> => [],
+                  getErrors: (): Array<Problem> => [],
                };
             },
             parseAttributeValue: (): void => {},
@@ -298,7 +300,7 @@ describe('expandAttributes() (unit)', () => {
    });
 
    it('calls back with the parsed contents when the entity can not be loaded', (done) => {
-      const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
+      const attrError = new WellFormedError(WFEID.XMLDECL_NO_PARAMS, []);
       const unloadable = new GeneralEntityReferencePToken({
          open: toSToken('&'),
          name: toSToken('unloadable'),
@@ -318,7 +320,7 @@ describe('expandAttributes() (unit)', () => {
             b: any,
             chain: any,
             callback: (result: {
-               byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
+               byproducts: Array<Problem | ElidedEntityDeclarationPToken>;
             }) => void,
          ) => {
             callback({ byproducts: [attrError] } as any);
@@ -385,7 +387,7 @@ describe('expandAttributes() (unit)', () => {
       });
 
       it('calls back with errors from parsing the geref contents as an attribute value', (done) => {
-         const attrError = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
+         const attrError = new WellFormedError(WFEID.XMLDECL_NO_PARAMS, []);
          params.utils.parseAttributeValue = (
             sTokenSource: STokenSource,
             done: (results: AttributeValueResults) => void,
@@ -418,7 +420,7 @@ describe('expandAttributes() (unit)', () => {
             undefined,
             '',
          );
-         const loadingError = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
+         const loadingError = new WellFormedError(WFEID.INTERNAL_ERROR, ['foo']);
          const addProtoReplacementTextSpy = spyOn(
             addProtoReplacementText,
             'addProtoReplacementText',
@@ -429,7 +431,7 @@ describe('expandAttributes() (unit)', () => {
                b: any,
                chain: any,
                callback: (result: {
-                  byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
+                  byproducts: Array<Problem | ElidedEntityDeclarationPToken>;
                }) => void,
             ) => {
                callback({ byproducts: [loadingError] } as any);
@@ -455,9 +457,9 @@ describe('expandAttributes() (unit)', () => {
    });
 
    it('calls back with errors from two levels of entity reference parsing and a loading error', (done) => {
-      const attrError1 = new WellFormedError(WellFormedError.ID.XMLDECL_NO_PARAMS, []);
-      const attrError2 = new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, ['foo']);
-      const loadingError = new WellFormedError(WellFormedError.ID.TOKEN_INVALID_CONTEXT, ['foo']);
+      const attrError1 = new WellFormedError(WFEID.XMLDECL_NO_PARAMS, []);
+      const attrError2 = new WellFormedError(WFEID.INTERNAL_ERROR, ['foo']);
+      const loadingError = new WellFormedError(WFEID.TOKEN_INVALID_CONTEXT, ['foo']);
       const get2Decl = new GeneralEntityDeclarationPToken({
          open: toSToken('<!'),
          name: toSToken('ge2'),
@@ -476,7 +478,7 @@ describe('expandAttributes() (unit)', () => {
             b: any,
             chain: any,
             callback: (result: {
-               byproducts: Array<XmlErrorToken | ElidedEntityDeclarationPToken>;
+               byproducts: Array<Problem | ElidedEntityDeclarationPToken>;
             }) => void,
          ) => {
             entityDetails.updateDeclaredValue(get2Decl, [ge2Value], []);

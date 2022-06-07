@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 import { ParseToken } from 'pToken';
-import { WellFormedWarning } from 'wellformedness'; // ick
+import { Warning } from 'wellformedness'; // ick
 
 import { STokenSource, strOrBlank, toSToken } from 'sToken';
 import { CommentPToken, ConditionalEndPToken, ConditionalStartPToken } from 'token';
@@ -48,7 +48,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
 
    it('immediately passes an error token to the expander', () => {
       const expanded = () => {};
-      const token = new WellFormedWarning('foobar');
+      const token = new Warning('foobar');
       const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
 
       cbp.handleToken(token, expanded);
@@ -87,7 +87,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
 
       source.extract('all', (sToken) => {
          expect(strOrBlank(sToken)).toEqual('xfoo');
-         done?.();
+         done();
       });
    });
 

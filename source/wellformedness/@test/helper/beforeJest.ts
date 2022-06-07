@@ -1,10 +1,17 @@
 import { expect } from '@jest/globals';
-import { makeErrorMatcher } from 'basic-test';
+import { makeProblemMatcher } from 'basic-test';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { WellFormedError } from '../../error/wellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
+import { fatalErrorCodes } from '../../error/fatalErrorCodes';
+import { errorCodes } from '../../error/errorCodes';
 
 expect.extend({
-   toReportWFError: makeErrorMatcher(WellFormedError),
+   toHaveWellFormedError: makeProblemMatcher(wellFormedErrorCodes),
+   toHaveWFError: makeProblemMatcher(errorCodes),
+   toHaveWFFatalError: makeProblemMatcher(fatalErrorCodes),
+   toHaveWFWarning: makeProblemMatcher(warningCodes),
 });
 
 // declare global {

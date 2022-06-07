@@ -1,37 +1,37 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { nameCheck } from '../common/nameCheck';
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 
 function parameterEntityReferenceCheck(
    pToken: ParameterEntityReferencePToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
    const entityName = strOrBlank(pToken.name);
 
-   ec.setPos(pToken.open);
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.PEREF_XTRA_SPACE, [entityName]);
+   collector.setPos(pToken.open);
+   collector.setPos(pToken.openSpace);
+   collector.check(pToken.openSpace, WFEID.PEREF_XTRA_SPACE, [entityName]);
 
-   ec.setPos(pToken.name);
-   ec.check(!pToken.name, WFEID.PEREF_NO_NAME);
+   collector.setPos(pToken.name);
+   collector.check(!pToken.name, WFEID.PEREF_NO_NAME);
 
    if (pToken.name) {
-      nameCheck(pToken.name, ec, confVer, WFEID.PEREF_NAME_INVALID);
+      nameCheck(pToken.name, collector, confVer, WFEID.PEREF_NAME_INVALID);
    }
 
-   ec.setPos(pToken.nameSpace);
-   ec.check(pToken.nameSpace, WFEID.PEREF_XTRA_TRAILING_SPACE, [entityName]);
+   collector.setPos(pToken.nameSpace);
+   collector.check(pToken.nameSpace, WFEID.PEREF_XTRA_TRAILING_SPACE, [entityName]);
 
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.PEREF_NO_SEMICOLON, [entityName]);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.PEREF_NO_SEMICOLON, [entityName]);
 }
 
 export { parameterEntityReferenceCheck };

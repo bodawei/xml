@@ -1,9 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { EntityId, Offset, XML_ERROR_TOKEN } from 'basic';
+import { EntityId, ERROR_SEVERITY, Offset, PROBLEM } from 'basic';
 import { toSToken } from 'sToken';
 
-import { VALIDITY_ERROR_SUBTYPE, ValidityError } from '../validityError';
+import { ValidityError } from '../validityError';
 
 describe('ValidityError()', () => {
    it('constructs an instance with just an id', () => {
@@ -15,8 +15,9 @@ describe('ValidityError()', () => {
          id: 'ELEMENT_NO_DECLARATION',
          message: 'Missing declaration for element type "{0}" (§3.0.0).',
          place: undefined,
-         subtype: VALIDITY_ERROR_SUBTYPE,
-         type: XML_ERROR_TOKEN,
+         severity: ERROR_SEVERITY,
+         source: 'VALIDITY_CONSTRAINT',
+         type: PROBLEM,
       });
    });
 
@@ -34,8 +35,9 @@ describe('ValidityError()', () => {
          id: 'ELEMENT_NO_DECLARATION',
          message: 'Missing declaration for element type "a" (§3.0.0).',
          place: new Offset(new EntityId(), 0, 0, 0),
-         subtype: VALIDITY_ERROR_SUBTYPE,
-         type: XML_ERROR_TOKEN,
+         severity: ERROR_SEVERITY,
+         source: 'VALIDITY_CONSTRAINT',
+         type: PROBLEM,
       });
    });
 });

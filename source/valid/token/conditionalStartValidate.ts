@@ -1,18 +1,18 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { strOrBlank } from 'sToken';
 import { ConditionalStartPToken } from 'token';
 
 import { ValidityState } from '../common/validityState';
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 
 function conditionalStartValidate(
    token: ConditionalStartPToken,
    state: ValidityState,
-   ec: ErrorCollector,
+   coll: Collector,
 ): void {
    if (!token.unexpanded) {
       return;
@@ -23,9 +23,9 @@ function conditionalStartValidate(
    //    contained in the replacement text for a parameter-entity
    //    reference, all of them must be contained in the same
    //    replacement text.
-   ec.setPos(token.unexpanded.peRef.open);
+   coll.setPos(token.unexpanded.peRef.open);
 
-   ec.check(token.unexpanded.includedBracket, VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET, [
+   coll.check(token.unexpanded.includedBracket, VID.CONDITIONALSECTION_PEREF_INVALID_BRACKET, [
       strOrBlank(token.unexpanded.peRef.name),
    ]);
 }

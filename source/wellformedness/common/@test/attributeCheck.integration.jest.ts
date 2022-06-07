@@ -1,23 +1,26 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, ProblemCollector } from 'basic';
 import { SToken, STokenSource, toSToken } from 'sToken';
 import { parseAttribute } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
+import { warningCodes } from '../../error/warningCodes';
 
 import { attributeCheck } from '../attributeCheck';
+
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 describe('attributeCheck (integration)', () => {
    let source: STokenSource;
    let preSpace: SToken;
-   let ec: ErrorCollector;
+   let collector: ProblemCollector;
 
    beforeEach(() => {
       source = new STokenSource();
       preSpace = toSToken(' ');
-      ec = new ErrorCollector(toSToken('x'), WellFormedError);
+      collector = new ProblemCollector(toSToken('x'), WellFormedError);
    });
 
    it('asks nameCheck() to complain if the name is bad', (done) => {
@@ -25,9 +28,10 @@ describe('attributeCheck (integration)', () => {
       source.endText();
 
       parseAttribute(source, { terminators: ['>'] }, (parsing) => {
-         attributeCheck(parsing!, ec, new ConformanceVersion(), preSpace, 'x');
+         attributeCheck(parsing!, collector, new ConformanceVersion(), preSpace, 'x');
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.ATTRIBUTE_INVALID_NAME);
          done();
       });
    });
@@ -39,13 +43,14 @@ describe('attributeCheck (integration)', () => {
       parseAttribute(source, { terminators: ['>'] }, (parsing) => {
          attributeCheck(
             parsing!,
-            ec,
+            collector,
             new ConformanceVersion(),
             preSpace,
-            WellFormedError.ID.NOUN_ATTRIBUTE,
+            WFEID.NOUN_ATTRIBUTE,
          );
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.ATTRIBUTE_LANG_BAD_CODE);
          done();
       });
    });
@@ -56,11 +61,10 @@ describe('attributeCheck (integration)', () => {
       source.endText();
 
       parseAttribute(source, { terminators: ['>'] }, (parsing) => {
-         attributeCheck(parsing!, ec, confVer, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+         attributeCheck(parsing!, collector, confVer, preSpace, WFEID.NOUN_ATTRIBUTE);
 
-         expect(ec.getErrors()[0].id).toEqual(
-            wellFormedWarningCodes.id.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
-         );
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WID.ATTRIBUTE_NAME_XMLCOLON_RESERVED);
          done();
       });
    });
@@ -70,9 +74,10 @@ describe('attributeCheck (integration)', () => {
       source.endText();
 
       parseAttribute(source, { terminators: ['>'] }, (parsing) => {
-         attributeCheck(parsing!, ec, new ConformanceVersion(), preSpace, 'x');
+         attributeCheck(parsing!, collector, new ConformanceVersion(), preSpace, 'x');
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.ATTRIBUTE_NO_EQUAL);
          done();
       });
    });
@@ -82,9 +87,10 @@ describe('attributeCheck (integration)', () => {
       source.endText();
 
       parseAttribute(source, { terminators: ['>'] }, (parsing) => {
-         attributeCheck(parsing!, ec, new ConformanceVersion(), preSpace, 'x');
+         attributeCheck(parsing!, collector, new ConformanceVersion(), preSpace, 'x');
 
-         expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+         // @ts-expect-error 2329/matchers
+         expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
          done();
       });
    });

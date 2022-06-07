@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, ConformanceVersion } from 'basic';
+import { Collector, ConformanceVersion } from 'basic';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    CHARREF_PTOKEN,
@@ -57,7 +57,7 @@ interface CheckMap {
       | undefined
       | ((
            pToken: any,
-           errorCollector: ErrorCollector,
+           Collector: Collector,
            confVer: ConformanceVersion,
            inSecondPassContxt?: boolean,
         ) => void);

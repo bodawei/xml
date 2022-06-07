@@ -42,7 +42,7 @@ describe('declaration (unit)', () => {
                declType: SToken.fromString('ENTITY'),
                declTypeSpace: SToken.fromString(' '),
             });
-            expect(args[2]).toBeInstanceOf(Function);
+            expect(typeof args[2]).toEqual('function');
          });
 
          it('seeks to parse an entity when the decl type is Entity (wrong case)', () => {
@@ -64,7 +64,7 @@ describe('declaration (unit)', () => {
                declType: SToken.fromString('eNtiTy'),
                declTypeSpace: SToken.fromString(' '),
             });
-            expect(args[2]).toBeInstanceOf(Function);
+            expect(typeof args[2]).toEqual('function');
          });
 
       });

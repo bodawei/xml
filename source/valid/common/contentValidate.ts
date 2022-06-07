@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from 'basic';
+import { Collector } from 'basic';
 import { CHARREF_PTOKEN, ParseToken, PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN } from 'pToken';
 import { strOrBlank } from 'sToken';
 import {
@@ -16,14 +16,15 @@ import {
    CDATA_PTOKEN,
 } from 'token';
 
-import { validCodes } from '../error/validCodes';
+import { validityErrorCodes } from '../error/validityErrorCodes';
+
 import { isXmlData } from './isXmlData';
 import { ElDeclType, ElementContext, ValidityState } from './validityState';
 
-const VID = validCodes.id;
+const VID = validityErrorCodes.id;
 const S_REGEXP = /^[\t\n\r ]*$/;
 
-function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorCollector): void {
+function contentValidate(token: ParseToken, state: ValidityState, coll: Collector): void {
    const stack = state.elementContext.contextStack;
    const curContext = stack[stack.length - 1] as ElementContext | undefined;
    const details = curContext?.details;
@@ -37,7 +38,7 @@ function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorColle
       //     Other: The declaration matches EMPTY and the element has no content (not
       //        even entity references, comments, PIs or white space).
       //  [Note: we will never get here if an ElementEmpty was enccountered)
-      ec.check(
+      coll.check(
          isXml && token.type !== ELEMENT_END_PTOKEN,
          VID.CONTENTEMPTY_INVALID_SYNTAX,
          [strOrBlank(details.token.name)],
@@ -90,14 +91,14 @@ function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorColle
             token.type === TEXTDECL_PTOKEN;
       }
 
-      ec.check(
+      coll.check(
          isNoLeadingTrailingSpaceVersion && isWhitespace && !curContext?.lastToken,
          VID.CONTENTELEMENT_XTRA_SPACE,
          [strOrBlank(details.token.name)],
          getFirstSToken(token),
       );
 
-      ec.check(
+      coll.check(
          isXml && !okType,
          VID.CONTENTELEMENT_INVALID_SYNTAX,
          [strOrBlank(details.token.name), String(ver), String(ed), token.type],
@@ -117,7 +118,7 @@ function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorColle
          (lastToken?.type === SPACE_PTOKEN ||
             (lastToken?.type === CHARDATA_PTOKEN && S_REGEXP.test(strOrBlank(lastToken.text))))
       ) {
-         ec.report(VID.CONTENTELEMENT_XTRA_SPACE, [strOrBlank(token.name)], lastToken.text);
+         coll.report(VID.CONTENTELEMENT_XTRA_SPACE, [strOrBlank(token.name)], lastToken.text);
       }
    } else if (details?.type === ElDeclType.MIXED || details?.type === ElDeclType.ANY) {
       // §3.0.0 Validity Constraint: Element Valid
@@ -165,7 +166,7 @@ function contentValidate(token: ParseToken, state: ValidityState, ec: ErrorColle
          okType = okType || token.type === CDATA_PTOKEN || token.type === CHARREF_PTOKEN;
       }
 
-      ec.check(
+      coll.check(
          isXml && !okType,
          details.type === ElDeclType.MIXED
             ? VID.CONTENTMIXED_INVALID_SYNTAX

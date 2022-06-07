@@ -1,22 +1,22 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector, Offset } from 'basic';
+import { ConformanceVersion, Collector, Offset, rangeEndOffset } from 'basic';
 import { CommentPToken } from 'token';
 
 import { charCheck } from '../common/charCheck';
-import { WellFormedError } from '../error/WellFormedError';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
 
 function commentCheck(
    pToken: CommentPToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   ec.setPos(pToken.open);
+   collector.setPos(pToken.open);
 
    if (pToken.text.length === 0) {
-      ec.setPos(undefined);
+      collector.setPos(undefined);
    } else
       for (let index = 0; index < pToken.text.length; index++) {
          const textSToken = pToken.text[index];
@@ -24,17 +24,17 @@ function commentCheck(
          const isLastElement = index === pToken.text.length - 1;
          const isDoubleHyphenPiece = textSToken.str === '--';
 
-         ec.setPos(textSToken);
-         charCheck(textSToken, ec, confVer, false);
+         collector.setPos(textSToken);
+         charCheck(textSToken, collector, confVer, false);
 
          if (isDoubleHyphenPiece) {
-            ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);
+            collector.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);
          } else if (lastCharIsHyphen && isLastElement) {
             const range = textSToken.lastRange;
             let offset;
 
             if (range) {
-               const original = range.getEndOffset();
+               const original = rangeEndOffset(range);
                // Adjust to the location of the hyphen
                offset = new Offset(
                   original.entityId,
@@ -44,12 +44,12 @@ function commentCheck(
                );
             }
 
-            ec.report(WFEID.COMMENT_ENDS_WITH_HYPHEN, undefined, offset);
+            collector.report(WFEID.COMMENT_ENDS_WITH_HYPHEN, undefined, offset);
          }
       }
 
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.COMMENT_NO_CLOSE);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.COMMENT_NO_CLOSE);
 }
 
 export { commentCheck };

@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion } from 'basic';
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import {
    CharRefPToken,
    GeneralEntityDeclarationPToken,
@@ -13,52 +13,62 @@ import {
 import { toSToken } from 'sToken';
 
 import { CheckState } from '../../checkUtils';
-import { fatalError } from '../../error/fatalError';
 import { dtdEndCheck } from '../dtdEndCheck';
 
-import { wellFormedWarningCodes } from '../../error/wellFormedWarningCodes';
 import { errorCodes } from '../../error/errorCodes';
+import { fatalErrorCodes } from '../../error/fatalErrorCodes';
+import { warningCodes } from '../../error/warningCodes';
 
-const WARNID = wellFormedWarningCodes.id;
+const EID = errorCodes.id;
+const FEID = fatalErrorCodes.id;
+const WID = warningCodes.id;
 
 describe('dtdEndCheck()', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let confVer: ConformanceVersion;
    let fakeState: CheckState;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
       confVer = new ConformanceVersion();
    });
 
    it('reports no errors when there are are no general or parameter entity declarations', () => {
       fakeState = {
+         atts: {},
          confVer,
+         elementDecl: {},
          generalDecls: {},
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {},
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports no errors when the general and parameter entities have no gerefs', () => {
       fakeState = {
+         atts: {},
          confVer,
+         elementDecl: {},
          generalDecls: {
             foo: {
+               declaredInInternalSubset: true,
                token: new GeneralEntityDeclarationPToken({
                   open: toSToken('<!'),
                   value: [new TextPToken(toSToken('foo &foo'))],
                }),
-               declaredInInternalSubset: true,
             },
          },
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {
             bar: new ParameterEntityDeclarationPToken({
                open: toSToken('<!'),
@@ -66,28 +76,31 @@ describe('dtdEndCheck()', () => {
             }),
          },
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports no errors when the general and parameter entities have gerefs to unknown entities', () => {
       fakeState = {
+         atts: {},
          confVer,
+         elementDecl: {},
          generalDecls: {
             foo: {
+               declaredInInternalSubset: true,
                token: new GeneralEntityDeclarationPToken({
                   open: toSToken('<!'),
                   value: [new TextPToken(toSToken('foo &bar;'))],
                }),
-               declaredInInternalSubset: true,
             },
          },
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {
             bar: new ParameterEntityDeclarationPToken({
                open: toSToken('<!'),
@@ -95,34 +108,37 @@ describe('dtdEndCheck()', () => {
             }),
          },
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports no errors when character references contain ampersands', () => {
       fakeState = {
+         atts: {},
          confVer,
+         elementDecl: {},
          generalDecls: {
             foo: {
+               declaredInInternalSubset: true,
                token: new GeneralEntityDeclarationPToken({
                   open: toSToken('<!'),
                   value: [
                      new TextPToken(toSToken('foo &bar;')),
                      new CharRefPToken({
-                        open: toSToken('&#'),
                         digits: toSToken('38'),
+                        open: toSToken('&#'),
                      }),
                   ],
                }),
-               declaredInInternalSubset: true,
             },
          },
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {
             bar: new ParameterEntityDeclarationPToken({
                open: toSToken('<!'),
@@ -130,36 +146,39 @@ describe('dtdEndCheck()', () => {
             }),
          },
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error when there is a reference to an unparsed entity in a general entity declaration', () => {
       const text = new TextPToken(toSToken('foo & bar;'));
       fakeState = {
+         atts: {},
          confVer,
+         elementDecl: {},
          generalDecls: {
+            bar: {
+               declaredInInternalSubset: true,
+               token: new GeneralEntityDeclarationPToken({
+                  nDataName: toSToken('booga'),
+                  open: toSToken('<!'),
+               }),
+            },
             foo: {
+               declaredInInternalSubset: true,
                token: new GeneralEntityDeclarationPToken({
                   open: toSToken('<!'),
                   value: [text],
                }),
-               declaredInInternalSubset: true,
-            },
-            bar: {
-               token: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-                  nDataName: toSToken('booga'),
-               }),
-               declaredInInternalSubset: true,
             },
          },
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {
             bar: new ParameterEntityDeclarationPToken({
                open: toSToken('<!'),
@@ -167,16 +186,13 @@ describe('dtdEndCheck()', () => {
             }),
          },
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
-         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
+      expect(collector).toHaveWFError({
+         id: EID.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -185,23 +201,28 @@ describe('dtdEndCheck()', () => {
    it('reports an error when there is a reference to an unparsed entity in a parameter entity declaration', () => {
       const text = new TextPToken(toSToken('foo &bar;'));
       fakeState = {
+         atts: {},
          confVer,
+         elementDecl: {},
          generalDecls: {
+            bar: {
+               declaredInInternalSubset: true,
+               token: new GeneralEntityDeclarationPToken({
+                  nDataName: toSToken('booga'),
+                  open: toSToken('<!'),
+               }),
+            },
             foo: {
+               declaredInInternalSubset: true,
                token: new GeneralEntityDeclarationPToken({
                   open: toSToken('<!'),
                   value: [new TextPToken(toSToken('foo &other;'))],
                }),
-               declaredInInternalSubset: true,
-            },
-            bar: {
-               token: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-                  nDataName: toSToken('booga'),
-               }),
-               declaredInInternalSubset: true,
             },
          },
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {
             bar: new ParameterEntityDeclarationPToken({
                open: toSToken('<!'),
@@ -209,16 +230,13 @@ describe('dtdEndCheck()', () => {
             }),
          },
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
-         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
+      expect(collector).toHaveWFError({
+         id: EID.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -227,23 +245,28 @@ describe('dtdEndCheck()', () => {
    it('reports a fatal error when there is a reference to an unparsed entity and the version is 1.0/2', () => {
       const text = new TextPToken(toSToken('foo &bar;'));
       fakeState = {
+         atts: {},
          confVer: new ConformanceVersion(1, 2),
+         elementDecl: {},
          generalDecls: {
+            bar: {
+               declaredInInternalSubset: true,
+               token: new GeneralEntityDeclarationPToken({
+                  nDataName: toSToken('booga'),
+                  open: toSToken('<!'),
+               }),
+            },
             foo: {
+               declaredInInternalSubset: true,
                token: new GeneralEntityDeclarationPToken({
                   open: toSToken('<!'),
                   value: [new TextPToken(toSToken('foo &other;'))],
                }),
-               declaredInInternalSubset: true,
-            },
-            bar: {
-               token: new GeneralEntityDeclarationPToken({
-                  open: toSToken('<!'),
-                  nDataName: toSToken('booga'),
-               }),
-               declaredInInternalSubset: true,
             },
          },
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {
             bar: new ParameterEntityDeclarationPToken({
                open: toSToken('<!'),
@@ -251,16 +274,13 @@ describe('dtdEndCheck()', () => {
             }),
          },
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportFatalError({
-         id: fatalError.id.REFERENCE_INVALID_UNPARSED,
+      expect(collector).toHaveWFFatalError({
+         id: FEID.REFERENCE_INVALID_UNPARSED,
          params: ['bar'],
          position: text.text,
       });
@@ -268,52 +288,54 @@ describe('dtdEndCheck()', () => {
 
    it('reports multiple errors when there are multiple references to unparsed entities', () => {
       const unparsed = {
-         token: new GeneralEntityDeclarationPToken({
-            open: toSToken('<!'),
-            nDataName: toSToken('booga'),
-         }),
          declaredInInternalSubset: true,
+         token: new GeneralEntityDeclarationPToken({
+            nDataName: toSToken('booga'),
+            open: toSToken('<!'),
+         }),
       };
       const text1 = new TextPToken(toSToken('foo &bar1;&bar2;'));
       const text2 = new TextPToken(toSToken('foo &bar3;'));
       fakeState = {
+         atts: {},
          confVer,
+         elementDecl: {},
          generalDecls: {
+            bar1: unparsed,
+            bar2: unparsed,
+            bar3: unparsed,
             foo: {
+               declaredInInternalSubset: true,
                token: new GeneralEntityDeclarationPToken({
                   open: toSToken('<!'),
                   value: [text1, text2],
                }),
-               declaredInInternalSubset: true,
             },
-            bar1: unparsed,
-            bar2: unparsed,
-            bar3: unparsed,
          },
+         hasExternalDTD: false,
+         hasNoDTD: false,
+         isStandalone: false,
          paramDecls: {},
          peRefCount: 0,
-         isStandalone: false,
-         hasNoDTD: false,
-         hasExternalDTD: false,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
-         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
+      expect(collector).toHaveWFError({
+         id: EID.REFERENCE_INVALID_UNPARSED,
          params: ['bar1'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
-         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
+      expect(collector).toHaveWFError({
+         id: EID.REFERENCE_INVALID_UNPARSED,
          params: ['bar2'],
          position: text1.text,
       });
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportError({
-         id: errorCodes.id.REFERENCE_INVALID_UNPARSED,
+      expect(collector).toHaveWFError({
+         id: EID.REFERENCE_INVALID_UNPARSED,
          params: ['bar3'],
          position: text2.text,
       });
@@ -336,11 +358,11 @@ describe('dtdEndCheck()', () => {
          peRefCount: 0,
       };
 
-      dtdEndCheck(fakeState, mockErrorCollector);
+      dtdEndCheck(fakeState, collector);
 
       // @ts-expect-error 2329/matchers
-      expect(mockErrorCollector).toReportWarning({
-         id: WARNID.ATTLISTDECL_NO_ELEMENTDECL,
+      expect(collector).toHaveWFWarning({
+         id: WID.ATTLISTDECL_NO_ELEMENTDECL,
          params: ['el1'],
          position: undefined,
       });

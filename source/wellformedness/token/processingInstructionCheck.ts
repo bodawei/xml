@@ -1,54 +1,55 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion, ErrorCollector } from 'basic';
+import { ConformanceVersion, Collector } from 'basic';
 import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'sToken';
 
 import { charCheck } from '../common/charCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
 import { nameCheck } from '../common/nameCheck';
-import { WellFormedError } from '../error/WellFormedError';
-import { wellFormedWarningCodes } from '../error/wellFormedWarningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { warningCodes } from '../error/warningCodes';
 
-const WFEID = WellFormedError.ID;
+const WFEID = wellFormedErrorCodes.id;
+const WID = warningCodes.id;
 
 function processingInstructionCheck(
    pToken: ProcessingInstructionPToken,
-   ec: ErrorCollector,
+   collector: Collector,
    confVer: ConformanceVersion,
 ): void {
    const targetName = strOrBlank(pToken.target);
    const lcTarget = targetName.toLowerCase();
    const hasXml = lcTarget.indexOf('xml') !== -1;
 
-   ec.setPos(pToken.open);
-   ec.setPos(pToken.openSpace);
-   ec.check(pToken.openSpace, WFEID.PI_SPACE_AFTER_OPEN, [targetName]);
+   collector.setPos(pToken.open);
+   collector.setPos(pToken.openSpace);
+   collector.check(pToken.openSpace, WFEID.PI_SPACE_AFTER_OPEN, [targetName]);
 
-   ec.setPos(pToken.target);
-   ec.check(!pToken.target, WFEID.PI_NO_TARGET);
-   nameCheck(pToken.target, ec, confVer, WFEID.PI_TARGET_NAME_INVALID);
+   collector.setPos(pToken.target);
+   collector.check(!pToken.target, WFEID.PI_NO_TARGET);
+   nameCheck(pToken.target, collector, confVer, WFEID.PI_TARGET_NAME_INVALID);
    // Note that while §2.3.0 disallows any name that STARTS with xml, §2.6.0
    // Seems to disallow XML anywhere in the name of a PI target.
-   ec.check(hasXml, WFEID.PI_TARGET_HAS_XML, [targetName]);
+   collector.check(hasXml, WFEID.PI_TARGET_HAS_XML, [targetName]);
    nameXmlCheck(
       pToken.target,
-      ec,
+      collector,
       confVer,
       'PI',
-      wellFormedWarningCodes.id.PI_TARGET_XMLDASH_RESERVED,
-      wellFormedWarningCodes.id.PI_TARGET_XML_RESERVED,
+      WID.PI_TARGET_XMLDASH_RESERVED,
+      WID.PI_TARGET_XML_RESERVED,
    );
 
-   ec.setPos(pToken.targetSpace);
+   collector.setPos(pToken.targetSpace);
    if (pToken.instruction) {
-      ec.check(!pToken.targetSpace, WFEID.PI_NO_SPACE_AFTER_TARGET, [targetName]);
+      collector.check(!pToken.targetSpace, WFEID.PI_NO_SPACE_AFTER_TARGET, [targetName]);
    }
 
-   ec.setPos(pToken.instruction);
-   charCheck(pToken.instruction, ec, confVer, false);
-   ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.PI_NO_CLOSE, [targetName]);
+   collector.setPos(pToken.instruction);
+   charCheck(pToken.instruction, collector, confVer, false);
+   collector.setPos(pToken.close);
+   collector.check(!pToken.close, WFEID.PI_NO_CLOSE, [targetName]);
 }
 
 export { processingInstructionCheck };

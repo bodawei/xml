@@ -72,7 +72,7 @@ describe('attribute (unit)', () => {
 
          expect(litParse.calls.argsFor(0)[0]).toEqual(mockSource);
          expect(litParse.calls.argsFor(0)[1].geRef).toEqual(true);
-         expect(litParse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(typeof litParse.calls.argsFor(0)[2]).toEqual('function');
       });
 
       it('parses multiple attributes', () => {

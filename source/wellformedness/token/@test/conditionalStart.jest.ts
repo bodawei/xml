@@ -1,28 +1,31 @@
-import { MockErrorCollector } from 'basic-test';
+import { ParamCollector } from 'basic-test';
 import { toSToken } from 'sToken';
 import { ConditionalStartPToken } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { conditionalStartCheck } from '../conditionalStartCheck';
 
+const WFEID = wellFormedErrorCodes.id;
+
 describe('checkWellFormed()', () => {
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
    let conditionalPToken: ConditionalStartPToken;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
+      collector = new ParamCollector();
 
       conditionalPToken = new ConditionalStartPToken({
+         bracket: toSToken('['),
          open: toSToken('<!['),
          sectionType: toSToken('IGNORE'),
-         bracket: toSToken('['),
       });
    });
 
    it('reports no errors if no pToken is provided', () => {
-      conditionalStartCheck(undefined, mockErrorCollector);
+      conditionalStartCheck(undefined, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error if an unknown type is provided', () => {
@@ -30,13 +33,14 @@ describe('checkWellFormed()', () => {
          sectionType: toSToken('bogus'),
       });
 
-      conditionalStartCheck(conditionalPToken, mockErrorCollector);
+      conditionalStartCheck(conditionalPToken, collector);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CONDITIONAL_UNKNOWN,
+      // @ts-expect-error ts2339 types for matchers not right
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CONDITIONAL_UNKNOWN,
+         lastPosition: undefined,
          params: ['bogus'],
          position: conditionalPToken.sectionType,
-         lastPosition: undefined,
       });
    });
 
@@ -45,13 +49,14 @@ describe('checkWellFormed()', () => {
          sectionType: toSToken('ignore'),
       });
 
-      conditionalStartCheck(conditionalPToken, mockErrorCollector);
+      conditionalStartCheck(conditionalPToken, collector);
 
-      expect(mockErrorCollector).toReportWFError({
-         id: WellFormedError.ID.CONDITIONAL_INVALID_CASE,
+      // @ts-expect-error ts2339 types for matchers not right
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.CONDITIONAL_INVALID_CASE,
+         lastPosition: undefined,
          params: ['ignore', 'IGNORE'],
          position: conditionalPToken.sectionType,
-         lastPosition: undefined,
       });
    });
 });

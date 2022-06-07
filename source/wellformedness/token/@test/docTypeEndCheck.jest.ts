@@ -1,70 +1,67 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { MockErrorCollector } from 'basic-test';
-import { toSToken, SToken } from 'sToken';
+import { ParamCollector } from 'basic-test';
+import { toSToken } from 'sToken';
 import { DocTypeEndPToken, DocTypeStartPToken } from 'token';
 
-import { WellFormedError } from '../../error/WellFormedError';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { docTypeEndCheck } from '../docTypeEndCheck';
+
+const WFEID = wellFormedErrorCodes.id;
 
 describe('docTypeEndCheck()', () => {
    let startPToken: DocTypeStartPToken;
    let docTypeEndPToken: DocTypeEndPToken;
-   let mockErrorCollector: MockErrorCollector;
+   let collector: ParamCollector;
 
    beforeEach(() => {
-      mockErrorCollector = new MockErrorCollector();
-      startPToken = new DocTypeStartPToken({ open: SToken.fromString('<!'), openSubset: true });
+      collector = new ParamCollector();
+      startPToken = new DocTypeStartPToken({ open: toSToken('<!'), openSubset: true });
       docTypeEndPToken = new DocTypeEndPToken({
-         docTypeStartPToken: startPToken,
+         close: toSToken('>'),
          closeSubset: toSToken(']'),
          closeSubsetSpace: undefined,
-         close: toSToken('>'),
+         docTypeStartPToken: startPToken,
       });
    });
 
    it('returns no errors if no problems ', () => {
-      docTypeEndCheck(docTypeEndPToken, mockErrorCollector);
+      docTypeEndCheck(docTypeEndPToken, collector);
 
-      expect(mockErrorCollector.errors).toEqual([]);
+      // @ts-expect-error 2329/matchers
+      expect(collector).not.toHaveAnyProblems();
    });
 
    it('reports an error if there is no close', () => {
       docTypeEndPToken = new DocTypeEndPToken({
-         docTypeStartPToken: startPToken,
          closeSubset: toSToken(']'),
+         docTypeStartPToken: startPToken,
       });
 
-      docTypeEndCheck(docTypeEndPToken, mockErrorCollector);
+      docTypeEndCheck(docTypeEndPToken, collector);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).not.toReportWFError({
-         id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
-         params: undefined,
-         position: docTypeEndPToken.closeSubsetSpace,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DOCTYPE_NO_CLOSE,
+         lastPosition: docTypeEndPToken.closeSubset,
+         params: [],
       });
    });
 
    it('reports an error if there is a "]", but there was no opening "["', () => {
-      docTypeEndCheck(docTypeEndPToken, mockErrorCollector);
-
-      // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).not.toReportWFError({
-         id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
-         params: undefined,
-         position: docTypeEndPToken.closeSubsetSpace,
+      docTypeEndPToken = new DocTypeEndPToken({
+         closeSubset: toSToken(']'),
+         docTypeStartPToken: new DocTypeStartPToken({ open: toSToken('<!'), openSubset: false }),
       });
-   });
 
-   it('reports an error if there is a "]", but there was no start token', () => {
-      docTypeEndCheck(docTypeEndPToken, mockErrorCollector);
+      docTypeEndCheck(docTypeEndPToken, collector);
 
       // @ts-expect-error ts2339 types for matchers not right
-      expect(mockErrorCollector).not.toReportWFError({
-         id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
-         params: undefined,
-         position: docTypeEndPToken.closeSubsetSpace,
+      expect(collector).toHaveWellFormedError({
+         id: WFEID.DOCTYPE_INVALID_SUBSET_CLOSE,
+         params: [],
+         position: docTypeEndPToken.closeSubset,
       });
    });
 });
