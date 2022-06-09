@@ -289,9 +289,9 @@ describe('attributeCheck (unit)', () => {
       });
 
       attributesPChunk[1].value = [
-         new TextPToken({ text: SToken.fromString('foo') }),
-         new GeneralEntityReferencePToken({ open: SToken.fromString('&') }),
-         new TextPToken({ text: SToken.fromString('t<o') }),
+         new TextPToken({ text: toSToken('foo') }),
+         new GeneralEntityReferencePToken({ open: toSToken('&') }),
+         new TextPToken({ text: toSToken('t<o') }),
       ];
 
       attributeCheck(attributesPChunk, collector, confVer, previousSpace, WFEID.NOUN_ATTRIBUTE);

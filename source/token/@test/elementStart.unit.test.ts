@@ -6,7 +6,7 @@ import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import attribute from '../common/attribute';
 import { ElementEmptyPToken, ElementStartPToken, parseElementStart } from '../elementStart';
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 
 describe('elementStart (unit)', () => {
    let elementStartPToken: ElementStartPToken;
@@ -32,12 +32,12 @@ describe('elementStart (unit)', () => {
       });
 
       elementEmptyPToken = new ElementEmptyPToken({
-         open: SToken.fromString('<'),
+         open: toSToken('<'),
          openSpace: undefined,
-         name: SToken.fromString('elemName'),
-         nameSpace: SToken.fromString(' '),
+         name: toSToken('elemName'),
+         nameSpace: toSToken(' '),
          attributes: [],
-         close: SToken.fromString('>'),
+         close: toSToken('>'),
       });
    });
 

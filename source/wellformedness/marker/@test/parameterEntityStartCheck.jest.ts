@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { ParameterEntityStartPToken } from 'token';
 
 import { parameterEntityReferenceCheck } from '../../token/parameterEntityReferenceCheck';
@@ -16,8 +16,8 @@ describe('parameterEntityReferenceCheck (unit)', () => {
       const confVer = new ConformanceVersion();
       const collector = new ParamCollector();
       const reference = new ParameterEntityReferencePToken({
-         name: SToken.fromString('foo'),
-         open: SToken.fromString('%'),
+         name: toSToken('foo'),
+         open: toSToken('%'),
       });
       const token = new ParameterEntityStartPToken(reference);
 

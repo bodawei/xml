@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { TextPToken } from 'pToken';
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import literal, { LiteralPToken } from '../literal';
@@ -31,7 +31,7 @@ describe('literal (unit)', () => {
 
       beforeEach(() => {
          litCallback = jasmine.createSpy('callbackSpy');
-         textPToken = new TextPToken({ text: SToken.fromString('test') });
+         textPToken = new TextPToken({ text: toSToken('test') });
          valueParseSpy = spyOn(literalValue, 'parse')
          valueParseSpy.and.callFake((_1: any, _2: any, callback: LiteralValueCallback) => callback([ textPToken ]));
       });

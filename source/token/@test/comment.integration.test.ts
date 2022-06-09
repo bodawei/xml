@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { SToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import { CommentPToken, parseComment } from '../comment';
@@ -15,7 +15,7 @@ describe('comment (integration)', () => {
       confVer = new ConformanceVersion();
       const expectedSToken = makeSTokenMaker();
       commentPToken = new CommentPToken({
-         open: SToken.fromString(''),
+         open: toSToken(''),
          text: [ expectedSToken('my comment') ],
          close: expectedSToken('-->'),
       });

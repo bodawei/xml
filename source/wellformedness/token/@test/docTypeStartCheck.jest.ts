@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
-import { toSToken, SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { DocTypeStartPToken } from 'token';
 
 import { externalIdCheck } from '../../common/externalIdCheck';
@@ -28,7 +28,7 @@ describe('docTypeStartCheck()', () => {
          externalIdSpace: toSToken(' '),
          name: toSToken('rootElement'),
          nameSpace: toSToken(' '),
-         open: SToken.fromString('<!'),
+         open: toSToken('<!'),
          openSubset: toSToken('['),
       });
 
@@ -63,7 +63,7 @@ describe('docTypeStartCheck()', () => {
          externalId: {},
          externalIdSpace: toSToken(' '),
          nameSpace: toSToken(' '),
-         open: SToken.fromString('<!'),
+         open: toSToken('<!'),
          openSubset: toSToken('['),
       });
 

@@ -3,7 +3,7 @@
 /* istanbul ignore */ // For some reason istanbul with Safari is picking up this file
 
 import { EntityId, Range } from 'basic';
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 import { toContainPTokenProps, toEqualRangeless } from './beforeJasmine';
 
 describe('token custom matchers', () => {
@@ -192,7 +192,7 @@ describe('token custom matchers', () => {
             });
 
             const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
-               one: SToken.fromString('one'),
+               one: toSToken('one'),
             });
 
             expect(result).toEqual({
@@ -221,14 +221,14 @@ describe('token custom matchers', () => {
             const spy = jasmine.createSpy();
             spy({
                one: {
-                  child: SToken.fromString('one'),
+                  child: toSToken('one'),
                   childTwo: true,
                },
             });
 
             const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
                one: {
-                  child: SToken.fromString('one'),
+                  child: toSToken('one'),
                   childTwo: true,
                },
             });
@@ -258,8 +258,8 @@ describe('token custom matchers', () => {
             });
 
             const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
-               one: SToken.fromString('actual'),
-               two: SToken.fromString('two'),
+               one: toSToken('actual'),
+               two: toSToken('two'),
             });
 
             expect(result).toEqual({

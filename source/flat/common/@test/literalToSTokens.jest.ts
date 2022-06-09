@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { TextPToken } from 'pToken';
-import { SToken, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { LiteralPToken } from 'token';
 
 import { literalValueToSTokens } from '../literalValueToStokens';
@@ -35,7 +35,7 @@ describe('literalToSTokens() (unit)', () => {
 
       expect(results).toEqual([
          literalPToken.openQuote!,
-         SToken.fromString('xxx'),
+         toSToken('xxx'),
          literalPToken.closeQuote!,
       ]);
    });

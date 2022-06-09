@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ParameterEntityReferencePToken } from 'pToken';
-import { SToken, STokenSource, toSToken } from 'sToken';
+import {  STokenSource, toSToken } from 'sToken';
 import { CdataPToken, ConditionalStartPToken,  } from 'token';
 
 import { parseSection } from '../section';
@@ -37,9 +37,9 @@ describe('section (integration)', () => {
          source.addText(' INCLUDE [ FOO ]]>');
          source.endText();
 
-         parseSection(source, SToken.fromString('<!['), (parsing) => {
+         parseSection(source, toSToken('<!['), (parsing) => {
             const expected = new ConditionalStartPToken({
-               open: SToken.fromString('<!['),
+               open: toSToken('<!['),
                openSpace: toSToken(' '),
                sectionType: toSToken('INCLUDE'),
                sectionTypeSpace: toSToken(' '),
@@ -63,9 +63,9 @@ describe('section (integration)', () => {
          source.addText(' % foo ; [ FOO ]]>');
          source.endText();
 
-         parseSection(source, SToken.fromString('<!['), (parsing) => {
+         parseSection(source, toSToken('<!['), (parsing) => {
             const expected = new ConditionalStartPToken({
-               open: SToken.fromString('<!['),
+               open: toSToken('<!['),
                openSpace: toSToken(' '),
                unexpanded: {
                   peRef,

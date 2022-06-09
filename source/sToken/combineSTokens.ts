@@ -28,12 +28,12 @@ function combineSTokens(first: SToken | undefined, other: SToken | undefined): S
    const originalStr = first.originalStr + other.originalStr;
    const firstRanges = [...first.ranges];
    const otherRanges = [...other.ranges];
+   const firstRange = other.ranges[0];
+   const firstRangeCount = first.ranges.length - 1;
+   const lastRange = firstRangeCount >= 0 ? first.ranges[firstRangeCount] : undefined;
 
-   if (first.lastRange && other.firstRange) {
-      if (canFuseRanges(first.lastRange, other.firstRange)) {
-         const lastRange = first.lastRange;
-         const firstRange = other.firstRange;
-
+   if (lastRange && firstRange) {
+      if (canFuseRanges(lastRange, firstRange)) {
          // Remove the last range of this and the first of the next
          firstRanges.pop();
          otherRanges.shift();

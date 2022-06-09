@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
-import { SToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'sToken';
 import { parseLiteral, LiteralPToken } from 'token';
 
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
@@ -27,7 +27,7 @@ describe('literalCheck() (integration)', () => {
             pToken: pToken,
          },
          () => {
-            const ec = new ProblemCollector(SToken.fromString(''), WellFormedError);
+            const ec = new ProblemCollector(toSToken(''), WellFormedError);
 
             literalCheck(pToken, ec, new ConformanceVersion(), 'aType');
 
@@ -49,7 +49,7 @@ describe('literalCheck() (integration)', () => {
             pToken: pToken,
          },
          () => {
-            const ec = new ProblemCollector(SToken.fromString(''), WellFormedError);
+            const ec = new ProblemCollector(toSToken(''), WellFormedError);
 
             literalCheck(pToken, ec, new ConformanceVersion(), 'aType');
 

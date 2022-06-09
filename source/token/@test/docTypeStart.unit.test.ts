@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { SToken, STokenSource, toSToken } from 'sToken';
+import {  STokenSource, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
@@ -13,7 +13,7 @@ describe('docTypeStart (unit)', () => {
 
    beforeEach(() => {
       docTypeStartPToken = new DocTypeStartPToken({
-         open: SToken.fromString('<!'),
+         open: toSToken('<!'),
          name: toSToken('rootElement'),
          nameSpace: toSToken(' '),
          externalId: { },
@@ -40,7 +40,7 @@ describe('docTypeStart (unit)', () => {
             [ '[', 'match', '[' ],
          ]);
 
-         parseDocTypeStart(mockSource, { open: SToken.fromString('<!') } as any, callback);
+         parseDocTypeStart(mockSource, { open: toSToken('<!') } as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless(docTypeStartPToken);

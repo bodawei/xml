@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ParameterEntityReferencePToken } from 'pToken';
-import { SToken, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as cdata from '../../cdata';
@@ -16,10 +16,10 @@ describe('section (unit)', () => {
 
    beforeEach(() => {
       sectionStart = {
-         open: SToken.fromString('<!['),
-         openSpace: SToken.fromString(' '),
-         sectionType: SToken.fromString('CDATA'),
-         sectionTypeSpace: SToken.fromString(' '),
+         open: toSToken('<!['),
+         openSpace: toSToken(' '),
+         sectionType: toSToken('CDATA'),
+         sectionTypeSpace: toSToken(' '),
       };
    });
 
@@ -71,10 +71,10 @@ describe('section (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({
-            open: SToken.fromString('<!['),
-            openSpace: SToken.fromString(' '),
-            sectionType: SToken.fromString('SUPER'),
-            sectionTypeSpace: SToken.fromString(' '),
+            open: toSToken('<!['),
+            openSpace: toSToken(' '),
+            sectionType: toSToken('SUPER'),
+            sectionTypeSpace: toSToken(' '),
          });
       });
 
@@ -90,8 +90,8 @@ describe('section (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({
-            open: SToken.fromString('<!['),
-            openSpace: SToken.fromString(' '),
+            open: toSToken('<!['),
+            openSpace: toSToken(' '),
             unexpanded: {
                peRef,
                propName: 'sectionType',
@@ -111,7 +111,7 @@ describe('section (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({
-            open: SToken.fromString('<!['),
+            open: toSToken('<!['),
          });
       });
 

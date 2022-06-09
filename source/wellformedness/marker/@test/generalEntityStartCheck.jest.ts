@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { GeneralEntityStartPToken } from 'token';
 
 import { generalEntityReferenceCheck } from '../../token/generalEntityReferenceCheck';
@@ -16,8 +16,8 @@ describe('generalEntityStartCheck (unit)', () => {
       const confVer = new ConformanceVersion();
       const collector = new ParamCollector();
       const reference = new GeneralEntityReferencePToken({
-         open: SToken.fromString('&'),
-         name: SToken.fromString('foo'),
+         open: toSToken('&'),
+         name: toSToken('foo'),
       });
       const token = new GeneralEntityStartPToken(reference);
 

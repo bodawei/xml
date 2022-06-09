@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { TextPToken } from 'pToken';
-import { STokenSource, SToken, toSToken } from 'sToken';
+import { STokenSource,  toSToken } from 'sToken';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 
@@ -11,7 +11,7 @@ describe('docTypeStart (integration)', () => {
 
    beforeEach(() => {
       docTypeStartPToken = new DocTypeStartPToken({
-         open: SToken.fromString('<!'),
+         open: toSToken('<!'),
          name: toSToken('rootElement'),
          nameSpace: toSToken(' '),
          externalId: {
@@ -35,7 +35,7 @@ describe('docTypeStart (integration)', () => {
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 
-         parseDocTypeStart(source, { open: SToken.fromString('<!'), } as any, (parsing) => {
+         parseDocTypeStart(source, { open: toSToken('<!'), } as any, (parsing) => {
             expect(parsing).toEqualRangeless(docTypeStartPToken);
             done();
          });

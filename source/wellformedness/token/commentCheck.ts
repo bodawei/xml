@@ -30,7 +30,8 @@ function commentCheck(
          if (isDoubleHyphenPiece) {
             collector.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);
          } else if (lastCharIsHyphen && isLastElement) {
-            const range = textSToken.lastRange;
+            const ranges = textSToken.ranges;
+            const range = ranges.length >= 1 ? ranges[ranges.length - 1] : undefined;
             let offset;
 
             if (range) {

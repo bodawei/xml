@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { SToken, toSToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
@@ -17,19 +17,19 @@ describe('textDeclaration (unit)', () => {
 
    beforeEach(() => {
       textDeclPToken = new TextDeclarationPToken({
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
          fields: [
             {
-               name: SToken.fromString('version'),
+               name: toSToken('version'),
                nameSpace: undefined,
-               equal: SToken.fromString('='),
+               equal: toSToken('='),
                equalSpace: undefined,
             },
          ],
-         close: SToken.fromString('?>'),
+         close: toSToken('?>'),
       });
 
       start = {
@@ -155,7 +155,7 @@ describe('textDeclaration (unit)', () => {
          fieldedSpy.mockImplementation(
             (_1: any, _2: any, _params: any, cb: (result?: any) => void) => {
                cb({
-                  open: SToken.fromString('testing'),
+                  open: toSToken('testing'),
                   fields: [],
                });
             },
@@ -168,7 +168,7 @@ describe('textDeclaration (unit)', () => {
          const result = callback.mock.calls[0][0];
          expect(result).toEqual(
             new TextDeclarationPToken({
-               open: SToken.fromString('testing'),
+               open: toSToken('testing'),
                fields: [],
             }),
          );

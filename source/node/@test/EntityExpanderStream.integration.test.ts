@@ -15,7 +15,7 @@ import {
    ParseType,
    ParseToken,
 } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 import {
    DOCTYPE_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
@@ -589,30 +589,30 @@ describe('EntityExpanderStream (integration)', () => {
    //       (results) => {
    //          const index = getIndex(results, GENERAL_ENTITY_DECLARATION_PTOKEN);
    //          const expectedRef2 = new ParameterEntityReferencePToken({
-   //             open: SToken.fromString('%'),
+   //             open: toSToken('%'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('internalPE2'),
+   //             name: toSToken('internalPE2'),
    //             nameSpace: undefined,
-   //             close: SToken.fromString(';'),
+   //             close: toSToken(';'),
    //          });
    //          const expectedRef1 = new ParameterEntityReferencePToken({
-   //             open: SToken.fromString('%'),
+   //             open: toSToken('%'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('internalPE1'),
+   //             name: toSToken('internalPE1'),
    //             nameSpace: undefined,
-   //             close: SToken.fromString(';'),
+   //             close: toSToken(';'),
    //          });
 
    //          expect((results[index] as any).value).toEqualRangeless([
-   //             new TextPToken({ text: SToken.fromString('[') }),
+   //             new TextPToken({ text: toSToken('[') }),
    //             new ParameterEntityStartPToken(expectedRef2),
-   //             new TextPToken({ text: SToken.fromString('(') }),
+   //             new TextPToken({ text: toSToken('(') }),
    //             new ParameterEntityStartPToken(expectedRef1),
-   //             new TextPToken({ text: SToken.fromString('foo') }),
+   //             new TextPToken({ text: toSToken('foo') }),
    //             new ParameterEntityEndPToken(expectedRef1),
-   //             new TextPToken({ text: SToken.fromString(')') }),
+   //             new TextPToken({ text: toSToken(')') }),
    //             new ParameterEntityEndPToken(expectedRef2),
-   //             new TextPToken({ text: SToken.fromString(']') }),
+   //             new TextPToken({ text: toSToken(']') }),
    //          ]);
    //       },
    //       done,
@@ -636,16 +636,16 @@ describe('EntityExpanderStream (integration)', () => {
    //       (results) => {
    //          const index = getIndex(results, GENERAL_ENTITY_DECLARATION_PTOKEN);
    //          const expectedRef1 = new ParameterEntityReferencePToken({
-   //             open: SToken.fromString('%'),
+   //             open: toSToken('%'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('externalPE'),
+   //             name: toSToken('externalPE'),
    //             nameSpace: undefined,
-   //             close: SToken.fromString(';'),
+   //             close: toSToken(';'),
    //          });
 
    //          expect((results[index] as any).value).toEqualRangeless([
    //             new ParameterEntityStartPToken(expectedRef1),
-   //             new TextPToken({ text: SToken.fromString('!placeholder!') }),
+   //             new TextPToken({ text: toSToken('!placeholder!') }),
    //             new ParameterEntityEndPToken(expectedRef1),
    //          ]);
    //       },
@@ -670,66 +670,66 @@ describe('EntityExpanderStream (integration)', () => {
    //       (results) => {
    //          const index = getIndex(results, 'ATTLISTDECL_PTOKEN_TYPE');
    //          const expectedRef1 = new ParameterEntityReferencePToken({
-   //             open: SToken.fromString('%'),
+   //             open: toSToken('%'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('internalPE'),
+   //             name: toSToken('internalPE'),
    //             nameSpace: undefined,
-   //             close: SToken.fromString(';'),
+   //             close: toSToken(';'),
    //          });
    //          const expectedRef2 = new GeneralEntityReferencePToken({
-   //             open: SToken.fromString('&'),
+   //             open: toSToken('&'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('internalGE'),
+   //             name: toSToken('internalGE'),
    //             nameSpace: undefined,
-   //             close: SToken.fromString(';'),
+   //             close: toSToken(';'),
    //          });
    //          const expected = new AttListPToken({
-   //             open: SToken.fromString('<!'),
+   //             open: toSToken('<!'),
    //             openSpace: undefined,
-   //             declType: SToken.fromString('ATTLIST'),
-   //             declTypeSpace: SToken.fromString(' '),
-   //             elementName: SToken.fromString('one'),
-   //             postElementNameSpace: SToken.fromString(' '),
+   //             declType: toSToken('ATTLIST'),
+   //             declTypeSpace: toSToken(' '),
+   //             elementName: toSToken('one'),
+   //             postElementNameSpace: toSToken(' '),
    //             attDefs: [
    //                {
-   //                   name: SToken.fromString('anAttr'),
-   //                   postNameSpace: SToken.fromString(' '),
-   //                   type: SToken.fromString('CDATA'),
-   //                   postTypeSpace: SToken.fromString(' '),
-   //                   openQuote: SToken.fromString('"'),
-   //                   closeQuote: SToken.fromString('"'),
+   //                   name: toSToken('anAttr'),
+   //                   postNameSpace: toSToken(' '),
+   //                   type: toSToken('CDATA'),
+   //                   postTypeSpace: toSToken(' '),
+   //                   openQuote: toSToken('"'),
+   //                   closeQuote: toSToken('"'),
    //                   value: [
    //                      new CharRefPToken({
-   //                         open: SToken.fromString('&#'),
+   //                         open: toSToken('&#'),
    //                         openSpace: undefined,
    //                         hexMarkerSpace: undefined,
-   //                         digits: SToken.fromString('91'),
+   //                         digits: toSToken('91'),
    //                         digitsSpace: undefined,
-   //                         close: SToken.fromString(';'),
+   //                         close: toSToken(';'),
    //                         charCode: 91,
    //                      }),
    //                      new GeneralEntityStartPToken(expectedRef2),
-   //                      new CharDataPToken({ text: SToken.fromString('(foo)') }),
-   //                      // new TextPToken({ text: SToken.fromString('(') }),
+   //                      new CharDataPToken({ text: toSToken('(foo)') }),
+   //                      // new TextPToken({ text: toSToken('(') }),
    //                      // new ParameterEntityStartPToken(expectedRef1), // Maybe should not ahve these
-   //                      // new TextPToken({ text: SToken.fromString('foo') }),
+   //                      // new TextPToken({ text: toSToken('foo') }),
    //                      // new ParameterEntityEndPToken(expectedRef1),
-   //                      // new TextPToken({ text: SToken.fromString(')') }),
+   //                      // new TextPToken({ text: toSToken(')') }),
    //                      new GeneralEntityEndPToken(expectedRef2),
    //                      new CharRefPToken({
-   //                         open: SToken.fromString('&#'),
+   //                         open: toSToken('&#'),
    //                         openSpace: undefined,
-   //                         hexMarker: SToken.fromString('x'),
+   //                         hexMarker: toSToken('x'),
    //                         hexMarkerSpace: undefined,
-   //                         digits: SToken.fromString('5D'),
+   //                         digits: toSToken('5D'),
    //                         digitsSpace: undefined,
-   //                         close: SToken.fromString(';'),
+   //                         close: toSToken(';'),
    //                         charCode: 0x5d,
    //                      }),
    //                   ],
    //                },
    //             ] as any,
-   //             close: SToken.fromString('>'),
+   //             close: toSToken('>'),
    //          });
 
    //          expect(results[index] as any).toEqualRangeless(expected);
@@ -757,87 +757,87 @@ describe('EntityExpanderStream (integration)', () => {
    //       (results) => {
    //          const index = getIndex(results, ELEMENT_EMPTY_PTOKEN);
    //          const expectedRef1 = new ParameterEntityReferencePToken({
-   //             open: SToken.fromString('%'),
+   //             open: toSToken('%'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('internalPE'),
+   //             name: toSToken('internalPE'),
    //             nameSpace: undefined,
-   //             close: SToken.fromString(';'),
+   //             close: toSToken(';'),
    //          });
    //          const expectedRef2 = new GeneralEntityReferencePToken({
-   //             open: SToken.fromString('&'),
+   //             open: toSToken('&'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('internalGE'),
+   //             name: toSToken('internalGE'),
    //             nameSpace: undefined,
-   //             close: SToken.fromString(';'),
+   //             close: toSToken(';'),
    //          });
    //          const expected = new ElementEmptyPToken({
-   //             open: SToken.fromString('<'),
+   //             open: toSToken('<'),
    //             openSpace: undefined,
-   //             name: SToken.fromString('one'),
-   //             nameSpace: SToken.fromString(' '),
+   //             name: toSToken('one'),
+   //             nameSpace: toSToken(' '),
    //             attributes: [
    //                {
-   //                   name: SToken.fromString('second'),
+   //                   name: toSToken('second'),
    //                   postNameSpace: undefined,
-   //                   equal: SToken.fromString('='),
+   //                   equal: toSToken('='),
    //                   postEqualSpace: undefined,
-   //                   openQuote: SToken.fromString('"'),
-   //                   closeQuote: SToken.fromString('"'),
+   //                   openQuote: toSToken('"'),
+   //                   closeQuote: toSToken('"'),
    //                   value: [
-   //                      new TextPToken({ text: SToken.fromString('first ') }),
+   //                      new TextPToken({ text: toSToken('first ') }),
    //                      new CharRefPToken({
-   //                         open: SToken.fromString('&#'),
+   //                         open: toSToken('&#'),
    //                         openSpace: undefined,
    //                         hexMarkerSpace: undefined,
-   //                         digits: SToken.fromString('45'),
+   //                         digits: toSToken('45'),
    //                         digitsSpace: undefined,
-   //                         close: SToken.fromString(';'),
+   //                         close: toSToken(';'),
    //                         charCode: 45,
    //                      }),
-   //                      new TextPToken({ text: SToken.fromString(' ') }),
+   //                      new TextPToken({ text: toSToken(' ') }),
    //                      new GeneralEntityStartPToken(expectedRef2),
-   //                      new CharDataPToken({ text: SToken.fromString('(foo)') }),
-   //                      // new TextPToken({ text: SToken.fromString('(') }),
+   //                      new CharDataPToken({ text: toSToken('(foo)') }),
+   //                      // new TextPToken({ text: toSToken('(') }),
    //                      // new ParameterEntityStartPToken(expectedRef1),
-   //                      // new TextPToken({ text: SToken.fromString('foo') }),
+   //                      // new TextPToken({ text: toSToken('foo') }),
    //                      // new ParameterEntityEndPToken(expectedRef1),
-   //                      // new TextPToken({ text: SToken.fromString(')') }),
+   //                      // new TextPToken({ text: toSToken(')') }),
    //                      new GeneralEntityEndPToken(expectedRef2),
    //                   ],
-   //                   trailingSpace: SToken.fromString(' '),
+   //                   trailingSpace: toSToken(' '),
    //                },
    //                {
-   //                   name: SToken.fromString('first'),
+   //                   name: toSToken('first'),
    //                   postNameSpace: undefined,
-   //                   equal: SToken.fromString('='),
+   //                   equal: toSToken('='),
    //                   postEqualSpace: undefined,
-   //                   openQuote: SToken.fromString('"'),
-   //                   closeQuote: SToken.fromString('"'),
+   //                   openQuote: toSToken('"'),
+   //                   closeQuote: toSToken('"'),
    //                   value: [
-   //                      new TextPToken({ text: SToken.fromString('second ') }),
+   //                      new TextPToken({ text: toSToken('second ') }),
    //                      new CharRefPToken({
-   //                         open: SToken.fromString('&#'),
+   //                         open: toSToken('&#'),
    //                         openSpace: undefined,
    //                         hexMarkerSpace: undefined,
-   //                         digits: SToken.fromString('45'),
+   //                         digits: toSToken('45'),
    //                         digitsSpace: undefined,
-   //                         close: SToken.fromString(';'),
+   //                         close: toSToken(';'),
    //                         charCode: 45,
    //                      }),
-   //                      new TextPToken({ text: SToken.fromString(' ') }),
+   //                      new TextPToken({ text: toSToken(' ') }),
    //                      new GeneralEntityStartPToken(expectedRef2),
-   //                      new CharDataPToken({ text: SToken.fromString('(foo)') }),
-   //                      // new TextPToken({ text: SToken.fromString('(') }),
+   //                      new CharDataPToken({ text: toSToken('(foo)') }),
+   //                      // new TextPToken({ text: toSToken('(') }),
    //                      // new ParameterEntityStartPToken(expectedRef1),
-   //                      // new TextPToken({ text: SToken.fromString('foo') }),
+   //                      // new TextPToken({ text: toSToken('foo') }),
    //                      // new ParameterEntityEndPToken(expectedRef1),
-   //                      // new TextPToken({ text: SToken.fromString(')') }),
+   //                      // new TextPToken({ text: toSToken(')') }),
    //                      new GeneralEntityEndPToken(expectedRef2),
    //                   ],
    //                   trailingSpace: undefined,
    //                },
    //             ],
-   //             close: SToken.fromString('/>'),
+   //             close: toSToken('/>'),
    //          });
 
    //          expect((results[index] as any).attributes[0]).toEqualRangeless(expected.attributes[0]);

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource, toSToken } from 'sToken';
 import base from '../base';
 
 /**********************************************************************\
@@ -25,7 +25,7 @@ class DeclarationPToken extends base.PToken {
       if (props && 'open' in props) {
          this.open = props.open;
       } else {
-         this.open = SToken.fromString('');
+         this.open = toSToken('');
       }
    }
 }

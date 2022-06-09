@@ -7,8 +7,6 @@ import { ConditionalStartPToken, parseConditional, resumeParseConditional } from
 import { SectionStart } from '../bridge/section';
 import { ParameterEntityReferencePToken } from 'pToken';
 
-const { fromString } = SToken;
-
 describe('conditional (integration)', () => {
    let source: STokenSource;
    let sectionStart: SectionStart;
@@ -16,17 +14,17 @@ describe('conditional (integration)', () => {
    beforeEach(() => {
       source = new STokenSource();
       sectionStart = {
-         open: fromString('<!['),
-         sectionType: fromString('IGNORE'),
+         open: toSToken('<!['),
+         sectionType: toSToken('IGNORE'),
       };
    });
 
    describe('parse()', () => {
       it('parses an IGNORE with embedded values', (done) => {
          const expected = new ConditionalStartPToken({
-            open: fromString('<!['),
-            sectionType: fromString('IGNORE'),
-            bracket: fromString('['),
+            open: toSToken('<!['),
+            sectionType: toSToken('IGNORE'),
+            bracket: toSToken('['),
          });
          source.addText('[blah<![two<![three]]>four]]>]]>');
 
@@ -40,19 +38,19 @@ describe('conditional (integration)', () => {
    describe('resumeParseConditional()', () => {
       it('adds section type and bracket', (done) => {
          const start = new ConditionalStartPToken({
-            open: fromString('<!['),
-            openSpace: fromString(' '),
+            open: toSToken('<!['),
+            openSpace: toSToken(' '),
             unexpanded: {
                peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
                propName: 'sectionType',
             }
          });
          const expected = new ConditionalStartPToken({
-            open: fromString('<!['),
-            openSpace: fromString('  '),
-            sectionType: fromString('blah'),
-            sectionTypeSpace: fromString(' '),
-            bracket: fromString('['),
+            open: toSToken('<!['),
+            openSpace: toSToken('  '),
+            sectionType: toSToken('blah'),
+            sectionTypeSpace: toSToken(' '),
+            bracket: toSToken('['),
             unexpanded: {
                peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
                propName: 'sectionType',
@@ -68,10 +66,10 @@ describe('conditional (integration)', () => {
 
       it('adds bracket', (done) => {
          const start = new ConditionalStartPToken({
-            open: fromString('<!['),
-            openSpace: fromString(' '),
-            sectionType: fromString('blah'),
-            sectionTypeSpace: fromString(' '),
+            open: toSToken('<!['),
+            openSpace: toSToken(' '),
+            sectionType: toSToken('blah'),
+            sectionTypeSpace: toSToken(' '),
             unexpanded: {
                peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
                propName: 'sectionType',
@@ -82,11 +80,11 @@ describe('conditional (integration)', () => {
 
          resumeParseConditional(source, start, (result) => {
             expect(result).toEqualRangeless(new ConditionalStartPToken({
-               open: fromString('<!['),
-               openSpace: fromString(' '),
-               sectionType: fromString('blah'),
-               sectionTypeSpace: fromString(' \t'),
-               bracket: fromString('['),
+               open: toSToken('<!['),
+               openSpace: toSToken(' '),
+               sectionType: toSToken('blah'),
+               sectionTypeSpace: toSToken(' \t'),
+               bracket: toSToken('['),
                unexpanded: {
                   peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
                   propName: 'sectionType',

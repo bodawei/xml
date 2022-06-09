@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 
 import { parseXmlDeclaration } from '../xmlDeclaration';
 import { InstructionStart } from '../../bridge/instruction';
@@ -11,10 +11,10 @@ describe('xmlDeclaration (integration)', () => {
 
    beforeEach(() => {
       start = {
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
       };
    });
 
@@ -26,7 +26,7 @@ describe('xmlDeclaration (integration)', () => {
 
          parseXmlDeclaration(source, start, (parsing) => {
             expect(parsing.fields[0].name.str).toEqual('version');
-            done?.();
+            done();
          });
       });
 
@@ -37,7 +37,7 @@ describe('xmlDeclaration (integration)', () => {
 
          parseXmlDeclaration(source, start, (parsing) => {
             expect(parsing.fields[1].value!.str).toEqual('ascii');
-            done?.();
+            done();
          });
       });
    });

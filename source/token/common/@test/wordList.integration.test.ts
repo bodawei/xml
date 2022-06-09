@@ -3,7 +3,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { SToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'sToken';
 
 import {
    parseWordList,
@@ -16,21 +16,21 @@ describe('wordList (integration)', () => {
 
    beforeEach(() => {
       wlPToken = new WordListPToken(WordListType.NOTATION, {
-         open: SToken.fromString('('),
-         openSpace: SToken.fromString(' '),
+         open: toSToken('('),
+         openSpace: toSToken(' '),
          words: [ {
-            word: SToken.fromString('one'),
+            word: toSToken('one'),
             wordSpace: undefined,
-            connector: SToken.fromString('|'),
-            connectorSpace: SToken.fromString(' '),
+            connector: toSToken('|'),
+            connectorSpace: toSToken(' '),
          }, {
-            word: SToken.fromString('two'),
+            word: toSToken('two'),
             wordSpace: undefined,
             connector: undefined,
             connectorSpace: undefined,
          }],
-         close: SToken.fromString(')'),
-         closeSpace: SToken.fromString(' '),
+         close: toSToken(')'),
+         closeSpace: toSToken(' '),
       });
    });
 
@@ -54,22 +54,22 @@ describe('wordList (integration)', () => {
 
          parseWordList(source, WordListType.NOTATION, (result) => {
             expect(result).toEqualRangeless({
-               open: SToken.fromString('('),
-               openSpace: SToken.fromString(' '),
+               open: toSToken('('),
+               openSpace: toSToken(' '),
                words: [ {
                   word: undefined,
                   wordSpace: undefined,
-                  connector: SToken.fromString('|'),
-                  connectorSpace: SToken.fromString(' '),
+                  connector: toSToken('|'),
+                  connectorSpace: toSToken(' '),
                }, {
-                  word: SToken.fromString('two'),
-                  wordSpace: SToken.fromString(' '),
+                  word: toSToken('two'),
+                  wordSpace: toSToken(' '),
                   connector: undefined,
                   connectorSpace: undefined,
                }, {
-                  word: SToken.fromString('three'),
-                  wordSpace: SToken.fromString(' '),
-                  connector: SToken.fromString('|'),
+                  word: toSToken('three'),
+                  wordSpace: toSToken(' '),
+                  connector: toSToken('|'),
                   connectorSpace: undefined,
                }],
                close: undefined,

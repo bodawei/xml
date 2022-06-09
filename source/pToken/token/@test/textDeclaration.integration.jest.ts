@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 
 import { InstructionStart } from '../../bridge/instruction';
 import { parseTextDeclaration } from '../textDeclaration';
@@ -12,10 +12,10 @@ describe('textDeclaration (integration)', () => {
 
    beforeEach(() => {
       start = {
-         open: SToken.fromString('<?'),
+         open: toSToken('<?'),
          openSpace: undefined,
-         target: SToken.fromString('xml'),
-         targetSpace: SToken.fromString(' '),
+         target: toSToken('xml'),
+         targetSpace: toSToken(' '),
       };
    });
 
@@ -27,7 +27,7 @@ describe('textDeclaration (integration)', () => {
 
          parseTextDeclaration(source, start, (parsing) => {
             expect(parsing.fields[0].name.str).toEqual('version');
-            done?.();
+            done();
          });
       });
 
@@ -38,7 +38,7 @@ describe('textDeclaration (integration)', () => {
 
          parseTextDeclaration(source, start, (parsing) => {
             expect(parsing.fields[1].value!.str).toEqual('ascii');
-            done?.();
+            done();
          });
       });
    });

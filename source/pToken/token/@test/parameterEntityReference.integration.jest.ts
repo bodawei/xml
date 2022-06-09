@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 
 import {
    parseParameterEntityReference,
@@ -17,11 +17,11 @@ describe('ParameterEntityReferencePToken (integration)', () => {
          parseParameterEntityReference(source, (parsing) => {
             expect(parsing).toEqualRangeless(
                new ParameterEntityReferencePToken({
-                  open: SToken.fromString('%'),
-                  openSpace: SToken.fromString(' '),
-                  name: SToken.fromString('foo'),
-                  nameSpace: SToken.fromString(' '),
-                  close: SToken.fromString(';'),
+                  open: toSToken('%'),
+                  openSpace: toSToken(' '),
+                  name: toSToken('foo'),
+                  nameSpace: toSToken(' '),
+                  close: toSToken(';'),
                }),
             );
             done();

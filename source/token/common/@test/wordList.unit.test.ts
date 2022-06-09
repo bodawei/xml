@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 import { parseWordList, WordListPToken, WordListType } from '../wordList';
 
@@ -10,20 +10,20 @@ describe('wordList (unit)', () => {
 
    beforeEach(() => {
       wlPToken = new WordListPToken(WordListType.NOTATION, {
-         open: SToken.fromString('('),
-         openSpace: SToken.fromString(' '),
+         open: toSToken('('),
+         openSpace: toSToken(' '),
          words: [ {
-            word: SToken.fromString('one'),
-            wordSpace: SToken.fromString(' '),
-            connector: SToken.fromString('|'),
-            connectorSpace: SToken.fromString(' '),
+            word: toSToken('one'),
+            wordSpace: toSToken(' '),
+            connector: toSToken('|'),
+            connectorSpace: toSToken(' '),
          }, {
-            word:  SToken.fromString('two'),
+            word:  toSToken('two'),
             wordSpace: undefined,
             connector: undefined,
             connectorSpace: undefined,
          }],
-         close: SToken.fromString(')'),
+         close: toSToken(')'),
          closeSpace: undefined,
       });
    });
@@ -33,7 +33,7 @@ describe('wordList (unit)', () => {
       it('will not let an instance be constructed without a words array', () => {
 
          wlPToken = new WordListPToken(WordListType.NOTATION, {
-            open: SToken.fromString('('),
+            open: toSToken('('),
             words: undefined,
          });
 
@@ -87,10 +87,10 @@ describe('wordList (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({
-            open: SToken.fromString('('),
-            openSpace: SToken.fromString(' '),
+            open: toSToken('('),
+            openSpace: toSToken(' '),
             words: [],
-            close: SToken.fromString(')'),
+            close: toSToken(')'),
             closeSpace: undefined,
          });
       });
@@ -113,15 +113,15 @@ describe('wordList (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({
-            open: SToken.fromString('('),
+            open: toSToken('('),
             openSpace: undefined,
             words: [ {
-               word: SToken.fromString('one'),
+               word: toSToken('one'),
                wordSpace: undefined,
-               connector: SToken.fromString('|'),
+               connector: toSToken('|'),
                connectorSpace: undefined,
             }],
-            close: SToken.fromString(')'),
+            close: toSToken(')'),
             closeSpace: undefined,
          });
       });
@@ -149,20 +149,20 @@ describe('wordList (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({
-            open: SToken.fromString('('),
-            openSpace: SToken.fromString(' '),
+            open: toSToken('('),
+            openSpace: toSToken(' '),
             words: [ {
-               word: SToken.fromString('one'),
-               wordSpace: SToken.fromString(' '),
+               word: toSToken('one'),
+               wordSpace: toSToken(' '),
                connector: undefined,
                connectorSpace: undefined,
             }, {
-               word: SToken.fromString('two'),
+               word: toSToken('two'),
                wordSpace: undefined,
                connector: undefined,
                connectorSpace: undefined,
             }],
-            close: SToken.fromString(')'),
+            close: toSToken(')'),
             closeSpace: undefined,
          });
       });
@@ -190,20 +190,20 @@ describe('wordList (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({
-            open: SToken.fromString('('),
-            openSpace: SToken.fromString(' '),
+            open: toSToken('('),
+            openSpace: toSToken(' '),
             words: [ {
                word: undefined,
                wordSpace: undefined,
-               connector: SToken.fromString('|'),
+               connector: toSToken('|'),
                connectorSpace: undefined,
             }, {
                word: undefined,
                wordSpace: undefined,
-               connector: SToken.fromString('|'),
-               connectorSpace: SToken.fromString(' '),
+               connector: toSToken('|'),
+               connectorSpace: toSToken(' '),
             }],
-            close: SToken.fromString(')'),
+            close: toSToken(')'),
             closeSpace: undefined,
          });
       });

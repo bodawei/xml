@@ -570,10 +570,10 @@ describe('STokenSource (unit)', () => {
 
             source.extract('tox', ']', sTokenSpy);
             source.extract('tox', 'b', (sToken) => {
-               expect(sTokenSpy.calls.argsFor(0)[0].firstRange).toEqual(
+               expect(sTokenSpy.calls.argsFor(0)[0].ranges[0]).toEqual(
                   new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
                );
-               expect(sToken!.firstRange).toEqual(new Range(new EntityId(), 4, 2, 2, 5, 2, 3));
+               expect(sToken!.ranges[0]).toEqual(new Range(new EntityId(), 4, 2, 2, 5, 2, 3));
                done();
             });
          });

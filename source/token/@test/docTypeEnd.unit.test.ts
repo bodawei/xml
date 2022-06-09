@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import { DocTypeEndPToken, parseDocTypeEnd } from '../docTypeEnd';
@@ -13,7 +13,7 @@ describe('docTypeEnd (unit)', () => {
    let docTypeEndPToken: DocTypeEndPToken;
 
    beforeEach(() => {
-      startPToken = new DocTypeStartPToken({ open: SToken.fromString('<!'), openSubset: true });
+      startPToken = new DocTypeStartPToken({ open: toSToken('<!'), openSubset: true });
       const makeSToken = makeSTokenMaker();
       docTypeEndPToken = new DocTypeEndPToken({
          docTypeStartPToken: startPToken,

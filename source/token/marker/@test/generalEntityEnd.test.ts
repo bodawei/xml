@@ -3,16 +3,16 @@
 /* eslint-env jasmine */
 
 import { GeneralEntityReferencePToken } from 'pToken';
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 
 import { GeneralEntityEndPToken } from '../generalEntityEnd';
 
 describe('GeneralEntityEndPToken (unit)', () => {
 
    it('is constructed with the specified name', () => {
-      const token = new GeneralEntityEndPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));
+      const token = new GeneralEntityEndPToken(new GeneralEntityReferencePToken({ open: toSToken('&') }));
 
-      expect(token.referencePToken).toEqual(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));
+      expect(token.referencePToken).toEqual(new GeneralEntityReferencePToken({ open: toSToken('&') }));
    });
 
 });

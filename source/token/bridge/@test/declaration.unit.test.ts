@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { SToken, toSToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as pToken from '../../../pToken/bridge/entityDeclaration';
@@ -11,7 +11,7 @@ describe('declaration (unit)', () => {
    let open: SToken;
 
    beforeEach(() => {
-      open = SToken.fromString('<?');
+      open = toSToken('<?');
    });
 
    describe('parseDeclaration()', () => {
@@ -39,8 +39,8 @@ describe('declaration (unit)', () => {
             expect(args[1]).toEqualRangeless({
                open,
                openSpace: undefined,
-               declType: SToken.fromString('ENTITY'),
-               declTypeSpace: SToken.fromString(' '),
+               declType: toSToken('ENTITY'),
+               declTypeSpace: toSToken(' '),
             });
             expect(typeof args[2]).toEqual('function');
          });
@@ -60,9 +60,9 @@ describe('declaration (unit)', () => {
             expect(args[0]).toEqual(mockSource);
             expect(args[1]).toEqualRangeless({
                open,
-               openSpace: SToken.fromString(' '),
-               declType: SToken.fromString('eNtiTy'),
-               declTypeSpace: SToken.fromString(' '),
+               openSpace: toSToken(' '),
+               declType: toSToken('eNtiTy'),
+               declTypeSpace: toSToken(' '),
             });
             expect(typeof args[2]).toEqual('function');
          });

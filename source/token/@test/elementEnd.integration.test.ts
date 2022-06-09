@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import { ElementEndPToken, parseElementEnd } from '../elementEnd';
@@ -12,7 +12,7 @@ describe('elementEnd (integration)', () => {
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
       elementEndPToken = new ElementEndPToken({
-         open: SToken.fromString('<'),
+         open: toSToken('<'),
          openSpace: undefined,
          name: makeSToken('elemName'),
          nameSpace: makeSToken(' '),

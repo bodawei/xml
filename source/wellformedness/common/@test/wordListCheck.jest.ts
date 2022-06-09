@@ -2,7 +2,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { WordListPToken, WordListType } from 'token';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
@@ -23,21 +23,21 @@ describe('wordListCheck (unit)', () => {
 
    beforeEach(() => {
       wlPToken = new WordListPToken(WordListType.NOTATION, {
-         close: SToken.fromString(')'),
+         close: toSToken(')'),
          closeSpace: undefined,
-         open: SToken.fromString('('),
-         openSpace: SToken.fromString(' '),
+         open: toSToken('('),
+         openSpace: toSToken(' '),
          words: [
             {
-               connector: SToken.fromString('|'),
-               connectorSpace: SToken.fromString(' '),
-               word: SToken.fromString('one'),
-               wordSpace: SToken.fromString(' '),
+               connector: toSToken('|'),
+               connectorSpace: toSToken(' '),
+               word: toSToken('one'),
+               wordSpace: toSToken(' '),
             },
             {
                connector: undefined,
                connectorSpace: undefined,
-               word: SToken.fromString('two'),
+               word: toSToken('two'),
                wordSpace: undefined,
             },
          ],
@@ -98,10 +98,10 @@ describe('wordListCheck (unit)', () => {
       wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
          words: [
             {
-               connector: SToken.fromString('|'),
-               connectorSpace: SToken.fromString(' '),
+               connector: toSToken('|'),
+               connectorSpace: toSToken(' '),
                word: undefined,
-               wordSpace: SToken.fromString(' '),
+               wordSpace: toSToken(' '),
             },
          ],
       });
@@ -122,15 +122,15 @@ describe('wordListCheck (unit)', () => {
          words: [
             {
                connector: undefined,
-               connectorSpace: SToken.fromString(' '),
-               word: SToken.fromString('xxx'),
-               wordSpace: SToken.fromString(' '),
+               connectorSpace: toSToken(' '),
+               word: toSToken('xxx'),
+               wordSpace: toSToken(' '),
             },
             {
                connector: undefined,
-               connectorSpace: SToken.fromString(' '),
-               word: SToken.fromString('two'),
-               wordSpace: SToken.fromString(' '),
+               connectorSpace: toSToken(' '),
+               word: toSToken('two'),
+               wordSpace: toSToken(' '),
             },
          ],
       });
@@ -150,10 +150,10 @@ describe('wordListCheck (unit)', () => {
       wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
          words: [
             {
-               connector: SToken.fromString('|'),
-               connectorSpace: SToken.fromString(' '),
+               connector: toSToken('|'),
+               connectorSpace: toSToken(' '),
                word: undefined,
-               wordSpace: SToken.fromString(' '),
+               wordSpace: toSToken(' '),
             },
          ],
       });

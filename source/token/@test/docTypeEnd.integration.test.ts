@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, toSToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import { DocTypeStartPToken } from '../docTypeStart';
@@ -12,7 +12,7 @@ describe('docTypeEnd (integration)', () => {
    let startToken: DocTypeStartPToken;
 
    beforeEach(() => {
-      startToken = new DocTypeStartPToken({ open: SToken.fromString('<!'), });
+      startToken = new DocTypeStartPToken({ open: toSToken('<!'), });
       const makeSToken = makeSTokenMaker();
       docTypeEndPToken = new DocTypeEndPToken({
          docTypeStartPToken: startToken,

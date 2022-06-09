@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { toSToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import { SectionStart } from '../bridge/section';
@@ -15,12 +15,12 @@ describe('cdata (unit)', () => {
    beforeEach(() => {
       const expectedSToken = makeSTokenMaker();
       sectionStart = {
-         open: SToken.fromString('<!['),
-         sectionType: SToken.fromString('CDATA'),
+         open: toSToken('<!['),
+         sectionType: toSToken('CDATA'),
       };
       cDataPToken = new CdataPToken({
-         open: SToken.fromString('<!['),
-         sectionType: SToken.fromString('CDATA'),
+         open: toSToken('<!['),
+         sectionType: toSToken('CDATA'),
          bracket: expectedSToken('['),
          text: expectedSToken('test text'),
          close: expectedSToken(']]>'),
