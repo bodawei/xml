@@ -11,7 +11,7 @@ import {
    PseudoSpace,
    PSEUDO_SPACE,
 } from 'extractor';
-import { PSEUDO_SYSTEMID } from 'source/extractor/Segment';
+import { PSEUDO_SYSTEMID } from 'extractor';
 
 import SToken from '../SToken';
 import STokenSource from '../STokenSource';

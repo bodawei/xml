@@ -5,6 +5,6 @@ export { default as SToken } from './SToken'; // done
 export { toSToken } from './toSToken'; // done
 export { default as strOrBlank } from './strOrBlank'; // done
 export { getStartOffset } from './getStartOffset'; // done
-export * from './combineSTokens'; //
+export * from './combineSTokens'; // done
 
 export { default as STokenSource } from './STokenSource';

@@ -3,6 +3,7 @@
 export * from './versionTypes';
 export * from './util/problemCodes';
 export * from './sToken/sToken';
+export * from './sToken/STokenSource';
 export * from './token/conformanceVersion';
 export * from './token/entityId';
 export * from './token/problem';
