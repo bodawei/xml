@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenArrayBuilder } from 'sToken';
+import { SToken } from 'sToken';
 import { AttributesPToken } from 'token';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { literalToSTokens } from './literalToSTokens';
 

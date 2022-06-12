@@ -1,7 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { FieldedInstruction } from 'pToken';
-import { SToken, STokenArrayBuilder } from 'sToken';
+import { SToken } from 'sToken';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function fieldedInstructionToSTokens(pToken: FieldedInstruction): Array<SToken> {
    const builder = new STokenArrayBuilder();

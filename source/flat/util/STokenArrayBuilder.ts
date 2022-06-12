@@ -1,4 +1,4 @@
-import SToken from './SToken';
+import { SToken } from 'sToken';
 
 class STokenArrayBuilder {
    public sTokenArray: Array<SToken> = [];
@@ -26,4 +26,4 @@ class STokenArrayBuilder {
    }
 }
 
-export default STokenArrayBuilder;
+export { STokenArrayBuilder };

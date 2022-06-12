@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { TextPToken } from 'pToken';
-import { SToken, STokenArrayBuilder } from 'sToken';
+import { SToken } from 'sToken';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function textToSTokens(pToken: TextPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

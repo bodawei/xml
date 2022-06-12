@@ -1,7 +1,8 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { AttListDeclarationPToken } from 'pToken';
-import { STokenArrayBuilder, SToken } from 'sToken';
+import { SToken } from 'sToken';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { literalToSTokens } from '../common/literalToSTokens';
 import { unexpandedToSTokens } from '../common/unexpandedToSTokens';

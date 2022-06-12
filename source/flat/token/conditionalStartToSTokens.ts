@@ -1,8 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenArrayBuilder } from 'sToken';
+import { SToken } from 'sToken';
 import { ConditionalStartPToken } from 'token';
 import { parameterEntityReferenceToSTokens } from './parameterEntityReferenceToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function conditionalStartToSTokens(pToken: ConditionalStartPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

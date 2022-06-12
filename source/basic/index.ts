@@ -2,6 +2,7 @@
 
 export * from './versionTypes';
 export * from './util/problemCodes';
+export * from './sToken/sToken';
 export * from './token/conformanceVersion';
 export * from './token/entityId';
 export * from './token/problem';
@@ -11,6 +12,8 @@ export * from './util/collector';
 export * from './util/doAsyncLoop';
 export * from './util/doAsyncWhileLoop';
 export * from './util/extractSurrogatePair';
+export * from './util/getSTokenStartOffset';
+export * from './util/isSToken';
 export * from './util/makeOffset';
 export * from './util/offset';
 export * from './util/offsetsAreEqual';

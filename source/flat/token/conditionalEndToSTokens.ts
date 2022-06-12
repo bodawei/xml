@@ -1,7 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenArrayBuilder } from 'sToken';
+import { SToken } from 'sToken';
 import { ConditionalEndPToken } from 'token';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function conditionalEndToSTokens(pToken: ConditionalEndPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

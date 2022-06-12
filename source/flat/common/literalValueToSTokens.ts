@@ -6,8 +6,9 @@ import {
    TEXT_PTOKEN,
    CHARREF_PTOKEN,
 } from 'pToken';
-import { STokenArrayBuilder, SToken } from 'sToken';
+import { SToken } from 'sToken';
 import { LiteralValuePToken } from 'token';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { generalEntityReferenceToSTokens } from '../token/generalEntityReferenceToSTokens';
 import { parameterEntityReferenceToSTokens } from '../token/parameterEntityReferenceToSTokens';

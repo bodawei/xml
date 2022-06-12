@@ -1,9 +1,10 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2018-2022 by 柏大衛. All rights reserved. */
+
+import { describe, expect, it } from '@jest/globals';
 
 import { toSToken } from 'sToken';
 
-import STokenArrayBuilder from '../STokenArrayBuilder';
+import { STokenArrayBuilder } from '../STokenArrayBuilder';
 
 describe('STokenArrayBuilder (unit)', () => {
    describe('add()', () => {

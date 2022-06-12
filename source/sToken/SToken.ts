@@ -29,7 +29,7 @@ import { Range } from '../basic/util/range';
 \**********************************************************************/
 
 class SToken {
-   public str: string;
+   public readonly str: string;
 
    public originalStr: string;
 

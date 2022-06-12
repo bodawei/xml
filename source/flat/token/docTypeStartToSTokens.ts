@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { STokenArrayBuilder, SToken } from 'sToken';
+import { SToken } from 'sToken';
 import { DocTypeStartPToken } from 'token';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { externalIdToSTokens } from '../common/externalIdToSTokens';
 

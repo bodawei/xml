@@ -1,7 +1,9 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenArrayBuilder } from 'sToken';
+import { SToken } from 'sToken';
 import { DeclarationPToken } from 'token';
+
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function unknownDeclarationToSTokens(pToken: DeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
