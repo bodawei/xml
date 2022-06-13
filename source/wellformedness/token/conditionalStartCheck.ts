@@ -1,5 +1,5 @@
 import { Collector } from 'basic';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { ConditionalStartPToken } from 'token';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';

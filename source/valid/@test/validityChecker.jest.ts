@@ -1,8 +1,7 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, ProblemCollector } from 'basic';
-import { toSToken } from 'sToken';
+import { ConformanceVersion, ProblemCollector, toSToken } from 'basic';
 import { ConditionalEndPToken, ConditionalStartPToken, ElidedEntityDeclarationPToken } from 'token';
 import {
    makeAttListDeclaration,

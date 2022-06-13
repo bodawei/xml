@@ -2,8 +2,8 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import { ContentModelP } from '../../common/contentModel';
 import * as contentModel from '../../common/contentModel';

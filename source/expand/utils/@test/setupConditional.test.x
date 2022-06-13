@@ -8,7 +8,7 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'basic';
 import { ConditionalStartPToken, EntityValuePToken } from 'token';
 
 import { ExpandParams } from '../../types';

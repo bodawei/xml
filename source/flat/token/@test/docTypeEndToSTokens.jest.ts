@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { DocTypeStartPToken, DocTypeEndPToken } from 'token';
 
 import { docTypeEndToSTokens } from '../docTypeEndToSTokens';

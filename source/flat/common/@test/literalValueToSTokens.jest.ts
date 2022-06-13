@@ -6,7 +6,7 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { generalEntityReferenceToSTokens } from '../../token/generalEntityReferenceToSTokens';
 import { parameterEntityReferenceToSTokens } from '../../token/parameterEntityReferenceToSTokens';

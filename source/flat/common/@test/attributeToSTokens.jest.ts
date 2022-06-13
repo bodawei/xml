@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { AttributePToken } from 'token';
 
 import { attributeToSTokens } from '../attributeToSTokens';

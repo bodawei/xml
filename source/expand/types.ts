@@ -1,6 +1,6 @@
 import { EntityId, ConformanceVersion, Problem } from 'basic';
 import { ParseType, ParseToken } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import { AttributeValuePToken, EntityValuePToken } from 'token';
 
 import { EntityDetails } from './utils/EntityDetails';

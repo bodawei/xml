@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { toSToken, STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { toSToken, STokenSource } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 
 import { CommentPToken, parseComment } from '../comment';
 

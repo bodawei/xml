@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { Collector, ConformanceVersion, isSpace } from 'basic';
+import { Collector, ConformanceVersion, isSpace, strOrBlank } from 'basic';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
@@ -10,7 +10,6 @@ import {
    UnexpandedMarkupToken,
    pTokenArrayToString,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { ContentDetails, ElDeclType, ValidityState } from '../common/validityState';
 import { Error } from '../error/error';

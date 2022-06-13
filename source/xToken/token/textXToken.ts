@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { TextPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 const TEXT_XTOKEN = 'TEXT_XTOKEN';
 

@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { CHARREF_PTOKEN } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { ParseToken } from '../index';
 import { TEXT_PTOKEN } from '../token/text';

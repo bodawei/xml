@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { XmlDeclarationPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { fieldedInstructionToSTokens } from '../../common/fieldedInstructionToSTokens';
 import { xmlDeclarationToSTokens } from '../xmlDeclarationToSTokens';

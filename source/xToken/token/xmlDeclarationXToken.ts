@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { XmlDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';
 

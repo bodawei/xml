@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityId, Range } from 'basic';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 import { parseSpace } from '../space';
 

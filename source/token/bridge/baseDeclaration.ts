@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource, toSToken } from 'sToken';
+import { SToken, STokenSource, toSToken } from 'basic';
 import base from '../base';
 
 /**********************************************************************\

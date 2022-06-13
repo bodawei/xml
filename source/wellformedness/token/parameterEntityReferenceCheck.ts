@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { nameCheck } from '../common/nameCheck';
 import { wellFormedErrorCodes } from '../error/wellFormedError';

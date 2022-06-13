@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { GeneralEntityEndPToken } from 'token';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 const GENERAL_ENTITY_END_XTOKEN = 'GENERAL_ENTITY_END_XTOKEN';
 

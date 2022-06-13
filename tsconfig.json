@@ -42,8 +42,8 @@
          "sToken": [
             "./source/sToken"
          ],
-         "sToken-test": [
-            "./source/sToken/@test/helper"
+         "pToken-test": [
+            "./source/pToken/@test/helper"
          ],
          "token": [
             "./source/token"

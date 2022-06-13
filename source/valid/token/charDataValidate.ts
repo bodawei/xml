@@ -1,7 +1,6 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
-import { Collector, isSpace } from 'basic';
-import { strOrBlank } from 'sToken';
+import { Collector, isSpace, strOrBlank } from 'basic';
 import { CharDataPToken } from 'token';
 
 import { ElDeclType, ElementContext, ValidityState } from '../common/validityState';

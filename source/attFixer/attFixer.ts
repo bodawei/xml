@@ -11,7 +11,7 @@ import {
    ParseToken,
    TextPToken,
 } from 'pToken';
-import { strOrBlank, toSToken, SToken } from 'sToken';
+import { strOrBlank, toSToken, SToken } from 'basic';
 
 // ick
 import {

@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';

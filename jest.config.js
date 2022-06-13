@@ -112,7 +112,7 @@ module.exports = {
      '^pTokenStream$': '<rootDir>/source/pTokenStream',
      '^pToken-test$': '<rootDir>/source/pToken/@test/helper',
      '^sToken$': '<rootDir>/source/sToken',
-     '^sToken-test$': '<rootDir>/source/sToken/@test/helper',
+     '^pToken-test$': '<rootDir>/source/pToken/@test/helper',
      '^flat$': '<rootDir>/source/flat',
      '^token$': '<rootDir>/source/token',
      '^token-test$': '<rootDir>/source/token/@test/helper',

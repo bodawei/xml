@@ -1,8 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { STokenSource } from 'basic';
 import { parseContentModel } from 'pToken';
-import { STokenSource } from 'sToken';
 
 import { CmGraph } from '../cmGraphTypes';
 import { cmToCmGraph } from '../cmToCmGraph';

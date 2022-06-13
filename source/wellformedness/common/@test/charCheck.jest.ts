@@ -2,7 +2,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';

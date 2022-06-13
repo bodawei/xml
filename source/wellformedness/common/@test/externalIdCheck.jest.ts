@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { CharRefPToken, ExternalIdP, TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { errorCodes } from '../../error/errorCodes';

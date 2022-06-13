@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { STokenSource, SToken, strOrBlank, combineSTokens } from 'sToken';
+import { STokenSource, SToken, strOrBlank, combineSTokens } from 'basic';
 
 import literal, { LiteralPToken } from '../../token/common/literal';
 

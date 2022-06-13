@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
 import { parseEntityDeclaration } from 'pToken';
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 import { DeclarationStart } from 'token';
 
 import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';

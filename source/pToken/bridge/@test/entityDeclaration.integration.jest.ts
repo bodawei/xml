@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { TextPToken } from 'pToken';
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 
 import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { ElementEmptyPToken } from 'token';
 
 import { AttributeX, cloneAttributeX } from '../../common/attributeX';

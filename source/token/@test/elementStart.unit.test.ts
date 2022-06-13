@@ -2,11 +2,11 @@
 
 /* eslint-env jasmine */
 
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import attribute from '../common/attribute';
 import { ElementEmptyPToken, ElementStartPToken, parseElementStart } from '../elementStart';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 describe('elementStart (unit)', () => {
    let elementStartPToken: ElementStartPToken;

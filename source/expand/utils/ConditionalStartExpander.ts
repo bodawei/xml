@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { STokenSource, strOrBlank } from 'sToken';
+import { STokenSource, strOrBlank } from 'basic';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { ConditionalStartPToken, resumeParseConditional } from 'token';
 import { addProtoReplacementText } from './addProtoReplacementText';

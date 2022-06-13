@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { LiteralPToken } from 'token';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';

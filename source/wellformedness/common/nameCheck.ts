@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector, isName } from 'basic';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 /**********************************************************************\
  checkName() validates that the specified SToken matches the basic

@@ -1,6 +1,6 @@
 /* Copyright ® 2021-2022 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 import { makeOffset } from '../util/makeOffset';
 import { Offset } from '../util/offset';

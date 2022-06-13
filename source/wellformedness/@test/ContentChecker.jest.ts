@@ -10,7 +10,7 @@ import {
    NotationDeclarationPToken,
    TextDeclarationPToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    CdataPToken,

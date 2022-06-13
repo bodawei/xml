@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { CharRefPToken, TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { lookupPredefinedEntityValue } from '../lookupPredefinedEntityValue';
 

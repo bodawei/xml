@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { AttListDeclarationPToken } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
+import { SToken, strOrBlank } from 'basic';
 
 import { LiteralValueX, makeLiteralValueX } from '../common/literalValueX';
 

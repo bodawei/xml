@@ -7,7 +7,7 @@ import { EntityId, ENTITY_ID } from 'basic';
 import { EntityExpander, OpaqueEntityLoc, RetrieveResults, AttributeValueResults } from 'expand';
 import { PTokenStream, PTokenLiteralStream } from 'node';
 import { ParseType } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import {
    AttributeValueElement,
    AttributeValuePToken,

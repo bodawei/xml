@@ -1,12 +1,11 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
+import { Collector, SToken, strOrBlank } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
 } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
 import { ElidedEntityDeclarationPToken, PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
 import { validityErrorCodes } from '../error/validityErrorCodes';

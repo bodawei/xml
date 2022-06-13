@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion, Range, EntityId } from 'basic';
-import { SToken, STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { SToken, STokenSource } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 
 import { parseCdata, CdataPToken } from '../cdata';
 import { SectionStart } from '../bridge/section';

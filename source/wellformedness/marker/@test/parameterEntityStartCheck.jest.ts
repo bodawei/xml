@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { ParameterEntityStartPToken } from 'token';
 
 import { parameterEntityReferenceCheck } from '../../token/parameterEntityReferenceCheck';

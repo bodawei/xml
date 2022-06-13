@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Problem } from 'basic';
-import { strOrBlank, toSToken } from 'sToken';
+import { strOrBlank, toSToken } from 'basic';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    ExternalIdP,

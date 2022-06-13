@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'basic';
 import { ElementDeclarationPToken, isContentModelP } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { makeCmGraph } from '../contentModel/makeCmGraph';
 

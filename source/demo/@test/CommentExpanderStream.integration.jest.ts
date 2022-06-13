@@ -4,7 +4,7 @@ import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { PTokenStream } from 'node';
 import { XMLDECL_PTOKEN, ParseToken } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import {
    COMMENT_PTOKEN,
    ELEMENT_END_PTOKEN,

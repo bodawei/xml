@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { CharDataPToken } from 'token';
 
 const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';

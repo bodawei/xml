@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 
 import { parseInstruction } from './bridge/instruction';
 import { parseCharRef } from './token/charRef';

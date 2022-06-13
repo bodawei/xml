@@ -1,5 +1,4 @@
-import { getSTokenStartOffset } from 'basic';
-import { SToken, isSToken } from 'sToken';
+import { getSTokenStartOffset, SToken, isSToken } from 'basic';
 
 import { Offset } from '../util/offset';
 

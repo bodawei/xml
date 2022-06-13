@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { ExternalIdP, pTokenArrayToString, TextPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 import { errorCodes } from '../error/errorCodes';

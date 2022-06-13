@@ -3,7 +3,7 @@
 import { Problem } from 'basic';
 import { doAsyncLoop } from 'basic';
 import { GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken } from 'pToken';
-import { strOrBlank, STokenSource } from 'sToken';
+import { strOrBlank, STokenSource } from 'basic';
 import {
    AttributeValuePToken,
    ElidedEntityDeclarationPToken,

@@ -3,7 +3,7 @@
 /* istanbul ignore */ // For some reason istanbul with Safari is picking up this file
 
 import { EntityId, Range } from 'basic';
-import { SToken, toSToken } from 'sToken';
+import { SToken, toSToken } from 'basic';
 import { toContainPTokenProps, toEqualRangeless } from './beforeJasmine';
 
 describe('token custom matchers', () => {

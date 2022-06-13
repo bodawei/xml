@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ProcessingInstructionPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { processingInstructionToSTokens } from '../processingInstructionToSTokens';
 

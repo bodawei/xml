@@ -15,7 +15,7 @@ import {
    XMLDECL_PTOKEN,
    ParseToken,
 } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,

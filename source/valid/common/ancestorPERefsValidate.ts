@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
+import { Collector, SToken, strOrBlank } from 'basic';
 import { ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
 import {
    EntityValuePToken,
    GeneralEntityStartPToken,

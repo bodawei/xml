@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'basic';
 import { ElementDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { ContentDetails, ValidityState } from '../common/validityState';
 

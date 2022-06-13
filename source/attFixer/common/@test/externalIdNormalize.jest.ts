@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ExternalIdP, TextPToken } from 'pToken';
-import { toSToken, SToken } from 'sToken';
+import { toSToken, SToken } from 'basic';
 
 import { externalIdNormalize } from '../externalIdNormalize';
 

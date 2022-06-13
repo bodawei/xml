@@ -10,7 +10,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
+import { SToken, strOrBlank } from 'basic';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,

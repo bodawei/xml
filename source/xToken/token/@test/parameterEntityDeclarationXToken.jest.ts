@@ -8,7 +8,7 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXToken';

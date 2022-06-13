@@ -1,6 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 const CONDITIONAL_END_PTOKEN = 'CONDITIONAL_END_PTOKEN';
 

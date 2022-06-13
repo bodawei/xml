@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { AttributeDetails, ValidityState } from '../common/validityState';
 

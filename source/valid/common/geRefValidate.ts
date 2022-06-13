@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
+import { Collector, strOrBlank } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { PREDEFINED_ENTITIES } from '../common/constants';
 import { ValidityState } from '../common/validityState';

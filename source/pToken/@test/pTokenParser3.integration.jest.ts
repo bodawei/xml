@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId } from 'basic';
 import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ParseType } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import {
    CONDITIONAL_START_PTOKEN,
    CONDITIONAL_END_PTOKEN,
@@ -97,7 +97,7 @@ describe('pTokenParser (integration)', () => {
                type: CONFORMANCE_VERSION,
                version: 1,
             });
-            done?.();
+            done();
          });
       });
 
@@ -116,7 +116,7 @@ describe('pTokenParser (integration)', () => {
                type: CONFORMANCE_VERSION,
                version: 1,
             });
-            done?.();
+            done();
          });
       });
 
@@ -133,7 +133,7 @@ describe('pTokenParser (integration)', () => {
                type: CONFORMANCE_VERSION,
                version: 1.1,
             });
-            done?.();
+            done();
          });
       });
 
@@ -156,7 +156,7 @@ describe('pTokenParser (integration)', () => {
                type: CONFORMANCE_VERSION,
                version: 1.0,
             });
-            done?.();
+            done();
          });
       });
 
@@ -173,7 +173,7 @@ describe('pTokenParser (integration)', () => {
                type: CONFORMANCE_VERSION,
                version: 1.0,
             });
-            done?.();
+            done();
          });
       });
 
@@ -188,7 +188,7 @@ describe('pTokenParser (integration)', () => {
             const result = findToken(results, CONFORMANCE_VERSION);
 
             expect(result).toBeUndefined();
-            done?.();
+            done();
          });
       });
    });
@@ -205,7 +205,7 @@ describe('pTokenParser (integration)', () => {
                systemId: './document.xml',
                type: ENTITY_ID,
             });
-            done?.();
+            done();
          });
       });
 
@@ -225,7 +225,7 @@ describe('pTokenParser (integration)', () => {
                systemId: 'http://foo.com/bar.xml',
                type: ENTITY_ID,
             });
-            done?.();
+            done();
          });
       });
 
@@ -241,7 +241,7 @@ describe('pTokenParser (integration)', () => {
             const result = findToken(results, ENTITY_ID);
 
             expect(result).toBeUndefined();
-            done?.();
+            done();
          });
       });
    });
@@ -252,7 +252,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ATTLIST_DECLARATION_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -262,7 +262,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, CHARREF_PTOKEN, CHARDATA_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -277,7 +277,7 @@ describe('pTokenParser (integration)', () => {
             CHARDATA_PTOKEN,
             ELEMENT_END_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -294,7 +294,7 @@ describe('pTokenParser (integration)', () => {
             CHARDATA_PTOKEN,
             ELEMENT_END_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -304,7 +304,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, COMMENT_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -314,7 +314,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ELEMENT_START_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -329,7 +329,7 @@ describe('pTokenParser (integration)', () => {
             DOCTYPE_START_PTOKEN,
             DOCTYPE_END_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -344,7 +344,7 @@ describe('pTokenParser (integration)', () => {
             DOCTYPE_START_PTOKEN,
             DOCTYPE_END_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -354,7 +354,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ELEMENT_END_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -364,7 +364,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, ELEMENT_DECLARATION_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -374,7 +374,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, GENERAL_ENTITY_DECLARATION_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -384,7 +384,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, GENERAL_ENTITY_REFERENCE_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -400,7 +400,7 @@ describe('pTokenParser (integration)', () => {
             PARAMETER_ENTITY_REFERENCE_PTOKEN,
             DOCTYPE_END_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -416,7 +416,7 @@ describe('pTokenParser (integration)', () => {
             ELEMENT_START_PTOKEN,
             CHARDATA_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -426,7 +426,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, NOTATION_DECLARATION_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -436,7 +436,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, PROCESSING_INSTRUCTION_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -446,7 +446,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, SPACE_PTOKEN, CHARDATA_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -461,7 +461,7 @@ describe('pTokenParser (integration)', () => {
             ELEMENT_START_PTOKEN,
             CHARDATA_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -477,7 +477,7 @@ describe('pTokenParser (integration)', () => {
             ELEMENT_END_PTOKEN,
             SPACE_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -490,7 +490,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([ELEMENT_START_PTOKEN, ELEMENT_END_PTOKEN, CHARDATA_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -506,7 +506,7 @@ describe('pTokenParser (integration)', () => {
             ELEMENT_END_PTOKEN,
             SPACE_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -523,7 +523,7 @@ describe('pTokenParser (integration)', () => {
             ELEMENT_END_PTOKEN,
             SPACE_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -538,7 +538,7 @@ describe('pTokenParser (integration)', () => {
             UNKNOWNDECL_PTOKEN,
             CHARDATA_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -548,7 +548,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, UNKNOWNDECL_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -558,7 +558,7 @@ describe('pTokenParser (integration)', () => {
 
       gatherTypes(pTokenParser, (types) => {
          expect(types).toEqual([CONFORMANCE_VERSION, ENTITY_ID, CONDITIONAL_START_PTOKEN]);
-         done?.();
+         done();
       });
    });
 
@@ -575,7 +575,7 @@ describe('pTokenParser (integration)', () => {
             CHARDATA_PTOKEN,
             ELEMENT_END_PTOKEN,
          ]);
-         done?.();
+         done();
       });
    });
 
@@ -592,7 +592,7 @@ describe('pTokenParser (integration)', () => {
                TEXT_PTOKEN,
                CONDITIONAL_END_PTOKEN,
             ]);
-            done?.();
+            done();
          });
       });
 
@@ -609,7 +609,7 @@ describe('pTokenParser (integration)', () => {
             }, []);
 
             expect(strings).toEqual(['foo ', '<![', 'INCLUDE[bar', ']]>']);
-            done?.();
+            done();
          });
       });
 
@@ -628,7 +628,7 @@ describe('pTokenParser (integration)', () => {
                CONDITIONAL_END_PTOKEN,
                CONDITIONAL_END_PTOKEN,
             ]);
-            done?.();
+            done();
          });
       });
 
@@ -652,7 +652,7 @@ describe('pTokenParser (integration)', () => {
                ELEMENT_START_PTOKEN,
                ELEMENT_END_PTOKEN,
             ]);
-            done?.();
+            done();
          });
       });
    });

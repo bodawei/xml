@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import { PTokenStream } from '../pTokenStream';
 
 import { PToXTokenStream } from '../pToXTokenStream';

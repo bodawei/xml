@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
 import { ProcessingInstructionPToken, parseProcessingInstruction } from 'pToken';
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 
 import { WellFormedError } from '../../error/wellFormedError';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';

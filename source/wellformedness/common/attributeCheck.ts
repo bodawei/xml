@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector, rangeStartOffset } from 'basic';
 import { isTextPToken, pTokenArrayToString } from 'pToken';
-import { strOrBlank, SToken } from 'sToken';
+import { strOrBlank, SToken } from 'basic';
 import { AttributePToken, LiteralValuePToken } from 'token';
 
 import { attributeLangCheck } from './attributeLangCheck';

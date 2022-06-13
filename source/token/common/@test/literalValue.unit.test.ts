@@ -3,8 +3,8 @@
 
 import { Range, EntityId } from 'basic';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
-import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { SToken } from 'basic';
+import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
 import * as charRef from '../../../pToken/token/charRef';

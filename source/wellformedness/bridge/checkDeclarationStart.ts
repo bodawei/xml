@@ -2,7 +2,7 @@
 
 import { Collector } from 'basic';
 import { DeclarationStart } from 'token';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 

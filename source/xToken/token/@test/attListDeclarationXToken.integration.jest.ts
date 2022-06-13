@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { parseAttListDeclaration } from 'pToken';
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 
 import { DeclarationStart } from 'token';
 
@@ -34,7 +34,7 @@ describe('attListDeclarationXToken (integration)', () => {
             attDefs: [],
             pToken,
          });
-         done?.();
+         done();
       });
    });
 
@@ -61,7 +61,7 @@ describe('attListDeclarationXToken (integration)', () => {
             pToken,
          });
 
-         done?.();
+         done();
       });
    });
 
@@ -88,7 +88,7 @@ describe('attListDeclarationXToken (integration)', () => {
             pToken,
          });
 
-         done?.();
+         done();
       });
    });
 });

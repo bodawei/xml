@@ -3,7 +3,7 @@
 /* eslint-env jasmine */
 
 import { ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { ParameterEntityEndPToken } from '../parameterEntityEnd';
 

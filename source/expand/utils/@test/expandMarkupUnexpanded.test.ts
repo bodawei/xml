@@ -7,7 +7,7 @@ import {
    UnexpandedMarkupToken,
    TextPToken,
 } from 'pToken';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'basic';
 import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import { ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
 

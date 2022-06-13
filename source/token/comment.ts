@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';
 

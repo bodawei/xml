@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { gatherStreamResults } from 'basic-test';
-import { toSToken, SToken, STokenSource } from 'sToken';
+import { toSToken, SToken, STokenSource } from 'basic';
 import { XmlDeclarationPToken, XMLDECL_PTOKEN, TextPToken, ParseToken } from 'pToken';
 import { ElementStartPToken } from 'token';
 

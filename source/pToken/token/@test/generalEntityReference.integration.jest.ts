@@ -1,6 +1,6 @@
 /* Copyright ® 2018-201 by 柏大衛. All rights reserved. */
 
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 
 import {
    parseGeneralEntityReference,

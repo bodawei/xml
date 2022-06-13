@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ProblemCollector } from 'basic';
 import { parseAttListDeclaration } from 'pToken';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'basic';
 import { DeclarationStart } from 'token';
 
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';

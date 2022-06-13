@@ -2,7 +2,7 @@
 
 import { Readable } from 'stream';
 import { PTokenOptions, ParseType, PTokenParser } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 
 class PTokenStream extends Readable {
    private parser: PTokenParser;

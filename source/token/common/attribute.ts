@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 import literal, { LiteralPToken } from './literal';
 import { GeneralEntityEndPToken } from '../marker/generalEntityEnd';

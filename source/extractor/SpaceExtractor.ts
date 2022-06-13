@@ -1,6 +1,5 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { Range } from 'basic';
 import Extractor from './Extractor';
 import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
 

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { ParameterEntityDeclarationPToken } from 'pToken';
 
 import { ExternalIdX } from '../common/externalIdX';

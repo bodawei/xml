@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, SToken } from 'basic';
 import {
    AttDefinitionP,
    ElementDeclarationPToken,
@@ -8,7 +8,6 @@ import {
    ParameterEntityDeclarationPToken,
    ParseToken,
 } from 'pToken';
-import { SToken } from 'sToken';
 import {
    ConditionalStartPToken,
    DocTypeStartPToken,

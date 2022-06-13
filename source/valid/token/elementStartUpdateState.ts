@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'basic';
 import { pTokenArrayToString } from 'pToken';
-import { strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, ELEMENT_EMPTY_PTOKEN } from 'token';
 
 import {

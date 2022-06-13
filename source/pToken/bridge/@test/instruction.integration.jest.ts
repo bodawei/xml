@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { ProcessingInstructionPToken, TextDeclarationPToken, XmlDeclarationPToken } from 'pToken';
-import { STokenSource, SToken, toSToken } from 'sToken';
+import { STokenSource, SToken, toSToken } from 'basic';
 
 import { parseInstruction } from '../instruction';
 

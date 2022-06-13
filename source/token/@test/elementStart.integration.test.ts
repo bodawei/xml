@@ -3,8 +3,8 @@
 
 import { ConformanceVersion } from 'basic';
 import {GeneralEntityReferencePToken, TextPToken } from 'pToken';
-import { STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { STokenSource } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 
 import { ElementStartPToken, parseElementStart } from '../elementStart';
 

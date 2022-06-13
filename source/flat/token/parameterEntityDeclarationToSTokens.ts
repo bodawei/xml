@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ParameterEntityDeclarationPToken } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { externalIdToSTokens } from '../common/externalIdToSTokens';

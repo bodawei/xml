@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, Problem } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ParseType, ParseToken } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
 
 import { DocumentChecker } from '../DocumentChecker';

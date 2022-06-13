@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import { STokenSource, SToken } from 'sToken';
+import { STokenSource, SToken } from 'basic';
 
 
 const CHARDATA_PTOKEN = 'CHARDATA_PTOKEN';

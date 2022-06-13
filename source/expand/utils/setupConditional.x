@@ -1,5 +1,5 @@
 import { ParseType, ParseToken } from 'pToken';
-import { STokenSource, strOrBlank } from 'sToken';
+import { STokenSource, strOrBlank } from 'basic';
 import { ConditionalStartPToken, resumeParseConditional } from 'token';
 
 import { ConditionalInfo, ExpandParams } from '../types';

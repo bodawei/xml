@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { CdataPToken } from 'token';
 
 import { charCheck } from '../common/charCheck';

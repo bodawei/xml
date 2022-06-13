@@ -3,8 +3,8 @@
 /* eslint-env jasmine */
 
 import { ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 import { makeParameterEntityReference } from 'token-test';
 
 import { SectionStart } from '../bridge/section';

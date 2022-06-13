@@ -4,7 +4,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { ParameterEntityStartPToken } from '../parameterEntityStart';
 

@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { InstructionField, XmlDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { fatalErrorCodes } from '../error/fatalErrorCodes';
 
 import { charCheck } from '../common/charCheck';

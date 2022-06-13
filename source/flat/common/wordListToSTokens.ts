@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { WordListPToken } from 'token';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 

@@ -8,7 +8,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { charCheck } from '../../common/charCheck';
 import { externalIdCheck } from '../../common/externalIdCheck';

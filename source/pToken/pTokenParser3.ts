@@ -11,7 +11,7 @@ import {
    TextPToken,
    parseCharRef,
 } from 'pToken';
-import { strOrBlank, SToken, STokenSource } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'basic';
 import {
    DOCTYPE_START_PTOKEN,
    ELEMENT_END_PTOKEN,

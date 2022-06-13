@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { NotationDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { nameCheck } from '../common/nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';

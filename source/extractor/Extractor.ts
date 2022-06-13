@@ -1,6 +1,5 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Range } from 'basic';
 import {DoneSegment, PseudoSpace, PSEUDO_SPACE, Segment} from './Segment';
 
 type SegmentInfo = {

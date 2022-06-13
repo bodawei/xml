@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ParameterEntityDeclarationPToken, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 import { EntityValuePToken } from './EntityValuePToken';
 

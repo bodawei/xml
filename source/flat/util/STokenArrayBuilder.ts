@@ -1,4 +1,4 @@
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 class STokenArrayBuilder {
    public sTokenArray: Array<SToken> = [];

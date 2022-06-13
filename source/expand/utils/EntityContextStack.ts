@@ -3,7 +3,7 @@ import {
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { OpaqueEntityLoc } from '../types';
 import { EntityId } from 'basic';
 import {

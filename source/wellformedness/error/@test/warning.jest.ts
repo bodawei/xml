@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { WARNING_SEVERITY, PROBLEM, EntityId, Offset } from 'basic';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { Warning } from '../Warning';
 

@@ -2,8 +2,8 @@
 
 /* eslint-env jasmine */
 
-import { toSToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import { SectionStart } from '../bridge/section';
 import { parseCdata, CdataPToken } from '../cdata';

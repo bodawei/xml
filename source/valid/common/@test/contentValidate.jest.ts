@@ -1,10 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
+import { ConformanceVersion, XmlEdition, XmlVersion, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
-import { toSToken } from 'sToken';
 import { getFirstSToken } from 'token';
 import {
    makeAttListDeclaration,

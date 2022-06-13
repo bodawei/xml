@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { STokenSource, SToken, toSToken } from 'sToken';
+import { STokenSource, SToken, toSToken } from 'basic';
 
 import { ConditionalStartPToken, parseConditional, resumeParseConditional } from '../conditionalStart';
 import { SectionStart } from '../bridge/section';

@@ -7,7 +7,7 @@ import { EntityId, Problem } from 'basic';
 import { PTokenLiteralStream } from './pTokenLiteralStream';
 import { PTokenStream } from './pTokenStream';
 import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import { AttributeValuePToken, EntityValuePToken, PToken } from 'token';
 
 import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../expand/types';

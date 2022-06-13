@@ -15,7 +15,7 @@ import {
    ParseType,
    ParseToken,
 } from 'pToken';
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 import {
    DOCTYPE_START_PTOKEN,
    DOCTYPE_END_PTOKEN,

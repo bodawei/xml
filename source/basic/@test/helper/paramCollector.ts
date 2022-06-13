@@ -1,6 +1,6 @@
 /* Copyright ® 2022 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 import { ProblemConstructor, ProblemParam, ProblemPosition } from '../../token/problem';
 import { Collector } from '../../util/collector';

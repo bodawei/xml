@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
-import { SToken, STokenSource, toSToken } from 'sToken';
+import { SToken, STokenSource, toSToken } from 'basic';
 import { parseAttribute } from 'token';
 
 import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';

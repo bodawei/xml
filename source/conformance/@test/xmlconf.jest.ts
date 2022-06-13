@@ -6,7 +6,7 @@ import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, CheckWellFormed, PTokenStream } from 'node';
 import { ParseType, ParseToken } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 
 import metadata from './data/xmlconf.json';
 import { TestDetails, prepareTestDetails } from './helper/prepareTestDetails';
@@ -151,7 +151,7 @@ describe('XML Conformance tests', () => {
                gatherStreamResults<ParseToken>(wellFormedStream, (results) => {
                   // @ts-expect-error 2329/matchers
                   expect(results).not.toHaveXmlConfErrors();
-                  done?.();
+                  done();
                });
             });
          }

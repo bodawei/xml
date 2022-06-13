@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { DocTypeStartPToken } from 'token';
 
 import { externalIdCheck } from '../../common/externalIdCheck';

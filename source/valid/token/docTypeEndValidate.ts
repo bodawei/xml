@@ -1,7 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
-import { strOrBlank } from 'sToken';
+import { Collector, strOrBlank } from 'basic';
 import { WordListPToken } from 'token';
 
 import { ValidityState } from '../common/validityState';

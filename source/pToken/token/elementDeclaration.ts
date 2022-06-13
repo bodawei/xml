@@ -1,4 +1,4 @@
-import { combineSTokens, SToken, STokenSource } from 'sToken';
+import { combineSTokens, SToken, STokenSource } from 'basic';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
 import { ContentModelP, parseContentModel, resumeParseContentModel } from '../common/contentModel';

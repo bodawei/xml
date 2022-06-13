@@ -10,7 +10,7 @@ import {
    ParameterEntityDeclarationPToken,
    TextPToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { CheckState } from '../../checkUtils';
 import { dtdEndCheck } from '../dtdEndCheck';

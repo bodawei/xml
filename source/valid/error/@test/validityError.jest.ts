@@ -1,7 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { EntityId, ERROR_SEVERITY, Offset, PROBLEM } from 'basic';
-import { toSToken } from 'sToken';
+import { EntityId, ERROR_SEVERITY, Offset, PROBLEM, toSToken } from 'basic';
 
 import { ValidityError } from '../validityError';
 

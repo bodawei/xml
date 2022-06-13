@@ -3,7 +3,7 @@
 import { ConformanceVersion, extractSurrogatePair, isChar } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { CharRefPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { makeCharRef } from 'token-test';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';

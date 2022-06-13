@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ProcessingInstructionPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { charCheck } from '../../common/charCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';

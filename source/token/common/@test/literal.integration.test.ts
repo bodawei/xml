@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { STokenSource } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken,  } from 'pToken';
 
 import literal, { LiteralPToken } from '../literal';

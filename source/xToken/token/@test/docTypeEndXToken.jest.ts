@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { DocTypeEndPToken, DocTypeStartPToken } from 'token';
 
 import { DocTypeEndXToken, DOCTYPE_END_XTOKEN } from '../docTypeEndXToken';

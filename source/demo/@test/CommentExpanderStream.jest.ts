@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { Range } from 'basic';
-import { toSToken, SToken } from 'sToken';
+import { toSToken, SToken } from 'basic';
 import { CommentPToken } from 'token';
 
 import { CommentExpanderStream } from '../CommentExpanderStream';

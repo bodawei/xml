@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { doAsyncWhileLoop } from 'basic';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 import { parseParameterEntityReference } from '../token/parameterEntityReference';
 import { TextPToken, parseText } from '../token/text';

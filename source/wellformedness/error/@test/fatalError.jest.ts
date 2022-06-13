@@ -1,7 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { PROBLEM, EntityId, Offset, FATAL_ERROR_SEVERITY } from 'basic';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { FatalError } from '../fatalError';
 

@@ -9,7 +9,7 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    ParseToken,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,

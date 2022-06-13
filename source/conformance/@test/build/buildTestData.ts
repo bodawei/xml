@@ -7,7 +7,7 @@ import { Transform } from 'stream';
 import { EntityId, ConformanceVersion } from 'basic';
 import { EntityExpanderStream, PTokenStream, PToXTokenStream } from 'node';
 import SimpleObj from '../../../simpleobj/so';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 
 import { convertToStringWithSurrogateHalves } from './surrogateUtils';
 

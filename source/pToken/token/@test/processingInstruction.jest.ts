@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import {
    parseProcessingInstruction,
@@ -94,7 +94,7 @@ describe('ProcessingInstructionPToken (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless(
+         expect(result).toEqualRangeless(
             new ProcessingInstructionPToken({
                open: toSToken('<?'),
                instruction: toSToken('blah'),
@@ -110,7 +110,7 @@ describe('ProcessingInstructionPToken (unit)', () => {
          mockSource.respondInAsyncTime();
 
          // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless({
+         expect(result).toEqualRangeless({
             open: toSToken('<?'),
             instruction: undefined,
             close: undefined,

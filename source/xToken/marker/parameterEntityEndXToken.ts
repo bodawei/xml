@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { ParameterEntityEndPToken } from 'token';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 const PARAMETER_ENTITY_END_XTOKEN = 'PARAMETER_ENTITY_END_XTOKEN';
 

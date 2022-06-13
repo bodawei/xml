@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
 import {   GENERAL_ENTITY_DECLARATION_PTOKEN, GENERAL_ENTITY_REFERENCE_PTOKEN,  PROCESSING_INSTRUCTION_PTOKEN,    NOTATION_DECLARATION_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import { ELEMENT_DECLARATION_PTOKEN } from 'pToken';
 
 import {PTokenStream} from '../pTokenStream';

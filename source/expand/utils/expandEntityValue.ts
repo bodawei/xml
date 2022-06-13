@@ -1,6 +1,6 @@
 import { Problem } from 'basic';
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import {
    ElidedEntityDeclarationPToken,
    EntityValuePToken,

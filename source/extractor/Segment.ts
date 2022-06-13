@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityId, Range } from 'basic';
+import { EntityId } from '../basic/token/entityId';
+import { Range } from '../basic/util/range';
 
 const DONE_SEGMENT = 'DONE_SEGMENT';
 const SEGMENT_TYPE = 'SEGMENT_TYPE';

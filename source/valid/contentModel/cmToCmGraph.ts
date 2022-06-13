@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
+import { SToken, strOrBlank } from 'basic';
 import { ContentModelP, ContentNameP, isContentModelP } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
 
 import { MutableCmState, MutableCmGraph } from './cmGraphTypes';
 

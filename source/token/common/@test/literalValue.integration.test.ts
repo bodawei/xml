@@ -1,8 +1,9 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { SToken } from '../../../basic/sToken/sToken';
+import { STokenSource, toSToken } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 
 import literalValue from '../literalValue';
 
@@ -20,10 +21,9 @@ describe('literalValue (integration)', () => {
          source.endText();
 
          literalValue.parse(source, ['"'], (pToken) => {
-            const makeSToken = makeSTokenMaker();
-            expect(pToken).toEqual([
-               new TextPToken({ text: makeSToken('one%peref;two&geref;&geref2;three') }),
-            ]);
+            expect(pToken).toEqualRangeless([
+                  new TextPToken({ text: toSToken('one%peref;two&geref;&geref2;three') }),
+               ]);
             done();
          });
       });
@@ -35,7 +35,7 @@ describe('literalValue (integration)', () => {
 
          literalValue.parse(source, ['"', '%', '&', '&#'], (pToken) => {
             const makeSToken = makeSTokenMaker();
-            expect(pToken).toEqual([
+            const expected = [
                new TextPToken({ text: makeSToken('one') }),
                new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
@@ -68,7 +68,9 @@ describe('literalValue (integration)', () => {
                   close: makeSToken(';'),
                }),
                new TextPToken({ text: makeSToken('three') }),
-            ]);
+            ];
+
+            expect(pToken).toEqual(expected);
             done();
          });
       });

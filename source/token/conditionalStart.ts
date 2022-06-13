@@ -1,7 +1,7 @@
 /* Copyright ® 2019-2021 by 柏大衛. All rights reserved. */
 
 import { parseParameterEntityReference, ParameterEntityReferencePToken } from 'pToken';
-import { combineSTokens, SToken, STokenSource } from 'sToken';
+import { combineSTokens, SToken, STokenSource } from 'basic';
 
 import { SectionStart } from './bridge/section';
 

@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { doAsyncWhileLoop } from 'basic';
-import { SToken, STokenSource, combineSTokens } from 'sToken';
+import { SToken, STokenSource, combineSTokens } from 'basic';
 
 type DeliverContentModel = (pToken?: ContentModelP) => void;
 

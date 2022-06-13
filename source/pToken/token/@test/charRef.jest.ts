@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { SToken, toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { SToken, toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import { CharRefPToken, parseCharRef } from '../charRef';
 

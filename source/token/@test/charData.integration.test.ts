@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion,  } from 'basic';
-import { STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { STokenSource } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 
 import { CharDataPToken, parseCharData } from '../charData';
 // import * as charData from '../charData';

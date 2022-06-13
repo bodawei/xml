@@ -1,8 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken } from 'basic';
 import { ElementDeclarationPToken } from 'pToken';
-import { toSToken } from 'sToken';
 import { ElementEndPToken } from 'token';
 
 import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';

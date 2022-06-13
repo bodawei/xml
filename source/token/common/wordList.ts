@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 const ENUMERATION_PTOKEN = 'ENUMERATION_PTOKEN';
 const NOTATION_PTOKEN = 'NOTATION_PTOKEN';

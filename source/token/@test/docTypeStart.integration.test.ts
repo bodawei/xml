@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { TextPToken } from 'pToken';
-import { STokenSource,  toSToken } from 'sToken';
+import { STokenSource,  toSToken } from 'basic';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 

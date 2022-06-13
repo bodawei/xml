@@ -13,7 +13,7 @@ import {
    TextDeclarationPToken,
    TextPToken,
 } from 'pToken';
-import { strOrBlank, toSToken } from 'sToken';
+import { strOrBlank, toSToken } from 'basic';
 import {
    CommentPToken,
    ExternalSubsetStartToken,

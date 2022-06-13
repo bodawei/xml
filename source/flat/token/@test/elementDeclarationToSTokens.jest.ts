@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ContentModelP, ElementDeclarationPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { contentModelToSTokens } from '../../common/contentModelToSTokens';
 import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';

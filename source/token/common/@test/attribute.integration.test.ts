@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { TextPToken, } from 'pToken';
-import { STokenSource } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { STokenSource } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 
 import attribute from '../attribute';
 

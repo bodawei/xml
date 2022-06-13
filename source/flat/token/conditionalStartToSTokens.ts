@@ -1,6 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { ConditionalStartPToken } from 'token';
 import { parameterEntityReferenceToSTokens } from './parameterEntityReferenceToSTokens';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';

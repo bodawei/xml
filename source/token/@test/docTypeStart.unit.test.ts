@@ -2,8 +2,8 @@
 
 /* eslint-env jasmine */
 
-import {  STokenSource, toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import {  STokenSource, toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import * as externalId from '../../pToken/common/externalId';

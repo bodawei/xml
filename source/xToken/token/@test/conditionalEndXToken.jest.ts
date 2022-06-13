@@ -1,7 +1,7 @@
 /* Copyright ® 2020-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { ConditionalEndPToken } from 'token';
 
 import { ConditionalEndXToken } from '../conditionalEndXToken';
@@ -16,9 +16,7 @@ describe('ConditionalClose', () => {
    });
 
    it('creates an XToken from a pToken', () => {
-      const xToken = new ConditionalEndXToken(
-         new ConditionalEndPToken({ open: toSToken('<![') }),
-      );
+      const xToken = new ConditionalEndXToken(new ConditionalEndPToken({ open: toSToken('<![') }));
 
       expect(xToken).toEqual({
          type: 'CONDITIONAL_SECTION_END_XTOKEN',

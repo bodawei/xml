@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
 import { makeGeneralEntityDeclaration, makeGeneralEntityReference } from 'token-test';
 
 import { validityErrorCodes } from '../../error/validityErrorCodes';

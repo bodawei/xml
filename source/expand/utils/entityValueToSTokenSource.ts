@@ -3,7 +3,7 @@
 
 import { EntityId } from 'basic';
 import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import {
    EntityValuePToken,
    PARAMETER_ENTITY_START_PTOKEN,

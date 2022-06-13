@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ParameterEntityReferencePToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 const PARAMETER_ENTITY_REFERENCE_XTOKEN = 'PARAMETER_ENTITY_REFERENCE_XTOKEN';
 

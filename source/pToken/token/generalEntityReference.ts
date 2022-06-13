@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 const GENERAL_ENTITY_REFERENCE_PTOKEN = 'GENERAL_ENTITY_REFERENCE_PTOKEN';
 

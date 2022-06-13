@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ParameterEntityReferencePToken } from 'pToken';
-import {  STokenSource, toSToken } from 'sToken';
+import {  STokenSource, toSToken } from 'basic';
 import { CdataPToken, ConditionalStartPToken,  } from 'token';
 
 import { parseSection } from '../section';

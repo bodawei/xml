@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 type Props =  { [name: string]: any, calls?: any };
 
@@ -71,7 +71,7 @@ function makeRangeless(item: void | Props): Props | void | null {
       return props;
    }
 
-   if (props instanceof SToken) {
+   if (typeof props === 'object' && 'originalStr' in props) {
       return new SToken(props.str, props.originalStr, []);
    }
 
@@ -82,7 +82,7 @@ function makeRangeless(item: void | Props): Props | void | null {
    Object.keys(props).forEach((name) => {
       const value = props[name];
 
-      if (value instanceof SToken) {
+      if (typeof value === 'object' && 'originalStr' in value) {
          result[name] = new SToken(value.str, value.originalStr, []);
       } else if (Array.isArray(value)) {
          result[name] = value.map((element) => makeRangeless(element));
@@ -153,7 +153,7 @@ function toEqualRangeless(util: any, customEqualityTesters: any) {
             let exp = expected[propName];
             const act = actual[propName];
 
-            if (act instanceof SToken && typeof exp === 'string') {
+            if ((typeof act === 'object' && 'originalStr' in act) && typeof exp === 'string') {
                exp = new SToken(exp, exp, []);
             }
 

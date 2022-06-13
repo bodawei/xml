@@ -2,7 +2,7 @@
 
 import { ENTITY_ID, CONFORMANCE_VERSION, Problem } from 'basic';
 import { GeneralEntityDeclarationPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'basic';
 import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import {
    GeneralEntityEndPToken,

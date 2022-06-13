@@ -3,7 +3,7 @@
 /* eslint-env jasmine */
 
 import { GeneralEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { GeneralEntityStartPToken } from '../generalEntityStart';
 

@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2022 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { toSToken, SToken } from 'sToken';
+import { toSToken, SToken } from 'basic';
 
 import { EntityId } from '../../token/entityId';
 import { ERROR_SEVERITY, WARNING_SEVERITY, ProblemPosition, Problem } from '../../token/problem';

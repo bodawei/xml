@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { ElementEndPToken } from 'token';
 
 import { ElementContext, ValidityState } from '../common/validityState';

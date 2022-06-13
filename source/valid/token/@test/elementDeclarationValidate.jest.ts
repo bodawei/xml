@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -10,7 +10,6 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
 import { ContentDetails, ElDeclType, ValidityState } from '../../common/validityState';

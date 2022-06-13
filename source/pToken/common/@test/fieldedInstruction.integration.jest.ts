@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 
 import { parseFieldedInstruction } from '../fieldedInstruction';
 
@@ -19,7 +19,7 @@ describe('entityInstruction (integration)', () => {
             ['version', 'encoding'],
             (parsing) => {
                expect(parsing.fields[0].name.str).toEqual('version');
-               done?.();
+               done();
             },
          );
       });
@@ -31,7 +31,7 @@ describe('entityInstruction (integration)', () => {
 
          parseFieldedInstruction(source, { open: toSToken('<?') }, ['fish', 'frog'], (parsing) => {
             expect(parsing.fields[1].value!.str).toEqual('ascii');
-            done?.();
+            done();
          });
       });
    });

@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { ParameterEntityStartPToken } from 'token';
 import { ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import {
    PARAMETER_ENTITY_START_XTOKEN,

@@ -7,7 +7,7 @@ import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ParseType, ParseToken } from 'pToken';
 import { PTokenStream } from '../pTokenStream';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 
 import { FlattenPTokenStream } from '../flattenPTokenStream';

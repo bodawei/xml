@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { GeneralEntityReferencePToken } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function generalEntityReferenceToSTokens(pToken: GeneralEntityReferencePToken): Array<SToken> {

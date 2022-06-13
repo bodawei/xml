@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { AttListDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { literalCheck } from '../common/literalCheck';
 import { nameCheck } from '../common/nameCheck';

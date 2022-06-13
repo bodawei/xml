@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { SPACE_REGEX, Collector, isName, isNmToken } from 'basic';
+import { SPACE_REGEX, Collector, isName, isNmToken, strOrBlank } from 'basic';
 import { AttListDeclarationPToken, AttDefinitionP, pTokenArrayToString } from 'pToken';
-import { strOrBlank } from 'sToken';
 import { GENERAL_ENTITY_START_PTOKEN, getFirstSToken, WordListEntryPToken } from 'token';
 
 import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';

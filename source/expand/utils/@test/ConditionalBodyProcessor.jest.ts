@@ -5,7 +5,7 @@ import { EntityId, Range } from 'basic';
 import { ParseToken } from 'pToken';
 import { Warning } from 'wellformedness'; // ick
 
-import { STokenSource, strOrBlank, toSToken } from 'sToken';
+import { STokenSource, strOrBlank, toSToken } from 'basic';
 import { CommentPToken, ConditionalEndPToken, ConditionalStartPToken } from 'token';
 import { makeTextPToken } from 'token-test';
 

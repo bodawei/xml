@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { combineSTokens, SToken, STokenSource } from 'sToken';
+import { combineSTokens, SToken, STokenSource } from 'basic';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
 

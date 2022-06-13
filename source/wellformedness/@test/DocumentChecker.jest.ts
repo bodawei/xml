@@ -9,7 +9,7 @@ import {
    TextDeclarationPToken,
    XmlDeclarationPToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import {
    COMMENT_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,

@@ -10,7 +10,7 @@ import {
    TextPToken,
    parseCharRef,
 } from 'pToken';
-import { strOrBlank, STokenSource } from 'sToken';
+import { strOrBlank, STokenSource } from 'basic';
 import {
    DOCTYPE_START_PTOKEN,
    ELEMENT_END_PTOKEN,

@@ -3,7 +3,7 @@
 import { Transform } from 'stream';
 import { ParseToken } from 'pToken';
 import { COMMENT_PTOKEN, CommentPToken } from 'token';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 const CHARREF_REGEX = /(&#(x?)([a-fA-F0-9]+);)/g;
 

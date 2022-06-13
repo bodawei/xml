@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
+import { Collector, strOrBlank } from 'basic';
 import { AttDefinitionP } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { Error } from '../error/error';
 import { errorCodes } from '../error/errorCodes';

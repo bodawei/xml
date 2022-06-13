@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 import { ELEMENT_START_PTOKEN, parseElementStart } from 'token';
 
 import { TextXToken } from '../textXToken';

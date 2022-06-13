@@ -7,7 +7,7 @@ import {
    ParameterEntityDeclarationPToken,
    TEXT_PTOKEN,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { LiteralValuePToken } from 'token';
 
 import { charCheck } from '../common/charCheck';

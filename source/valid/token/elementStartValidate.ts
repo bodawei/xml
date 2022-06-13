@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { isAugmentedAttribute } from 'attFixer';
-import { Collector, isName, isNmToken } from 'basic';
+import { Collector, isName, isNmToken, SToken, strOrBlank } from 'basic';
 import { AttDefinitionP, pTokenArrayToString } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
 import { ElementStartPToken, ElementEmptyPToken, GENERAL_ENTITY_START_PTOKEN } from 'token';
 
 import { ancestorPERefsValidate } from '../common/ancestorPERefsValidate';

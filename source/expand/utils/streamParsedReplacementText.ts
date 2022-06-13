@@ -9,7 +9,7 @@ import {
    externalIdToEntityId,
    ParseToken,
 } from 'pToken';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import {
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,

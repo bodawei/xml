@@ -11,7 +11,7 @@ import {
    ParameterEntityDeclarationPToken,
    TextPToken,
 } from 'pToken';
-import { toSToken, SToken } from 'sToken';
+import { toSToken, SToken } from 'basic';
 import {
    makeAttListDeclaration,
    makeElementStart,

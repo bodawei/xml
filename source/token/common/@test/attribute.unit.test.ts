@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import attribute from '../attribute';
 import literal from '../literal';

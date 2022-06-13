@@ -5,7 +5,7 @@ import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, Range, EntityId } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { AttListDeclarationPToken } from 'pToken';
-import { SToken, toSToken } from 'sToken';
+import { SToken, toSToken } from 'basic';
 import { WordListPToken, WordListType } from 'token';
 
 import { literalCheck } from '../../common/literalCheck';

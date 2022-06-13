@@ -3,7 +3,7 @@
 import { PTokenStream } from 'node';
 import { PToXTokenStream } from '../node';
 import SimpleObjStream from './so';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 
 describe('SimpleObjStream (integration)', () => {
    let sTokenSource: STokenSource;

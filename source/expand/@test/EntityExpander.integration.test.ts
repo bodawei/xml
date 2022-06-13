@@ -12,7 +12,7 @@ import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'pToken';
 import { PTokenStream, PTokenLiteralStream } from 'node';
-import { toSToken, SToken, STokenSource } from 'sToken';
+import { toSToken, SToken, STokenSource } from 'basic';
 import {
    AttributeValuePToken,
    ElementStartPToken,

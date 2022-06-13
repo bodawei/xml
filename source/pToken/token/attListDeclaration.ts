@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { combineSTokens, SToken, STokenSource, strOrBlank } from 'sToken';
+import { combineSTokens, SToken, STokenSource, strOrBlank } from 'basic';
 
 import { parseUnexpanded } from '../common/parseUnexpanded';
 import { UnexpandedMarkupDetails } from '../types';

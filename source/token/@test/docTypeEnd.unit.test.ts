@@ -2,8 +2,8 @@
 
 /* eslint-env jasmine */
 
-import { toSToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import { DocTypeEndPToken, parseDocTypeEnd } from '../docTypeEnd';
 import { DocTypeStartPToken } from '../docTypeStart';

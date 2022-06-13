@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 
 import { InstructionStart } from '../../bridge/instruction';
 import { parseTextDeclaration } from '../textDeclaration';

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { DocTypeStartPToken } from 'token';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 

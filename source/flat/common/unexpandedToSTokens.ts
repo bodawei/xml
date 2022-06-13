@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN, UnexpandedMarkupDetails } from 'pToken';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 

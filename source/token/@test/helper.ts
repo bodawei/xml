@@ -17,7 +17,7 @@ import {
    ContentModelP,
    TEXT_PTOKEN,
  } from 'pToken';
-import { SToken, toSToken } from 'sToken';
+import { SToken, toSToken } from 'basic';
 import {
    CdataPToken,
    CommentPToken,

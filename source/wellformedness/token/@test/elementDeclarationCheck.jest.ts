@@ -3,7 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { contentModelCheck } from '../../common/contentModelCheck';
 import { nameCheck } from '../../common/nameCheck';

@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ParamCollector } from 'basic-test';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { DeclarationStart } from 'token';
 import { makeCharRef } from 'token-test';
 

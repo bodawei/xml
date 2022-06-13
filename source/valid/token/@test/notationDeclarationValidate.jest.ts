@@ -1,10 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion } from 'basic';
+import { ConformanceVersion, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { NotationDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'sToken';
 import { makeNotationDeclaration } from 'token-test';
 
 import { ValidityState } from '../../common/validityState';

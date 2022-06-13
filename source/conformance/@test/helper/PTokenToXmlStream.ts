@@ -11,7 +11,7 @@ import {
    TEXT_PTOKEN,
    XMLDECL_PTOKEN,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,

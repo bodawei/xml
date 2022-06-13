@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import * as unexpanded from '../../common/parseUnexpanded';
 import { UnexpandedMarkupDetails } from '../../common/parseUnexpanded';

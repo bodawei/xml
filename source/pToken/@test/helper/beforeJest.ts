@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 interface Props {
    [name: string]: any;

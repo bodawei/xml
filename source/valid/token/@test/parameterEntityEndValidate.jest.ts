@@ -1,6 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
    AttListDeclarationPToken,
@@ -10,7 +11,6 @@ import {
    ParseToken,
    ProcessingInstructionPToken,
 } from 'pToken';
-import { SToken, toSToken } from 'sToken';
 import { CommentPToken } from 'token';
 import {
    makeCharData,

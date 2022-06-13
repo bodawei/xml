@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
+import { Collector, strOrBlank } from 'basic';
 import { CHARREF_PTOKEN, ParseToken, PROCESSING_INSTRUCTION_PTOKEN, TEXTDECL_PTOKEN } from 'pToken';
-import { strOrBlank } from 'sToken';
 import {
    ELEMENT_START_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,

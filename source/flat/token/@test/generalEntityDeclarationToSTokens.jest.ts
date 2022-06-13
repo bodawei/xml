@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { externalIdToSTokens } from '../../common/externalIdToSTokens';
 import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';

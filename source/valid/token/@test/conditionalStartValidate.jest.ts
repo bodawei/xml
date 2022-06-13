@@ -1,8 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
-import { toSToken } from 'sToken';
 import { ConditionalStartPToken } from 'token';
 import { makeElementDeclaration, makeParameterEntityReference } from 'token-test';
 

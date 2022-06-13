@@ -7,7 +7,7 @@ import {
    ParameterEntityReferencePToken,
    UnexpandedMarkupToken,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import {
    ElidedEntityDeclarationPToken,
    ParameterEntityStartPToken,

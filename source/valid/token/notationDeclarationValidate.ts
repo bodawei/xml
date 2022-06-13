@@ -1,8 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
+import { Collector, strOrBlank } from 'basic';
 import { NotationDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { ValidityState } from '../common/validityState';
 import { validityErrorCodes } from '../error/validityErrorCodes';

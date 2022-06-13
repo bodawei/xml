@@ -3,8 +3,8 @@
 import { describe, expect, it } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 import { TextPToken, parseText, isTextPToken } from 'pToken';
-import { toSToken, SToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { toSToken, SToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 describe('TextPToken (unit)', () => {
    describe('construction', () => {

@@ -1,8 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken } from 'basic';
 import { ElementDeclarationPToken } from 'pToken';
-import { toSToken } from 'sToken';
 
 import { ContentDetails, ElDeclType, ValidityState } from '../../common/validityState';
 import { elementDeclarationUpdateState } from '../elementDeclarationUpdateState';

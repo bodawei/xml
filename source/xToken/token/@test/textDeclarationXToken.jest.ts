@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { TextDeclarationPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { TextDeclarationXToken, TEXTDECL_XTOKEN } from '../textDeclarationXToken';
 

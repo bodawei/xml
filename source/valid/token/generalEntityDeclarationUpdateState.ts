@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'basic';
 import { GeneralEntityDeclarationPToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'pToken';
-import { strOrBlank } from 'sToken';
 import { PARAMETER_ENTITY_START_PTOKEN } from 'token';
 
 import { ValidityState } from '../common/validityState';

@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ElementDeclarationPToken } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { contentModelToSTokens } from '../common/contentModelToSTokens';

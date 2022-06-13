@@ -3,8 +3,7 @@
 import { ConformanceVersion } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
-import { makeSTokenMaker } from 'sToken-test';
-import { SToken, toSToken } from 'sToken';
+import { SToken, toSToken } from 'basic';
 import { AttributePToken } from 'token';
 
 import { attributeLangCheck } from '../attributeLangCheck';
@@ -52,8 +51,7 @@ describe('attributeCheck (unit)', () => {
       ];
 
       confVer = new ConformanceVersion();
-      const makeToken = makeSTokenMaker();
-      previousSpace = makeToken(' ');
+      previousSpace = toSToken(' ');
       collector = new ParamCollector();
       mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
    });

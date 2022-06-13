@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
 import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ParseType } from 'pToken';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 import {
    CONDITIONAL_START_PTOKEN,
    CONDITIONAL_END_PTOKEN,
@@ -32,8 +32,8 @@ import {
    makeSpace,
 } from 'token-test';
 
-// import { SToken, toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+// import { SToken, toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import { parseXmlDecl, parsePlainInstruction } from '../bridge/instruction';
 import { parseCharRef } from '../token/charRef';

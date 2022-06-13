@@ -1,8 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { toSToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
 import { TEXTDECL_PTOKEN, parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';

@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ConformanceVersion } from 'basic';
-import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
+import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import declaration, { DeclarationPToken } from '../baseDeclaration';
 

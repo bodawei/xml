@@ -1,8 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
-import { toSToken } from 'sToken';
 
 import { ValidityState } from '../../common/validityState';
 import { validityErrorCodes } from '../../error/validityErrorCodes';

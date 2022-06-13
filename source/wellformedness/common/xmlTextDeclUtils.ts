@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { InstructionField } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 import { Error } from '../error/error';
 import { FatalError } from '../error/fatalError';

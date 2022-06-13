@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { TEXT_PTOKEN } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import { LiteralValuePToken } from 'token';
 import { CheckState, GeneralEntitiesInfo } from '../checkUtils';
 import { FatalError } from '../error/fatalError';

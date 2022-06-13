@@ -2,7 +2,7 @@
 
 import { EntityId } from 'basic';
 import { CharRefPToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
 
 import { entityValueToSTokenSource } from '../entityValueToSTokenSource';

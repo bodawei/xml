@@ -3,7 +3,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
-import { STokenSource, SToken, toSToken } from 'sToken';
+import { STokenSource, SToken, toSToken } from 'basic';
 
 import { parseDeclaration } from '../declaration';
 

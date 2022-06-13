@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { ElementDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { contentModelCheck } from '../common/contentModelCheck';
 import { nameCheck } from '../common/nameCheck';

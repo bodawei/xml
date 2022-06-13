@@ -3,7 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { ParameterEntityReferencePToken, UnexpandedMarkupDetails, TextPToken } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 
 import { parameterEntityReferenceToSTokens } from '../../token/parameterEntityReferenceToSTokens';
 import { textToSTokens } from '../../token/textToSTokens';

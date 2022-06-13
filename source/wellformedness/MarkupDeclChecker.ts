@@ -19,7 +19,7 @@ import {
    ParameterEntityReferencePToken,
    ParseToken,
 } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 import {
    COMMENT_PTOKEN,
    CONDITIONAL_START_PTOKEN,

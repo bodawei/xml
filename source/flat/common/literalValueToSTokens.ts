@@ -6,7 +6,7 @@ import {
    TEXT_PTOKEN,
    CHARREF_PTOKEN,
 } from 'pToken';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 import { LiteralValuePToken } from 'token';
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 

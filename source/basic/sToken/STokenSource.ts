@@ -1,25 +1,20 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import {
-   ConformanceVersion,
-   EntityId,
-   Offset,
-   Range,
-   rangeEndOffset,
-   rangeStartOffset,
-} from 'basic';
-import {
-   Extractor,
-   PSEUDO_SPACE,
-   PseudoSpace,
-   Segment,
+   defaultExtractors,
    ExtractorConstructor,
    ExtractorMap,
-   defaultExtractors,
-} from 'extractor';
-import { SegmentInfo } from 'extractor'; // typeHack
+} from '../../extractor/defaultExtractors';
+import Extractor, { SegmentInfo } from '../../extractor/Extractor';
+import { PSEUDO_SPACE, PseudoSpace, Segment } from '../../extractor/Segment';
+import { ConformanceVersion } from '../token/conformanceVersion';
+import { EntityId } from '../token/entityId';
+import { Offset } from '../util/offset';
+import { Range } from '../util/range';
+import { rangeEndOffset } from '../util/rangeEndOffset';
+import { rangeStartOffset } from '../util/rangeStartOffset';
 
-import { SToken } from './SToken';
+import { SToken } from './sToken';
 
 type DeliverSToken = (stoken?: SToken) => void;
 
@@ -465,6 +460,7 @@ class STokenSource {
       ranges: Array<Range>,
    ): void {
       if (extractorContext.extractor.state === Extractor.STATE.SUCCESS) {
+         // console.log(new SToken(str, originalStr, ranges).constructor === maker('foo').constructor);
          extractorContext.callback(new SToken(str, originalStr, ranges));
       } else {
          extractorContext.callback();

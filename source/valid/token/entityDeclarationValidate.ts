@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { Collector } from 'basic';
+import { Collector, strOrBlank } from 'basic';
 import { GeneralEntityDeclarationPToken, ParameterEntityDeclarationPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
 
 import { entityDeclarationValueValidate } from '../common/entityDeclarationValueValidate';
 import { ValidityState } from '../common/validityState';

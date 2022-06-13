@@ -1,11 +1,10 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion, Problem } from 'basic';
+import { ConformanceVersion, Problem, STokenSource } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
 import { ParseType, ParseToken } from 'pToken';
-import { STokenSource } from 'sToken';
 
 import { validityErrorCodes } from '../error/validityErrorCodes';
 import { ValidityChecker } from '../validityChecker';

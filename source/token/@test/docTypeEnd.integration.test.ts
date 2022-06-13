@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { STokenSource, toSToken } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
+import { STokenSource, toSToken } from 'basic';
+import { makeSTokenMaker } from 'pToken-test';
 
 import { DocTypeStartPToken } from '../docTypeStart';
 import { DocTypeEndPToken, parseDocTypeEnd } from '../docTypeEnd';

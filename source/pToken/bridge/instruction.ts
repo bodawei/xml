@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import { strOrBlank, SToken, STokenSource } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'basic';
 
 import { XmlDeclarationPToken, parseXmlDeclaration } from '../token/xmlDeclaration';
 import { TextDeclarationPToken, parseTextDeclaration } from '../token/textDeclaration';

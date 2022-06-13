@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { DocTypeStartPToken } from 'token';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { ExternalIdX, cloneExternalIdX } from '../common/externalIdX';
 

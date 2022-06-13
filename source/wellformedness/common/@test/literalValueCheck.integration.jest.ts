@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'basic';
 import { parseLiteralValue } from 'token';
 
 import { literalValueCheck } from '../literalValueCheck';

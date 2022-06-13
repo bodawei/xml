@@ -1,5 +1,5 @@
 import { ParamCollector } from 'basic-test';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { ConditionalStartPToken } from 'token';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';

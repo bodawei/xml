@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ElementDeclarationPToken } from 'pToken';
-import { SToken, strOrBlank } from 'sToken';
+import { SToken, strOrBlank } from 'basic';
 
 import { ContentModelX, isContentNameX, cloneContentModelX } from '../common/contentModelX';
 

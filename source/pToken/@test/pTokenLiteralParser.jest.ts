@@ -4,8 +4,8 @@ import { describe, expect, it } from '@jest/globals';
 
 import { Range, EntityId } from 'basic';
 import { TextPToken } from 'pToken';
-import { SToken } from 'sToken';
-import { MockSTokenSource } from 'sToken-test';
+import { SToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import { PTokenLiteralParser } from '../pTokenLiteralParser';
 

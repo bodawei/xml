@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { ProcessingInstructionPToken } from 'pToken';
-import { strOrBlank } from 'sToken';
+import { strOrBlank } from 'basic';
 
 import { charCheck } from '../common/charCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';

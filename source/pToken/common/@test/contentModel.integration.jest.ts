@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { STokenSource, toSToken } from 'sToken';
+import { STokenSource, toSToken } from 'basic';
 
 import { ContentModelP, parseContentModel } from '../contentModel';
 
@@ -50,7 +50,7 @@ describe('ContentModel (integration)', () => {
 
          parseContentModel(source, (result) => {
             expect(result).toEqualRangeless(contentSpec);
-            done?.();
+            done();
          });
       });
 
@@ -82,7 +82,7 @@ describe('ContentModel (integration)', () => {
                   repeatSpace: undefined,
                }),
             );
-            done?.();
+            done();
          });
       });
 
@@ -705,7 +705,7 @@ describe('ContentModel (integration)', () => {
                  "repeatSpace": undefined,
                }
             `);
-            done?.();
+            done();
          });
       });
    });

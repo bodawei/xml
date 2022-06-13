@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Offset, EntityId, } from 'basic';
-import { STokenSource } from 'sToken';
+import { STokenSource } from 'basic';
 import { ELEMENT_START_PTOKEN } from 'token';
 import { WellFormedError, wellFormedErrorCodes  } from 'wellformedness';
 

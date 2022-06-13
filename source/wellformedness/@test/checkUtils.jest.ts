@@ -9,7 +9,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import {
    ElementStartPToken,
    ElementEmptyPToken,

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { toSToken } from 'sToken';
+import { toSToken } from 'basic';
 import { WordListPToken, WordListType } from 'token';
 import { wordListToSTokens } from '../wordListToSTokens';
 

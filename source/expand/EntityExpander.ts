@@ -34,7 +34,7 @@ import {
    parseText,
    ParseType,
 } from 'pToken';
-import { STokenSource, strOrBlank } from 'sToken';
+import { STokenSource, strOrBlank } from 'basic';
 import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,

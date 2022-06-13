@@ -3,7 +3,7 @@
 
 import { ConformanceVersion } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'basic';
 
 import {
    parseWordList,

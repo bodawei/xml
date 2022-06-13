@@ -9,7 +9,7 @@ import {
    TextPToken,
    ParseToken,
 } from 'pToken';
-import { toSToken, STokenSource } from 'sToken';
+import { toSToken, STokenSource } from 'basic';
 import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import {
    ExternalSubsetStartToken,

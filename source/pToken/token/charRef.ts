@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
 import { extractSurrogatePair } from 'basic';
-import { SToken, STokenSource } from 'sToken';
+import { SToken, STokenSource } from 'basic';
 
 const CHARREF_PTOKEN = 'CHARREF_PTOKEN';
 

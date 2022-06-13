@@ -1,8 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ConformanceVersion } from 'basic';
-import { toSToken } from 'sToken';
+import { ConformanceVersion, toSToken } from 'basic';
 import {
    makeCdata,
    makeComment,

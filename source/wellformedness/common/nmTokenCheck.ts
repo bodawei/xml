@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector, isNmToken } from 'basic';
-import { SToken } from 'sToken';
+import { SToken } from 'basic';
 
 /**********************************************************************\
  nmTokenCheck() validates that the specified SToken matches the basic
