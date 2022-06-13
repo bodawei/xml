@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { Range, EntityId, CONFORMANCE_VERSION } from 'basic';
+
 import {
    DONE_SEGMENT,
    Extractor,
@@ -10,8 +11,7 @@ import {
    PseudoSpace,
    PSEUDO_SPACE,
    PSEUDO_SYSTEMID,
-} from 'extractor';
-
+} from '../../extractor';
 import { SToken } from '../sToken';
 import { STokenSource } from '../STokenSource';
 
@@ -328,7 +328,7 @@ describe('STokenSource (unit)', () => {
          source.addText('', testRange);
          source.addText('333');
 
-         expect((source._segments[1] as any).range).toEqual(testRange);
+         expect(source._segments[1].range).toEqual(testRange);
       });
 
       it('ignores the range on an empty value if the next has a range (whitebox)', () => {
@@ -338,7 +338,7 @@ describe('STokenSource (unit)', () => {
          source.addText('', testRange1);
          source.addText('333', testRange2);
 
-         expect((source._segments[1] as any).range).toEqual(testRange2);
+         expect(source._segments[1].range).toEqual(testRange2);
       });
    });
 

@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { Range, EntityId } from 'basic';
-import { SEGMENT_TYPE } from 'extractor';
 
+import { SEGMENT_TYPE } from '../../extractor/Segment';
 import { SToken } from '../sToken';
 import { STokenSource } from '../STokenSource';
 

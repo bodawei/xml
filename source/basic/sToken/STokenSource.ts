@@ -4,9 +4,9 @@ import {
    defaultExtractors,
    ExtractorConstructor,
    ExtractorMap,
-} from '../../extractor/defaultExtractors';
-import Extractor, { SegmentInfo } from '../../extractor/Extractor';
-import { PSEUDO_SPACE, PseudoSpace, Segment } from '../../extractor/Segment';
+} from '../extractor/defaultExtractors';
+import Extractor, { SegmentInfo } from '../extractor/Extractor';
+import { PSEUDO_SPACE, PseudoSpace, Segment } from '../extractor/Segment';
 import { ConformanceVersion } from '../token/conformanceVersion';
 import { EntityId } from '../token/entityId';
 import { Offset } from '../util/offset';
@@ -169,7 +169,7 @@ class STokenSource {
       this._segments.push(pseudoSpace);
 
       if (!this._lastOffset) {
-         this._lastOffset = new Offset(pseudoSpace.range!.entityId, 0, 0, 0);
+         this._lastOffset = new Offset((pseudoSpace.range as any).entityId, 0, 0, 0);
       }
    }
 
@@ -279,17 +279,14 @@ class STokenSource {
       if (typeof extractorDefinition === 'object') {
          extractorConstructor = extractorDefinition.extractorConstructor;
 
-         // @ts-expect-error fixme
-         if (extractorDefinition.params.extractorConstructor) {
-            // @ts-expect-error fixme
-            paramsToUse = new extractorDefinition.params.extractorConstructor(
+         if ((extractorDefinition.params as any).extractorConstructor) {
+            paramsToUse = new (extractorDefinition.params as any).extractorConstructor(
                this.confVer.version,
                this.processLineEndings,
                params,
             );
          } else {
-            // @ts-expect-error fixme
-            paramsToUse = extractorDefinition.params;
+            paramsToUse = extractorDefinition.params as any;
          }
       } else {
          // put this check here to make code coverage happier. babel turns typeof object into a check for undef.

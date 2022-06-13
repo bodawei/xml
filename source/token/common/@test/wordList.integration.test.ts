@@ -1,8 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ConformanceVersion } from 'basic';
-import { defaultExtractors } from 'extractor';
 import { toSToken, STokenSource } from 'basic';
 
 import {

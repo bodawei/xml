@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityId } from '../basic/token/entityId';
-import { Range } from '../basic/util/range';
+import { EntityId } from '../token/entityId';
+import { Range } from '../util/range';
 
 const DONE_SEGMENT = 'DONE_SEGMENT';
 const SEGMENT_TYPE = 'SEGMENT_TYPE';
@@ -10,7 +10,9 @@ const PSEUDO_SYSTEMID = 'https://xml-introduced-space/section-4.4.8';
 
 class PseudoSpace {
    public type: typeof PSEUDO_SPACE;
+
    public index: 0;
+
    public range?: Range;
 
    constructor() {
@@ -25,7 +27,6 @@ type DoneSegment = {
    range?: Range;
 };
 
-
 /**********************************************************************\
  Segment is a simple data structure that tracks information about a
  unit of text, including a current offset into that text, and an
@@ -35,8 +36,11 @@ type DoneSegment = {
 
 class Segment {
    public type: typeof SEGMENT_TYPE;
+
    public text: string;
+
    public index: number;
+
    public range?: Range;
 
    constructor(text: string, range?: Range) {
@@ -51,4 +55,12 @@ class Segment {
    }
 }
 
-export { DoneSegment, PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, PSEUDO_SYSTEMID, SEGMENT_TYPE, Segment };
+export {
+   DoneSegment,
+   PseudoSpace,
+   DONE_SEGMENT,
+   PSEUDO_SPACE,
+   PSEUDO_SYSTEMID,
+   SEGMENT_TYPE,
+   Segment,
+};
